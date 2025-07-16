@@ -1,5 +1,8 @@
 // Common enums and constants for the JSON App Compiler system
 
+// HTTP methods type
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+
 // Log levels for the logging system
 export enum LogLevel {
   DEBUG = 0,

@@ -1,2 +1,2 @@
-// Shared package entry point
-export * from "./src/index.ts";
+// Main export file for the shared package
+export * from './src/index.ts';

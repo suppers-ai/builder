@@ -1,5 +1,7 @@
 // Core type definitions for the JSON App Compiler system
 
+import type { HttpMethod } from './enums.ts';
+
 // Common utility types
 export type ComponentChildren = string | number | boolean | null | undefined | ComponentChildren[];
 
@@ -84,8 +86,8 @@ export interface AppConfig {
   build?: BuildConfig;
 }
 
-// HTTP methods enum
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+// HTTP methods enum (imported from enums.ts)
+// export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
 // Validation schema interface
 export interface ValidationSchema {

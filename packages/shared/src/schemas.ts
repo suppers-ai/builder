@@ -527,9 +527,6 @@ export const appConfigSchema: JSONSchema = {
   },
   required: ['metadata', 'components', 'routes', 'api'],
   additionalProperties: false,
-  definitions: {
-    componentDefinition: componentDefinitionSchema,
-  },
 };
 
 // Schema registry for easy access
