@@ -1,0 +1,71 @@
+{
+  "workspace": [
+    "./packages/compiler",
+    "./packages/api",
+    "./packages/ui-library",
+    "./packages/shared",
+    "./packages/templates"
+  ],
+  "imports": {
+    "@json-app-compiler/compiler": "./packages/compiler/mod.ts",
+    "@json-app-compiler/api": "./packages/api/mod.ts",
+    "@json-app-compiler/ui-library": "./packages/ui-library/mod.ts",
+    "@json-app-compiler/shared": "./packages/shared/mod.ts",
+    "@json-app-compiler/templates": "./packages/templates/",
+    "$fresh/": "https://deno.land/x/fresh@2.0.0-alpha.19/",
+    "preact": "https://esm.sh/preact@10.19.6",
+    "preact/": "https://esm.sh/preact@10.19.6/",
+    "@preact/signals": "https://esm.sh/*@preact/signals@1.2.2",
+    "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
+    "tailwindcss": "npm:tailwindcss@3.4.1",
+    "tailwindcss/": "npm:/tailwindcss@3.4.1/",
+    "tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plugin.js"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es6"
+    ]
+  },
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "build": "deno run -A scripts/build-all.ts",
+    "test": "deno run -A scripts/test-all.ts",
+    "test:watch": "deno test -A --watch",
+    "lint": "deno lint",
+    "fmt": "deno fmt",
+    "check": "deno check **/*.ts **/*.tsx",
+    "dev": "deno run -A --node-modules-dir --watch=static/,routes/ dev.ts",
+    "preview": "deno run -A --node-modules-dir main.ts",
+    "update": "deno run -A -r https://fresh.deno.dev/update ."
+  },
+  "exclude": [
+    "**/_fresh/*"
+  ],
+  "lint": {
+    "rules": {
+      "tags": [
+        "fresh",
+        "recommended"
+      ]
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": false,
+    "proseWrap": "preserve",
+    "include": [
+      "src/",
+      "packages/"
+    ],
+    "exclude": [
+      "**/_fresh/*"
+    ]
+  }
+}
