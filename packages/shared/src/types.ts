@@ -56,6 +56,8 @@ export interface RouteMeta {
   description?: string;
   keywords?: string[];
   requiresAuth?: boolean;
+  dataHandler?: boolean;
+  cacheControl?: string;
 }
 
 // API endpoint definition
@@ -166,20 +168,28 @@ export interface ComponentRegistryEntry {
 
 // Compilation context interface
 export interface CompilationContext {
-  config: AppConfig;
+  config?: AppConfig;
+  configPath?: string;
   outputDir: string;
   templateDir: string;
+  projectPath?: string;
   verbose?: boolean;
   dryRun?: boolean;
+  dependencyGraph?: Record<string, string[]>;
 }
+
+// Error severity levels
+export type ErrorSeverity = 'error' | 'warning' | 'info';
 
 // Error types for better error handling
 export interface CompilationError {
-  type: 'validation' | 'template' | 'component' | 'file' | 'dependency';
+  type: 'validation' | 'template' | 'component' | 'file' | 'dependency' | 'route' | 'api' | 'compilation' | 'general';
   message: string;
   details?: string;
   location?: ErrorLocation;
   suggestions?: string[];
+  severity?: ErrorSeverity;
+  code?: string;
 }
 
 // Error location information
@@ -188,6 +198,19 @@ export interface ErrorLocation {
   line?: number;
   column?: number;
   path?: string; // JSON path for configuration errors
+  source?: string; // Source code snippet
+  context?: string; // Additional context information
+}
+
+// Error recovery context
+export interface ErrorRecoveryContext {
+  phase: 'parse' | 'plan' | 'generate' | 'integrate' | 'optimize';
+  compilationContext: CompilationContext;
+  currentFile?: string;
+  currentComponent?: ComponentDefinition;
+  currentRoute?: RouteDefinition;
+  currentApiEndpoint?: ApiEndpoint;
+  fallbackOptions?: Record<string, unknown>;
 }
 
 // Template variable interface

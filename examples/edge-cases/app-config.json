@@ -1,0 +1,258 @@
+{
+  "metadata": {
+    "name": "edge-case-app",
+    "version": "1.0.0",
+    "description": "An application with edge cases for testing validation and error handling",
+    "author": "JSON App Compiler",
+    "license": "MIT"
+  },
+  "components": [
+    {
+      "id": "mainLayout",
+      "type": "Layout",
+      "props": {
+        "variant": "default",
+        "padding": "md",
+        "backgroundColor": "#ffffff"
+      },
+      "children": [
+        {
+          "id": "headerContent",
+          "type": "Card",
+          "props": {
+            "variant": "default",
+            "padding": "md",
+            "shadow": "sm",
+            "title": "Edge Case App"
+          },
+          "children": "Testing edge cases and validation"
+        }
+      ]
+    },   
+ {
+      "id": "missingRequiredProps",
+      "type": "Button",
+      "props": {
+        "size": "md"
+      },
+      "children": "Missing variant prop"
+    },
+    {
+      "id": "invalidPropValue",
+      "type": "Input",
+      "props": {
+        "type": "invalid-type",
+        "label": "Invalid Input Type",
+        "placeholder": "This input has an invalid type"
+      }
+    },
+    {
+      "id": "nonExistentComponent",
+      "type": "NonExistentComponent",
+      "props": {
+        "someProperty": "value"
+      },
+      "children": "This component type doesn't exist"
+    },
+    {
+      "id": "deeplyNestedComponents",
+      "type": "Layout",
+      "props": {
+        "variant": "default",
+        "padding": "md"
+      },
+      "children": [       
+ {
+          "id": "level1",
+          "type": "Card",
+          "props": {
+            "variant": "default",
+            "padding": "md"
+          },
+          "children": [
+            {
+              "id": "level2",
+              "type": "Layout",
+              "props": {
+                "variant": "default",
+                "padding": "sm"
+              },
+              "children": [
+                {
+                  "id": "level3",
+                  "type": "Card",
+                  "props": {
+                    "variant": "default",
+                    "padding": "xs"
+                  },
+                  "children": [
+                    {
+                      "id": "level4",
+                      "type": "Button",
+                      "props": {
+                        "variant": "primary",
+                        "size": "sm"
+                      },
+                      "children": "Deeply nested component"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },    
+{
+      "id": "circularReference",
+      "type": "Layout",
+      "props": {
+        "variant": "default",
+        "padding": "md",
+        "refId": "circularReference"
+      },
+      "children": "This component references itself"
+    },
+    {
+      "id": "emptyChildren",
+      "type": "Card",
+      "props": {
+        "variant": "default",
+        "padding": "md",
+        "title": "Empty Children"
+      },
+      "children": []
+    },
+    {
+      "id": "extremelyLongId",
+      "type": "Button",
+      "props": {
+        "variant": "primary",
+        "size": "md"
+      },
+      "children": "This component has an extremely long ID that might cause issues with file naming or reference handling in the compiler"
+    }
+  ],  "rout
+es": [
+    {
+      "path": "/",
+      "component": "mainLayout",
+      "meta": {
+        "title": "Edge Case App",
+        "description": "Testing edge cases and validation"
+      }
+    },
+    {
+      "path": "/missing-component",
+      "component": "nonExistentComponent",
+      "meta": {
+        "title": "Missing Component",
+        "description": "This route references a component that doesn't exist"
+      }
+    },
+    {
+      "path": "/duplicate",
+      "component": "mainLayout",
+      "meta": {
+        "title": "Duplicate Route 1",
+        "description": "This is a duplicate route path"
+      }
+    },
+    {
+      "path": "/duplicate",
+      "component": "mainLayout",
+      "meta": {
+        "title": "Duplicate Route 2",
+        "description": "This is a duplicate route path"
+      }
+    },    {
+   
+   "path": "invalid-path-no-slash",
+      "component": "mainLayout",
+      "meta": {
+        "title": "Invalid Path",
+        "description": "This route has an invalid path without a leading slash"
+      }
+    },
+    {
+      "path": "/invalid/middleware",
+      "component": "mainLayout",
+      "middleware": ["nonExistentMiddleware"],
+      "meta": {
+        "title": "Invalid Middleware",
+        "description": "This route references middleware that doesn't exist"
+      }
+    }
+  ],
+  "api": {
+    "endpoints": [
+      {
+        "path": "/api/test",
+        "methods": ["INVALID_METHOD"],
+        "handler": "TestHandler"
+      },
+      {
+        "path": "/api/duplicate",
+        "methods": ["GET"],
+        "handler": "DuplicateHandler1"
+      }, 
+     {
+        "path": "/api/duplicate",
+        "methods": ["POST"],
+        "handler": "DuplicateHandler2"
+      },
+      {
+        "path": "api/invalid-path-no-slash",
+        "methods": ["GET"],
+        "handler": "InvalidPathHandler"
+      },
+      {
+        "path": "/api/invalid-validation",
+        "methods": ["POST"],
+        "handler": "InvalidValidationHandler",
+        "validation": {
+          "body": {
+            "email": {
+              "type": "string",
+              "pattern": "invalid-regex-pattern[["
+            }
+          }
+        }
+      }
+    ],
+    "middleware": [
+      {
+        "name": "validMiddleware",
+        "order": 0
+      },
+      {
+        "name": "duplicateOrderMiddleware",
+        "order": 1
+      },      {
+
+        "name": "anotherDuplicateOrderMiddleware",
+        "order": 1
+      }
+    ],
+    "auth": {
+      "provider": "invalid-provider",
+      "config": {
+        "secret": ""
+      }
+    }
+  },
+  "theme": {
+    "primaryColor": "not-a-color",
+    "secondaryColor": "#invalid-hex",
+    "fontFamily": 12345,
+    "spacing": {
+      "negative": "-1rem",
+      "zero": 0
+    }
+  },
+  "build": {
+    "target": "invalid-target",
+    "minify": "not-a-boolean",
+    "sourceMaps": "not-a-boolean"
+  }
+}

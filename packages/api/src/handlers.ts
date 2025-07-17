@@ -189,10 +189,13 @@ export class BaseApiHandler {
       }
 
       // Simulate deletion - in real implementation, this would delete from database
-      return this.successResponse(
-        { id, deleted: true },
-        HttpStatus.NO_CONTENT
-      );
+      // For 204 No Content, we should not return a body
+      return new Response(null, {
+        status: HttpStatus.NO_CONTENT,
+        headers: {
+          'X-API-Version': '1.0',
+        },
+      });
     } catch (error) {
       return this.handleError(error);
     }
@@ -239,6 +242,24 @@ export class BaseApiHandler {
   async handle(req: ValidatedRequest, ctx: FreshContext): Promise<Response> {
     const method = req.method as HttpMethod;
     const hasId = ctx.params.id !== undefined;
+
+    // Check if the operation is allowed for this resource
+    const operationMap: Record<string, CrudOperation[]> = {
+      'GET': hasId ? ['read'] : ['list'],
+      'POST': ['create'],
+      'PUT': ['update'],
+      'PATCH': ['update'],
+      'DELETE': ['delete'],
+    };
+
+    const requiredOperations = operationMap[method];
+    if (requiredOperations && !requiredOperations.some(op => this.config.operations.includes(op))) {
+      return this.errorResponse(
+        HttpStatus.METHOD_NOT_ALLOWED,
+        'METHOD_NOT_ALLOWED',
+        `Method ${method} is not allowed for this resource`
+      );
+    }
 
     switch (method) {
       case 'GET':

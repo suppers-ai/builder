@@ -24,6 +24,25 @@ export {
   type ValidationErrorDetail,
 } from "./middleware.ts";
 
+// Export route generator
+export {
+  generateRouteHandler,
+  generateRouteHandlers,
+  generateApiRoutes,
+  createMiddlewareChain,
+  type RouteGenerationOptions,
+  type GeneratedRouteHandler,
+  type RouteGenerationResult,
+} from "./route-generator.ts";
+
+// Export API config parser
+export {
+  parseApiConfig,
+  validateApiEndpoint,
+  type ApiConfigParsingOptions,
+  type ParsedApiConfig,
+} from "./api-config-parser.ts";
+
 // Re-export shared types that are commonly used with API
 export type {
   ApiEndpoint,

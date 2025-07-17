@@ -115,10 +115,9 @@ Deno.test("BaseApiHandler - delete operation", async () => {
   const response = await handler.delete(req, ctx);
   assertEquals(response.status, HttpStatus.NO_CONTENT);
 
-  const data = await response.json();
-  assertEquals(data.success, true);
-  assertEquals(data.data.id, "123");
-  assertEquals(data.data.deleted, true);
+  // 204 No Content should not have a body
+  const text = await response.text();
+  assertEquals(text, "");
 });
 
 Deno.test("BaseApiHandler - list operation", async () => {

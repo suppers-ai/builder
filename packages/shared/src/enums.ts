@@ -9,7 +9,8 @@ export enum LogLevel {
   INFO = 1,
   WARN = 2,
   ERROR = 3,
-  SILENT = 4,
+  FATAL = 4,
+  SILENT = 5,
 }
 
 // Component categories for organization
