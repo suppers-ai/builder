@@ -27,7 +27,8 @@
     "lib": [
       "dom",
       "dom.iterable",
-      "es6"
+      "es2017",
+      "deno.ns"
     ]
   },
   "nodeModulesDir": "auto",

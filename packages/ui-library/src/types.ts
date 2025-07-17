@@ -1,10 +1,13 @@
 // Component registry types and interfaces
 
-import type { ComponentChildren, JSONSchema } from '@json-app-compiler/shared';
-import type { ComponentCategory } from '@json-app-compiler/shared/enums';
+import type { ComponentChildren } from '@json-app-compiler/shared';
+import { ComponentCategory } from '@json-app-compiler/shared';
 
 // Fresh component type (generic for now, will be refined with actual Fresh types)
-export type FreshComponent<P = Record<string, unknown>> = (props: P) => JSX.Element;
+export type FreshComponent<P = Record<string, unknown>> = (props: P) => any;
+
+// JSON Schema type (simplified) - use the one from shared package
+export type JSONSchema = Record<string, unknown>;
 
 // Component metadata for registry
 export interface ComponentMetadata {
@@ -20,21 +23,24 @@ export interface ComponentMetadata {
 
 // Component prop schema definition
 export interface ComponentPropSchema {
-  [propName: string]: {
-    type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'function' | 'node' | 'element';
-    required?: boolean;
-    default?: unknown;
-    description?: string;
-    enum?: unknown[];
-    pattern?: string;
-    min?: number;
-    max?: number;
-    minLength?: number;
-    maxLength?: number;
-    items?: ComponentPropSchema;
-    properties?: ComponentPropSchema;
-    validation?: (value: unknown) => boolean | string;
-  };
+  [propName: string]: ComponentPropDefinition;
+}
+
+// Individual prop definition
+export interface ComponentPropDefinition {
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object' | 'function' | 'node' | 'element';
+  required?: boolean;
+  default?: unknown;
+  description?: string;
+  enum?: unknown[];
+  pattern?: string;
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  items?: ComponentPropDefinition;
+  properties?: ComponentPropSchema;
+  validation?: (value: unknown) => boolean | string;
 }
 
 // Component registry entry with enhanced metadata

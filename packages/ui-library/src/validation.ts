@@ -3,6 +3,7 @@
 import type { JSONSchema } from '@json-app-compiler/shared';
 import type { 
   ComponentPropSchema, 
+  ComponentPropDefinition,
   ValidationResult, 
   ValidationError, 
   ValidationWarning,
@@ -61,7 +62,7 @@ export function validateComponentProps(
  */
 function validatePropValue(
   value: unknown,
-  propDef: ComponentPropSchema[string],
+  propDef: ComponentPropDefinition,
   propName: string
 ): ValidationResult {
   const errors: ValidationError[] = [];
@@ -300,7 +301,8 @@ export function propSchemaToJsonSchema(propSchema: ComponentPropSchema): JSONSch
     }
 
     if (propDef.items) {
-      jsonSchemaProp.items = propSchemaToJsonSchema({ item: propDef.items }).properties!.item;
+      const itemSchema: ComponentPropSchema = { item: propDef.items };
+      jsonSchemaProp.items = propSchemaToJsonSchema(itemSchema).properties!.item;
     }
 
     if (propDef.properties) {
