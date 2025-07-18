@@ -1,6 +1,8 @@
 // File system operations for copying and creating project files
 import { fs, logger, type FileOperationResult } from "../../shared/src/utils.ts";
 import type { AppConfig } from "../../shared/src/types.ts";
+import { performanceCache } from "./performance-cache.ts";
+import { parallelProcessor, type ParallelTask } from "./parallel-processor.ts";
 
 /**
  * Options for file operations
@@ -510,7 +512,7 @@ export class FileManager {
   }
   
   /**
-   * Check if a file exists
+   * Check if a file exists (with caching)
    * 
    * @param path Path to the file
    * @returns Whether the file exists
@@ -518,9 +520,16 @@ export class FileManager {
   async fileExists(path: string): Promise<boolean> {
     const normalizedPath = fs.normalizePath(path);
     
+    // Check cache first
+    const cachedInfo = await performanceCache.getCachedFileInfo(normalizedPath);
+    if (cachedInfo) {
+      return cachedInfo.exists;
+    }
+    
+    // Cache miss, check file system
     try {
-      const stat = await Deno.stat(normalizedPath);
-      return stat.isFile;
+      const entry = await performanceCache.cacheFileInfo(normalizedPath);
+      return entry.exists;
     } catch (error) {
       if (error instanceof Deno.errors.NotFound) {
         return false;
@@ -769,6 +778,93 @@ export class FileManager {
         errors
       };
     }
+  }
+  
+  /**
+   * Copy multiple files in parallel
+   * 
+   * @param filePairs Array of source-destination file pairs
+   * @param options File operation options
+   * @returns Results of the operations
+   */
+  async copyFilesParallel(
+    filePairs: Array<{ source: string; destination: string }>,
+    options: FileOperationOptions = {}
+  ): Promise<FileOperationResult[]> {
+    const tasks: ParallelTask<{ source: string; destination: string }, FileOperationResult>[] = 
+      filePairs.map((pair, index) => ({
+        id: `copy-${index}`,
+        description: `Copy ${pair.source} to ${pair.destination}`,
+        execute: async (input) => {
+          return this.copyFile(input.source, input.destination, options);
+        },
+        input: pair
+      }));
+    
+    const result = await parallelProcessor.executeBatch(tasks, {
+      maxConcurrency: 4,
+      stopOnError: false,
+      logProgress: options.verbose !== false
+    });
+    
+    return result.results.map(r => r.result!);
+  }
+  
+  /**
+   * Create multiple files in parallel
+   * 
+   * @param fileSpecs Array of file specifications
+   * @param options File operation options
+   * @returns Results of the operations
+   */
+  async createFilesParallel(
+    fileSpecs: Array<{ path: string; content: string | Uint8Array }>,
+    options: FileOperationOptions = {}
+  ): Promise<FileOperationResult[]> {
+    const tasks: ParallelTask<{ path: string; content: string | Uint8Array }, FileOperationResult>[] = 
+      fileSpecs.map((spec, index) => ({
+        id: `create-${index}`,
+        description: `Create file ${spec.path}`,
+        execute: async (input) => {
+          return this.createFile(input.path, input.content, options);
+        },
+        input: spec
+      }));
+    
+    const result = await parallelProcessor.executeBatch(tasks, {
+      maxConcurrency: 4,
+      stopOnError: false,
+      logProgress: options.verbose !== false
+    });
+    
+    return result.results.map(r => r.result!);
+  }
+  
+  /**
+   * Check multiple files existence in parallel
+   * 
+   * @param paths Array of file paths to check
+   * @returns Array of existence results
+   */
+  async checkFilesExistParallel(paths: string[]): Promise<Array<{ path: string; exists: boolean }>> {
+    const tasks: ParallelTask<string, { path: string; exists: boolean }>[] = 
+      paths.map((path, index) => ({
+        id: `check-${index}`,
+        description: `Check existence of ${path}`,
+        execute: async (filePath) => {
+          const exists = await this.fileExists(filePath);
+          return { path: filePath, exists };
+        },
+        input: path
+      }));
+    
+    const result = await parallelProcessor.executeBatch(tasks, {
+      maxConcurrency: 8,
+      stopOnError: false,
+      logProgress: false
+    });
+    
+    return result.results.map(r => r.result!);
   }
 }
 

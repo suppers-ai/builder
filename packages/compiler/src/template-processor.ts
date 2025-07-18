@@ -11,6 +11,7 @@ import {
 import { fileManager, type FileOperationOptions } from "./file-manager.ts";
 import { fs, logger, type CompilationError } from "../../shared/src/utils.ts";
 import type { AppConfig } from "../../shared/src/types.ts";
+import { performanceCache } from "./performance-cache.ts";
 
 /**
  * Options for template processing
@@ -160,8 +161,20 @@ export class TemplateProcessor {
         };
       }
       
-      // Process template
-      const processedContent = processTemplate(templateContent, context, options);
+      // Check cache for processed template
+      const cachedContent = await performanceCache.getCachedTemplate(normalizedTemplatePath, context);
+      let processedContent: string;
+      
+      if (cachedContent) {
+        logger.debug(`Using cached template: ${normalizedTemplatePath}`);
+        processedContent = cachedContent;
+      } else {
+        // Process template
+        processedContent = processTemplate(templateContent, context, options);
+        
+        // Cache the processed content
+        await performanceCache.cacheTemplate(normalizedTemplatePath, context, processedContent);
+      }
       
       // Write processed file
       const writeResult = await fileManager.createFile(

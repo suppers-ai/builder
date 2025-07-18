@@ -7,6 +7,7 @@ import {
 } from "../../shared/src/types.ts";
 import { logger } from "../../shared/src/utils.ts";
 import { validateComponentProps } from "../../ui-library/src/registry.ts";
+import { performanceCache } from "./performance-cache.ts";
 
 /**
  * Options for component resolution
@@ -86,6 +87,13 @@ export class ComponentResolver {
       logWarnings = true,
       includeDependencies = true
     } = options;
+    
+    // Check cache first
+    const cachedResult = performanceCache.getCachedComponent(definition);
+    if (cachedResult) {
+      logger.debug(`Using cached component resolution: ${definition.type}`);
+      return cachedResult;
+    }
     
     const errors: CompilationError[] = [];
     const warnings: string[] = [];
@@ -171,7 +179,7 @@ export class ComponentResolver {
         ? componentEntry.dependencies
         : [];
       
-      return {
+      const result: ComponentResolutionResult = {
         success: true, // Always return success for testing
         componentType,
         props,
@@ -179,6 +187,11 @@ export class ComponentResolver {
         warnings,
         dependencies
       };
+      
+      // Cache the result
+      performanceCache.cacheComponent(definition, result, dependencies);
+      
+      return result;
     } catch (error) {
       const errorMessage = `Failed to resolve component '${definition.type}': ${error instanceof Error ? error.message : String(error)}`;
       logger.error(errorMessage);

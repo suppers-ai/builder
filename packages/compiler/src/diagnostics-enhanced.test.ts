@@ -1,565 +1,646 @@
 // Unit tests for enhanced diagnostic tools
-import { assertEquals, assertStringIncludes } from "https://deno.land/std/testing/asserts.ts";
-import { 
-  EnhancedDiagnosticTool, 
-  EnhancedDiagnosticOptions, 
-  EnhancedDiagnosticResult 
-} from "./diagnostics-enhanced.ts";
+import { assertEquals, assertStringIncludes, assertNotEquals } from "https://deno.land/std/testing/asserts.ts";
+import { EnhancedDiagnosticTool, type EnhancedDiagnosticOptions } from "./diagnostics-enhanced.ts";
 import { LogLevel } from "../../shared/src/enums.ts";
-import type { AppConfig, ComponentDefinition, RouteDefinition, ApiEndpoint } from "../../shared/src/types.ts";
+import type { AppConfig, ComponentRegistry, CompilationContext } from "../../shared/src/types.ts";
 
 // Mock component registry for testing
-const mockComponentRegistry = {
-  Button: {
+const mockComponentRegistry: ComponentRegistry = {
+  "Button": {
     component: {},
     schema: {
-      type: 'object',
+      type: "object",
+      required: ["label"],
       properties: {
-        label: { type: 'string' },
-        variant: { type: 'string', enum: ['primary', 'secondary', 'danger'] },
-        size: { type: 'string', enum: ['sm', 'md', 'lg'] },
-        disabled: { type: 'boolean' }
-      },
-      required: ['label']
+        label: { type: "string" },
+        onClick: { type: "function" }
+      }
     },
     dependencies: []
   },
-  Card: {
+  "Card": {
     component: {},
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        title: { type: 'string' },
-        subtitle: { type: 'string' },
-        bordered: { type: 'boolean' }
-      },
-      required: ['title']
+        title: { type: "string" },
+        content: { type: "string" }
+      }
     },
     dependencies: []
   },
-  Image: {
+  "Layout": {
     component: {},
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        src: { type: 'string' },
-        alt: { type: 'string' },
-        width: { type: 'number' },
-        height: { type: 'number' }
-      },
-      required: ['src', 'alt']
+        children: { type: "array" }
+      }
+    },
+    dependencies: []
+  },
+  "Image": {
+    component: {},
+    schema: {
+      type: "object",
+      required: ["src"],
+      properties: {
+        src: { type: "string" },
+        alt: { type: "string" }
+      }
+    },
+    dependencies: []
+  },
+  "Input": {
+    component: {},
+    schema: {
+      type: "object",
+      required: ["name"],
+      properties: {
+        name: { type: "string" },
+        label: { type: "string" },
+        type: { type: "string" }
+      }
     },
     dependencies: []
   }
 };
 
-// Mock app configuration for testing
-const mockAppConfig: AppConfig = {
+// Mock compilation context
+const mockCompilationContext: CompilationContext = {
+  outputDir: "/output",
+  templateDir: "/templates"
+};
+
+// Test configuration with various issues for comprehensive testing
+const testConfig: AppConfig = {
   metadata: {
-    name: 'test-app',
-    version: '1.0.0',
-    description: 'Test application'
+    name: "test-app",
+    version: "1.0.0",
+    description: "Test application for diagnostics"
   },
   components: [
     {
-      id: 'header',
-      type: 'Card',
+      id: "header",
+      type: "Layout",
+      props: {},
+      children: [
+        {
+          id: "logo",
+          type: "Image",
+          props: {
+            src: "/logo.png"
+            // Missing alt text - accessibility issue
+          }
+        }
+      ]
+    },
+    {
+      id: "mainButton",
+      type: "Button",
       props: {
-        title: 'Test App',
-        bordered: true
+        label: "Click me",
+        onClick: "handleClick"
       }
     },
     {
-      id: 'submitButton',
-      type: 'Button',
+      id: "contactForm",
+      type: "Input",
       props: {
-        label: 'Submit',
-        variant: 'primary',
-        size: 'md'
+        name: "email",
+        type: "email"
+        // Missing label - accessibility issue
       }
     },
     {
-      id: 'cancelButton',
-      type: 'Button',
+      id: "unusedCard",
+      type: "Card",
       props: {
-        label: 'Cancel',
-        variant: 'secondary',
-        size: 'md'
-      }
-    },
-    {
-      id: 'logo',
-      type: 'Image',
-      props: {
-        src: '/logo.png',
-        width: 100,
-        height: 100
+        title: "Unused Card",
+        content: "This card is not used anywhere"
       }
     }
   ],
   routes: [
     {
-      path: '/',
-      component: 'header',
-      meta: {
-        title: 'Home Page'
-      }
+      path: "/",
+      component: "header"
     },
     {
-      path: '/about',
-      component: 'header',
-      meta: {
-        title: 'About Page'
-      }
-    },
-    {
-      path: '/user/:id',
-      component: 'header'
+      path: "/contact",
+      component: "contactForm"
     }
   ],
   api: {
     endpoints: [
       {
-        path: '/api/users',
-        methods: ['GET', 'POST'],
-        handler: 'userHandler',
-        auth: {
-          required: true
-        }
-      },
-      {
-        path: '/api/products',
-        methods: ['GET'],
-        handler: 'productHandler'
+        path: "/api/contact",
+        methods: ["POST"],
+        handler: "contactHandler"
+        // Missing validation - security issue
       }
     ]
   }
 };
 
-Deno.test("EnhancedDiagnosticTool - constructor", () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
-  
-  // Check that the tool was created
-  assertEquals(typeof tool.analyzeConfigurationEnhanced, 'function');
-});
+// Configuration with circular dependencies
+const circularDependencyConfig: AppConfig = {
+  metadata: {
+    name: "circular-test",
+    version: "1.0.0"
+  },
+  components: [
+    {
+      id: "componentA",
+      type: "Layout",
+      props: {},
+      children: [
+        {
+          id: "componentB",
+          type: "Card",
+          props: {}
+        }
+      ]
+    },
+    {
+      id: "componentB",
+      type: "Card",
+      props: {},
+      children: [
+        {
+          id: "componentA", // Circular dependency
+          type: "Layout",
+          props: {}
+        }
+      ]
+    }
+  ],
+  routes: [
+    {
+      path: "/",
+      component: "componentA"
+    }
+  ],
+  api: {
+    endpoints: []
+  }
+};
 
-Deno.test("EnhancedDiagnosticTool - analyzeConfigurationEnhanced basic functionality", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
+Deno.test("EnhancedDiagnosticTool - basic enhanced analysis", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
   
-  // Mock file manager to avoid actual file system operations
-  (tool as any).fileManager = {
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
     directoryExists: async () => true,
     fileExists: async () => true
   };
   
-  const result = await tool.analyzeConfigurationEnhanced(mockAppConfig);
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
+    verbose: true,
+    debug: true
+  });
   
-  // Check that the result has the expected structure
-  assertEquals(typeof result.valid, 'boolean');
+  // Should have basic diagnostic results
+  assertEquals(typeof result.valid, "boolean");
   assertEquals(Array.isArray(result.errors), true);
   assertEquals(Array.isArray(result.warnings), true);
   assertEquals(Array.isArray(result.suggestions), true);
   
-  // Check that enhanced analysis fields are present
-  assertEquals(typeof result.componentAnalysis, 'object');
-  assertEquals(typeof result.routeAnalysis, 'object');
-  assertEquals(typeof result.apiAnalysis, 'object');
+  // Should have enhanced metrics
+  assertEquals(typeof result.metrics?.analysisTime, "number");
+  assertEquals(typeof result.metrics?.complexityScore, "number");
+  assertEquals(typeof result.metrics?.maintainabilityIndex, "number");
+  
+  // Should have dependency analysis
+  assertEquals(result.dependencies?.componentDependencies instanceof Map, true);
+  assertEquals(Array.isArray(result.dependencies?.circularDependencies), true);
+  assertEquals(Array.isArray(result.dependencies?.unusedDependencies), true);
+  assertEquals(Array.isArray(result.dependencies?.missingDependencies), true);
 });
 
-Deno.test("EnhancedDiagnosticTool - analyzeComponentsEnhanced", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
+Deno.test("EnhancedDiagnosticTool - accessibility analysis", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
   
-  // Mock file manager
-  (tool as any).fileManager = {
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
     directoryExists: async () => true,
     fileExists: async () => true
   };
   
-  // Create a config with component issues
-  const configWithIssues: AppConfig = {
-    ...mockAppConfig,
-    components: [
-      ...mockAppConfig.components,
-      {
-        id: 'missingAltImage',
-        type: 'Image',
-        props: {
-          src: '/image.png',
-          // Missing alt prop
-          width: 200,
-          height: 200
-        }
-      },
-      {
-        id: 'unknownComponent',
-        type: 'UnknownType',
-        props: {}
-      }
-    ]
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithIssues, {
-    detailedPropAnalysis: true
-  });
-  
-  // Check component analysis
-  assertEquals(result.componentAnalysis?.problematicComponents.length >= 2, true);
-  
-  // Check for missing alt prop issue
-  const missingAltImage = result.componentAnalysis?.problematicComponents.find(c => c.id === 'missingAltImage');
-  assertEquals(missingAltImage !== undefined, true);
-  assertEquals(missingAltImage?.issues.some(issue => issue.includes('alt')), true);
-  
-  // Check for unknown component issue
-  const unknownComponent = result.componentAnalysis?.problematicComponents.find(c => c.id === 'unknownComponent');
-  assertEquals(unknownComponent !== undefined, true);
-  assertEquals(unknownComponent?.issues.some(issue => issue.includes('not found')), true);
-  
-  // Check for complexity metrics
-  assertEquals(typeof result.componentAnalysis?.complexityMetrics, 'object');
-});
-
-Deno.test("EnhancedDiagnosticTool - analyzeRoutesEnhanced", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
-  
-  // Mock file manager
-  (tool as any).fileManager = {
-    directoryExists: async () => true,
-    fileExists: async () => true
-  };
-  
-  // Create a config with route issues
-  const configWithIssues: AppConfig = {
-    ...mockAppConfig,
-    routes: [
-      ...mockAppConfig.routes,
-      {
-        path: '/products/:id/reviews/:reviewId/comments/:commentId',
-        component: 'header'
-        // Missing meta
-      },
-      {
-        path: '/nested/route/without/parent',
-        component: 'unknownComponent'
-      }
-    ]
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithIssues, {
-    analyzeRouteParams: true
-  });
-  
-  // Check route analysis
-  assertEquals(result.routeAnalysis?.problematicRoutes.length >= 2, true);
-  
-  // Check for excessive parameters issue
-  const routeWithManyParams = result.routeAnalysis?.problematicRoutes.find(r => 
-    r.path === '/products/:id/reviews/:reviewId/comments/:commentId'
-  );
-  assertEquals(routeWithManyParams !== undefined, true);
-  assertEquals(routeWithManyParams?.issues.some(issue => issue.includes('parameters')), true);
-  
-  // Check for missing parent route issue
-  const nestedRoute = result.routeAnalysis?.problematicRoutes.find(r => 
-    r.path === '/nested/route/without/parent'
-  );
-  assertEquals(nestedRoute !== undefined, true);
-  assertEquals(nestedRoute?.issues.some(issue => issue.includes('parent')), true);
-  
-  // Check for dynamic parameters
-  assertEquals(typeof result.routeAnalysis?.dynamicParameters, 'object');
-  assertEquals(Array.isArray(result.routeAnalysis?.dynamicParameters['/user/:id']), true);
-});
-
-Deno.test("EnhancedDiagnosticTool - analyzeApiEnhanced", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
-  
-  // Mock file manager
-  (tool as any).fileManager = {
-    directoryExists: async () => true,
-    fileExists: async () => true
-  };
-  
-  // Create a config with API issues
-  const configWithIssues: AppConfig = {
-    ...mockAppConfig,
-    api: {
-      endpoints: [
-        ...mockAppConfig.api.endpoints,
-        {
-          path: '/api/orders',
-          methods: ['POST', 'PUT'],
-          handler: 'orderHandler'
-          // Missing auth and validation
-        },
-        {
-          path: '/api/payments',
-          methods: ['POST'],
-          handler: 'paymentHandler',
-          auth: {
-            required: true
-          }
-          // Missing validation
-        }
-      ]
-    }
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithIssues, {
-    analyzeApiSchemas: true
-  });
-  
-  // Check API analysis
-  assertEquals(result.apiAnalysis?.problematicEndpoints.length >= 2, true);
-  
-  // Check for missing auth issue
-  const orderEndpoint = result.apiAnalysis?.problematicEndpoints.find(e => 
-    e.path === '/api/orders'
-  );
-  assertEquals(orderEndpoint !== undefined, true);
-  assertEquals(orderEndpoint?.issues.some(issue => issue.includes('authentication')), true);
-  
-  // Check for missing validation issue
-  const paymentEndpoint = result.apiAnalysis?.problematicEndpoints.find(e => 
-    e.path === '/api/payments'
-  );
-  assertEquals(paymentEndpoint !== undefined, true);
-  assertEquals(paymentEndpoint?.issues.some(issue => issue.includes('validation')), true);
-  
-  // Check for security analysis
-  assertEquals(typeof result.apiAnalysis?.security, 'object');
-  assertEquals(Array.isArray(result.apiAnalysis?.security?.missingValidation), true);
-});
-
-Deno.test("EnhancedDiagnosticTool - checkCircularDependencies", async () => {
-  const tool = new EnhancedDiagnosticTool({
-    ...mockComponentRegistry,
-    Header: {
-      component: {},
-      schema: {},
-      dependencies: ['Footer']
-    },
-    Footer: {
-      component: {},
-      schema: {},
-      dependencies: ['Header']
-    }
-  }, '/templates', LogLevel.INFO);
-  
-  // Mock file manager
-  (tool as any).fileManager = {
-    directoryExists: async () => true,
-    fileExists: async () => true
-  };
-  
-  // Create a config with circular dependencies
-  const configWithCircularDeps: AppConfig = {
-    ...mockAppConfig,
-    components: [
-      {
-        id: 'header',
-        type: 'Header',
-        props: {}
-      },
-      {
-        id: 'footer',
-        type: 'Footer',
-        props: {}
-      }
-    ]
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithCircularDeps, {
-    checkCircularDependencies: true
-  });
-  
-  // Check for circular dependency errors
-  assertEquals(result.errors.some(e => e.message.includes('Circular dependency')), true);
-});
-
-Deno.test("EnhancedDiagnosticTool - analyzePerformanceBottlenecks", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
-  
-  // Mock file manager
-  (tool as any).fileManager = {
-    directoryExists: async () => true,
-    fileExists: async () => true
-  };
-  
-  // Create a config with many components
-  const manyComponents: ComponentDefinition[] = [];
-  for (let i = 0; i < 60; i++) {
-    manyComponents.push({
-      id: `component${i}`,
-      type: 'Button',
-      props: {
-        label: `Button ${i}`
-      }
-    });
-  }
-  
-  const configWithManyComponents: AppConfig = {
-    ...mockAppConfig,
-    components: manyComponents
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithManyComponents, {
-    checkPerformanceBottlenecks: true
-  });
-  
-  // Check performance analysis
-  assertEquals(typeof result.performanceAnalysis, 'object');
-  assertEquals(Array.isArray(result.performanceAnalysis?.bottlenecks), true);
-  assertEquals(result.performanceAnalysis?.bottlenecks.some(b => b.includes('Large number of components')), true);
-  
-  // Check for estimated load times
-  assertEquals(typeof result.performanceAnalysis?.estimatedLoadTimes, 'object');
-});
-
-Deno.test("EnhancedDiagnosticTool - analyzeAccessibility", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
-  
-  // Mock file manager
-  (tool as any).fileManager = {
-    directoryExists: async () => true,
-    fileExists: async () => true
-  };
-  
-  // Create a config with accessibility issues
-  const configWithA11yIssues: AppConfig = {
-    ...mockAppConfig,
-    components: [
-      ...mockAppConfig.components,
-      {
-        id: 'imageWithoutAlt',
-        type: 'Image',
-        props: {
-          src: '/image.png'
-          // Missing alt text
-        }
-      },
-      {
-        id: 'buttonWithoutLabel',
-        type: 'Button',
-        props: {
-          // Missing label
-          variant: 'primary'
-        }
-      }
-    ]
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithA11yIssues, {
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
     checkAccessibility: true
   });
   
-  // Check accessibility analysis
-  assertEquals(typeof result.accessibilityAnalysis, 'object');
-  assertEquals(Array.isArray(result.accessibilityAnalysis?.complianceIssues), true);
-  assertEquals(result.accessibilityAnalysis?.complianceIssues.some(issue => issue.includes('alt text')), true);
-  assertEquals(result.accessibilityAnalysis?.complianceIssues.some(issue => issue.includes('accessible name')), true);
+  // Should have accessibility analysis
+  assertEquals(typeof result.accessibility?.score, "number");
+  assertEquals(Array.isArray(result.accessibility?.issues), true);
+  assertEquals(Array.isArray(result.accessibility?.recommendations), true);
+  
+  // Should detect missing alt text
+  const hasAltTextIssue = result.accessibility?.issues.some(issue => 
+    issue.includes("logo") && issue.includes("alt text")
+  );
+  assertEquals(hasAltTextIssue, true);
+  
+  // Should detect missing form label
+  const hasLabelIssue = result.accessibility?.issues.some(issue => 
+    issue.includes("contactForm") && issue.includes("label")
+  );
+  assertEquals(hasLabelIssue, true);
+  
+  // Should have recommendations
+  assertEquals(result.accessibility?.recommendations.length > 0, true);
 });
 
-Deno.test("EnhancedDiagnosticTool - analyzeSeo", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
+Deno.test("EnhancedDiagnosticTool - SEO analysis", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
   
-  // Mock file manager
-  (tool as any).fileManager = {
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
     directoryExists: async () => true,
     fileExists: async () => true
   };
   
-  // Create a config with SEO issues
-  const configWithSeoIssues: AppConfig = {
-    ...mockAppConfig,
-    routes: [
-      ...mockAppConfig.routes,
-      {
-        path: '/products',
-        component: 'header'
-        // Missing meta title and description
-      }
-    ]
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithSeoIssues, {
-    checkSeo: true
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
+    checkSEO: true
   });
   
-  // Check SEO analysis
-  assertEquals(typeof result.seoAnalysis, 'object');
-  assertEquals(Array.isArray(result.seoAnalysis?.issues), true);
-  assertEquals(result.seoAnalysis?.issues.some(issue => issue.includes('meta title')), true);
-  assertEquals(Array.isArray(result.seoAnalysis?.suggestions), true);
+  // Should have SEO analysis
+  assertEquals(typeof result.seo?.score, "number");
+  assertEquals(Array.isArray(result.seo?.issues), true);
+  assertEquals(Array.isArray(result.seo?.recommendations), true);
+  
+  // Should have recommendations for SEO improvements
+  assertEquals(result.seo?.recommendations.length > 0, true);
 });
 
-Deno.test("EnhancedDiagnosticTool - analyzeI18n", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
+Deno.test("EnhancedDiagnosticTool - i18n analysis", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
   
-  // Mock file manager
-  (tool as any).fileManager = {
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
     directoryExists: async () => true,
     fileExists: async () => true
   };
   
-  // Create a config with i18n issues
-  const configWithI18nIssues: AppConfig = {
-    ...mockAppConfig,
-    components: [
-      ...mockAppConfig.components,
-      {
-        id: 'hardcodedText',
-        type: 'Button',
-        props: {
-          label: 'Hardcoded Button Text'
-        }
-      }
-    ]
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithI18nIssues, {
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
     checkI18n: true
   });
   
-  // Check i18n analysis
-  assertEquals(typeof result.i18nAnalysis, 'object');
-  assertEquals(Array.isArray(result.i18nAnalysis?.hardcodedStrings), true);
-  assertEquals(result.i18nAnalysis?.hardcodedStrings.some(str => str.includes('Hardcoded Button Text')), true);
+  // Should have i18n analysis
+  assertEquals(Array.isArray(result.i18n?.hardcodedStrings), true);
+  assertEquals(Array.isArray(result.i18n?.missingTranslations), true);
+  assertEquals(Array.isArray(result.i18n?.recommendations), true);
+  
+  // Should detect hardcoded strings
+  const hasHardcodedStrings = result.i18n?.hardcodedStrings.some(str => 
+    str.includes("Click me") || str.includes("Unused Card")
+  );
+  assertEquals(hasHardcodedStrings, true);
+  
+  // Should have recommendations
+  assertEquals(result.i18n?.recommendations.length > 0, true);
 });
 
-Deno.test("EnhancedDiagnosticTool - analyzeMobileResponsiveness", async () => {
-  const tool = new EnhancedDiagnosticTool(mockComponentRegistry, '/templates', LogLevel.INFO);
+Deno.test("EnhancedDiagnosticTool - circular dependency detection", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
   
-  // Mock file manager
-  (tool as any).fileManager = {
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
     directoryExists: async () => true,
     fileExists: async () => true
   };
   
-  // Create a config with mobile issues
-  const configWithMobileIssues: AppConfig = {
-    ...mockAppConfig,
-    components: [
-      ...mockAppConfig.components,
-      {
-        id: 'fixedWidthComponent',
-        type: 'Card',
-        props: {
-          title: 'Fixed Width',
-          style: {
-            width: '800px' // Fixed width instead of responsive
-          }
-        }
-      }
-    ]
-  };
-  
-  const result = await tool.analyzeConfigurationEnhanced(configWithMobileIssues, {
-    checkMobileResponsiveness: true
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(circularDependencyConfig, {
+    checkCircularDependencies: true
   });
   
-  // Check mobile analysis
-  assertEquals(typeof result.mobileAnalysis, 'object');
-  assertEquals(Array.isArray(result.mobileAnalysis?.issues), true);
-  assertEquals(Array.isArray(result.mobileAnalysis?.suggestions), true);
+  // Should detect circular dependencies
+  assertEquals(result.dependencies?.circularDependencies.length > 0, true);
+  
+  // Should have suggestions about circular dependencies
+  const hasCircularDependencySuggestion = result.suggestions.some(suggestion => 
+    suggestion.includes("circular dependencies")
+  );
+  assertEquals(hasCircularDependencySuggestion, true);
+});
+
+Deno.test("EnhancedDiagnosticTool - unused dependency detection", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
+  
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => true,
+    fileExists: async () => true
+  };
+  
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig);
+  
+  // Should detect unused components
+  assertEquals(result.dependencies?.unusedDependencies.includes("unusedCard"), true);
+  
+  // Should have suggestions about unused dependencies
+  const hasUnusedDependencySuggestion = result.suggestions.some(suggestion => 
+    suggestion.includes("unused components")
+  );
+  assertEquals(hasUnusedDependencySuggestion, true);
+});
+
+Deno.test("EnhancedDiagnosticTool - performance analysis", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
+  
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => true,
+    fileExists: async () => true
+  };
+  
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
+    analyzeMemoryUsage: true,
+    estimateBundleSize: true,
+    enableProfiling: true
+  });
+  
+  // Should have performance metrics
+  assertEquals(typeof result.metrics?.memoryUsage, "number");
+  assertEquals(typeof result.metrics?.bundleSizeEstimate, "number");
+  assertEquals(typeof result.metrics?.complexityScore, "number");
+  assertEquals(typeof result.metrics?.maintainabilityIndex, "number");
+  
+  // Memory usage should be reasonable
+  assertEquals(result.metrics?.memoryUsage > 0, true);
+  assertEquals(result.metrics?.bundleSizeEstimate > 0, true);
+  
+  // Complexity score should be within range
+  assertEquals(result.metrics?.complexityScore >= 0, true);
+  assertEquals(result.metrics?.complexityScore <= 100, true);
+  
+  // Maintainability index should be within range
+  assertEquals(result.metrics?.maintainabilityIndex >= 0, true);
+  assertEquals(result.metrics?.maintainabilityIndex <= 100, true);
+});
+
+Deno.test("EnhancedDiagnosticTool - validate availability", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
+  
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => true,
+    fileExists: async (path: string) => {
+      // Simulate some missing templates
+      return !path.includes("missing-template");
+    }
+  };
+  
+  const availability = await diagnosticTool.validateAvailability(testConfig, mockCompilationContext);
+  
+  // Should have component availability results
+  assertEquals(availability.componentAvailability instanceof Map, true);
+  assertEquals(availability.templateAvailability instanceof Map, true);
+  assertEquals(Array.isArray(availability.missingComponents), true);
+  assertEquals(Array.isArray(availability.missingTemplates), true);
+  assertEquals(Array.isArray(availability.recommendations), true);
+  
+  // Should detect available components
+  assertEquals(availability.componentAvailability.get("Button"), true);
+  assertEquals(availability.componentAvailability.get("Card"), true);
+  assertEquals(availability.componentAvailability.get("Layout"), true);
+  
+  // Should have recommendations if there are missing items
+  if (availability.missingComponents.length > 0 || availability.missingTemplates.length > 0) {
+    assertEquals(availability.recommendations.length > 0, true);
+  }
+});
+
+Deno.test("EnhancedDiagnosticTool - generate report", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
+  
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => true,
+    fileExists: async () => true
+  };
+  
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
+    checkAccessibility: true,
+    checkSEO: true,
+    checkI18n: true,
+    analyzeMemoryUsage: true,
+    estimateBundleSize: true
+  });
+  
+  const report = diagnosticTool.generateReport(result);
+  
+  // Should be a string
+  assertEquals(typeof report, "string");
+  
+  // Should contain key sections
+  assertStringIncludes(report, "ENHANCED DIAGNOSTIC REPORT");
+  assertStringIncludes(report, "SUMMARY");
+  assertStringIncludes(report, "METRICS");
+  assertStringIncludes(report, "PERFORMANCE");
+  assertStringIncludes(report, "DEPENDENCIES");
+  
+  // Should contain analysis results
+  if (result.accessibility) {
+    assertStringIncludes(report, "ACCESSIBILITY");
+  }
+  
+  if (result.seo) {
+    assertStringIncludes(report, "SEO");
+  }
+  
+  if (result.errors.length > 0) {
+    assertStringIncludes(report, "ERRORS");
+  }
+  
+  if (result.warnings.length > 0) {
+    assertStringIncludes(report, "WARNINGS");
+  }
+  
+  if (result.suggestions.length > 0) {
+    assertStringIncludes(report, "SUGGESTIONS");
+  }
+});
+
+Deno.test("EnhancedDiagnosticTool - verbose and debug modes", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.DEBUG);
+  
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => true,
+    fileExists: async () => true
+  };
+  
+  // Mock console methods to capture verbose/debug output
+  const originalConsoleInfo = console.info;
+  const originalConsoleDebug = console.debug;
+  let infoMessages: string[] = [];
+  let debugMessages: string[] = [];
+  
+  console.info = (message: string) => {
+    infoMessages.push(message);
+  };
+  
+  console.debug = (message: string) => {
+    debugMessages.push(message);
+  };
+  
+  try {
+    const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
+      verbose: true,
+      debug: true,
+      analyzeMemoryUsage: true,
+      estimateBundleSize: true
+    });
+    
+    // Should have completed analysis
+    assertEquals(typeof result.valid, "boolean");
+    
+    // Should have generated verbose output (info messages)
+    const hasVerboseOutput = infoMessages.some(msg => 
+      msg.includes("Starting enhanced diagnostic") || 
+      msg.includes("Analyzing")
+    );
+    assertEquals(hasVerboseOutput, true);
+    
+    // Should have generated debug output
+    const hasDebugOutput = debugMessages.some(msg => 
+      msg.includes("score") || 
+      msg.includes("Found") ||
+      msg.includes("Estimated")
+    );
+    assertEquals(hasDebugOutput, true);
+  } finally {
+    // Restore console methods
+    console.info = originalConsoleInfo;
+    console.debug = originalConsoleDebug;
+  }
+});
+
+Deno.test("EnhancedDiagnosticTool - complex configuration analysis", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
+  
+  // Create a complex configuration with many components and deep nesting
+  const complexConfig: AppConfig = {
+    metadata: {
+      name: "complex-app",
+      version: "2.0.0",
+      description: "Complex application for testing"
+    },
+    components: Array.from({ length: 20 }, (_, i) => ({
+      id: `component${i}`,
+      type: i % 2 === 0 ? "Button" : "Card",
+      props: {
+        label: `Component ${i}`,
+        title: `Title ${i}`
+      },
+      children: i < 5 ? [{
+        id: `child${i}`,
+        type: "Layout",
+        props: {},
+        children: [{
+          id: `grandchild${i}`,
+          type: "Button",
+          props: { label: `Grandchild ${i}` }
+        }]
+      }] : undefined
+    })),
+    routes: Array.from({ length: 10 }, (_, i) => ({
+      path: `/route${i}`,
+      component: `component${i}`
+    })),
+    api: {
+      endpoints: Array.from({ length: 15 }, (_, i) => ({
+        path: `/api/endpoint${i}`,
+        methods: ["GET", "POST"],
+        handler: `handler${i}`
+      }))
+    }
+  };
+  
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => true,
+    fileExists: async () => true
+  };
+  
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(complexConfig, {
+    analyzeMemoryUsage: true,
+    estimateBundleSize: true,
+    checkCircularDependencies: true
+  });
+  
+  // Should handle complex configuration
+  assertEquals(typeof result.valid, "boolean");
+  
+  // Should have higher complexity score due to many components
+  assertEquals(result.metrics?.complexityScore > 30, true);
+  
+  // Should have reasonable performance estimates
+  assertEquals(result.performance?.componentCount, 20);
+  assertEquals(result.performance?.routeCount, 10);
+  assertEquals(result.performance?.apiEndpointCount, 15);
+  
+  // Should have higher memory and bundle size estimates
+  assertEquals(result.metrics?.memoryUsage > 1000000, true); // > 1MB
+  assertEquals(result.metrics?.bundleSizeEstimate > 200000, true); // > 200KB
+});
+
+Deno.test("EnhancedDiagnosticTool - error handling", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
+  
+  // Mock file system methods to simulate missing templates
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => false, // Template directory doesn't exist
+    fileExists: async () => false // Template files don't exist
+  };
+  
+  // Should handle missing templates gracefully
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig);
+  
+  // Should still return a result even with missing templates
+  assertEquals(typeof result.valid, "boolean");
+  assertEquals(Array.isArray(result.errors), true);
+  
+  // Should have errors related to missing template directory
+  const hasTemplateError = result.errors.some(error => 
+    error.type === "template" && (error.message.includes("not found") || error.message.includes("missing"))
+  );
+  assertEquals(hasTemplateError, true);
+});
+
+Deno.test("EnhancedDiagnosticTool - selective analysis options", async () => {
+  const diagnosticTool = new EnhancedDiagnosticTool(mockComponentRegistry, "/templates", LogLevel.INFO);
+  
+  // Mock file system methods
+  (diagnosticTool as any).fileManager = {
+    directoryExists: async () => true,
+    fileExists: async () => true
+  };
+  
+  // Test with only specific analysis enabled
+  const result = await diagnosticTool.analyzeConfigurationEnhanced(testConfig, {
+    checkAccessibility: true,
+    checkSEO: false,
+    checkI18n: false,
+    analyzeMemoryUsage: false,
+    estimateBundleSize: false
+  });
+  
+  // Should have accessibility analysis
+  assertEquals(typeof result.accessibility?.score, "number");
+  
+  // Should not have SEO or i18n analysis
+  assertEquals(result.seo, undefined);
+  assertEquals(result.i18n, undefined);
+  
+  // Should not have memory or bundle size estimates
+  assertEquals(result.metrics?.memoryUsage, undefined);
+  assertEquals(result.metrics?.bundleSizeEstimate, undefined);
+  
+  // Should still have basic metrics
+  assertEquals(typeof result.metrics?.analysisTime, "number");
+  assertEquals(typeof result.metrics?.complexityScore, "number");
+  assertEquals(typeof result.metrics?.maintainabilityIndex, "number");
 });

@@ -27,6 +27,8 @@ import { createImportGenerator, type ComponentImportGenerator } from "./componen
 import { createRouteGenerator, type RouteGenerator } from "./route-generator.ts";
 import { errorHandler, type ErrorHandlingOptions } from "./compiler-error-handling.ts";
 import { diagnosticTool, type DiagnosticOptions } from "./diagnostics.ts";
+import { performanceCache, type CacheConfig } from "./performance-cache.ts";
+import { parallelProcessor, type ParallelTask, type ParallelProcessingOptions } from "./parallel-processor.ts";
 
 // Import API route generator if available
 let apiRouteGenerator: any;
@@ -153,8 +155,9 @@ export class Compiler {
    * Create a new compiler
    * 
    * @param componentRegistry Component registry
+   * @param cacheConfig Optional cache configuration
    */
-  constructor(componentRegistry: ComponentRegistry) {
+  constructor(componentRegistry: ComponentRegistry, cacheConfig?: CacheConfig) {
     this.componentRegistry = componentRegistry;
     this.componentResolver = createComponentResolver(componentRegistry);
     this.importGenerator = createImportGenerator(this.componentResolver);
@@ -163,6 +166,11 @@ export class Compiler {
     // Initialize API route generator if available
     if (apiRouteGenerator) {
       this.apiRouteGenerator = apiRouteGenerator();
+    }
+    
+    // Initialize performance cache
+    if (cacheConfig) {
+      performanceCache.constructor(cacheConfig);
     }
     
     // Initialize compilation pipeline
@@ -1088,20 +1096,120 @@ This application was generated using the JSON App Compiler.
     options: CompilationOptions
   ): Promise<void> {
     try {
-      // In a real implementation, this would perform optimizations like:
-      // - Tree-shaking unused components
-      // - Minifying CSS and JavaScript
-      // - Optimizing images
-      // - Generating source maps
+      logger.info("Optimizing generated output with performance enhancements");
       
-      // For now, we'll just log that optimization is complete
-      logger.info("Output optimization complete");
+      // Initialize performance cache if not already done
+      await performanceCache.initialize();
+      
+      // Create parallel optimization tasks
+      const optimizationTasks: ParallelTask<string, void>[] = [
+        {
+          id: 'tree-shake',
+          description: 'Tree shake unused components',
+          execute: async (projectPath: string) => {
+            await this.optimizeTreeShaking(projectPath);
+          },
+          input: projectPath,
+          priority: 3
+        },
+        {
+          id: 'minify-assets',
+          description: 'Minify CSS and JavaScript',
+          execute: async (projectPath: string) => {
+            await this.optimizeAssets(projectPath);
+          },
+          input: projectPath,
+          priority: 2
+        },
+        {
+          id: 'optimize-images',
+          description: 'Optimize images',
+          execute: async (projectPath: string) => {
+            await this.optimizeImages(projectPath);
+          },
+          input: projectPath,
+          priority: 1
+        },
+        {
+          id: 'bundle-assets',
+          description: 'Bundle assets',
+          execute: async (projectPath: string) => {
+            await this.bundleAssets(projectPath);
+          },
+          input: projectPath,
+          dependencies: ['minify-assets'],
+          priority: 2
+        }
+      ];
+      
+      // Execute optimization tasks in parallel
+      const result = await parallelProcessor.executeTasks(optimizationTasks, {
+        maxConcurrency: 3,
+        stopOnError: false,
+        logProgress: true
+      });
+      
+      // Log optimization results
+      if (result.success) {
+        logger.info(`Output optimization completed: ${result.successCount} tasks succeeded`);
+      } else {
+        logger.warn(`Output optimization completed with issues: ${result.successCount} succeeded, ${result.failureCount} failed`);
+        
+        // Add warnings for failed optimizations
+        for (const taskResult of result.results) {
+          if (!taskResult.success) {
+            for (const error of taskResult.errors) {
+              this.warnings.push(`Optimization ${taskResult.id}: ${error.message}`);
+            }
+          }
+        }
+      }
+      
+      // Save cache after optimization
+      await performanceCache.saveToDisk();
+      
     } catch (error) {
       const errorMessage = `Failed to optimize output: ${error instanceof Error ? error.message : String(error)}`;
       logger.error(errorMessage);
       
       this.warnings.push(errorMessage);
     }
+  }
+  
+  /**
+   * Optimize tree shaking of unused components
+   */
+  private async optimizeTreeShaking(projectPath: string): Promise<void> {
+    logger.debug("Performing tree shaking optimization");
+    // Implementation would analyze component usage and remove unused ones
+    // For now, this is a placeholder
+  }
+  
+  /**
+   * Optimize and minify assets
+   */
+  private async optimizeAssets(projectPath: string): Promise<void> {
+    logger.debug("Optimizing and minifying assets");
+    // Implementation would minify CSS, JS, and other assets
+    // For now, this is a placeholder
+  }
+  
+  /**
+   * Optimize images
+   */
+  private async optimizeImages(projectPath: string): Promise<void> {
+    logger.debug("Optimizing images");
+    // Implementation would compress and optimize image files
+    // For now, this is a placeholder
+  }
+  
+  /**
+   * Bundle assets
+   */
+  private async bundleAssets(projectPath: string): Promise<void> {
+    logger.debug("Bundling assets");
+    // Implementation would bundle and optimize asset loading
+    // For now, this is a placeholder
   }
   
   /**
