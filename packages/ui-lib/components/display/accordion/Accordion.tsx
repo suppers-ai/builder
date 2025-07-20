@@ -19,7 +19,7 @@ export interface AccordionItemProps {
 
 export function Accordion({
   class: className = "",
-  items,
+  items = [],
   multiple = false,
   defaultOpen = [],
   openItems,

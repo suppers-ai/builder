@@ -21,7 +21,7 @@ export function Select({
   color,
   disabled = false,
   value,
-  options,
+  options = [],
   placeholder,
   bordered = true,
   ghost = false,
