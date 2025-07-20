@@ -1,0 +1,5 @@
+export const snapshot = {};
+
+snapshot[`ChatBubbleDisplay - HTML snapshot 1`] = `'<div class="chat chat-start"><div class="chat-image avatar "><div class="w-10 rounded-full"><img src="/user1.jpg" alt="Alice"/></div></div><div class="chat-header">Alice</div><div class="chat-bubble">Hello, how are you?</div></div>'`;
+
+snapshot[`ChatBubbleDisplay - HTML snapshot end position 1`] = `\`<div class="chat chat-end"><div class="chat-image avatar "><div class="w-10 rounded-full"><img src="/user2.jpg" alt="Bob"/></div></div><div class="chat-header">Bob<time class="text-xs opacity-50 ml-1">Read</time></div><div class="chat-bubble chat-bubble-primary">I'm doing great, thanks!</div></div>\``;

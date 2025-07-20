@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`WindowMockupDisplay - HTML snapshot 1`] = `'<div class="mockup-window bg-base-300"><div class="flex justify-between items-center px-4 py-2 bg-base-200 border-b"><div class="flex space-x-2"><div class="w-3 h-3 bg-red-500 rounded-full"></div><div class="w-3 h-3 bg-yellow-500 rounded-full"></div><div class="w-3 h-3 bg-green-500 rounded-full"></div></div><div class="text-sm font-medium">Test Window</div><div class="w-12"></div></div><div class="flex justify-center px-4 py-16 bg-base-200">Test content for snapshot</div></div>'`;
+
+snapshot[`WindowMockupDisplay - HTML snapshot bordered variant 1`] = `'<div class="mockup-window border bg-base-300"><div class="flex justify-between items-center px-4 py-2 bg-base-200 border-b"><div class="flex space-x-2"><div class="w-3 h-3 bg-red-500 rounded-full"></div><div class="w-3 h-3 bg-yellow-500 rounded-full"></div><div class="w-3 h-3 bg-green-500 rounded-full"></div></div><div class="text-sm font-medium">Bordered Window</div><div class="w-12"></div></div><div class="flex justify-center px-4 py-16 bg-base-200">Bordered window content</div></div>'`;
+
+snapshot[`WindowMockupDisplay - HTML snapshot without controls 1`] = `'<div class="mockup-window bg-base-300"><div class="flex justify-center px-4 py-16 bg-base-200">No controls content</div></div>'`;

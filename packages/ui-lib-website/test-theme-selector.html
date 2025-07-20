@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Selector Test</title>
+    <link href="http://localhost:8001/_fresh/static/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="p-8 min-h-screen bg-base-100">
+        <h1 class="text-2xl font-bold mb-8 text-base-content">Theme Selector UI Test</h1>
+        
+        <div class="max-w-md mx-auto">
+            <!-- Simulated theme selector dropdown -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost gap-2 min-w-0">
+                    <span class="truncate">🧁 Cupcake</span>
+                    <svg class="fill-current w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                    </svg>
+                </div>
+
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-80 p-2 shadow-lg border border-base-300">
+                    <li class="menu-title">
+                        <div class="flex items-center justify-between w-full">
+                            <span>Choose Theme</span>
+                            <button class="btn btn-primary btn-xs">+ Custom</button>
+                        </div>
+                    </li>
+
+                    <div class="max-h-96 overflow-y-auto">
+                        <li class="menu-title mt-2">
+                            <span class="text-xs">Built-in Themes</span>
+                        </li>
+                        
+                        <!-- Theme items with improved layout -->
+                        <li>
+                            <button class="flex items-center justify-between p-3 min-w-0 active">
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
+                                    <div class="flex flex-col items-start min-w-0 flex-1">
+                                        <span class="font-medium truncate w-full">☀️ Light</span>
+                                        <span class="text-xs opacity-70 truncate w-full">Clean and bright</span>
+                                    </div>
+                                    <div class="flex gap-1 flex-shrink-0">
+                                        <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-secondary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                                        <div class="w-3 h-3 bg-neutral rounded-full"></div>
+                                    </div>
+                                </div>
+                                <svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </li>
+                        
+                        <li>
+                            <button class="flex items-center justify-between p-3 min-w-0">
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
+                                    <div class="flex flex-col items-start min-w-0 flex-1">
+                                        <span class="font-medium truncate w-full">🌙 Dark</span>
+                                        <span class="text-xs opacity-70 truncate w-full">Easy on the eyes</span>
+                                    </div>
+                                    <div class="flex gap-1 flex-shrink-0">
+                                        <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-secondary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                                        <div class="w-3 h-3 bg-neutral rounded-full"></div>
+                                    </div>
+                                </div>
+                            </button>
+                        </li>
+                        
+                        <li>
+                            <button class="flex items-center justify-between p-3 min-w-0">
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
+                                    <div class="flex flex-col items-start min-w-0 flex-1">
+                                        <span class="font-medium truncate w-full">🧁 Cupcake</span>
+                                        <span class="text-xs opacity-70 truncate w-full">Sweet and colorful</span>
+                                    </div>
+                                    <div class="flex gap-1 flex-shrink-0">
+                                        <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-secondary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                                        <div class="w-3 h-3 bg-neutral rounded-full"></div>
+                                    </div>
+                                </div>
+                            </button>
+                        </li>
+                        
+                        <li>
+                            <button class="flex items-center justify-between p-3 min-w-0">
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
+                                    <div class="flex flex-col items-start min-w-0 flex-1">
+                                        <span class="font-medium truncate w-full">🐝 Bumblebee</span>
+                                        <span class="text-xs opacity-70 truncate w-full">Bright and energetic</span>
+                                    </div>
+                                    <div class="flex gap-1 flex-shrink-0">
+                                        <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-secondary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                                        <div class="w-3 h-3 bg-neutral rounded-full"></div>
+                                    </div>
+                                </div>
+                            </button>
+                        </li>
+                        
+                        <li>
+                            <button class="flex items-center justify-between p-3 min-w-0">
+                                <div class="flex items-center gap-3 min-w-0 flex-1">
+                                    <div class="flex flex-col items-start min-w-0 flex-1">
+                                        <span class="font-medium truncate w-full">💚 Emerald</span>
+                                        <span class="text-xs opacity-70 truncate w-full">Rich and natural</span>
+                                    </div>
+                                    <div class="flex gap-1 flex-shrink-0">
+                                        <div class="w-3 h-3 bg-primary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-secondary rounded-full"></div>
+                                        <div class="w-3 h-3 bg-accent rounded-full"></div>
+                                        <div class="w-3 h-3 bg-neutral rounded-full"></div>
+                                    </div>
+                                </div>
+                            </button>
+                        </li>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <p class="text-base-content opacity-70">Click the theme selector above to test the improved UI</p>
+        </div>
+    </div>
+</body>
+</html>

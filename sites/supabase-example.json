@@ -1,0 +1,41 @@
+{
+  "site": {
+    "name": "supabase-example",
+    "version": "1.0.0",
+    "description": "An example Supabase application with authentication and SSO"
+  },
+  "libraries": [
+    {
+      "name": "@builder/ui-lib",
+      "priority": 1,
+      "type": "component-library"
+    }
+  ],
+  "template": "supabase-app",
+  "pages": [
+    {
+      "path": "",
+      "components": [
+        {
+          "type": "Hero",
+          "inputs": {
+            "title": "Welcome to Your Supabase App!",
+            "subtitle": "Full-stack authentication with protected routes"
+          }
+        }
+      ]
+    },
+    {
+      "path": "features",
+      "components": [
+        {
+          "type": "Hero",
+          "inputs": {
+            "title": "Powerful Features",
+            "subtitle": "Everything you need for modern authentication"
+          }
+        }
+      ]
+    }
+  ]
+}

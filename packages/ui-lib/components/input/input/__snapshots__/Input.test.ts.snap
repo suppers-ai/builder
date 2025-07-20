@@ -1,0 +1,31 @@
+export const snapshot = {};
+
+snapshot[`InputDisplay - HTML snapshot basic 1`] = `'<input type="text" class="input input-md input-bordered" placeholder value/>'`;
+
+snapshot[`InputDisplay - HTML snapshot with all props 1`] = `'<input type="email" class="input input-lg input-primary input-bordered" placeholder="Enter your email address" value="user@example.com" id="email-input"/>'`;
+
+snapshot[`InputDisplay - HTML snapshot variants 1`] = `
+'<input type="text" class="input input-sm input-bordered" placeholder="Text input" value/>
+<input type="email" class="input input-md input-primary input-bordered" placeholder="Email input" value/>
+<input type="password" class="input input-md input-secondary input-bordered" placeholder="Password input" value/>
+<input type="number" class="input input-lg input-bordered" placeholder="Number input" value/>
+<input type="text" class="input input-md input-bordered input-ghost" placeholder="Ghost input" value/>
+<input type="text" class="input input-md input-bordered" placeholder value="Disabled input" disabled/>'
+`;
+
+snapshot[`InputDisplay - HTML snapshot sizes 1`] = `
+'<input type="text" class="input input-xs input-primary input-bordered" placeholder="Size xs" value/>
+<input type="text" class="input input-sm input-primary input-bordered" placeholder="Size sm" value/>
+<input type="text" class="input input-md input-primary input-bordered" placeholder="Size md" value/>
+<input type="text" class="input input-lg input-primary input-bordered" placeholder="Size lg" value/>'
+`;
+
+snapshot[`InputDisplay - HTML snapshot colors 1`] = `
+'<input type="text" class="input input-md input-primary input-bordered" placeholder="Color primary" value/>
+<input type="text" class="input input-md input-secondary input-bordered" placeholder="Color secondary" value/>
+<input type="text" class="input input-md input-accent input-bordered" placeholder="Color accent" value/>
+<input type="text" class="input input-md input-info input-bordered" placeholder="Color info" value/>
+<input type="text" class="input input-md input-success input-bordered" placeholder="Color success" value/>
+<input type="text" class="input input-md input-warning input-bordered" placeholder="Color warning" value/>
+<input type="text" class="input input-md input-error input-bordered" placeholder="Color error" value/>'
+`;

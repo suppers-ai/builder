@@ -1,0 +1,16 @@
+export const snapshot = {};
+
+snapshot[`CheckboxDisplay - HTML snapshot basic 1`] = `'<input type="checkbox" class="checkbox checkbox-md checkbox-primary"/>'`;
+
+snapshot[`CheckboxDisplay - HTML snapshot with label 1`] = `'<div class="form-control"><label class="label cursor-pointer"><input type="checkbox" class="checkbox checkbox-md checkbox-primary" checked/><span class="label-text">Checkbox with label</span></label></div>'`;
+
+snapshot[`CheckboxDisplay - HTML snapshot disabled 1`] = `'<div class="form-control"><label class="label cursor-pointer"><input type="checkbox" class="checkbox checkbox-md checkbox-primary" disabled/><span class="label-text">Disabled checkbox</span></label></div>'`;
+
+snapshot[`CheckboxDisplay - HTML snapshot all sizes 1`] = `
+'<div class="form-control"><label class="label cursor-pointer"><input type="checkbox" class="checkbox checkbox-xs checkbox-primary"/><span class="label-text">Size xs</span></label></div>
+<div class="form-control"><label class="label cursor-pointer"><input type="checkbox" class="checkbox checkbox-sm checkbox-primary"/><span class="label-text">Size sm</span></label></div>
+<div class="form-control"><label class="label cursor-pointer"><input type="checkbox" class="checkbox checkbox-md checkbox-primary"/><span class="label-text">Size md</span></label></div>
+<div class="form-control"><label class="label cursor-pointer"><input type="checkbox" class="checkbox checkbox-lg checkbox-primary"/><span class="label-text">Size lg</span></label></div>'
+`;
+
+snapshot[`CheckboxDisplay - HTML snapshot complex 1`] = `'<div class="form-control"><label class="label cursor-pointer"><input type="checkbox" class="checkbox checkbox-lg checkbox-success custom-checkbox" checked id="terms-agreement"/><span class="label-text">I agree to the terms and conditions</span></label></div>'`;

@@ -1,55 +1,53 @@
-# Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# supabase branches and temp files
+.branches
+.temp
 
-# Deno
-.deno/
-deno.lock
+_fresh/
 
-# Build outputs
-dist/
-build/
-out/
+# Environment variables files
+.env*
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Generated sites (keep for now, may want to ignore later)
+apps/generated/*
 
-# IDE and editor files
+# Deno coverage output
+coverage/
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 .vscode/
-.idea/
-*.swp
-*.swo
-*~
+.cursor/
 
-# OS generated files
+# System Files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
 # Logs
 *.log
-logs/
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
 
 # Temporary files
 tmp/
 temp/
+
+# Build outputs (if any)
+dist/
+build/
+
+# Playwright test artifacts (NOT the baseline snapshots)
+test-results/
+playwright-report/
+*-actual.png
+*-diff.png
+*-previous.png
+*.trace
+*.webm
+*.mp4
+
+# Node modules (if any)
+node_modules/

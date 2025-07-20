@@ -1,0 +1,11 @@
+export const snapshot = {};
+
+snapshot[`AvatarDisplay - HTML snapshot with image 1`] = `'<div class="avatar online"><img src="https://example.com/user.jpg" alt="User Avatar" class="ring ring-primary ring-offset-base-100 ring-offset-2 rounded-full w-12 h-12"/></div>'`;
+
+snapshot[`AvatarDisplay - HTML snapshot with placeholder 1`] = `'<div class="avatar offline custom-avatar"><div class="placeholder rounded-full w-16 h-16 bg-neutral text-neutral-content"><span class="text-xl">JD</span></div></div>'`;
+
+snapshot[`AvatarDisplay - HTML snapshot with initials 1`] = `'<div class="avatar" id="initials-avatar"><div class="placeholder ring ring-primary ring-offset-base-100 ring-offset-2 rounded-full w-24 h-24 bg-neutral text-neutral-content"><span class="text-xl">AB</span></div></div>'`;
+
+snapshot[`AvatarDisplay - HTML snapshot minimal 1`] = `'<div class="avatar"><div class="placeholder rounded-full w-12 h-12 bg-neutral text-neutral-content"><span class="text-xl">?</span></div></div>'`;
+
+snapshot[`AvatarDisplay - HTML snapshot all props 1`] = `'<div class="avatar online profile-avatar" id="user-profile-avatar"><img src="profile.jpg" alt="Profile Picture" class="ring ring-primary ring-offset-base-100 ring-offset-2 rounded-full w-16 h-16"/></div>'`;

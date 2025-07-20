@@ -1,0 +1,57 @@
+/* Store Package Styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the store package */
+.store-container {
+  @apply min-h-screen bg-base-200;
+}
+
+.store-card {
+  @apply bg-base-100 shadow-lg rounded-lg p-6;
+}
+
+.store-header {
+  @apply text-center mb-8;
+}
+
+.store-title {
+  @apply text-3xl font-bold text-primary mb-2;
+}
+
+.store-subtitle {
+  @apply text-lg text-base-content/70;
+}
+
+.store-form {
+  @apply space-y-6;
+}
+
+.store-button {
+  @apply w-full btn btn-primary;
+}
+
+.store-link {
+  @apply link link-primary;
+}
+
+/* Theme transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Loading states */
+.store-loading {
+  @apply flex items-center justify-center p-8;
+}
+
+/* Error states */
+.store-error {
+  @apply alert alert-error mb-4;
+}
+
+/* Success states */
+.store-success {
+  @apply alert alert-success mb-4;
+}

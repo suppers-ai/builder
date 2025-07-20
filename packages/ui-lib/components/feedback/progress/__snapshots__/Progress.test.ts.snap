@@ -1,0 +1,24 @@
+export const snapshot = {};
+
+snapshot[`ProgressDisplay - HTML snapshot basic 1`] = `'<progress class="progress progress-primary progress-md" value="50" max="100">50%</progress>'`;
+
+snapshot[`ProgressDisplay - HTML snapshot indeterminate 1`] = `'<progress class="progress progress-secondary progress-md progress-animated"></progress>'`;
+
+snapshot[`ProgressDisplay - HTML snapshot styled 1`] = `'<progress class="progress progress-success progress-lg progress-striped progress-animated" value="75" max="100">75%</progress>'`;
+
+snapshot[`ProgressDisplay - HTML snapshot all sizes 1`] = `
+'<progress class="progress progress-primary progress-xs" value="60" max="100">60%</progress>
+<progress class="progress progress-primary progress-sm" value="60" max="100">60%</progress>
+<progress class="progress progress-primary progress-md" value="60" max="100">60%</progress>
+<progress class="progress progress-primary progress-lg" value="60" max="100">60%</progress>'
+`;
+
+snapshot[`ProgressDisplay - HTML snapshot all colors 1`] = `
+'<progress class="progress progress-primary progress-md" value="45" max="100">45%</progress>
+<progress class="progress progress-secondary progress-md" value="45" max="100">45%</progress>
+<progress class="progress progress-accent progress-md" value="45" max="100">45%</progress>
+<progress class="progress progress-info progress-md" value="45" max="100">45%</progress>
+<progress class="progress progress-success progress-md" value="45" max="100">45%</progress>
+<progress class="progress progress-warning progress-md" value="45" max="100">45%</progress>
+<progress class="progress progress-error progress-md" value="45" max="100">45%</progress>'
+`;

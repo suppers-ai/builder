@@ -1,0 +1,5 @@
+export const snapshot = {};
+
+snapshot[`CollapseDisplay - HTML snapshot 1`] = `'<div class="collapse collapse-arrow"><input type="checkbox"/><div class="collapse-title text-xl font-medium">What is DaisyUI?</div><div class="collapse-content">DaisyUI is a semantic component library for Tailwind CSS.</div></div>'`;
+
+snapshot[`CollapseDisplay - HTML snapshot checkbox type 1`] = `'<div class="collapse collapse-plus" type="checkbox" bordered><input type="checkbox"/><div class="collapse-title text-xl font-medium">Terms and Conditions</div><div class="collapse-content">Please read our terms and conditions carefully...</div></div>'`;

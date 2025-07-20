@@ -1,0 +1,23 @@
+export const snapshot = {};
+
+snapshot[`LoadingDisplay - HTML snapshot spinner 1`] = `'<span class="loading loading-spinner loading-md text-primary"></span>'`;
+
+snapshot[`LoadingDisplay - HTML snapshot dots 1`] = `'<span class="loading loading-dots loading-lg text-secondary"></span>'`;
+
+snapshot[`LoadingDisplay - HTML snapshot ring 1`] = `'<span class="loading loading-ring loading-sm text-accent"></span>'`;
+
+snapshot[`LoadingDisplay - HTML snapshot all variants 1`] = `
+'<span class="loading loading-spinner loading-md"></span>
+<span class="loading loading-dots loading-md"></span>
+<span class="loading loading-ring loading-md"></span>
+<span class="loading loading-ball loading-md"></span>
+<span class="loading loading-bars loading-md"></span>
+<span class="loading loading-infinity loading-md"></span>'
+`;
+
+snapshot[`LoadingDisplay - HTML snapshot all sizes 1`] = `
+'<span class="loading loading-spinner loading-xs text-primary"></span>
+<span class="loading loading-spinner loading-sm text-primary"></span>
+<span class="loading loading-spinner loading-md text-primary"></span>
+<span class="loading loading-spinner loading-lg text-primary"></span>'
+`;

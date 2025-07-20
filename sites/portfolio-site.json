@@ -1,0 +1,244 @@
+{
+    "application": {
+        "name": "portfolio-site",
+        "version": "1.0.0",
+        "description": "Personal portfolio website with project showcase",
+        "id": "app_portfolio_001"
+    },
+    "variables": {
+        "GITHUB_API_URL": "https://api.github.com",
+        "CONTACT_FORM_URL": "https://formspree.io/f/your-form-id",
+        "ANALYTICS_ID": "G-XXXXXXXXXX"
+    },
+    "compiler": {
+        "id": "fresh-deno",
+        "version": "1.0.0"
+    },
+    "data": {
+        "global": {
+            "head": {
+                "meta": {
+                    "title": "John Doe - Full Stack Developer",
+                    "description": "Portfolio of John Doe, Full Stack Developer specializing in modern web technologies"
+                }
+            },
+            "header": {
+                "component": {
+                    "id": "Header",
+                    "props": {
+                        "transparent": true,
+                        "sticky": true
+                    },
+                    "components": [
+                        {
+                            "id": "Logo",
+                            "props": {
+                                "text": "JD",
+                                "href": "/"
+                            }
+                        },
+                        {
+                            "id": "Navigation",
+                            "props": {
+                                "items": [
+                                    {"label": "Home", "href": "/"},
+                                    {"label": "About", "href": "/#about"},
+                                    {"label": "Projects", "href": "/#projects"},
+                                    {"label": "Contact", "href": "/#contact"}
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "footer": {
+                "component": {
+                    "id": "Footer",
+                    "props": {
+                        "minimal": true
+                    },
+                    "components": [
+                        {
+                            "id": "SocialLinks",
+                            "props": {
+                                "links": [
+                                    {"platform": "github", "url": "https://github.com/johndoe"},
+                                    {"platform": "linkedin", "url": "https://linkedin.com/in/johndoe"},
+                                    {"platform": "twitter", "url": "https://twitter.com/johndoe"}
+                                ]
+                            }
+                        },
+                        {
+                            "id": "Copyright",
+                            "props": {
+                                "text": "© 2024 John Doe. All rights reserved."
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "routes": [
+            {
+                "path": "/",
+                "type": "page",
+                "components": [
+                    {
+                        "id": "Hero",
+                        "props": {
+                            "title": "Hi, I'm John Doe",
+                            "subtitle": "Full Stack Developer",
+                            "description": "I build amazing web applications using modern technologies",
+                            "backgroundVideo": "/hero-video.mp4",
+                            "ctaText": "View My Work",
+                            "ctaHref": "#projects"
+                        }
+                    },
+                    {
+                        "id": "About",
+                        "props": {
+                            "id": "about",
+                            "title": "About Me",
+                            "content": "I'm a passionate full stack developer with 5 years of experience in creating web applications. I specialize in React, Node.js, and modern development practices.",
+                            "skills": [
+                                "JavaScript/TypeScript",
+                                "React/Next.js",
+                                "Node.js/Deno",
+                                "Python",
+                                "PostgreSQL",
+                                "AWS/Docker"
+                            ],
+                            "image": "/profile.jpg"
+                        }
+                    },
+                    {
+                        "id": "Projects",
+                        "props": {
+                            "id": "projects",
+                            "title": "Featured Projects",
+                            "data": {
+                                "url": "${{GITHUB_API_URL}}",
+                                "endpoint": "/users/johndoe/repos",
+                                "method": "GET"
+                            }
+                        }
+                    },
+                    {
+                        "id": "CustomHtml",
+                        "props": {
+                            "html": "<section id='testimonials' class='py-20'><div class='container mx-auto'><h2 class='text-3xl font-bold text-center mb-12'>What People Say</h2><div class='grid grid-cols-1 md:grid-cols-2 gap-8'><blockquote class='bg-gray-100 p-6 rounded-lg'><p class='italic'>\"John delivered an exceptional web application that exceeded our expectations.\"</p><cite class='block mt-4 font-semibold'>- Sarah Johnson, CEO</cite></blockquote><blockquote class='bg-gray-100 p-6 rounded-lg'><p class='italic'>\"Professional, reliable, and highly skilled. Would definitely work with John again.\"</p><cite class='block mt-4 font-semibold'>- Mike Chen, CTO</cite></blockquote></div></div></section>"
+                        }
+                    },
+                    {
+                        "id": "Contact",
+                        "props": {
+                            "id": "contact",
+                            "title": "Get In Touch",
+                            "description": "Let's discuss your next project",
+                            "form": {
+                                "action": "${{CONTACT_FORM_URL}}",
+                                "method": "POST",
+                                "fields": [
+                                    {"name": "name", "label": "Name", "type": "text", "required": true},
+                                    {"name": "email", "label": "Email", "type": "email", "required": true},
+                                    {"name": "subject", "label": "Subject", "type": "text", "required": true},
+                                    {"name": "message", "label": "Message", "type": "textarea", "required": true}
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "path": "/resume",
+                "type": "page",
+                "override": {
+                    "head": {
+                        "meta": {
+                            "title": "Resume - John Doe",
+                            "description": "Professional resume of John Doe, Full Stack Developer"
+                        }
+                    }
+                },
+                "components": [
+                    {
+                        "id": "Resume",
+                        "props": {
+                            "downloadUrl": "/resume.pdf",
+                            "experience": [
+                                {
+                                    "title": "Senior Full Stack Developer",
+                                    "company": "Tech Corp",
+                                    "period": "2022 - Present",
+                                    "description": "Led development of multiple web applications using React and Node.js"
+                                },
+                                {
+                                    "title": "Full Stack Developer",
+                                    "company": "StartupXYZ",
+                                    "period": "2020 - 2022",
+                                    "description": "Developed and maintained e-commerce platform serving 10k+ users"
+                                }
+                            ],
+                            "education": [
+                                {
+                                    "degree": "B.S. Computer Science",
+                                    "school": "University of Technology",
+                                    "period": "2016 - 2020"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "path": "/blog",
+                "type": "page",
+                "override": {
+                    "head": {
+                        "meta": {
+                            "title": "Blog - John Doe",
+                            "description": "Technical blog posts and tutorials"
+                        }
+                    }
+                },
+                "components": [
+                    {
+                        "id": "BlogList",
+                        "props": {
+                            "title": "Latest Posts",
+                            "data": {
+                                "endpoint": "/api/blog/posts",
+                                "method": "GET"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "path": "/admin/blog",
+                "type": "page",
+                "permissions": ["admin"],
+                "override": {
+                    "head": {
+                        "meta": {
+                            "title": "Blog Admin - John Doe",
+                            "description": "Blog administration panel"
+                        }
+                    }
+                },
+                "components": [
+                    {
+                        "id": "BlogEditor",
+                        "props": {
+                            "title": "Write New Post",
+                            "data": {
+                                "endpoint": "/api/blog/posts",
+                                "method": "POST"
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`BrowserMockupDisplay - HTML snapshot 1`] = `'<div class="mockup-browser"><div class="mockup-browser-toolbar"><div class="input">https://example.com</div></div><div class="flex justify-center px-4 py-16 bg-base-200">Test content for snapshot</div></div>'`;
+
+snapshot[`BrowserMockupDisplay - HTML snapshot dark variant 1`] = `'<div class="mockup-browser bg-base-300"><div class="mockup-browser-toolbar"><div class="input">https://dark.example.com</div></div><div class="flex justify-center px-4 py-16 bg-base-200">Dark theme content</div></div>'`;
+
+snapshot[`BrowserMockupDisplay - HTML snapshot minimal without controls 1`] = `'<div class="mockup-browser border-base-300"><div class="flex justify-center px-4 py-16 bg-base-200">Minimal content</div></div>'`;

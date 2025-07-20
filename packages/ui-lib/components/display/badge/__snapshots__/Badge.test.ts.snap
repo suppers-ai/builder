@@ -1,0 +1,9 @@
+export const snapshot = {};
+
+snapshot[`BadgeDisplay - HTML snapshot regular badge 1`] = `'<div class="badge badge-md badge-primary">Regular Badge</div>'`;
+
+snapshot[`BadgeDisplay - HTML snapshot positioned badge 1`] = `'<div class="indicator"><span class="indicator-item badge badge-sm badge-error indicator-top-right">5</span><button class="btn">Notifications</button></div>'`;
+
+snapshot[`BadgeDisplay - HTML snapshot all variants 1`] = `'<div class="flex gap-2"><div class="badge badge-md badge-primary">Primary</div><div class="badge badge-md badge-secondary badge-outline">Outline</div><div class="badge badge-lg badge-accent">Large</div><div class="badge badge-xs badge-error">Small</div></div>'`;
+
+snapshot[`BadgeDisplay - HTML snapshot complex positioned 1`] = `'<div class="indicator"><span class="indicator-item badge badge-md badge-warning indicator-top-right">99+</span><div class="avatar"><div class="w-16 h-16 rounded-full bg-neutral text-neutral-content"><span>JD</span></div></div></div>'`;

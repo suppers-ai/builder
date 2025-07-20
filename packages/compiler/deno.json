@@ -1,14 +1,33 @@
 {
-  "name": "@json-app-compiler/compiler",
-  "version": "0.1.0",
+  "name": "@suppers/compiler",
+  "version": "1.0.0",
   "exports": "./mod.ts",
   "imports": {
-    "@json-app-compiler/shared": "../shared/mod.ts",
-    "@json-app-compiler/templates": "../templates/",
-    "@json-app-compiler/ui-library": "../ui-library/mod.ts"
+    "@cliffy/command": "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts",
+    "@cliffy/prompt": "https://deno.land/x/cliffy@v1.0.0-rc.4/prompt/mod.ts",
+    "$fresh/runtime": "jsr:@fresh/core@^2.0.0-alpha.34/runtime",
+    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
+    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
+    "@suppers/shared": "../shared/mod.ts"
   },
   "tasks": {
-    "test": "deno test -A",
-    "dev": "deno run -A --watch src/index.ts"
+    "dev": "deno run --allow-all --watch cli.ts",
+    "build": "deno compile --allow-all --output=./bin/builder cli.ts",
+    "test": "deno test --allow-all",
+    "lint": "deno lint",
+    "fmt": "deno fmt",
+    "check": "deno check **/*.ts"
+  },
+  "compilerOptions": {
+    "lib": ["deno.ns", "dom", "dom.asynciterable"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "strict": true
+  },
+  "fmt": {
+    "options": { "indentWidth": 2, "lineWidth": 100, "semiColons": true }
+  },
+  "lint": {
+    "rules": { "tags": ["recommended"] }
   }
 }

@@ -1,73 +1,73 @@
 {
   "workspace": [
-    "./packages/compiler",
-    "./packages/api",
-    "./packages/ui-library",
-    "./packages/shared",
-    "./packages/templates",
-    "./ui-lib-website"
+    "packages/compiler",
+    "packages/ui-lib",
+    "packages/ui-lib-website",
+    "packages/shared",
+    "packages/api",
+    "packages/auth-client",
+    "packages/store"
   ],
   "imports": {
-    "@json-app-compiler/compiler": "./packages/compiler/mod.ts",
-    "@json-app-compiler/api": "./packages/api/mod.ts",
-    "@json-app-compiler/ui-library": "./packages/ui-library/mod.ts",
-    "@json-app-compiler/shared": "./packages/shared/mod.ts",
-    "@json-app-compiler/templates": "./packages/templates/",
-    "$fresh/": "https://deno.land/x/fresh@2.0.0-alpha.19/",
-    "preact": "https://esm.sh/preact@10.19.6",
-    "preact/": "https://esm.sh/preact@10.19.6/",
-    "@preact/signals": "https://esm.sh/*@preact/signals@1.2.2",
-    "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
-    "tailwindcss": "npm:tailwindcss@3.4.1",
-    "tailwindcss/": "npm:/tailwindcss@3.4.1/",
-    "tailwindcss/plugin": "npm:/tailwindcss@3.4.1/plugin.js"
+    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
+    "@std/": "https://deno.land/std@0.224.0/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.3",
+    "preact": "npm:preact@10.26.9",
+    "preact/": "npm:preact@10.26.9/",
+    "preact/hooks": "npm:preact@10.26.9/hooks",
+    "@preact/signals": "npm:@preact/signals@2.2.1",
+    "tailwindcss": "npm:tailwindcss@3.4.0",
+    "tailwindcss/": "npm:tailwindcss@3.4.0/",
+    "tailwindcss/plugin": "npm:tailwindcss@3.4.0/plugin.js",
+    "zod": "https://esm.sh/zod@3.25.1",
+    "lucide-preact": "https://esm.sh/lucide-preact@0.460.0",
+    "fresh": "jsr:@fresh/core@^2.0.0-alpha.34"
   },
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2017",
-      "deno.ns"
-    ]
-  },
-  "nodeModulesDir": "auto",
   "tasks": {
-    "build": "deno run -A scripts/build-all.ts",
-    "test": "deno run -A scripts/test-all.ts",
-    "test:watch": "deno test -A --watch",
+    "dev": "deno task --config packages/compiler/deno.json dev",
+    "build": "deno run --allow-all packages/compiler/cli.ts build",
+    "test": "deno test --allow-all",
+    "test:watch": "deno test --allow-all --watch",
+    "test:coverage": "deno test --allow-all --coverage=coverage",
     "lint": "deno lint",
     "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "generate": "deno run --allow-all packages/compiler/cli.ts",
+    "generate:blog": "deno run --allow-all packages/compiler/cli.ts generate my-blog",
+    "setup": "deno run --allow-all scripts/setup.ts",
+    "clean": "deno run --allow-all scripts/clean.ts",
     "check": "deno check **/*.ts **/*.tsx",
-    "dev": "deno run -A --node-modules-dir --watch=static/,routes/ dev.ts",
-    "preview": "deno run -A --node-modules-dir main.ts",
-    "update": "deno run -A -r https://fresh.deno.dev/update ."
-  },
-  "exclude": [
-    "**/_fresh/*"
-  ],
-  "lint": {
-    "rules": {
-      "tags": [
-        "fresh",
-        "recommended"
-      ]
-    }
+    "check:all": "deno task check && deno task lint && deno task fmt:check",
+    "dev:basic": "cd packages/templates/fresh-basic && deno task start",
+    "dev:ui": "cd packages/ui-lib-website && deno task start",
+    "dev:api-local": "cd packages/api && deno task dev",
+    "dev:store": "cd packages/store && deno task dev",
+    "api:deploy": "cd packages/api && deno task deploy",
+    "api:deploy:api": "cd packages/api && deno task deploy:api",
+    "api:deploy:oauth": "cd packages/api && deno task deploy:oauth",
+    "api:logs": "cd packages/api && deno task logs",
+    "api:logs:authorize": "cd packages/api && deno task logs:authorize",
+    "api:logs:callback": "cd packages/api && deno task logs:callback",
+    "api:reset": "cd packages/api && deno task reset",
+    "api:types": "cd packages/api && deno task types",
+    "cache": "deno cache --reload packages/**/*.ts",
+    "update": "deno run -A -r https://fresh.deno.dev/update packages/templates/fresh-basic"
   },
   "fmt": {
-    "useTabs": false,
-    "lineWidth": 80,
-    "indentWidth": 2,
-    "semiColons": true,
-    "singleQuote": false,
-    "proseWrap": "preserve",
-    "include": [
-      "src/",
-      "packages/"
-    ],
-    "exclude": [
-      "**/_fresh/*"
-    ]
-  }
+    "options": { "indentWidth": 2, "lineWidth": 100, "semiColons": true },
+    "include": ["packages/", "scripts/", "sites/"],
+    "exclude": ["packages/templates/*/fresh.gen.ts", "ui-lib/", "compiler/"]
+  },
+  "lint": {
+    "rules": { "tags": ["recommended"] },
+    "include": ["packages/", "scripts/"],
+    "exclude": ["packages/templates/*/fresh.gen.ts", "ui-lib/", "compiler/"]
+  },
+  "test": { "include": ["packages/*/test/", "packages/**/*.test.ts"] },
+  "compilerOptions": {
+    "lib": ["dom", "dom.asynciterable", "deno.ns"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  },
+  "unstable": ["kv", "cron"]
 }

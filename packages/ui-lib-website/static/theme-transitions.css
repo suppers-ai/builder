@@ -1,0 +1,116 @@
+/* Theme Transition Styles */
+.theme-transition {
+  transition:
+    background-color var(--theme-transition-duration, 300ms) ease-in-out,
+    border-color var(--theme-transition-duration, 300ms) ease-in-out,
+    color var(--theme-transition-duration, 300ms) ease-in-out;
+}
+
+.theme-transition * {
+  transition:
+    background-color var(--theme-transition-duration, 300ms) ease-in-out,
+    border-color var(--theme-transition-duration, 300ms) ease-in-out,
+    color var(--theme-transition-duration, 300ms) ease-in-out;
+}
+
+/* Override for elements that shouldn't transition */
+.theme-transition .no-transition,
+.theme-transition .no-transition * {
+  transition: none !important;
+}
+
+/* Smooth transitions for common elements */
+.theme-transition .btn,
+.theme-transition .card,
+.theme-transition .navbar,
+.theme-transition .dropdown-content,
+.theme-transition .modal-box,
+.theme-transition .input,
+.theme-transition .textarea,
+.theme-transition .select,
+.theme-transition .badge,
+.theme-transition .alert,
+.theme-transition .progress,
+.theme-transition .loading,
+.theme-transition .tooltip,
+.theme-transition .menu,
+.theme-transition .tabs,
+.theme-transition .accordion,
+.theme-transition .collapse,
+.theme-transition .drawer-content,
+.theme-transition .drawer-side {
+  transition:
+    background-color var(--theme-transition-duration, 300ms) ease-in-out,
+    border-color var(--theme-transition-duration, 300ms) ease-in-out,
+    color var(--theme-transition-duration, 300ms) ease-in-out,
+    box-shadow var(--theme-transition-duration, 300ms) ease-in-out;
+}
+
+/* Transition for CSS custom properties that DaisyUI uses */
+.theme-transition {
+  --theme-transition-duration: 300ms;
+}
+
+/* Specific transitions for theme-dependent colors */
+.theme-transition .text-primary,
+.theme-transition .text-secondary,
+.theme-transition .text-accent,
+.theme-transition .text-neutral,
+.theme-transition .text-base-content,
+.theme-transition .text-base-100,
+.theme-transition .text-base-200,
+.theme-transition .text-base-300,
+.theme-transition .bg-primary,
+.theme-transition .bg-secondary,
+.theme-transition .bg-accent,
+.theme-transition .bg-neutral,
+.theme-transition .bg-base-content,
+.theme-transition .bg-base-100,
+.theme-transition .bg-base-200,
+.theme-transition .bg-base-300,
+.theme-transition .border-primary,
+.theme-transition .border-secondary,
+.theme-transition .border-accent,
+.theme-transition .border-neutral,
+.theme-transition .border-base-content,
+.theme-transition .border-base-100,
+.theme-transition .border-base-200,
+.theme-transition .border-base-300 {
+  transition:
+    background-color var(--theme-transition-duration, 300ms) ease-in-out,
+    border-color var(--theme-transition-duration, 300ms) ease-in-out,
+    color var(--theme-transition-duration, 300ms) ease-in-out;
+}
+
+/* Prevent transitions on hover/focus states during theme change */
+.theme-transition *:hover,
+.theme-transition *:focus {
+  transition-duration: 0ms !important;
+}
+
+/* Fade effect for theme switching */
+.theme-transition {
+  animation: theme-fade-in var(--theme-transition-duration, 300ms) ease-in-out;
+}
+
+@keyframes theme-fade-in {
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Smooth scaling for theme preview dots */
+.theme-transition .dropdown-content button:hover {
+  transform: scale(1.02);
+  transition: transform 150ms ease-in-out;
+}
+
+/* Loading state for theme switching */
+.theme-switching {
+  pointer-events: none;
+  opacity: 0.8;
+  transition: opacity var(--theme-transition-duration, 300ms) ease-in-out;
+}

@@ -1,0 +1,242 @@
+/* Consistent Spacing System */
+:root {
+  /* Base spacing units */
+  --spacing-unit: 0.25rem; /* 4px */
+
+  /* Spacing scale - consistent with Tailwind/DaisyUI */
+  --spacing-0: 0;
+  --spacing-1: calc(var(--spacing-unit) * 1); /* 4px */
+  --spacing-2: calc(var(--spacing-unit) * 2); /* 8px */
+  --spacing-3: calc(var(--spacing-unit) * 3); /* 12px */
+  --spacing-4: calc(var(--spacing-unit) * 4); /* 16px */
+  --spacing-5: calc(var(--spacing-unit) * 5); /* 20px */
+  --spacing-6: calc(var(--spacing-unit) * 6); /* 24px */
+  --spacing-8: calc(var(--spacing-unit) * 8); /* 32px */
+  --spacing-10: calc(var(--spacing-unit) * 10); /* 40px */
+  --spacing-12: calc(var(--spacing-unit) * 12); /* 48px */
+  --spacing-16: calc(var(--spacing-unit) * 16); /* 64px */
+  --spacing-20: calc(var(--spacing-unit) * 20); /* 80px */
+  --spacing-24: calc(var(--spacing-unit) * 24); /* 96px */
+  --spacing-32: calc(var(--spacing-unit) * 32); /* 128px */
+
+  /* Component-specific spacing */
+  --card-padding: var(--spacing-6);
+  --section-padding: var(--spacing-8);
+  --page-padding: var(--spacing-4);
+  --component-gap: var(--spacing-4);
+  --header-height: 4rem;
+  --sidebar-width: 16rem;
+  --content-max-width: 80rem;
+
+  /* Responsive breakpoints */
+  --mobile-padding: var(--spacing-4);
+  --tablet-padding: var(--spacing-6);
+  --desktop-padding: var(--spacing-8);
+}
+
+/* Consistent spacing utilities */
+.spacing-consistent {
+  /* Use consistent spacing throughout the app */
+  --card-body-padding: var(--card-padding);
+  --section-spacing: var(--section-padding);
+  --component-margin: var(--component-gap);
+}
+
+/* Layout spacing helpers */
+.layout-spacing {
+  padding: var(--page-padding);
+}
+
+@media (min-width: 768px) {
+  .layout-spacing {
+    padding: var(--tablet-padding);
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout-spacing {
+    padding: var(--desktop-padding);
+  }
+}
+
+/* Component spacing overrides */
+.card-consistent {
+  --card-body-padding: var(--card-padding);
+}
+
+.card-consistent .card-body {
+  padding: var(--card-body-padding);
+}
+
+.section-consistent {
+  padding: var(--section-padding) 0;
+}
+
+.container-consistent {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--page-padding);
+}
+
+@media (min-width: 768px) {
+  .container-consistent {
+    padding: 0 var(--tablet-padding);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-consistent {
+    padding: 0 var(--desktop-padding);
+  }
+}
+
+/* Consistent gaps and margins */
+.gap-consistent {
+  gap: var(--component-gap);
+}
+
+.gap-consistent-sm {
+  gap: var(--spacing-2);
+}
+
+.gap-consistent-lg {
+  gap: var(--spacing-6);
+}
+
+.margin-consistent {
+  margin: var(--component-gap);
+}
+
+.margin-consistent-y {
+  margin-top: var(--component-gap);
+  margin-bottom: var(--component-gap);
+}
+
+.margin-consistent-x {
+  margin-left: var(--component-gap);
+  margin-right: var(--component-gap);
+}
+
+/* Consistent component spacing */
+.component-preview-card {
+  padding: var(--card-padding);
+  margin-bottom: var(--component-gap);
+}
+
+.component-section {
+  margin-bottom: var(--section-padding);
+}
+
+.component-grid {
+  gap: var(--component-gap);
+}
+
+/* Hero section spacing */
+.hero-consistent {
+  padding: var(--spacing-16) var(--page-padding);
+}
+
+@media (min-width: 768px) {
+  .hero-consistent {
+    padding: var(--spacing-24) var(--tablet-padding);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero-consistent {
+    padding: var(--spacing-32) var(--desktop-padding);
+  }
+}
+
+/* Navigation spacing */
+.nav-consistent .navbar {
+  padding: 0 var(--page-padding);
+}
+
+@media (min-width: 768px) {
+  .nav-consistent .navbar {
+    padding: 0 var(--tablet-padding);
+  }
+}
+
+@media (min-width: 1024px) {
+  .nav-consistent .navbar {
+    padding: 0 var(--desktop-padding);
+  }
+}
+
+/* Form spacing */
+.form-consistent .form-control {
+  margin-bottom: var(--spacing-4);
+}
+
+.form-consistent .form-control:last-child {
+  margin-bottom: 0;
+}
+
+/* Button spacing */
+.btn-group-consistent {
+  gap: var(--spacing-2);
+}
+
+.btn-group-consistent.btn-group-lg {
+  gap: var(--spacing-3);
+}
+
+/* Alert spacing */
+.alert-consistent {
+  margin-bottom: var(--spacing-4);
+}
+
+.alert-consistent:last-child {
+  margin-bottom: 0;
+}
+
+/* Table spacing */
+.table-consistent th,
+.table-consistent td {
+  padding: var(--spacing-3) var(--spacing-4);
+}
+
+/* Modal spacing */
+.modal-consistent .modal-box {
+  padding: var(--spacing-6);
+}
+
+/* Sidebar spacing */
+.sidebar-consistent {
+  width: var(--sidebar-width);
+}
+
+.sidebar-consistent .menu {
+  padding: var(--spacing-4);
+}
+
+.sidebar-consistent .menu li {
+  margin-bottom: var(--spacing-1);
+}
+
+/* Content spacing when sidebar is present */
+.content-with-sidebar {
+  margin-left: var(--sidebar-width);
+  padding: var(--page-padding);
+}
+
+@media (max-width: 1023px) {
+  .content-with-sidebar {
+    margin-left: 0;
+  }
+}
+
+/* Responsive spacing adjustments */
+@media (max-width: 767px) {
+  :root {
+    --card-padding: var(--spacing-4);
+    --section-padding: var(--spacing-6);
+    --page-padding: var(--spacing-4);
+  }
+
+  .hero-consistent {
+    padding: var(--spacing-12) var(--spacing-4);
+  }
+}

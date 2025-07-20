@@ -1,289 +1,206 @@
-# JSON App Compiler - API Package
+# API Package
 
-This package provides Fresh 2.0 compatible API route handlers and middleware for the JSON App Compiler system. It includes CRUD operation templates, request validation middleware, and consistent error response formatting.
+This package contains the backend API integration for the UI library builder, including
+database schema, Edge Functions, and **comprehensive SSO/OAuth support** for external applications.
 
-## Features
+## 📁 Package Structure
 
-- **CRUD Handlers**: Pre-built handlers for Create, Read, Update, Delete, and List operations
-- **Request Validation**: Middleware for validating request bodies, query parameters, headers, and URL parameters
-- **Error Handling**: Consistent error response formatting with detailed error information
-- **CORS Support**: Configurable CORS middleware for cross-origin requests
-- **Rate Limiting**: Basic rate limiting middleware to prevent abuse
-- **Fresh 2.0 Compatible**: Designed to work seamlessly with Fresh 2.0 alpha routing conventions
-
-## Installation
-
-This package is part of the JSON App Compiler monorepo and is typically used internally by the compiler. However, you can also use it directly in your Fresh applications.
-
-```typescript
-import { 
-  createCrudHandler, 
-  createValidationMiddleware,
-  createCorsMiddleware 
-} from "@json-app-compiler/api";
+```
+packages/api/
+├── README.md                    # This file
+├── supabase-setup.md           # Complete setup guide
+├── sso-configuration.md        # SSO setup for external apps
+├── database-schema.sql         # Database schema with OAuth tables
+├── config.toml                 # Supabase local development config
+└── functions/
+    ├── api/                    # Main API endpoints
+    │   ├── index.ts           # API router
+    │   └── handlers/          # Auth, apps, profile, access
+    └── oauth/                 # OAuth server for external apps
+        ├── authorize.ts       # OAuth authorization endpoint
+        ├── callback.ts        # OAuth callback handler
+        └── deno.json         # OAuth function config
 ```
 
-## Quick Start
+## 🔐 SSO & OAuth Features
 
-### Basic CRUD Handler
+### **Built-in OAuth Providers**
 
-```typescript
-// routes/api/users/[id].ts
-import type { FreshContext } from "$fresh/server.ts";
-import { createCrudHandler, type CrudConfig } from "@json-app-compiler/api";
+✅ Google, GitHub, Microsoft Azure, Apple, Discord, Twitter, LinkedIn, Slack, Spotify, Zoom
 
-const config: CrudConfig = {
-  resource: "users",
-  operations: ["create", "read", "update", "delete", "list"],
-};
+### **External App Integration**
 
-const handler = createCrudHandler(config);
+✅ **Custom OAuth Server** - Let external apps authenticate via your backend\
+✅ **JWT Token Exchange** - Secure API access for external applications\
+✅ **PKCE Support** - Secure mobile app authentication\
+✅ **Enterprise SSO** - SAML 2.0 and OIDC via WorkOS integration
 
-export async function handler(req: Request, ctx: FreshContext) {
-  return await handler.handle(req as any, ctx);
-}
-```
+### **Database Tables for OAuth**
 
-### With Validation
+- `oauth_clients` - Registered external applications
+- `oauth_codes` - Authorization codes for OAuth flow
+- `oauth_tokens` - Access/refresh tokens for external apps
+- Row-level security policies for all OAuth data
 
-```typescript
-// routes/api/users/[id].ts
-import type { FreshContext } from "$fresh/server.ts";
-import { 
-  createCrudHandler, 
-  createValidationMiddleware,
-  type CrudConfig,
-  type ValidationSchema 
-} from "@json-app-compiler/api";
+## 🚀 Quick Start
 
-const config: CrudConfig = {
-  resource: "users",
-  operations: ["create", "read", "update", "delete", "list"],
-  validation: {
-    create: {
-      body: {
-        name: { type: "string", required: true, min: 2, max: 50 },
-        email: { type: "string", required: true, pattern: "^[^@]+@[^@]+\\.[^@]+$" },
-        age: { type: "number", min: 0, max: 120 },
-      },
-    },
-  },
-};
+### 1. **Standard Setup**
 
-const crudHandler = createCrudHandler(config);
-const validationMiddleware = createValidationMiddleware({
-  schema: config.validation?.create || {},
-});
+Follow the setup guide: See `supabase-setup.md` for detailed instructions
 
-export async function handler(req: Request, ctx: FreshContext) {
-  // Apply validation first
-  const validationResponse = await validationMiddleware(req, ctx);
-  if (validationResponse.status !== 200) {
-    return validationResponse;
-  }
+### 2. **SSO for External Apps**
 
-  // Handle the request
-  return await crudHandler.handle(req as any, ctx);
-}
-```
+Follow the SSO guide: See `sso-configuration.md` for external app integration
 
-## API Reference
-
-### CRUD Handlers
-
-#### `createCrudHandler(config: CrudConfig)`
-
-Creates a new CRUD handler with the specified configuration.
-
-**Parameters:**
-- `config.resource` - The name of the resource (e.g., "users", "posts")
-- `config.operations` - Array of allowed operations: `["create", "read", "update", "delete", "list"]`
-- `config.validation` - Optional validation schemas for different operations
-- `config.middleware` - Optional middleware function names
-
-**Returns:** `BaseApiHandler` instance
-
-#### `BaseApiHandler` Methods
-
-- `create(req, ctx)` - Handle POST requests (create new resource)
-- `read(req, ctx)` - Handle GET requests with ID (read single resource)
-- `update(req, ctx)` - Handle PUT/PATCH requests (update existing resource)
-- `delete(req, ctx)` - Handle DELETE requests (delete resource)
-- `list(req, ctx)` - Handle GET requests without ID (list resources with pagination)
-- `handle(req, ctx)` - Route requests to appropriate method based on HTTP method and presence of ID
-
-### Validation Middleware
-
-#### `createValidationMiddleware(options: ValidationMiddlewareOptions)`
-
-Creates middleware that validates incoming requests against JSON schemas.
-
-**Parameters:**
-- `options.schema` - Validation schema object
-- `options.strict` - Whether to use strict validation (default: true)
-- `options.allowUnknown` - Whether to allow unknown fields (default: false)
-
-**Schema Structure:**
-```typescript
-{
-  body?: Record<string, FieldValidation>;     // Request body validation
-  query?: Record<string, FieldValidation>;    // Query parameters validation
-  params?: Record<string, FieldValidation>;   // URL parameters validation
-  headers?: Record<string, FieldValidation>;  // Headers validation
-}
-```
-
-**Field Validation Options:**
-```typescript
-{
-  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
-  required?: boolean;
-  min?: number;        // Min length/value/items
-  max?: number;        // Max length/value/items
-  pattern?: string;    // Regex pattern (for strings)
-  enum?: unknown[];    // Allowed values
-  custom?: string;     // Custom validation function name
-}
-```
-
-### CORS Middleware
-
-#### `createCorsMiddleware(options)`
-
-Creates CORS middleware for handling cross-origin requests.
-
-**Parameters:**
-- `options.origin` - Allowed origins (string, array, or boolean)
-- `options.methods` - Allowed HTTP methods
-- `options.allowedHeaders` - Allowed request headers
-- `options.credentials` - Whether to allow credentials
-
-### Rate Limiting Middleware
-
-#### `createRateLimitMiddleware(options)`
-
-Creates basic rate limiting middleware.
-
-**Parameters:**
-- `options.windowMs` - Time window in milliseconds (default: 15 minutes)
-- `options.maxRequests` - Maximum requests per window (default: 100)
-- `options.keyGenerator` - Function to generate rate limit keys
-
-## Response Format
-
-All API responses follow a consistent format:
-
-### Success Response
-```json
-{
-  "success": true,
-  "data": { /* response data */ },
-  "meta": {
-    "timestamp": "2024-01-01T00:00:00.000Z",
-    "pagination": { /* pagination info for list responses */ }
-  }
-}
-```
-
-### Error Response
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable error message",
-    "details": "Additional error details",
-    "field": "field_name", // For validation errors
-    "suggestions": ["suggestion1", "suggestion2"]
-  },
-  "meta": {
-    "timestamp": "2024-01-01T00:00:00.000Z"
-  }
-}
-```
-
-### Validation Error Response
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Request validation failed",
-    "details": "2 validation error(s) found"
-  },
-  "validationErrors": [
-    {
-      "field": "body.email",
-      "message": "Field 'email' does not match required pattern",
-      "code": "PATTERN_VIOLATION",
-      "value": "invalid-email"
-    }
-  ],
-  "meta": {
-    "timestamp": "2024-01-01T00:00:00.000Z"
-  }
-}
-```
-
-## HTTP Status Codes
-
-The handlers use appropriate HTTP status codes:
-
-- `200 OK` - Successful GET, PUT, PATCH requests
-- `201 Created` - Successful POST requests
-- `204 No Content` - Successful DELETE requests
-- `400 Bad Request` - Validation errors, missing required data
-- `401 Unauthorized` - Authentication required
-- `403 Forbidden` - Insufficient permissions
-- `404 Not Found` - Resource not found
-- `405 Method Not Allowed` - HTTP method not supported for resource
-- `422 Unprocessable Entity` - Semantic validation errors
-- `429 Too Many Requests` - Rate limit exceeded
-- `500 Internal Server Error` - Server errors
-
-## Examples
-
-See the `examples/` directory for complete examples of how to use the API handlers in Fresh 2.0 applications.
-
-## Testing
-
-Run the test suite:
+### 3. **OAuth Server Setup**
 
 ```bash
-deno test packages/api/ --allow-all
+# Deploy OAuth functions
+cd packages/api
+deno task deploy
+
+# OAuth endpoints will be available at:
+# https://your-project.supabase.co/functions/v1/oauth/authorize
+# https://your-project.supabase.co/functions/v1/oauth/callback
 ```
 
-The package includes comprehensive tests for:
-- CRUD operations
-- Request validation
-- Error handling
-- Middleware functionality
-- Type conversions
-- Edge cases
+### 4. **External App Flow**
 
-## Integration with JSON App Compiler
+```javascript
+// External app redirects to your OAuth server
+const authUrl = "https://your-project.supabase.co/functions/v1/oauth/authorize?" +
+  "client_id=external-web-app&" +
+  "redirect_uri=https://external-app.com/callback&" +
+  "response_type=code&" +
+  "scope=openid email profile";
 
-This package is designed to work seamlessly with the JSON App Compiler system. When you define API endpoints in your JSON configuration, the compiler will automatically generate Fresh routes that use these handlers and middleware.
-
-Example JSON configuration:
-```json
-{
-  "api": {
-    "endpoints": [
-      {
-        "path": "/api/users",
-        "methods": ["GET", "POST"],
-        "handler": "UserHandler",
-        "validation": {
-          "body": {
-            "name": { "type": "string", "required": true },
-            "email": { "type": "string", "required": true }
-          }
-        }
-      }
-    ]
-  }
-}
+window.location.href = authUrl;
 ```
 
-This will generate a Fresh route that uses the handlers and validation from this package.
+## 🔗 Integration Examples
+
+### **React Component**
+
+```tsx
+import { SSOLogin, SSOCallback } from '@suppers/ui-lib';
+
+// Multi-provider login
+<SSOLogin 
+  providers={['google', 'github', 'microsoft']}
+  onSuccess={() => console.log('Logged in!')}
+/>
+
+// Handle OAuth callbacks
+<SSOCallback 
+  successRedirect="/dashboard"
+  errorRedirect="/login"
+/>
+```
+
+### **External API Access**
+
+```javascript
+// External app gets JWT token after OAuth
+const response = await fetch("https://your-api.com/user/apps", {
+  headers: {
+    "Authorization": `Bearer ${jwtToken}`,
+    "Content-Type": "application/json",
+  },
+});
+```
+
+### **Mobile Apps (React Native)**
+
+```javascript
+import { supabase } from "@suppers/api";
+
+const { data, error } = await supabase.auth.signInWithOAuth({
+  provider: "google",
+  options: {
+    redirectTo: "com.yourapp://callback",
+    pkce: true,
+  },
+});
+```
+
+## 🏢 Enterprise Features
+
+- **SAML 2.0** via WorkOS integration
+- **Active Directory** and Google Workspace
+- **Custom OIDC** providers
+- **Multi-tenant** support with organization isolation
+- **Audit logging** for compliance
+
+## 🔒 Security Features
+
+- **Row Level Security** on all tables
+- **JWT signature verification** for external apps
+- **PKCE flow** for mobile applications
+- **Scope-based permissions** (read, write, admin)
+- **Token expiration** and automatic cleanup
+- **Rate limiting** and abuse protection
+
+## 🎯 Use Cases
+
+### **Internal Applications**
+
+- User management with profiles and avatars
+- Application sharing with granular permissions
+- Real-time authentication state management
+
+### **External Integrations**
+
+- **Partner APIs** - Let partners access user data via OAuth
+- **Mobile Apps** - Native iOS/Android authentication
+- **Third-party Tools** - Integrate with external services
+- **Webhooks** - Secure API access for automated systems
+
+## 🛠️ Development Commands
+
+```bash
+# Start local Supabase
+deno task dev
+
+# Deploy all functions
+deno task deploy
+
+# Generate TypeScript types
+deno task types
+
+# View function logs
+deno task logs
+```
+
+## 📚 Documentation
+
+- **Setup Guide**: `supabase-setup.md` - Complete Supabase setup
+- **SSO Configuration**: `sso-configuration.md` - External app integration
+- **Database Schema**: `database-schema.sql` - Tables and security policies
+- **API Documentation**: See handler files for endpoint specifications
+
+## 🎉 Ready for Production!
+
+Your API package provides enterprise-grade authentication with:
+
+- ✅ **Multi-provider SSO** (Google, GitHub, Microsoft, etc.)
+- ✅ **Custom OAuth server** for external app integration
+- ✅ **Mobile app support** with PKCE security
+- ✅ **Enterprise SSO** (SAML, OIDC)
+- ✅ **JWT-based APIs** with proper validation
+- ✅ **Comprehensive security** with RLS and scope management
+
+Perfect for SaaS platforms, mobile apps, and enterprise integrations! 🚀
+
+### Database Schema
+
+The package includes a complete database schema with:
+
+- **`users`** - User profile information with flexible name fields (first_name, middle_names,
+  last_name, display_name)
+- **`applications`** - User-created applications with owner_id and template_id references
+- **`user_access`** - Granular access control (read/write/admin)
+- **`oauth_codes`** - Authorization codes for OAuth flow
+- **`oauth_tokens`** - Access/refresh tokens for external apps
+- **`oauth_clients`** - Registered external applications
+
+All tables include Row Level Security (RLS) policies for secure multi-tenant access.

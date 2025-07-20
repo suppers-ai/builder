@@ -1,9 +1,0 @@
-{
-  "version": "0.1.0",
-  "tasks": {
-    "test": "deno test --allow-read --allow-write"
-  },
-  "compilerOptions": {
-    "lib": ["deno.ns", "es2020", "dom"]
-  }
-}

@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`AlertDisplay - HTML snapshot basic 1`] = `'<div class="alert alert-info"><span>ℹ️</span><span>Basic alert message</span></div>'`;
+
+snapshot[`AlertDisplay - HTML snapshot with actions 1`] = `'<div class="alert alert-success"><span>✅</span><span>Success alert with actions</span><div><div><button class="btn btn-sm">Action</button></div></div><button class="btn btn-sm btn-circle btn-ghost">✕</button></div>'`;
+
+snapshot[`AlertDisplay - HTML snapshot complex 1`] = `'<div class="alert alert-warning custom-alert"><span>⚡</span><span><div><h4 class="font-bold">Important Notice</h4><p>This action cannot be undone. Please confirm your choice.</p></div></span><div><div><button class="btn btn-sm btn-ghost">Cancel</button><button class="btn btn-sm btn-warning">Confirm</button></div></div><button class="btn btn-sm btn-circle btn-ghost">✕</button></div>'`;

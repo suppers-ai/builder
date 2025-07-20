@@ -1,0 +1,18 @@
+export const snapshot = {};
+
+snapshot[`ThemeControllerDisplay - HTML snapshot dropdown 1`] = `
+'<div class="dropdown dropdown-end "><div tabindex="0" role="button" class="btn  btn-ghost">☀️ Light<svg class="fill-current w-4 h-4 ml-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"></path></svg></div><div tabindex="0" class="dropdown-content z-[1] p-4 shadow-2xl bg-base-100 rounded-box w-80 border border-base-300 max-h-96 overflow-y-auto"><div class="mb-3"><h3 class="font-semibold text-sm mb-1">Choose Theme</h3><div class="text-xs text-base-content/60">Current: ☀️ Light</div></div><div class="grid gap-2"><button class="
+                  flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                  bg-primary/20 ring-2 ring-primary/30
+                " data-theme="light"><span class="text-base shrink-0">☀️</span><div class="flex-1 text-left"><div class="font-medium text-sm">Light</div></div><div class="w-2 h-2 bg-primary rounded-full shrink-0"></div></button><button class="
+                  flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                  hover:bg-base-200 hover:scale-[1.02]
+                " data-theme="dark"><span class="text-base shrink-0">🌙</span><div class="flex-1 text-left"><div class="font-medium text-sm">Dark</div></div></button><button class="
+                  flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                  hover:bg-base-200 hover:scale-[1.02]
+                " data-theme="cupcake"><span class="text-base shrink-0">🧁</span><div class="flex-1 text-left"><div class="font-medium text-sm">Cupcake</div></div></button></div></div></div>'
+`;
+
+snapshot[`ThemeControllerDisplay - HTML snapshot toggle 1`] = `'<div class="form-control " showLabels><label class="label cursor-pointer"><span class="label-text">Dark mode</span><input type="checkbox" class="toggle toggle-primary " checked data-theme="dark"/></label></div>'`;
+
+snapshot[`ThemeControllerDisplay - HTML snapshot radio 1`] = `'<div class="form-control " showLabels><label class="label"><span class="label-text">Choose Theme</span></label><div class="flex flex-wrap gap-2"><label class="label cursor-pointer"><input type="radio" name="theme-radio" class="radio radio-primary" value="light" data-theme="light"/><span class="label-text ml-2">☀️ Light</span></label><label class="label cursor-pointer"><input type="radio" name="theme-radio" class="radio radio-primary" value="dark" data-theme="dark"/><span class="label-text ml-2">🌙 Dark</span></label><label class="label cursor-pointer"><input type="radio" name="theme-radio" class="radio radio-primary" value="cupcake" checked data-theme="cupcake"/><span class="label-text ml-2">🧁 Cupcake</span></label><label class="label cursor-pointer"><input type="radio" name="theme-radio" class="radio radio-primary" value="cyberpunk" data-theme="cyberpunk"/><span class="label-text ml-2">🤖 Cyberpunk</span></label></div></div>'`;

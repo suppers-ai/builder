@@ -1,0 +1,150 @@
+{
+    "application": {
+        "name": "my-blog",
+        "version": "1.0.0",
+        "description": "Personal blog with authentication",
+        "id": "app_blog_001"
+    },
+    "variables": {
+        "SUPPERS_API_URL": "https://localhost:5000/api",
+        "EXTERNAL_CAMPSITES_URL": "https://external-campsite-api.com/api"
+    },
+    "compiler": {
+        "id": "fresh-deno",
+        "version": "1.0.0"
+    },
+    "data": {
+        "global": {
+            "head": {
+                "meta": {
+                    "title": "My Blog",
+                    "description": "A personal blog about technology and life"
+                }
+            },
+            "menu": {
+                "component": {
+                    "id": "Menu",
+                    "props": {
+                        "items": [
+                            {"label": "Home", "href": "/"},
+                            {"label": "Admin", "href": "/admin"}
+                        ]
+                    }
+                }
+            },
+            "header": {
+                "component": {
+                    "id": "Header",
+                    "props": {
+                        "title": "My Blog",
+                        "subtitle": "Thoughts on technology and life"
+                    }
+                }
+            },
+            "footer": {
+                "component": {
+                    "id": "Footer",
+                    "props": {
+                        "copyright": "© 2024 My Blog"
+                    }
+                }
+            }
+        },
+        "routes": [
+            {
+                "path": "/",
+                "type": "page",
+                "override": {
+                    "head": {
+                        "meta": {
+                            "title": "Home - My Blog",
+                            "description": "Welcome to my personal blog"
+                        }
+                    }
+                },
+                "components": [
+                    {
+                        "id": "HomePage",
+                        "components": [
+                            {
+                                "id": "Hero",
+                                "props": {
+                                    "title": "Welcome to My Blog",
+                                    "subtitle": "Thoughts on technology and life"
+                                }
+                            },
+                            {
+                                "id": "CustomHtml",
+                                "props": {
+                                    "html": "<p>Hello, I'm custom HTML content!</p>"
+                                }
+                            },
+                            {
+                                "id": "BlogPostList",
+                                "props": {
+                                    "title": "Latest Posts",
+                                    "limit": 5,
+                                    "data": {
+                                        "endpoint": "/posts",
+                                        "method": "GET"
+                                    }
+                                }
+                            },
+                            {
+                                "id": "BlogPostList",
+                                "props": {
+                                    "title": "External Campsite Posts",
+                                    "limit": 3,
+                                    "data": {
+                                        "url": "${{EXTERNAL_CAMPSITES_URL}}",
+                                        "endpoint": "/campsites",
+                                        "method": "GET"
+                                    }
+                                }
+                            },
+                            {
+                                "id": "Button",
+                                "props": {
+                                    "text": "View Custom Page",
+                                    "href": "/custom"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "path": "/custom",
+                "type": "page",
+                "source": "./custom"
+            },
+            {
+                "path": "/admin",
+                "type": "page",
+                "permissions": [
+                    "admin"
+                ],
+                "override": {
+                    "head": {
+                        "meta": {
+                            "title": "Admin - My Blog",
+                            "description": "Admin panel for blog management"
+                        }
+                    }
+                },
+                "components": [
+                    {
+                        "id": "PostEditor",
+                        "props": {
+                            "title": "Create New Post",
+                            "data": {
+                                "endpoint": "/posts",
+                                "method": "POST"
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

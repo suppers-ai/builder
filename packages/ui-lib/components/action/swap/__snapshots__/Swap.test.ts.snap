@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`SwapDisplay - HTML snapshot when inactive 1`] = `'<label class="swap swap-rotate"><input type="checkbox"/><div class="swap-on">ON</div><div class="swap-off">OFF</div></label>'`;
+
+snapshot[`SwapDisplay - HTML snapshot when active 1`] = `'<label class="swap swap-flip swap-active"><input type="checkbox" checked/><div class="swap-on">ON</div><div class="swap-off">OFF</div></label>'`;
+
+snapshot[`SwapDisplay - HTML snapshot complex 1`] = `'<label class="swap swap-rotate custom-swap"><input type="checkbox"/><div class="swap-on"><div class="flex items-center gap-2 p-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2L3 7v11a2 2 0 002 2h4v-6h2v6h4a2 2 0 002-2V7l-7-5z"></path></svg><span>Home</span></div></div><div class="swap-off"><div class="flex items-center gap-2 p-2"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"></path></svg><span>Menu</span></div></div></label>'`;
