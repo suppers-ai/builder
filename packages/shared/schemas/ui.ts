@@ -7,11 +7,38 @@ import { z } from "zod";
 
 // DaisyUI Theme Schema
 export const DaisyUIThemeSchema = z.enum([
-  "light", "dark", "cupcake", "bumblebee", "emerald", "corporate",
-  "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden",
-  "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black",
-  "luxury", "dracula", "cmyk", "autumn", "business", "acid", "lemonade",
-  "night", "coffee", "winter", "dim", "nord", "sunset"
+  "light",
+  "dark",
+  "cupcake",
+  "bumblebee",
+  "emerald",
+  "corporate",
+  "synthwave",
+  "retro",
+  "cyberpunk",
+  "valentine",
+  "halloween",
+  "garden",
+  "forest",
+  "aqua",
+  "lofi",
+  "pastel",
+  "fantasy",
+  "wireframe",
+  "black",
+  "luxury",
+  "dracula",
+  "cmyk",
+  "autumn",
+  "business",
+  "acid",
+  "lemonade",
+  "night",
+  "coffee",
+  "winter",
+  "dim",
+  "nord",
+  "sunset",
 ]);
 
 // Custom Theme Variables Schema
@@ -43,15 +70,27 @@ export const ComponentSizeSchema = z.enum(["xs", "sm", "md", "lg", "xl"]);
 
 // Component Color Schema
 export const ComponentColorSchema = z.enum([
-  "primary", "secondary", "accent", "neutral",
-  "info", "success", "warning", "error",
-  "ghost", "link"
+  "primary",
+  "secondary",
+  "accent",
+  "neutral",
+  "info",
+  "success",
+  "warning",
+  "error",
+  "ghost",
+  "link",
 ]);
 
 // Component Variant Schema
 export const ComponentVariantSchema = z.enum([
-  "default", "outline", "ghost", "link",
-  "solid", "soft", "surface"
+  "default",
+  "outline",
+  "ghost",
+  "link",
+  "solid",
+  "soft",
+  "surface",
 ]);
 
 // Button Props Schema
@@ -140,14 +179,16 @@ export const MenuItemSchema: z.ZodType<{
   active?: boolean;
   disabled?: boolean;
   children?: any[];
-}> = z.lazy(() => z.object({
-  label: z.string().min(1, "Menu item label is required"),
-  href: z.string().optional(),
-  icon: z.string().optional(),
-  active: z.boolean().optional(),
-  disabled: z.boolean().optional(),
-  children: z.array(MenuItemSchema).optional(),
-}));
+}> = z.lazy(() =>
+  z.object({
+    label: z.string().min(1, "Menu item label is required"),
+    href: z.string().optional(),
+    icon: z.string().optional(),
+    active: z.boolean().optional(),
+    disabled: z.boolean().optional(),
+    children: z.array(MenuItemSchema).optional(),
+  })
+);
 
 // Tab Item Schema
 export const TabItemSchema = z.object({
@@ -196,15 +237,61 @@ export const BreakpointSchema = z.enum(["sm", "md", "lg", "xl", "2xl"]);
 
 // Tailwind Spacing Schema
 export const TailwindSpacingSchema = z.enum([
-  "0", "px", "0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4", "5", "6", "7", "8", "9", "10",
-  "11", "12", "14", "16", "20", "24", "28", "32", "36", "40", "44", "48", "52", "56", "60", "64",
-  "72", "80", "96"
+  "0",
+  "px",
+  "0.5",
+  "1",
+  "1.5",
+  "2",
+  "2.5",
+  "3",
+  "3.5",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "14",
+  "16",
+  "20",
+  "24",
+  "28",
+  "32",
+  "36",
+  "40",
+  "44",
+  "48",
+  "52",
+  "56",
+  "60",
+  "64",
+  "72",
+  "80",
+  "96",
 ]);
 
 // Animation Type Schema
 export const AnimationTypeSchema = z.enum([
-  "bounce", "flash", "pulse", "rubber-band", "shake", "swing", "tada", "wobble",
-  "jello", "heart-beat", "fade-in", "fade-out", "slide-in", "slide-out", "zoom-in", "zoom-out"
+  "bounce",
+  "flash",
+  "pulse",
+  "rubber-band",
+  "shake",
+  "swing",
+  "tada",
+  "wobble",
+  "jello",
+  "heart-beat",
+  "fade-in",
+  "fade-out",
+  "slide-in",
+  "slide-out",
+  "zoom-in",
+  "zoom-out",
 ]);
 
 // Icon Props Schema

@@ -47,10 +47,10 @@ export function Stat({
   // Value formatting
   const formatValue = (val: string | number) => {
     if (formatter === "none") return val;
-    
+
     const numValue = typeof val === "string" ? parseFloat(val) : val;
     if (isNaN(numValue)) return val;
-    
+
     switch (formatter) {
       case "currency":
         return new Intl.NumberFormat(locale, {
@@ -86,9 +86,7 @@ export function Stat({
       {title && <div class="stat-title">{title}</div>}
 
       <div class="stat-value">
-        {loading ? (
-          <div class="loading loading-spinner loading-sm"></div>
-        ) : (
+        {loading ? <div class="loading loading-spinner loading-sm"></div> : (
           formatValue(value)
         )}
       </div>
@@ -135,7 +133,7 @@ export function StatsGroup({
         intervalRef.current = null;
       }
     }
-    
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -153,14 +151,16 @@ export function StatsGroup({
 
   const renderControls = () => {
     if (!showControls) return null;
-    
+
     return (
       <div class="card bg-base-100 shadow-md mb-4">
         <div class="card-body">
           <h3 class="card-title">Stats Controls</h3>
           <p class="text-base-content/70">
-            These stats {autoRefresh ? `update automatically every ${refreshInterval / 1000} seconds` : "can be refreshed manually"}.
-            {stats.some(stat => stat.onClick) && " Click on any stat to trigger its action."}
+            These stats {autoRefresh
+              ? `update automatically every ${refreshInterval / 1000} seconds`
+              : "can be refreshed manually"}.
+            {stats.some((stat) => stat.onClick) && " Click on any stat to trigger its action."}
           </p>
           <div class="card-actions justify-center">
             <button
@@ -168,14 +168,16 @@ export function StatsGroup({
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              {isRefreshing ? (
-                <>
-                  <span class="loading loading-spinner loading-sm"></span>
-                  Refreshing...
-                </>
-              ) : (
-                "Refresh Data"
-              )}
+              {isRefreshing
+                ? (
+                  <>
+                    <span class="loading loading-spinner loading-sm"></span>
+                    Refreshing...
+                  </>
+                )
+                : (
+                  "Refresh Data"
+                )}
             </button>
           </div>
         </div>

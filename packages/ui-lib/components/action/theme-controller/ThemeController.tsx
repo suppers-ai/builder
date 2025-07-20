@@ -40,7 +40,7 @@ export function ThemeController({
 }: ThemeControllerProps) {
   const [manualTheme, setManualTheme] = useState("");
   const [internalTheme, setInternalTheme] = useState(currentTheme);
-  
+
   // Load saved theme on mount
   useEffect(() => {
     if (autoLoadSavedTheme && useGlobalState) {
@@ -64,11 +64,11 @@ export function ThemeController({
   // Controls component
   const renderControls = () => {
     if (!showControls) return null;
-    
+
     return (
       <div class="bg-base-200 p-4 border border-base-300 rounded-lg mb-4">
         <h3 class="text-lg font-bold mb-4">Theme Controller Settings</h3>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="form-control">
             <label class="label cursor-pointer">
@@ -596,8 +596,12 @@ export function ThemeController({
     <div class="space-y-4">
       {renderControls()}
       <div class={`dropdown dropdown-end ${className}`} id={id} {...props}>
-        <div tabIndex={0} role="button" class={`btn ${sizeClasses[size]} btn-ghost gap-3`} aria-label="Theme">
-          
+        <div
+          tabIndex={0}
+          role="button"
+          class={`btn ${sizeClasses[size]} btn-ghost gap-3`}
+          aria-label="Theme"
+        >
           <span class="hidden md:inline">Theme</span>
           <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
@@ -607,17 +611,19 @@ export function ThemeController({
           <div class="grid grid-cols-1 gap-2 p-2" tabIndex={0}>
             {availableThemes.map((theme) => {
               const isActive = theme.value === activeTheme;
-              
+
               return (
-                <div 
+                <div
                   key={theme.value}
-                  class={`outline-base-content overflow-hidden rounded-lg outline-2 outline-offset-2 ${isActive ? 'outline' : ''}`} 
-                  tabIndex={0} 
-                  data-set-theme={theme.value} 
+                  class={`outline-base-content overflow-hidden rounded-lg outline-2 outline-offset-2 ${
+                    isActive ? "outline" : ""
+                  }`}
+                  tabIndex={0}
+                  data-set-theme={theme.value}
                   data-act-class="outline"
                 >
-                  <div 
-                    data-theme={theme.value} 
+                  <div
+                    data-theme={theme.value}
                     class="bg-base-100 text-base-content w-full cursor-pointer font-sans hover:outline hover:outline-base-content hover:outline-2"
                     onClick={() => handleThemeSelection(theme.value)}
                   >
@@ -637,9 +643,7 @@ export function ThemeController({
                           <div class="bg-accent w-2 h-2 rounded"></div>
                           <div class="bg-neutral w-2 h-2 rounded"></div>
                         </div>
-                        {isActive && (
-                          <div class="text-primary font-bold text-xs">✓</div>
-                        )}
+                        {isActive && <div class="text-primary font-bold text-xs">✓</div>}
                       </div>
                     </div>
                   </div>
@@ -654,7 +658,9 @@ export function ThemeController({
 }
 
 // Enhanced version with global state management
-export function GlobalThemeController(props: Omit<ThemeControllerProps, "currentTheme" | "useGlobalState">) {
+export function GlobalThemeController(
+  props: Omit<ThemeControllerProps, "currentTheme" | "useGlobalState">,
+) {
   return (
     <ThemeController
       {...props}

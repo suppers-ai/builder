@@ -3,7 +3,7 @@
  * Common utilities for file operations and path handling
  */
 
-import { join, dirname, basename, extname } from "jsr:@std/path";
+import { basename, dirname, extname, join } from "jsr:@std/path";
 
 /**
  * Format file path by joining segments
@@ -53,11 +53,11 @@ export async function copyFile(source: string, destination: string): Promise<voi
  * Write file with automatic directory creation
  */
 export async function writeFile(
-  filePath: string, 
-  content: string | Uint8Array
+  filePath: string,
+  content: string | Uint8Array,
 ): Promise<void> {
   await ensureDir(dirname(filePath));
-  
+
   if (typeof content === "string") {
     await Deno.writeTextFile(filePath, content);
   } else {
@@ -138,7 +138,7 @@ export async function isDirectory(path: string): Promise<boolean> {
  */
 export async function listFiles(dirPath: string): Promise<string[]> {
   const files: string[] = [];
-  
+
   try {
     for await (const entry of Deno.readDir(dirPath)) {
       if (entry.isFile) {
@@ -150,7 +150,7 @@ export async function listFiles(dirPath: string): Promise<string[]> {
       throw error;
     }
   }
-  
+
   return files.sort();
 }
 
@@ -159,7 +159,7 @@ export async function listFiles(dirPath: string): Promise<string[]> {
  */
 export async function listDirectories(dirPath: string): Promise<string[]> {
   const dirs: string[] = [];
-  
+
   try {
     for await (const entry of Deno.readDir(dirPath)) {
       if (entry.isDirectory) {
@@ -171,7 +171,7 @@ export async function listDirectories(dirPath: string): Promise<string[]> {
       throw error;
     }
   }
-  
+
   return dirs.sort();
 }
 
@@ -193,11 +193,11 @@ export async function remove(path: string): Promise<void> {
  */
 export async function copyDir(source: string, destination: string): Promise<void> {
   await ensureDir(destination);
-  
+
   for await (const entry of Deno.readDir(source)) {
     const sourcePath = join(source, entry.name);
     const destPath = join(destination, entry.name);
-    
+
     if (entry.isDirectory) {
       await copyDir(sourcePath, destPath);
     } else {
@@ -248,7 +248,7 @@ export function normalizePath(path: string): string {
 export function hasExtension(filePath: string, extensions: string | string[]): boolean {
   const ext = getFileExtension(filePath).toLowerCase();
   const extsToCheck = Array.isArray(extensions) ? extensions : [extensions];
-  return extsToCheck.some(e => ext === e.toLowerCase());
+  return extsToCheck.some((e) => ext === e.toLowerCase());
 }
 
 /**

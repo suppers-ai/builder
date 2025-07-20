@@ -1,6 +1,6 @@
 /**
  * @fileoverview Store Package Library Module
- * 
+ *
  * This module exports all library functions and utilities for the store package.
  */
 

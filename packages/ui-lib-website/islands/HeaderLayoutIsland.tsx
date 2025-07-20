@@ -38,8 +38,8 @@ export default function HeaderLayoutIsland({
     setSearchLoading(true);
     try {
       // Simulate search API call
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // Mock search results for demo
       const mockResults: SearchResult[] = [
         {
@@ -63,11 +63,11 @@ export default function HeaderLayoutIsland({
           url: "/components/input",
           category: "Input",
         },
-      ].filter(item => 
+      ].filter((item) =>
         item.title.toLowerCase().includes(query.toLowerCase()) ||
         item.description.toLowerCase().includes(query.toLowerCase())
       );
-      
+
       setSearchResults(mockResults);
     } catch (error) {
       console.error("Search failed:", error);

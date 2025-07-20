@@ -4,12 +4,12 @@ import {
   CheckCircle,
   Code2,
   Component,
+  Flower,
   Palette,
   Shield,
   Smartphone,
   Target,
   Zap,
-  Flower,
 } from "lucide-preact";
 
 interface Benefit {
@@ -37,8 +37,7 @@ const benefits: Benefit[] = [
   {
     icon: <Zap size={32} />,
     title: "Fresh 2.0 Native",
-    description:
-      "Built specifically for Fresh 2.0 using preact for optimal performance.",
+    description: "Built specifically for Fresh 2.0 using preact for optimal performance.",
     features: [
       "Server-side rendering",
       "Component islands",

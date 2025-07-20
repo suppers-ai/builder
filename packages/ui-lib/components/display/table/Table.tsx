@@ -107,7 +107,7 @@ export function Table({
   // Controls component
   const renderControls = () => {
     if (!showControls) return null;
-    
+
     return (
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         {showStats && (
@@ -139,7 +139,8 @@ export function Table({
             <select
               class="select select-bordered select-sm"
               value={itemsPerPage}
-              onChange={(e) => onItemsPerPageChange?.(parseInt((e.target as HTMLSelectElement).value))}
+              onChange={(e) =>
+                onItemsPerPageChange?.(parseInt((e.target as HTMLSelectElement).value))}
             >
               {itemsPerPageOptions.map((option) => (
                 <option key={option} value={option}>{option}</option>
@@ -154,11 +155,12 @@ export function Table({
   // Pagination info
   const renderPaginationInfo = () => {
     if (!paginated) return null;
-    
+
     return (
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
         <div class="text-sm text-base-content/70">
-          Showing {startIndex + 1}-{Math.min(endIndex, totalItems || data.length)} of {totalItems || data.length} items
+          Showing {startIndex + 1}-{Math.min(endIndex, totalItems || data.length)} of{" "}
+          {totalItems || data.length} items
         </div>
 
         <Pagination
@@ -277,55 +279,55 @@ export function Table({
       {renderControls()}
       <div class="overflow-x-auto">
         <table class={tableClasses} id={id} {...props}>
-        <thead>
-          <tr>
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                style={column.width ? { width: column.width } : {}}
-                class={[
-                  column.align ? `text-${column.align}` : "",
-                  sortable && column.sortable ? "cursor-pointer hover:bg-base-200" : "",
-                ].filter(Boolean).join(" ")}
-                onClick={() => handleSort(column.key)}
-              >
-                <div class="flex items-center gap-2">
-                  <span>{column.title}</span>
-                  {sortable && column.sortable && getSortIcon(column.key)}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.length === 0
-            ? (
-              <tr>
-                <td colSpan={columns.length} class="text-center py-8 text-base-content/70">
-                  {emptyMessage}
-                </td>
-              </tr>
-            )
-            : (
-              displayData.map((row, index) => (
-                <tr key={index}>
-                  {columns.map((column) => (
-                    <td
-                      key={column.key}
-                      class={column.align ? `text-${column.align}` : ""}
-                    >
-                      {column.render ? column.render(row[column.key], row) : row[column.key]}
-                    </td>
-                  ))}
+          <thead>
+            <tr>
+              {columns.map((column) => (
+                <th
+                  key={column.key}
+                  style={column.width ? { width: column.width } : {}}
+                  class={[
+                    column.align ? `text-${column.align}` : "",
+                    sortable && column.sortable ? "cursor-pointer hover:bg-base-200" : "",
+                  ].filter(Boolean).join(" ")}
+                  onClick={() => handleSort(column.key)}
+                >
+                  <div class="flex items-center gap-2">
+                    <span>{column.title}</span>
+                    {sortable && column.sortable && getSortIcon(column.key)}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.length === 0
+              ? (
+                <tr>
+                  <td colSpan={columns.length} class="text-center py-8 text-base-content/70">
+                    {emptyMessage}
+                  </td>
                 </tr>
-              ))
-            )}
-        </tbody>
-      </table>
+              )
+              : (
+                displayData.map((row, index) => (
+                  <tr key={index}>
+                    {columns.map((column) => (
+                      <td
+                        key={column.key}
+                        class={column.align ? `text-${column.align}` : ""}
+                      >
+                        {column.render ? column.render(row[column.key], row) : row[column.key]}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
+          </tbody>
+        </table>
+      </div>
+      {renderPaginationInfo()}
     </div>
-    {renderPaginationInfo()}
-  </div>
-);
+  );
 }
 
 export function PaginatedTable({
@@ -353,12 +355,14 @@ export function PaginatedTable({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Sort data
-  const sortedData = allowSorting ? [...data].sort((a, b) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
-    const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-    return sortDirection === "asc" ? comparison : -comparison;
-  }) : data;
+  const sortedData = allowSorting
+    ? [...data].sort((a, b) => {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      return sortDirection === "asc" ? comparison : -comparison;
+    })
+    : data;
 
   const handleSort = (column: string, direction: "asc" | "desc") => {
     setSortColumn(column);

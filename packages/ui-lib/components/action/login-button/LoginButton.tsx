@@ -4,7 +4,16 @@ import { Button } from "../button/Button.tsx";
 
 export interface LoginButtonProps {
   children?: ComponentChildren;
-  variant?: "primary" | "secondary" | "accent" | "ghost" | "link" | "info" | "success" | "warning" | "error";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "accent"
+    | "ghost"
+    | "link"
+    | "info"
+    | "success"
+    | "warning"
+    | "error";
   size?: "xs" | "sm" | "md" | "lg";
   class?: string;
   href?: string;
@@ -28,7 +37,9 @@ export function LoginButton({
 }: LoginButtonProps) {
   const content = (
     <>
-      {showIcon && <LogIn size={size === "xs" ? 14 : size === "sm" ? 16 : size === "lg" ? 20 : 18} />}
+      {showIcon && (
+        <LogIn size={size === "xs" ? 14 : size === "sm" ? 16 : size === "lg" ? 20 : 18} />
+      )}
       {children}
     </>
   );

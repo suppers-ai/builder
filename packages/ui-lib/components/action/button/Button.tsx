@@ -72,7 +72,7 @@ export function Button({
   ].filter(Boolean).join(" ");
 
   const Component = as as any;
-  
+
   return (
     <Component
       type={as === "button" ? type : undefined}

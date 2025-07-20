@@ -13,20 +13,20 @@ export function checkPermissions(
   requiredPermissions: string[],
 ): boolean {
   if (!user || !requiredPermissions.length) return false;
-  
+
   // Admin users have all permissions
   if (user.role === "admin") return true;
-  
+
   // Check if user has any of the required permissions
-  return requiredPermissions.some(permission => {
+  return requiredPermissions.some((permission) => {
     // Check role-based permissions
     if (permission === user.role) return true;
-    
+
     // Check specific permissions (if user has permissions array)
-    if ('permissions' in user && Array.isArray(user.permissions)) {
+    if ("permissions" in user && Array.isArray(user.permissions)) {
       return user.permissions.includes(permission);
     }
-    
+
     return false;
   });
 }
@@ -60,7 +60,7 @@ export function redirectToLogin(req: Request): Response {
   const url = new URL(req.url);
   const loginUrl = new URL("/login", url.origin);
   loginUrl.searchParams.set("redirect", url.pathname + url.search);
-  
+
   return new Response(null, {
     status: 302,
     headers: {
@@ -99,12 +99,12 @@ export function forbiddenResponse(): Response {
 export function extractAuthToken(request: Request): string | null {
   const authHeader = request.headers.get("Authorization");
   if (!authHeader) return null;
-  
+
   // Support both "Bearer token" and "token" formats
   if (authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
-  
+
   return authHeader;
 }
 
@@ -123,11 +123,11 @@ export function requirePermissions(permissions: string[]) {
   return (handler: (req: Request, ctx: any) => Promise<Response>) => {
     return async (req: Request, ctx: any) => {
       const user = ctx.user; // Assuming user is set in context
-      
+
       if (!checkPermissions(user, permissions)) {
         return forbiddenResponse();
       }
-      
+
       return handler(req, ctx);
     };
   };
@@ -140,11 +140,11 @@ export function requireRole(role: string) {
   return (handler: (req: Request, ctx: any) => Promise<Response>) => {
     return async (req: Request, ctx: any) => {
       const user = ctx.user;
-      
+
       if (!checkRole(user, role)) {
         return forbiddenResponse();
       }
-      
+
       return handler(req, ctx);
     };
   };

@@ -79,14 +79,17 @@ The schema automatically sets up an `avatars` bucket. Verify in **Storage** → 
 
 ## 📁 Project Structure
 
-// TODO need to refactor, have a store which does the supabase authentication, then the other apps would
-// sso into this, remove all components
+// TODO need to refactor, have a store which does the supabase authentication, then the other apps
+would // sso into this, remove all components
 
-// components should only do a POST or GET requests to the api package, or sso to the store, they do not connect direclty to supabase
+// components should only do a POST or GET requests to the api package, or sso to the store, they do
+not connect direclty to supabase
 
-// Refactor, more templates, templates so simple site, blog site, dashboard etc, these are where the islands and page layouts will be defined
+// Refactor, more templates, templates so simple site, blog site, dashboard etc, these are where the
+islands and page layouts will be defined
 
-// TODO I am thinking the sidebar needs to be reworked, so on desktop it will take a section, and on minimise it will stay in top left? maybe fancy animation?
+// TODO I am thinking the sidebar needs to be reworked, so on desktop it will take a section, and on
+minimise it will stay in top left? maybe fancy animation?
 
 ```
 packages/ui-lib/src/

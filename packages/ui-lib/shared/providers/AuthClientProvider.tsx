@@ -1,8 +1,8 @@
-import { createContext, ComponentChildren } from "preact";
+import { ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { AuthClient } from "@packages/auth-client";
-import type { AuthUser, AuthSession } from "@packages/auth-client";
+import type { AuthSession, AuthUser } from "@packages/auth-client";
 
 export interface AuthClientContextType {
   authClient: AuthClient;
@@ -39,23 +39,25 @@ export function AuthClientProvider({
   redirectUri,
   scopes = ["openid", "email", "profile"],
 }: AuthClientProviderProps) {
-  const [authClient] = useState(() => new AuthClient({
-    storeUrl,
-    clientId,
-    redirectUri,
-    scopes,
-  }));
+  const [authClient] = useState(() =>
+    new AuthClient({
+      storeUrl,
+      clientId,
+      redirectUri,
+      scopes,
+    })
+  );
 
   useEffect(() => {
     // Initialize auth client
     const initializeAuth = async () => {
       try {
         await authClient.initialize();
-        
+
         // Get current state
         const user = authClient.getUser();
         const session = authClient.getSession();
-        
+
         userSignal.value = user;
         sessionSignal.value = session;
         loadingSignal.value = false;

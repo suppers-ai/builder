@@ -41,27 +41,27 @@ export function isValidPassword(password: string): {
   errors: string[];
 } {
   const errors: string[] = [];
-  
+
   if (password.length < 8) {
     errors.push("Password must be at least 8 characters long");
   }
-  
+
   if (!/[A-Z]/.test(password)) {
     errors.push("Password must contain at least one uppercase letter");
   }
-  
+
   if (!/[a-z]/.test(password)) {
     errors.push("Password must contain at least one lowercase letter");
   }
-  
+
   if (!/\d/.test(password)) {
     errors.push("Password must contain at least one number");
   }
-  
+
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
     errors.push("Password must contain at least one special character");
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
@@ -152,7 +152,7 @@ export const UuidSchema = z.string().uuid("Invalid UUID format");
 
 export const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-  "Invalid slug format. Use lowercase letters, numbers, and hyphens only."
+  "Invalid slug format. Use lowercase letters, numbers, and hyphens only.",
 );
 
 export const PasswordSchema = z.string()
@@ -160,11 +160,14 @@ export const PasswordSchema = z.string()
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/\d/, "Password must contain at least one number")
-  .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain at least one special character");
+  .regex(
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+    "Password must contain at least one special character",
+  );
 
 export const PhoneSchema = z.string().regex(
   /^\+?[1-9]\d{1,14}$/,
-  "Invalid phone number format"
+  "Invalid phone number format",
 );
 
 export const UrlSchema = z.string().url("Invalid URL format");
@@ -192,7 +195,7 @@ export interface ValidationResult {
  */
 export function validateWithSchema<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): ValidationResult {
   try {
     const validatedData = schema.parse(data);
@@ -205,10 +208,10 @@ export function validateWithSchema<T>(
     if (error instanceof z.ZodError) {
       return {
         valid: false,
-        errors: error.errors.map(e => `${e.path.join(".")}: ${e.message}`),
+        errors: error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
       };
     }
-    
+
     return {
       valid: false,
       errors: [error instanceof Error ? error.message : "Validation failed"],
@@ -221,16 +224,16 @@ export function validateWithSchema<T>(
  */
 export function safeParseWithSchema<T>(
   schema: z.ZodSchema<T>,
-  data: unknown
+  data: unknown,
 ): { success: true; data: T } | { success: false; errors: string[] } {
   const result = schema.safeParse(data);
-  
+
   if (result.success) {
     return { success: true, data: result.data };
   }
-  
+
   return {
     success: false,
-    errors: result.error.errors.map(e => `${e.path.join(".")}: ${e.message}`),
+    errors: result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
   };
 }

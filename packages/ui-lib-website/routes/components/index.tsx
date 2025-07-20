@@ -1,4 +1,18 @@
-import { ComponentPreviewCard, Button, Dropdown, Swap, Avatar, Badge, Card, Alert, Loading, Progress, Checkbox, Input, Breadcrumbs } from "@suppers/ui-lib";
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Breadcrumbs,
+  Button,
+  Card,
+  Checkbox,
+  ComponentPreviewCard,
+  Dropdown,
+  Input,
+  Loading,
+  Progress,
+  Swap,
+} from "@suppers/ui-lib";
 import { Filter, Grid, List, Search } from "lucide-preact";
 
 interface Component {
@@ -34,7 +48,7 @@ const components: Component[] = [
     category: "Actions",
     categoryColor: "primary",
     preview: (
-      <Dropdown 
+      <Dropdown
         trigger={<Button color="primary">Dropdown</Button>}
         content={
           <ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
@@ -260,7 +274,7 @@ export default function ComponentsPage() {
             size="sm"
             items={[
               { label: "Home", href: "/" },
-              { label: "Components", active: true }
+              { label: "Components", active: true },
             ]}
           />
         </div>

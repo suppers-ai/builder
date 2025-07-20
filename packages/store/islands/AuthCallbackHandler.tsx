@@ -1,5 +1,5 @@
-import { useState, useEffect } from "preact/hooks";
-import { Loading, Card, Alert, Button } from "@suppers/ui-lib";
+import { useEffect, useState } from "preact/hooks";
+import { Alert, Button, Card, Loading } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 
 interface AuthCallbackHandlerProps {
@@ -17,11 +17,12 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
         const urlObj = new URL(url);
         const searchParams = urlObj.searchParams;
         const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-        
+
         // Check for errors in callback
         const error = searchParams.get("error") || hashParams.get("error");
-        const errorDescription = searchParams.get("error_description") || hashParams.get("error_description");
-        
+        const errorDescription = searchParams.get("error_description") ||
+          hashParams.get("error_description");
+
         if (error) {
           throw new Error(errorDescription || error);
         }
@@ -29,14 +30,14 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
         // Check for auth tokens in URL
         const accessToken = hashParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token");
-        
+
         if (accessToken) {
           // OAuth callback with tokens
           setSuccess("Authentication successful! Redirecting...");
-          
+
           // Get redirect URL
           const redirectTo = searchParams.get("redirect_to") || "/profile";
-          
+
           // Small delay to show success message
           setTimeout(() => {
             window.location.href = redirectTo;
@@ -44,13 +45,13 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
         } else {
           // Check for session
           const session = await AuthHelpers.getCurrentSession();
-          
+
           if (session) {
             setSuccess("Authentication successful! Redirecting...");
-            
+
             // Get redirect URL
             const redirectTo = searchParams.get("redirect_to") || "/profile";
-            
+
             // Small delay to show success message
             setTimeout(() => {
               window.location.href = redirectTo;
@@ -93,11 +94,11 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
           <div class="text-center p-8">
             <div class="text-red-500 text-6xl mb-4">❌</div>
             <h2 class="text-xl font-semibold mb-4">Authentication Failed</h2>
-            
+
             <Alert type="error" class="mb-6">
               {error}
             </Alert>
-            
+
             <div class="space-y-3">
               <Button
                 as="a"
@@ -129,15 +130,15 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
           <div class="text-center p-8">
             <div class="text-green-500 text-6xl mb-4">✅</div>
             <h2 class="text-xl font-semibold mb-4">Authentication Successful!</h2>
-            
+
             <Alert type="success" class="mb-6">
               {success}
             </Alert>
-            
+
             <div class="mb-4">
               <Loading size="sm" />
             </div>
-            
+
             <p class="text-base-content/70">
               You will be redirected automatically...
             </p>

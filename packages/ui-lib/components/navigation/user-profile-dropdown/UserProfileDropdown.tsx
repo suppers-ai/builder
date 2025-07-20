@@ -1,6 +1,6 @@
 import { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import { ChevronDown, User, Settings, LogOut, Shield } from "lucide-preact";
+import { ChevronDown, LogOut, Settings, Shield, User } from "lucide-preact";
 import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
 import { Dropdown } from "../../action/dropdown/Dropdown.tsx";
 
@@ -76,7 +76,7 @@ export function UserProfileDropdown({
         </div>
       </li>
       <div class="divider my-1"></div>
-      
+
       <li>
         <a
           href={profileHref}
@@ -92,7 +92,7 @@ export function UserProfileDropdown({
           Profile
         </a>
       </li>
-      
+
       <li>
         <a
           href={settingsHref}
@@ -108,7 +108,7 @@ export function UserProfileDropdown({
           Settings
         </a>
       </li>
-      
+
       {showAdmin && (
         <li>
           <a
@@ -126,11 +126,11 @@ export function UserProfileDropdown({
           </a>
         </li>
       )}
-      
+
       {children}
-      
+
       <div class="divider my-1"></div>
-      
+
       <li>
         <a
           onClick={(e) => {

@@ -28,8 +28,8 @@ export default function UserProfileDropdownDemo(props: PageProps) {
         <div class="flex gap-4">
           <UserProfileDropdown
             user={mockUser}
-            onLogout={() => console.log('Logout')}
-            onProfile={() => console.log('Profile')}
+            onLogout={() => console.log("Logout")}
+            onProfile={() => console.log("Profile")}
           />
         </div>
       ),

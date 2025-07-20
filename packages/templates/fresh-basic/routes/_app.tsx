@@ -12,10 +12,12 @@ export default function App({ Component }: PageProps) {
         <link rel="stylesheet" href="/styles.css" />
       </head>
       <body>
-        <AuthClientProvider 
+        <AuthClientProvider
           storeUrl="http://localhost:8001"
           clientId="fresh-basic-app"
-          redirectUri={typeof window !== "undefined" ? window.location.origin + "/auth/callback" : ""}
+          redirectUri={typeof window !== "undefined"
+            ? window.location.origin + "/auth/callback"
+            : ""}
         >
           <Comp />
         </AuthClientProvider>

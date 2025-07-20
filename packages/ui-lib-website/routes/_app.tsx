@@ -60,7 +60,7 @@ export default function App({ Component, state }: PageProps) {
         {/* Performance Optimization */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* Custom CSS files */}
         <link rel="stylesheet" href={asset("/styles.css")} />
         <link rel="stylesheet" href={asset("/theme-transitions.css")} />

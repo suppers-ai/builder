@@ -63,11 +63,13 @@ export const HeadSchema = z.object({
 export type Head = z.infer<typeof HeadSchema>;
 
 // Component Schema (recursive)
-export const ComponentSchema: z.ZodType<ComponentDefinition> = z.lazy(() => z.object({
-  id: z.string(),
-  props: z.record(z.any()).optional(),
-  components: z.array(ComponentSchema).optional(),
-}));
+export const ComponentSchema: z.ZodType<ComponentDefinition> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    props: z.record(z.any()).optional(),
+    components: z.array(ComponentSchema).optional(),
+  })
+);
 
 export interface ComponentDefinition {
   id: string;

@@ -5,7 +5,16 @@ import { Kbd } from "../../display/kbd/Kbd.tsx";
 
 export interface SearchButtonProps {
   onClick: () => void;
-  variant?: "primary" | "secondary" | "accent" | "ghost" | "link" | "info" | "success" | "warning" | "error";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "accent"
+    | "ghost"
+    | "link"
+    | "info"
+    | "success"
+    | "warning"
+    | "error";
   size?: "xs" | "sm" | "md" | "lg";
   shape?: "circle" | "square";
   class?: string;
@@ -29,7 +38,9 @@ export function SearchButton({
   disabled = false,
   ...props
 }: SearchButtonProps) {
-  const searchIcon = <Search size={size === "xs" ? 14 : size === "sm" ? 16 : size === "lg" ? 20 : 18} />;
+  const searchIcon = (
+    <Search size={size === "xs" ? 14 : size === "sm" ? 16 : size === "lg" ? 20 : 18} />
+  );
 
   const buttonContent = children || (
     <>

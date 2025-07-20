@@ -1,5 +1,5 @@
 import { type PageProps } from "fresh";
-import { ComponentPageTemplate, Button, Button as ButtonComponent } from "@suppers/ui-lib";
+import { Button, Button as ButtonComponent, ComponentPageTemplate } from "@suppers/ui-lib";
 
 export default function ButtonDemo(props: PageProps) {
   // Set the title in state for the app component

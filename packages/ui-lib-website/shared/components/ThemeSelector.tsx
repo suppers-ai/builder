@@ -84,9 +84,20 @@ export function ThemeSelector({
   return (
     <>
       <div class={`dropdown dropdown-end ${className}`}>
-        <Button as="div" tabIndex={0} role="button" variant="ghost" size={size} class="gap-2 min-w-0">
+        <Button
+          as="div"
+          tabIndex={0}
+          role="button"
+          variant="ghost"
+          size={size}
+          class="gap-2 min-w-0"
+        >
           <span class="truncate">{currentThemeData.label}</span>
-          <svg class="fill-current w-5 h-5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <svg
+            class="fill-current w-5 h-5 flex-shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+          >
             <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
           </svg>
         </Button>
@@ -168,7 +179,9 @@ export function ThemeSelector({
                       <div class="flex items-center gap-3 min-w-0 flex-1">
                         <div class="flex flex-col items-start min-w-0 flex-1">
                           <span class="font-medium truncate w-full">{theme.label}</span>
-                          <span class="text-xs opacity-70 truncate w-full">{theme.description}</span>
+                          <span class="text-xs opacity-70 truncate w-full">
+                            {theme.description}
+                          </span>
                         </div>
                         <div class="flex gap-1 flex-shrink-0">
                           <div class="w-3 h-3 bg-primary rounded-full"></div>

@@ -1,2 +1,2 @@
-export { ThemeController, GlobalThemeController } from "./ThemeController.tsx";
+export { GlobalThemeController, ThemeController } from "./ThemeController.tsx";
 export type { ThemeControllerProps } from "./ThemeController.tsx";

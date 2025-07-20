@@ -74,9 +74,9 @@ export interface SessionData {
 }
 
 // Permission Types
-export type Permission = 
+export type Permission =
   | "read_profile"
-  | "write_profile" 
+  | "write_profile"
   | "read_applications"
   | "write_applications"
   | "delete_applications"
@@ -92,9 +92,9 @@ export interface UserPermissions {
 }
 
 // Auth Event Types
-export type AuthEvent = 
+export type AuthEvent =
   | "SIGNED_IN"
-  | "SIGNED_OUT" 
+  | "SIGNED_OUT"
   | "TOKEN_REFRESHED"
   | "USER_UPDATED"
   | "PASSWORD_RECOVERY";

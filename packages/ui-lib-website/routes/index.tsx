@@ -1,10 +1,10 @@
-import { HeroSection, BenefitsSection } from "@suppers/ui-lib";
+import { BenefitsSection, HeroSection } from "@suppers/ui-lib";
 
 export default function Home() {
   return (
     <>
       <HeroSection />
-      
+
       {/* Technology Stack Section */}
       <section class="py-16 bg-base-100">
         <div class="container mx-auto px-6">
@@ -16,7 +16,7 @@ export default function Home() {
               Powered by the latest tools for optimal performance and developer experience
             </p>
           </div>
-          
+
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div class="card bg-base-200 shadow-lg">
               <div class="card-body text-center">
@@ -27,7 +27,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            
+
             <div class="card bg-base-200 shadow-lg">
               <div class="card-body text-center">
                 <div class="text-4xl mb-4">🍋</div>
@@ -37,7 +37,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            
+
             <div class="card bg-base-200 shadow-lg">
               <div class="card-body text-center">
                 <div class="text-4xl mb-4">⚛️</div>
@@ -47,7 +47,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            
+
             <div class="card bg-base-200 shadow-lg">
               <div class="card-body text-center">
                 <div class="text-4xl mb-4">🌼</div>
@@ -60,7 +60,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-      
+
       <BenefitsSection />
     </>
   );

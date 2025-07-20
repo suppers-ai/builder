@@ -46,7 +46,9 @@ export default function Login(props: PageProps) {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <SSOClientLogin
             providers={["google", "github"]}
-            redirectUri={typeof window !== "undefined" ? window.location.origin + "/auth/callback" : ""}
+            redirectUri={typeof window !== "undefined"
+              ? window.location.origin + "/auth/callback"
+              : ""}
             onSuccess={() => {
               console.log("Login successful");
             }}
@@ -54,7 +56,7 @@ export default function Login(props: PageProps) {
               console.error("Login error:", error);
             }}
           />
-          
+
           <div className="mt-6 text-center">
             <a
               href="/"

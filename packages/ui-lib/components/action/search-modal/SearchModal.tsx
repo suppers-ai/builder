@@ -1,6 +1,6 @@
 import { ComponentChildren } from "preact";
-import { useState, useEffect, useRef } from "preact/hooks";
-import { Search, X, ArrowRight } from "lucide-preact";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { ArrowRight, Search, X } from "lucide-preact";
 import { Modal } from "../modal/Modal.tsx";
 import { Input } from "../../input/input/Input.tsx";
 import { Button } from "../button/Button.tsx";
@@ -83,13 +83,13 @@ export function SearchModal({
         break;
       case "ArrowDown":
         e.preventDefault();
-        setSelectedIndex(prev => 
+        setSelectedIndex((prev) =>
           Math.min(prev + 1, Math.min(searchResults.length, maxResults) - 1)
         );
         break;
       case "ArrowUp":
         e.preventDefault();
-        setSelectedIndex(prev => Math.max(prev - 1, 0));
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case "Enter":
         if (searchResults.length > 0 && selectedIndex < searchResults.length) {
@@ -112,8 +112,8 @@ export function SearchModal({
   const displayedResults = searchResults.slice(0, maxResults);
 
   return (
-    <Modal 
-      open={isOpen} 
+    <Modal
+      open={isOpen}
       onClose={onClose}
       class={`modal-top ${className}`}
       closeOnBackdrop={true}
@@ -135,7 +135,7 @@ export function SearchModal({
                 />
               </div>
             </div>
-            
+
             <div class="flex items-center gap-2">
               {showKeyboardShortcut && (
                 <div class="hidden sm:flex items-center gap-1 text-xs text-base-content/60">
@@ -178,8 +178,8 @@ export function SearchModal({
                   key={result.id}
                   href={result.url}
                   class={`flex items-center gap-4 p-4 hover:bg-base-200 cursor-pointer border-l-4 transition-colors ${
-                    index === selectedIndex 
-                      ? "bg-base-200 border-l-primary" 
+                    index === selectedIndex
+                      ? "bg-base-200 border-l-primary"
                       : "border-l-transparent"
                   }`}
                   onClick={() => onClose()}
@@ -189,7 +189,7 @@ export function SearchModal({
                       {result.icon}
                     </div>
                   )}
-                  
+
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                       <h3 class="font-medium text-base-content truncate">
@@ -207,7 +207,7 @@ export function SearchModal({
                       </p>
                     )}
                   </div>
-                  
+
                   <ArrowRight size={16} class="text-base-content/40 flex-shrink-0" />
                 </a>
               ))}
@@ -220,7 +220,9 @@ export function SearchModal({
               <p class="text-base-content/60">Start typing to search</p>
               {showKeyboardShortcut && (
                 <p class="text-sm text-base-content/40 mt-1">
-                  Use <kbd class="kbd kbd-sm">↑</kbd> <kbd class="kbd kbd-sm">↓</kbd> to navigate, <kbd class="kbd kbd-sm">Enter</kbd> to select
+                  Use <kbd class="kbd kbd-sm">↑</kbd> <kbd class="kbd kbd-sm">↓</kbd> to navigate,
+                  {" "}
+                  <kbd class="kbd kbd-sm">Enter</kbd> to select
                 </p>
               )}
             </div>

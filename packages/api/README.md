@@ -1,7 +1,7 @@
 # API Package
 
-This package contains the backend API integration for the UI library builder, including
-database schema, Edge Functions, and **comprehensive SSO/OAuth support** for external applications.
+This package contains the backend API integration for the UI library builder, including database
+schema, Edge Functions, and **comprehensive SSO/OAuth support** for external applications.
 
 ## 📁 Package Structure
 

@@ -1,4 +1,4 @@
-import { ComponentPageTemplate, Dropdown, Button } from "@suppers/ui-lib";
+import { Button, ComponentPageTemplate, Dropdown } from "@suppers/ui-lib";
 
 export default function DropdownDemo() {
   const examples = [

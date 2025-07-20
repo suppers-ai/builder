@@ -52,32 +52,38 @@ serve(async (req) => {
 
   try {
     const body: TokenRequest = await req.json();
-    
+
     if (!body.code) {
-      return new Response(JSON.stringify({ 
-        error: "Missing authorization code" 
-      }), {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+      return new Response(
+        JSON.stringify({
+          error: "Missing authorization code",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
-      });
+      );
     }
 
     // Exchange authorization code for session
     const { data, error } = await supabase.auth.exchangeCodeForSession(body.code);
 
     if (error || !data.session) {
-      return new Response(JSON.stringify({ 
-        error: error?.message || "Invalid authorization code" 
-      }), {
-        status: 401,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+      return new Response(
+        JSON.stringify({
+          error: error?.message || "Invalid authorization code",
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
-      });
+      );
     }
 
     const { session } = data;
@@ -104,18 +110,20 @@ serve(async (req) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-
   } catch (error) {
     console.error("Token exchange error:", error);
-    
-    return new Response(JSON.stringify({ 
-      error: "Internal server error" 
-    }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+
+    return new Response(
+      JSON.stringify({
+        error: "Internal server error",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
       },
-    });
+    );
   }
 });

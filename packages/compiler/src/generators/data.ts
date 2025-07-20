@@ -5,12 +5,7 @@
 
 import { FileSystem } from "../utils/mod.ts";
 import { substituteVariables } from "../utils/variables.ts";
-import type { 
-  ApplicationSpec,
-  ComponentDefinition,
-  DataConfig,
-  Variables,
-} from "../types/mod.ts";
+import type { ApplicationSpec, ComponentDefinition, DataConfig, Variables } from "../types/mod.ts";
 
 /**
  * Generate data services in the generated application
@@ -20,16 +15,16 @@ export async function generateDataServices(
   spec: ApplicationSpec,
 ): Promise<void> {
   console.log("🔌 Generating data services...");
-  
+
   const servicesDir = FileSystem.join(destinationRoot, "services");
   await FileSystem.ensureDir(servicesDir);
-  
+
   // Generate main data service
   await generateMainDataService(servicesDir, spec);
-  
+
   // Generate Supabase service if needed
   await generateSupabaseService(servicesDir, spec);
-  
+
   console.log("  📄 Generated data services");
 }
 
@@ -42,7 +37,7 @@ async function generateMainDataService(
 ): Promise<void> {
   const variables = spec.variables || {};
   const defaultApiUrl = variables.SUPPERS_API_URL || "http://localhost:5000/api";
-  
+
   const dataServiceContent = `/**
  * Data Service
  * Handles API calls and data fetching for the application
@@ -354,7 +349,7 @@ export function generateDataConfig(
   defaultApiUrl = "http://localhost:5000/api",
 ): DataConfig | null {
   const dataProps = component.props?.data;
-  
+
   if (!dataProps) {
     return null;
   }
@@ -411,7 +406,7 @@ export function generateServerDataFetching(
   const fetchFunctions = dataConfigs.map((config, index) => {
     const processedUrl = substituteVariables(config.url || "", variables);
     const processedEndpoint = substituteVariables(config.endpoint, variables);
-    
+
     return `
   // Data fetch ${index + 1}
   const response${index + 1} = await fetch("\${processedUrl}\${processedEndpoint}");

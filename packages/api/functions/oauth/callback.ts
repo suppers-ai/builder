@@ -83,7 +83,9 @@ Deno.serve(async (req: Request) => {
       const sessionMatch = cookieHeader.match(/sb-access-token=([^;]+)/);
       if (sessionMatch) {
         const sessionToken = sessionMatch[1];
-        const { data: { user: sessionUser }, error: sessionError } = await supabase.auth.getUser(sessionToken);
+        const { data: { user: sessionUser }, error: sessionError } = await supabase.auth.getUser(
+          sessionToken,
+        );
         user = sessionUser;
       }
     }

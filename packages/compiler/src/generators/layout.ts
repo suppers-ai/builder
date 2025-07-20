@@ -4,10 +4,10 @@
  */
 
 import { FileSystem } from "../utils/mod.ts";
-import type { 
-  ApplicationSpec, 
-  GlobalConfig, 
+import type {
+  ApplicationSpec,
   ComponentDefinition,
+  GlobalConfig,
   Head,
   HeadMeta,
 } from "../types/mod.ts";
@@ -20,7 +20,7 @@ export async function generateGlobalLayout(
   spec: ApplicationSpec,
 ): Promise<void> {
   const globalConfig = spec.data.global;
-  
+
   if (!globalConfig) {
     console.log("⚠️  No global configuration found, skipping layout generation");
     return;
@@ -31,7 +31,7 @@ export async function generateGlobalLayout(
   // Generate _layout.tsx file
   const layoutContent = generateLayoutContent(globalConfig, spec);
   const layoutPath = FileSystem.join(destinationRoot, "routes", "_layout.tsx");
-  
+
   await FileSystem.writeText(layoutPath, layoutContent);
   console.log("  📄 Generated _layout.tsx");
 }
@@ -90,13 +90,13 @@ export default function Layout(props: PageProps) {
         ${headMeta}
       </Head>
       <div class="min-h-screen flex flex-col">
-        ${components.filter(c => c.includes("header") || c.includes("menu")).join("\n        ")}
+        ${components.filter((c) => c.includes("header") || c.includes("menu")).join("\n        ")}
         
         <main class="flex-1">
           <props.Component />
         </main>
         
-        ${components.filter(c => c.includes("footer")).join("\n        ")}
+        ${components.filter((c) => c.includes("footer")).join("\n        ")}
       </div>
     </>
   );
@@ -109,7 +109,7 @@ export default function Layout(props: PageProps) {
  */
 function generateComponentImport(component: ComponentDefinition): string | null {
   if (!component.id) return null;
-  
+
   // Default to ui-lib for now
   const libraryName = "jsr:@suppers/ui-lib";
   return `import { ${component.id} } from "${libraryName}";`;
@@ -119,14 +119,16 @@ function generateComponentImport(component: ComponentDefinition): string | null 
  * Generate component element with props
  */
 function generateComponentElement(component: ComponentDefinition, section: string): string {
-  const props = component.props 
+  const props = component.props
     ? Object.entries(component.props)
-        .map(([key, value]) => `${key}={${JSON.stringify(value)}}`)
-        .join(" ")
+      .map(([key, value]) => `${key}={${JSON.stringify(value)}}`)
+      .join(" ")
     : "";
 
-  const nestedComponents = component.components 
-    ? component.components.map(child => generateComponentElement(child, section)).join("\n          ")
+  const nestedComponents = component.components
+    ? component.components.map((child) => generateComponentElement(child, section)).join(
+      "\n          ",
+    )
     : "";
 
   if (nestedComponents) {
@@ -143,7 +145,7 @@ function generateComponentElement(component: ComponentDefinition, section: strin
  */
 function generateHeadMeta(head?: Head): string {
   if (!head?.meta) {
-    return '<title>Generated App</title>';
+    return "<title>Generated App</title>";
   }
 
   const meta = head.meta;
@@ -171,7 +173,7 @@ export function generateHeadOverrides(
   const global = globalHead?.meta;
 
   if (!overrides && !global) {
-    return '<title>Generated Page</title>';
+    return "<title>Generated Page</title>";
   }
 
   const metaTags: string[] = [];

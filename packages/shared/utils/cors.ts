@@ -37,26 +37,36 @@ export function createJsonResponse(data: any, status: number = 200): Response {
 /**
  * Create an error response with CORS headers
  */
-export function createErrorResponse(message: string, status: number = 500, details?: any): Response {
-  return new Response(JSON.stringify({
-    error: message,
-    details,
-  }), {
-    status,
-    headers: jsonHeaders,
-  });
+export function createErrorResponse(
+  message: string,
+  status: number = 500,
+  details?: any,
+): Response {
+  return new Response(
+    JSON.stringify({
+      error: message,
+      details,
+    }),
+    {
+      status,
+      headers: jsonHeaders,
+    },
+  );
 }
 
 /**
  * Create a success response with CORS headers
  */
 export function createSuccessResponse(data: any, message?: string): Response {
-  return new Response(JSON.stringify({
-    success: true,
-    data,
-    message,
-  }), {
-    status: 200,
-    headers: jsonHeaders,
-  });
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data,
+      message,
+    }),
+    {
+      status: 200,
+      headers: jsonHeaders,
+    },
+  );
 }

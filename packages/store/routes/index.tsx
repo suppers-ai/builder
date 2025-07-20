@@ -14,25 +14,25 @@ export default function Home(props: PageProps) {
               Your Authentication Hub
             </h2>
             <p class="text-lg text-base-content/80 mb-8">
-              Secure, centralized authentication for all your applications. 
-              Sign in once, access everywhere.
+              Secure, centralized authentication for all your applications. Sign in once, access
+              everywhere.
             </p>
-            
+
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                as="a" 
-                href="/login" 
-                color="primary" 
+              <Button
+                as="a"
+                href="/login"
+                color="primary"
                 size="lg"
                 class="shadow-lg"
               >
                 Sign In
               </Button>
-              <Button 
-                as="a" 
-                href="/login?mode=register" 
-                variant="outline" 
-                color="primary" 
+              <Button
+                as="a"
+                href="/login?mode=register"
+                variant="outline"
+                color="primary"
                 size="lg"
               >
                 Create Account
@@ -48,7 +48,8 @@ export default function Home(props: PageProps) {
             Why Choose Suppers Store?
           </h2>
           <p class="text-lg text-base-content/70 max-w-2xl mx-auto">
-            Built for developers, designed for users. Experience seamless authentication across all your applications.
+            Built for developers, designed for users. Experience seamless authentication across all
+            your applications.
           </p>
         </div>
 
@@ -57,7 +58,8 @@ export default function Home(props: PageProps) {
             <div class="text-4xl mb-4">🔒</div>
             <h3 class="text-xl font-semibold mb-3">Secure</h3>
             <p class="text-base-content/70">
-              Enterprise-grade security with OAuth 2.0, JWT tokens, and multi-factor authentication support.
+              Enterprise-grade security with OAuth 2.0, JWT tokens, and multi-factor authentication
+              support.
             </p>
           </Card>
 
@@ -84,10 +86,10 @@ export default function Home(props: PageProps) {
             <p class="text-base-content/70 mb-6">
               Join thousands of users who trust Suppers Store for their authentication needs.
             </p>
-            <Button 
-              as="a" 
-              href="/login" 
-              color="primary" 
+            <Button
+              as="a"
+              href="/login"
+              color="primary"
               size="lg"
             >
               Get Started Now

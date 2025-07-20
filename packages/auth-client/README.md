@@ -91,11 +91,11 @@ authClient.addEventListener("error", (event, error) => {
 
 ```typescript
 interface AuthClientConfig {
-  storeUrl: string;        // URL of the auth store
-  clientId?: string;       // Your application's client ID
-  redirectUri?: string;    // Redirect URI after authentication
-  scopes?: string[];       // OAuth scopes to request
-  storageKey?: string;     // Key for session storage
+  storeUrl: string; // URL of the auth store
+  clientId?: string; // Your application's client ID
+  redirectUri?: string; // Redirect URI after authentication
+  scopes?: string[]; // OAuth scopes to request
+  storageKey?: string; // Key for session storage
 }
 ```
 
@@ -198,17 +198,19 @@ function App() {
 
   if (loading) return <div>Loading...</div>;
 
-  return user ? (
-    <div>
-      <h1>Welcome, {user.email}!</h1>
-      <button onClick={() => authClient.logout()}>Logout</button>
-    </div>
-  ) : (
-    <div>
-      <h1>Please log in</h1>
-      <button onClick={() => authClient.login()}>Login</button>
-    </div>
-  );
+  return user
+    ? (
+      <div>
+        <h1>Welcome, {user.email}!</h1>
+        <button onClick={() => authClient.logout()}>Logout</button>
+      </div>
+    )
+    : (
+      <div>
+        <h1>Please log in</h1>
+        <button onClick={() => authClient.login()}>Login</button>
+      </div>
+    );
 }
 ```
 

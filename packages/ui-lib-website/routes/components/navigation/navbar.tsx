@@ -1,4 +1,4 @@
-import { Navbar, Button, Badge, Input } from "@suppers/ui-lib";
+import { Badge, Button, Input, Navbar } from "@suppers/ui-lib";
 
 export default function NavbarPage() {
   return (

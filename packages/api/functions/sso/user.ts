@@ -45,15 +45,18 @@ serve(async (req) => {
     // Get the access token from Authorization header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ 
-        error: "Missing or invalid authorization header" 
-      }), {
-        status: 401,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+      return new Response(
+        JSON.stringify({
+          error: "Missing or invalid authorization header",
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
-      });
+      );
     }
 
     const accessToken = authHeader.substring(7); // Remove "Bearer " prefix
@@ -62,15 +65,18 @@ serve(async (req) => {
     const { data: { user }, error } = await supabase.auth.getUser(accessToken);
 
     if (error || !user) {
-      return new Response(JSON.stringify({ 
-        error: error?.message || "Invalid token" 
-      }), {
-        status: 401,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+      return new Response(
+        JSON.stringify({
+          error: error?.message || "Invalid token",
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
-      });
+      );
     }
 
     // Get additional user data from database
@@ -100,18 +106,20 @@ serve(async (req) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-
   } catch (error) {
     console.error("Get user error:", error);
-    
-    return new Response(JSON.stringify({ 
-      error: "Internal server error" 
-    }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+
+    return new Response(
+      JSON.stringify({
+        error: "Internal server error",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
       },
-    });
+    );
   }
 });

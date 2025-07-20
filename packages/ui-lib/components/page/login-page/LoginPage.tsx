@@ -277,8 +277,7 @@ export function LoginPage({
                       autoComplete="email"
                       required
                       value={formData.email}
-                      onInput={(e) =>
-                        onInputChange("email", (e.target as HTMLInputElement).value)}
+                      onInput={(e) => onInputChange("email", (e.target as HTMLInputElement).value)}
                       bordered
                       class="w-full"
                     />
@@ -348,11 +347,7 @@ export function LoginPage({
                       color="primary"
                       class="w-full"
                     >
-                      {isLoading
-                        ? <Loading size="sm" />
-                        : isLogin
-                        ? "Sign in"
-                        : "Create account"}
+                      {isLoading ? <Loading size="sm" /> : isLogin ? "Sign in" : "Create account"}
                     </Button>
                   </div>
 

@@ -28,4 +28,4 @@ export async function handleGenerate(options: GenerateOptions, name: string): Pr
     console.error("❌ Error generating application:", errorMessage);
     Deno.exit(1);
   }
-} 
+}

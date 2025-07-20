@@ -113,7 +113,7 @@ export function HeaderLayout({
           toggleGlobalSidebar();
         }
       }
-      
+
       // Open search modal with Ctrl/Cmd + K
       if ((e.metaKey || e.ctrlKey) && e.key === "k" && showSearch) {
         e.preventDefault();
@@ -323,15 +323,15 @@ export function HeaderLayout({
       )}
 
       {/* Authentication */}
-      {user ? (
-        <UserProfileDropdown
-          user={user}
-          onLogout={handleLogout}
-          onProfile={onProfileClick}
-        />
-      ) : showLogin && (
-        <LoginButton onClick={handleLogin} />
-      )}
+      {user
+        ? (
+          <UserProfileDropdown
+            user={user}
+            onLogout={handleLogout}
+            onProfile={onProfileClick}
+          />
+        )
+        : showLogin && <LoginButton onClick={handleLogin} />}
 
       {/* Theme controller */}
       <GlobalThemeController
@@ -473,20 +473,22 @@ export function HeaderLayout({
           </Button>
 
           {/* Authentication - Far Right */}
-          {user ? (
-            <UserProfileDropdown
-              user={user}
-              onLogout={handleLogout}
-              onProfile={onProfileClick}
-              class="bg-black/20 backdrop-blur-md border border-white/20 shadow-lg"
-            />
-          ) : showLogin && (
-            <LoginButton 
-              onClick={handleLogin}
-              variant="ghost"
-              class="bg-black/20 backdrop-blur-md border border-white/20 text-white hover:bg-black/30 shadow-lg"
-            />
-          )}
+          {user
+            ? (
+              <UserProfileDropdown
+                user={user}
+                onLogout={handleLogout}
+                onProfile={onProfileClick}
+                class="bg-black/20 backdrop-blur-md border border-white/20 shadow-lg"
+              />
+            )
+            : showLogin && (
+              <LoginButton
+                onClick={handleLogin}
+                variant="ghost"
+                class="bg-black/20 backdrop-blur-md border border-white/20 text-white hover:bg-black/30 shadow-lg"
+              />
+            )}
         </div>
 
         {/* Floating Breadcrumbs */}

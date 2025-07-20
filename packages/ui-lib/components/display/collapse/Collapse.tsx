@@ -43,42 +43,50 @@ export function Collapse({
   // Internal state for interactive controls
   const [internalOpen, setInternalOpen] = useState(open);
   const [currentStyle, setCurrentStyle] = useState<"none" | "arrow" | "plus" | "checkbox">(
-    checkbox ? "checkbox" : arrow ? "arrow" : plus ? "plus" : "none"
+    checkbox ? "checkbox" : arrow ? "arrow" : plus ? "plus" : "none",
   );
   const [customIconEnabled, setCustomIconEnabled] = useState(false);
-  
+
   // Use controlled mode if isOpen is provided, otherwise uncontrolled
   const isControlled = isOpen !== undefined;
   const currentOpen = isControlled ? isOpen : (showControls ? internalOpen : open);
-  
+
   // Apply current style from interactive controls
   const activeCheckbox = showControls ? currentStyle === "checkbox" : checkbox;
   const activeArrow = showControls ? currentStyle === "arrow" : arrow;
   const activePlus = showControls ? currentStyle === "plus" : plus;
-  
+
   const collapseClasses = [
     "collapse",
-    activeCheckbox ? "collapse-checkbox" : activeArrow ? "collapse-arrow" : activePlus ? "collapse-plus" : "",
+    activeCheckbox
+      ? "collapse-checkbox"
+      : activeArrow
+      ? "collapse-arrow"
+      : activePlus
+      ? "collapse-plus"
+      : "",
     className,
   ].filter(Boolean).join(" ");
-  
+
   // Use custom icon if enabled and provided
-  const activeIcon = (showControls && customIconEnabled && allowCustomIcon) ? (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  ) : icon;
+  const activeIcon = (showControls && customIconEnabled && allowCustomIcon)
+    ? (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    )
+    : icon;
 
   const collapseId = id || `collapse-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -95,7 +103,7 @@ export function Collapse({
     if (!showControls) return null;
 
     const controlsClass = controlsPosition === "top" ? "mb-4" : "mt-4";
-    
+
     return (
       <div class={`card bg-base-100 shadow-md ${controlsClass}`}>
         <div class="card-body">

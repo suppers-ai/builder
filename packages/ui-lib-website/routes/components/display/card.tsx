@@ -1,4 +1,4 @@
-import { ComponentPageTemplate, Card, Button } from "@suppers/ui-lib";
+import { Button, Card, ComponentPageTemplate } from "@suppers/ui-lib";
 
 export default function CardDemo() {
   const examples = [

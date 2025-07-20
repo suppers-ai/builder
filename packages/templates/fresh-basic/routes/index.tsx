@@ -25,56 +25,61 @@ export default function Home() {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          {isAuthenticated() ? (
-            <div className="text-center">
-              <div className="flex items-center justify-center space-x-4 mb-4">
-                <UserClientAvatar user={user!} size="lg" />
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Welcome, {user!.name || user!.email}!
-                  </h2>
-                  <p className="text-gray-600">{user!.email}</p>
+          {isAuthenticated()
+            ? (
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-4 mb-4">
+                  <UserClientAvatar user={user!} size="lg" />
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Welcome, {user!.name || user!.email}!
+                    </h2>
+                    <p className="text-gray-600">{user!.email}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-gray-700">
+                    You are successfully authenticated via SSO.
+                  </p>
+
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={() => logout()}
+                      className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold"
+                    >
+                      Logout
+                    </button>
+                  </div>
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                <p className="text-gray-700">
-                  You are successfully authenticated via SSO.
+            )
+            : (
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Authentication Required
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Please sign in to access the application.
                 </p>
-                
-                <div className="flex justify-center space-x-4">
+
+                <div className="space-y-4">
                   <button
-                    onClick={() => logout()}
-                    className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold"
+                    onClick={() => login()}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
                   >
-                    Logout
+                    Sign In
                   </button>
+
+                  <p className="text-sm text-gray-500">
+                    Or visit the{" "}
+                    <a href="/auth/login" className="text-blue-600 hover:text-blue-500">
+                      login page
+                    </a>
+                  </p>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Authentication Required
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Please sign in to access the application.
-              </p>
-              
-              <div className="space-y-4">
-                <button
-                  onClick={() => login()}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
-                >
-                  Sign In
-                </button>
-                
-                <p className="text-sm text-gray-500">
-                  Or visit the <a href="/auth/login" className="text-blue-600 hover:text-blue-500">login page</a>
-                </p>
-              </div>
-            </div>
-          )}
+            )}
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-6">

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "preact/hooks";
-import { Loading, Card, Alert, Button } from "@suppers/ui-lib";
+import { useEffect, useState } from "preact/hooks";
+import { Alert, Button, Card, Loading } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import type { OAuthProvider } from "../types/auth.ts";
 
@@ -71,11 +71,11 @@ export function OAuthHandler({ url }: OAuthHandlerProps) {
           <div class="text-center p-8">
             <div class="text-red-500 text-6xl mb-4">❌</div>
             <h2 class="text-xl font-semibold mb-4">OAuth Failed</h2>
-            
+
             <Alert type="error" class="mb-6">
               {error}
             </Alert>
-            
+
             <div class="space-y-3">
               <Button
                 as="a"

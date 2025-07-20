@@ -60,7 +60,8 @@ export default function LoginButtonDemo(props: PageProps) {
     },
     {
       name: "variant",
-      type: "'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error' | 'outline'",
+      type:
+        "'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error' | 'outline'",
       default: "'primary'",
       description: "Button visual style",
     },

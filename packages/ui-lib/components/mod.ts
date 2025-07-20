@@ -10,7 +10,10 @@ export type { SearchButtonProps } from "./action/search-button/SearchButton.tsx"
 export { SearchModal } from "./action/search-modal/SearchModal.tsx";
 export type { SearchModalProps, SearchResult } from "./action/search-modal/SearchModal.tsx";
 export { UserProfileDropdown } from "./navigation/user-profile-dropdown/UserProfileDropdown.tsx";
-export type { UserProfileDropdownProps, UserProfileDropdownUser } from "./navigation/user-profile-dropdown/UserProfileDropdown.tsx";
+export type {
+  UserProfileDropdownProps,
+  UserProfileDropdownUser,
+} from "./navigation/user-profile-dropdown/UserProfileDropdown.tsx";
 export { Rating } from "./input/rating/Rating.tsx";
 export type { RatingProps } from "./input/rating/Rating.tsx";
 export { FileInput } from "./input/file-input/FileInput.tsx";
@@ -27,7 +30,10 @@ export { Pagination } from "./navigation/pagination/Pagination.tsx";
 export type { PaginationProps } from "./navigation/pagination/Pagination.tsx";
 export { Countdown } from "./display/countdown/Countdown.tsx";
 export type { CountdownProps } from "./display/countdown/Countdown.tsx";
-export { ThemeController, GlobalThemeController } from "./action/theme-controller/ThemeController.tsx";
+export {
+  GlobalThemeController,
+  ThemeController,
+} from "./action/theme-controller/ThemeController.tsx";
 export type { ThemeControllerProps } from "./action/theme-controller/ThemeController.tsx";
 export { ChatBubble } from "./display/chat-bubble/ChatBubble.tsx";
 export type { ChatBubbleProps } from "./display/chat-bubble/ChatBubble.tsx";
@@ -176,14 +182,14 @@ export type { PhoneMockupProps } from "./mockup/phone/PhoneMockup.tsx";
 export type * from "./types.ts";
 
 // Export utilities and configurations
-export { 
-  defaultUISidebarConfig, 
-  fullSidebarConfig, 
-  minimalSidebarConfig, 
+export {
   createSidebarConfig,
+  defaultUISidebarConfig,
+  fullSidebarConfig,
+  minimalSidebarConfig,
   type SidebarConfig,
+  type SidebarLink,
   type SidebarSection,
-  type SidebarLink
 } from "../utils/sidebar-config.tsx";
 
 // Export metadata files for ui-lib-website

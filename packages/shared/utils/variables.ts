@@ -17,17 +17,17 @@ export function resolveVariable(
   environmentVariables?: Record<string, string>,
 ): string {
   const trimmedName = variableName.trim();
-  
+
   // Check environment variables first
   if (environmentVariables && trimmedName in environmentVariables) {
     return environmentVariables[trimmedName];
   }
-  
+
   // Check provided variables
   if (trimmedName in variables) {
     return variables[trimmedName];
   }
-  
+
   throw new Error(`Variable "${trimmedName}" not found`);
 }
 
@@ -60,11 +60,11 @@ export function substituteVariables(
   if (typeof obj === "string") {
     return substituteVariablesInString(obj, variables, environmentVariables);
   }
-  
+
   if (Array.isArray(obj)) {
-    return obj.map(item => substituteVariables(item, variables, environmentVariables));
+    return obj.map((item) => substituteVariables(item, variables, environmentVariables));
   }
-  
+
   if (obj !== null && typeof obj === "object") {
     const result: any = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -72,7 +72,7 @@ export function substituteVariables(
     }
     return result;
   }
-  
+
   return obj;
 }
 
@@ -85,7 +85,7 @@ export function validateVariableReferences(
   environmentVariables?: Record<string, string>,
 ): { valid: boolean; missingVariables: string[] } {
   const missingVariables = new Set<string>();
-  
+
   function checkObject(value: any): void {
     if (typeof value === "string") {
       const matches = value.matchAll(VARIABLE_PATTERN);
@@ -103,9 +103,9 @@ export function validateVariableReferences(
       Object.values(value).forEach(checkObject);
     }
   }
-  
+
   checkObject(obj);
-  
+
   return {
     valid: missingVariables.size === 0,
     missingVariables: Array.from(missingVariables),
@@ -117,7 +117,7 @@ export function validateVariableReferences(
  */
 export function extractVariableNames(obj: any): string[] {
   const variables = new Set<string>();
-  
+
   function extractFromValue(value: any): void {
     if (typeof value === "string") {
       const matches = value.matchAll(VARIABLE_PATTERN);
@@ -130,7 +130,7 @@ export function extractVariableNames(obj: any): string[] {
       Object.values(value).forEach(extractFromValue);
     }
   }
-  
+
   extractFromValue(obj);
   return Array.from(variables);
 }
@@ -140,7 +140,7 @@ export function extractVariableNames(obj: any): string[] {
  */
 export function getEnvironmentVariables(): Record<string, string> {
   const env: Record<string, string> = {};
-  
+
   // In Deno, environment variables are available through Deno.env
   if (typeof Deno !== "undefined" && Deno.env) {
     for (const [key, value] of Object.entries(Deno.env.toObject())) {
@@ -149,7 +149,7 @@ export function getEnvironmentVariables(): Record<string, string> {
       }
     }
   }
-  
+
   return env;
 }
 
@@ -172,18 +172,16 @@ export function validateVariables(
   if (!requiredVariables || requiredVariables.length === 0) {
     return { valid: true, missingVariables: [] };
   }
-  
+
   const missingVariables = requiredVariables.filter(
-    variable => !(variable in variables)
+    (variable) => !(variable in variables),
   );
-  
+
   const valid = missingVariables.length === 0;
-  
+
   return {
     valid,
     missingVariables,
-    errorMessage: valid 
-      ? undefined 
-      : `Missing required variables: ${missingVariables.join(", ")}`,
+    errorMessage: valid ? undefined : `Missing required variables: ${missingVariables.join(", ")}`,
   };
 }

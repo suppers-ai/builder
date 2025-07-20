@@ -1,12 +1,12 @@
 import { supabase } from "./supabase-client.ts";
 import type { Session, User } from "@supabase/supabase-js";
-import type { 
-  AuthState, 
-  SignUpData, 
-  SignInData, 
-  ResetPasswordData, 
-  UpdateUserData, 
-  OAuthProvider 
+import type {
+  AuthState,
+  OAuthProvider,
+  ResetPasswordData,
+  SignInData,
+  SignUpData,
+  UpdateUserData,
 } from "../types/auth.ts";
 
 export class AuthHelpers {
@@ -214,11 +214,15 @@ export class AuthHelpers {
   /**
    * Create JWT token for external app
    */
-  static async createJWTToken(user: User, clientId: string, scope: string = "openid email profile") {
+  static async createJWTToken(
+    user: User,
+    clientId: string,
+    scope: string = "openid email profile",
+  ) {
     // This would typically use a JWT library
     // For now, return the session access token
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session) {
       throw new Error("No active session");
     }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "preact/hooks";
-import { Loading, Card, Alert, Button } from "@suppers/ui-lib";
+import { useEffect, useState } from "preact/hooks";
+import { Alert, Button, Card, Loading } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 
 export function LogoutHandler() {
@@ -12,7 +12,7 @@ export function LogoutHandler() {
       try {
         await AuthHelpers.signOut();
         setSuccess("Successfully logged out! Redirecting...");
-        
+
         // Redirect to home after a short delay
         setTimeout(() => {
           window.location.href = "/";
@@ -51,11 +51,11 @@ export function LogoutHandler() {
           <div class="text-center p-8">
             <div class="text-red-500 text-6xl mb-4">❌</div>
             <h2 class="text-xl font-semibold mb-4">Logout Failed</h2>
-            
+
             <Alert type="error" class="mb-6">
               {error}
             </Alert>
-            
+
             <div class="space-y-3">
               <Button
                 as="a"
@@ -87,15 +87,15 @@ export function LogoutHandler() {
           <div class="text-center p-8">
             <div class="text-green-500 text-6xl mb-4">👋</div>
             <h2 class="text-xl font-semibold mb-4">Goodbye!</h2>
-            
+
             <Alert type="success" class="mb-6">
               {success}
             </Alert>
-            
+
             <div class="mb-4">
               <Loading size="sm" />
             </div>
-            
+
             <p class="text-base-content/70">
               You will be redirected to the home page...
             </p>

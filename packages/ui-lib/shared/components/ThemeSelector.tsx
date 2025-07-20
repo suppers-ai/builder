@@ -3,7 +3,7 @@ import type { CustomTheme } from "../lib/theme-types.ts";
 import { Loading } from "../../components/feedback/loading/Loading.tsx";
 import { Button } from "../../components/action/button/Button.tsx";
 import { Badge } from "../../components/display/badge/Badge.tsx";
-import { setGlobalTheme, loadSavedTheme, globalTheme } from "../../utils/signals.ts";
+import { globalTheme, loadSavedTheme, setGlobalTheme } from "../../utils/signals.ts";
 import { useEffect } from "preact/hooks";
 
 interface ThemeSelectorProps {
@@ -64,7 +64,6 @@ export function ThemeSelector({
   onThemeChange,
   onCreateCustomTheme,
 }: ThemeSelectorProps) {
-  
   // Load saved theme on mount
   useEffect(() => {
     loadSavedTheme();

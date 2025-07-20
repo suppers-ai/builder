@@ -41,7 +41,7 @@ export const allIslands: IslandComponent[] = [
     hooksDependencies: ["useState", "useEffect"],
     interactivityLevel: "advanced",
   },
-  
+
   // Interactive Component Controls
   {
     name: "Interactive Chat Controls",

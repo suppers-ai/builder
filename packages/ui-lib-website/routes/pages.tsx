@@ -5,7 +5,7 @@ import {
   getPagesByCategory,
   getPagesByType,
 } from "../data/pages.ts";
-import { Badge, Card, Button } from "@suppers/ui-lib";
+import { Badge, Button, Card } from "@suppers/ui-lib";
 
 export default function PagesPage() {
   const categories = getAllPageCategories();

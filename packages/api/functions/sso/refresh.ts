@@ -49,17 +49,20 @@ serve(async (req) => {
 
   try {
     const body: RefreshRequest = await req.json();
-    
+
     if (!body.refresh_token) {
-      return new Response(JSON.stringify({ 
-        error: "Missing refresh token" 
-      }), {
-        status: 400,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+      return new Response(
+        JSON.stringify({
+          error: "Missing refresh token",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
-      });
+      );
     }
 
     // Refresh the token with Supabase
@@ -68,15 +71,18 @@ serve(async (req) => {
     });
 
     if (error || !data.session) {
-      return new Response(JSON.stringify({ 
-        error: error?.message || "Invalid refresh token" 
-      }), {
-        status: 401,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
+      return new Response(
+        JSON.stringify({
+          error: error?.message || "Invalid refresh token",
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
         },
-      });
+      );
     }
 
     const { session } = data;
@@ -102,18 +108,20 @@ serve(async (req) => {
         "Access-Control-Allow-Origin": "*",
       },
     });
-
   } catch (error) {
     console.error("Token refresh error:", error);
-    
-    return new Response(JSON.stringify({ 
-      error: "Internal server error" 
-    }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+
+    return new Response(
+      JSON.stringify({
+        error: "Internal server error",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
       },
-    });
+    );
   }
 });

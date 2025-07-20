@@ -1,285 +1,285 @@
 {
-    "application": {
-        "name": "ecommerce-app",
-        "version": "1.0.0",
-        "description": "E-commerce application with user authentication and product catalog",
-        "id": "app_ecommerce_001"
-    },
-    "variables": {
-        "STRIPE_API_URL": "https://api.stripe.com/v1",
-        "PRODUCT_API_URL": "https://api.mystore.com/v1",
-        "ANALYTICS_URL": "https://analytics.mystore.com/api"
-    },
-    "compiler": {
-        "id": "fresh-deno",
-        "version": "1.0.0"
-    },
-    "data": {
-        "global": {
-            "head": {
-                "meta": {
-                    "title": "MyStore - E-commerce Platform",
-                    "description": "Your one-stop shop for everything you need"
-                }
+  "application": {
+    "name": "ecommerce-app",
+    "version": "1.0.0",
+    "description": "E-commerce application with user authentication and product catalog",
+    "id": "app_ecommerce_001"
+  },
+  "variables": {
+    "STRIPE_API_URL": "https://api.stripe.com/v1",
+    "PRODUCT_API_URL": "https://api.mystore.com/v1",
+    "ANALYTICS_URL": "https://analytics.mystore.com/api"
+  },
+  "compiler": {
+    "id": "fresh-deno",
+    "version": "1.0.0"
+  },
+  "data": {
+    "global": {
+      "head": {
+        "meta": {
+          "title": "MyStore - E-commerce Platform",
+          "description": "Your one-stop shop for everything you need"
+        }
+      },
+      "header": {
+        "component": {
+          "id": "Header",
+          "components": [
+            {
+              "id": "Logo",
+              "props": {
+                "src": "/logo.png",
+                "alt": "MyStore"
+              }
             },
-            "header": {
-                "component": {
-                    "id": "Header",
-                    "components": [
-                        {
-                            "id": "Logo",
-                            "props": {
-                                "src": "/logo.png",
-                                "alt": "MyStore"
-                            }
-                        },
-                        {
-                            "id": "Menu",
-                            "props": {
-                                "items": [
-                                    {"label": "Home", "href": "/"},
-                                    {"label": "Products", "href": "/products"},
-                                    {"label": "Cart", "href": "/cart"},
-                                    {"label": "Account", "href": "/account"}
-                                ]
-                            }
-                        }
-                    ]
-                }
-            },
-            "footer": {
-                "component": {
-                    "id": "Footer",
-                    "components": [
-                        {
-                            "id": "FooterLinks",
-                            "props": {
-                                "sections": [
-                                    {
-                                        "title": "Shop",
-                                        "links": [
-                                            {"label": "All Products", "href": "/products"},
-                                            {"label": "New Arrivals", "href": "/products?filter=new"},
-                                            {"label": "Sale", "href": "/products?filter=sale"}
-                                        ]
-                                    },
-                                    {
-                                        "title": "Support",
-                                        "links": [
-                                            {"label": "Contact Us", "href": "/contact"},
-                                            {"label": "FAQ", "href": "/faq"},
-                                            {"label": "Returns", "href": "/returns"}
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
+            {
+              "id": "Menu",
+              "props": {
+                "items": [
+                  { "label": "Home", "href": "/" },
+                  { "label": "Products", "href": "/products" },
+                  { "label": "Cart", "href": "/cart" },
+                  { "label": "Account", "href": "/account" }
+                ]
+              }
             }
+          ]
+        }
+      },
+      "footer": {
+        "component": {
+          "id": "Footer",
+          "components": [
+            {
+              "id": "FooterLinks",
+              "props": {
+                "sections": [
+                  {
+                    "title": "Shop",
+                    "links": [
+                      { "label": "All Products", "href": "/products" },
+                      { "label": "New Arrivals", "href": "/products?filter=new" },
+                      { "label": "Sale", "href": "/products?filter=sale" }
+                    ]
+                  },
+                  {
+                    "title": "Support",
+                    "links": [
+                      { "label": "Contact Us", "href": "/contact" },
+                      { "label": "FAQ", "href": "/faq" },
+                      { "label": "Returns", "href": "/returns" }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "routes": [
+      {
+        "path": "/",
+        "type": "page",
+        "override": {
+          "head": {
+            "meta": {
+              "title": "Home - MyStore",
+              "description": "Welcome to MyStore - Find amazing products at great prices"
+            }
+          }
         },
-        "routes": [
-            {
-                "path": "/",
-                "type": "page",
-                "override": {
-                    "head": {
-                        "meta": {
-                            "title": "Home - MyStore",
-                            "description": "Welcome to MyStore - Find amazing products at great prices"
-                        }
-                    }
-                },
-                "components": [
-                    {
-                        "id": "Hero",
-                        "props": {
-                            "title": "Welcome to MyStore",
-                            "subtitle": "Find amazing products at great prices",
-                            "backgroundImage": "/hero-bg.jpg",
-                            "ctaText": "Shop Now",
-                            "ctaHref": "/products"
-                        }
-                    },
-                    {
-                        "id": "FeaturedProducts",
-                        "props": {
-                            "title": "Featured Products",
-                            "limit": 8,
-                            "data": {
-                                "url": "${{PRODUCT_API_URL}}",
-                                "endpoint": "/products/featured",
-                                "method": "GET"
-                            }
-                        }
-                    },
-                    {
-                        "id": "Newsletter",
-                        "props": {
-                            "title": "Stay Updated",
-                            "description": "Get the latest deals and product updates",
-                            "placeholder": "Enter your email",
-                            "buttonText": "Subscribe"
-                        }
-                    }
-                ]
-            },
-            {
-                "path": "/products",
-                "type": "page",
-                "override": {
-                    "head": {
-                        "meta": {
-                            "title": "Products - MyStore",
-                            "description": "Browse our complete product catalog"
-                        }
-                    }
-                },
-                "components": [
-                    {
-                        "id": "ProductCatalog",
-                        "props": {
-                            "title": "All Products",
-                            "enableFilters": true,
-                            "enableSorting": true,
-                            "itemsPerPage": 24,
-                            "data": {
-                                "url": "${{PRODUCT_API_URL}}",
-                                "endpoint": "/products",
-                                "method": "GET"
-                            }
-                        }
-                    }
-                ]
-            },
-            {
-                "path": "/cart",
-                "type": "page",
-                "override": {
-                    "head": {
-                        "meta": {
-                            "title": "Shopping Cart - MyStore",
-                            "description": "Review your selected items"
-                        }
-                    }
-                },
-                "components": [
-                    {
-                        "id": "ShoppingCart",
-                        "props": {
-                            "title": "Your Cart",
-                            "enableCouponCode": true,
-                            "shippingCalculator": true,
-                            "data": {
-                                "endpoint": "/cart",
-                                "method": "GET"
-                            }
-                        }
-                    }
-                ]
-            },
-            {
-                "path": "/account",
-                "type": "page",
-                "permissions": ["user"],
-                "override": {
-                    "head": {
-                        "meta": {
-                            "title": "My Account - MyStore",
-                            "description": "Manage your account and orders"
-                        }
-                    }
-                },
-                "components": [
-                    {
-                        "id": "AccountDashboard",
-                        "components": [
-                            {
-                                "id": "OrderHistory",
-                                "props": {
-                                    "title": "Order History",
-                                    "data": {
-                                        "endpoint": "/orders",
-                                        "method": "GET"
-                                    }
-                                }
-                            },
-                            {
-                                "id": "ProfileSettings",
-                                "props": {
-                                    "title": "Profile Settings",
-                                    "data": {
-                                        "endpoint": "/profile",
-                                        "method": "GET"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "path": "/admin",
-                "type": "page",
-                "permissions": ["admin"],
-                "override": {
-                    "head": {
-                        "meta": {
-                            "title": "Admin Dashboard - MyStore",
-                            "description": "Store administration panel"
-                        }
-                    }
-                },
-                "components": [
-                    {
-                        "id": "AdminDashboard",
-                        "components": [
-                            {
-                                "id": "ProductManager",
-                                "props": {
-                                    "title": "Product Management",
-                                    "data": {
-                                        "url": "${{PRODUCT_API_URL}}",
-                                        "endpoint": "/admin/products",
-                                        "method": "GET"
-                                    }
-                                }
-                            },
-                            {
-                                "id": "OrderManager",
-                                "props": {
-                                    "title": "Order Management",
-                                    "data": {
-                                        "endpoint": "/admin/orders",
-                                        "method": "GET"
-                                    }
-                                }
-                            },
-                            {
-                                "id": "Analytics",
-                                "props": {
-                                    "title": "Store Analytics",
-                                    "data": {
-                                        "url": "${{ANALYTICS_URL}}",
-                                        "endpoint": "/dashboard",
-                                        "method": "GET"
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "path": "/privacy",
-                "type": "page",
-                "source": "./static-pages/privacy"
-            },
-            {
-                "path": "/terms",
-                "type": "page",
-                "source": "./static-pages/terms"
+        "components": [
+          {
+            "id": "Hero",
+            "props": {
+              "title": "Welcome to MyStore",
+              "subtitle": "Find amazing products at great prices",
+              "backgroundImage": "/hero-bg.jpg",
+              "ctaText": "Shop Now",
+              "ctaHref": "/products"
             }
+          },
+          {
+            "id": "FeaturedProducts",
+            "props": {
+              "title": "Featured Products",
+              "limit": 8,
+              "data": {
+                "url": "${{PRODUCT_API_URL}}",
+                "endpoint": "/products/featured",
+                "method": "GET"
+              }
+            }
+          },
+          {
+            "id": "Newsletter",
+            "props": {
+              "title": "Stay Updated",
+              "description": "Get the latest deals and product updates",
+              "placeholder": "Enter your email",
+              "buttonText": "Subscribe"
+            }
+          }
         ]
-    }
+      },
+      {
+        "path": "/products",
+        "type": "page",
+        "override": {
+          "head": {
+            "meta": {
+              "title": "Products - MyStore",
+              "description": "Browse our complete product catalog"
+            }
+          }
+        },
+        "components": [
+          {
+            "id": "ProductCatalog",
+            "props": {
+              "title": "All Products",
+              "enableFilters": true,
+              "enableSorting": true,
+              "itemsPerPage": 24,
+              "data": {
+                "url": "${{PRODUCT_API_URL}}",
+                "endpoint": "/products",
+                "method": "GET"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "path": "/cart",
+        "type": "page",
+        "override": {
+          "head": {
+            "meta": {
+              "title": "Shopping Cart - MyStore",
+              "description": "Review your selected items"
+            }
+          }
+        },
+        "components": [
+          {
+            "id": "ShoppingCart",
+            "props": {
+              "title": "Your Cart",
+              "enableCouponCode": true,
+              "shippingCalculator": true,
+              "data": {
+                "endpoint": "/cart",
+                "method": "GET"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "path": "/account",
+        "type": "page",
+        "permissions": ["user"],
+        "override": {
+          "head": {
+            "meta": {
+              "title": "My Account - MyStore",
+              "description": "Manage your account and orders"
+            }
+          }
+        },
+        "components": [
+          {
+            "id": "AccountDashboard",
+            "components": [
+              {
+                "id": "OrderHistory",
+                "props": {
+                  "title": "Order History",
+                  "data": {
+                    "endpoint": "/orders",
+                    "method": "GET"
+                  }
+                }
+              },
+              {
+                "id": "ProfileSettings",
+                "props": {
+                  "title": "Profile Settings",
+                  "data": {
+                    "endpoint": "/profile",
+                    "method": "GET"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "/admin",
+        "type": "page",
+        "permissions": ["admin"],
+        "override": {
+          "head": {
+            "meta": {
+              "title": "Admin Dashboard - MyStore",
+              "description": "Store administration panel"
+            }
+          }
+        },
+        "components": [
+          {
+            "id": "AdminDashboard",
+            "components": [
+              {
+                "id": "ProductManager",
+                "props": {
+                  "title": "Product Management",
+                  "data": {
+                    "url": "${{PRODUCT_API_URL}}",
+                    "endpoint": "/admin/products",
+                    "method": "GET"
+                  }
+                }
+              },
+              {
+                "id": "OrderManager",
+                "props": {
+                  "title": "Order Management",
+                  "data": {
+                    "endpoint": "/admin/orders",
+                    "method": "GET"
+                  }
+                }
+              },
+              {
+                "id": "Analytics",
+                "props": {
+                  "title": "Store Analytics",
+                  "data": {
+                    "url": "${{ANALYTICS_URL}}",
+                    "endpoint": "/dashboard",
+                    "method": "GET"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "/privacy",
+        "type": "page",
+        "source": "./static-pages/privacy"
+      },
+      {
+        "path": "/terms",
+        "type": "page",
+        "source": "./static-pages/terms"
+      }
+    ]
+  }
 }

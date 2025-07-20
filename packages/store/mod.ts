@@ -1,6 +1,6 @@
 /**
  * @fileoverview Store Package - SSO Authentication Service
- * 
+ *
  * This package serves as the centralized Single Sign-On (SSO) service for the
  * Suppers AI Builder platform. It handles authentication, user management,
  * and provides OAuth integration for other applications.

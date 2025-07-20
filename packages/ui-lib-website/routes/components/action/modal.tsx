@@ -1,4 +1,4 @@
-import { ComponentPageTemplate, Modal, Button, Input, Badge, Alert } from "@suppers/ui-lib";
+import { Alert, Badge, Button, ComponentPageTemplate, Input, Modal } from "@suppers/ui-lib";
 
 export default function ModalDemo() {
   const examples = [

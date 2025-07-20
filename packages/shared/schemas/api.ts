@@ -10,25 +10,35 @@ export const HttpMethodSchema = z.enum(["GET", "POST", "PUT", "DELETE", "PATCH",
 
 // HTTP Status Schema
 export const HttpStatusSchema = z.union([
-  z.literal(200), z.literal(201), z.literal(204),
-  z.literal(400), z.literal(401), z.literal(403), z.literal(404), z.literal(409), z.literal(422),
-  z.literal(500), z.literal(502), z.literal(503),
+  z.literal(200),
+  z.literal(201),
+  z.literal(204),
+  z.literal(400),
+  z.literal(401),
+  z.literal(403),
+  z.literal(404),
+  z.literal(409),
+  z.literal(422),
+  z.literal(500),
+  z.literal(502),
+  z.literal(503),
 ]);
 
 // Generic API Response Schema
-export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) => z.object({
-  data: dataSchema.optional(),
-  error: z.string().optional(),
-  message: z.string().optional(),
-  success: z.boolean(),
-  status: HttpStatusSchema,
-  meta: z.object({
-    total: z.number().optional(),
-    page: z.number().optional(),
-    limit: z.number().optional(),
-    hasMore: z.boolean().optional(),
-  }).optional(),
-});
+export const ApiResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+  z.object({
+    data: dataSchema.optional(),
+    error: z.string().optional(),
+    message: z.string().optional(),
+    success: z.boolean(),
+    status: HttpStatusSchema,
+    meta: z.object({
+      total: z.number().optional(),
+      page: z.number().optional(),
+      limit: z.number().optional(),
+      hasMore: z.boolean().optional(),
+    }).optional(),
+  });
 
 // API Error Schema
 export const ApiErrorSchema = z.object({
@@ -217,7 +227,7 @@ export const EmailSchema = z.string().email("Invalid email format");
 export const UrlSchema = z.string().url("Invalid URL format");
 export const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-  "Invalid slug format. Use lowercase letters, numbers, and hyphens only."
+  "Invalid slug format. Use lowercase letters, numbers, and hyphens only.",
 );
 
 // Export inferred types

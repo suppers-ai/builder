@@ -39,4 +39,3 @@ if (Deno.args.includes("build")) {
     port: 8002,
   });
 }
-

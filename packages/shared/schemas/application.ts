@@ -38,11 +38,13 @@ export const ComponentSchema: z.ZodType<{
   id: string;
   props?: Record<string, any>;
   components?: any[];
-}> = z.lazy(() => z.object({
-  id: z.string().min(1, "Component ID is required"),
-  props: z.record(z.any()).optional(),
-  components: z.array(ComponentSchema).optional(),
-}));
+}> = z.lazy(() =>
+  z.object({
+    id: z.string().min(1, "Component ID is required"),
+    props: z.record(z.any()).optional(),
+    components: z.array(ComponentSchema).optional(),
+  })
+);
 
 // Layout Component Schema
 export const LayoutComponentSchema = z.object({

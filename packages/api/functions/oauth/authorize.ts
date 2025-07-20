@@ -41,7 +41,10 @@ const fallbackClients = new Map([
   }],
   ["suppers-store", {
     name: "Suppers Store",
-    redirectUris: ["http://localhost:8001/auth/callback", "https://store.yourdomain.com/auth/callback"],
+    redirectUris: [
+      "http://localhost:8001/auth/callback",
+      "https://store.yourdomain.com/auth/callback",
+    ],
     allowedScopes: ["openid", "email", "profile", "applications:read", "applications:write"],
   }],
 ]);

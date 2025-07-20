@@ -5,11 +5,7 @@
 
 import { FileSystem } from "../utils/mod.ts";
 import { substituteVariables } from "../utils/variables.ts";
-import type { 
-  ComponentDefinition, 
-  ApplicationSpec,
-  Variables,
-} from "../types/mod.ts";
+import type { ApplicationSpec, ComponentDefinition, Variables } from "../types/mod.ts";
 
 /**
  * Component registry for tracking available components
@@ -45,11 +41,11 @@ export function generateComponentImports(
   registry: ComponentRegistry = DEFAULT_REGISTRY,
 ): string[] {
   const imports = new Map<string, Set<string>>();
-  
+
   function collectImports(comps: ComponentDefinition[]): void {
     for (const component of comps) {
       const registryEntry = registry[component.id];
-      
+
       if (registryEntry && registryEntry.type === "ui-lib") {
         const source = registryEntry.source;
         if (!imports.has(source)) {
@@ -57,23 +53,23 @@ export function generateComponentImports(
         }
         imports.get(source)!.add(component.id);
       }
-      
+
       // Recursively collect imports from nested components
       if (component.components) {
         collectImports(component.components);
       }
     }
   }
-  
+
   collectImports(components);
-  
+
   // Generate import statements
   const importStatements: string[] = [];
   for (const [source, componentNames] of imports) {
     const components = Array.from(componentNames).sort();
     importStatements.push(`import { ${components.join(", ")} } from "${source}";`);
   }
-  
+
   return importStatements;
 }
 
@@ -88,10 +84,10 @@ export function generateComponentElements(
 ): string[] {
   const elements: string[] = [];
   const indent = "  ".repeat(indentLevel);
-  
+
   for (const component of components) {
     const registryEntry = registry[component.id];
-    
+
     if (registryEntry?.type === "html") {
       // Handle custom HTML components
       elements.push(generateCustomHtmlComponent(component, variables, indent));
@@ -100,7 +96,7 @@ export function generateComponentElements(
       elements.push(generateRegularComponent(component, variables, registry, indent));
     }
   }
-  
+
   return elements;
 }
 
@@ -116,7 +112,7 @@ function generateCustomHtmlComponent(
     const htmlContent = substituteVariables(component.props.html, variables);
     return `${indent}<div dangerouslySetInnerHTML={{ __html: ${JSON.stringify(htmlContent)} }} />`;
   }
-  
+
   return `${indent}<!-- Unknown custom HTML component: ${component.id} -->`;
 }
 
@@ -130,10 +126,8 @@ function generateRegularComponent(
   indent: string,
 ): string {
   // Substitute variables in props
-  const processedProps = component.props 
-    ? substituteVariables(component.props, variables)
-    : {};
-  
+  const processedProps = component.props ? substituteVariables(component.props, variables) : {};
+
   // Generate props string
   const propsString = Object.entries(processedProps)
     .map(([key, value]) => {
@@ -144,7 +138,7 @@ function generateRegularComponent(
       }
     })
     .join(" ");
-  
+
   // Handle nested components
   if (component.components && component.components.length > 0) {
     const nestedElements = generateComponentElements(
@@ -153,7 +147,7 @@ function generateRegularComponent(
       registry,
       indent.length / 2 + 1,
     );
-    
+
     return `${indent}<${component.id}${propsString ? " " + propsString : ""}>
 ${nestedElements.join("\n")}
 ${indent}</${component.id}>`;
@@ -170,21 +164,21 @@ export function validateComponents(
   registry: ComponentRegistry = DEFAULT_REGISTRY,
 ): { valid: boolean; missingComponents: string[] } {
   const missing = new Set<string>();
-  
+
   function validate(comps: ComponentDefinition[]): void {
     for (const component of comps) {
       if (!registry[component.id]) {
         missing.add(component.id);
       }
-      
+
       if (component.components) {
         validate(component.components);
       }
     }
   }
-  
+
   validate(components);
-  
+
   return {
     valid: missing.size === 0,
     missingComponents: Array.from(missing),
@@ -198,24 +192,24 @@ export async function generateComponentRegistry(
   uiLibPath: string,
 ): Promise<ComponentRegistry> {
   const registry: ComponentRegistry = { ...DEFAULT_REGISTRY };
-  
+
   // Check if ui-lib components directory exists
   const componentsPath = FileSystem.join(uiLibPath, "src", "components");
-  
+
   if (await FileSystem.exists(componentsPath)) {
     // Discover components from ui-lib structure
     const categories = await FileSystem.listDir(componentsPath);
-    
+
     for (const category of categories) {
       const categoryPath = FileSystem.join(componentsPath, category);
-      
+
       if (await FileSystem.isDirectory(categoryPath)) {
         const componentFiles = await FileSystem.listDir(categoryPath);
-        
+
         for (const file of componentFiles) {
           if (file.endsWith(".tsx") || file.endsWith(".ts")) {
             const componentName = file.replace(/\.(tsx|ts)$/, "");
-            
+
             // Skip index files
             if (componentName !== "index") {
               registry[componentName] = {
@@ -228,7 +222,7 @@ export async function generateComponentRegistry(
       }
     }
   }
-  
+
   return registry;
 }
 
@@ -242,13 +236,13 @@ export function generatePageWithComponents(
 ): string {
   const imports = generateComponentImports(components, registry);
   const elements = generateComponentElements(components, variables, registry, 2);
-  
+
   // Add Fresh imports
   const freshImports = [
     'import { PageProps } from "$fresh/server.ts";',
     'import { Head } from "$fresh/runtime.ts";',
   ];
-  
+
   return `${[...freshImports, ...imports].join("\n")}
 
 export default function Page(props: PageProps) {
@@ -270,7 +264,7 @@ export function generateServiceImports(
   components: ComponentDefinition[],
 ): string[] {
   const serviceImports: string[] = [];
-  
+
   function collectServiceImports(comps: ComponentDefinition[]): void {
     for (const component of comps) {
       // Check if component has data configuration
@@ -278,14 +272,14 @@ export function generateServiceImports(
         serviceImports.push('import { dataService } from "../services/data.ts";');
         break; // Only need to import once
       }
-      
+
       if (component.components) {
         collectServiceImports(component.components);
       }
     }
   }
-  
+
   collectServiceImports(components);
-  
+
   return serviceImports;
 }

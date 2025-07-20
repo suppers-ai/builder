@@ -40,7 +40,7 @@ export function Drawer({
   const [internalOpen, setInternalOpen] = useState(open);
   const [currentSide, setCurrentSide] = useState<"left" | "right">(side);
   const [overlayEnabled, setOverlayEnabled] = useState(overlay);
-  
+
   // Use internal state if showControls is enabled, otherwise use props
   const isControlled = onToggle !== undefined;
   const currentOpen = isControlled ? open : (showControls ? internalOpen : open);
@@ -78,7 +78,7 @@ export function Drawer({
   // Controls component
   const renderControls = () => {
     if (!showControls) return null;
-    
+
     return (
       <div class="mb-4">
         <h3 class="text-lg font-bold mb-4">Interactive Drawer Controls</h3>
@@ -106,7 +106,8 @@ export function Drawer({
             <select
               class="select select-bordered"
               value={currentSide}
-              onChange={(e) => setCurrentSide((e.target as HTMLSelectElement).value as "left" | "right")}
+              onChange={(e) =>
+                setCurrentSide((e.target as HTMLSelectElement).value as "left" | "right")}
             >
               <option value="left">Left</option>
               <option value="right">Right</option>

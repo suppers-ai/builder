@@ -5,8 +5,8 @@ import {
   Github,
   Layout,
   Palette,
-  Star,
   Palmtree,
+  Star,
   Zap,
 } from "lucide-preact";
 import { Button } from "../../action/button/Button.tsx";
@@ -21,15 +21,15 @@ export function HeroSection() {
         playsInline
         preload="metadata"
         class="absolute inset-0 w-full h-full object-cover z-0"
-        onError={() => console.warn('Hero video failed to load')}
+        onError={() => console.warn("Hero video failed to load")}
       >
         <source src="/hero.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
-      
+
       {/* Subtle overlay for text readability */}
       <div class="absolute inset-0 bg-black/20 z-10"></div>
-      
+
       {/* Background decoration */}
       <div class="absolute inset-0 bg-grid-pattern opacity-5 z-20"></div>
       <div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-48 translate-x-48 z-20">

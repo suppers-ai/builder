@@ -16,9 +16,9 @@ export interface SidebarLayoutProps extends BaseComponentProps {
   width?: string;
 }
 
-export function SidebarLayout({ 
+export function SidebarLayout({
   class: className = "",
-  isOpen, 
+  isOpen,
   onClose,
   showControls = false,
   allowKeyboardNav = true,
@@ -40,7 +40,7 @@ export function SidebarLayout({
   // Handle keyboard navigation
   useEffect(() => {
     if (!allowKeyboardNav) return;
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && activeOpen) {
         if (showControls) {
@@ -90,11 +90,11 @@ export function SidebarLayout({
   // Controls component
   const renderControls = () => {
     if (!showControls) return null;
-    
+
     return (
       <div class="p-4 border-b border-base-300 bg-base-200">
         <h3 class="text-lg font-bold mb-4">Sidebar Controls</h3>
-        
+
         <div class="form-control mb-4">
           <label class="label cursor-pointer">
             <span class="label-text">Open/Close</span>

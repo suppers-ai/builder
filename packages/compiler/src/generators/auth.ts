@@ -14,27 +14,29 @@ export async function generateAuthSystem(
   spec: ApplicationSpec,
 ): Promise<void> {
   const routes = spec.data.routes;
-  const hasProtectedRoutes = routes.some(route => route.permissions && route.permissions.length > 0);
-  
+  const hasProtectedRoutes = routes.some((route) =>
+    route.permissions && route.permissions.length > 0
+  );
+
   if (!hasProtectedRoutes) {
     console.log("ℹ️  No protected routes found, skipping auth generation");
     return;
   }
 
   console.log("🔒 Generating authentication system...");
-  
+
   const libDir = FileSystem.join(destinationRoot, "lib");
   await FileSystem.ensureDir(libDir);
-  
+
   // Generate auth utilities
   await generateAuthUtils(libDir);
-  
+
   // Generate middleware
   await generateAuthMiddleware(libDir);
-  
+
   // Generate route protection
   await generateRouteProtection(destinationRoot, routes);
-  
+
   console.log("  🔐 Generated authentication system");
 }
 
@@ -292,7 +294,7 @@ async function generateProtectedRoute(
   const routePath = route.path === "/" ? "" : route.path;
   const routeDir = FileSystem.join(destinationRoot, "routes", routePath);
   const handlerPath = FileSystem.join(routeDir, "_middleware.ts");
-  
+
   const middlewareContent = `/**
  * Route Protection Middleware
  * Generated for route: ${route.path}
@@ -300,7 +302,9 @@ async function generateProtectedRoute(
  */
 
 import { HandlerContext } from "$fresh/server.ts";
-import { createAuthContext, checkPermissions, redirectToLogin, forbiddenResponse } from "${getRelativePathToLib(routePath)}";
+import { createAuthContext, checkPermissions, redirectToLogin, forbiddenResponse } from "${
+    getRelativePathToLib(routePath)
+  }";
 
 export async function handler(
   req: Request,
@@ -335,12 +339,12 @@ export async function handler(
  * Generate relative path to lib directory
  */
 function getRelativePathToLib(routePath: string): string {
-  const depth = routePath.split("/").filter(segment => segment.length > 0).length;
-  
+  const depth = routePath.split("/").filter((segment) => segment.length > 0).length;
+
   if (depth === 0) {
     return "../lib/auth.ts";
   }
-  
+
   return "../".repeat(depth + 1) + "lib/auth.ts";
 }
 
@@ -350,12 +354,12 @@ function getRelativePathToLib(routePath: string): string {
 export async function generateLoginPage(destinationRoot: string): Promise<void> {
   const loginDir = FileSystem.join(destinationRoot, "routes", "login");
   const loginPath = FileSystem.join(loginDir, "index.tsx");
-  
+
   if (await FileSystem.exists(loginPath)) {
     console.log("ℹ️  Login page already exists, skipping generation");
     return;
   }
-  
+
   const loginContent = `/**
  * Login Page
  * Generated authentication page
@@ -428,7 +432,7 @@ export default function LoginPage(props: PageProps) {
  * Get all protected routes from the specification
  */
 export function getProtectedRoutes(routes: Route[]): Route[] {
-  return routes.filter(route => route.permissions && route.permissions.length > 0);
+  return routes.filter((route) => route.permissions && route.permissions.length > 0);
 }
 
 /**
@@ -436,7 +440,7 @@ export function getProtectedRoutes(routes: Route[]): Route[] {
  */
 export function getAllRequiredPermissions(routes: Route[]): string[] {
   const permissions = new Set<string>();
-  
+
   for (const route of routes) {
     if (route.permissions) {
       for (const permission of route.permissions) {
@@ -444,6 +448,6 @@ export function getAllRequiredPermissions(routes: Route[]): string[] {
       }
     }
   }
-  
+
   return Array.from(permissions);
 }

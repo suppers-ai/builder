@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { UserPage } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
@@ -19,7 +19,7 @@ export default function ProfilePageIsland() {
       try {
         const user = await AuthHelpers.getCurrentUser();
         userSignal.value = user;
-        
+
         if (!user) {
           // Redirect to login if not authenticated
           window.location.href = "/login?redirect_to=/profile";
@@ -41,7 +41,7 @@ export default function ProfilePageIsland() {
         if (!session?.user) {
           window.location.href = "/login?redirect_to=/profile";
         }
-      }
+      },
     );
 
     return () => subscription.unsubscribe();
@@ -61,7 +61,7 @@ export default function ProfilePageIsland() {
     try {
       await AuthHelpers.updateUser(data);
       setSuccess("Profile updated successfully!");
-      
+
       // Refresh user data
       const updatedUser = await AuthHelpers.getCurrentUser();
       userSignal.value = updatedUser;
@@ -81,9 +81,9 @@ export default function ProfilePageIsland() {
     try {
       const avatarUrl = await AuthHelpers.uploadAvatar(file, userSignal.value.id);
       await AuthHelpers.updateUser({ avatarUrl });
-      
+
       setSuccess("Avatar updated successfully!");
-      
+
       // Refresh user data
       const updatedUser = await AuthHelpers.getCurrentUser();
       userSignal.value = updatedUser;

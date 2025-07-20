@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import type { User } from "@supabase/supabase-js";
@@ -12,9 +12,9 @@ interface LoginPageIslandProps {
   redirectTo?: string;
 }
 
-export default function LoginPageIsland({ 
+export default function LoginPageIsland({
   initialMode = "login",
-  redirectTo = "/"
+  redirectTo = "/",
 }: LoginPageIslandProps) {
   const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,7 @@ export default function LoginPageIsland({
       try {
         const user = await AuthHelpers.getCurrentUser();
         userSignal.value = user;
-        
+
         if (user) {
           // Redirect if already logged in
           window.location.href = redirectTo;
@@ -56,7 +56,7 @@ export default function LoginPageIsland({
         if (session?.user) {
           window.location.href = redirectTo;
         }
-      }
+      },
     );
 
     return () => subscription.unsubscribe();
@@ -88,7 +88,7 @@ export default function LoginPageIsland({
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setError(null);
   };
 
@@ -119,7 +119,7 @@ export default function LoginPageIsland({
           lastName: formData.lastName,
           displayName: `${formData.firstName} ${formData.lastName}`.trim(),
         });
-        
+
         setSuccess("Account created! Please check your email for verification.");
       }
     } catch (err) {
@@ -135,7 +135,7 @@ export default function LoginPageIsland({
       const currentUrl = new URL(window.location.href);
       const callbackUrl = new URL("/auth/callback", window.location.origin);
       callbackUrl.searchParams.set("redirect_to", redirectTo);
-      
+
       await AuthHelpers.signInWithOAuth(provider, callbackUrl.toString());
     } catch (err) {
       setError(err instanceof Error ? err.message : "OAuth login failed");
@@ -179,12 +179,11 @@ export default function LoginPageIsland({
               Suppers Store
             </h1>
             <p className="text-gray-600">
-              {showForgotPassword 
-                ? "Reset your password" 
-                : isLogin 
-                  ? "Sign in to your account" 
-                  : "Create a new account"
-              }
+              {showForgotPassword
+                ? "Reset your password"
+                : isLogin
+                ? "Sign in to your account"
+                : "Create a new account"}
             </p>
           </div>
 
@@ -200,133 +199,153 @@ export default function LoginPageIsland({
             </div>
           )}
 
-          {showForgotPassword ? (
-            /* Forgot Password Form */
-            <form onSubmit={handleForgotPassword} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onInput={(e) => handleInputChange("email", (e.target as HTMLInputElement).value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your email"
-                />
-              </div>
-              
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {isLoading ? "Sending..." : "Send Reset Email"}
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleHideForgotPassword}
-                className="w-full text-blue-600 hover:text-blue-500"
-              >
-                Back to Sign In
-              </button>
-            </form>
-          ) : (
-            /* Login/Register Form */
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {!isLogin && (
-                <>
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name
-                    </label>
-                    <input
-                      id="firstName"
-                      type="text"
-                      value={formData.firstName}
-                      onInput={(e) => handleInputChange("firstName", (e.target as HTMLInputElement).value)}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="First Name"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name
-                    </label>
-                    <input
-                      id="lastName"
-                      type="text"
-                      value={formData.lastName}
-                      onInput={(e) => handleInputChange("lastName", (e.target as HTMLInputElement).value)}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Last Name"
-                    />
-                  </div>
-                </>
-              )}
-              
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onInput={(e) => handleInputChange("email", (e.target as HTMLInputElement).value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Email address"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onInput={(e) => handleInputChange("password", (e.target as HTMLInputElement).value)}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Password"
-                />
-              </div>
-              
-              {!isLogin && (
+          {showForgotPassword
+            ? (
+              /* Forgot Password Form */
+              <form onSubmit={handleForgotPassword} className="space-y-6">
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm Password
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email address
                   </label>
                   <input
-                    id="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onInput={(e) => handleInputChange("confirmPassword", (e.target as HTMLInputElement).value)}
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onInput={(e) =>
+                      handleInputChange("email", (e.target as HTMLInputElement).value)}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Confirm Password"
+                    placeholder="Enter your email"
                   />
                 </div>
-              )}
-              
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
-              </button>
-            </form>
-          )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  {isLoading ? "Sending..." : "Send Reset Email"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleHideForgotPassword}
+                  className="w-full text-blue-600 hover:text-blue-500"
+                >
+                  Back to Sign In
+                </button>
+              </form>
+            )
+            : (
+              /* Login/Register Form */
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {!isLogin && (
+                  <>
+                    <div>
+                      <label
+                        htmlFor="firstName"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        First Name
+                      </label>
+                      <input
+                        id="firstName"
+                        type="text"
+                        value={formData.firstName}
+                        onInput={(e) =>
+                          handleInputChange("firstName", (e.target as HTMLInputElement).value)}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="First Name"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="lastName"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Last Name
+                      </label>
+                      <input
+                        id="lastName"
+                        type="text"
+                        value={formData.lastName}
+                        onInput={(e) =>
+                          handleInputChange("lastName", (e.target as HTMLInputElement).value)}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Last Name"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email address
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onInput={(e) =>
+                      handleInputChange("email", (e.target as HTMLInputElement).value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Email address"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onInput={(e) =>
+                      handleInputChange("password", (e.target as HTMLInputElement).value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Password"
+                  />
+                </div>
+
+                {!isLogin && (
+                  <div>
+                    <label
+                      htmlFor="confirmPassword"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Confirm Password
+                    </label>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onInput={(e) =>
+                        handleInputChange("confirmPassword", (e.target as HTMLInputElement).value)}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Confirm Password"
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
+                </button>
+              </form>
+            )}
 
           {!showForgotPassword && (
             <>
@@ -340,7 +359,7 @@ export default function LoginPageIsland({
                     <span className="px-2 bg-white text-gray-500">Or continue with</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 grid grid-cols-2 gap-3">
                   <button
                     type="button"
@@ -349,7 +368,7 @@ export default function LoginPageIsland({
                   >
                     Google
                   </button>
-                  
+
                   <button
                     type="button"
                     onClick={() => handleOAuthLogin("github")}
@@ -369,7 +388,7 @@ export default function LoginPageIsland({
                 >
                   {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
                 </button>
-                
+
                 {isLogin && (
                   <div>
                     <button

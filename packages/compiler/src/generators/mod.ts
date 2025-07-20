@@ -8,28 +8,24 @@ export type { SiteGeneratorOptions } from "../types/mod.ts";
 
 // Export application generators
 export { generateGlobalLayout, generateHeadOverrides } from "./layout.ts";
-export { 
-  generateComponentImports, 
-  generateComponentElements, 
+export {
+  generateComponentElements,
+  generateComponentImports,
+  generateComponentRegistry,
   generatePageWithComponents,
   generateServiceImports,
-  generateComponentRegistry,
   validateComponents,
 } from "./components.ts";
-export { 
-  generateDataServices, 
-  generateDataConfig, 
+export {
   extractDataConfigurations,
+  generateDataConfig,
+  generateDataServices,
   generateServerDataFetching,
 } from "./data.ts";
-export { 
-  generateAuthSystem, 
-  generateLoginPage, 
-  getProtectedRoutes,
+export {
+  generateAuthSystem,
+  generateLoginPage,
   getAllRequiredPermissions,
+  getProtectedRoutes,
 } from "./auth.ts";
-export { 
-  generateRoutes, 
-  generateApiRoutes, 
-  generateRouteManifest,
-} from "./routes.ts";
+export { generateApiRoutes, generateRouteManifest, generateRoutes } from "./routes.ts";

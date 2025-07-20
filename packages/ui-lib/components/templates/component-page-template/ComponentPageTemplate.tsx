@@ -79,15 +79,72 @@ export function ComponentPageTemplate({
 
                 {/* Code */}
                 <div class="relative">
-                  <div class="flex items-center justify-between bg-base-300 px-4 py-2 rounded-t-lg">
-                    <span class="text-sm font-medium">Code</span>
-                    <Button size="xs" variant="ghost">
+                  <div class="flex items-center justify-between bg-gray-800 px-4 py-3 rounded-t-lg border-b border-gray-700">
+                    <div class="flex items-center gap-2">
+                      <div class="flex gap-1.5">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                      </div>
+                      <span class="text-sm font-medium text-gray-300 ml-2">Code</span>
+                    </div>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      class="text-gray-300 hover:text-white hover:bg-gray-700"
+                      onClick={() => {
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(example.code).then(() => {
+                            // Optional: Show a temporary feedback
+                            const button = document.activeElement as HTMLElement;
+                            if (button) {
+                              const originalText = button.textContent;
+                              button.textContent = "Copied!";
+                              setTimeout(() => {
+                                button.textContent = originalText;
+                              }, 1000);
+                            }
+                          }).catch((err) => {
+                            console.error("Failed to copy: ", err);
+                          });
+                        }
+                      }}
+                    >
                       <Copy size={12} />
                       Copy
                     </Button>
                   </div>
-                  <div class="mockup-code rounded-t-none">
-                    <pre><code>{example.code}</code></pre>
+                  <div class="bg-gray-900 rounded-t-none rounded-b-lg p-4 overflow-x-auto">
+                    <pre class="text-sm leading-relaxed">
+                      <code
+                        class="text-gray-100"
+                        dangerouslySetInnerHTML={{
+                          __html: example.code
+                            .replace(/&/g, "&amp;")
+                            .replace(/</g, "&lt;")
+                            .replace(/>/g, "&gt;")
+                            .replace(/"/g, "&quot;")
+                            .replace(/'/g, "&#39;")
+                            .replace(
+                              /(&lt;\/?)(\w+)/g,
+                              '<span class="text-blue-400">$1$2</span>',
+                            )
+                            .replace(
+                              /(color|size|variant|disabled|loading|active|onClick)=/g,
+                              '<span class="text-green-400">$1</span>=',
+                            )
+                            .replace(
+                              /(&quot;[^&]*&quot;)/g,
+                              '<span class="text-yellow-300">$1</span>',
+                            )
+                            .replace(
+                              /(&gt;[^&<]*&lt;)/g,
+                              '<span class="text-gray-100">$1</span>',
+                            ),
+                        }}
+                      >
+                      </code>
+                    </pre>
                   </div>
                 </div>
               </div>

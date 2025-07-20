@@ -44,17 +44,19 @@ export function PageLayout({
   ...props
 }: PageLayoutProps) {
   const [currentFooterConfig, setCurrentFooterConfig] = useState<"default" | "minimal" | "company">(
-    footerConfig === "custom" ? "default" : footerConfig
+    footerConfig === "custom" ? "default" : footerConfig,
   );
   const [customFooterEnabled, setCustomFooterEnabled] = useState(footerConfig === "custom");
 
   // Get current path for active link highlighting
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
-  
+
   // Resolve footer configuration
   const getFooterConfig = () => {
     // If custom props are provided, use them
-    if (customFooterEnabled && (footerSections || footerCopyright || footerSocialLinks || footerLogo)) {
+    if (
+      customFooterEnabled && (footerSections || footerCopyright || footerSocialLinks || footerLogo)
+    ) {
       return {
         sections: footerSections || defaultFooterSections,
         copyright: footerCopyright || defaultFooterCopyright,
@@ -83,11 +85,11 @@ export function PageLayout({
   // Controls component
   const renderControls = () => {
     if (!showControls) return null;
-    
+
     return (
       <div class="bg-base-200 p-4 border-b border-base-300">
         <h3 class="text-lg font-bold mb-4">Page Layout Controls</h3>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           {allowFooterCustomization && (
             <>
@@ -98,7 +100,8 @@ export function PageLayout({
                 <select
                   class="select select-bordered"
                   value={currentFooterConfig}
-                  onChange={(e) => setCurrentFooterConfig((e.target as HTMLSelectElement).value as any)}
+                  onChange={(e) =>
+                    setCurrentFooterConfig((e.target as HTMLSelectElement).value as any)}
                 >
                   <option value="default">Default</option>
                   <option value="minimal">Minimal</option>
@@ -148,7 +151,9 @@ export function PageLayout({
         <div class="stats stats-horizontal shadow mt-4">
           <div class="stat">
             <div class="stat-title">Footer Config</div>
-            <div class="stat-value text-sm">{customFooterEnabled ? "Custom" : currentFooterConfig}</div>
+            <div class="stat-value text-sm">
+              {customFooterEnabled ? "Custom" : currentFooterConfig}
+            </div>
           </div>
           <div class="stat">
             <div class="stat-title">Sidebar</div>
@@ -168,10 +173,10 @@ export function PageLayout({
   return (
     <div class={`min-h-screen bg-base-100 ${className}`} id={id} {...props}>
       {renderControls()}
-      
+
       {/* HeaderLayout - Provides navigation, search, and sidebar */}
-      <HeaderLayout 
-        currentPath={currentPath} 
+      <HeaderLayout
+        currentPath={currentPath}
         showControls={showHeaderControls}
         {...headerProps}
       />

@@ -4,10 +4,10 @@
 
 import { assertEquals, assertThrows } from "@std/assert";
 import {
+  extractVariableNames,
   substituteVariables,
   substituteVariablesInString,
   validateVariableReferences,
-  extractVariableNames,
   VariableNotFoundError,
 } from "../src/utils/variables.ts";
 
@@ -41,7 +41,7 @@ Deno.test("Variable substitution - object with nested values", () => {
     },
     title: "Users from ${{API_URL}}",
   };
-  
+
   const result = substituteVariables(obj, variables);
   assertEquals(result, {
     data: {
@@ -59,7 +59,7 @@ Deno.test("Variable substitution - array values", () => {
     "${{BASE_URL}}/page2",
     { url: "${{BASE_URL}}/api" },
   ];
-  
+
   const result = substituteVariables(array, variables);
   assertEquals(result, [
     "https://example.com/page1",
@@ -74,7 +74,7 @@ Deno.test("Variable validation - all valid", () => {
     url: "${{API_URL}}",
     version: "${{VERSION}}",
   };
-  
+
   const result = validateVariableReferences(obj, variables);
   assertEquals(result.valid, true);
   assertEquals(result.missingVariables, []);
@@ -89,7 +89,7 @@ Deno.test("Variable validation - missing variables", () => {
       also_missing: "${{ANOTHER_MISSING}}",
     },
   };
-  
+
   const result = validateVariableReferences(obj, variables);
   assertEquals(result.valid, false);
   assertEquals(result.missingVariables.sort(), ["ANOTHER_MISSING", "MISSING_VAR"]);
@@ -104,7 +104,7 @@ Deno.test("Extract variable names", () => {
       another: "${{NESTED_VAR}}",
     },
   };
-  
+
   const result = extractVariableNames(obj);
   assertEquals(result.sort(), ["API_URL", "NESTED_VAR", "VERSION"]);
 });
@@ -114,7 +114,7 @@ Deno.test("Variable extraction - no variables", () => {
     url: "https://api.example.com",
     version: "v1",
   };
-  
+
   const result = extractVariableNames(obj);
   assertEquals(result, []);
 });
@@ -125,7 +125,7 @@ Deno.test("Variable extraction - duplicate variables", () => {
     url2: "${{API_URL}}",
     version: "${{VERSION}}",
   };
-  
+
   const result = extractVariableNames(obj);
   assertEquals(result.sort(), ["API_URL", "VERSION"]);
 });
@@ -138,7 +138,7 @@ Deno.test("Variable substitution - non-string values", () => {
     enabled: true,
     nothing: null,
   };
-  
+
   const result = substituteVariables(obj, variables);
   assertEquals(result, {
     url: "https://api.example.com",
@@ -151,8 +151,12 @@ Deno.test("Variable substitution - non-string values", () => {
 Deno.test("Variable substitution - environment fallback", () => {
   const variables = { API_URL: "https://api.example.com" };
   const envVars = { FALLBACK_VAR: "fallback_value" };
-  
-  const result = substituteVariablesInString("${{API_URL}} and ${{FALLBACK_VAR}}", variables, envVars);
+
+  const result = substituteVariablesInString(
+    "${{API_URL}} and ${{FALLBACK_VAR}}",
+    variables,
+    envVars,
+  );
   assertEquals(result, "https://api.example.com and fallback_value");
 });
 
@@ -161,7 +165,7 @@ Deno.test("Variable substitution - complex nested structure", () => {
     API_URL: "https://api.example.com",
     VERSION: "v1",
   };
-  
+
   const spec = {
     application: {
       name: "test-app",
@@ -185,7 +189,7 @@ Deno.test("Variable substitution - complex nested structure", () => {
       ],
     },
   };
-  
+
   const result = substituteVariables(spec, variables);
   assertEquals(result.data.routes[0].components[0].props.data, {
     url: "https://api.example.com",
@@ -198,7 +202,7 @@ Deno.test("Variable substitution - ApplicationSpec example", () => {
     SUPPERS_API_URL: "https://localhost:5000/api",
     EXTERNAL_CAMPSITES_URL: "https://external-campsite-api.com/api",
   };
-  
+
   const routeComponent = {
     id: "BlogPostList",
     props: {
@@ -210,7 +214,7 @@ Deno.test("Variable substitution - ApplicationSpec example", () => {
       },
     },
   };
-  
+
   const result = substituteVariables(routeComponent, variables);
   assertEquals(result.props.data.url, "https://external-campsite-api.com/api");
 });

@@ -17,16 +17,16 @@ export const setGlobalTheme = (theme: string) => {
   if (typeof window !== "undefined") {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
-    
+
     // Force reflow to ensure theme applies immediately
-    document.body.style.display = 'none';
+    document.body.style.display = "none";
     document.body.offsetHeight; // trigger reflow
-    document.body.style.display = '';
-    
+    document.body.style.display = "";
+
     console.log(`Theme changed to: ${theme}`, {
       documentTheme: document.documentElement.getAttribute("data-theme"),
       bodyClass: document.body.className,
-      computedBg: getComputedStyle(document.documentElement).getPropertyValue('--color-base-100')
+      computedBg: getComputedStyle(document.documentElement).getPropertyValue("--color-base-100"),
     });
   }
 };

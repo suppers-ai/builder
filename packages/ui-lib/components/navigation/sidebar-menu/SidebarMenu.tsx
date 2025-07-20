@@ -9,10 +9,10 @@ import {
   Layout,
   MessageCircle,
   Navigation,
+  Palmtree,
   Puzzle,
   Search,
   Smartphone,
-  Palmtree,
   X,
   Zap,
 } from "lucide-preact";

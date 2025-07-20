@@ -4,12 +4,39 @@
  */
 
 // Theme Types
-export type DaisyUITheme = 
-  | "light" | "dark" | "cupcake" | "bumblebee" | "emerald" | "corporate"
-  | "synthwave" | "retro" | "cyberpunk" | "valentine" | "halloween" | "garden"
-  | "forest" | "aqua" | "lofi" | "pastel" | "fantasy" | "wireframe" | "black"
-  | "luxury" | "dracula" | "cmyk" | "autumn" | "business" | "acid" | "lemonade"
-  | "night" | "coffee" | "winter" | "dim" | "nord" | "sunset";
+export type DaisyUITheme =
+  | "light"
+  | "dark"
+  | "cupcake"
+  | "bumblebee"
+  | "emerald"
+  | "corporate"
+  | "synthwave"
+  | "retro"
+  | "cyberpunk"
+  | "valentine"
+  | "halloween"
+  | "garden"
+  | "forest"
+  | "aqua"
+  | "lofi"
+  | "pastel"
+  | "fantasy"
+  | "wireframe"
+  | "black"
+  | "luxury"
+  | "dracula"
+  | "cmyk"
+  | "autumn"
+  | "business"
+  | "acid"
+  | "lemonade"
+  | "night"
+  | "coffee"
+  | "winter"
+  | "dim"
+  | "nord"
+  | "sunset";
 
 // Custom Theme Variables
 export interface CustomThemeVariables {
@@ -40,15 +67,27 @@ export interface CustomTheme {
 export type ComponentSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 // Component Color Variants
-export type ComponentColor = 
-  | "primary" | "secondary" | "accent" | "neutral"
-  | "info" | "success" | "warning" | "error"
-  | "ghost" | "link";
+export type ComponentColor =
+  | "primary"
+  | "secondary"
+  | "accent"
+  | "neutral"
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "ghost"
+  | "link";
 
 // Component Variants
-export type ComponentVariant = 
-  | "default" | "outline" | "ghost" | "link"
-  | "solid" | "soft" | "surface";
+export type ComponentVariant =
+  | "default"
+  | "outline"
+  | "ghost"
+  | "link"
+  | "solid"
+  | "soft"
+  | "surface";
 
 // Button Types
 export interface ButtonProps {
@@ -183,15 +222,61 @@ export interface LayoutProps {
 export type Breakpoint = "sm" | "md" | "lg" | "xl" | "2xl";
 
 // CSS Class Utilities
-export type TailwindSpacing = 
-  | "0" | "px" | "0.5" | "1" | "1.5" | "2" | "2.5" | "3" | "3.5" | "4" | "5" | "6" | "7" | "8" | "9" | "10"
-  | "11" | "12" | "14" | "16" | "20" | "24" | "28" | "32" | "36" | "40" | "44" | "48" | "52" | "56" | "60" | "64"
-  | "72" | "80" | "96";
+export type TailwindSpacing =
+  | "0"
+  | "px"
+  | "0.5"
+  | "1"
+  | "1.5"
+  | "2"
+  | "2.5"
+  | "3"
+  | "3.5"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "10"
+  | "11"
+  | "12"
+  | "14"
+  | "16"
+  | "20"
+  | "24"
+  | "28"
+  | "32"
+  | "36"
+  | "40"
+  | "44"
+  | "48"
+  | "52"
+  | "56"
+  | "60"
+  | "64"
+  | "72"
+  | "80"
+  | "96";
 
 // Animation Types
-export type AnimationType = 
-  | "bounce" | "flash" | "pulse" | "rubber-band" | "shake" | "swing" | "tada" | "wobble"
-  | "jello" | "heart-beat" | "fade-in" | "fade-out" | "slide-in" | "slide-out" | "zoom-in" | "zoom-out";
+export type AnimationType =
+  | "bounce"
+  | "flash"
+  | "pulse"
+  | "rubber-band"
+  | "shake"
+  | "swing"
+  | "tada"
+  | "wobble"
+  | "jello"
+  | "heart-beat"
+  | "fade-in"
+  | "fade-out"
+  | "slide-in"
+  | "slide-out"
+  | "zoom-in"
+  | "zoom-out";
 
 // Icon Types
 export interface IconProps {

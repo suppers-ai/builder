@@ -13,7 +13,7 @@ export default function SearchButtonDemo(props: PageProps) {
       code: `<SearchButton onClick={() => console.log('Search clicked')} />`,
       preview: (
         <div class="flex gap-4">
-          <SearchButton onClick={() => console.log('Search clicked')} />
+          <SearchButton onClick={() => console.log("Search clicked")} />
         </div>
       ),
     },

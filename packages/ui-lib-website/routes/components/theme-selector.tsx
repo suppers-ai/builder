@@ -43,15 +43,15 @@ export default function ThemeSelectorDemo() {
 
   const handleThemeChange = (theme: string, custom?: any) => {
     console.log("Theme changed:", { theme, custom });
-    
+
     // Use the global theme system
     setGlobalTheme(theme);
-    
+
     // Show demo alert
     const alertTimeout = setTimeout(() => {
       alert(`Demo: Theme changed to ${theme}${custom ? ` (custom: ${custom.label})` : ""}`);
     }, 100); // Small delay to allow theme to apply first
-    
+
     // Clear timeout if component unmounts
     return () => clearTimeout(alertTimeout);
   };

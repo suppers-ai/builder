@@ -14,7 +14,17 @@ export type DaisyUIColor =
   | "success"
   | "warning"
   | "error";
-export type DaisyUIVariant = "primary" | "secondary" | "accent" | "info" | "success" | "warning" | "error" | "outline" | "ghost" | "link";
+export type DaisyUIVariant =
+  | "primary"
+  | "secondary"
+  | "accent"
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "outline"
+  | "ghost"
+  | "link";
 
 // Common component props
 export interface BaseComponentProps {

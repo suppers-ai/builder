@@ -7,14 +7,14 @@ export default {
     "../ui-lib/**/*.{ts,tsx}",
   ],
   plugins: [
-    daisyui
+    daisyui,
   ],
   daisyui: {
     themes: [
       "light",
       "dark",
       "cupcake",
-      "bumblebee", 
+      "bumblebee",
       "emerald",
       "corporate",
       "synthwave",
@@ -27,7 +27,7 @@ export default {
       "aqua",
       "lofi",
       "pastel",
-      "fantasy", 
+      "fantasy",
       "wireframe",
       "black",
       "luxury",

@@ -3,13 +3,13 @@
  * Main generator for new ApplicationSpec format
  */
 
-import { FileSystem, copyDirectory, generateDenoConfig } from "../utils/mod.ts";
+import { copyDirectory, FileSystem, generateDenoConfig } from "../utils/mod.ts";
 import { substituteVariables, validateVariableReferences } from "../utils/variables.ts";
 import { generateGlobalLayout } from "./layout.ts";
 import { generateComponentRegistry } from "./components.ts";
 import { generateDataServices } from "./data.ts";
 import { generateAuthSystem, generateLoginPage } from "./auth.ts";
-import { generateRoutes, generateApiRoutes } from "./routes.ts";
+import { generateApiRoutes, generateRoutes } from "./routes.ts";
 import { ApplicationSpecSchema } from "../types/mod.ts";
 import type { ApplicationSpec, SiteGeneratorOptions } from "../types/mod.ts";
 
@@ -58,7 +58,7 @@ export async function generateApplication(options: SiteGeneratorOptions): Promis
   // Copy the template files
   const templateName = "fresh-basic"; // Default template for now
   const templateRoot = FileSystem.join("packages", "templates", templateName);
-  
+
   if (!(await FileSystem.exists(templateRoot))) {
     throw new Error(`Template not found: ${templateRoot}`);
   }

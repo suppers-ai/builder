@@ -5,19 +5,14 @@
 
 import { FileSystem } from "../utils/mod.ts";
 import { generateHeadOverrides } from "./layout.ts";
-import { 
-  generateComponentImports, 
-  generateComponentElements, 
+import {
+  generateComponentElements,
+  generateComponentImports,
   generatePageWithComponents,
   generateServiceImports,
 } from "./components.ts";
 import { generateServerDataFetching } from "./data.ts";
-import type { 
-  ApplicationSpec, 
-  Route, 
-  ComponentDefinition,
-  Variables,
-} from "../types/mod.ts";
+import type { ApplicationSpec, ComponentDefinition, Route, Variables } from "../types/mod.ts";
 
 /**
  * Generate all routes from the application specification
@@ -27,14 +22,14 @@ export async function generateRoutes(
   spec: ApplicationSpec,
 ): Promise<void> {
   console.log("📄 Generating routes...");
-  
+
   const routes = spec.data.routes;
   const variables = spec.variables || {};
-  
+
   for (const route of routes) {
     await generateRoute(destinationRoot, route, spec, variables);
   }
-  
+
   console.log("  ✅ All routes generated");
 }
 
@@ -49,9 +44,9 @@ async function generateRoute(
 ): Promise<void> {
   const routePath = route.path === "/" ? "" : route.path;
   const routeDir = FileSystem.join(destinationRoot, "routes", routePath);
-  
+
   await FileSystem.ensureDir(routeDir);
-  
+
   if (route.source) {
     // Handle custom source routes (static files)
     await generateCustomSourceRoute(destinationRoot, route);
@@ -61,7 +56,7 @@ async function generateRoute(
   } else {
     console.warn(`⚠️  Route ${route.path} has no components or source, skipping`);
   }
-  
+
   console.log(`  📄 Generated route: ${route.path}`);
 }
 
@@ -75,17 +70,17 @@ async function generateCustomSourceRoute(
   const sourcePath = route.source!;
   const routePath = route.path === "/" ? "" : route.path;
   const routeDir = FileSystem.join(destinationRoot, "routes", routePath);
-  
+
   // Check if source path exists
   if (!(await FileSystem.exists(sourcePath))) {
     console.warn(`⚠️  Source path ${sourcePath} does not exist for route ${route.path}`);
     return;
   }
-  
+
   if (await FileSystem.isDirectory(sourcePath)) {
     // Copy entire directory content
     await FileSystem.copy(sourcePath, routeDir);
-    
+
     // If there's an index.html, create a Fresh handler for it
     const indexHtmlPath = FileSystem.join(routeDir, "index.html");
     if (await FileSystem.exists(indexHtmlPath)) {
@@ -96,7 +91,7 @@ async function generateCustomSourceRoute(
     const filename = FileSystem.basename(sourcePath);
     const destPath = FileSystem.join(routeDir, filename);
     await FileSystem.copy(sourcePath, destPath);
-    
+
     // If it's an HTML file, create a Fresh handler for it
     if (filename.endsWith(".html")) {
       await generateStaticHtmlHandler(routeDir, destPath);
@@ -112,7 +107,7 @@ async function generateStaticHtmlHandler(
   htmlPath: string,
 ): Promise<void> {
   const htmlContent = await FileSystem.readText(htmlPath);
-  
+
   const handlerContent = `/**
  * Static HTML Route Handler
  * Serves custom HTML content
@@ -135,7 +130,7 @@ export async function handler(
 
   const handlerPath = FileSystem.join(routeDir, "index.ts");
   await FileSystem.writeText(handlerPath, handlerContent);
-  
+
   // Remove the original HTML file since we're serving it through the handler
   await FileSystem.remove(htmlPath);
 }
@@ -151,10 +146,10 @@ async function generateComponentRoute(
 ): Promise<void> {
   const components = route.components || [];
   const globalConfig = spec.data.global;
-  
+
   // Generate route content
   const routeContent = generateRouteContent(route, components, spec, variables);
-  
+
   const routePath = FileSystem.join(routeDir, "index.tsx");
   await FileSystem.writeText(routePath, routeContent);
 }
@@ -170,37 +165,37 @@ function generateRouteContent(
 ): string {
   const imports: string[] = [];
   const elements: string[] = [];
-  
+
   // Add Fresh imports
   imports.push('import { PageProps } from "$fresh/server.ts";');
   imports.push('import { Head } from "$fresh/runtime.ts";');
-  
+
   // Add Handlers import if needed for server-side data fetching
   const hasDataComponents = hasDataConfiguration(components);
   if (hasDataComponents) {
     imports.push('import { Handlers } from "$fresh/server.ts";');
   }
-  
+
   // Generate component imports
   const componentImports = generateComponentImports(components);
   imports.push(...componentImports);
-  
+
   // Generate service imports if needed
   const serviceImports = generateServiceImports(components);
   imports.push(...serviceImports);
-  
+
   // Generate component elements
   const componentElements = generateComponentElements(components, variables, undefined, 2);
   elements.push(...componentElements);
-  
+
   // Generate head overrides
   const headOverrides = generateHeadOverrides(route.override, spec.data.global?.head);
-  
+
   // Generate server-side data fetching if needed
-  const serverDataFetching = hasDataComponents 
+  const serverDataFetching = hasDataComponents
     ? generateServerDataFetching(components, variables)
     : "";
-  
+
   // Generate route structure
   return `${imports.join("\n")}
 ${serverDataFetching}
@@ -227,12 +222,12 @@ function hasDataConfiguration(components: ComponentDefinition[]): boolean {
     if (component.props?.data) {
       return true;
     }
-    
+
     if (component.components && hasDataConfiguration(component.components)) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -245,20 +240,20 @@ export async function generateApiRoutes(
 ): Promise<void> {
   const routes = spec.data.routes;
   const apiRoutes = extractApiRoutes(routes);
-  
+
   if (apiRoutes.length === 0) {
     return;
   }
-  
+
   console.log("🔌 Generating API routes...");
-  
+
   const apiDir = FileSystem.join(destinationRoot, "routes", "api");
   await FileSystem.ensureDir(apiDir);
-  
+
   for (const apiRoute of apiRoutes) {
     await generateApiRoute(apiDir, apiRoute, spec);
   }
-  
+
   console.log("  ✅ API routes generated");
 }
 
@@ -275,7 +270,7 @@ function extractApiRoutes(routes: Route[]): Array<{
     method: string;
     component: ComponentDefinition;
   }> = [];
-  
+
   function extractFromComponents(components: ComponentDefinition[]): void {
     for (const component of components) {
       if (component.props?.data?.endpoint) {
@@ -285,19 +280,19 @@ function extractApiRoutes(routes: Route[]): Array<{
           component,
         });
       }
-      
+
       if (component.components) {
         extractFromComponents(component.components);
       }
     }
   }
-  
+
   for (const route of routes) {
     if (route.components) {
       extractFromComponents(route.components);
     }
   }
-  
+
   return apiRoutes;
 }
 
@@ -314,11 +309,11 @@ async function generateApiRoute(
   spec: ApplicationSpec,
 ): Promise<void> {
   const { endpoint, method, component } = apiRoute;
-  
+
   // Clean endpoint path for file system
   const cleanEndpoint = endpoint.replace(/^\//, "").replace(/\//g, "_");
   const routePath = FileSystem.join(apiDir, `${cleanEndpoint}.ts`);
-  
+
   const apiContent = `/**
  * API Route: ${endpoint}
  * Method: ${method}
@@ -370,18 +365,18 @@ export async function generateRouteManifest(
 ): Promise<void> {
   const routes = spec.data.routes;
   const routeEntries: string[] = [];
-  
+
   for (const route of routes) {
     const routePath = route.path === "/" ? "" : route.path;
     const routeKey = route.path === "/" ? "/" : route.path;
     const filePath = routePath ? `./routes${routePath}/index.tsx` : "./routes/index.tsx";
-    
+
     routeEntries.push(`  "${routeKey}": {
     component: () => import("${filePath}"),
     pattern: "${routeKey}",
   }`);
   }
-  
+
   const manifestContent = `/**
  * Route Manifest
  * Generated route configuration for Fresh

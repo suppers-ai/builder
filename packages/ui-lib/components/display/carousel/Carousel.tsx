@@ -61,15 +61,15 @@ export function Carousel({
 
   // Use controlled mode if handlers are provided
   const isControlled = !!(onSlideChange || onNextSlide || onPrevSlide || onGoToSlide);
-  
+
   // Internal state for interactive controls
   const [internalSlide, setInternalSlide] = useState(currentSlide);
   const [autoSlideEnabled, setAutoSlideEnabled] = useState(autoSlide);
   const intervalRef = useRef<number | null>(null);
-  
+
   // Use internal state if not controlled
   const activeSlide = isControlled ? currentSlide : internalSlide;
-  
+
   // Auto-slide functionality
   useEffect(() => {
     if (autoSlideEnabled && slideCount > 1) {
@@ -78,7 +78,7 @@ export function Carousel({
           const nextSlide = (activeSlide + 1) % slideCount;
           onSlideChange?.(nextSlide);
         } else {
-          setInternalSlide(prev => (prev + 1) % slideCount);
+          setInternalSlide((prev) => (prev + 1) % slideCount);
         }
       }, interval);
     } else {
@@ -87,7 +87,7 @@ export function Carousel({
         intervalRef.current = null;
       }
     }
-    
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -132,7 +132,7 @@ export function Carousel({
     if (!showControls) return null;
 
     const controlsClass = controlsPosition === "top" ? "-mb-4 -mt-2" : "mt-4";
-    
+
     return (
       <div class={`flex justify-center items-center gap-4 ${controlsClass}`}>
         {showSlideCounter && (
@@ -142,10 +142,10 @@ export function Carousel({
         )}
         {allowAutoSlideToggle && (
           <button
-            class={`btn btn-sm ${autoSlideEnabled ? 'btn-secondary' : 'btn-outline'}`}
+            class={`btn btn-sm ${autoSlideEnabled ? "btn-secondary" : "btn-outline"}`}
             onClick={() => setAutoSlideEnabled(!autoSlideEnabled)}
           >
-            {autoSlideEnabled ? 'Stop Auto-slide' : 'Start Auto-slide'}
+            {autoSlideEnabled ? "Stop Auto-slide" : "Start Auto-slide"}
           </button>
         )}
       </div>
@@ -198,7 +198,7 @@ export function Carousel({
             ))}
           </div>
         )}
-        
+
         {controlsPosition === "bottom" && renderControls()}
       </div>
     );
