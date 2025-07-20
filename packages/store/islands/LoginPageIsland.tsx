@@ -2,6 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import type { User } from "@supabase/supabase-js";
+import { Input, EmailInput, PasswordInput, Button, Card, Alert, Loading, Toast } from "@suppers/ui-lib";
 
 // Signals for reactive state
 const userSignal = signal<User | null>(null);
@@ -163,22 +164,22 @@ export default function LoginPageIsland({
   if (authLoadingSignal.value) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <Loading variant="spinner" size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-300 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <Card bordered class="bg-base-100 shadow-xl">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="text-4xl mb-4">🚀</div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl font-bold text-base-content mb-2">
               Suppers Store
             </h1>
-            <p className="text-gray-600">
+            <p className="text-base-content/70">
               {showForgotPassword
                 ? "Reset your password"
                 : isLogin
@@ -189,13 +190,17 @@ export default function LoginPageIsland({
 
           {/* Error/Success Messages */}
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-              {error}
+            <div className="mb-4">
+              <Alert color="error">
+                {error}
+              </Alert>
             </div>
           )}
           {success && (
-            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-              {success}
+            <div className="mb-4">
+              <Alert color="success">
+                {success}
+              </Alert>
             </div>
           )}
 
@@ -204,36 +209,38 @@ export default function LoginPageIsland({
               /* Forgot Password Form */
               <form onSubmit={handleForgotPassword} className="space-y-6">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-base-content mb-1">
                     Email address
                   </label>
-                  <input
+                  <EmailInput
                     id="email"
-                    type="email"
                     value={formData.email}
                     onInput={(e) =>
                       handleInputChange("email", (e.target as HTMLInputElement).value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your email"
+                    class="w-full"
                   />
                 </div>
 
-                <button
+                <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  loading={isLoading}
+                  color="primary"
+                  wide
                 >
                   {isLoading ? "Sending..." : "Send Reset Email"}
-                </button>
+                </Button>
 
-                <button
+                <Button
                   type="button"
                   onClick={handleHideForgotPassword}
-                  className="w-full text-blue-600 hover:text-blue-500"
+                  variant="ghost"
+                  wide
                 >
                   Back to Sign In
-                </button>
+                </Button>
               </form>
             )
             : (
@@ -244,75 +251,73 @@ export default function LoginPageIsland({
                     <div>
                       <label
                         htmlFor="firstName"
-                        className="block text-sm font-medium text-gray-700 mb-1"
+                        className="block text-sm font-medium text-base-content mb-1"
                       >
                         First Name
                       </label>
-                      <input
+                      <Input
                         id="firstName"
                         type="text"
                         value={formData.firstName}
                         onInput={(e) =>
                           handleInputChange("firstName", (e.target as HTMLInputElement).value)}
                         required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="First Name"
+                        class="w-full"
                       />
                     </div>
 
                     <div>
                       <label
                         htmlFor="lastName"
-                        className="block text-sm font-medium text-gray-700 mb-1"
+                        className="block text-sm font-medium text-base-content mb-1"
                       >
                         Last Name
                       </label>
-                      <input
+                      <Input
                         id="lastName"
                         type="text"
                         value={formData.lastName}
                         onInput={(e) =>
                           handleInputChange("lastName", (e.target as HTMLInputElement).value)}
                         required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Last Name"
+                        class="w-full"
                       />
                     </div>
                   </>
                 )}
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="email" className="block text-sm font-medium text-base-content mb-1">
                     Email address
                   </label>
-                  <input
+                  <EmailInput
                     id="email"
-                    type="email"
                     value={formData.email}
                     onInput={(e) =>
                       handleInputChange("email", (e.target as HTMLInputElement).value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Email address"
+                    class="w-full"
                   />
                 </div>
 
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-base-content mb-1"
                   >
                     Password
                   </label>
-                  <input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     value={formData.password}
                     onInput={(e) =>
                       handleInputChange("password", (e.target as HTMLInputElement).value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Password"
+                    class="w-full"
                   />
                 </div>
 
@@ -320,30 +325,31 @@ export default function LoginPageIsland({
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-gray-700 mb-1"
+                      className="block text-sm font-medium text-base-content mb-1"
                     >
                       Confirm Password
                     </label>
-                    <input
+                    <PasswordInput
                       id="confirmPassword"
-                      type="password"
                       value={formData.confirmPassword}
                       onInput={(e) =>
                         handleInputChange("confirmPassword", (e.target as HTMLInputElement).value)}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Confirm Password"
+                      class="w-full"
                     />
                   </div>
                 )}
 
-                <button
+                <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  loading={isLoading}
+                  color="primary"
+                  wide
                 >
                   {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
-                </button>
+                </Button>
               </form>
             )}
 
@@ -353,51 +359,55 @@ export default function LoginPageIsland({
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+                    <div className="w-full border-t border-base-300" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                    <span className="px-2 bg-base-100 text-base-content/50">Or continue with</span>
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => handleOAuthLogin("google")}
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                    variant="outline"
+                    size="sm"
                   >
                     Google
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
                     onClick={() => handleOAuthLogin("github")}
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                    variant="outline"
+                    size="sm"
                   >
                     GitHub
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {/* Toggle Mode & Forgot Password */}
               <div className="mt-6 text-center space-y-2">
-                <button
+                <Button
                   type="button"
                   onClick={handleToggleMode}
-                  className="text-blue-600 hover:text-blue-500 text-sm"
+                  variant="link"
+                  size="sm"
                 >
                   {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
-                </button>
+                </Button>
 
                 {isLogin && (
                   <div>
-                    <button
+                    <Button
                       type="button"
                       onClick={handleShowForgotPassword}
-                      className="text-blue-600 hover:text-blue-500 text-sm"
+                      variant="link"
+                      size="sm"
                     >
                       Forgot your password?
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -406,14 +416,14 @@ export default function LoginPageIsland({
               <div className="mt-6 text-center">
                 <a
                   href="/"
-                  className="text-gray-600 hover:text-gray-500 text-sm"
+                  className="text-base-content/60 hover:text-base-content/50 text-sm"
                 >
                   ← Back to Home
                 </a>
               </div>
             </>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

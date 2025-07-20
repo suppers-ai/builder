@@ -66,16 +66,8 @@ import {
   windowMetadata,
 } from "@suppers/ui-lib";
 
-// Component metadata interface
-export interface ComponentMetadata {
-  name: string;
-  description: string;
-  category: string;
-  path: string;
-  tags: string[];
-  examples: string[];
-  relatedComponents: string[];
-}
+// Re-export ComponentMetadata interface from ui-lib
+export type { ComponentMetadata } from "@suppers/ui-lib";
 
 // All metadata is now imported from individual .metadata.ts files
 

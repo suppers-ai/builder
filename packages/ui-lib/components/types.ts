@@ -71,3 +71,15 @@ export interface StepProps {
   status: "pending" | "current" | "completed" | "error";
   icon?: ComponentChildren;
 }
+
+// Component metadata interface
+export interface ComponentMetadata {
+  name: string;
+  description: string;
+  category: string;
+  path: string;
+  tags: string[];
+  examples: string[];
+  relatedComponents: string[];
+  preview: ComponentChildren; // JSX preview component
+}

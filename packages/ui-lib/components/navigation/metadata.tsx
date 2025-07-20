@@ -1,0 +1,17 @@
+import { breadcrumbsMetadata } from "./breadcrumbs/Breadcrumbs.metadata.tsx";
+import { linkMetadata } from "./link/Link.metadata.tsx";
+import { menuMetadata } from "./menu/Menu.metadata.tsx";
+import { navbarMetadata } from "./navbar/Navbar.metadata.tsx";
+import { paginationMetadata } from "./pagination/Pagination.metadata.tsx";
+import { stepsMetadata } from "./steps/Steps.metadata.tsx";
+import { tabsMetadata } from "./tabs/Tabs.metadata.tsx";
+
+export const navigationComponentsMetadata = [
+  breadcrumbsMetadata,
+  linkMetadata,
+  menuMetadata,
+  navbarMetadata,
+  paginationMetadata,
+  stepsMetadata,
+  tabsMetadata,
+];

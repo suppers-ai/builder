@@ -1,3 +1,6 @@
+// Export types
+export type * from "./types.ts";
+
 // Export all display components and their types
 export { Toast } from "./feedback/toast/Toast.tsx";
 export type { ToastProps } from "./feedback/toast/Toast.tsx";
@@ -193,57 +196,73 @@ export {
 } from "../utils/sidebar-config.tsx";
 
 // Export metadata files for ui-lib-website
-export { buttonMetadata } from "./action/button/Button.metadata.ts";
-export { dropdownMetadata } from "./action/dropdown/Dropdown.metadata.ts";
-export { modalMetadata } from "./action/modal/Modal.metadata.ts";
-export { swapMetadata } from "./action/swap/Swap.metadata.ts";
-export { themeControllerMetadata } from "./action/theme-controller/ThemeController.metadata.ts";
-export { accordionMetadata } from "./display/accordion/Accordion.metadata.ts";
-export { avatarMetadata } from "./display/avatar/Avatar.metadata.ts";
-export { badgeMetadata } from "./display/badge/Badge.metadata.ts";
-export { cardMetadata } from "./display/card/Card.metadata.ts";
-export { carouselMetadata } from "./display/carousel/Carousel.metadata.ts";
-export { chatBubbleMetadata } from "./display/chat-bubble/ChatBubble.metadata.ts";
-export { collapseMetadata } from "./display/collapse/Collapse.metadata.ts";
-export { countdownMetadata } from "./display/countdown/Countdown.metadata.ts";
-export { diffMetadata } from "./display/diff/Diff.metadata.ts";
-export { kbdMetadata } from "./display/kbd/Kbd.metadata.ts";
-export { statMetadata } from "./display/stat/Stat.metadata.ts";
-export { tableMetadata } from "./display/table/Table.metadata.ts";
-export { timelineMetadata } from "./display/timeline/Timeline.metadata.ts";
-export { breadcrumbsMetadata } from "./navigation/breadcrumbs/Breadcrumbs.metadata.ts";
-export { linkMetadata } from "./navigation/link/Link.metadata.ts";
-export { menuMetadata } from "./navigation/menu/Menu.metadata.ts";
-export { navbarMetadata } from "./navigation/navbar/Navbar.metadata.ts";
-export { paginationMetadata } from "./navigation/pagination/Pagination.metadata.ts";
-export { stepsMetadata } from "./navigation/steps/Steps.metadata.ts";
-export { tabsMetadata } from "./navigation/tabs/Tabs.metadata.ts";
-export { checkboxMetadata } from "./input/checkbox/Checkbox.metadata.ts";
-export { fileInputMetadata } from "./input/file-input/FileInput.metadata.ts";
-export { radioMetadata } from "./input/radio/Radio.metadata.ts";
-export { rangeMetadata } from "./input/range/Range.metadata.ts";
-export { ratingMetadata } from "./input/rating/Rating.metadata.ts";
-export { selectMetadata } from "./input/select/Select.metadata.ts";
+export { buttonMetadata } from "./action/button/Button.metadata.tsx";
+export { dropdownMetadata } from "./action/dropdown/Dropdown.metadata.tsx";
+export { modalMetadata } from "./action/modal/Modal.metadata.tsx";
+export { swapMetadata } from "./action/swap/Swap.metadata.tsx";
+export { themeControllerMetadata } from "./action/theme-controller/ThemeController.metadata.tsx";
+export { accordionMetadata } from "./display/accordion/Accordion.metadata.tsx";
+export { avatarMetadata } from "./display/avatar/Avatar.metadata.tsx";
+export { badgeMetadata } from "./display/badge/Badge.metadata.tsx";
+export { cardMetadata } from "./display/card/Card.metadata.tsx";
+export { carouselMetadata } from "./display/carousel/Carousel.metadata.tsx";
+export { chatBubbleMetadata } from "./display/chat-bubble/ChatBubble.metadata.tsx";
+export { collapseMetadata } from "./display/collapse/Collapse.metadata.tsx";
+export { countdownMetadata } from "./display/countdown/Countdown.metadata.tsx";
+export { diffMetadata } from "./display/diff/Diff.metadata.tsx";
+export { kbdMetadata } from "./display/kbd/Kbd.metadata.tsx";
+export { statMetadata } from "./display/stat/Stat.metadata.tsx";
+export { tableMetadata } from "./display/table/Table.metadata.tsx";
+export { timelineMetadata } from "./display/timeline/Timeline.metadata.tsx";
+export { breadcrumbsMetadata } from "./navigation/breadcrumbs/Breadcrumbs.metadata.tsx";
+export { linkMetadata } from "./navigation/link/Link.metadata.tsx";
+export { menuMetadata } from "./navigation/menu/Menu.metadata.tsx";
+export { navbarMetadata } from "./navigation/navbar/Navbar.metadata.tsx";
+export { paginationMetadata } from "./navigation/pagination/Pagination.metadata.tsx";
+export { stepsMetadata } from "./navigation/steps/Steps.metadata.tsx";
+export { tabsMetadata } from "./navigation/tabs/Tabs.metadata.tsx";
+export { checkboxMetadata } from "./input/checkbox/Checkbox.metadata.tsx";
+export { fileInputMetadata } from "./input/file-input/FileInput.metadata.tsx";
+export { radioMetadata } from "./input/radio/Radio.metadata.tsx";
+export { rangeMetadata } from "./input/range/Range.metadata.tsx";
+export { ratingMetadata } from "./input/rating/Rating.metadata.tsx";
+export { selectMetadata } from "./input/select/Select.metadata.tsx";
 export { textInputMetadata } from "./input/text-input/TextInput.metadata.ts";
-export { textareaMetadata } from "./input/textarea/Textarea.metadata.ts";
-export { toggleMetadata } from "./input/toggle/Toggle.metadata.ts";
-export { artboardMetadata } from "./layout/artboard/Artboard.metadata.ts";
-export { dividerMetadata } from "./layout/divider/Divider.metadata.ts";
-export { drawerMetadata } from "./layout/drawer/Drawer.metadata.ts";
-export { footerMetadata } from "./layout/footer/Footer.metadata.ts";
-export { heroMetadata } from "./layout/hero/Hero.metadata.ts";
-export { indicatorMetadata } from "./layout/indicator/Indicator.metadata.ts";
-export { joinMetadata } from "./layout/join/Join.metadata.ts";
-export { maskMetadata } from "./layout/mask/Mask.metadata.ts";
-export { stackMetadata } from "./layout/stack/Stack.metadata.ts";
-export { alertMetadata } from "./feedback/alert/Alert.metadata.ts";
-export { loadingMetadata } from "./feedback/loading/Loading.metadata.ts";
-export { progressMetadata } from "./feedback/progress/Progress.metadata.ts";
-export { radialProgressMetadata } from "./feedback/radial-progress/RadialProgress.metadata.ts";
-export { skeletonMetadata } from "./feedback/skeleton/Skeleton.metadata.ts";
-export { toastMetadata } from "./feedback/toast/Toast.metadata.ts";
-export { tooltipMetadata } from "./feedback/tooltip/Tooltip.metadata.ts";
-export { browserMetadata } from "./mockup/browser/Browser.metadata.ts";
-export { codeMetadata } from "./mockup/code/Code.metadata.ts";
-export { phoneMetadata } from "./mockup/phone/Phone.metadata.ts";
-export { windowMetadata } from "./mockup/window/Window.metadata.ts";
+export { textareaMetadata } from "./input/textarea/Textarea.metadata.tsx";
+export { toggleMetadata } from "./input/toggle/Toggle.metadata.tsx";
+export { artboardMetadata } from "./layout/artboard/Artboard.metadata.tsx";
+export { dividerMetadata } from "./layout/divider/Divider.metadata.tsx";
+export { drawerMetadata } from "./layout/drawer/Drawer.metadata.tsx";
+export { footerMetadata } from "./layout/footer/Footer.metadata.tsx";
+export { heroMetadata } from "./layout/hero/Hero.metadata.tsx";
+export { indicatorMetadata } from "./layout/indicator/Indicator.metadata.tsx";
+export { joinMetadata } from "./layout/join/Join.metadata.tsx";
+export { maskMetadata } from "./layout/mask/Mask.metadata.tsx";
+export { stackMetadata } from "./layout/stack/Stack.metadata.tsx";
+export { alertMetadata } from "./feedback/alert/Alert.metadata.tsx";
+export { loadingMetadata } from "./feedback/loading/Loading.metadata.tsx";
+export { progressMetadata } from "./feedback/progress/Progress.metadata.tsx";
+export { radialProgressMetadata } from "./feedback/radial-progress/RadialProgress.metadata.tsx";
+export { skeletonMetadata } from "./feedback/skeleton/Skeleton.metadata.tsx";
+export { toastMetadata } from "./feedback/toast/Toast.metadata.tsx";
+export { tooltipMetadata } from "./feedback/tooltip/Tooltip.metadata.tsx";
+export { browserMetadata } from "./mockup/browser/Browser.metadata.tsx";
+export { codeMetadata } from "./mockup/code/Code.metadata.tsx";
+export { phoneMetadata } from "./mockup/phone/Phone.metadata.tsx";
+export { windowMetadata } from "./mockup/window/Window.metadata.tsx";
+
+// Export organized metadata collections
+export {
+  allComponentsMetadata,
+  flatComponentsMetadata,
+  actionComponentsMetadata,
+  displayComponentsMetadata,
+  feedbackComponentsMetadata,
+  inputComponentsMetadata,
+  layoutComponentsMetadata,
+  mockupComponentsMetadata,
+  navigationComponentsMetadata,
+  pageComponentsMetadata,
+  sectionComponentsMetadata,
+  templateComponentsMetadata,
+} from "./metadata.tsx";

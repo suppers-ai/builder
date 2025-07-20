@@ -3,74 +3,76 @@
 
 // Import all metadata from local components
 // Actions
-import { buttonMetadata } from "../components/action/button/Button.metadata.ts";
-import { dropdownMetadata } from "../components/action/dropdown/Dropdown.metadata.ts";
-import { modalMetadata } from "../components/action/modal/Modal.metadata.ts";
-import { swapMetadata } from "../components/action/swap/Swap.metadata.ts";
-import { themeControllerMetadata } from "../components/action/theme-controller/ThemeController.metadata.ts";
+import { buttonMetadata } from "../components/action/button/Button.metadata.tsx";
+import { dropdownMetadata } from "../components/action/dropdown/Dropdown.metadata.tsx";
+import { modalMetadata } from "../components/action/modal/Modal.metadata.tsx";
+import { swapMetadata } from "../components/action/swap/Swap.metadata.tsx";
+import { themeControllerMetadata } from "../components/action/theme-controller/ThemeController.metadata.tsx";
 
 // Data Display
-import { accordionMetadata } from "../components/display/accordion/Accordion.metadata.ts";
-import { avatarMetadata } from "../components/display/avatar/Avatar.metadata.ts";
-import { badgeMetadata } from "../components/display/badge/Badge.metadata.ts";
-import { cardMetadata } from "../components/display/card/Card.metadata.ts";
-import { carouselMetadata } from "../components/display/carousel/Carousel.metadata.ts";
-import { chatBubbleMetadata } from "../components/display/chat-bubble/ChatBubble.metadata.ts";
-import { collapseMetadata } from "../components/display/collapse/Collapse.metadata.ts";
-import { countdownMetadata } from "../components/display/countdown/Countdown.metadata.ts";
-import { diffMetadata } from "../components/display/diff/Diff.metadata.ts";
-import { kbdMetadata } from "../components/display/kbd/Kbd.metadata.ts";
-import { statMetadata } from "../components/display/stat/Stat.metadata.ts";
-import { tableMetadata } from "../components/display/table/Table.metadata.ts";
-import { timelineMetadata } from "../components/display/timeline/Timeline.metadata.ts";
+import { accordionMetadata } from "../components/display/accordion/Accordion.metadata.tsx";
+import { avatarMetadata } from "../components/display/avatar/Avatar.metadata.tsx";
+import { badgeMetadata } from "../components/display/badge/Badge.metadata.tsx";
+import { cardMetadata } from "../components/display/card/Card.metadata.tsx";
+import { carouselMetadata } from "../components/display/carousel/Carousel.metadata.tsx";
+import { chatBubbleMetadata } from "../components/display/chat-bubble/ChatBubble.metadata.tsx";
+import { collapseMetadata } from "../components/display/collapse/Collapse.metadata.tsx";
+import { countdownMetadata } from "../components/display/countdown/Countdown.metadata.tsx";
+import { diffMetadata } from "../components/display/diff/Diff.metadata.tsx";
+import { kbdMetadata } from "../components/display/kbd/Kbd.metadata.tsx";
+import { statMetadata } from "../components/display/stat/Stat.metadata.tsx";
+import { tableMetadata } from "../components/display/table/Table.metadata.tsx";
+import { timelineMetadata } from "../components/display/timeline/Timeline.metadata.tsx";
 
 // Navigation
-import { breadcrumbsMetadata } from "../components/navigation/breadcrumbs/Breadcrumbs.metadata.ts";
-import { linkMetadata } from "../components/navigation/link/Link.metadata.ts";
-import { menuMetadata } from "../components/navigation/menu/Menu.metadata.ts";
-import { navbarMetadata } from "../components/navigation/navbar/Navbar.metadata.ts";
-import { paginationMetadata } from "../components/navigation/pagination/Pagination.metadata.ts";
-import { stepsMetadata } from "../components/navigation/steps/Steps.metadata.ts";
-import { tabsMetadata } from "../components/navigation/tabs/Tabs.metadata.ts";
+import { breadcrumbsMetadata } from "../components/navigation/breadcrumbs/Breadcrumbs.metadata.tsx";
+import { linkMetadata } from "../components/navigation/link/Link.metadata.tsx";
+import { menuMetadata } from "../components/navigation/menu/Menu.metadata.tsx";
+import { navbarMetadata } from "../components/navigation/navbar/Navbar.metadata.tsx";
+import { paginationMetadata } from "../components/navigation/pagination/Pagination.metadata.tsx";
+import { stepsMetadata } from "../components/navigation/steps/Steps.metadata.tsx";
+import { tabsMetadata } from "../components/navigation/tabs/Tabs.metadata.tsx";
 
 // Data Input
-import { checkboxMetadata } from "../components/input/checkbox/Checkbox.metadata.ts";
-import { fileInputMetadata } from "../components/input/file-input/FileInput.metadata.ts";
-import { radioMetadata } from "../components/input/radio/Radio.metadata.ts";
-import { rangeMetadata } from "../components/input/range/Range.metadata.ts";
-import { ratingMetadata } from "../components/input/rating/Rating.metadata.ts";
-import { selectMetadata } from "../components/input/select/Select.metadata.ts";
+import { checkboxMetadata } from "../components/input/checkbox/Checkbox.metadata.tsx";
+import { fileInputMetadata } from "../components/input/file-input/FileInput.metadata.tsx";
+import { radioMetadata } from "../components/input/radio/Radio.metadata.tsx";
+import { rangeMetadata } from "../components/input/range/Range.metadata.tsx";
+import { ratingMetadata } from "../components/input/rating/Rating.metadata.tsx";
+import { selectMetadata } from "../components/input/select/Select.metadata.tsx";
 import { textInputMetadata } from "../components/input/text-input/TextInput.metadata.ts";
-import { textareaMetadata } from "../components/input/textarea/Textarea.metadata.ts";
-import { toggleMetadata } from "../components/input/toggle/Toggle.metadata.ts";
+import { textareaMetadata } from "../components/input/textarea/Textarea.metadata.tsx";
+import { toggleMetadata } from "../components/input/toggle/Toggle.metadata.tsx";
 
 // Layout
-import { artboardMetadata } from "../components/layout/artboard/Artboard.metadata.ts";
-import { dividerMetadata } from "../components/layout/divider/Divider.metadata.ts";
-import { drawerMetadata } from "../components/layout/drawer/Drawer.metadata.ts";
-import { footerMetadata } from "../components/layout/footer/Footer.metadata.ts";
-import { heroMetadata } from "../components/layout/hero/Hero.metadata.ts";
-import { indicatorMetadata } from "../components/layout/indicator/Indicator.metadata.ts";
-import { joinMetadata } from "../components/layout/join/Join.metadata.ts";
-import { maskMetadata } from "../components/layout/mask/Mask.metadata.ts";
-import { stackMetadata } from "../components/layout/stack/Stack.metadata.ts";
+import { artboardMetadata } from "../components/layout/artboard/Artboard.metadata.tsx";
+import { dividerMetadata } from "../components/layout/divider/Divider.metadata.tsx";
+import { drawerMetadata } from "../components/layout/drawer/Drawer.metadata.tsx";
+import { footerMetadata } from "../components/layout/footer/Footer.metadata.tsx";
+import { heroMetadata } from "../components/layout/hero/Hero.metadata.tsx";
+import { indicatorMetadata } from "../components/layout/indicator/Indicator.metadata.tsx";
+import { joinMetadata } from "../components/layout/join/Join.metadata.tsx";
+import { maskMetadata } from "../components/layout/mask/Mask.metadata.tsx";
+import { stackMetadata } from "../components/layout/stack/Stack.metadata.tsx";
 
 // Feedback
-import { alertMetadata } from "../components/feedback/alert/Alert.metadata.ts";
-import { loadingMetadata } from "../components/feedback/loading/Loading.metadata.ts";
-import { progressMetadata } from "../components/feedback/progress/Progress.metadata.ts";
-import { radialProgressMetadata } from "../components/feedback/radial-progress/RadialProgress.metadata.ts";
-import { skeletonMetadata } from "../components/feedback/skeleton/Skeleton.metadata.ts";
-import { toastMetadata } from "../components/feedback/toast/Toast.metadata.ts";
-import { tooltipMetadata } from "../components/feedback/tooltip/Tooltip.metadata.ts";
+import { alertMetadata } from "../components/feedback/alert/Alert.metadata.tsx";
+import { loadingMetadata } from "../components/feedback/loading/Loading.metadata.tsx";
+import { progressMetadata } from "../components/feedback/progress/Progress.metadata.tsx";
+import { radialProgressMetadata } from "../components/feedback/radial-progress/RadialProgress.metadata.tsx";
+import { skeletonMetadata } from "../components/feedback/skeleton/Skeleton.metadata.tsx";
+import { toastMetadata } from "../components/feedback/toast/Toast.metadata.tsx";
+import { tooltipMetadata } from "../components/feedback/tooltip/Tooltip.metadata.tsx";
 
 // Mockup
-import { browserMetadata } from "../components/mockup/browser/Browser.metadata.ts";
-import { codeMetadata } from "../components/mockup/code/Code.metadata.ts";
-import { phoneMetadata } from "../components/mockup/phone/Phone.metadata.ts";
-import { windowMetadata } from "../components/mockup/window/Window.metadata.ts";
+import { browserMetadata } from "../components/mockup/browser/Browser.metadata.tsx";
+import { codeMetadata } from "../components/mockup/code/Code.metadata.tsx";
+import { phoneMetadata } from "../components/mockup/phone/Phone.metadata.tsx";
+import { windowMetadata } from "../components/mockup/window/Window.metadata.tsx";
 
 // Component metadata interface
+import type { ComponentChildren } from "preact";
+
 export interface ComponentMetadata {
   name: string;
   description: string;
@@ -79,6 +81,7 @@ export interface ComponentMetadata {
   tags: string[];
   examples: string[];
   relatedComponents: string[];
+  preview: ComponentChildren;
 }
 
 // All metadata is now imported from individual .metadata.ts files
