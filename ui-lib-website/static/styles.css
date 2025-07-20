@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for the showcase */
+.component-section {
+  @apply mb-12 p-6 bg-white rounded-lg shadow-sm border;
+}
+
+.code-example {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto;
+}
+
+.props-table {
+  @apply w-full border-collapse border border-gray-300;
+}
+
+.props-table th,
+.props-table td {
+  @apply border border-gray-300 px-4 py-2 text-left;
+}
+
+.props-table th {
+  @apply bg-gray-50 font-semibold;
+}

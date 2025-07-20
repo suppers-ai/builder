@@ -40,7 +40,7 @@ export default function Layout({
   // Fresh 2.0 island state management for responsive behavior
   const isMobile = useSignal(false);
   const sidebarCollapsed = useSignal(false);
-  
+
   // Check for mobile viewport on mount (Fresh 2.0 island client-side behavior)
   if (typeof window !== 'undefined') {
     const checkMobile = () => {
@@ -49,10 +49,10 @@ export default function Layout({
         sidebarCollapsed.value = true;
       }
     };
-    
+
     // Initial check
     checkMobile();
-    
+
     // Listen for resize events
     window.addEventListener('resize', checkMobile);
   }
@@ -208,13 +208,13 @@ export default function Layout({
             {sidebar}
           </aside>
         )}
-        
+
         <main className={mainClasses}>
           <div className={maxWidthClasses[maxWidth].join(' ')}>
             {children}
           </div>
         </main>
-        
+
         {sidebarPosition === 'right' && sidebar && (
           <aside className={sidebarClasses}>
             {sidebar}
@@ -268,11 +268,11 @@ export default function Layout({
             {header}
           </header>
         )}
-        
+
         <main className={mainClasses}>
           {children}
         </main>
-        
+
         {footer && (
           <footer className={footerClasses}>
             {footer}

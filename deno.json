@@ -4,7 +4,8 @@
     "./packages/api",
     "./packages/ui-library",
     "./packages/shared",
-    "./packages/templates"
+    "./packages/templates",
+    "./ui-lib-website"
   ],
   "imports": {
     "@json-app-compiler/compiler": "./packages/compiler/mod.ts",
