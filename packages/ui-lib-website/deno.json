@@ -12,6 +12,7 @@
     "$fresh/runtime": "jsr:@fresh/core@^2.0.0-alpha.34/runtime",
     "lucide-preact": "https://esm.sh/lucide-preact@0.460.0",
     "@suppers/shared": "../shared/mod.ts",
+    "@suppers/shared/": "../shared/",
     "@suppers/ui-lib": "../ui-lib/mod.ts",
     "tailwindcss": "npm:tailwindcss@^3.4.0"
   },

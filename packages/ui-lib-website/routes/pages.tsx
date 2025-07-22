@@ -1,27 +1,29 @@
 import {
-  allPages,
-  getAllPageCategories,
-  getPageCount,
+  pageTemplates,
   getPagesByCategory,
-  getPagesByType,
+  getPageCount,
 } from "../data/pages.ts";
-import { Badge, Button, Card } from "@suppers/ui-lib";
 
 export default function PagesPage() {
-  const categories = getAllPageCategories();
-  const routePages = getPagesByType("route");
-  const demoPages = getPagesByType("demo");
-  const pageComponents = getPagesByType("page");
-  const sharedComponents = getPagesByType("shared");
+  const landingTemplates = pageTemplates.templates.landing;
+  const dashboardTemplates = pageTemplates.templates.dashboard;
+  const formTemplates = pageTemplates.templates.form;
+  const authTemplates = pageTemplates.templates.auth;
+  const allTemplates = [
+    ...landingTemplates,
+    ...dashboardTemplates,
+    ...formTemplates,
+    ...authTemplates,
+  ];
 
   return (
     <>
       <div class="container mx-auto px-4 py-8 space-y-8">
         {/* Page Header */}
         <div class="text-center space-y-4">
-          <h1 class="text-4xl font-bold">Pages & Routes</h1>
+          <h1 class="text-4xl font-bold">Building Complete Pages</h1>
           <p class="text-lg text-base-content/70">
-            Complete overview of application pages, routes, and page-level components
+            Learn how to compose ui-lib components into complete page layouts and templates
           </p>
           <div class="breadcrumbs justify-center">
             <ul>
@@ -32,271 +34,292 @@ export default function PagesPage() {
             </ul>
           </div>
         </div>
+
         {/* Overview Stats */}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div class="stat bg-base-200 rounded-lg">
-            <div class="stat-title text-xs">Routes</div>
-            <div class="stat-value text-xl">{routePages.length}</div>
-            <div class="stat-desc text-xs">Main routes</div>
+            <div class="stat-title">Page Templates</div>
+            <div class="stat-value text-2xl">{allTemplates.length}</div>
+            <div class="stat-desc">Ready to use</div>
           </div>
           <div class="stat bg-base-200 rounded-lg">
-            <div class="stat-title text-xs">Pages</div>
-            <div class="stat-value text-xl">{pageComponents.length}</div>
-            <div class="stat-desc text-xs">Page components</div>
+            <div class="stat-title">Categories</div>
+            <div class="stat-value text-2xl">4</div>
+            <div class="stat-desc">Different types</div>
           </div>
           <div class="stat bg-base-200 rounded-lg">
-            <div class="stat-title text-xs">Demos</div>
-            <div class="stat-value text-xl">{demoPages.length}</div>
-            <div class="stat-desc text-xs">Component demos</div>
+            <div class="stat-title">Components Used</div>
+            <div class="stat-value text-2xl">15+</div>
+            <div class="stat-desc">UI library components</div>
           </div>
           <div class="stat bg-base-200 rounded-lg">
-            <div class="stat-title text-xs">Shared</div>
-            <div class="stat-value text-xl">{sharedComponents.length}</div>
-            <div class="stat-desc text-xs">Reusable</div>
+            <div class="stat-title">Guides</div>
+            <div class="stat-value text-2xl">{pageTemplates.guides.length}</div>
+            <div class="stat-desc">Best practices</div>
           </div>
         </div>
 
-        {/* Page Architecture */}
+        {/* What are Page Templates? */}
         <div class="card bg-base-100 shadow-sm border border-base-300">
           <div class="card-body">
-            <h2 class="card-title text-xl mb-4">Page Architecture</h2>
+            <h2 class="card-title text-xl mb-4">What are Page Templates?</h2>
             <div class="prose max-w-none">
               <p>
-                Our application follows Fresh 2.0 patterns with clear separation between different
-                types of pages and components.
+                Page templates are complete page implementations built using ui-lib components.
+                They demonstrate how to combine components effectively to create cohesive user interfaces
+                for different use cases.
               </p>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                <div>
-                  <h3 class="font-semibold mb-2">Routes (/routes/)</h3>
-                  <ul class="text-sm space-y-1">
-                    <li>• Main application entry points</li>
-                    <li>• Server-side rendered by default</li>
-                    <li>• Handle HTTP requests and responses</li>
-                    <li>• Can include page handlers</li>
-                  </ul>
-                </div>
-                <div>
-                  <h3 class="font-semibold mb-2">Pages (/pages/)</h3>
-                  <ul class="text-sm space-y-1">
-                    <li>• Organized page-level components</li>
-                    <li>• Include display and logic components</li>
-                    <li>• Feature-based directory structure</li>
-                    <li>• Reusable across different routes</li>
-                  </ul>
-                </div>
+              <ul>
+                <li>
+                  <strong>Component Composition:</strong> Show how to combine multiple ui-lib components
+                </li>
+                <li>
+                  <strong>Layout Patterns:</strong> Demonstrate effective page structure and organization
+                </li>
+                <li>
+                  <strong>Responsive Design:</strong> All templates work across different screen sizes
+                </li>
+                <li>
+                  <strong>Production Ready:</strong> Complete implementations you can adapt for your projects
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Template Categories */}
+        <div class="space-y-8">
+          <h2 class="text-2xl font-bold">Page Template Categories</h2>
+
+          {/* Landing Pages */}
+          <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="text-xl">🚀</span>
+                <h3 class="card-title text-lg">Landing Pages</h3>
+                <div class="badge badge-primary">{landingTemplates.length} templates</div>
+              </div>
+              <p class="text-sm text-base-content/70 mb-4">
+                Marketing and promotional pages designed to convert visitors
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {landingTemplates.map((template) => (
+                  <div key={template.id} class="card bg-base-200 hover:bg-base-300 transition-colors">
+                    <div class="card-body p-4">
+                      <h4 class="font-semibold text-sm">{template.name}</h4>
+                      <p class="text-xs text-base-content/70 line-clamp-2 mb-2">
+                        {template.description}
+                      </p>
+                      
+                      <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs text-base-content/50">
+                          {template.components.slice(0, 3).join(", ")}
+                          {template.components.length > 3 && "..."}
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                          {template.features.slice(0, 2).map((feature) => (
+                            <div key={feature} class="badge badge-xs badge-outline">
+                              {feature}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div class="text-xs text-base-content/60">
+                        {template.layout.structure}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Dashboard Pages */}
+          <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="text-xl">📊</span>
+                <h3 class="card-title text-lg">Dashboard Pages</h3>
+                <div class="badge badge-secondary">{dashboardTemplates.length} templates</div>
+              </div>
+              <p class="text-sm text-base-content/70 mb-4">
+                Data-rich interfaces for analytics, admin panels, and user dashboards
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {dashboardTemplates.map((template) => (
+                  <div key={template.id} class="card bg-base-200 hover:bg-base-300 transition-colors">
+                    <div class="card-body p-4">
+                      <h4 class="font-semibold text-sm">{template.name}</h4>
+                      <p class="text-xs text-base-content/70 line-clamp-2 mb-2">
+                        {template.description}
+                      </p>
+                      
+                      <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs text-base-content/50">
+                          {template.components.slice(0, 3).join(", ")}
+                          {template.components.length > 3 && "..."}
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                          {template.features.slice(0, 2).map((feature) => (
+                            <div key={feature} class="badge badge-xs badge-outline">
+                              {feature}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div class="text-xs text-base-content/60">
+                        {template.layout.structure}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Form Pages */}
+          <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="text-xl">📝</span>
+                <h3 class="card-title text-lg">Form Pages</h3>
+                <div class="badge badge-accent">{formTemplates.length} templates</div>
+              </div>
+              <p class="text-sm text-base-content/70 mb-4">
+                Data collection interfaces with validation and user-friendly design
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formTemplates.map((template) => (
+                  <div key={template.id} class="card bg-base-200 hover:bg-base-300 transition-colors">
+                    <div class="card-body p-4">
+                      <h4 class="font-semibold text-sm">{template.name}</h4>
+                      <p class="text-xs text-base-content/70 line-clamp-2 mb-2">
+                        {template.description}
+                      </p>
+                      
+                      <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs text-base-content/50">
+                          {template.components.slice(0, 3).join(", ")}
+                          {template.components.length > 3 && "..."}
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                          {template.features.slice(0, 2).map((feature) => (
+                            <div key={feature} class="badge badge-xs badge-outline">
+                              {feature}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div class="text-xs text-base-content/60">
+                        {template.layout.structure}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Authentication Pages */}
+          <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card-body">
+              <div class="flex items-center gap-3 mb-4">
+                <span class="text-xl">🔐</span>
+                <h3 class="card-title text-lg">Authentication Pages</h3>
+                <div class="badge badge-info">{authTemplates.length} templates</div>
+              </div>
+              <p class="text-sm text-base-content/70 mb-4">
+                User authentication flows including login, signup, and password recovery
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {authTemplates.map((template) => (
+                  <div key={template.id} class="card bg-base-200 hover:bg-base-300 transition-colors">
+                    <div class="card-body p-4">
+                      <h4 class="font-semibold text-sm">{template.name}</h4>
+                      <p class="text-xs text-base-content/70 line-clamp-2 mb-2">
+                        {template.description}
+                      </p>
+                      
+                      <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs text-base-content/50">
+                          {template.components.slice(0, 3).join(", ")}
+                          {template.components.length > 3 && "..."}
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                          {template.features.slice(0, 2).map((feature) => (
+                            <div key={feature} class="badge badge-xs badge-outline">
+                              {feature}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div class="text-xs text-base-content/60">
+                        {template.layout.structure}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Routes */}
-        <div class="card bg-base-100 shadow-sm border border-base-300">
-          <div class="card-body">
-            <div class="flex items-center gap-3 mb-4">
-              <span class="text-xl">🌐</span>
-              <h3 class="card-title text-lg">Main Routes</h3>
-              <Badge color="neutral">{routePages.length}</Badge>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {routePages.map((page) => (
-                <a
-                  key={page.path}
-                  href={page.path}
-                  class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer"
-                >
-                  <div class="card-body p-4">
-                    <h4 class="font-semibold text-sm">{page.name}</h4>
-                    <p class="text-xs text-base-content/70 line-clamp-2">{page.description}</p>
-
-                    <div class="flex items-center justify-between mt-3">
-                      <div class="text-xs font-mono text-base-content/60">
-                        {page.path}
-                      </div>
-                      <div class="flex gap-2">
-                        {(page as any).authRequired && (
-                          <Badge size="xs" color="warning">
-                            Auth
-                          </Badge>
-                        )}
-                        {(page as any).layoutUsed && (
-                          <Badge size="xs" color="info">{(page as any).layoutUsed}</Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {(page as any).features && (
-                      <div class="flex flex-wrap gap-1 mt-2">
-                        {(page as any).features.slice(0, 3).map((feature: string) => (
-                          <Badge key={feature} size="xs" variant="outline">
-                            {feature}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Page Components */}
-        <div class="card bg-base-100 shadow-sm border border-base-300">
-          <div class="card-body">
-            <div class="flex items-center gap-3 mb-4">
-              <span class="text-xl">📄</span>
-              <h3 class="card-title text-lg">Page Components</h3>
-              <Badge color="neutral">{pageComponents.length}</Badge>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pageComponents.map((page) => (
-                <div
-                  key={page.path}
-                  class="card bg-base-200"
-                >
-                  <div class="card-body p-4">
-                    <h4 class="font-semibold text-sm">{page.name}</h4>
-                    <p class="text-xs text-base-content/70 line-clamp-2">{page.description}</p>
-
-                    <div class="flex items-center justify-between mt-3">
-                      <div class="text-xs font-mono text-base-content/60">
-                        {page.path}
-                      </div>
-                      <div class="flex gap-2">
-                        {(page as any).authRequired && (
-                          <Badge size="xs" color="warning">Protected</Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {(page as any).features && (
-                      <div class="flex flex-wrap gap-1 mt-2">
-                        {(page as any).features.slice(0, 3).map((feature: string) => (
-                          <Badge key={feature} size="xs" variant="outline">
-                            {feature}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Component Demos */}
-        <div class="card bg-base-100 shadow-sm border border-base-300">
-          <div class="card-body">
-            <div class="flex items-center gap-3 mb-4">
-              <span class="text-xl">🎭</span>
-              <h3 class="card-title text-lg">Component Demos</h3>
-              <Badge color="neutral">
-                {demoPages.filter((p) => p.category === "Component Demos").length}
-              </Badge>
-            </div>
-            <p class="text-sm text-base-content/70 mb-4">
-              Interactive demonstrations showcasing individual components
-            </p>
-
-            <div class="text-center py-8">
-              <div class="text-4xl mb-4">🧩</div>
-              <p class="text-base-content/60">
-                Component demos are integrated into the main{" "}
-                <a href="/components" class="link link-primary">Components</a> section
-              </p>
-              <a href="/components">
-                <Button color="primary" size="sm" class="mt-4">
-                  Browse Components
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Shared Components */}
-        <div class="card bg-base-100 shadow-sm border border-base-300">
-          <div class="card-body">
-            <div class="flex items-center gap-3 mb-4">
-              <span class="text-xl">🔧</span>
-              <h3 class="card-title text-lg">Shared Components</h3>
-              <Badge color="neutral">{sharedComponents.length}</Badge>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sharedComponents.map((page) => (
-                <div
-                  key={page.path}
-                  class="card bg-base-200"
-                >
-                  <div class="card-body p-4">
-                    <h4 class="font-semibold text-sm">{page.name}</h4>
-                    <p class="text-xs text-base-content/70 line-clamp-2">{page.description}</p>
-
-                    <div class="flex items-center justify-between mt-3">
-                      <div class="text-xs font-mono text-base-content/60">
-                        {page.path}
-                      </div>
-                      <div class="flex gap-2">
-                        {(page as any).authRequired && (
-                          <Badge size="xs" color="warning">
-                            Auth
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {(page as any).features && (
-                      <div class="flex flex-wrap gap-1 mt-2">
-                        {(page as any).features.slice(0, 3).map((feature: string) => (
-                          <Badge key={feature} size="xs" variant="outline">
-                            {feature}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Development Guide */}
+        {/* Composition Guide */}
         <div class="card bg-secondary text-secondary-content">
           <div class="card-body">
-            <h2 class="card-title text-xl mb-4">Page Development Guide</h2>
+            <h2 class="card-title text-xl mb-4">Page Composition Guide</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <h3 class="font-semibold mb-2">Routing</h3>
+                <h3 class="font-semibold mb-2">Layout Structure</h3>
                 <ul class="text-sm space-y-1 opacity-90">
-                  <li>• File-based routing in /routes/</li>
-                  <li>• Dynamic routes with [param]</li>
-                  <li>• Nested layouts with _layout</li>
-                  <li>• API routes with handlers</li>
+                  <li>• Start with clear page hierarchy</li>
+                  <li>• Use layout components for structure</li>
+                  <li>• Maintain consistent spacing</li>
+                  <li>• Plan for responsive behavior</li>
                 </ul>
               </div>
               <div>
-                <h3 class="font-semibold mb-2">Layouts</h3>
+                <h3 class="font-semibold mb-2">Component Selection</h3>
                 <ul class="text-sm space-y-1 opacity-90">
-                  <li>• MainLayout for most pages</li>
-                  <li>• ComponentPageTemplate for demos</li>
-                  <li>• AuthLayout for auth pages</li>
-                  <li>• Custom layouts as needed</li>
+                  <li>• Choose components that fit the purpose</li>
+                  <li>• Combine components thoughtfully</li>
+                  <li>• Consider user experience flow</li>
+                  <li>• Maintain visual consistency</li>
                 </ul>
               </div>
               <div>
                 <h3 class="font-semibold mb-2">Best Practices</h3>
                 <ul class="text-sm space-y-1 opacity-90">
-                  <li>• Use SSR-safe components</li>
-                  <li>• Islands for interactivity</li>
-                  <li>• Consistent breadcrumbs</li>
-                  <li>• Proper meta tags</li>
+                  <li>• Test on multiple screen sizes</li>
+                  <li>• Ensure accessibility compliance</li>
+                  <li>• Optimize for performance</li>
+                  <li>• Follow design system guidelines</li>
                 </ul>
               </div>
             </div>
+            
+            {pageTemplates.guides.length > 0 && (
+              <div class="mt-6">
+                <h3 class="font-semibold mb-3">Composition Guide: {pageTemplates.guides[0].title}</h3>
+                <p class="text-sm opacity-90 mb-4">{pageTemplates.guides[0].description}</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {pageTemplates.guides[0].sections.map((section, index) => (
+                    <div key={index} class="bg-secondary-content/10 rounded-lg p-3">
+                      <div class="text-sm font-medium mb-1">{section.title}</div>
+                      <div class="text-xs opacity-80">{section.content}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

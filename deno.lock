@@ -7,23 +7,29 @@
     "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7": "0.0.1-alpha.7",
     "jsr:@std/assert@0.221": "0.221.0",
     "jsr:@std/bytes@^1.0.6": "1.0.6",
+    "jsr:@std/collections@^1.1.1": "1.1.2",
     "jsr:@std/crypto@1": "1.0.5",
     "jsr:@std/datetime@~0.225.2": "0.225.5",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/encoding@^1.0.10": "1.0.10",
     "jsr:@std/fmt@^1.0.7": "1.0.8",
+    "jsr:@std/front-matter@^1.0.9": "1.0.9",
     "jsr:@std/fs@1": "1.0.19",
     "jsr:@std/html@1": "1.0.4",
     "jsr:@std/http@^1.0.15": "1.0.19",
     "jsr:@std/internal@^1.0.9": "1.0.9",
     "jsr:@std/jsonc@1": "1.0.2",
     "jsr:@std/media-types@1": "1.1.0",
+    "jsr:@std/path@*": "1.1.1",
     "jsr:@std/path@0.221": "0.221.0",
     "jsr:@std/path@1": "1.1.1",
+    "jsr:@std/path@^1.0.8": "1.1.1",
     "jsr:@std/path@^1.1.0": "1.1.1",
     "jsr:@std/path@^1.1.1": "1.1.1",
     "jsr:@std/semver@1": "1.0.5",
+    "jsr:@std/toml@^1.0.3": "1.0.8",
     "jsr:@std/uuid@^1.0.7": "1.0.9",
+    "jsr:@std/yaml@^1.0.5": "1.0.8",
     "jsr:@supabase/functions-js@*": "2.4.5",
     "jsr:@supabase/supabase-js@2": "2.51.0",
     "npm:@opentelemetry/api@^1.9.0": "1.9.0",
@@ -108,6 +114,9 @@
     "@std/bytes@1.0.6": {
       "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
     },
+    "@std/collections@1.1.2": {
+      "integrity": "f1685dd45c3ec27c39d0e8a642ccf810f391ec8a6cb5e7355926e6dacc64c43e"
+    },
     "@std/crypto@1.0.5": {
       "integrity": "0dcfbb319fe0bba1bd3af904ceb4f948cde1b92979ec1614528380ed308a3b40"
     },
@@ -119,6 +128,13 @@
     },
     "@std/fmt@1.0.8": {
       "integrity": "71e1fc498787e4434d213647a6e43e794af4fd393ef8f52062246e06f7e372b7"
+    },
+    "@std/front-matter@1.0.9": {
+      "integrity": "ee6201d06674cbef137dda2252f62477450b48249e7d8d9ab57a30f85ff6f051",
+      "dependencies": [
+        "jsr:@std/toml",
+        "jsr:@std/yaml"
+      ]
     },
     "@std/fs@1.0.19": {
       "integrity": "051968c2b1eae4d2ea9f79a08a3845740ef6af10356aff43d3e2ef11ed09fb06",
@@ -159,11 +175,20 @@
     "@std/semver@1.0.5": {
       "integrity": "529f79e83705714c105ad0ba55bec0f9da0f24d2f726b6cc1c15e505cc2c0624"
     },
+    "@std/toml@1.0.8": {
+      "integrity": "eb8ae76b4cc1c6c13f2a91123675823adbec2380de75cd3748c628960d952164",
+      "dependencies": [
+        "jsr:@std/collections"
+      ]
+    },
     "@std/uuid@1.0.9": {
       "integrity": "44b627bf2d372fe1bd099e2ad41b2be41a777fc94e62a3151006895a037f1642",
       "dependencies": [
         "jsr:@std/bytes"
       ]
+    },
+    "@std/yaml@1.0.8": {
+      "integrity": "90b8aab62995e929fa0ea5f4151c287275b63e321ac375c35ff7406ca60c169d"
     },
     "@supabase/functions-js@2.4.5": {
       "integrity": "ead2df253fe0c3b0b682c5f25076978ab62c10afff4d04222451a90ba512c394",
@@ -3316,6 +3341,11 @@
       "packages/compiler": {
         "dependencies": [
           "jsr:@fresh/core@^2.0.0-alpha.34",
+          "npm:preact@10.26.9"
+        ]
+      },
+      "packages/shared": {
+        "dependencies": [
           "npm:preact@10.26.9"
         ]
       },

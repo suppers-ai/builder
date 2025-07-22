@@ -17,6 +17,7 @@ export function HeroSection() {
       {/* Video Background */}
       <video
         autoplay
+        loop
         muted
         playsInline
         preload="metadata"
@@ -27,14 +28,13 @@ export function HeroSection() {
         Your browser does not support the video tag.
       </video>
 
-      {/* Subtle overlay for text readability */}
-      <div class="absolute inset-0 bg-black/20 z-10"></div>
+
 
       {/* Background decoration */}
-      <div class="absolute inset-0 bg-grid-pattern opacity-5 z-20"></div>
-      <div class="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-48 translate-x-48 z-20">
+      <div class="absolute inset-0 bg-grid-pattern opacity-3 z-20"></div>
+      <div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-2xl -translate-y-32 translate-x-32 z-20">
       </div>
-      <div class="absolute bottom-0 left-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl translate-y-48 -translate-x-48 z-20">
+      <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/10 rounded-full blur-2xl translate-y-32 -translate-x-32 z-20">
       </div>
 
       <div class="relative px-4 lg:px-6 py-20 lg:py-32 z-30">
@@ -46,7 +46,7 @@ export function HeroSection() {
           </div>
 
           {/* Main heading */}
-          <h1 class="text-4xl lg:text-6xl xl:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+          <h1 class="text-4xl lg:text-6xl xl:text-7xl font-bold text-black mb-6 leading-tight drop-shadow-lg">
             Build Beautiful{" "}
             <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent">
               User Interfaces

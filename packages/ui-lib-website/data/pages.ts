@@ -1,426 +1,613 @@
 import { SearchableComponent } from "../utils/search.ts";
 
-export interface PageComponent extends SearchableComponent {
-  type: "route" | "page" | "demo" | "shared";
-  authRequired?: boolean;
-  layoutUsed?: string;
-  features?: string[];
+export interface PageTemplate extends SearchableComponent {
+  id: string;
+  category: 'landing' | 'dashboard' | 'form' | 'admin' | 'auth' | 'content';
+  components: string[]; // ui-lib components used
+  layout: {
+    structure: string; // Description of layout structure
+    responsive: boolean;
+    sections: string[]; // Header, main, footer, etc.
+  };
+  features: string[]; // Key features demonstrated
+  codeFiles: {
+    filename: string;
+    content: string;
+    language: 'tsx' | 'ts' | 'css';
+  }[];
+  liveExample?: string; // URL to working example if available
 }
 
-export const allPages: PageComponent[] = [
-  // Main Application Routes
-  {
-    name: "Home Page",
-    description: "Landing page showcasing published applications and community content",
-    category: "Main Routes",
-    tags: ["home", "landing", "applications", "community"],
-    path: "/",
-    keywords: ["home", "landing", "main", "applications"],
-    type: "route",
-    authRequired: false,
-    layoutUsed: "MainLayout",
-    features: ["application-showcase", "search", "filters", "responsive"],
-  },
-  {
-    name: "Components Page",
-    description: "Interactive component library browser and showcase",
-    category: "Main Routes",
-    tags: ["components", "library", "showcase", "interactive"],
-    path: "/components",
-    keywords: ["components", "library", "showcase", "demo"],
-    type: "route",
-    authRequired: false,
-    layoutUsed: "MainLayout",
-    features: ["component-browser", "search", "categories", "live-demos"],
-  },
-  {
-    name: "Theme Islands Demo",
-    description: "Demonstration of theme system with interactive islands",
-    category: "Demo Routes",
-    tags: ["theme", "islands", "demo", "interactive"],
-    path: "/demo/theme-islands",
-    keywords: ["theme", "islands", "demo", "showcase"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "MainLayout",
-    features: ["theme-switching", "island-demos", "live-preview"],
-  },
+export interface PageGuide {
+  title: string;
+  description: string;
+  sections: {
+    title: string;
+    content: string;
+    examples?: string[];
+  }[];
+}
 
-  // Page Routes
-  {
-    name: "Admin Dashboard",
-    description: "Administrative interface for system management",
-    category: "Page Routes",
-    tags: ["admin", "dashboard", "management", "system"],
-    path: "/pages/admin",
-    keywords: ["admin", "dashboard", "management", "system"],
-    type: "page",
-    authRequired: true,
-    layoutUsed: "AdminLayout",
-    features: ["user-management", "system-stats", "configuration", "monitoring"],
-  },
-  {
-    name: "User Home Dashboard",
-    description: "Personalized user dashboard with applications and activity",
-    category: "Page Routes",
-    tags: ["user", "dashboard", "personal", "activity"],
-    path: "/pages/home",
-    keywords: ["user", "dashboard", "personal", "home"],
-    type: "page",
-    authRequired: true,
-    layoutUsed: "MainLayout",
-    features: ["personal-apps", "activity-feed", "quick-actions", "stats"],
-  },
-  {
-    name: "Login Page",
-    description: "Authentication interface with login and signup options",
-    category: "Page Routes",
-    tags: ["login", "auth", "signup", "authentication"],
-    path: "/pages/login",
-    keywords: ["login", "auth", "signup", "signin"],
-    type: "page",
-    authRequired: false,
-    layoutUsed: "AuthLayout",
-    features: ["oauth", "email-auth", "signup", "password-reset"],
-  },
-  {
-    name: "My Applications",
-    description: "User's application management interface",
-    category: "Page Routes",
-    tags: ["applications", "management", "user", "personal"],
-    path: "/pages/my-applications",
-    keywords: ["applications", "my-apps", "management", "personal"],
-    type: "page",
-    authRequired: true,
-    layoutUsed: "MainLayout",
-    features: ["app-creation", "app-editing", "publishing", "analytics"],
-  },
-  {
-    name: "User Profile",
-    description: "User account management and profile settings",
-    category: "Page Routes",
-    tags: ["user", "profile", "settings", "account"],
-    path: "/pages/user",
-    keywords: ["user", "profile", "settings", "account"],
-    type: "page",
-    authRequired: true,
-    layoutUsed: "MainLayout",
-    features: ["profile-editing", "preferences", "security", "billing"],
-  },
+export interface PageTemplateData {
+  templates: {
+    landing: PageTemplate[];
+    dashboard: PageTemplate[];
+    form: PageTemplate[];
+    admin: PageTemplate[];
+    auth: PageTemplate[];
+    content: PageTemplate[];
+  };
+  guides: PageGuide[];
+}
 
-  // Component Demo Routes - Actions
-  {
-    name: "Button Demo",
-    description: "Interactive demonstration of button component variants",
-    category: "Component Demos",
-    tags: ["button", "demo", "variants", "interactive"],
-    path: "/components/action/button",
-    keywords: ["button", "demo", "variants", "showcase"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "code-snippets", "variant-showcase", "interactive-props"],
-  },
-  {
-    name: "Dropdown Demo",
-    description: "Interactive demonstration of dropdown component",
-    category: "Component Demos",
-    tags: ["dropdown", "demo", "menu", "interactive"],
-    path: "/components/action/dropdown",
-    keywords: ["dropdown", "demo", "menu", "showcase"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "code-snippets", "menu-variations", "positioning"],
-  },
-  {
-    name: "Modal Demo",
-    description: "Interactive demonstration of modal dialogs",
-    category: "Component Demos",
-    tags: ["modal", "demo", "dialog", "interactive"],
-    path: "/components/action/modal",
-    keywords: ["modal", "demo", "dialog", "popup"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "code-snippets", "modal-types", "animations"],
-  },
-  {
-    name: "Swap Demo",
-    description: "Interactive demonstration of swap toggle component",
-    category: "Component Demos",
-    tags: ["swap", "demo", "toggle", "animation"],
-    path: "/components/action/swap",
-    keywords: ["swap", "demo", "toggle", "animation"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "code-snippets", "animation-types", "state-management"],
-  },
-  {
-    name: "Theme Controller Demo",
-    description: "Interactive demonstration of theme switching",
-    category: "Component Demos",
-    tags: ["theme", "demo", "controller", "switching"],
-    path: "/components/action/theme-controller",
-    keywords: ["theme", "demo", "controller", "switching"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "theme-preview", "persistence", "custom-themes"],
-  },
+export const pageTemplates: PageTemplateData = {
+  templates: {
+    landing: [
+      {
+        id: "hero-landing",
+        name: "Hero Landing Page",
+        description: "Modern landing page with hero section, features grid, and call-to-action",
+        category: "landing",
+        tags: ["hero", "landing", "marketing", "features"],
+        path: "/pages/templates/hero-landing",
+        keywords: ["hero", "landing", "marketing", "cta"],
+        components: ["HeroSection", "Card", "Button", "Badge", "Stats"],
+        layout: {
+          structure: "Header + Hero + Features Grid + Stats + Footer",
+          responsive: true,
+          sections: ["header", "hero", "features", "stats", "footer"]
+        },
+        features: ["hero-banner", "feature-showcase", "social-proof", "responsive-design"],
+        codeFiles: [
+          {
+            filename: "HeroLandingPage.tsx",
+            language: "tsx",
+            content: `import { HeroSection, Card, Button, Badge, Stats } from "@suppers/ui-lib";
 
-  // Component Demo Routes - Display
-  {
-    name: "Accordion Demo",
-    description: "Interactive demonstration of accordion component",
-    category: "Component Demos",
-    tags: ["accordion", "demo", "collapsible", "content"],
-    path: "/components/display/accordion",
-    keywords: ["accordion", "demo", "collapsible", "expand"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "code-snippets", "animation-options", "nested-content"],
-  },
-  {
-    name: "Avatar Demo",
-    description: "Interactive demonstration of avatar component",
-    category: "Component Demos",
-    tags: ["avatar", "demo", "profile", "image"],
-    path: "/components/display/avatar",
-    keywords: ["avatar", "demo", "profile", "user"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "size-variants", "placeholder-options", "status-indicators"],
-  },
-  {
-    name: "Badge Demo",
-    description: "Interactive demonstration of badge component",
-    category: "Component Demos",
-    tags: ["badge", "demo", "label", "indicator"],
-    path: "/components/display/badge",
-    keywords: ["badge", "demo", "label", "status"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "color-variants", "size-options", "positioning"],
-  },
-  {
-    name: "Card Demo",
-    description: "Interactive demonstration of card component",
-    category: "Component Demos",
-    tags: ["card", "demo", "container", "content"],
-    path: "/components/display/card",
-    keywords: ["card", "demo", "container", "layout"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "layout-variants", "content-types", "interactive-elements"],
-  },
-  {
-    name: "Carousel Demo",
-    description: "Interactive demonstration of carousel component",
-    category: "Component Demos",
-    tags: ["carousel", "demo", "slider", "gallery"],
-    path: "/components/display/carousel",
-    keywords: ["carousel", "demo", "slider", "gallery"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "navigation-types", "autoplay", "responsive-behavior"],
-  },
-  {
-    name: "Chat Bubble Demo",
-    description: "Interactive demonstration of chat bubble component",
-    category: "Component Demos",
-    tags: ["chat", "demo", "bubble", "messaging"],
-    path: "/components/display/chat-bubble",
-    keywords: ["chat", "demo", "bubble", "message"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["live-examples", "message-types", "positioning", "typing-indicators"],
-  },
+export default function HeroLandingPage() {
+  return (
+    <div class="min-h-screen">
+      {/* Hero Section */}
+      <HeroSection
+        title="Build Amazing Apps"
+        subtitle="Create beautiful, responsive applications with our comprehensive UI library"
+        primaryAction={<Button size="lg">Get Started</Button>}
+        secondaryAction={<Button variant="outline" size="lg">Learn More</Button>}
+        backgroundImage="/hero-bg.jpg"
+      />
+      
+      {/* Features Grid */}
+      <section class="py-16 px-4">
+        <div class="max-w-6xl mx-auto">
+          <h2 class="text-3xl font-bold text-center mb-12">Why Choose Our Library?</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card class="p-6 text-center">
+              <Badge color="primary" class="mb-4">Fast</Badge>
+              <h3 class="text-xl font-semibold mb-2">Lightning Speed</h3>
+              <p>Optimized components for maximum performance</p>
+            </Card>
+            <Card class="p-6 text-center">
+              <Badge color="secondary" class="mb-4">Modern</Badge>
+              <h3 class="text-xl font-semibold mb-2">Latest Tech</h3>
+              <p>Built with Fresh 2.0 and modern web standards</p>
+            </Card>
+            <Card class="p-6 text-center">
+              <Badge color="accent" class="mb-4">Flexible</Badge>
+              <h3 class="text-xl font-semibold mb-2">Customizable</h3>
+              <p>Easily themed and adapted to your brand</p>
+            </Card>
+          </div>
+        </div>
+      </section>
+      
+      {/* Stats Section */}
+      <section class="py-16 bg-base-200">
+        <div class="max-w-4xl mx-auto px-4">
+          <Stats class="grid-cols-1 md:grid-cols-3">
+            <div class="stat">
+              <div class="stat-value">50+</div>
+              <div class="stat-title">Components</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">1000+</div>
+              <div class="stat-title">Downloads</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">99%</div>
+              <div class="stat-title">Satisfaction</div>
+            </div>
+          </Stats>
+        </div>
+      </section>
+    </div>
+  );
+}`
+          }
+        ]
+      },
+      {
+        id: "product-showcase",
+        name: "Product Showcase",
+        description: "Product-focused landing page with carousel, testimonials, and pricing",
+        category: "landing",
+        tags: ["product", "showcase", "carousel", "pricing"],
+        path: "/pages/templates/product-showcase",
+        keywords: ["product", "showcase", "carousel", "testimonials"],
+        components: ["Carousel", "Card", "Button", "Avatar", "Badge", "Pricing"],
+        layout: {
+          structure: "Header + Product Carousel + Testimonials + Pricing + Footer",
+          responsive: true,
+          sections: ["header", "carousel", "testimonials", "pricing", "footer"]
+        },
+        features: ["product-gallery", "customer-testimonials", "pricing-tiers", "social-proof"],
+        codeFiles: [
+          {
+            filename: "ProductShowcasePage.tsx",
+            language: "tsx",
+            content: `import { Carousel, Card, Button, Avatar, Badge } from "@suppers/ui-lib";
 
-  // Shared Route Components
-  {
-    name: "Application Card",
-    description: "Reusable application display card component",
-    category: "Shared Components",
-    tags: ["application", "card", "shared", "reusable"],
-    path: "/components/application-card",
-    keywords: ["application", "card", "shared", "display"],
-    type: "shared",
-    authRequired: false,
-    features: ["app-info", "actions", "status", "responsive"],
-  },
-  {
-    name: "Application Form",
-    description: "Application creation and editing form",
-    category: "Shared Components",
-    tags: ["application", "form", "creation", "editing"],
-    path: "/components/application-form",
-    keywords: ["application", "form", "create", "edit"],
-    type: "shared",
-    authRequired: true,
-    features: ["validation", "auto-save", "templates", "preview"],
-  },
-  {
-    name: "Auth Provider",
-    description: "Authentication state management wrapper",
-    category: "Shared Components",
-    tags: ["auth", "provider", "state", "management"],
-    path: "/components/auth-provider",
-    keywords: ["auth", "provider", "authentication", "state"],
-    type: "shared",
-    authRequired: false,
-    features: ["state-management", "context", "persistence", "refresh"],
-  },
-  {
-    name: "Protected Route",
-    description: "Route protection and authentication wrapper",
-    category: "Shared Components",
-    tags: ["protected", "route", "auth", "wrapper"],
-    path: "/components/protected-route",
-    keywords: ["protected", "route", "auth", "security"],
-    type: "shared",
-    authRequired: true,
-    features: ["auth-check", "redirects", "loading-states", "error-handling"],
-  },
-  {
-    name: "SSO Callback",
-    description: "Single sign-on callback handler",
-    category: "Shared Components",
-    tags: ["sso", "callback", "oauth", "auth"],
-    path: "/components/sso-callback",
-    keywords: ["sso", "callback", "oauth", "signin"],
-    type: "shared",
-    authRequired: false,
-    features: ["oauth-handling", "token-exchange", "redirects", "error-handling"],
-  },
-  {
-    name: "SSO Login",
-    description: "Single sign-on login interface",
-    category: "Shared Components",
-    tags: ["sso", "login", "oauth", "auth"],
-    path: "/components/sso-login",
-    keywords: ["sso", "login", "oauth", "providers"],
-    type: "shared",
-    authRequired: false,
-    features: ["provider-buttons", "oauth-flow", "branding", "error-states"],
-  },
-  {
-    name: "User Avatar",
-    description: "User profile avatar display component",
-    category: "Shared Components",
-    tags: ["user", "avatar", "profile", "display"],
-    path: "/components/user-avatar",
-    keywords: ["user", "avatar", "profile", "image"],
-    type: "shared",
-    authRequired: false,
-    features: ["profile-image", "fallbacks", "status", "menu"],
-  },
+export default function ProductShowcasePage() {
+  const products = [
+    { id: 1, name: "Premium Plan", image: "/product1.jpg" },
+    { id: 2, name: "Business Plan", image: "/product2.jpg" },
+    { id: 3, name: "Enterprise Plan", image: "/product3.jpg" }
+  ];
+  
+  const testimonials = [
+    { name: "John Doe", role: "CEO", company: "TechCorp", avatar: "/avatar1.jpg", quote: "Amazing product!" },
+    { name: "Jane Smith", role: "Designer", company: "DesignCo", avatar: "/avatar2.jpg", quote: "Love the UI!" }
+  ];
+  
+  return (
+    <div class="min-h-screen">
+      {/* Product Carousel */}
+      <section class="py-16">
+        <div class="max-w-4xl mx-auto px-4">
+          <h1 class="text-4xl font-bold text-center mb-12">Our Products</h1>
+          <Carousel>
+            {products.map(product => (
+              <div key={product.id} class="carousel-item w-full">
+                <Card class="w-full">
+                  <img src={product.image} alt={product.name} class="w-full h-64 object-cover" />
+                  <div class="card-body">
+                    <h2 class="card-title">{product.name}</h2>
+                    <Button class="btn-primary">Learn More</Button>
+                  </div>
+                </Card>
+              </div>
+            ))}
+          </Carousel>
+        </div>
+      </section>
+      
+      {/* Testimonials */}
+      <section class="py-16 bg-base-200">
+        <div class="max-w-6xl mx-auto px-4">
+          <h2 class="text-3xl font-bold text-center mb-12">What Our Customers Say</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} class="p-6">
+                <div class="flex items-center mb-4">
+                  <Avatar src={testimonial.avatar} size="md" class="mr-4" />
+                  <div>
+                    <h3 class="font-semibold">{testimonial.name}</h3>
+                    <p class="text-sm opacity-70">{testimonial.role} at {testimonial.company}</p>
+                  </div>
+                </div>
+                <p class="italic">"{testimonial.quote}"</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}`
+          }
+        ]
+      }
+    ],
+    dashboard: [
+      {
+        id: "admin-dashboard",
+        name: "Admin Dashboard",
+        description: "Comprehensive admin interface with sidebar navigation, stats, and data tables",
+        category: "dashboard",
+        tags: ["admin", "dashboard", "sidebar", "stats"],
+        path: "/pages/templates/admin-dashboard",
+        keywords: ["admin", "dashboard", "management", "analytics"],
+        components: ["Sidebar", "Stats", "Table", "Card", "Button", "Badge", "Avatar"],
+        layout: {
+          structure: "Sidebar + Main Content (Stats + Tables + Charts)",
+          responsive: true,
+          sections: ["sidebar", "header", "stats", "content", "tables"]
+        },
+        features: ["user-management", "analytics", "data-tables", "responsive-sidebar"],
+        codeFiles: [
+          {
+            filename: "AdminDashboard.tsx",
+            language: "tsx",
+            content: `import { Sidebar, Stats, Table, Card, Button, Badge, Avatar } from "@suppers/ui-lib";
 
-  // Additional Component Demos (condensed for brevity)
-  {
-    name: "Input Components Demo",
-    description: "Comprehensive showcase of all input components",
-    category: "Component Demos",
-    tags: ["input", "forms", "demo", "comprehensive"],
-    path: "/components/input",
-    keywords: ["input", "forms", "demo", "showcase"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["form-controls", "validation", "accessibility", "responsive"],
+export default function AdminDashboard() {
+  const users = [
+    { id: 1, name: "John Doe", email: "john@example.com", role: "Admin", status: "Active" },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", role: "User", status: "Inactive" }
+  ];
+  
+  return (
+    <div class="flex min-h-screen">
+      {/* Sidebar */}
+      <Sidebar class="w-64 bg-base-200">
+        <div class="p-4">
+          <h1 class="text-xl font-bold">Admin Panel</h1>
+        </div>
+        <ul class="menu">
+          <li><a href="#dashboard">Dashboard</a></li>
+          <li><a href="#users">Users</a></li>
+          <li><a href="#settings">Settings</a></li>
+        </ul>
+      </Sidebar>
+      
+      {/* Main Content */}
+      <div class="flex-1 p-6">
+        {/* Stats Overview */}
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-4">Dashboard Overview</h2>
+          <Stats class="grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="stat bg-base-100">
+              <div class="stat-value text-primary">1,234</div>
+              <div class="stat-title">Total Users</div>
+              <div class="stat-desc">↗︎ 12% increase</div>
+            </div>
+            <div class="stat bg-base-100">
+              <div class="stat-value text-secondary">567</div>
+              <div class="stat-title">Active Sessions</div>
+              <div class="stat-desc">↗︎ 8% increase</div>
+            </div>
+            <div class="stat bg-base-100">
+              <div class="stat-value text-accent">89</div>
+              <div class="stat-title">New Signups</div>
+              <div class="stat-desc">↘︎ 3% decrease</div>
+            </div>
+            <div class="stat bg-base-100">
+              <div class="stat-value text-info">99.9%</div>
+              <div class="stat-title">Uptime</div>
+              <div class="stat-desc">Last 30 days</div>
+            </div>
+          </Stats>
+        </div>
+        
+        {/* Users Table */}
+        <Card class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">Recent Users</h3>
+            <Button size="sm">Add User</Button>
+          </div>
+          <Table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(user => (
+                <tr key={user.id}>
+                  <td>
+                    <div class="flex items-center">
+                      <Avatar size="sm" class="mr-2" />
+                      {user.name}
+                    </div>
+                  </td>
+                  <td>{user.email}</td>
+                  <td>
+                    <Badge color={user.role === 'Admin' ? 'primary' : 'secondary'}>
+                      {user.role}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Badge color={user.status === 'Active' ? 'success' : 'warning'}>
+                      {user.status}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Button size="xs" variant="outline">Edit</Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card>
+      </div>
+    </div>
+  );
+}`
+          }
+        ]
+      }
+    ],
+    form: [
+      {
+        id: "contact-form",
+        name: "Contact Form",
+        description: "Professional contact form with validation and multiple input types",
+        category: "form",
+        tags: ["contact", "form", "validation", "inputs"],
+        path: "/pages/templates/contact-form",
+        keywords: ["contact", "form", "validation", "inputs"],
+        components: ["Input", "Textarea", "Button", "Card", "Alert"],
+        layout: {
+          structure: "Header + Form Card + Success/Error States",
+          responsive: true,
+          sections: ["header", "form", "validation", "submission"]
+        },
+        features: ["form-validation", "error-handling", "responsive-design", "accessibility"],
+        codeFiles: [
+          {
+            filename: "ContactFormPage.tsx",
+            language: "tsx",
+            content: `import { Input, Textarea, Button, Card, Alert } from "@suppers/ui-lib";
+
+export default function ContactFormPage() {
+  return (
+    <div class="min-h-screen bg-base-200 py-12">
+      <div class="max-w-2xl mx-auto px-4">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold mb-2">Contact Us</h1>
+          <p class="text-base-content/70">We'd love to hear from you. Send us a message!</p>
+        </div>
+        
+        <Card class="p-8">
+          <form class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="label">
+                  <span class="label-text">First Name *</span>
+                </label>
+                <Input 
+                  type="text" 
+                  placeholder="John" 
+                  required 
+                  class="w-full"
+                />
+              </div>
+              <div>
+                <label class="label">
+                  <span class="label-text">Last Name *</span>
+                </label>
+                <Input 
+                  type="text" 
+                  placeholder="Doe" 
+                  required 
+                  class="w-full"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label class="label">
+                <span class="label-text">Email Address *</span>
+              </label>
+              <Input 
+                type="email" 
+                placeholder="john@example.com" 
+                required 
+                class="w-full"
+              />
+            </div>
+            
+            <div>
+              <label class="label">
+                <span class="label-text">Subject</span>
+              </label>
+              <Input 
+                type="text" 
+                placeholder="How can we help?" 
+                class="w-full"
+              />
+            </div>
+            
+            <div>
+              <label class="label">
+                <span class="label-text">Message *</span>
+              </label>
+              <Textarea 
+                placeholder="Tell us more about your inquiry..."
+                rows={5}
+                required
+                class="w-full"
+              />
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-base-content/70">
+                * Required fields
+              </div>
+              <Button type="submit" size="lg">
+                Send Message
+              </Button>
+            </div>
+          </form>
+        </Card>
+        
+        <Alert class="mt-6" type="info">
+          <span>We typically respond within 24 hours during business days.</span>
+        </Alert>
+      </div>
+    </div>
+  );
+}`
+          }
+        ]
+      }
+    ],
+    admin: [],
+    auth: [
+      {
+        id: "login-page",
+        name: "Login Page",
+        description: "Clean authentication page with social login options and form validation",
+        category: "auth",
+        tags: ["login", "auth", "social", "validation"],
+        path: "/pages/templates/login-page",
+        keywords: ["login", "signin", "auth", "social"],
+        components: ["Input", "Button", "Card", "Divider", "Alert"],
+        layout: {
+          structure: "Centered Card + Form + Social Options + Links",
+          responsive: true,
+          sections: ["header", "form", "social", "links"]
+        },
+        features: ["social-login", "form-validation", "responsive-design", "accessibility"],
+        codeFiles: [
+          {
+            filename: "LoginPage.tsx",
+            language: "tsx",
+            content: `import { Input, Button, Card, Divider, Alert } from "@suppers/ui-lib";
+
+export default function LoginPage() {
+  return (
+    <div class="min-h-screen bg-base-200 flex items-center justify-center py-12 px-4">
+      <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold">Welcome Back</h1>
+          <p class="text-base-content/70 mt-2">Sign in to your account</p>
+        </div>
+        
+        <Card class="p-8">
+          {/* Social Login */}
+          <div class="space-y-3 mb-6">
+            <Button variant="outline" class="w-full" size="lg">
+              <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                {/* Google icon */}
+              </svg>
+              Continue with Google
+            </Button>
+            <Button variant="outline" class="w-full" size="lg">
+              <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                {/* GitHub icon */}
+              </svg>
+              Continue with GitHub
+            </Button>
+          </div>
+          
+          <Divider>OR</Divider>
+          
+          {/* Email/Password Form */}
+          <form class="space-y-4">
+            <div>
+              <label class="label">
+                <span class="label-text">Email</span>
+              </label>
+              <Input 
+                type="email" 
+                placeholder="Enter your email"
+                class="w-full"
+                required
+              />
+            </div>
+            
+            <div>
+              <label class="label">
+                <span class="label-text">Password</span>
+              </label>
+              <Input 
+                type="password" 
+                placeholder="Enter your password"
+                class="w-full"
+                required
+              />
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <label class="label cursor-pointer">
+                <input type="checkbox" class="checkbox checkbox-sm" />
+                <span class="label-text ml-2">Remember me</span>
+              </label>
+              <a href="#" class="link link-primary text-sm">Forgot password?</a>
+            </div>
+            
+            <Button type="submit" class="w-full" size="lg">
+              Sign In
+            </Button>
+          </form>
+          
+          <div class="text-center mt-6">
+            <span class="text-base-content/70">Don't have an account? </span>
+            <a href="#" class="link link-primary">Sign up</a>
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}`
+          }
+        ]
+      }
+    ],
+    content: []
   },
-  {
-    name: "Layout Components Demo",
-    description: "Comprehensive showcase of layout components",
-    category: "Component Demos",
-    tags: ["layout", "structure", "demo", "responsive"],
-    path: "/components/layout",
-    keywords: ["layout", "structure", "demo", "responsive"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["layout-patterns", "responsive-design", "grid-systems", "positioning"],
-  },
-  {
-    name: "Navigation Components Demo",
-    description: "Comprehensive showcase of navigation components",
-    category: "Component Demos",
-    tags: ["navigation", "menu", "demo", "interactive"],
-    path: "/components/navigation",
-    keywords: ["navigation", "menu", "demo", "links"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["navigation-patterns", "responsive-menus", "breadcrumbs", "pagination"],
-  },
-  {
-    name: "Feedback Components Demo",
-    description: "Comprehensive showcase of feedback components",
-    category: "Component Demos",
-    tags: ["feedback", "notifications", "demo", "status"],
-    path: "/components/feedback",
-    keywords: ["feedback", "notifications", "demo", "status"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["notifications", "loading-states", "progress", "alerts"],
-  },
-  {
-    name: "Mockup Components Demo",
-    description: "Comprehensive showcase of mockup components",
-    category: "Component Demos",
-    tags: ["mockup", "frames", "demo", "devices"],
-    path: "/components/mockup",
-    keywords: ["mockup", "frames", "demo", "devices"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "ComponentPageTemplate",
-    features: ["device-frames", "responsive-mockups", "content-display", "branding"],
-  },
+  guides: [
+    {
+      title: "Building Effective Page Layouts",
+      description: "Learn how to compose ui-lib components into cohesive page designs",
+      sections: [
+        {
+          title: "Layout Fundamentals",
+          content: "Start with a clear hierarchy: header, main content, and footer. Use layout components like Sidebar and Drawer for navigation.",
+          examples: ["hero-landing", "admin-dashboard"]
+        },
+        {
+          title: "Component Composition",
+          content: "Combine components thoughtfully. Cards work well for content sections, Stats for metrics, and Tables for data display.",
+          examples: ["admin-dashboard", "contact-form"]
+        },
+        {
+          title: "Responsive Design",
+          content: "Use Tailwind's responsive classes to ensure your layouts work on all devices. Test mobile-first approaches.",
+          examples: ["hero-landing", "login-page"]
+        }
+      ]
+    }
+  ]
+};
+
+// Utility functions for working with page templates
+const allTemplates = [
+  ...pageTemplates.templates.landing,
+  ...pageTemplates.templates.dashboard,
+  ...pageTemplates.templates.form,
+  ...pageTemplates.templates.admin,
+  ...pageTemplates.templates.auth,
+  ...pageTemplates.templates.content
 ];
 
 export const getPagesByCategory = (category: string) => {
-  return allPages.filter((page) => page.category.toLowerCase() === category.toLowerCase());
-};
-
-export const getPagesByType = (type: "route" | "page" | "demo" | "shared") => {
-  return allPages.filter((page) => page.type === type);
+  return allTemplates.filter((template) => template.category.toLowerCase() === category.toLowerCase());
 };
 
 export const getPageByPath = (path: string) => {
-  return allPages.find((page) => page.path === path);
+  return allTemplates.find((template) => template.path === path);
 };
 
 export const getAllPageCategories = () => {
-  const categories = new Set(allPages.map((page) => page.category));
+  const categories = new Set(allTemplates.map((template) => template.category));
   return Array.from(categories);
 };
 
-export const getPageCount = () => allPages.length;
+export const getPageCount = () => allTemplates.length;
 
 export const getPageCategoryCount = (category: string) => {
-  return allPages.filter((page) => page.category.toLowerCase() === category.toLowerCase()).length;
-};
-
-export const getProtectedPages = () => {
-  return allPages.filter((page) => page.authRequired);
-};
-
-export const getPublicPages = () => {
-  return allPages.filter((page) => !page.authRequired);
+  return allTemplates.filter((template) => template.category.toLowerCase() === category.toLowerCase()).length;
 };
 
 export const getPagesByFeature = (feature: string) => {
-  return allPages.filter((page) => page.features?.includes(feature));
+  return allTemplates.filter((template) => template.features?.includes(feature));
 };
 
-export const getPagesByLayout = (layout: string) => {
-  return allPages.filter((page) => page.layoutUsed === layout);
+export const getPagesByComponent = (component: string) => {
+  return allTemplates.filter((template) => template.components?.includes(component));
 };
