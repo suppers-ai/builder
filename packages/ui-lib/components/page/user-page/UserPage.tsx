@@ -1,14 +1,8 @@
 import { BaseComponentProps } from "../../types.ts";
-import { Loading } from "../../feedback/loading/Loading.tsx";
 import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
-import { Button } from "../../action/button/Button.tsx";
-import { Card } from "../../display/card/Card.tsx";
-import { Badge } from "../../display/badge/Badge.tsx";
-import { Stat } from "../../display/stat/Stat.tsx";
 import { EditUserModal } from "./EditUserModal.tsx";
 import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
 import type { Application, User } from "../../../shared/lib/api-helpers.ts";
-import type { AuthUser } from "@suppers/shared/types/auth.ts";
 import { TypeMappers } from "@suppers/shared/utils";
 
 interface UserStats {

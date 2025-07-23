@@ -22,7 +22,7 @@ import {
   toggleGlobalSidebar,
   updateScrollTop,
 } from "../../../utils/signals.ts";
-import type { SidebarConfig } from "../../../utils/sidebar-config.tsx";
+import type { SidebarConfig } from "../../../../shared/types/sidebar.tsx";
 
 export interface HeaderLayoutProps extends BaseComponentProps {
   title?: string;

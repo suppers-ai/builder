@@ -12,41 +12,9 @@ import {
   Zap,
 } from "lucide-preact";
 import {
-  actionComponentsMetadata,
-  displayComponentsMetadata,
-  feedbackComponentsMetadata,
-  inputComponentsMetadata,
-  layoutComponentsMetadata,
-  mockupComponentsMetadata,
-  navigationComponentsMetadata,
+  SidebarConfig,
 } from "@suppers/ui-lib";
-
-export interface SidebarLink {
-  name: string;
-  path: string;
-  icon?: any;
-  description?: string;
-  badge?: string | number;
-  external?: boolean;
-}
-
-export interface SidebarSection {
-  id: string;
-  title: string;
-  icon?: any;
-  links: SidebarLink[];
-  defaultOpen?: boolean;
-  badge?: string | number;
-}
-
-export interface SidebarConfig {
-  sections: SidebarSection[];
-  showSearch?: boolean;
-  showQuickLinks?: boolean;
-  quickLinks?: SidebarLink[];
-  title?: string;
-  logo?: any;
-}
+import { componentsMetadata } from "@suppers/ui-lib/components/metadata.tsx";
 
 // Icon mapping for categories
 export const categoryIcons: Record<string, any> = {
@@ -85,7 +53,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
       title: "Actions",
       icon: categoryIcons["Actions"],
       defaultOpen: true,
-      links: actionComponentsMetadata.map((value) => ({
+      links: componentsMetadata.action.map((value) => ({
         name: value.name,
         path: value.path,
       })),
@@ -95,7 +63,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
       title: "Display",
       icon: categoryIcons["Data Display"],
       defaultOpen: true,
-      links: displayComponentsMetadata.map((value) => ({
+      links: componentsMetadata.display.map((value) => ({
         name: value.name,
         path: value.path,
       })),
@@ -105,7 +73,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
       title: "Navigation",
       icon: categoryIcons["Navigation"],
       defaultOpen: true,
-      links: navigationComponentsMetadata.map((value) => ({
+      links: componentsMetadata.navigation.map((value) => ({
         name: value.name,
         path: value.path,
       })),
@@ -115,7 +83,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
       title: "Input",
       icon: categoryIcons["Data Input"],
       defaultOpen: true,
-      links: inputComponentsMetadata.map((value) => ({
+      links: componentsMetadata.input.map((value) => ({
         name: value.name,
         path: value.path,
       })),
@@ -125,7 +93,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
       title: "Layout",
       icon: categoryIcons["Layout"],
       defaultOpen: true,
-      links: layoutComponentsMetadata.map((value) => ({
+      links: componentsMetadata.layout.map((value) => ({
         name: value.name,
         path: value.path,
       })),
@@ -135,7 +103,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
       title: "Feedback",
       icon: categoryIcons["Feedback"],
       defaultOpen: true,
-      links: feedbackComponentsMetadata.map((value) => ({
+      links: componentsMetadata.feedback.map((value) => ({
         name: value.name,
         path: value.path,
       })),
@@ -145,7 +113,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
       title: "Mockup",
       icon: categoryIcons["Mockup"],
       defaultOpen: true,
-      links: mockupComponentsMetadata.map((value) => ({
+      links: componentsMetadata.mockup.map((value) => ({
         name: value.name,
         path: value.path,
       })),

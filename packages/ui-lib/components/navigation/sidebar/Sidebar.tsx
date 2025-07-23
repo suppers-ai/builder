@@ -2,7 +2,7 @@ import {
   type SidebarConfig,
   type SidebarLink,
   type SidebarSection,
-} from "../../../utils/sidebar-config.tsx";
+} from "../../../../shared/types/sidebar.tsx";
 import { Badge } from "../../display/badge/Badge.tsx";
 import { ChevronRight } from "lucide-preact";
 import { useState } from "preact/hooks";

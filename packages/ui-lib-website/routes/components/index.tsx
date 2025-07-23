@@ -3,40 +3,35 @@ import { PageProps } from "fresh";
 
 // Import metadata using the new organized structure
 import {
-  actionComponentsMetadata,
-  displayComponentsMetadata,
-  feedbackComponentsMetadata,
+  componentsMetadata,
   flatComponentsMetadata,
-  inputComponentsMetadata,
-  layoutComponentsMetadata,
-  mockupComponentsMetadata,
-  navigationComponentsMetadata,
 } from "../../../ui-lib/components/metadata.tsx";
+import ComponentsFilterInteractive from "../../islands/ComponentsFilter.tsx";
 
-interface Component {
-  name: string;
-  description: string;
-  path: string;
-  category: string;
-  categoryColor: string;
-  preview: any;
-  tags: string[];
-}
+const allComponents = flatComponentsMetadata;
 
-const components: Component[] = flatComponentsMetadata;
-
-console.log("Test metadata components loaded:", components.length);
+// Create a serializable version of components data (excluding functions and JSX)
+const serializableComponents = flatComponentsMetadata.map((comp) => ({
+  name: comp.name,
+  description: comp.description,
+  path: comp.path,
+  category: comp.category,
+  tags: comp.tags || [],
+  // Exclude: preview, schema, examples, and other non-serializable properties
+}));
 
 const categories = [
-  { name: "All", count: components.length, color: "neutral" },
-  { name: "Actions", count: actionComponentsMetadata.length, color: "primary" },
-  { name: "Display", count: displayComponentsMetadata.length, color: "secondary" },
-  { name: "Navigation", count: navigationComponentsMetadata.length, color: "accent" },
-  { name: "Input", count: inputComponentsMetadata.length, color: "info" },
-  { name: "Layout", count: layoutComponentsMetadata.length, color: "success" },
-  { name: "Feedback", count: feedbackComponentsMetadata.length, color: "warning" },
-  { name: "Mockup", count: mockupComponentsMetadata.length, color: "error" },
+  { name: "All", count: allComponents.length, color: "neutral" as const },
+  { name: "Actions", count: componentsMetadata.action.length, color: "primary" as const },
+  { name: "Display", count: componentsMetadata.display.length, color: "secondary" as const },
+  { name: "Navigation", count: componentsMetadata.navigation.length, color: "accent" as const },
+  { name: "Input", count: componentsMetadata.input.length, color: "info" as const },
+  { name: "Layout", count: componentsMetadata.layout.length, color: "success" as const },
+  { name: "Feedback", count: componentsMetadata.feedback.length, color: "warning" as const },
+  { name: "Mockup", count: componentsMetadata.mockup.length, color: "error" as const },
 ];
+
+console.log("Test metadata components loaded:", allComponents.length);
 
 export default function ComponentsPage({ url }: PageProps) {
   // Get category filter from URL parameters
@@ -69,6 +64,20 @@ export default function ComponentsPage({ url }: PageProps) {
           />
         </div>
       </nav>
+  
+      <div class="px-4 lg:px-6 py-8">
+        <div class="max-w-7xl mx-auto">
+          {/* Interactive Components Filter using serializable metadata */}
+          <ComponentsFilterInteractive
+            components={serializableComponents.map((comp) => ({
+              ...comp,
+              categoryColor: comp.category,
+            }))}
+            categories={categories}
+            initialCategory={selectedCategory}
+          />
+        </div>
+      </div>
     </>
   );
 }

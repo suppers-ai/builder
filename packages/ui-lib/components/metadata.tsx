@@ -9,7 +9,7 @@ import { pageComponentsMetadata } from "./page/metadata.tsx";
 import { sectionComponentsMetadata } from "./sections/metadata.tsx";
 import { templateComponentsMetadata } from "./templates/metadata.tsx";
 
-export const allComponentsMetadata = {
+export const componentsMetadata = {
   action: actionComponentsMetadata,
   display: displayComponentsMetadata,
   feedback: feedbackComponentsMetadata,
@@ -22,28 +22,4 @@ export const allComponentsMetadata = {
   templates: templateComponentsMetadata,
 };
 
-export const flatComponentsMetadata = [
-  ...actionComponentsMetadata,
-  ...displayComponentsMetadata,
-  ...feedbackComponentsMetadata,
-  ...inputComponentsMetadata,
-  ...layoutComponentsMetadata,
-  ...mockupComponentsMetadata,
-  ...navigationComponentsMetadata,
-  ...pageComponentsMetadata,
-  ...sectionComponentsMetadata,
-  ...templateComponentsMetadata,
-];
-
-export {
-  actionComponentsMetadata,
-  displayComponentsMetadata,
-  feedbackComponentsMetadata,
-  inputComponentsMetadata,
-  layoutComponentsMetadata,
-  mockupComponentsMetadata,
-  navigationComponentsMetadata,
-  pageComponentsMetadata,
-  sectionComponentsMetadata,
-  templateComponentsMetadata,
-};
+export const flatComponentsMetadata = Object.values(componentsMetadata).flat();

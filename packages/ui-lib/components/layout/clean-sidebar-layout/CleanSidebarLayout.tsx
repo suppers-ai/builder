@@ -3,7 +3,7 @@ import { Code2, X } from "lucide-preact";
 import { BaseComponentProps } from "../../types.ts";
 import { Sidebar } from "../../navigation/sidebar/Sidebar.tsx";
 import { Button } from "../../action/button/Button.tsx";
-import { type SidebarConfig, type SidebarLink } from "../../../utils/sidebar-config.tsx";
+import { type SidebarConfig, type SidebarLink } from "../../../../shared/types/sidebar.tsx";
 
 export interface CleanSidebarLayoutProps extends BaseComponentProps {
   isOpen: boolean;

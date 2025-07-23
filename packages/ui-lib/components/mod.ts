@@ -184,7 +184,7 @@ export {
   type SidebarConfig,
   type SidebarLink,
   type SidebarSection,
-} from "../utils/sidebar-config.tsx";
+} from "../../shared/types/sidebar.tsx";
 
 // Export metadata files for ui-lib-website
 export { buttonMetadata } from "./action/button/Button.metadata.tsx";
@@ -225,7 +225,6 @@ export { radioMetadata } from "./input/radio/Radio.metadata.tsx";
 export { rangeMetadata } from "./input/range/Range.metadata.tsx";
 export { ratingMetadata } from "./input/rating/Rating.metadata.tsx";
 export { selectMetadata } from "./input/select/Select.metadata.tsx";
-export { textInputMetadata } from "./input/text-input/TextInput.metadata.ts";
 export { textareaMetadata } from "./input/textarea/Textarea.metadata.tsx";
 export { toggleMetadata } from "./input/toggle/Toggle.metadata.tsx";
 export { artboardMetadata } from "./layout/artboard/Artboard.metadata.tsx";
@@ -251,16 +250,6 @@ export { windowMetadata } from "./mockup/window/Window.metadata.tsx";
 
 // Export organized metadata collections
 export {
-  actionComponentsMetadata,
-  allComponentsMetadata,
-  displayComponentsMetadata,
-  feedbackComponentsMetadata,
+  componentsMetadata,
   flatComponentsMetadata,
-  inputComponentsMetadata,
-  layoutComponentsMetadata,
-  mockupComponentsMetadata,
-  navigationComponentsMetadata,
-  pageComponentsMetadata,
-  sectionComponentsMetadata,
-  templateComponentsMetadata,
 } from "./metadata.tsx";
