@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const skeletonExamples: ComponentExample[] = [
   {
@@ -170,7 +175,13 @@ export const skeletonMetadata: ComponentMetadata = {
   examples: skeletonExamples,
   props: skeletonProps,
   variants: ["basic", "circle", "text", "card", "list"],
-  useCases: ["Loading states", "Content placeholders", "Image loading", "Text loading", "Complex layouts"],
+  useCases: [
+    "Loading states",
+    "Content placeholders",
+    "Image loading",
+    "Text loading",
+    "Complex layouts",
+  ],
   usageNotes: [
     "Use skeletons that match the actual content structure and dimensions",
     "Vary skeleton widths to create more realistic loading states",

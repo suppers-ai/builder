@@ -1,6 +1,15 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentSchema } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentSchema,
+} from "../../types.ts";
 import { Button } from "./Button.tsx";
-import { ButtonPropsSchema, validateButtonProps, safeValidateButtonProps } from "./Button.schema.ts";
+import {
+  ButtonPropsSchema,
+  safeValidateButtonProps,
+  validateButtonProps,
+} from "./Button.schema.ts";
 
 const buttonSchema: ComponentSchema = {
   schema: ButtonPropsSchema,

@@ -591,7 +591,7 @@ export function ThemeController({
     );
   }
 
-  // Default dropdown variant - DaisyUI native style
+  // Default dropdown variant - daisyUI native style
   return (
     <div class="space-y-4">
       {renderControls()}

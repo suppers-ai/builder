@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const collapseExamples: ComponentExample[] = [
   {
@@ -64,13 +69,13 @@ const collapseExamples: ComponentExample[] = [
     description: "Multiple collapses for FAQ or help sections",
     code: `<div class="space-y-2">
   <Collapse title="What is this component library?" arrow>
-    This is a comprehensive UI component library built with Deno, Fresh, and DaisyUI, 
+    This is a comprehensive UI component library built with Deno, Fresh, and daisyUI, 
     providing reusable components for building modern web applications.
   </Collapse>
   
   <Collapse title="How do I customize the styling?" arrow>
     You can customize styling by passing additional CSS classes through the 'class' prop,
-    or by modifying the DaisyUI theme configuration.
+    or by modifying the daisyUI theme configuration.
   </Collapse>
   
   <Collapse title="Is it mobile responsive?" arrow>
@@ -209,7 +214,13 @@ export const collapseMetadata: ComponentMetadata = {
   examples: collapseExamples,
   props: collapseProps,
   variants: ["basic", "arrow", "plus", "checkbox", "nested"],
-  useCases: ["FAQ sections", "Settings panels", "Content organization", "Space-saving layouts", "Progressive disclosure"],
+  useCases: [
+    "FAQ sections",
+    "Settings panels",
+    "Content organization",
+    "Space-saving layouts",
+    "Progressive disclosure",
+  ],
   usageNotes: [
     "Use arrow variant for general expand/collapse UI patterns",
     "Checkbox variant works well in forms and settings interfaces",

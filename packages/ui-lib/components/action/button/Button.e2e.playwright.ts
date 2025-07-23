@@ -8,7 +8,7 @@ test.describe("Button E2E Tests", () => {
 
   test("page loads and displays button examples", async ({ page }) => {
     // Check that the page title is correct (using current title format)
-    await expect(page).toHaveTitle("DaisyUI Component Library - Fresh 2.0");
+    await expect(page).toHaveTitle("daisyUI Component Library - Fresh 2.0");
 
     // Check that the main heading is present
     await expect(page.locator("h1").first()).toContainText("Button");

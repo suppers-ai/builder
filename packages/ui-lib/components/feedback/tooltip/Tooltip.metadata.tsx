@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const tooltipExamples: ComponentExample[] = [
   {
@@ -155,7 +160,7 @@ const tooltipProps: ComponentProp[] = [
   },
   {
     name: "onHide",
-    type: "() => void", 
+    type: "() => void",
     description: "Callback when tooltip becomes hidden",
   },
   {
@@ -167,7 +172,8 @@ const tooltipProps: ComponentProp[] = [
 
 export const tooltipMetadata: ComponentMetadata = {
   name: "Tooltip",
-  description: "Contextual information popups that appear on hover to provide helpful hints and details",
+  description:
+    "Contextual information popups that appear on hover to provide helpful hints and details",
   category: ComponentCategory.FEEDBACK,
   path: "/components/feedback/tooltip",
   tags: ["tooltip", "hover", "popup", "help", "information", "hint"],
@@ -189,7 +195,13 @@ export const tooltipMetadata: ComponentMetadata = {
   examples: tooltipExamples,
   props: tooltipProps,
   variants: ["basic", "positions", "colors", "always-visible"],
-  useCases: ["Help text", "Additional information", "Form field hints", "Icon explanations", "Feature guidance"],
+  useCases: [
+    "Help text",
+    "Additional information",
+    "Form field hints",
+    "Icon explanations",
+    "Feature guidance",
+  ],
   usageNotes: [
     "Keep tooltip text concise and helpful - aim for one sentence",
     "Position tooltips to avoid covering important UI elements",

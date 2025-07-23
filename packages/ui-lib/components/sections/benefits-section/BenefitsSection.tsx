@@ -23,7 +23,7 @@ interface Benefit {
 const benefits: Benefit[] = [
   {
     icon: <Flower size={32} />,
-    title: "DaisyUI Components",
+    title: "daisyUI Components",
     description:
       "Components are built with DaisyUI and are ready to use in your Fresh applications.",
     features: [

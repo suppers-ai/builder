@@ -7,7 +7,7 @@ test.describe("DatetimeInput E2E Tests", () => {
   });
 
   test("page loads and displays datetime input examples", async ({ page }) => {
-    await expect(page).toHaveTitle("DaisyUI Component Library - Fresh 2.0");
+    await expect(page).toHaveTitle("daisyUI Component Library - Fresh 2.0");
     await expect(page.locator("h1").first()).toContainText("Datetime Input");
     await expect(page.locator('input[type="datetime-local"]').first()).toBeVisible();
   });

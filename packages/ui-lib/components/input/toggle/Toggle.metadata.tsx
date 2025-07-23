@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const toggleExamples: ComponentExample[] = [
   {
@@ -128,7 +133,13 @@ export const toggleMetadata: ComponentMetadata = {
   examples: toggleExamples,
   props: toggleProps,
   variants: ["basic", "sizes", "colors", "disabled", "with-labels"],
-  useCases: ["Settings panels", "Feature toggles", "Preferences", "Notifications", "Privacy controls"],
+  useCases: [
+    "Settings panels",
+    "Feature toggles",
+    "Preferences",
+    "Notifications",
+    "Privacy controls",
+  ],
   usageNotes: [
     "Use toggles for immediate binary state changes (on/off)",
     "Provide clear labels to indicate what the toggle controls",

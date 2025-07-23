@@ -21,6 +21,7 @@ export function Sidebar({
   class: className = "",
 }: SidebarProps) {
   const isLinkActive = (link: SidebarLink) => {
+    console.log(link.path);
     if (link.path === "/" && currentPath === "/") return true;
     if (link.path !== "/" && currentPath.startsWith(link.path)) return true;
     return false;
@@ -46,18 +47,18 @@ export function Sidebar({
 
       {/* Quick Links */}
       {config.showQuickLinks && config.quickLinks && config.quickLinks.length > 0 && (
-        <div class="p-4 border-b border-base-300">
+        <div class="p-4">
           <h3 class="text-sm font-medium text-base-content/70 mb-3">Quick Links</h3>
           <ul class="space-y-1">
             {config.quickLinks.map((link) => (
               <li key={link.path}>
                 <a
                   href={link.path}
-                  class={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary ${
-                    isLinkActive(link)
-                      ? "bg-primary/10 text-primary font-medium border-r-2 border-primary"
-                      : "text-base-content"
-                  }`}
+                  class={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-base-200 focus:outline-none 
+                    ${isLinkActive(link)
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-base-content"}
+                  `}
                   onClick={() => handleLinkClick(link)}
                 >
                   {link.icon}
@@ -123,7 +124,7 @@ function SidebarSection({ section, currentPath, onLinkClick }: SidebarSectionPro
       {/* Section Header - Clickable */}
       <button
         onClick={toggleSection}
-        class={`w-full px-4 py-2 flex items-center justify-between hover:bg-base-200/50 transition-colors ${
+        class={`w-full px-4 py-2 flex items-center justify-between transition-colors hover:bg-base-200/50 focus:outline-none ${
           hasActiveLink ? "bg-primary/5" : ""
         }`}
       >
@@ -156,9 +157,9 @@ function SidebarSection({ section, currentPath, onLinkClick }: SidebarSectionPro
                 <li key={link.path}>
                   <a
                     href={link.path}
-                    class={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary ${
+                    class={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors hover:bg-base-200 focus:outline-none ${
                       isActive
-                        ? "bg-primary/10 text-primary font-medium border-r-2 border-primary"
+                        ? "bg-primary/10 text-primary font-medium"
                         : "text-base-content/80 hover:text-base-content"
                     }`}
                     onClick={() => onLinkClick(link)}

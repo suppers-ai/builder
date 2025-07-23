@@ -443,12 +443,12 @@ ${JSON.stringify(structuredData, null, 2)}
 // Pre-defined card data for the component library
 export const componentLibraryCards = {
   homepage: {
-    title: "DaisyUI Components for Fresh 2.0",
+    title: "daisyUI Components for Fresh 2.0",
     description:
       "Professional, accessible, and TypeScript-ready components. 65+ components with perfect theming and Fresh 2.0 integration.",
     url: "https://your-domain.com",
     type: "website" as const,
-    siteName: "DaisyUI Fresh Components",
+    siteName: "daisyUI Fresh Components",
     theme: "light" as const,
   },
   components: {
@@ -457,7 +457,7 @@ export const componentLibraryCards = {
       "Explore our complete collection of DaisyUI components built for Fresh 2.0. Actions, Display, Navigation, Forms, and more.",
     url: "https://your-domain.com/components",
     type: "website" as const,
-    siteName: "DaisyUI Fresh Components",
+    siteName: "daisyUI Fresh Components",
     theme: "light" as const,
   },
   documentation: {
@@ -466,7 +466,7 @@ export const componentLibraryCards = {
       "Complete installation guide and documentation for the most comprehensive DaisyUI component library for Fresh 2.0.",
     url: "https://your-domain.com/docs",
     type: "article" as const,
-    siteName: "DaisyUI Fresh Components",
+    siteName: "daisyUI Fresh Components",
     theme: "light" as const,
   },
 };

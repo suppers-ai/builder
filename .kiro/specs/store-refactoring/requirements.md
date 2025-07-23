@@ -23,8 +23,8 @@ This document outlines the requirements for refactoring and enhancing the `packa
 
 #### Acceptance Criteria
 
-1. WHEN custom CSS classes are removed THEN the system SHALL use DaisyUI theme tokens instead of hardcoded colors
-2. WHEN theme tokens are applied THEN the system SHALL support all 29 DaisyUI themes consistently
+1. WHEN custom CSS classes are removed THEN the system SHALL use daisyUI theme tokens instead of hardcoded colors
+2. WHEN theme tokens are applied THEN the system SHALL support all 29 daisyUI themes consistently
 3. WHEN styling is standardized THEN the system SHALL replace custom classes like `bg-blue-600` and `text-gray-900` with theme tokens like `bg-primary` and `text-base-content`
 4. WHEN components are styled THEN the system SHALL ensure visual consistency across all authentication flows
 

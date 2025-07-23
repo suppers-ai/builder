@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const modalExamples: ComponentExample[] = [
   {

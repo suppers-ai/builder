@@ -5,7 +5,7 @@
 
 import { z } from "zod";
 
-// DaisyUI Theme Schema
+// daisyUI Theme Schema
 export const DaisyUIThemeSchema = z.enum([
   "light",
   "dark",

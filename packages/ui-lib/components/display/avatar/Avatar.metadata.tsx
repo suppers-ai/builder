@@ -1,10 +1,16 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const avatarExamples: ComponentExample[] = [
   {
     title: "Basic Avatar",
     description: "Simple avatars with images and placeholders",
-    code: `<Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+    code:
+      `<Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
 <Avatar initials="JD" />
 <Avatar placeholder="?" />`,
     showCode: true,
@@ -12,7 +18,8 @@ const avatarExamples: ComponentExample[] = [
   {
     title: "Avatar Sizes",
     description: "Different sizes for various contexts",
-    code: `<Avatar size="xs" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+    code:
+      `<Avatar size="xs" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
 <Avatar size="sm" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
 <Avatar size="md" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
 <Avatar size="lg" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
@@ -22,7 +29,8 @@ const avatarExamples: ComponentExample[] = [
   {
     title: "Avatar with Status Indicators",
     description: "Online/offline status indicators",
-    code: `<Avatar online src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+    code:
+      `<Avatar online src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
 <Avatar offline src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
 <Avatar online initials="JD" />
 <Avatar offline initials="SM" />`,
@@ -31,7 +39,8 @@ const avatarExamples: ComponentExample[] = [
   {
     title: "Avatar with Ring",
     description: "Avatars with decorative rings",
-    code: `<Avatar ring src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+    code:
+      `<Avatar ring src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
 <Avatar ring initials="AB" />
 <Avatar ring online src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />`,
     showCode: true,

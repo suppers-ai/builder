@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const dockExamples: ComponentExample[] = [
   {
@@ -160,7 +165,9 @@ export const dockMetadata: ComponentMetadata = {
         <button class="flex flex-col items-center justify-center w-12 h-12 rounded-lg hover:bg-base-200/50 relative">
           <span class="text-lg">💬</span>
           <span class="text-xs">Chat</span>
-          <span class="absolute -top-1 -right-1 bg-primary text-primary-content text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+          <span class="absolute -top-1 -right-1 bg-primary text-primary-content text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            3
+          </span>
         </button>
       </div>
     </div>

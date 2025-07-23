@@ -18,7 +18,7 @@ export interface HeaderLayoutIslandProps {
 export default function HeaderLayoutIsland({
   currentPath = "",
   showControls = false,
-  title = "DaisyUI Components",
+  title = "daisyUI Components",
   showSearch = true,
   showLogin = true,
   showProfile = false,

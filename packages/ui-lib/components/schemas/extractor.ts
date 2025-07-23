@@ -27,19 +27,19 @@ export interface ExtractorOptions {
  */
 export function extractApiPropsFromSchema(
   schema: z.ZodSchema,
-  options: ExtractorOptions = {}
+  options: ExtractorOptions = {},
 ): ApiProp[] {
   const props: ApiProp[] = [];
-  
+
   function extractFromZodType(
     zodType: z.ZodTypeAny,
     propName: string,
-    path: string[] = []
+    path: string[] = [],
   ): void {
     // Handle ZodObject
     if (zodType instanceof z.ZodObject) {
       const shape = zodType.shape;
-      
+
       for (const [key, fieldSchema] of Object.entries(shape)) {
         extractFromZodType(fieldSchema as z.ZodTypeAny, key, [...path, propName]);
       }
@@ -75,10 +75,10 @@ export function extractApiPropsFromSchema(
     // Get type information
     const typeString = getZodTypeString(innerType);
     const description = zodType.description || innerType.description || "";
-    
+
     // Extract metadata if available
     const metadata = (zodType as any)._def?.metadata || {};
-    
+
     props.push({
       name: propName,
       type: typeString,
@@ -94,21 +94,21 @@ export function extractApiPropsFromSchema(
   // Start extraction from the root schema
   if (schema instanceof z.ZodObject) {
     const shape = schema.shape;
-    
+
     for (const [key, fieldSchema] of Object.entries(shape)) {
       extractFromZodType(fieldSchema as z.ZodTypeAny, key);
     }
   } else {
     // Handle non-object schemas
-    extractFromZodType(schema, 'value');
+    extractFromZodType(schema, "value");
   }
 
-  return props.filter(prop => {
+  return props.filter((prop) => {
     // Filter out private props if not requested
-    if (!options.includePrivate && prop.name.startsWith('_')) {
+    if (!options.includePrivate && prop.name.startsWith("_")) {
       return false;
     }
-    
+
     return true;
   }).sort((a, b) => {
     // Sort required props first, then alphabetically
@@ -140,13 +140,13 @@ function getZodTypeString(zodType: z.ZodTypeAny): string {
   // Handle ZodEnum
   if (zodType instanceof z.ZodEnum) {
     const values = zodType._def.values;
-    return values.map((v: any) => `'${v}'`).join(' | ');
+    return values.map((v: any) => `'${v}'`).join(" | ");
   }
 
   // Handle ZodLiteral
   if (zodType instanceof z.ZodLiteral) {
     const value = zodType._def.value;
-    return typeof value === 'string' ? `'${value}'` : String(value);
+    return typeof value === "string" ? `'${value}'` : String(value);
   }
 
   // Handle ZodUnion
@@ -154,7 +154,7 @@ function getZodTypeString(zodType: z.ZodTypeAny): string {
     const options = zodType._def.options;
     return options
       .map((option: z.ZodTypeAny) => getZodTypeString(option))
-      .join(' | ');
+      .join(" | ");
   }
 
   // Handle ZodArray
@@ -167,13 +167,15 @@ function getZodTypeString(zodType: z.ZodTypeAny): string {
   if (zodType instanceof z.ZodFunction) {
     const args = zodType._def.args;
     const returns = zodType._def.returns;
-    
+
     if (args instanceof z.ZodTuple && args._def.items.length > 0) {
       const argTypes = args._def.items.map((arg: z.ZodTypeAny) => getZodTypeString(arg));
       const returnType = getZodTypeString(returns);
-      return `(${argTypes.map((t: string, i: number) => `arg${i}: ${t}`).join(', ')}) => ${returnType}`;
+      return `(${
+        argTypes.map((t: string, i: number) => `arg${i}: ${t}`).join(", ")
+      }) => ${returnType}`;
     }
-    
+
     return "Function";
   }
 
@@ -181,18 +183,18 @@ function getZodTypeString(zodType: z.ZodTypeAny): string {
   if (zodType instanceof z.ZodObject) {
     const shape = zodType.shape;
     const entries = Object.entries(shape);
-    
+
     if (entries.length === 0) {
       return "object";
     }
-    
+
     const props = entries.map(([key, value]) => {
       const type = getZodTypeString(value as z.ZodTypeAny);
-      const optional = (value as any)?.isOptional?.() ? '?' : '';
+      const optional = (value as any)?.isOptional?.() ? "?" : "";
       return `${key}${optional}: ${type}`;
     });
-    
-    return `{ ${props.join('; ')} }`;
+
+    return `{ ${props.join("; ")} }`;
   }
 
   // Handle ZodAny
@@ -235,7 +237,7 @@ export function withMetadata<T extends z.ZodTypeAny>(
     deprecated?: boolean;
     since?: string;
     category?: string;
-  }
+  },
 ): T {
   (schema as any)._def.metadata = {
     ...(schema as any)._def.metadata,
@@ -254,10 +256,10 @@ export function createDocumentedSchema<T extends z.ZodRawShape>(
     description?: string;
     examples?: Record<string, any>[];
     since?: string;
-  } = {}
+  } = {},
 ): z.ZodObject<T> {
   const schema = z.object(shape);
-  
+
   if (options.description) {
     schema.describe(options.description);
   }
@@ -277,28 +279,28 @@ export function createDocumentedSchema<T extends z.ZodRawShape>(
  */
 export function generateSchemaExamples(
   schema: z.ZodSchema,
-  count: number = 3
+  count: number = 3,
 ): Record<string, any>[] {
   const examples: Record<string, any>[] = [];
-  
+
   // This is a simplified example generator
   // In a real implementation, you might want more sophisticated example generation
-  
+
   if (schema instanceof z.ZodObject) {
     const shape = schema.shape;
-    
+
     for (let i = 0; i < count; i++) {
       const example: Record<string, any> = {};
-      
+
       for (const [key, fieldSchema] of Object.entries(shape)) {
         const fieldType = fieldSchema as z.ZodTypeAny;
         example[key] = generateExampleValue(fieldType, i);
       }
-      
+
       examples.push(example);
     }
   }
-  
+
   return examples;
 }
 
@@ -308,7 +310,7 @@ export function generateSchemaExamples(
 function generateExampleValue(zodType: z.ZodTypeAny, index: number = 0): any {
   // Handle ZodOptional and ZodDefault
   let innerType = zodType;
-  
+
   if (zodType instanceof z.ZodOptional) {
     // Sometimes return undefined for optional fields
     if (index % 3 === 2) return undefined;

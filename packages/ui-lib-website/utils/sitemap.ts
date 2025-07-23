@@ -131,7 +131,7 @@ export function generateStructuredData(baseUrl: string = "https://your-domain.co
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "DaisyUI Component Library",
+    "name": "daisyUI Component Library",
     "description":
       "Professional DaisyUI component library built for Fresh 2.0 with 65+ production-ready components",
     "url": baseUrl,
@@ -144,13 +144,13 @@ export function generateStructuredData(baseUrl: string = "https://your-domain.co
     },
     "creator": {
       "@type": "Organization",
-      "name": "DaisyUI Component Library Team",
+      "name": "daisyUI Component Library Team",
     },
     "softwareVersion": "1.0.0",
     "programmingLanguage": ["TypeScript", "JavaScript"],
     "runtimePlatform": ["Fresh", "Deno"],
     "keywords": [
-      "DaisyUI",
+      "daisyUI",
       "Fresh",
       "Components",
       "TypeScript",
@@ -185,7 +185,7 @@ export function generateComponentOpenGraph(
     url: `${baseUrl}/components/${componentName.toLowerCase()}`,
     image: `${baseUrl}/components/${componentName.toLowerCase()}/preview.png`,
     type: "article",
-    siteName: "DaisyUI Component Library",
+    siteName: "daisyUI Component Library",
   };
 }
 
@@ -231,7 +231,7 @@ export function generateComponentCollectionStructuredData(
   const collection = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "DaisyUI Component Library",
+    "name": "daisyUI Component Library",
     "description": "Complete collection of DaisyUI components built for Fresh 2.0",
     "url": `${baseUrl}/components`,
     "mainEntity": {

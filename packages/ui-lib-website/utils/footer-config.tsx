@@ -34,7 +34,7 @@ export const defaultFooterSections: FooterSection[] = [
   {
     title: "Resources",
     links: [
-      { text: "DaisyUI", href: "https://daisyui.com", external: true },
+      { text: "daisyUI", href: "https://daisyui.com", external: true },
       { text: "Fresh Framework", href: "https://fresh.deno.dev", external: true },
       { text: "Preact", href: "https://preactjs.com", external: true },
       { text: "Tailwind CSS", href: "https://tailwindcss.com", external: true },

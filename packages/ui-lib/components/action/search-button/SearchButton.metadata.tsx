@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const searchButtonExamples: ComponentExample[] = [
   {
@@ -75,7 +80,8 @@ const searchButtonProps: ComponentProp[] = [
   },
   {
     name: "variant",
-    type: "'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error'",
+    type:
+      "'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error'",
     description: "Visual style variant",
     default: "ghost",
   },
@@ -128,7 +134,8 @@ const searchButtonProps: ComponentProp[] = [
 
 export const searchButtonMetadata: ComponentMetadata = {
   name: "SearchButton",
-  description: "Specialized button component for triggering search functionality with keyboard shortcuts",
+  description:
+    "Specialized button component for triggering search functionality with keyboard shortcuts",
   category: ComponentCategory.ACTION,
   path: "/components/action/search-button",
   tags: ["search", "find", "lookup", "keyboard", "shortcut"],
@@ -137,15 +144,29 @@ export const searchButtonMetadata: ComponentMetadata = {
   preview: (
     <div class="flex gap-2 items-center">
       <button class="btn btn-ghost btn-square">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.35-4.35"/>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
         </svg>
       </button>
       <button class="btn btn-outline">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <path d="m21 21-4.35-4.35"/>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
         </svg>
         Search
       </button>

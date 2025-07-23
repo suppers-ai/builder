@@ -79,8 +79,8 @@ Deno.test("Collapse - with border", () => {
 
 Deno.test("Collapse - HTML snapshot", async (t) => {
   const html = renderToString(Collapse({
-    title: "What is DaisyUI?",
-    children: "DaisyUI is a semantic component library for Tailwind CSS.",
+    title: "What is daisyUI?",
+    children: "daisyUI is a semantic component library for Tailwind CSS.",
     arrow: true,
   }));
   await assertSnapshot(t, html);

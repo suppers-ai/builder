@@ -69,6 +69,11 @@ export const defaultUISidebarConfig: SidebarConfig = {
   showQuickLinks: true,
   quickLinks: [
     {
+      name: "Home",
+      path: "/",
+      icon: categoryIcons["Home"],
+    },
+    {
       name: "UI Components",
       path: "/components",
       icon: categoryIcons["Components"],

@@ -1,9 +1,24 @@
-import { BenefitsSection, HeroSection } from "@suppers/ui-lib";
+import { BenefitsSection, Hero } from "@suppers/ui-lib";
 
 export default function Home() {
   return (
     <>
-      <HeroSection />
+      <Hero
+        title="Build Beautiful User Interfaces with Fresh"
+        subtitle="A comprehensive UI component library built for Fresh applications. 90+ components, 29 themes, and TypeScript-first design."
+        primaryCTA={{
+          text: "Browse Components",
+          href: "/components"
+        }}
+        secondaryCTA={{
+          text: "View on GitHub",
+          href: "https://github.com/suppers/ui-lib"
+        }}
+        variant="centered"
+        background="gradient"
+        size="lg"
+        className="bg-gradient-to-br from-base-100 to-base-200"
+      />
 
       {/* Technology Stack Section */}
       <section class="py-16 bg-base-100">
@@ -18,9 +33,11 @@ export default function Home() {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="card bg-base-200 shadow-lg">
+            <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
               <div class="card-body text-center">
-                <div class="text-4xl mb-4">🦕</div>
+                <div class="flex justify-center mb-4">
+                  <img src="/logos/deno.svg" alt="Deno" class="w-12 h-12" />
+                </div>
                 <h3 class="card-title justify-center text-xl mb-2">Deno</h3>
                 <p class="text-base-content/70">
                   Modern TypeScript runtime with built-in security and performance
@@ -28,9 +45,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div class="card bg-base-200 shadow-lg">
+            <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
               <div class="card-body text-center">
-                <div class="text-4xl mb-4">🍋</div>
+                <div class="flex justify-center mb-4">
+                  <img src="/logos/fresh.svg" alt="Fresh" class="w-12 h-12" />
+                </div>
                 <h3 class="card-title justify-center text-xl mb-2">Fresh</h3>
                 <p class="text-base-content/70">
                   Zero-config web framework with islands architecture
@@ -38,9 +57,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div class="card bg-base-200 shadow-lg">
+            <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
               <div class="card-body text-center">
-                <div class="text-4xl mb-4">⚛️</div>
+                <div class="flex justify-center mb-4">
+                  <img src="/logos/preact.svg" alt="Preact" class="w-12 h-12" />
+                </div>
                 <h3 class="card-title justify-center text-xl mb-2">Preact</h3>
                 <p class="text-base-content/70">
                   Fast, lightweight React alternative with the same API
@@ -48,9 +69,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div class="card bg-base-200 shadow-lg">
+            <div class="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow">
               <div class="card-body text-center">
-                <div class="text-4xl mb-4">🌼</div>
+                <div class="flex justify-center mb-4">
+                  <img src="/logos/daisyui.svg" alt="daisyUI" class="w-12 h-12" />
+                </div>
                 <h3 class="card-title justify-center text-xl mb-2">DaisyUI</h3>
                 <p class="text-base-content/70">
                   Beautiful Tailwind CSS components with semantic class names

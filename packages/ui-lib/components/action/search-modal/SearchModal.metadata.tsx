@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const searchModalExamples: ComponentExample[] = [
   {
@@ -139,7 +144,8 @@ const searchModalProps: ComponentProp[] = [
 
 export const searchModalMetadata: ComponentMetadata = {
   name: "SearchModal",
-  description: "Full-featured search modal with keyboard navigation and customizable results display",
+  description:
+    "Full-featured search modal with keyboard navigation and customizable results display",
   category: ComponentCategory.ACTION,
   path: "/components/action/search-modal",
   tags: ["search", "modal", "find", "lookup", "keyboard", "navigation"],
@@ -150,9 +156,16 @@ export const searchModalMetadata: ComponentMetadata = {
       <div class="flex justify-center items-center px-4 py-16 bg-base-200">
         <div class="w-full max-w-md">
           <div class="flex items-center gap-3 p-4 bg-base-100 rounded-lg shadow">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
             </svg>
             <span class="text-base-content/60">Search components...</span>
           </div>

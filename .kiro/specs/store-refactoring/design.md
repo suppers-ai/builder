@@ -8,7 +8,7 @@ This design document outlines the architecture and implementation approach for r
 
 ### Current Architecture
 - **Framework**: Fresh 2.0 (alpha) with Preact
-- **Styling**: TailwindCSS + DaisyUI with 29 themes
+- **Styling**: TailwindCSS + daisyUI with 29 themes
 - **Authentication**: Supabase Auth with OAuth providers
 - **UI Library**: Partial integration with `@suppers/ui-lib`
 - **SSO Role**: Centralized authentication provider for client applications
@@ -16,7 +16,7 @@ This design document outlines the architecture and implementation approach for r
 ### Target Architecture
 - **Component Layer**: Enhanced with ui-lib base components (Input, Button, Card, Alert, Loading, Toast)
 - **Authentication Layer**: Preserved existing SSO provider logic and OAuth integrations
-- **Styling Layer**: Standardized DaisyUI theme tokens replacing hardcoded colors
+- **Styling Layer**: Standardized daisyUI theme tokens replacing hardcoded colors
 - **Dependency Layer**: Cleaned up duplicate packages and unused dependencies
 
 ## Components and Interfaces
@@ -189,7 +189,7 @@ interface TestingApproach {
   };
   
   visualTests: {
-    themeConsistency: "Test all 29 DaisyUI themes";
+    themeConsistency: "Test all 29 daisyUI themes";
     responsiveDesign: "Test mobile/desktop layouts";
     accessibility: "Leverage ui-lib accessibility features";
   };
@@ -228,7 +228,7 @@ interface Phase2Implementation {
   themeTokens: {
     removeHardcoded: "Replace bg-blue-600, text-gray-900, etc.";
     applyTokens: "Use bg-primary, text-base-content, etc.";
-    testThemes: "Verify all 29 DaisyUI themes work";
+    testThemes: "Verify all 29 daisyUI themes work";
   };
   
   componentStyling: {

@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const loadingExamples: ComponentExample[] = [
   {
@@ -103,7 +108,13 @@ export const loadingMetadata: ComponentMetadata = {
   examples: loadingExamples,
   props: loadingProps,
   variants: ["spinner", "dots", "ring", "ball", "bars", "infinity"],
-  useCases: ["Button loading states", "Page transitions", "Data fetching", "Form submissions", "File uploads"],
+  useCases: [
+    "Button loading states",
+    "Page transitions",
+    "Data fetching",
+    "Form submissions",
+    "File uploads",
+  ],
   usageNotes: [
     "Choose appropriate variant based on design context and space available",
     "Use consistent sizes within the same interface section",

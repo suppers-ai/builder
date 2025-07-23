@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const dividerExamples: ComponentExample[] = [
   {
@@ -137,7 +142,8 @@ const dividerProps: ComponentProp[] = [
 
 export const dividerMetadata: ComponentMetadata = {
   name: "Divider",
-  description: "Visual separators for organizing content into distinct sections with optional text labels",
+  description:
+    "Visual separators for organizing content into distinct sections with optional text labels",
   category: ComponentCategory.LAYOUT,
   path: "/components/layout/divider",
   tags: ["divider", "separator", "line", "break", "section", "hr"],
@@ -155,7 +161,13 @@ export const dividerMetadata: ComponentMetadata = {
   examples: dividerExamples,
   props: dividerProps,
   variants: ["basic", "with-text", "vertical", "positioned-text"],
-  useCases: ["Form sections", "Content separation", "Navigation groups", "Login/signup flows", "Card sections"],
+  useCases: [
+    "Form sections",
+    "Content separation",
+    "Navigation groups",
+    "Login/signup flows",
+    "Card sections",
+  ],
   usageNotes: [
     "Use horizontal dividers to separate vertical content stacks",
     "Use vertical dividers in flex layouts to separate side-by-side content",

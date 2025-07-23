@@ -8,7 +8,7 @@ function MockAuthProvider({ children }: { children: any }) {
 
 export default function App({ Component, state }: PageProps) {
   const Comp = Component as any;
-  const title = (state as any)?.title || "DaisyUI Component Library - Fresh 2.0";
+  const title = (state as any)?.title || "daisyUI Component Library - Fresh 2.0";
 
   return (
     <html>
@@ -24,14 +24,14 @@ export default function App({ Component, state }: PageProps) {
         />
         <meta
           name="keywords"
-          content="DaisyUI, Fresh, components, TypeScript, Preact, Tailwind CSS, UI library, web components, responsive design"
+          content="daisyUI, Fresh, components, TypeScript, Preact, Tailwind CSS, UI library, web components, responsive design"
         />
-        <meta name="author" content="DaisyUI Component Library" />
+        <meta name="author" content="daisyUI Component Library" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://your-domain.com/" />
 
         {/* Open Graph Meta Tags */}
-        <meta property="og:title" content="DaisyUI Component Library - Fresh 2.0" />
+        <meta property="og:title" content="daisyUI Component Library - Fresh 2.0" />
         <meta
           property="og:description"
           content="Professional DaisyUI component library with 65+ components built for Fresh 2.0"
@@ -39,11 +39,11 @@ export default function App({ Component, state }: PageProps) {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://your-domain.com/" />
         <meta property="og:image" content="https://your-domain.com/og-image.png" />
-        <meta property="og:site_name" content="DaisyUI Component Library" />
+        <meta property="og:site_name" content="daisyUI Component Library" />
 
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="DaisyUI Component Library - Fresh 2.0" />
+        <meta name="twitter:title" content="daisyUI Component Library - Fresh 2.0" />
         <meta
           name="twitter:description"
           content="Professional DaisyUI component library with 65+ components built for Fresh 2.0"

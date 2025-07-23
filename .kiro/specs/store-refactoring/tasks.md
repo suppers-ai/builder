@@ -38,20 +38,20 @@
   - Preserve all existing error handling and success notification logic
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [x] 3. Standardize styling with DaisyUI theme tokens
+- [x] 3. Standardize styling with daisyUI theme tokens
 - [x] 3.1 Replace hardcoded colors in LoginPageIsland.tsx
   - Replace bg-blue-600 with bg-primary theme token
   - Replace text-gray-900 with text-base-content theme token
   - Replace border-gray-300 with border-base-300 theme token
   - Replace hover:bg-blue-700 with hover:bg-primary-focus theme token
-  - Test color changes across multiple DaisyUI themes
+  - Test color changes across multiple daisyUI themes
   - _Requirements: 2.1, 2.2, 2.3_
 
 - [x] 3.2 Update custom CSS classes in static/styles.css
   - Identify custom CSS classes that use hardcoded colors
-  - Replace custom color definitions with DaisyUI theme tokens
+  - Replace custom color definitions with daisyUI theme tokens
   - Remove unused custom CSS classes after component integration
-  - Test CSS changes across all 29 DaisyUI themes
+  - Test CSS changes across all 29 daisyUI themes
   - _Requirements: 2.1, 2.2, 2.3_
 
 - [x] 3.3 Apply consistent component styling classes
@@ -99,7 +99,7 @@
   - Test SSO redirect flows to client applications
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 6.1_
 
-- [ ] 5.3 Test theme consistency across all DaisyUI themes
+- [ ] 5.3 Test theme consistency across all daisyUI themes
   - Create automated tests to verify component rendering across all 29 themes
   - Test theme token application in light and dark theme variants
   - Test component visual consistency across different theme categories

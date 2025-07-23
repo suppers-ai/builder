@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const checkboxExamples: ComponentExample[] = [
   {
@@ -93,7 +98,7 @@ const checkboxProps: ComponentProp[] = [
   },
   {
     name: "name",
-    type: "string", 
+    type: "string",
     description: "Form input name attribute",
   },
   {

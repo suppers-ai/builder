@@ -176,7 +176,7 @@ The application includes the following routes:
 
   readmeContent += `
 ### Features
-- 🎨 **Modern UI**: Built with TailwindCSS and DaisyUI
+- 🎨 **Modern UI**: Built with TailwindCSS and daisyUI
 - 🔐 **Authentication**: Supabase Auth integration
 - 📱 **Responsive Design**: Mobile-first approach
 - 🚀 **Server-Side Rendering**: Fresh framework with islands architecture

@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const kbdExamples: ComponentExample[] = [
   {
@@ -172,7 +177,8 @@ const kbdProps: ComponentProp[] = [
 
 export const kbdMetadata: ComponentMetadata = {
   name: "Kbd",
-  description: "Visual representation of keyboard keys and shortcuts for documentation and UI guides",
+  description:
+    "Visual representation of keyboard keys and shortcuts for documentation and UI guides",
   category: ComponentCategory.DISPLAY,
   path: "/components/display/kbd",
   tags: ["keyboard", "key", "shortcut", "command", "hotkey", "keystroke"],
@@ -192,7 +198,13 @@ export const kbdMetadata: ComponentMetadata = {
   examples: kbdExamples,
   props: kbdProps,
   variants: ["basic", "sizes", "combinations", "function-keys"],
-  useCases: ["Keyboard shortcuts", "Help documentation", "Tutorials", "Command references", "Accessibility guides"],
+  useCases: [
+    "Keyboard shortcuts",
+    "Help documentation",
+    "Tutorials",
+    "Command references",
+    "Accessibility guides",
+  ],
   usageNotes: [
     "Use consistent key representations (⌘ for Mac Command, Ctrl for Windows/Linux)",
     "Keep key labels short and recognizable",

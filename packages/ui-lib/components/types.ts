@@ -75,7 +75,7 @@ export interface StepProps {
 // Component category enum for type safety
 export enum ComponentCategory {
   ACTION = "action",
-  DISPLAY = "display", 
+  DISPLAY = "display",
   INPUT = "input",
   LAYOUT = "layout",
   NAVIGATION = "navigation",
@@ -83,7 +83,7 @@ export enum ComponentCategory {
   MOCKUP = "mockup",
   PAGE = "page",
   SECTIONS = "sections",
-  TEMPLATES = "templates"
+  TEMPLATES = "templates",
 }
 
 // Component example interface for rich examples
@@ -122,14 +122,14 @@ export interface ComponentMetadata {
   relatedComponents: string[];
   preview: ComponentChildren; // JSX preview component
   interactive?: boolean; // Whether component supports interactive mode (islands)
-  
+
   // Rich examples with full data (replaces simple examples: string[])
   examples: ComponentExample[];
-  
+
   // API documentation (either manual props or schema reference)
   props?: ComponentProp[];
   schema?: ComponentSchema;
-  
+
   // Usage information
   usageNotes?: string[];
   variants?: string[];

@@ -9,15 +9,30 @@ import type { ComponentChildren } from "preact";
 // DaisyUI Core Types
 export const DaisyUISizeSchema = z.enum(["xs", "sm", "md", "lg", "xl"]).describe("Component size");
 export const DaisyUIColorSchema = z.enum([
-  "primary", "secondary", "accent", "neutral", 
-  "base-100", "base-200", "base-300", 
-  "info", "success", "warning", "error"
+  "primary",
+  "secondary",
+  "accent",
+  "neutral",
+  "base-100",
+  "base-200",
+  "base-300",
+  "info",
+  "success",
+  "warning",
+  "error",
 ]).describe("Component color theme");
 
 export const DaisyUIVariantSchema = z.enum([
-  "primary", "secondary", "accent", "info", 
-  "success", "warning", "error", "outline", 
-  "ghost", "link"
+  "primary",
+  "secondary",
+  "accent",
+  "info",
+  "success",
+  "warning",
+  "error",
+  "outline",
+  "ghost",
+  "link",
 ]).describe("Component visual variant");
 
 // Base Props Schemas
@@ -104,7 +119,7 @@ export const AccessibilityPropsSchema = z.object({
   "aria-hidden": z.boolean().optional().describe("Whether element is hidden from screen readers"),
 }).describe("Accessibility properties");
 
-// Link Props Schemas  
+// Link Props Schemas
 export const LinkPropsSchema = z.object({
   href: z.string().optional().describe("Link URL"),
   target: z.enum(["_blank", "_self", "_parent", "_top"]).optional().describe("Link target"),
@@ -112,16 +127,16 @@ export const LinkPropsSchema = z.object({
 }).describe("Link properties");
 
 // Utility Schemas
-export const ResponsiveSchema = <T extends z.ZodTypeAny>(schema: T) => 
+export const ResponsiveSchema = <T extends z.ZodTypeAny>(schema: T) =>
   z.union([
     schema,
     z.object({
       xs: schema.optional(),
-      sm: schema.optional(), 
+      sm: schema.optional(),
       md: schema.optional(),
       lg: schema.optional(),
       xl: schema.optional(),
-    })
+    }),
   ]).describe("Responsive value (single value or breakpoint object)");
 
 // Schema Composition Helpers
@@ -142,7 +157,7 @@ export const ResponsiveSchema = <T extends z.ZodTypeAny>(schema: T) =>
 // Common Schema Combinations
 export const ButtonBaseSchema = BaseComponentPropsSchema
   .merge(SizePropsSchema)
-  .merge(ColorPropsSchema) 
+  .merge(ColorPropsSchema)
   .merge(VariantPropsSchema)
   .merge(DisabledPropsSchema)
   .merge(LoadingPropsSchema)
@@ -175,7 +190,7 @@ export function withMetadata<T extends z.ZodTypeAny>(
     deprecated?: boolean;
     since?: string;
     category?: string;
-  }
+  },
 ): T {
   (schema as any)._def.metadata = {
     ...(schema as any)._def.metadata,
@@ -183,4 +198,3 @@ export function withMetadata<T extends z.ZodTypeAny>(
   };
   return schema;
 }
-

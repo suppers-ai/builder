@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const textareaExamples: ComponentExample[] = [
   {
@@ -121,9 +126,16 @@ export const textareaMetadata: ComponentMetadata = {
   interactive: true, // User can type text
   preview: (
     <div class="flex flex-col gap-3 w-full max-w-sm">
-      <textarea class="textarea textarea-bordered w-full" placeholder="Basic textarea" rows={2}></textarea>
-      <textarea class="textarea textarea-bordered textarea-primary w-full" placeholder="Primary textarea" rows={2}></textarea>
-      <textarea class="textarea textarea-ghost w-full" placeholder="Ghost textarea" rows={2}></textarea>
+      <textarea class="textarea textarea-bordered w-full" placeholder="Basic textarea" rows={2}>
+      </textarea>
+      <textarea
+        class="textarea textarea-bordered textarea-primary w-full"
+        placeholder="Primary textarea"
+        rows={2}
+      >
+      </textarea>
+      <textarea class="textarea textarea-ghost w-full" placeholder="Ghost textarea" rows={2}>
+      </textarea>
     </div>
   ),
   examples: textareaExamples,

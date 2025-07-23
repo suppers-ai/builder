@@ -85,7 +85,7 @@ Deno.test("Diff - text comparison", () => {
 Deno.test("Diff - HTML snapshot", async (t) => {
   const html = renderToString(Diff({
     oldContent: "console.log('Hello World');",
-    newContent: "console.log('Hello, DaisyUI!');",
+    newContent: "console.log('Hello, daisyUI!');",
     oldLabel: "Before",
     newLabel: "After",
   }));

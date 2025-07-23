@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const ratingExamples: ComponentExample[] = [
   {
@@ -159,7 +164,8 @@ const ratingProps: ComponentProp[] = [
 
 export const ratingMetadata: ComponentMetadata = {
   name: "Rating",
-  description: "Interactive star rating component for collecting user feedback and displaying ratings",
+  description:
+    "Interactive star rating component for collecting user feedback and displaying ratings",
   category: ComponentCategory.INPUT,
   path: "/components/input/rating",
   tags: ["rating", "stars", "review", "score", "feedback", "evaluation"],
@@ -186,7 +192,13 @@ export const ratingMetadata: ComponentMetadata = {
   examples: ratingExamples,
   props: ratingProps,
   variants: ["basic", "sizes", "shapes", "half-stars", "readonly"],
-  useCases: ["Product reviews", "User feedback", "Content ratings", "Quality assessments", "Survey responses"],
+  useCases: [
+    "Product reviews",
+    "User feedback",
+    "Content ratings",
+    "Quality assessments",
+    "Survey responses",
+  ],
   usageNotes: [
     "Use readonly ratings for displaying existing ratings or reviews",
     "Half-star ratings provide more precise feedback collection",

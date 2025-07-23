@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const loginButtonExamples: ComponentExample[] = [
   {
@@ -58,7 +63,8 @@ const loginButtonProps: ComponentProp[] = [
   },
   {
     name: "variant",
-    type: "'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error'",
+    type:
+      "'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error'",
     description: "Visual style variant",
     default: "primary",
   },
@@ -115,10 +121,17 @@ export const loginButtonMetadata: ComponentMetadata = {
   preview: (
     <div class="flex gap-2">
       <button class="btn btn-primary">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m15 3 3 3-3 3"/>
-          <path d="M10 17V7"/>
-          <path d="M14 6h8"/>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="m15 3 3 3-3 3" />
+          <path d="M10 17V7" />
+          <path d="M14 6h8" />
         </svg>
         Login
       </button>

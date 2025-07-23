@@ -46,13 +46,13 @@ export function PageLayout({
 
   // Resolve footer configuration
   const getFooterConfig = () => {
-      return {
-        sections: footerSections,
-        copyright: footerCopyright,
-        socialLinks: footerSocialLinks,
-        logo: footerLogo,
-      };
+    return {
+      sections: footerSections,
+      copyright: footerCopyright,
+      socialLinks: footerSocialLinks,
+      logo: footerLogo,
     };
+  };
 
   // Controls component
   const renderControls = () => {

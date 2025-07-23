@@ -44,7 +44,7 @@ This is a **Suppers AI Builder** - a modular application builder platform built 
 
 **`packages/ui-lib/`** - React/Preact component library
 - 90+ UI components organized by category
-- Complete theme system with 29 DaisyUI themes
+- Complete theme system with 29 daisyUI themes
 - Supabase authentication integration
 - Entry point: `mod.ts`
 
@@ -61,7 +61,7 @@ This is a **Suppers AI Builder** - a modular application builder platform built 
 - **Runtime**: Deno with TypeScript
 - **Web Framework**: Fresh (Deno's web framework)
 - **Frontend**: Preact/React with TypeScript
-- **Styling**: TailwindCSS + DaisyUI
+- **Styling**: TailwindCSS + daisyUI
 - **Icons**: Lucide Preact (professional icon library)
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth with OAuth providers

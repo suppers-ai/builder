@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const rangeExamples: ComponentExample[] = [
   {
@@ -151,7 +156,13 @@ export const rangeMetadata: ComponentMetadata = {
   examples: rangeExamples,
   props: rangeProps,
   variants: ["basic", "sizes", "colors", "steps", "with-labels"],
-  useCases: ["Volume controls", "Price filters", "Settings sliders", "Progress adjustments", "Quantity selectors"],
+  useCases: [
+    "Volume controls",
+    "Price filters",
+    "Settings sliders",
+    "Progress adjustments",
+    "Quantity selectors",
+  ],
   usageNotes: [
     "Use appropriate min/max values based on the data range",
     "Consider step size for precision - smaller steps for fine control",

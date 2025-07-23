@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 
 const statExamples: ComponentExample[] = [
   {
@@ -245,7 +250,8 @@ const statProps: ComponentProp[] = [
 
 export const statMetadata: ComponentMetadata = {
   name: "Stat",
-  description: "Display statistics and metrics with titles, values, and contextual information for dashboards",
+  description:
+    "Display statistics and metrics with titles, values, and contextual information for dashboards",
   category: ComponentCategory.DISPLAY,
   path: "/components/display/stat",
   tags: ["statistics", "metrics", "numbers", "data", "dashboard", "analytics"],
@@ -273,7 +279,13 @@ export const statMetadata: ComponentMetadata = {
   examples: statExamples,
   props: statProps,
   variants: ["basic", "with-icons", "formatted", "vertical", "dashboard"],
-  useCases: ["Analytics dashboards", "KPI displays", "Performance metrics", "Business intelligence", "Progress tracking"],
+  useCases: [
+    "Analytics dashboards",
+    "KPI displays",
+    "Performance metrics",
+    "Business intelligence",
+    "Progress tracking",
+  ],
   usageNotes: [
     "Group related statistics together using the stats container class",
     "Use descriptive titles and clear value formatting for better readability",

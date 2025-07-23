@@ -1,4 +1,9 @@
-import { ComponentMetadata, ComponentCategory, ComponentExample, ComponentProp } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentProp,
+} from "../../types.ts";
 import { Dropdown } from "./Dropdown.tsx";
 
 const dropdownExamples: ComponentExample[] = [
@@ -83,7 +88,8 @@ const dropdownProps: ComponentProp[] = [
   },
   {
     name: "position",
-    type: "'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'",
+    type:
+      "'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'",
     description: "Position of dropdown relative to trigger",
     default: "bottom",
   },
