@@ -55,9 +55,11 @@ export function Sidebar({
                 <a
                   href={link.path}
                   class={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-base-200 focus:outline-none 
-                    ${isLinkActive(link)
+                    ${
+                    isLinkActive(link)
                       ? "bg-primary/10 text-primary font-medium"
-                      : "text-base-content"}
+                      : "text-base-content"
+                  }
                   `}
                   onClick={() => handleLinkClick(link)}
                 >

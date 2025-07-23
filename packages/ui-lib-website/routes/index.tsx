@@ -8,11 +8,11 @@ export default function Home() {
         subtitle="A comprehensive UI component library built for Fresh applications. 90+ components, 29 themes, and TypeScript-first design."
         primaryCTA={{
           text: "Browse Components",
-          href: "/components"
+          href: "/components",
         }}
         secondaryCTA={{
           text: "View on GitHub",
-          href: "https://github.com/suppers/ui-lib"
+          href: "https://github.com/suppers/ui-lib",
         }}
         variant="centered"
         background="gradient"

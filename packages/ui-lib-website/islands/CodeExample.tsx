@@ -1,5 +1,3 @@
-import { useEffect, useState } from "preact/hooks";
-import { Button } from "@suppers/ui-lib";
 import SyntaxHighlighter, { CodeFile } from "./SyntaxHighlighter.tsx";
 
 export interface CodeExampleProps {

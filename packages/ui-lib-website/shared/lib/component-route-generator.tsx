@@ -6,7 +6,10 @@
 import type { ComponentChildren } from "preact";
 import type { PageProps } from "fresh";
 import { join } from "jsr:@std/path@^1.0.8";
-import { extractApiPropsFromSchema, type ApiProp } from "../../../ui-lib/components/schemas/extractor.ts";
+import {
+  type ApiProp,
+  extractApiPropsFromSchema,
+} from "../../../ui-lib/components/schemas/extractor.ts";
 
 export interface ComponentRouteConfig {
   /** Component name (e.g., "Button") */
@@ -71,14 +74,14 @@ async function loadComponentPageData(
 
     // Try to load from metadata first (new preferred method)
     const { flatComponentsMetadata } = await import("@suppers/ui-lib");
-    const metadata = flatComponentsMetadata.find(meta => meta.name === componentName);
-    
+    const metadata = flatComponentsMetadata.find((meta) => meta.name === componentName);
+
     if (metadata) {
       // Use rich metadata if available
       return {
         title: metadata.name,
         description: metadata.description,
-        examples: metadata.examples.map(example => ({
+        examples: metadata.examples.map((example) => ({
           title: example.title,
           description: example.description,
           code: example.code,
@@ -87,7 +90,7 @@ async function loadComponentPageData(
         })),
         apiProps: metadata.schema ? await extractApiPropsFromSchema(componentPath) : [],
         usageNotes: metadata.usageNotes || [],
-        previewData: metadata.examples.map(example => ({
+        previewData: metadata.examples.map((example) => ({
           title: example.title,
           description: example.description,
           code: example.code,
@@ -125,39 +128,42 @@ function parseJSXExample(code: string, componentName: string): Array<{
   content: string;
 }> {
   const components: Array<{ props: Record<string, any>; content: string }> = [];
-  
+
   // Improved regex to handle multiline JSX and various prop formats
-  const componentRegex = new RegExp(`<${componentName}([^>]*?)>([\\s\\S]*?)<\\/${componentName}>`, 'g');
-  const selfClosingRegex = new RegExp(`<${componentName}([^>]*?)\\s*\\/>`, 'g');
-  
+  const componentRegex = new RegExp(
+    `<${componentName}([^>]*?)>([\\s\\S]*?)<\\/${componentName}>`,
+    "g",
+  );
+  const selfClosingRegex = new RegExp(`<${componentName}([^>]*?)\\s*\\/>`, "g");
+
   let match;
-  
+
   // Match components with content (e.g., <Button color="primary">Primary</Button>)
   while ((match = componentRegex.exec(code)) !== null) {
     const propsString = match[1];
     const content = match[2].trim();
     const props = parseProps(propsString);
-    
-    components.push({ 
-      props, 
-      content: content || (props.children as string) || 'Button' 
+
+    components.push({
+      props,
+      content: content || (props.children as string) || "Button",
     });
   }
-  
+
   // Reset regex lastIndex for self-closing components
   selfClosingRegex.lastIndex = 0;
-  
+
   // Match self-closing components (e.g., <Button color="primary" />)
   while ((match = selfClosingRegex.exec(code)) !== null) {
     const propsString = match[1];
     const props = parseProps(propsString);
-    
-    components.push({ 
-      props, 
-      content: (props.children as string) || 'Button' 
+
+    components.push({
+      props,
+      content: (props.children as string) || "Button",
     });
   }
-  
+
   return components;
 }
 
@@ -166,22 +172,22 @@ function parseJSXExample(code: string, componentName: string): Array<{
  */
 function parseProps(propsString: string): Record<string, any> {
   const props: Record<string, any> = {};
-  
+
   // Handle different prop formats: prop="value", prop={value}, prop={true}, prop
   const propsRegex = /(\w+)(?:=(?:"([^"]*)"|{([^}]*)}|([^\s>]+)))?/g;
-  
+
   let propMatch;
   while ((propMatch = propsRegex.exec(propsString)) !== null) {
     const [, key, quotedValue, bracedValue, unquotedValue] = propMatch;
-    
+
     if (quotedValue !== undefined) {
       // String value: prop="value"
       props[key] = quotedValue;
     } else if (bracedValue !== undefined) {
       // Expression value: prop={value}
       const value = bracedValue.trim();
-      if (value === 'true') props[key] = true;
-      else if (value === 'false') props[key] = false;
+      if (value === "true") props[key] = true;
+      else if (value === "false") props[key] = false;
       else if (value.match(/^\d+$/)) props[key] = parseInt(value);
       else if (value.startsWith('"') && value.endsWith('"')) {
         props[key] = value.slice(1, -1);
@@ -196,7 +202,7 @@ function parseProps(propsString: string): Record<string, any> {
       props[key] = true;
     }
   }
-  
+
   return props;
 }
 
@@ -233,18 +239,18 @@ export function createComponentRoute(config: ComponentRouteConfig) {
             <div key={index} class="border rounded-lg p-6">
               <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
               <p class="text-gray-600 mb-4">{example.description}</p>
-              
+
               <div class="bg-gray-50 p-4 rounded mb-4">
                 <div class="flex flex-wrap gap-4">
                   {(() => {
                     // Parse the JSX code to get component instances
                     const parsedComponents = parseJSXExample(example.code, componentName);
-                    
+
                     return parsedComponents.map((comp, compIndex) => {
-                      const Component = (example.interactive && InteractiveComponent) 
-                        ? InteractiveComponent 
+                      const Component = (example.interactive && InteractiveComponent)
+                        ? InteractiveComponent
                         : StaticComponent;
-                      
+
                       return (
                         <Component key={compIndex} {...comp.props}>
                           {comp.content}

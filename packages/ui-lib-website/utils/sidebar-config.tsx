@@ -11,7 +11,7 @@ import {
   Smartphone,
   Zap,
 } from "lucide-preact";
-import { 
+import {
   actionComponentsMetadata,
   displayComponentsMetadata,
   feedbackComponentsMetadata,

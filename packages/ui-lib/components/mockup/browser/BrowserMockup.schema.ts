@@ -4,10 +4,7 @@
  */
 
 import { z } from "zod";
-import {
-  BaseComponentPropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, withMetadata } from "../../schemas/base.ts";
 
 // BrowserMockup-specific props
 const BrowserMockupSpecificPropsSchema = z.object({

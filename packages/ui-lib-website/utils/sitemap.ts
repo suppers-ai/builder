@@ -1,6 +1,5 @@
 // Sitemap generation utilities
-import { flatComponentsMetadata } from "@suppers/ui-lib"
-
+import { flatComponentsMetadata } from "@suppers/ui-lib";
 
 interface SitemapUrl {
   loc: string;

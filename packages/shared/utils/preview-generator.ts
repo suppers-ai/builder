@@ -3,7 +3,7 @@
  * Uses component metadata for generating previews (no more file parsing!)
  */
 import { flatComponentsMetadata } from "@suppers/ui-lib";
-import type { ComponentMetadata, ComponentExample } from "@suppers/ui-lib";
+import type { ComponentExample, ComponentMetadata } from "@suppers/ui-lib";
 
 export interface PreviewConfig {
   wrapperClass?: string;
@@ -28,7 +28,7 @@ function findComponentMetadata(componentName: string): ComponentMetadata | null 
   const cached = metadataCache.get(componentName);
   if (cached) return cached;
 
-  const metadata = flatComponentsMetadata.find(meta => meta.name === componentName);
+  const metadata = flatComponentsMetadata.find((meta) => meta.name === componentName);
   if (metadata) {
     metadataCache.set(componentName, metadata);
   }
@@ -116,7 +116,7 @@ export async function getComponentPreviewData(componentName: string): Promise<an
   if (!metadata || !metadata.examples) return [];
 
   // Convert ComponentExample[] to legacy preview format for compatibility
-  return metadata.examples.map(example => ({
+  return metadata.examples.map((example) => ({
     title: example.title,
     description: example.description,
     code: example.code,
@@ -138,4 +138,4 @@ export async function generatePreviewFromMetadata(
 }
 
 // Legacy compatibility - remove hardcoded paths since we now use metadata
-export type { ComponentMetadata, ComponentExample } from "@suppers/ui-lib";
+export type { ComponentExample, ComponentMetadata } from "@suppers/ui-lib";
