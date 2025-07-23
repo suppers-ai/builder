@@ -1,6 +1,6 @@
 // Sitemap generation utilities
+import { flatComponentsMetadata } from "@suppers/ui-lib"
 
-import { allComponents } from "./component-metadata.ts";
 
 interface SitemapUrl {
   loc: string;
@@ -29,7 +29,7 @@ export function generateSitemap(baseUrl: string = "https://your-domain.com"): st
     },
 
     // Component pages
-    ...allComponents.map((component) => ({
+    ...flatComponentsMetadata.map((component) => ({
       loc: `${baseUrl}${component.path}`,
       lastmod: new Date().toISOString().split("T")[0],
       changefreq: "monthly" as const,
@@ -236,8 +236,8 @@ export function generateComponentCollectionStructuredData(
     "url": `${baseUrl}/components`,
     "mainEntity": {
       "@type": "ItemList",
-      "numberOfItems": allComponents.length,
-      "itemListElement": allComponents.map((component, index) => ({
+      "numberOfItems": flatComponentsMetadata.length,
+      "itemListElement": flatComponentsMetadata.map((component, index) => ({
         "@type": "SoftwareSourceCode",
         "position": index + 1,
         "name": component.name,

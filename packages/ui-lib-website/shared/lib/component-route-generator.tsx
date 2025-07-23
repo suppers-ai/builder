@@ -1,12 +1,12 @@
 /**
  * Generic component route generator
- * Extracts common logic for creating component documentation routes
+ * Uses metadata system for component documentation
  */
 
 import type { ComponentChildren } from "preact";
 import type { PageProps } from "fresh";
 import { join } from "jsr:@std/path@^1.0.8";
-import { parse as parseYaml } from "https://deno.land/std@0.224.0/yaml/mod.ts";
+import { extractApiPropsFromSchema, type ApiProp } from "../../../ui-lib/components/schemas/extractor.ts";
 
 export interface ComponentRouteConfig {
   /** Component name (e.g., "Button") */
@@ -47,68 +47,19 @@ export interface PreviewSpec {
 export interface ComponentPageData {
   title: string;
   description: string;
-  category: string;
   examples: Array<{
     title: string;
-    description?: string;
-    code: string;
-  }>;
-  apiProps: Array<{
-    name: string;
-    type: string;
     description: string;
-    required?: boolean;
+    code: string;
+    showCode?: boolean;
+    interactive?: boolean;
   }>;
+  apiProps: ApiProp[];
   usageNotes: string[];
 }
 
 /**
- * Extract examples from markdown content
- */
-function extractExamplesFromMarkdown(
-  content: string,
-): Array<{ title: string; description: string; code: string }> {
-  const examples: Array<{ title: string; description: string; code: string }> = [];
-
-  // Remove frontmatter
-  const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, "");
-
-  // Match all sections with ## headers and code blocks
-  const sectionRegex = /## ([^\n]+)\n\n([^#]*?)```tsx\n([\s\S]*?)```/g;
-  let match;
-
-  while ((match = sectionRegex.exec(contentWithoutFrontmatter)) !== null) {
-    const title = match[1].trim();
-    const description = match[2].trim();
-    const code = match[3].trim();
-
-    if (code) {
-      examples.push({ title, description, code });
-    }
-  }
-
-  return examples;
-}
-
-/**
- * Extract preview data from frontmatter
- */
-function extractPreviewDataFromFrontmatter(content: string): any[] {
-  const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-
-  if (!frontmatterMatch) return [];
-
-  try {
-    const frontmatter = parseYaml(frontmatterMatch[1]) as any;
-    return frontmatter.previewData || [];
-  } catch (error) {
-    console.warn("Failed to parse frontmatter:", error);
-    return [];
-  }
-}
-
-/**
- * Load component page data from markdown file
+ * Load component page data from metadata system
  */
 async function loadComponentPageData(
   componentPath: string,
@@ -117,122 +68,140 @@ async function loadComponentPageData(
     // Extract component info from path
     const pathParts = componentPath.split("/");
     const componentName = pathParts[pathParts.length - 1].replace(".tsx", "");
-    const category = pathParts[pathParts.length - 3];
 
-    // Try to find the examples markdown file
-    const examplesPath = componentPath.replace(".tsx", ".examples.md");
-
-    try {
-      const content = await Deno.readTextFile(examplesPath);
-
-      // Parse frontmatter for metadata
-      const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-      let title = componentName;
-      let description = `${componentName} component from the UI library`;
-      let apiProps: any[] = [];
-      let usageNotes: string[] = [];
-
-      if (frontmatterMatch) {
-        try {
-          const frontmatter = parseYaml(frontmatterMatch[1]) as any;
-          title = frontmatter.title || componentName;
-          description = frontmatter.description || description;
-          apiProps = frontmatter.apiProps || [];
-          usageNotes = frontmatter.usageNotes || [];
-        } catch (error) {
-          console.warn("Failed to parse frontmatter:", error);
-        }
-      }
-
-      // Extract examples from markdown
-      const examples = extractExamplesFromMarkdown(content);
-
-      // Extract preview data from frontmatter
-      const previewData = extractPreviewDataFromFrontmatter(content);
-
+    // Try to load from metadata first (new preferred method)
+    const { flatComponentsMetadata } = await import("@suppers/ui-lib");
+    const metadata = flatComponentsMetadata.find(meta => meta.name === componentName);
+    
+    if (metadata) {
+      // Use rich metadata if available
       return {
-        title,
-        description,
-        category,
-        examples: examples.length > 0 ? examples : [{
-          title: "Basic Example",
-          description: "Basic usage of the component",
-          code: `<${componentName} />`,
-        }],
-        apiProps,
-        usageNotes,
-        previewData,
-      };
-    } catch (error) {
-      console.warn(`Could not load examples file ${examplesPath}:`, error.message);
-      // If no markdown file, return basic data
-      return {
-        title: componentName,
-        description: `${componentName} component from the UI library`,
-        category,
-        examples: [{
-          title: "Basic Example",
-          description: "Basic usage of the component",
-          code: `<${componentName} />`,
-        }],
-        apiProps: [],
-        usageNotes: [],
-        previewData: [],
+        title: metadata.name,
+        description: metadata.description,
+        examples: metadata.examples.map(example => ({
+          title: example.title,
+          description: example.description,
+          code: example.code,
+          showCode: example.showCode,
+          interactive: example.interactive,
+        })),
+        apiProps: metadata.schema ? await extractApiPropsFromSchema(componentPath) : [],
+        usageNotes: metadata.usageNotes || [],
+        previewData: metadata.examples.map(example => ({
+          title: example.title,
+          description: example.description,
+          code: example.code,
+          showCode: example.showCode,
+          interactive: example.interactive,
+          type: example.interactive ? "interactive" : "static",
+        })),
       };
     }
+
+    // Fallback: return basic data if no metadata found
+    return {
+      title: componentName,
+      description: `${componentName} component from the UI library`,
+      examples: [{
+        title: "Basic Example",
+        description: "Basic usage of the component",
+        code: `<${componentName} />`,
+      }],
+      apiProps: [],
+      usageNotes: [],
+      previewData: [],
+    };
   } catch (error) {
-    throw new Error(`Failed to load component data: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to load component data: ${errorMessage}`);
   }
 }
 
 /**
- * Create preview generator for a component using preview data
+ * Parse JSX code and extract component props and content
  */
-function createComponentPreviewGenerator(
-  componentName: string,
-  Component: any,
-  previewData: any[],
-) {
-  return function generatePreviewSpec(code: string, exampleTitle: string): PreviewSpec {
-    try {
-      // Try to find matching preview data for this example
-      const matchingPreview = previewData.find((p) =>
-        p.title.toLowerCase().includes(exampleTitle.toLowerCase()) ||
-        exampleTitle.toLowerCase().includes(p.title.toLowerCase())
-      );
-
-      if (matchingPreview) {
-        if (matchingPreview.buttons) {
-          return {
-            type: "buttons",
-            wrapperClass: "flex flex-wrap gap-4",
-            buttons: matchingPreview.buttons,
-          };
-        } else if (matchingPreview.components) {
-          return {
-            type: "components",
-            wrapperClass: "flex flex-wrap gap-4",
-            components: matchingPreview.components,
-          };
-        }
-      }
-
-      // Fallback to code display
-      return {
-        type: "code",
-        code,
-      };
-    } catch (error) {
-      return {
-        type: "error",
-        error: `Failed to parse code: ${error.message}`,
-      };
-    }
-  };
+function parseJSXExample(code: string, componentName: string): Array<{
+  props: Record<string, any>;
+  content: string;
+}> {
+  const components: Array<{ props: Record<string, any>; content: string }> = [];
+  
+  // Improved regex to handle multiline JSX and various prop formats
+  const componentRegex = new RegExp(`<${componentName}([^>]*?)>([\\s\\S]*?)<\\/${componentName}>`, 'g');
+  const selfClosingRegex = new RegExp(`<${componentName}([^>]*?)\\s*\\/>`, 'g');
+  
+  let match;
+  
+  // Match components with content (e.g., <Button color="primary">Primary</Button>)
+  while ((match = componentRegex.exec(code)) !== null) {
+    const propsString = match[1];
+    const content = match[2].trim();
+    const props = parseProps(propsString);
+    
+    components.push({ 
+      props, 
+      content: content || (props.children as string) || 'Button' 
+    });
+  }
+  
+  // Reset regex lastIndex for self-closing components
+  selfClosingRegex.lastIndex = 0;
+  
+  // Match self-closing components (e.g., <Button color="primary" />)
+  while ((match = selfClosingRegex.exec(code)) !== null) {
+    const propsString = match[1];
+    const props = parseProps(propsString);
+    
+    components.push({ 
+      props, 
+      content: (props.children as string) || 'Button' 
+    });
+  }
+  
+  return components;
 }
 
 /**
- * Generate a component route function
+ * Parse props string and return props object
+ */
+function parseProps(propsString: string): Record<string, any> {
+  const props: Record<string, any> = {};
+  
+  // Handle different prop formats: prop="value", prop={value}, prop={true}, prop
+  const propsRegex = /(\w+)(?:=(?:"([^"]*)"|{([^}]*)}|([^\s>]+)))?/g;
+  
+  let propMatch;
+  while ((propMatch = propsRegex.exec(propsString)) !== null) {
+    const [, key, quotedValue, bracedValue, unquotedValue] = propMatch;
+    
+    if (quotedValue !== undefined) {
+      // String value: prop="value"
+      props[key] = quotedValue;
+    } else if (bracedValue !== undefined) {
+      // Expression value: prop={value}
+      const value = bracedValue.trim();
+      if (value === 'true') props[key] = true;
+      else if (value === 'false') props[key] = false;
+      else if (value.match(/^\d+$/)) props[key] = parseInt(value);
+      else if (value.startsWith('"') && value.endsWith('"')) {
+        props[key] = value.slice(1, -1);
+      } else {
+        props[key] = value;
+      }
+    } else if (unquotedValue !== undefined) {
+      // Unquoted value: prop=value
+      props[key] = unquotedValue;
+    } else {
+      // Boolean prop: prop (defaults to true)
+      props[key] = true;
+    }
+  }
+  
+  return props;
+}
+
+/**
+ * Create a component route with proper documentation
  */
 export function createComponentRoute(config: ComponentRouteConfig) {
   const {
@@ -241,22 +210,12 @@ export function createComponentRoute(config: ComponentRouteConfig) {
     StaticComponent,
     InteractiveComponent,
     customPreviewRenderer,
-    titleSuffix = "DaisyUI Component Library",
+    titleSuffix = "",
   } = config;
 
   return async function ComponentRoute(props: PageProps) {
-    // Set the title in state for the app component
-    if (props.state) {
-      (props.state as any).title = `${componentName} - ${titleSuffix}`;
-    }
-
-    // Load examples from markdown file
-    // Handle special directory naming for mockup components
-    let directoryName = componentName.toLowerCase();
-    if (category === "mockup") {
-      directoryName = componentName.toLowerCase().replace("mockup", "");
-    }
-
+    // Convert category/name to component path for loading metadata
+    const directoryName = componentName.toLowerCase().replace(/([A-Z])/g, "-$1").replace(/^-/, "");
     const componentPath = join(
       Deno.cwd(),
       `../ui-lib/components/${category}/${directoryName}/${componentName}.tsx`,
@@ -264,191 +223,63 @@ export function createComponentRoute(config: ComponentRouteConfig) {
 
     const pageData = await loadComponentPageData(componentPath);
 
-    // Create automatic preview generator with preview data
-    const generatePreviewSpec = createComponentPreviewGenerator(
-      componentName,
-      StaticComponent,
-      pageData.previewData,
-    );
-
-    // Generate preview components for each example using the code from markdown
-    const examples = pageData.examples.map((example) => {
-      const previewSpec = generatePreviewSpec(example.code, example.title);
-
-      // Use custom preview renderer if provided
-      if (customPreviewRenderer) {
-        return {
-          ...example,
-          preview: customPreviewRenderer(previewSpec, {
-            Static: StaticComponent,
-            Interactive: InteractiveComponent,
-          }),
-        };
-      }
-
-      // Default preview rendering
-      const preview = renderPreview(previewSpec, {
-        Static: StaticComponent,
-        Interactive: InteractiveComponent,
-        componentName,
-      });
-
-      return {
-        ...example,
-        preview,
-      };
-    });
-
-    // Add additional preview sections from previewData that don't have corresponding examples
-    const additionalPreviews = pageData.previewData.filter((previewItem) => {
-      return !pageData.examples.some((example) =>
-        example.title.toLowerCase().includes(previewItem.title.toLowerCase()) ||
-        previewItem.title.toLowerCase().includes(example.title.toLowerCase())
-      );
-    }).map((previewItem) => {
-      const previewSpec: PreviewSpec = {
-        type: previewItem.buttons ? "buttons" : (previewItem.components ? "components" : "code"),
-        wrapperClass: "flex flex-wrap gap-4",
-        buttons: previewItem.buttons,
-        components: previewItem.components,
-        code: previewItem.code,
-      };
-
-      const preview = renderPreview(previewSpec, {
-        Static: StaticComponent,
-        Interactive: InteractiveComponent,
-        componentName,
-      });
-
-      return {
-        title: previewItem.title,
-        description: previewItem.description || "",
-        code: previewItem.code || `// Preview for ${previewItem.title}`,
-        preview,
-      };
-    });
-
-    const allExamples = [...examples, ...additionalPreviews];
-
-    // Simple component page template for now
     return (
       <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold mb-4">{pageData.title}</h1>
         <p class="text-lg text-gray-600 mb-8">{pageData.description}</p>
 
         <div class="space-y-8">
-          {allExamples.map((example, index) => (
+          {pageData.examples.map((example, index) => (
             <div key={index} class="border rounded-lg p-6">
               <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
-              {example.description && <p class="text-gray-600 mb-4">{example.description}</p>}
-
+              <p class="text-gray-600 mb-4">{example.description}</p>
+              
               <div class="bg-gray-50 p-4 rounded mb-4">
-                {example.preview}
+                <div class="flex flex-wrap gap-4">
+                  {(() => {
+                    // Parse the JSX code to get component instances
+                    const parsedComponents = parseJSXExample(example.code, componentName);
+                    
+                    return parsedComponents.map((comp, compIndex) => {
+                      const Component = (example.interactive && InteractiveComponent) 
+                        ? InteractiveComponent 
+                        : StaticComponent;
+                      
+                      return (
+                        <Component key={compIndex} {...comp.props}>
+                          {comp.content}
+                        </Component>
+                      );
+                    });
+                  })()}
+                </div>
               </div>
 
-              <details class="mt-4">
-                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
-                  Show Code
-                </summary>
-                <pre class="bg-gray-900 text-white p-4 rounded mt-2 overflow-x-auto">
-                  <code>{example.code}</code>
-                </pre>
-              </details>
+              {(example.showCode !== false) && (
+                <details class="mt-4">
+                  <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
+                    Show Code
+                  </summary>
+                  <pre class="bg-gray-900 text-white p-4 rounded mt-2 overflow-x-auto">
+                    <code>{example.code}</code>
+                  </pre>
+                </details>
+              )}
             </div>
           ))}
         </div>
+
+        {pageData.usageNotes.length > 0 && (
+          <div class="mt-8 p-6 bg-blue-50 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">Usage Notes</h3>
+            <ul class="list-disc list-inside space-y-2">
+              {pageData.usageNotes.map((note, index) => (
+                <li key={index} class="text-gray-700">{note}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     );
   };
-}
-
-/**
- * Default preview renderer for common component patterns
- */
-function renderPreview(
-  previewSpec: PreviewSpec,
-  components: { Static: any; Interactive?: any; componentName: string },
-): ComponentChildren {
-  const { Static, Interactive, componentName } = components;
-
-  if (previewSpec.type === "buttons" && previewSpec.buttons && componentName === "Button") {
-    return (
-      <div class={previewSpec.wrapperClass || "flex flex-wrap gap-4"}>
-        {previewSpec.buttons.map((buttonSpec, index) => {
-          const Component = buttonSpec.isInteractive && Interactive ? Interactive : Static;
-          const props = { ...buttonSpec.props };
-
-          if (buttonSpec.isInteractive && Interactive) {
-            if (buttonSpec.content === "Click Me") {
-              props.onClick = () => alert("Button clicked!");
-            } else {
-              props.onClick = () => console.log("Logged to console");
-            }
-          }
-
-          return <Component key={index} {...props}>{buttonSpec.content}</Component>;
-        })}
-      </div>
-    );
-  }
-
-  if (previewSpec.type === "components" && previewSpec.components) {
-    return (
-      <div class={previewSpec.wrapperClass || "flex flex-wrap gap-4"}>
-        {previewSpec.components.map((componentSpec, index) => {
-          const props = { ...componentSpec.props };
-          return (
-            <Static key={index} {...props}>
-              {componentSpec.children}
-            </Static>
-          );
-        })}
-      </div>
-    );
-  }
-
-  if (previewSpec.type === "code") {
-    return (
-      <div class={previewSpec.wrapperClass || "flex flex-wrap gap-4"}>
-        <Static>Default {componentName}</Static>
-      </div>
-    );
-  }
-
-  if (previewSpec.type === "error") {
-    return (
-      <div class="alert alert-error">
-        <span>{previewSpec.error}</span>
-      </div>
-    );
-  }
-
-  return <div class="text-gray-500">Preview not available</div>;
-}
-
-/**
- * Helper to create button-specific routes
- */
-export function createButtonRoute(StaticButton: any, InteractiveButton: any) {
-  return createComponentRoute({
-    componentName: "Button",
-    category: "action",
-    StaticComponent: StaticButton,
-    InteractiveComponent: InteractiveButton,
-  });
-}
-
-/**
- * Helper to create simple component routes (no interactivity)
- */
-export function createSimpleComponentRoute(
-  componentName: string,
-  category: string,
-  Component: any,
-) {
-  return createComponentRoute({
-    componentName,
-    category,
-    StaticComponent: Component,
-  });
 }

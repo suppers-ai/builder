@@ -15,7 +15,6 @@ export type { SearchModalProps, SearchResult } from "./action/search-modal/Searc
 export { UserProfileDropdown } from "./navigation/user-profile-dropdown/UserProfileDropdown.tsx";
 export type {
   UserProfileDropdownProps,
-  UserProfileDropdownUser,
 } from "./navigation/user-profile-dropdown/UserProfileDropdown.tsx";
 export { Rating } from "./input/rating/Rating.tsx";
 export type { RatingProps } from "./input/rating/Rating.tsx";
@@ -68,7 +67,6 @@ export { Alert } from "./feedback/alert/Alert.tsx";
 export type { AlertProps } from "./feedback/alert/Alert.tsx";
 export { Badge } from "./display/badge/Badge.tsx";
 export { Button } from "./action/button/Button.tsx";
-export type { ButtonProps } from "./action/button/Button.tsx";
 export { Card } from "./display/card/Card.tsx";
 export { Checkbox } from "./input/checkbox/Checkbox.tsx";
 export type { CheckboxProps } from "./input/checkbox/Checkbox.tsx";
@@ -114,8 +112,6 @@ export { HeaderLayout } from "./layout/header-layout/HeaderLayout.tsx";
 export type { HeaderLayoutProps } from "./layout/header-layout/HeaderLayout.tsx";
 export { PageLayout } from "./layout/page-layout/PageLayout.tsx";
 export type { PageLayoutProps } from "./layout/page-layout/PageLayout.tsx";
-export { SidebarLayout } from "./layout/sidebar-layout/SidebarLayout.tsx";
-export type { SidebarLayoutProps } from "./layout/sidebar-layout/SidebarLayout.tsx";
 
 // Page components
 export { LoginPage } from "./page/login-page/LoginPage.tsx";
@@ -194,7 +190,10 @@ export {
 // Export metadata files for ui-lib-website
 export { buttonMetadata } from "./action/button/Button.metadata.tsx";
 export { dropdownMetadata } from "./action/dropdown/Dropdown.metadata.tsx";
+export { loginButtonMetadata } from "./action/login-button/LoginButton.metadata.tsx";
 export { modalMetadata } from "./action/modal/Modal.metadata.tsx";
+export { searchButtonMetadata } from "./action/search-button/SearchButton.metadata.tsx";
+export { searchModalMetadata } from "./action/search-modal/SearchModal.metadata.tsx";
 export { swapMetadata } from "./action/swap/Swap.metadata.tsx";
 export { themeControllerMetadata } from "./action/theme-controller/ThemeController.metadata.tsx";
 export { accordionMetadata } from "./display/accordion/Accordion.metadata.tsx";
@@ -211,6 +210,7 @@ export { statMetadata } from "./display/stat/Stat.metadata.tsx";
 export { tableMetadata } from "./display/table/Table.metadata.tsx";
 export { timelineMetadata } from "./display/timeline/Timeline.metadata.tsx";
 export { breadcrumbsMetadata } from "./navigation/breadcrumbs/Breadcrumbs.metadata.tsx";
+export { dockMetadata } from "./navigation/dock/Dock.metadata.tsx";
 export { linkMetadata } from "./navigation/link/Link.metadata.tsx";
 export { menuMetadata } from "./navigation/menu/Menu.metadata.tsx";
 export { navbarMetadata } from "./navigation/navbar/Navbar.metadata.tsx";
@@ -218,7 +218,10 @@ export { paginationMetadata } from "./navigation/pagination/Pagination.metadata.
 export { stepsMetadata } from "./navigation/steps/Steps.metadata.tsx";
 export { tabsMetadata } from "./navigation/tabs/Tabs.metadata.tsx";
 export { checkboxMetadata } from "./input/checkbox/Checkbox.metadata.tsx";
+export { dateInputMetadata } from "./input/date-input/DateInput.metadata.tsx";
 export { fileInputMetadata } from "./input/file-input/FileInput.metadata.tsx";
+export { inputMetadata } from "./input/input/Input.metadata.tsx";
+export { passwordInputMetadata } from "./input/password-input/PasswordInput.metadata.tsx";
 export { radioMetadata } from "./input/radio/Radio.metadata.tsx";
 export { rangeMetadata } from "./input/range/Range.metadata.tsx";
 export { ratingMetadata } from "./input/rating/Rating.metadata.tsx";

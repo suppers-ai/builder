@@ -3,13 +3,6 @@ import { ComponentChildren } from "preact";
 import { globalSidebarOpen } from "../../../utils/signals.ts";
 import { Footer, FooterSection, SocialLink } from "../footer/Footer.tsx";
 import { HeaderLayout } from "../header-layout/HeaderLayout.tsx";
-import {
-  companyFooterConfig,
-  defaultFooterCopyright,
-  defaultFooterSections,
-  defaultSocialLinks,
-  minimalFooterConfig,
-} from "../../../utils/footer-config.tsx";
 import { useState } from "preact/hooks";
 
 export interface PageLayoutProps extends BaseComponentProps {
@@ -53,34 +46,13 @@ export function PageLayout({
 
   // Resolve footer configuration
   const getFooterConfig = () => {
-    // If custom props are provided, use them
-    if (
-      customFooterEnabled && (footerSections || footerCopyright || footerSocialLinks || footerLogo)
-    ) {
       return {
-        sections: footerSections || defaultFooterSections,
-        copyright: footerCopyright || defaultFooterCopyright,
-        socialLinks: footerSocialLinks || defaultSocialLinks,
+        sections: footerSections,
+        copyright: footerCopyright,
+        socialLinks: footerSocialLinks,
         logo: footerLogo,
       };
-    }
-
-    // Otherwise use predefined configurations
-    switch (currentFooterConfig) {
-      case "minimal":
-        return minimalFooterConfig;
-      case "company":
-        return companyFooterConfig;
-      case "default":
-      default:
-        return {
-          sections: defaultFooterSections,
-          copyright: defaultFooterCopyright,
-          socialLinks: defaultSocialLinks,
-          logo: footerLogo,
-        };
-    }
-  };
+    };
 
   // Controls component
   const renderControls = () => {

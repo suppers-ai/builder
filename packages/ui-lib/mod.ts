@@ -14,3 +14,7 @@ export * from "./components/mod.ts";
 
 // Export utilities
 export * from "./utils/signals.ts";
+
+// Export schema utilities
+export * from "./components/schemas/base.ts";
+export * from "./components/schemas/extractor.ts";

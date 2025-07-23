@@ -1,32 +1,4 @@
-import {
-  BaseComponentProps,
-  ColorProps,
-  DisabledProps,
-  LoadingProps,
-  SizeProps,
-  VariantProps,
-} from "../../types.ts";
-
-export interface ButtonProps
-  extends BaseComponentProps, SizeProps, ColorProps, VariantProps, DisabledProps, LoadingProps {
-  type?: "button" | "submit" | "reset";
-  wide?: boolean;
-  circle?: boolean;
-  square?: boolean;
-  shape?: "circle" | "square";
-  glass?: boolean;
-  noAnimation?: boolean;
-  active?: boolean;
-  as?: string;
-  href?: string;
-  target?: string;
-  rel?: string;
-  tabIndex?: number;
-  role?: string;
-  onClick?: (event: MouseEvent) => void;
-  onFocus?: (event: FocusEvent) => void;
-  onBlur?: (event: FocusEvent) => void;
-}
+import { ButtonProps } from "./Button.schema.ts";
 
 export function Button({
   children,

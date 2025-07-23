@@ -1,4 +1,5 @@
 import { breadcrumbsMetadata } from "./breadcrumbs/Breadcrumbs.metadata.tsx";
+import { dockMetadata } from "./dock/Dock.metadata.tsx";
 import { linkMetadata } from "./link/Link.metadata.tsx";
 import { menuMetadata } from "./menu/Menu.metadata.tsx";
 import { navbarMetadata } from "./navbar/Navbar.metadata.tsx";
@@ -8,6 +9,7 @@ import { tabsMetadata } from "./tabs/Tabs.metadata.tsx";
 
 export const navigationComponentsMetadata = [
   breadcrumbsMetadata,
+  dockMetadata,
   linkMetadata,
   menuMetadata,
   navbarMetadata,

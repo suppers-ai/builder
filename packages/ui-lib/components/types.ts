@@ -72,14 +72,66 @@ export interface StepProps {
   icon?: ComponentChildren;
 }
 
+// Component category enum for type safety
+export enum ComponentCategory {
+  ACTION = "action",
+  DISPLAY = "display", 
+  INPUT = "input",
+  LAYOUT = "layout",
+  NAVIGATION = "navigation",
+  FEEDBACK = "feedback",
+  MOCKUP = "mockup",
+  PAGE = "page",
+  SECTIONS = "sections",
+  TEMPLATES = "templates"
+}
+
+// Component example interface for rich examples
+export interface ComponentExample {
+  title: string;
+  description: string;
+  code: string;
+  props?: Record<string, any>;
+  interactive?: boolean;
+  showCode?: boolean;
+}
+
+// Component prop documentation interface
+export interface ComponentProp {
+  name: string;
+  type: string;
+  description: string;
+  required?: boolean;
+  default?: string;
+}
+
+// Schema reference for automatic prop generation
+export interface ComponentSchema {
+  schema: any; // Zod schema object
+  validateFn?: (props: unknown) => any;
+  safeValidateFn?: (props: unknown) => any;
+}
+
 // Component metadata interface
 export interface ComponentMetadata {
   name: string;
   description: string;
-  category: string;
+  category: ComponentCategory;
   path: string;
   tags: string[];
-  examples: string[];
   relatedComponents: string[];
   preview: ComponentChildren; // JSX preview component
+  interactive?: boolean; // Whether component supports interactive mode (islands)
+  
+  // Rich examples with full data (replaces simple examples: string[])
+  examples: ComponentExample[];
+  
+  // API documentation (either manual props or schema reference)
+  props?: ComponentProp[];
+  schema?: ComponentSchema;
+  
+  // Usage information
+  usageNotes?: string[];
+  variants?: string[];
+  useCases?: string[];
 }

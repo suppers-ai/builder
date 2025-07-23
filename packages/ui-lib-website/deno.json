@@ -14,7 +14,9 @@
     "@suppers/shared": "../shared/mod.ts",
     "@suppers/shared/": "../shared/",
     "@suppers/ui-lib": "../ui-lib/mod.ts",
-    "tailwindcss": "npm:tailwindcss@^3.4.0"
+    "@suppers/ui-lib/": "../ui-lib/",
+    "tailwindcss": "npm:tailwindcss@^3.4.0",
+    "zod": "npm:zod@^3.23.8"
   },
   "tasks": {
     "dev": "deno run -A --watch=static/,routes/,islands/,components/,lib/,hooks/,providers/,pages/ dev.ts",
