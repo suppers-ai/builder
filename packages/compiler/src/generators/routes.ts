@@ -8,7 +8,6 @@ import { generateHeadOverrides } from "./layout.ts";
 import {
   generateComponentElements,
   generateComponentImports,
-  generatePageWithComponents,
   generateServiceImports,
 } from "./components.ts";
 import { generateServerDataFetching } from "./data.ts";

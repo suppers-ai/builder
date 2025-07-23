@@ -191,7 +191,7 @@ export const api = {
  */
 async function generateSupabaseService(
   servicesDir: string,
-  spec: ApplicationSpec,
+  _spec: ApplicationSpec,
 ): Promise<void> {
   const supabaseServiceContent = `/**
  * Supabase Service
@@ -404,8 +404,8 @@ export function generateServerDataFetching(
   }
 
   const fetchFunctions = dataConfigs.map((config, index) => {
-    const processedUrl = substituteVariables(config.url || "", variables);
-    const processedEndpoint = substituteVariables(config.endpoint, variables);
+    const _processedUrl = substituteVariables(config.url || "", variables);
+    const _processedEndpoint = substituteVariables(config.endpoint, variables);
 
     return `
   // Data fetch ${index + 1}

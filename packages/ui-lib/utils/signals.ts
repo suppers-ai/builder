@@ -60,12 +60,12 @@ export const initializeSidebar = () => {
   if (typeof window !== "undefined") {
     // On desktop (lg+), sidebar should be open by default
     // On mobile, sidebar should be closed by default
-    const isDesktop = window.innerWidth >= 1024;
+    const isDesktop = globalThis.innerWidth >= 1024;
     globalSidebarOpen.value = isDesktop;
 
     // Listen for resize events to handle responsive behavior
-    window.addEventListener("resize", () => {
-      const isNowDesktop = window.innerWidth >= 1024;
+    globalThis.addEventListener("resize", () => {
+      const isNowDesktop = globalThis.innerWidth >= 1024;
       if (isNowDesktop && !globalSidebarOpen.value) {
         // Switching to desktop - open sidebar
         globalSidebarOpen.value = true;
@@ -80,9 +80,9 @@ export const initializeSidebar = () => {
 
 // Scroll management functions
 export const updateScrollTop = () => {
-  globalShowScrollTop.value = window.scrollY > 400;
+  globalShowScrollTop.value = globalThis.scrollY > 400;
 };
 
 export const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  globalThis.scrollTo({ top: 0, behavior: "smooth" });
 };

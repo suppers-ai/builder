@@ -38,7 +38,7 @@ Deno.test("Stack - gap variants", () => {
 
   gaps.forEach((gap, index) => {
     const html = renderToString(Stack({
-      gap: gap as any,
+      gap: gap as string,
       children: `Gap ${gap}`,
     }));
     assertStringIncludes(html, gapClasses[index]);
@@ -52,7 +52,7 @@ Deno.test("Stack - align variants", () => {
 
   alignments.forEach((align, index) => {
     const html = renderToString(Stack({
-      align: align as any,
+      align: align as string,
       children: `Align ${align}`,
     }));
     assertStringIncludes(html, alignClasses[index]);
@@ -73,7 +73,7 @@ Deno.test("Stack - justify variants", () => {
 
   justifications.forEach((justify, index) => {
     const html = renderToString(Stack({
-      justify: justify as any,
+      justify: justify as string,
       children: `Justify ${justify}`,
     }));
     assertStringIncludes(html, justifyClasses[index]);

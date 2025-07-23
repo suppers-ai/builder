@@ -12,8 +12,13 @@ export const diffMetadata: ComponentMetadata = {
   preview: (
     <div class="w-full max-w-md">
       <Diff
-        oldContent={"function hello() {\n  console.log('Hello');\n}"}
-        newContent={"function hello() {\n  console.log('Hello World!');\n  return true;\n}"}
+        oldContent="function hello() {
+  console.log('Hello');
+}"
+        newContent="function hello() {
+  console.log('Hello World!');
+  return true;
+}"
         oldLabel="Before"
         newLabel="After"
         size="sm"

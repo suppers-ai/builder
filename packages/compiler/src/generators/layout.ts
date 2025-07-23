@@ -9,7 +9,6 @@ import type {
   ComponentDefinition,
   GlobalConfig,
   Head,
-  HeadMeta,
 } from "../types/mod.ts";
 
 /**
@@ -17,9 +16,9 @@ import type {
  */
 export async function generateGlobalLayout(
   destinationRoot: string,
-  spec: ApplicationSpec,
+  _spec: ApplicationSpec,
 ): Promise<void> {
-  const globalConfig = spec.data.global;
+  const globalConfig = _spec.data.global;
 
   if (!globalConfig) {
     console.log("⚠️  No global configuration found, skipping layout generation");
@@ -29,7 +28,7 @@ export async function generateGlobalLayout(
   console.log("🏗️  Generating global layout...");
 
   // Generate _layout.tsx file
-  const layoutContent = generateLayoutContent(globalConfig, spec);
+  const layoutContent = generateLayoutContent(globalConfig, _spec);
   const layoutPath = FileSystem.join(destinationRoot, "routes", "_layout.tsx");
 
   await FileSystem.writeText(layoutPath, layoutContent);

@@ -125,6 +125,7 @@ function SidebarSection({ section, currentPath, onLinkClick }: SidebarSectionPro
     <div class="py-1">
       {/* Section Header - Clickable */}
       <button
+        type="button"
         onClick={toggleSection}
         class={`w-full px-4 py-2 flex items-center justify-between transition-colors hover:bg-base-200/50 focus:outline-none ${
           hasActiveLink ? "bg-primary/5" : ""

@@ -37,7 +37,7 @@ export class AuthClient {
 
     // Check for auth callback in URL
     if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
+      const url = new URL(globalThis.location.href);
       const code = url.searchParams.get("code");
       const state = url.searchParams.get("state");
       const error = url.searchParams.get("error");
@@ -67,7 +67,7 @@ export class AuthClient {
     const params = new URLSearchParams({
       response_type: "code",
       client_id: this.config.clientId || "default",
-      redirect_uri: options.redirectUri || this.config.redirectUri || window.location.origin,
+      redirect_uri: options.redirectUri || this.config.redirectUri || globalThis.location.origin,
       scope: (options.scopes || this.config.scopes || []).join(" "),
     });
 
@@ -78,7 +78,7 @@ export class AuthClient {
     const loginUrl = `${this.config.storeUrl}/login?${params.toString()}`;
 
     if (typeof window !== "undefined") {
-      window.location.href = loginUrl;
+      globalThis.location.href = loginUrl;
     }
   }
 
@@ -232,7 +232,7 @@ export class AuthClient {
       body: JSON.stringify({
         code,
         client_id: this.config.clientId,
-        redirect_uri: this.config.redirectUri || window.location.origin,
+        redirect_uri: this.config.redirectUri || globalThis.location.origin,
         state,
       }),
     });
@@ -256,10 +256,10 @@ export class AuthClient {
 
     // Clean up URL
     if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
+      const url = new URL(globalThis.location.href);
       url.searchParams.delete("code");
       url.searchParams.delete("state");
-      window.history.replaceState({}, "", url.toString());
+      globalThis.history.replaceState({}, "", url.toString());
     }
   }
 
@@ -289,7 +289,7 @@ export class AuthClient {
   /**
    * Emit event
    */
-  private emitEvent(event: AuthEventType, data?: any): void {
+  private emitEvent(event: AuthEventType, data?: unknown): void {
     const callbacks = this.eventCallbacks.get(event);
     if (callbacks) {
       callbacks.forEach((callback) => {

@@ -49,5 +49,5 @@ export interface RefreshTokenResponse {
 export type AuthEventType = "login" | "logout" | "token_refresh" | "error";
 
 export interface AuthEventCallback {
-  (event: AuthEventType, data?: any): void;
+  (event: AuthEventType, data?: unknown): void;
 }

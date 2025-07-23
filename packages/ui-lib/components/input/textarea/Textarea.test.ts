@@ -79,7 +79,7 @@ Deno.test("Textarea - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Textarea({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `textarea-${size}`);
   });
@@ -90,7 +90,7 @@ Deno.test("Textarea - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Textarea({
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
     assertStringIncludes(html, `textarea-${color}`);
   });

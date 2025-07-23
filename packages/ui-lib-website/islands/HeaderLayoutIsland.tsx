@@ -84,7 +84,7 @@ export default function HeaderLayoutIsland({
       onLogin();
     } else {
       // Default behavior: navigate to login page
-      window.location.href = "/login";
+      globalThis.location.href = "/login";
     }
   };
 
@@ -94,7 +94,7 @@ export default function HeaderLayoutIsland({
       onLogout();
     } else {
       // Default behavior: navigate to logout endpoint
-      window.location.href = "/auth/logout";
+      globalThis.location.href = "/auth/logout";
     }
   };
 
@@ -125,9 +125,9 @@ export default function HeaderLayoutIsland({
       searchResults={searchResults}
       searchLoading={searchLoading}
       sidebarConfig={defaultUISidebarConfig}
-      showScrollToTop={true}
-      autoInitializeSidebar={true}
-      allowKeyboardShortcuts={true}
+      showScrollToTop
+      autoInitializeSidebar
+      allowKeyboardShortcuts
       showBreadcrumbs={false}
       showNotifications={false}
     />

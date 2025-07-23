@@ -41,7 +41,7 @@ Deno.test("Breadcrumbs - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(Breadcrumbs({
       items: basicBreadcrumbs,
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `text-${size}`);
   });

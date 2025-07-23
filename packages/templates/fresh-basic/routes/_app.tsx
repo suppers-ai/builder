@@ -16,7 +16,7 @@ export default function App({ Component }: PageProps) {
           storeUrl="http://localhost:8001"
           clientId="fresh-basic-app"
           redirectUri={typeof window !== "undefined"
-            ? window.location.origin + "/auth/callback"
+            ? globalThis.location.origin + "/auth/callback"
             : ""}
         >
           <Comp />

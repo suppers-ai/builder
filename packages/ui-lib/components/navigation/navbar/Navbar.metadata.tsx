@@ -12,7 +12,7 @@ export const navbarMetadata: ComponentMetadata = {
   preview: (
     <div class="w-full max-w-md">
       <Navbar
-        brand={"My App"}
+        brand="My App"
         items={[
           { label: "Home", href: "/", active: true },
           { label: "About", href: "/about" },

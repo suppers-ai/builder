@@ -110,7 +110,7 @@ Deno.test("ColorInput - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(ColorInput({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `input-${size}`);
   });
@@ -121,7 +121,7 @@ Deno.test("ColorInput - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(ColorInput({
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
     assertStringIncludes(html, `input-${color}`);
   });

@@ -28,7 +28,7 @@ export function OAuthHandler({ url }: OAuthHandlerProps) {
         }
 
         // Build callback URL
-        const callbackUrl = new URL("/auth/callback", window.location.origin);
+        const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
         callbackUrl.searchParams.set("redirect_to", redirectTo);
         if (state) {
           callbackUrl.searchParams.set("state", state);

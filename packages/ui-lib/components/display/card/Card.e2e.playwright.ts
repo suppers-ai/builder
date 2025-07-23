@@ -410,7 +410,7 @@ test.describe("Card E2E Tests", () => {
 
         // Check if card has shadow styling
         const hasShadow = await card.evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           return styles.boxShadow !== "none";
         });
 
@@ -506,7 +506,7 @@ test.describe("Card E2E Tests", () => {
 
         // Check that card has background
         const hasBackground = await card.evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           return styles.backgroundColor !== "rgba(0, 0, 0, 0)";
         });
         expect(hasBackground).toBeTruthy();

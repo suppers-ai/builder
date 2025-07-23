@@ -44,7 +44,7 @@ Deno.test("Badge - color variants", () => {
   colors.forEach((color) => {
     const html = renderToString(h(Badge, {
       children: "Test",
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
     assertStringIncludes(html, `badge-${color}`);
   });
@@ -56,7 +56,7 @@ Deno.test("Badge - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(h(Badge, {
       children: "Test",
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `badge-${size}`);
   });
@@ -68,7 +68,7 @@ Deno.test("Badge - variant styles", () => {
   variants.forEach((variant) => {
     const html = renderToString(h(Badge, {
       children: "Test",
-      variant: variant as any,
+      variant: variant as string,
     }));
     assertStringIncludes(html, `badge-${variant}`);
   });
@@ -109,7 +109,7 @@ Deno.test("Badge - positioned badge all positions", () => {
   positions.forEach((position) => {
     const html = renderToString(h(Badge, {
       content: "Badge",
-      position: position as any,
+      position: position as string,
       children: h("div", {}, "Content"),
     }));
     assertStringIncludes(html, "indicator");

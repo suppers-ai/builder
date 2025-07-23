@@ -4,7 +4,7 @@ import { BaseComponentProps } from "../../types.ts";
 export interface ToastProps extends BaseComponentProps {
   message: string;
   type?: "info" | "success" | "warning" | "error";
-  position?:
+  _position?:
     | "top-start"
     | "top-center"
     | "top-end"
@@ -22,7 +22,7 @@ export function Toast({
   class: className = "",
   message,
   type = "info",
-  position = "top-end",
+  _position = "top-end",
   dismissible = true,
   icon,
   id,
@@ -107,7 +107,7 @@ export function Toast({
       <span>{message}</span>
       {dismissible && (
         <div>
-          <button class="btn btn-sm btn-circle btn-ghost">
+          <button type="button" class="btn btn-sm btn-circle btn-ghost">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-4 w-4"

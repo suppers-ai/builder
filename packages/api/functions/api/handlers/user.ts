@@ -1,6 +1,6 @@
 import { corsHeaders } from "../lib/cors.ts";
 
-export async function handleUserRequest(request: Request, supabase: any): Promise<Response> {
+export async function handleUserRequest(request: Request, supabase: unknown): Promise<Response> {
   const url = new URL(request.url);
   const method = request.method;
 
@@ -27,7 +27,7 @@ export async function handleUserRequest(request: Request, supabase: any): Promis
   }
 }
 
-async function getUser(supabase: any, url: URL): Promise<Response> {
+async function getUser(supabase: unknown, url: URL): Promise<Response> {
   const userId = url.searchParams.get("user_id");
 
   if (!userId) {
@@ -63,7 +63,7 @@ async function getUser(supabase: any, url: URL): Promise<Response> {
   });
 }
 
-async function createUser(request: Request, supabase: any): Promise<Response> {
+async function createUser(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const {
     id,
@@ -111,7 +111,7 @@ async function createUser(request: Request, supabase: any): Promise<Response> {
   });
 }
 
-async function updateUser(request: Request, supabase: any): Promise<Response> {
+async function updateUser(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const {
     id,
@@ -130,7 +130,7 @@ async function updateUser(request: Request, supabase: any): Promise<Response> {
     });
   }
 
-  const updateData: any = {
+  const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
 

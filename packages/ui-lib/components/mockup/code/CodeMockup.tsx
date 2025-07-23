@@ -4,7 +4,7 @@ export interface CodeMockupProps extends BaseComponentProps {
   /** Code content to display */
   code?: string;
   /** Programming language for syntax highlighting */
-  language?: "javascript" | "typescript" | "python" | "html" | "css" | "json" | "bash" | "sql";
+  _language?: "javascript" | "typescript" | "python" | "html" | "css" | "json" | "bash" | "sql";
   /** Whether to show line numbers */
   showLineNumbers?: boolean;
   /** Code mockup variant */
@@ -14,12 +14,12 @@ export interface CodeMockupProps extends BaseComponentProps {
   /** Click handler for the mockup */
   onMockupClick?: () => void;
   /** Copy to clipboard handler */
-  onCopy?: (code: string) => void;
+  onCopyCode?: (code: string) => void;
 }
 
 export function CodeMockup({
   code = "console.log('Hello World!');",
-  language = "javascript",
+  _language = "javascript",
   showLineNumbers = false,
   variant = "default",
   filename,

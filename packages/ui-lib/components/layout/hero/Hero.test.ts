@@ -44,7 +44,7 @@ Deno.test("Hero - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(Hero({
       title: "Test Title",
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
 
     const expectedClasses = {
@@ -64,7 +64,7 @@ Deno.test("Hero - background variants", () => {
   backgrounds.forEach((background) => {
     const html = renderToString(Hero({
       title: "Test Title",
-      background: background as any,
+      background: background as string,
     }));
 
     if (background === "default") {
@@ -111,7 +111,7 @@ Deno.test("Hero - variant layouts", () => {
   variants.forEach((variant) => {
     const html = renderToString(Hero({
       title: "Test Title",
-      variant: variant as any,
+      variant: variant as string,
     }));
 
     if (variant === "centered") {
@@ -240,7 +240,7 @@ Deno.test("Hero - alignment options", () => {
   alignments.forEach((align) => {
     const html = renderToString(Hero({
       title: "Test Title",
-      align: align as any,
+      align: align as string,
     }));
 
     assertStringIncludes(html, `text-${align}`);

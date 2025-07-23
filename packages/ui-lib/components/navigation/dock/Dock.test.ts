@@ -29,7 +29,7 @@ Deno.test("Dock - position variants", () => {
 
   positions.forEach((position) => {
     const html = renderToString(Dock({
-      position: position as any,
+      position: position as string,
       items: [{ id: "test", label: "Test", icon: "✓" }],
     }));
 
@@ -96,7 +96,7 @@ Deno.test("Dock - size variants", () => {
 
   sizes.forEach((size, index) => {
     const html = renderToString(Dock({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
       items: [{ id: "test", label: "Test", icon: "✓" }],
     }));
     assertStringIncludes(html, sizeClasses[index]);
@@ -118,7 +118,7 @@ Deno.test("Dock - variant styles", () => {
 
   variants.forEach((variant, index) => {
     const html = renderToString(Dock({
-      variant: variant as any,
+      variant: variant as string,
       items: [{ id: "test", label: "Test" }],
     }));
     assertStringIncludes(html, variantClasses[index]);

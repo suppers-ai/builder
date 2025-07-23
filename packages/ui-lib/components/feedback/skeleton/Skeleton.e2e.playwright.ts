@@ -19,7 +19,7 @@ test.describe("Skeleton E2E Tests", () => {
     await expect(skeleton).toBeVisible();
 
     const hasAnimation = await skeleton.evaluate((el) => {
-      const style = window.getComputedStyle(el);
+      const style = globalThis.getComputedStyle(el);
       return style.animationName !== "none" || style.backgroundImage !== "none";
     });
 

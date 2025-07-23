@@ -73,7 +73,7 @@ Deno.serve(async (req: Request) => {
 
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
-      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser(token);
+      const { data: { user: authUser }, error: _userError } = await supabase.auth.getUser(token);
       user = authUser;
     }
 
@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
       const sessionMatch = cookieHeader.match(/sb-access-token=([^;]+)/);
       if (sessionMatch) {
         const sessionToken = sessionMatch[1];
-        const { data: { user: sessionUser }, error: sessionError } = await supabase.auth.getUser(
+        const { data: { user: sessionUser }, error: _sessionError } = await supabase.auth.getUser(
           sessionToken,
         );
         user = sessionUser;
@@ -101,7 +101,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Create authorization response
-    const authResponse = {
+    const _authResponse = {
       code: code,
       state: state,
       user: {

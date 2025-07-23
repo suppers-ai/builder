@@ -96,7 +96,7 @@ Deno.test("DateInput - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(DateInput({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `input-${size}`);
   });
@@ -107,7 +107,7 @@ Deno.test("DateInput - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(DateInput({
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
     assertStringIncludes(html, `input-${color}`);
   });

@@ -192,7 +192,7 @@ function resolveComponentLibrary(
 async function updateReadme(
   destinationRoot: string,
   siteSpec: SiteSpec,
-  options: SiteGeneratorOptions,
+  _options: SiteGeneratorOptions,
 ): Promise<void> {
   const readmePath = FileSystem.join(destinationRoot, "README.md");
 

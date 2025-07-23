@@ -1,4 +1,5 @@
 // @ts-check
+import process from "node:process";
 module.exports = {
   testDir: ".",
   testMatch: /.*\.playwright\.ts$/,

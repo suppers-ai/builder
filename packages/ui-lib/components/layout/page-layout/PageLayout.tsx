@@ -42,7 +42,7 @@ export function PageLayout({
   const [customFooterEnabled, setCustomFooterEnabled] = useState(footerConfig === "custom");
 
   // Get current path for active link highlighting
-  const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+  const currentPath = typeof window !== "undefined" ? globalThis.location.pathname : "";
 
   // Resolve footer configuration
   const getFooterConfig = () => {

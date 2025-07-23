@@ -29,7 +29,7 @@ test.describe("RadialProgress E2E Tests", () => {
 
       // Check CSS custom properties for progress value
       const progressValue = await radialProgress.evaluate((el) => {
-        const style = window.getComputedStyle(el);
+        const style = globalThis.getComputedStyle(el);
         return style.getPropertyValue("--value") || el.getAttribute("style");
       });
 
@@ -192,7 +192,7 @@ test.describe("RadialProgress E2E Tests", () => {
 
       // Verify stroke-width is applied
       const strokeWidth = await thickProgress.first().evaluate((el) => {
-        return window.getComputedStyle(el).getPropertyValue("stroke-width") ||
+        return globalThis.getComputedStyle(el).getPropertyValue("stroke-width") ||
           el.style.strokeWidth;
       });
 
@@ -228,7 +228,7 @@ test.describe("RadialProgress E2E Tests", () => {
     // Check if it uses SVG or CSS-based implementation
     const hasSvg = await radialProgress.locator("svg").count() > 0;
     const hasAfterPseudo = await radialProgress.evaluate((el) => {
-      const afterStyles = window.getComputedStyle(el, "::after");
+      const afterStyles = globalThis.getComputedStyle(el, "::after");
       return afterStyles.content !== "none";
     });
 

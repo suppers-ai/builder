@@ -48,7 +48,7 @@ export default function LoginPageIsland({
 
         if (user) {
           // Redirect if already logged in
-          window.location.href = redirectTo;
+          globalThis.location.href = redirectTo;
         }
       } catch (err) {
         console.log("No authenticated user");
@@ -64,7 +64,7 @@ export default function LoginPageIsland({
       (event, session) => {
         userSignal.value = session?.user ?? null;
         if (session?.user) {
-          window.location.href = redirectTo;
+          globalThis.location.href = redirectTo;
         }
       },
     );
@@ -142,8 +142,8 @@ export default function LoginPageIsland({
   const handleOAuthLogin = async (provider: "google" | "github") => {
     try {
       setError(null);
-      const currentUrl = new URL(window.location.href);
-      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      const currentUrl = new URL(globalThis.location.href);
+      const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
       callbackUrl.searchParams.set("redirect_to", redirectTo);
 
       await AuthHelpers.signInWithOAuth(provider, callbackUrl.toString());

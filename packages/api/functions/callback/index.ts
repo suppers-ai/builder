@@ -72,7 +72,7 @@ Deno.serve(async (req: Request) => {
 
     if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
-      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser(token);
+      const { data: { user: authUser }, error: _userError } = await supabase.auth.getUser(token);
       user = authUser;
     }
 
@@ -92,7 +92,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Create authorization response
-    const authResponse = {
+    const _authResponse = {
       code: code,
       state: state,
       user: {

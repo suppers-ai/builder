@@ -326,7 +326,7 @@ test.describe("Dropdown E2E Tests", () => {
 
       if (contentExists) {
         const zIndex = await dropdownContent.first().evaluate((el) => {
-          return window.getComputedStyle(el).zIndex;
+          return globalThis.getComputedStyle(el).zIndex;
         });
 
         // Should have a z-index value (not 'auto')

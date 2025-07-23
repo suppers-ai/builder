@@ -2,7 +2,7 @@ import { corsHeaders } from "../lib/cors.ts";
 
 export async function handleApplicationsRequest(
   request: Request,
-  supabase: any,
+  supabase: unknown,
 ): Promise<Response> {
   const url = new URL(request.url);
   const method = request.method;
@@ -32,7 +32,7 @@ export async function handleApplicationsRequest(
   }
 }
 
-async function getApplications(supabase: any, url: URL): Promise<Response> {
+async function getApplications(supabase: unknown, url: URL): Promise<Response> {
   const ownerId = url.searchParams.get("owner_id");
   const applicationId = url.searchParams.get("application_id");
 
@@ -92,7 +92,7 @@ async function getApplications(supabase: any, url: URL): Promise<Response> {
   }
 }
 
-async function createApplication(request: Request, supabase: any): Promise<Response> {
+async function createApplication(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const {
     ownerId,
@@ -141,7 +141,7 @@ async function createApplication(request: Request, supabase: any): Promise<Respo
   });
 }
 
-async function updateApplication(request: Request, supabase: any): Promise<Response> {
+async function updateApplication(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const {
     id,
@@ -159,7 +159,7 @@ async function updateApplication(request: Request, supabase: any): Promise<Respo
     });
   }
 
-  const updateData: any = {
+  const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
 
@@ -189,7 +189,7 @@ async function updateApplication(request: Request, supabase: any): Promise<Respo
   });
 }
 
-async function deleteApplication(request: Request, supabase: any): Promise<Response> {
+async function deleteApplication(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const { id } = body;
 

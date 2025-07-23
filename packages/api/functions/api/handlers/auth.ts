@@ -1,6 +1,6 @@
 import { corsHeaders } from "../lib/cors.ts";
 
-export async function handleAuthRequest(request: Request, supabase: any): Promise<Response> {
+export async function handleAuthRequest(request: Request, supabase: unknown): Promise<Response> {
   const url = new URL(request.url);
   const path = url.pathname.split("/").pop();
 
@@ -31,10 +31,10 @@ export async function handleAuthRequest(request: Request, supabase: any): Promis
   }
 }
 
-async function getCurrentUser(request: Request, supabase: any): Promise<Response> {
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+async function getCurrentUser(_request: Request, supabase: unknown): Promise<Response> {
+  const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
 
-  if (userError || !user) {
+  if (userError || !authUser) {
     return new Response(JSON.stringify({ error: "Not authenticated" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -42,14 +42,14 @@ async function getCurrentUser(request: Request, supabase: any): Promise<Response
   }
 
   // Get user from users table
-  const { data: user, error: userError } = await supabase
+  const { data: user, error: dbError } = await supabase
     .from("users")
     .select("*")
-    .eq("id", user.id)
+    .eq("id", authUser.id)
     .single();
 
-  if (userError && userError.code !== "PGRST116") {
-    return new Response(JSON.stringify({ error: userError.message }), {
+  if (dbError && dbError.code !== "PGRST116") {
+    return new Response(JSON.stringify({ error: dbError.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -69,7 +69,7 @@ async function getCurrentUser(request: Request, supabase: any): Promise<Response
   );
 }
 
-async function registerUser(request: Request, supabase: any): Promise<Response> {
+async function registerUser(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const {
     email,
@@ -119,7 +119,7 @@ async function registerUser(request: Request, supabase: any): Promise<Response> 
   );
 }
 
-async function loginUser(request: Request, supabase: any): Promise<Response> {
+async function loginUser(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const { email, password } = body;
 
@@ -154,7 +154,7 @@ async function loginUser(request: Request, supabase: any): Promise<Response> {
   );
 }
 
-async function logoutUser(request: Request, supabase: any): Promise<Response> {
+async function logoutUser(_request: Request, supabase: unknown): Promise<Response> {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
@@ -170,7 +170,7 @@ async function logoutUser(request: Request, supabase: any): Promise<Response> {
   });
 }
 
-async function refreshToken(request: Request, supabase: any): Promise<Response> {
+async function refreshToken(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const { refreshToken } = body;
 

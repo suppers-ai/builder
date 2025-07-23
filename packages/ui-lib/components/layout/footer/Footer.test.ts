@@ -60,7 +60,7 @@ Deno.test("Footer - background variants", () => {
 
   backgrounds.forEach((background, index) => {
     const html = renderToString(Footer({
-      background: background as any,
+      background: background as string,
     }));
     assertStringIncludes(html, backgroundClasses[index]);
   });
@@ -72,7 +72,7 @@ Deno.test("Footer - size variants", () => {
 
   sizes.forEach((size, index) => {
     const html = renderToString(Footer({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, sizeClasses[index]);
   });

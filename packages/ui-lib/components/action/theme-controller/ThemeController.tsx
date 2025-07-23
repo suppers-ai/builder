@@ -665,9 +665,9 @@ export function GlobalThemeController(
     <ThemeController
       {...props}
       currentTheme={globalTheme.value}
-      useGlobalState={true}
-      autoLoadSavedTheme={true}
-      autoSaveTheme={true}
+      useGlobalState
+      autoLoadSavedTheme
+      autoSaveTheme
     />
   );
 }

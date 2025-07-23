@@ -22,11 +22,11 @@ export default function ProfilePageIsland() {
 
         if (!user) {
           // Redirect to login if not authenticated
-          window.location.href = "/login?redirect_to=/profile";
+          globalThis.location.href = "/login?redirect_to=/profile";
         }
       } catch (err) {
         console.log("No authenticated user");
-        window.location.href = "/login?redirect_to=/profile";
+        globalThis.location.href = "/login?redirect_to=/profile";
       } finally {
         authLoadingSignal.value = false;
       }
@@ -39,7 +39,7 @@ export default function ProfilePageIsland() {
       (event, session) => {
         userSignal.value = session?.user ?? null;
         if (!session?.user) {
-          window.location.href = "/login?redirect_to=/profile";
+          globalThis.location.href = "/login?redirect_to=/profile";
         }
       },
     );
@@ -123,7 +123,7 @@ export default function ProfilePageIsland() {
   const handleSignOut = async () => {
     try {
       await AuthHelpers.signOut();
-      window.location.href = "/";
+      globalThis.location.href = "/";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign out");
     }
@@ -163,7 +163,7 @@ export default function ProfilePageIsland() {
       onSignOut={handleSignOut}
       appName="Suppers Store"
       appIcon="🚀"
-      showBackToHome={true}
+      showBackToHome
       homeUrl="/"
     />
   );

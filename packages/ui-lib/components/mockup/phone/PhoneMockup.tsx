@@ -6,7 +6,7 @@ export interface PhoneMockupProps extends BaseComponentProps {
   /** Child content to display in the phone */
   children: ComponentChildren;
   /** Phone variant/model */
-  variant?: "iphone" | "android" | "classic";
+  _variant?: "iphone" | "android" | "classic";
   /** Phone orientation */
   orientation?: "portrait" | "landscape";
   /** Phone color */
@@ -17,7 +17,7 @@ export interface PhoneMockupProps extends BaseComponentProps {
 
 export function PhoneMockup({
   children,
-  variant = "iphone",
+  _variant = "iphone",
   orientation = "portrait",
   color = "black",
   class: className,

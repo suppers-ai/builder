@@ -48,7 +48,7 @@ Deno.test("PhoneMockup - color variants", () => {
   colors.forEach((color) => {
     const html = renderToString(PhoneMockup({
       children: "Test content",
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
 
     if (color === "black") {
@@ -70,7 +70,7 @@ Deno.test("PhoneMockup - variant prop (currently not implemented)", () => {
   variants.forEach((variant) => {
     const html = renderToString(PhoneMockup({
       children: "Variant content",
-      variant: variant as any,
+      variant: variant as string,
     }));
 
     // Variant prop exists but doesn't affect classes currently

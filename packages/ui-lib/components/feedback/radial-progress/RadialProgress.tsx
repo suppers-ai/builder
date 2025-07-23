@@ -8,7 +8,7 @@ export interface RadialProgressProps extends BaseComponentProps, SizeProps, Colo
   label?: string;
   // Controlled mode props
   animatedValue?: number;
-  onChange?: (value: number) => void;
+  _onChange?: (value: number) => void;
 }
 
 export function RadialProgress({
@@ -21,7 +21,7 @@ export function RadialProgress({
   showValue = true,
   label,
   animatedValue,
-  onChange,
+  _onChange,
   id,
   ...props
 }: RadialProgressProps) {

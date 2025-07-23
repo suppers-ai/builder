@@ -64,7 +64,7 @@ export class AccessibilityTester {
    */
   static checkColorContrast(element: Element): string[] {
     const issues: string[] = [];
-    const styles = window.getComputedStyle(element);
+    const styles = globalThis.getComputedStyle(element);
     const color = styles.color;
     const backgroundColor = styles.backgroundColor;
 
@@ -102,7 +102,7 @@ export class AccessibilityTester {
       }
 
       // Check for focus indicators
-      const styles = window.getComputedStyle(element, ":focus");
+      const styles = globalThis.getComputedStyle(element, ":focus");
       if (!styles.outline || styles.outline === "none") {
         if (!styles.boxShadow && !styles.border) {
           issues.push("Element lacks visible focus indicator");

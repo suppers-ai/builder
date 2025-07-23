@@ -33,7 +33,7 @@ export function Alert({
       <span>{children}</span>
       {actions && <div>{actions}</div>}
       {dismissible && (
-        <button class="btn btn-sm btn-circle btn-ghost" onClick={onDismiss}>
+        <button type="button" class="btn btn-sm btn-circle btn-ghost" onClick={onDismiss}>
           ✕
         </button>
       )}

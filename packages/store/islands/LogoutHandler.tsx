@@ -15,7 +15,7 @@ export function LogoutHandler() {
 
         // Redirect to home after a short delay
         setTimeout(() => {
-          window.location.href = "/";
+          globalThis.location.href = "/";
         }, 1500);
       } catch (err) {
         console.error("Logout error:", err);

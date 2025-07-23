@@ -91,7 +91,7 @@ async function extractComponentData(filePath: string): Promise<ExtractedComponen
       relatedComponents: relatedComponents.length > 0 ? relatedComponents : undefined,
     };
   } catch (error) {
-    console.error(`Failed to extract data from ${filePath}:`, error.message);
+    console.error(`Failed to extract data from ${filePath}:`, (error as Error).message);
     return null;
   }
 }
@@ -237,7 +237,7 @@ function toTitleCase(kebabCase: string): string {
  * Generate markdown content from extracted data
  */
 function generateMarkdown(data: ExtractedComponentData): string {
-  const frontmatter: any = {
+  const frontmatter: Record<string, unknown> = {
     title: data.title,
     description: data.description,
     category: data.category,
@@ -280,7 +280,7 @@ function generateMarkdown(data: ExtractedComponentData): string {
 /**
  * Generate YAML from object
  */
-function generateYAML(obj: any, indent = 0): string {
+function generateYAML(obj: Record<string, unknown>, indent = 0): string {
   const spaces = "  ".repeat(indent);
   let yaml = "";
 
@@ -304,9 +304,9 @@ function generateYAML(obj: any, indent = 0): string {
           }
         }
       }
-    } else if (typeof value === "object") {
+    } else if (typeof value === "object" && value !== null) {
       yaml += "\n";
-      yaml += generateYAML(value, indent + 1);
+      yaml += generateYAML(value as Record<string, unknown>, indent + 1);
     } else if (typeof value === "string") {
       yaml += ` "${value}"\n`;
     } else {
@@ -350,7 +350,7 @@ async function convertComponentRoutes() {
         }
       }
     } catch (error) {
-      console.warn(`Cannot read directory ${dir}:`, error.message);
+      console.warn(`Cannot read directory ${dir}:`, (error as Error).message);
     }
   }
 
@@ -422,7 +422,7 @@ async function convertComponentRoutes() {
       );
       convertedCount++;
     } catch (error) {
-      console.log(`   ❌ Error: ${error.message}`);
+      console.log(`   ❌ Error: ${(error as Error).message}`);
       skippedCount++;
     }
   }

@@ -33,7 +33,7 @@ await new Command()
   .alias("v")
   .description("Validate a specification file")
   .arguments("<name:string>")
-  .action(async (options, name: string) => {
+  .action(async (_options, name: string) => {
     await handleValidate(name);
   })
   .command("version")

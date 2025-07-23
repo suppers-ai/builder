@@ -28,7 +28,7 @@ export function SSOCallback({
         }
 
         // Get the current URL to check for auth fragments
-        const url = new URL(window.location.href);
+        const url = new URL(globalThis.location.href);
         const hashFragment = url.hash;
 
         // Check for error in URL
@@ -80,7 +80,7 @@ export function SSOCallback({
 
       // Redirect to success page
       if (typeof window !== "undefined" && successRedirect) {
-        window.location.href = successRedirect;
+        globalThis.location.href = successRedirect;
       }
     }
   }, [user, processingCallback, onSuccess, successRedirect]);
@@ -91,7 +91,7 @@ export function SSOCallback({
       // Redirect to error page after a delay
       if (typeof window !== "undefined" && errorRedirect) {
         setTimeout(() => {
-          window.location.href = `${errorRedirect}?error=${encodeURIComponent(error)}`;
+          globalThis.location.href = `${errorRedirect}?error=${encodeURIComponent(error)}`;
         }, 3000);
       }
     }

@@ -1,4 +1,4 @@
-import { assertEquals, assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { assertSnapshot } from "https://deno.land/std@0.224.0/testing/snapshot.ts";
 import { renderToString } from "preact-render-to-string";
 import { Collapse } from "./Collapse.tsx";
@@ -17,7 +17,7 @@ Deno.test("Collapse - with checkbox", () => {
   const html = renderToString(Collapse({
     title: "Checkbox collapse",
     children: "Content",
-    type: "checkbox",
+    checkbox: true,
   }));
   assertStringIncludes(html, "collapse");
   assertStringIncludes(html, 'type="checkbox"');
@@ -72,7 +72,7 @@ Deno.test("Collapse - with border", () => {
   const html = renderToString(Collapse({
     title: "Bordered collapse",
     children: "Content",
-    bordered: true,
+    arrow: true,
   }));
   assertStringIncludes(html, "border");
 });
@@ -90,9 +90,9 @@ Deno.test("Collapse - HTML snapshot checkbox type", async (t) => {
   const html = renderToString(Collapse({
     title: "Terms and Conditions",
     children: "Please read our terms and conditions carefully...",
-    type: "checkbox",
+    checkbox: true,
     plus: true,
-    bordered: true,
+    arrow: true,
   }));
   await assertSnapshot(t, html);
 });

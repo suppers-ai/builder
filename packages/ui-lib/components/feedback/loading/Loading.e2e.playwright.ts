@@ -25,7 +25,7 @@ test.describe("Loading E2E Tests", () => {
 
     // Verify loading animation is active by checking computed styles
     const hasAnimation = await loading.evaluate((el) => {
-      const style = window.getComputedStyle(el);
+      const style = globalThis.getComputedStyle(el);
       return style.animationName !== "none" || style.transform !== "none";
     });
 

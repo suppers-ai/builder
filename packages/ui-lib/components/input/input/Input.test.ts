@@ -96,7 +96,7 @@ Deno.test("Input - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Input({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `input-${size}`);
   });
@@ -107,7 +107,7 @@ Deno.test("Input - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Input({
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
     assertStringIncludes(html, `input-${color}`);
   });
@@ -289,7 +289,7 @@ Deno.test("Input - HTML snapshot sizes", async (t) => {
   const sizes = ["xs", "sm", "md", "lg"];
   const htmls = sizes.map((size) =>
     renderToString(Input({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
       placeholder: `Size ${size}`,
       color: "primary",
     }))
@@ -301,7 +301,7 @@ Deno.test("Input - HTML snapshot colors", async (t) => {
   const colors = ["primary", "secondary", "accent", "info", "success", "warning", "error"];
   const htmls = colors.map((color) =>
     renderToString(Input({
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
       placeholder: `Color ${color}`,
       size: "md",
     }))

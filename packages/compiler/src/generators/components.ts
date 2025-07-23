@@ -5,7 +5,7 @@
 
 import { FileSystem } from "../utils/mod.ts";
 import { substituteVariables } from "../utils/variables.ts";
-import type { ApplicationSpec, ComponentDefinition, Variables } from "../types/mod.ts";
+import type { ComponentDefinition, Variables } from "../types/mod.ts";
 
 /**
  * Component registry for tracking available components

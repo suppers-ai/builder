@@ -100,7 +100,7 @@ export function ExampleNavigation({ user, onSignOut, className = "" }: ExampleNa
               user={user}
               onThemeChange={handleThemeChange}
               onCreateCustomTheme={handleCreateCustomTheme}
-              allowCustomThemes={true}
+              allowCustomThemes
               size="sm"
             />
 

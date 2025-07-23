@@ -36,7 +36,7 @@ Deno.test("Mask - variant shapes", () => {
 
   variants.forEach((variant) => {
     const html = renderToString(Mask({
-      variant: variant as any,
+      variant: variant as string,
       children: `${variant} content`,
     }));
     assertStringIncludes(html, `mask-${variant}`);
@@ -49,7 +49,7 @@ Deno.test("Mask - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Mask({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
       children: `Size ${size}`,
     }));
     assertStringIncludes(html, `mask-${size}`);
@@ -122,7 +122,7 @@ Deno.test("Mask - star variants", () => {
 
   starVariants.forEach((variant) => {
     const html = renderToString(Mask({
-      variant: variant as any,
+      variant: variant as string,
       children: `${variant} content`,
     }));
     assertStringIncludes(html, `mask-${variant}`);
@@ -135,7 +135,7 @@ Deno.test("Mask - triangle variants", () => {
 
   triangleVariants.forEach((variant) => {
     const html = renderToString(Mask({
-      variant: variant as any,
+      variant: variant as string,
       children: `${variant} content`,
     }));
     assertStringIncludes(html, `mask-${variant}`);
@@ -153,7 +153,7 @@ Deno.test("Mask - parallelogram variants", () => {
 
   parallelogramVariants.forEach((variant) => {
     const html = renderToString(Mask({
-      variant: variant as any,
+      variant: variant as string,
       children: `${variant} content`,
     }));
     assertStringIncludes(html, `mask-${variant}`);
@@ -166,7 +166,7 @@ Deno.test("Mask - hexagon variants", () => {
 
   hexagonVariants.forEach((variant) => {
     const html = renderToString(Mask({
-      variant: variant as any,
+      variant: variant as string,
       children: `${variant} content`,
     }));
     assertStringIncludes(html, `mask-${variant}`);

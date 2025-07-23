@@ -1,4 +1,5 @@
 import { BaseComponentProps, StepProps } from "../../types.ts";
+import { ComponentChildren } from "preact";
 
 export interface StepsProps extends BaseComponentProps {
   steps: StepProps[];
@@ -53,7 +54,7 @@ export function Steps({
     return `${baseClasses} ${statusClasses[effectiveStatus as keyof typeof statusClasses] || ""}`;
   };
 
-  const getStepIcon = (status: string, index: number, defaultIcon?: any) => {
+  const getStepIcon = (status: string, index: number, defaultIcon?: ComponentChildren) => {
     if (defaultIcon) return defaultIcon;
 
     // Override status based on current step if controlled

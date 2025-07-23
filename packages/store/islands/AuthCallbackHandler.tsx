@@ -40,7 +40,7 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
 
           // Small delay to show success message
           setTimeout(() => {
-            window.location.href = redirectTo;
+            globalThis.location.href = redirectTo;
           }, 1500);
         } else {
           // Check for session
@@ -54,7 +54,7 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
 
             // Small delay to show success message
             setTimeout(() => {
-              window.location.href = redirectTo;
+              globalThis.location.href = redirectTo;
             }, 1500);
           } else {
             throw new Error("No authentication session found");

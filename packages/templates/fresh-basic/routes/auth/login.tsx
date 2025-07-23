@@ -47,7 +47,7 @@ export default function Login(props: PageProps) {
           <SSOClientLogin
             providers={["google", "github"]}
             redirectUri={typeof window !== "undefined"
-              ? window.location.origin + "/auth/callback"
+              ? globalThis.location.origin + "/auth/callback"
               : ""}
             onSuccess={() => {
               console.log("Login successful");

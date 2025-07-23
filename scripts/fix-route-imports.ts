@@ -3,7 +3,7 @@
  * Fix imports in converted route files
  */
 
-import { basename, dirname, join } from "jsr:@std/path@^1.0.8";
+import { dirname, join } from "jsr:@std/path@^1.0.8";
 
 async function fixRouteImports() {
   console.log("🔧 Fixing imports in converted route files...");
@@ -46,7 +46,7 @@ async function fixRouteImports() {
         }
       }
     } catch (error) {
-      console.warn(`⚠️  Cannot read category directory ${categoryDir}:`, error.message);
+      console.warn(`⚠️  Cannot read category directory ${categoryDir}:`, (error as Error).message);
     }
   }
 

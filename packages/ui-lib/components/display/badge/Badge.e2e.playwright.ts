@@ -261,7 +261,7 @@ test.describe("Badge E2E Tests", () => {
 
         // Check font size is reasonable
         const fontSize = await badge.evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           return parseInt(styles.fontSize);
         });
         expect(fontSize).toBeGreaterThan(8); // Should be at least 8px
@@ -388,7 +388,7 @@ test.describe("Badge E2E Tests", () => {
 
         // Check z-index or stacking context
         const zIndex = await indicatorItem.first().evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           return styles.zIndex;
         });
 
@@ -410,7 +410,7 @@ test.describe("Badge E2E Tests", () => {
 
         // Check that badge has background color
         const hasBackground = await badge.evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           return styles.backgroundColor !== "rgba(0, 0, 0, 0)";
         });
         expect(hasBackground).toBeTruthy();

@@ -96,7 +96,7 @@ export function SearchModal({
           e.preventDefault();
           const selectedResult = searchResults[selectedIndex];
           if (selectedResult.url) {
-            window.location.href = selectedResult.url;
+            globalThis.location.href = selectedResult.url;
           }
           onClose();
         }
@@ -116,7 +116,7 @@ export function SearchModal({
       open={isOpen}
       onClose={onClose}
       class={`modal-top ${className}`}
-      closeOnBackdrop={true}
+      closeOnBackdrop
       showCloseButton={false}
     >
       <div class="modal-box w-full max-w-2xl mx-auto mt-16 p-0 bg-base-100">

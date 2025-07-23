@@ -178,10 +178,10 @@ export function QualityChecklist({
             Last updated: {new Date().toLocaleDateString()}
           </div>
           <div class="flex gap-2">
-            <button class="btn btn-sm btn-outline">
+            <button type="button" class="btn btn-sm btn-outline">
               Export Report
             </button>
-            <button class="btn btn-sm btn-primary">
+            <button type="button" class="btn btn-sm btn-primary">
               Run Tests
             </button>
           </div>

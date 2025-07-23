@@ -9,7 +9,7 @@ export default function AuthCallback(props: PageProps) {
     // Auth client will handle the callback automatically
     // Redirect to home after successful auth
     const timer = setTimeout(() => {
-      window.location.href = "/";
+      globalThis.location.href = "/";
     }, 2000);
 
     return () => clearTimeout(timer);

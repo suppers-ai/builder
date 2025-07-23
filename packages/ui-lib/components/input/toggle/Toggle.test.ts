@@ -27,7 +27,7 @@ Deno.test("Toggle - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Toggle({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `toggle-${size}`);
   });
@@ -38,7 +38,7 @@ Deno.test("Toggle - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Toggle({
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
     assertStringIncludes(html, `toggle-${color}`);
   });

@@ -32,7 +32,7 @@ export class LighthouseAuditor {
   }
 
   private initializeObservers() {
-    if (typeof window === "undefined" || !window.PerformanceObserver) {
+    if (typeof window === "undefined" || !globalThis.PerformanceObserver) {
       return;
     }
 
@@ -96,7 +96,7 @@ export class LighthouseAuditor {
   }
 
   private calculateTotalBlockingTime() {
-    if (!window.performance) return;
+    if (!globalThis.performance) return;
 
     const navigationEntry = performance.getEntriesByType("navigation")[0];
     if (!navigationEntry) return;
@@ -115,7 +115,7 @@ export class LighthouseAuditor {
   }
 
   private calculateSpeedIndex() {
-    if (!window.performance) return;
+    if (!globalThis.performance) return;
 
     // Simplified Speed Index calculation based on visual progress
     const paintEntries = performance.getEntriesByType("paint");
@@ -496,7 +496,7 @@ export function runLighthouseAudit(): void {
 
 // Auto-run audit when page loads
 if (typeof window !== "undefined") {
-  window.addEventListener("load", () => {
+  globalThis.addEventListener("load", () => {
     // Wait for page to stabilize before running audit
     setTimeout(runLighthouseAudit, 3000);
   });

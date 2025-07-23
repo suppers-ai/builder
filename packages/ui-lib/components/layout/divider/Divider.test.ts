@@ -61,7 +61,7 @@ Deno.test("Divider - position variants", () => {
 
   positions.forEach((position) => {
     const html = renderToString(Divider({
-      position: position as any,
+      position: position as string,
       text: "Test",
     }));
 

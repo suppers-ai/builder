@@ -141,7 +141,7 @@ test.describe("Countdown E2E Tests", () => {
 
       // Check color contrast
       const color = await countdown.evaluate((el) => getComputedStyle(el).color);
-      const backgroundColor = await countdown.evaluate((el) => {
+      const _backgroundColor = await countdown.evaluate((el) => {
         // Get background from element or its parent
         let bg = getComputedStyle(el).backgroundColor;
         if (bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
@@ -165,7 +165,7 @@ test.describe("Countdown E2E Tests", () => {
     await page.setViewportSize({ width: 1920, height: 1080 });
     await expect(countdown).toBeVisible();
 
-    const desktopSize = await countdown.evaluate((el) => ({
+    const _desktopSize = await countdown.evaluate((el) => ({
       width: el.offsetWidth,
       height: el.offsetHeight,
       fontSize: getComputedStyle(el).fontSize,

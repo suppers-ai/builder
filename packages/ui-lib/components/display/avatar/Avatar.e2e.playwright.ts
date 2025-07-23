@@ -308,7 +308,7 @@ test.describe("Avatar E2E Tests", () => {
 
         // Should have background and text content
         const hasBackground = await placeholder.evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           return styles.backgroundColor !== "rgba(0, 0, 0, 0)";
         });
         expect(hasBackground).toBeTruthy();

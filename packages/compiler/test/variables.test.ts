@@ -2,13 +2,12 @@
  * Tests for the variable substitution system
  */
 
-import { assertEquals, assertThrows } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import {
   extractVariableNames,
   substituteVariables,
   substituteVariablesInString,
   validateVariableReferences,
-  VariableNotFoundError,
 } from "../src/utils/variables.ts";
 
 Deno.test("Variable substitution - simple string", () => {

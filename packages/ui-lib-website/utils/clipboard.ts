@@ -13,7 +13,7 @@ export interface ClipboardResult {
 export async function copyToClipboard(text: string): Promise<ClipboardResult> {
   try {
     // Try using the modern Clipboard API first
-    if (navigator.clipboard && window.isSecureContext) {
+    if (navigator.clipboard && globalThis.isSecureContext) {
       await navigator.clipboard.writeText(text);
       return { success: true };
     } else {
@@ -74,7 +74,7 @@ function fallbackCopyToClipboard(text: string): ClipboardResult {
  * Check if clipboard API is available
  */
 export function isClipboardSupported(): boolean {
-  return !!(navigator.clipboard && window.isSecureContext) ||
+  return !!(navigator.clipboard && globalThis.isSecureContext) ||
     document.queryCommandSupported?.("copy") === true;
 }
 

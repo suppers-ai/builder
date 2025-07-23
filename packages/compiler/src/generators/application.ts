@@ -4,9 +4,8 @@
  */
 
 import { copyDirectory, FileSystem, generateDenoConfig } from "../utils/mod.ts";
-import { substituteVariables, validateVariableReferences } from "../utils/variables.ts";
+import { validateVariableReferences } from "../utils/variables.ts";
 import { generateGlobalLayout } from "./layout.ts";
-import { generateComponentRegistry } from "./components.ts";
 import { generateDataServices } from "./data.ts";
 import { generateAuthSystem, generateLoginPage } from "./auth.ts";
 import { generateApiRoutes, generateRoutes } from "./routes.ts";

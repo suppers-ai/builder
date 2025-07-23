@@ -74,10 +74,10 @@ export function substituteVariablesInString(
  * Recursively substitutes variables in any object value
  */
 export function substituteVariables(
-  obj: any,
+  obj: unknown,
   variables: Variables,
   environmentVariables?: Record<string, string>,
-): any {
+): unknown {
   if (typeof obj === "string") {
     return substituteVariablesInString(obj, variables, environmentVariables);
   }
@@ -87,7 +87,7 @@ export function substituteVariables(
   }
 
   if (obj && typeof obj === "object") {
-    const result: any = {};
+    const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       result[key] = substituteVariables(value, variables, environmentVariables);
     }
@@ -101,13 +101,13 @@ export function substituteVariables(
  * Validates that all variable references in an object can be resolved
  */
 export function validateVariableReferences(
-  obj: any,
+  obj: unknown,
   variables: Variables,
   environmentVariables?: Record<string, string>,
 ): { valid: boolean; missingVariables: string[] } {
   const missingVariables = new Set<string>();
 
-  function checkValue(value: any): void {
+  function checkValue(value: unknown): void {
     if (typeof value === "string") {
       let match;
       const regex = new RegExp(VARIABLE_PATTERN);
@@ -139,10 +139,10 @@ export function validateVariableReferences(
 /**
  * Extracts all variable names referenced in an object
  */
-export function extractVariableNames(obj: any): string[] {
+export function extractVariableNames(obj: unknown): string[] {
   const variables = new Set<string>();
 
-  function checkValue(value: any): void {
+  function checkValue(value: unknown): void {
     if (typeof value === "string") {
       let match;
       const regex = new RegExp(VARIABLE_PATTERN);

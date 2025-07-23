@@ -7,14 +7,14 @@ export interface TableColumn {
   key: string;
   title: string;
   sortable?: boolean;
-  render?: (value: any, row: any) => ComponentChildren;
+  render?: (value: unknown, row: unknown) => ComponentChildren;
   width?: string;
   align?: "left" | "center" | "right";
 }
 
 export interface TableProps extends BaseComponentProps {
   columns: TableColumn[];
-  data: any[];
+  data: Record<string, unknown>[];
   zebra?: boolean;
   compact?: boolean;
   hover?: boolean;
@@ -43,7 +43,7 @@ export interface TableProps extends BaseComponentProps {
 
 export interface PaginatedTableProps extends BaseComponentProps {
   columns: TableColumn[];
-  data: any[];
+  data: Record<string, unknown>[];
   // All table props
   zebra?: boolean;
   compact?: boolean;
@@ -390,7 +390,7 @@ export function PaginatedTable({
       pinRows={pinRows}
       pinCols={pinCols}
       emptyMessage={emptyMessage}
-      paginated={true}
+      paginated
       currentPage={currentPage}
       itemsPerPage={itemsPerPage}
       totalItems={data.length}

@@ -40,7 +40,7 @@ export function UserProfileDropdown({
     if (callback) {
       callback();
     } else if (href) {
-      window.location.href = href;
+      globalThis.location.href = href;
     }
   };
 

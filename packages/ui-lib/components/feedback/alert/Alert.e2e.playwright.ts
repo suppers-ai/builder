@@ -263,7 +263,7 @@ test.describe("Alert E2E Tests", () => {
 
         // Check contrast (alert should have background color)
         const hasBackground = await alert.evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           return styles.backgroundColor !== "rgba(0, 0, 0, 0)";
         });
         expect(hasBackground).toBeTruthy();
@@ -443,7 +443,7 @@ test.describe("Alert E2E Tests", () => {
 
       // Alert should be properly positioned
       const position = await firstAlert.evaluate((el) => {
-        const styles = window.getComputedStyle(el);
+        const styles = globalThis.getComputedStyle(el);
         return styles.position;
       });
 
@@ -464,7 +464,7 @@ test.describe("Alert E2E Tests", () => {
 
         // Check that alert has sufficient contrast
         const hasGoodContrast = await alert.evaluate((el) => {
-          const styles = window.getComputedStyle(el);
+          const styles = globalThis.getComputedStyle(el);
           const bgColor = styles.backgroundColor;
           const textColor = styles.color;
 

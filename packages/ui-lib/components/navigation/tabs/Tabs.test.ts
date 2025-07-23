@@ -51,7 +51,7 @@ Deno.test("Tabs - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(Tabs({
       tabs: basicTabs,
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `tabs-${size}`);
   });

@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { TypeMappers, type UserResponse } from "../../../shared/utils/type-mappers.ts";
+import { TypeMappers } from "../../../shared/utils/type-mappers.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;

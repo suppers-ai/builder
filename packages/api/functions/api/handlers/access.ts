@@ -1,6 +1,6 @@
 import { corsHeaders } from "../lib/cors.ts";
 
-export async function handleAccessRequest(request: Request, supabase: any): Promise<Response> {
+export async function handleAccessRequest(request: Request, supabase: unknown): Promise<Response> {
   const url = new URL(request.url);
   const method = request.method;
 
@@ -27,7 +27,7 @@ export async function handleAccessRequest(request: Request, supabase: any): Prom
   }
 }
 
-async function getAccess(supabase: any, url: URL): Promise<Response> {
+async function getAccess(supabase: unknown, url: URL): Promise<Response> {
   const applicationId = url.searchParams.get("application_id");
   const userId = url.searchParams.get("user_id");
 
@@ -75,7 +75,7 @@ async function getAccess(supabase: any, url: URL): Promise<Response> {
   );
 }
 
-async function grantAccess(request: Request, supabase: any): Promise<Response> {
+async function grantAccess(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const { applicationId, userId, accessLevel, grantedBy } = body;
 
@@ -139,7 +139,7 @@ async function grantAccess(request: Request, supabase: any): Promise<Response> {
   });
 }
 
-async function revokeAccess(request: Request, supabase: any): Promise<Response> {
+async function revokeAccess(request: Request, supabase: unknown): Promise<Response> {
   const body = await request.json();
   const { applicationId, userId } = body;
 

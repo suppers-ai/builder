@@ -103,7 +103,7 @@ Deno.test("TimeInput - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(TimeInput({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
     }));
     assertStringIncludes(html, `input-${size}`);
   });
@@ -114,7 +114,7 @@ Deno.test("TimeInput - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(TimeInput({
-      color: color as any,
+      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
     }));
     assertStringIncludes(html, `input-${color}`);
   });

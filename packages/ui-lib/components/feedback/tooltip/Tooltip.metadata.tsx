@@ -182,13 +182,13 @@ export const tooltipMetadata: ComponentMetadata = {
   preview: (
     <div class="flex gap-4 items-center">
       <div class="tooltip tooltip-top" data-tip="This is a tooltip">
-        <button class="btn btn-sm">Hover me</button>
+        <button type="button" class="btn btn-sm">Hover me</button>
       </div>
       <div class="tooltip tooltip-bottom tooltip-primary" data-tip="Bottom tooltip">
-        <button class="btn btn-sm btn-primary">Primary</button>
+        <button type="button" class="btn btn-sm btn-primary">Primary</button>
       </div>
       <div class="tooltip tooltip-right tooltip-accent" data-tip="Right side">
-        <button class="btn btn-sm btn-accent">Accent</button>
+        <button type="button" class="btn btn-sm btn-accent">Accent</button>
       </div>
     </div>
   ),

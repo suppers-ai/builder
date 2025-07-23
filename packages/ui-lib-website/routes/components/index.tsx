@@ -1,6 +1,5 @@
 import { Breadcrumbs } from "@suppers/ui-lib";
 import { PageProps } from "fresh";
-import ComponentsFilterInteractive from "../../islands/ComponentsFilter.tsx";
 
 // Import metadata using the new organized structure
 import {
@@ -70,17 +69,6 @@ export default function ComponentsPage({ url }: PageProps) {
           />
         </div>
       </nav>
-
-      <div class="px-4 lg:px-6 py-8">
-        <div class="max-w-7xl mx-auto">
-          {/* TEST: Interactive Components Filter using metadata - handles all filtering client-side */}
-          <ComponentsFilterInteractive
-            components={components.map(({ preview, ...comp }) => comp)}
-            categories={categories}
-            initialCategory={selectedCategory}
-          />
-        </div>
-      </div>
     </>
   );
 }

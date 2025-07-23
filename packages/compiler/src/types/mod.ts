@@ -66,14 +66,14 @@ export type Head = z.infer<typeof HeadSchema>;
 export const ComponentSchema: z.ZodType<ComponentDefinition> = z.lazy(() =>
   z.object({
     id: z.string(),
-    props: z.record(z.any()).optional(),
+    props: z.record(z.unknown()).optional(),
     components: z.array(ComponentSchema).optional(),
   })
 );
 
 export interface ComponentDefinition {
   id: string;
-  props?: Record<string, any>;
+  props?: Record<string, unknown>;
   components?: ComponentDefinition[];
 }
 

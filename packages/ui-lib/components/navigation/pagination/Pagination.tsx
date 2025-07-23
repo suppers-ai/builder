@@ -120,6 +120,7 @@ export function Pagination({
     <div class={`join ${className}`} id={id} {...props}>
       {showFirstLast && (
         <button
+          type="button"
           class={btnClasses}
           disabled={currentPage === 1}
           onClick={handleFirstPage}
@@ -131,6 +132,7 @@ export function Pagination({
 
       {showPrevNext && (
         <button
+          type="button"
           class={btnClasses}
           disabled={currentPage === 1}
           onClick={handlePrevPage}
@@ -144,6 +146,7 @@ export function Pagination({
         typeof page === "number"
           ? (
             <button
+              type="button"
               key={page}
               class={page === currentPage ? btnActiveClasses : btnClasses}
               onClick={() => handlePageClick(page)}
@@ -162,6 +165,7 @@ export function Pagination({
 
       {showPrevNext && (
         <button
+          type="button"
           class={btnClasses}
           disabled={currentPage === totalPages}
           onClick={handleNextPage}
@@ -173,6 +177,7 @@ export function Pagination({
 
       {showFirstLast && (
         <button
+          type="button"
           class={btnClasses}
           disabled={currentPage === totalPages}
           onClick={handleLastPage}

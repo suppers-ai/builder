@@ -13,7 +13,7 @@ export default function Layout({ Component, url }: PageProps) {
         title="Suppers Software"
         currentPath={currentPath}
         showSearch={false}
-        showLogin={true}
+        showLogin
         showProfile={false}
         user={undefined}
       />

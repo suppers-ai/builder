@@ -179,14 +179,14 @@ export class BrowserTester {
     }
 
     // Test media query support
-    if (!window.matchMedia) {
+    if (!globalThis.matchMedia) {
       passed = false;
       details += "Media queries not supported. ";
     }
 
     // Test screen size detection
     try {
-      const mq = window.matchMedia("(min-width: 768px)");
+      const mq = globalThis.matchMedia("(min-width: 768px)");
       if (!mq.matches && !mq.media) {
         passed = false;
         details += "Media query functionality broken. ";
@@ -225,9 +225,9 @@ export class BrowserTester {
 
     // Test screen reader detection (basic)
     if (
-      window.navigator.userAgent.includes("NVDA") ||
-      window.navigator.userAgent.includes("JAWS") ||
-      window.speechSynthesis
+      globalThis.navigator.userAgent.includes("NVDA") ||
+      globalThis.navigator.userAgent.includes("JAWS") ||
+      globalThis.speechSynthesis
     ) {
       details += "Screen reader detected. ";
     }
@@ -244,7 +244,7 @@ export class BrowserTester {
     let details = "";
 
     // Test Performance API
-    if (!window.performance) {
+    if (!globalThis.performance) {
       passed = false;
       details += "Performance API not supported. ";
       return { name: "Performance", passed, details };

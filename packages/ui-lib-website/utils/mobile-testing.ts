@@ -30,9 +30,9 @@ export class MobileCompatibilityTester {
 
   private detectDevice(): DeviceInfo {
     const userAgent = navigator.userAgent;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const pixelRatio = window.devicePixelRatio || 1;
+    const viewportWidth = globalThis.innerWidth;
+    const viewportHeight = globalThis.innerHeight;
+    const pixelRatio = globalThis.devicePixelRatio || 1;
 
     let name = "Unknown Device";
     let type: "phone" | "tablet" = "phone";
@@ -166,7 +166,7 @@ export class MobileCompatibilityTester {
     }
 
     // Test actual viewport behavior
-    const actualWidth = window.innerWidth;
+    const actualWidth = globalThis.innerWidth;
     const screenWidth = screen.width;
 
     if (Math.abs(actualWidth - (screenWidth / this.deviceInfo.pixelRatio)) > 50) {
@@ -192,8 +192,8 @@ export class MobileCompatibilityTester {
 
     // Test CSS orientation media queries
     try {
-      const portraitQuery = window.matchMedia("(orientation: portrait)");
-      const landscapeQuery = window.matchMedia("(orientation: landscape)");
+      const portraitQuery = globalThis.matchMedia("(orientation: portrait)");
+      const landscapeQuery = globalThis.matchMedia("(orientation: landscape)");
 
       if (!portraitQuery.media || !landscapeQuery.media) {
         passed = false;
@@ -335,7 +335,7 @@ export class MobileCompatibilityTester {
     // Test virtual keyboard handling
     if (this.deviceInfo.type === "phone") {
       // Check if viewport height changes are handled
-      const originalHeight = window.innerHeight;
+      const originalHeight = globalThis.innerHeight;
       details += `Viewport height: ${originalHeight}px. `;
     }
 
@@ -391,7 +391,7 @@ export class MobileCompatibilityTester {
     let passed = true;
     let details = "";
 
-    if (!window.performance) {
+    if (!globalThis.performance) {
       passed = false;
       details += "Performance API not available. ";
       return { name: "Mobile Performance", passed, details };
@@ -522,11 +522,11 @@ export class iOSSafariTester extends MobileCompatibilityTester {
     tests.push({
       name: "Address Bar Hiding",
       test: () => {
-        const initialHeight = window.innerHeight;
+        const initialHeight = globalThis.innerHeight;
         // Simulate scroll to hide address bar
-        window.scrollTo(0, 1);
+        globalThis.scrollTo(0, 1);
         setTimeout(() => {
-          const newHeight = window.innerHeight;
+          const newHeight = globalThis.innerHeight;
           return newHeight > initialHeight;
         }, 100);
       },
@@ -548,7 +548,7 @@ export class iOSSafariTester extends MobileCompatibilityTester {
         const computedHeight = testEl.offsetHeight;
         document.body.removeChild(testEl);
 
-        return computedHeight === window.innerHeight;
+        return computedHeight === globalThis.innerHeight;
       },
     });
 

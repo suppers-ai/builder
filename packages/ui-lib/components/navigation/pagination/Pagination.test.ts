@@ -10,7 +10,7 @@ Deno.test("Pagination - basic rendering", () => {
   const html = renderToString(Pagination({
     currentPage: 1,
     totalPages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, 'class="join');
   assertStringIncludes(html, 'class="btn"');
@@ -26,7 +26,7 @@ Deno.test("Pagination - with custom class", () => {
     currentPage: 1,
     totalPages: 3,
     class: "custom-pagination",
-  }) as any);
+  }) as ComponentProps);
   assertStringIncludes(html, 'class="join custom-pagination"');
 });
 
@@ -34,13 +34,13 @@ Deno.test("Pagination - returns null for totalPages <= 1", () => {
   const htmlZeroPages = renderToString(Pagination({
     currentPage: 1,
     totalPages: 0,
-  }) as any);
+  }) as ComponentProps);
   assertEquals(htmlZeroPages, "");
 
   const htmlOnePage = renderToString(Pagination({
     currentPage: 1,
     totalPages: 1,
-  }) as any);
+  }) as ComponentProps);
   assertEquals(htmlOnePage, "");
 });
 
@@ -51,8 +51,8 @@ Deno.test("Pagination - size variants", () => {
     const html = renderToString(Pagination({
       currentPage: 1,
       totalPages: 3,
-      size: size as any,
-    }) as any);
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+    }) as ComponentProps);
     if (size === "md") {
       // Default size doesn't add a class
       assertStringIncludes(html, 'class="btn"');
@@ -66,7 +66,7 @@ Deno.test("Pagination - current page active state", () => {
   const html = renderToString(Pagination({
     currentPage: 3,
     totalPages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "btn-active");
 
@@ -81,7 +81,7 @@ Deno.test("Pagination - first/last buttons", () => {
     currentPage: 3,
     totalPages: 5,
     showFirstLast: true,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "«");
   assertStringIncludes(html, "»");
@@ -94,7 +94,7 @@ Deno.test("Pagination - hide first/last buttons", () => {
     currentPage: 3,
     totalPages: 5,
     showFirstLast: false,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const firstButton = document?.querySelector('[aria-label="Go to first page"]');
@@ -108,7 +108,7 @@ Deno.test("Pagination - prev/next buttons", () => {
     currentPage: 3,
     totalPages: 5,
     showPrevNext: true,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "‹");
   assertStringIncludes(html, "›");
@@ -121,7 +121,7 @@ Deno.test("Pagination - hide prev/next buttons", () => {
     currentPage: 3,
     totalPages: 5,
     showPrevNext: false,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const prevButton = document?.querySelector('[aria-label="Go to previous page"]');
@@ -134,7 +134,7 @@ Deno.test("Pagination - disabled first/prev buttons on first page", () => {
   const html = renderToString(Pagination({
     currentPage: 1,
     totalPages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const firstButton = document?.querySelector('[aria-label="Go to first page"]');
@@ -148,7 +148,7 @@ Deno.test("Pagination - disabled last/next buttons on last page", () => {
   const html = renderToString(Pagination({
     currentPage: 5,
     totalPages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const lastButton = document?.querySelector('[aria-label="Go to last page"]');
@@ -163,7 +163,7 @@ Deno.test("Pagination - ellipsis for many pages", () => {
     currentPage: 10,
     totalPages: 20,
     maxVisiblePages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "...");
   assertStringIncludes(html, "1");
@@ -179,7 +179,7 @@ Deno.test("Pagination - maxVisiblePages controls visible page count", () => {
     currentPage: 5,
     totalPages: 10,
     maxVisiblePages: 3,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const pageButtons = document?.querySelectorAll('button[aria-label*="Go to page"]');
@@ -194,7 +194,7 @@ Deno.test("Pagination - with id", () => {
     currentPage: 1,
     totalPages: 3,
     id: "test-pagination",
-  }) as any);
+  }) as ComponentProps);
   assertStringIncludes(html, 'id="test-pagination"');
 });
 
@@ -202,7 +202,7 @@ Deno.test("Pagination - aria labels for accessibility", () => {
   const html = renderToString(Pagination({
     currentPage: 2,
     totalPages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, 'aria-label="Go to page 1"');
   assertStringIncludes(html, 'aria-label="Go to page 2"');
@@ -215,7 +215,7 @@ Deno.test("Pagination - ellipsis elements have correct styling", () => {
     currentPage: 10,
     totalPages: 20,
     maxVisiblePages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const ellipsis = document?.querySelectorAll(".btn-disabled");
@@ -231,7 +231,7 @@ Deno.test("Pagination - current page near beginning", () => {
     currentPage: 2,
     totalPages: 15,
     maxVisiblePages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "1");
   assertStringIncludes(html, "2");
@@ -246,7 +246,7 @@ Deno.test("Pagination - current page near end", () => {
     currentPage: 14,
     totalPages: 15,
     maxVisiblePages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "1");
   assertStringIncludes(html, "11");
@@ -261,7 +261,7 @@ Deno.test("Pagination - no ellipsis when all pages visible", () => {
     currentPage: 3,
     totalPages: 5,
     maxVisiblePages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const ellipsis = document?.querySelectorAll(".btn-disabled");
@@ -273,13 +273,13 @@ Deno.test("Pagination - single ellipsis scenarios", () => {
     currentPage: 13,
     totalPages: 15,
     maxVisiblePages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   const htmlEndEllipsis = renderToString(Pagination({
     currentPage: 3,
     totalPages: 15,
     maxVisiblePages: 5,
-  }) as any);
+  }) as ComponentProps);
 
   const documentStart = parser.parseFromString(htmlStartEllipsis, "text/html");
   const documentEnd = parser.parseFromString(htmlEndEllipsis, "text/html");
@@ -296,7 +296,7 @@ Deno.test("Pagination - button click handlers structure", () => {
     currentPage: 3,
     totalPages: 5,
     onPageChange: () => {},
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const pageButtons = document?.querySelectorAll('button[aria-label*="Go to page"]');
@@ -318,7 +318,7 @@ Deno.test("Pagination - all button types present", () => {
     totalPages: 5,
     showFirstLast: true,
     showPrevNext: true,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const allButtons = document?.querySelectorAll("button");
@@ -333,7 +333,7 @@ Deno.test("Pagination - minimal configuration", () => {
     totalPages: 3,
     showFirstLast: false,
     showPrevNext: false,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const allButtons = document?.querySelectorAll("button");
@@ -346,7 +346,7 @@ Deno.test("Pagination - default values", () => {
   const html = renderToString(Pagination({
     currentPage: 1,
     totalPages: 3,
-  }) as any);
+  }) as ComponentProps);
 
   // Check default values are applied
   assertStringIncludes(html, "btn"); // Default size (md doesn't add class)
@@ -362,7 +362,7 @@ Deno.test("Pagination - edge case: two pages", () => {
   const html = renderToString(Pagination({
     currentPage: 1,
     totalPages: 2,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "1");
   assertStringIncludes(html, "2");
@@ -387,7 +387,7 @@ Deno.test("Pagination - all props combined", () => {
     onNextPage: () => {},
     onPrevPage: () => {},
     id: "full-pagination",
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, 'class="join custom-pagination"');
   assertStringIncludes(html, 'id="full-pagination"');
@@ -404,7 +404,7 @@ Deno.test("Pagination - page button structure", () => {
   const html = renderToString(Pagination({
     currentPage: 2,
     totalPages: 4,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const pageButtons = document?.querySelectorAll('button[aria-label*="Go to page"]');
@@ -425,7 +425,7 @@ Deno.test("Pagination - complex pagination scenario", () => {
     totalPages: 100,
     maxVisiblePages: 7,
     size: "sm",
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "btn-sm");
   assertStringIncludes(html, "1");

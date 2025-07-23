@@ -44,7 +44,7 @@ Deno.test("Avatar - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Avatar({
-      size: size as any,
+      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
       placeholder: "T",
     }));
 

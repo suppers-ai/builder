@@ -95,8 +95,8 @@ export function HeaderLayout({
     if (!showScrollToTop) return;
 
     const handleScroll = () => updateScrollTop();
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    globalThis.addEventListener("scroll", handleScroll);
+    return () => globalThis.removeEventListener("scroll", handleScroll);
   }, [showScrollToTop]);
 
   // Handle keyboard shortcuts
@@ -121,8 +121,8 @@ export function HeaderLayout({
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    globalThis.addEventListener("keydown", handleKeyDown);
+    return () => globalThis.removeEventListener("keydown", handleKeyDown);
   }, [allowKeyboardShortcuts, showControls, internalSidebarOpen, showSearch]);
 
   // Search functionality
@@ -145,7 +145,7 @@ export function HeaderLayout({
     if (onLogin) {
       onLogin();
     } else {
-      window.location.href = "/login";
+      globalThis.location.href = "/login";
     }
   };
 
@@ -153,7 +153,7 @@ export function HeaderLayout({
     if (onLogout) {
       onLogout();
     } else {
-      window.location.href = "/logout";
+      globalThis.location.href = "/logout";
     }
   };
 
@@ -368,8 +368,8 @@ export function HeaderLayout({
         ]}
         variant="dropdown"
         size="sm"
-        showPreview={true}
-        enableTransitions={true}
+        showPreview
+        enableTransitions
       />
     </div>
   );
@@ -467,8 +467,8 @@ export function HeaderLayout({
               ]}
               variant="dropdown"
               size="sm"
-              showPreview={true}
-              enableTransitions={true}
+              showPreview
+              enableTransitions
             />
           </Button>
 
@@ -523,7 +523,7 @@ export function HeaderLayout({
         searchResults={searchResults}
         loading={searchLoading}
         placeholder="Search components..."
-        showKeyboardShortcut={true}
+        showKeyboardShortcut
       />
 
       {/* Scroll to Top Button */}

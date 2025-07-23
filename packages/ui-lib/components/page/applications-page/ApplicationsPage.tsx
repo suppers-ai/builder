@@ -188,7 +188,7 @@ export function ApplicationsPage({
               <ApplicationCard
                 key={application.id}
                 application={application}
-                showOwnerActions={true}
+                showOwnerActions
                 onEdit={onEditApplication}
                 onDelete={onDeleteApplication}
                 onSubmitForReview={onSubmitForReview}

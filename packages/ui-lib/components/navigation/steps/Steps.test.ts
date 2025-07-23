@@ -29,7 +29,7 @@ const basicSteps: StepProps[] = [
 Deno.test("Steps - basic rendering", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, 'class="steps steps-horizontal"');
   assertStringIncludes(html, "<ul");
@@ -45,7 +45,7 @@ Deno.test("Steps - with custom class", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     class: "custom-steps",
-  }) as any);
+  }) as ComponentProps);
   assertStringIncludes(html, 'class="steps steps-horizontal custom-steps"');
 });
 
@@ -53,7 +53,7 @@ Deno.test("Steps - vertical orientation", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     vertical: true,
-  }) as any);
+  }) as ComponentProps);
   assertStringIncludes(html, "steps-vertical");
 });
 
@@ -61,7 +61,7 @@ Deno.test("Steps - horizontal orientation (default)", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     vertical: false,
-  }) as any);
+  }) as ComponentProps);
   assertStringIncludes(html, "steps-horizontal");
 });
 
@@ -69,7 +69,7 @@ Deno.test("Steps - responsive layout", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     responsive: true,
-  }) as any);
+  }) as ComponentProps);
   assertStringIncludes(html, "lg:steps-horizontal");
 });
 
@@ -83,7 +83,7 @@ Deno.test("Steps - step status classes", () => {
 
   const html = renderToString(Steps({
     steps: stepsWithStatuses,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "step-primary");
   assertStringIncludes(html, "step-error");
@@ -105,7 +105,7 @@ Deno.test("Steps - controlled mode overrides status", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     currentStep: 1, // Second step (0-indexed)
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const steps = document?.querySelectorAll(".step");
@@ -128,7 +128,7 @@ Deno.test("Steps - step icons for different statuses", () => {
       { title: "Current", status: "current" },
       { title: "Pending", status: "pending" },
     ],
-  }) as any);
+  }) as ComponentProps);
 
   // Check for checkmark icon (completed)
   assertStringIncludes(
@@ -151,7 +151,7 @@ Deno.test("Steps - custom step icons", () => {
 
   const html = renderToString(Steps({
     steps: stepsWithCustomIcon,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, '<span class="custom-icon">★</span>');
 });
@@ -165,7 +165,7 @@ Deno.test("Steps - step numbering for steps without icons", () => {
 
   const html = renderToString(Steps({
     steps: stepsWithoutIcons,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, 'data-content="1"');
   assertStringIncludes(html, 'data-content="2"');
@@ -180,7 +180,7 @@ Deno.test("Steps - no data-content when step has icon", () => {
 
   const html = renderToString(Steps({
     steps: stepsWithIcons,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "data-content>");
 });
@@ -194,7 +194,7 @@ Deno.test("Steps - step descriptions", () => {
 
   const html = renderToString(Steps({
     steps: stepsWithDescriptions,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "Configure your environment");
   assertStringIncludes(html, "Install dependencies");
@@ -205,7 +205,7 @@ Deno.test("Steps - clickable steps", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     onStepClick: () => {},
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const stepElements = document?.querySelectorAll("li");
@@ -221,7 +221,7 @@ Deno.test("Steps - clickable steps", () => {
 Deno.test("Steps - non-clickable steps", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const stepElements = document?.querySelectorAll("li");
@@ -235,14 +235,14 @@ Deno.test("Steps - with id", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     id: "test-steps",
-  }) as any);
+  }) as ComponentProps);
   assertStringIncludes(html, 'id="test-steps"');
 });
 
 Deno.test("Steps - step content structure", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "step-content");
   assertStringIncludes(html, "step-icon");
@@ -253,7 +253,7 @@ Deno.test("Steps - controlled mode with currentStep", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     currentStep: 0, // First step is current
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const steps = document?.querySelectorAll(".step");
@@ -276,7 +276,7 @@ Deno.test("Steps - controlled mode overrides original status", () => {
   const html = renderToString(Steps({
     steps: stepsWithMixedStatus,
     currentStep: 1, // Second step is current
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const steps = document?.querySelectorAll(".step");
@@ -295,7 +295,7 @@ Deno.test("Steps - controlled mode overrides original status", () => {
 Deno.test("Steps - empty steps array", () => {
   const html = renderToString(Steps({
     steps: [],
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, 'class="steps steps-horizontal"');
   assertStringIncludes(html, "<ul");
@@ -313,7 +313,7 @@ Deno.test("Steps - single step", () => {
 
   const html = renderToString(Steps({
     steps: singleStep,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "Only Step");
   assertStringIncludes(html, "The only step");
@@ -329,7 +329,7 @@ Deno.test("Steps - responsive and vertical combined", () => {
     steps: basicSteps,
     vertical: true,
     responsive: true,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "steps-vertical");
   assertStringIncludes(html, "lg:steps-horizontal");
@@ -346,7 +346,7 @@ Deno.test("Steps - all status types with controlled mode", () => {
   const html = renderToString(Steps({
     steps: allStatusSteps,
     currentStep: 2, // Third step is current
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const steps = document?.querySelectorAll(".step");
@@ -371,7 +371,7 @@ Deno.test("Steps - icon rendering with controlled mode", () => {
       { title: "Step 3", status: "completed" }, // Should show number (pending)
     ],
     currentStep: 1, // Second step is current
-  }) as any);
+  }) as ComponentProps);
 
   // Check for checkmark icons (actual count may vary based on implementation)
   const checkmarkCount = (html.match(
@@ -409,7 +409,7 @@ Deno.test("Steps - complex step structure", () => {
 
   const html = renderToString(Steps({
     steps: complexSteps,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "Initial Setup");
   assertStringIncludes(html, "Configure your development environment");
@@ -424,7 +424,7 @@ Deno.test("Steps - complex step structure", () => {
 Deno.test("Steps - default values", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "steps-horizontal"); // Default vertical: false
 
@@ -449,7 +449,7 @@ Deno.test("Steps - all props combined", () => {
     currentStep: 1,
     onStepClick: () => {},
     id: "full-steps",
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, 'class="steps steps-vertical lg:steps-horizontal custom-steps"');
   assertStringIncludes(html, 'id="full-steps"');
@@ -465,7 +465,7 @@ Deno.test("Steps - step click handler structure", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     onStepClick: () => {},
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const stepElements = document?.querySelectorAll("li");
@@ -486,7 +486,7 @@ Deno.test("Steps - step without description", () => {
 
   const html = renderToString(Steps({
     steps: stepsNoDescription,
-  }) as any);
+  }) as ComponentProps);
 
   assertStringIncludes(html, "Step without description");
   assertStringIncludes(html, "font-medium");
@@ -500,7 +500,7 @@ Deno.test("Steps - controlled mode edge cases", () => {
   const html = renderToString(Steps({
     steps: basicSteps,
     currentStep: 5, // Beyond array length
-  }) as any);
+  }) as ComponentProps);
 
   const document = parser.parseFromString(html, "text/html");
   const steps = document?.querySelectorAll(".step");
@@ -520,7 +520,7 @@ Deno.test("Steps - step icon priority", () => {
 
   const html = renderToString(Steps({
     steps: stepsWithIconPriority,
-  }) as any);
+  }) as ComponentProps);
 
   // Custom icon should be used instead of default error icon
   assertStringIncludes(html, '<span class="priority-icon">P</span>');
