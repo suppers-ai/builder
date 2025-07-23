@@ -22,9 +22,7 @@
     "tailwindcss/plugin": "npm:tailwindcss@3.4.0/plugin.js",
     "zod": "https://esm.sh/zod@3.25.1",
     "lucide-preact": "https://esm.sh/lucide-preact@0.460.0",
-    "fresh": "jsr:@fresh/core@^2.0.0-alpha.34",
-    "@packages/auth-client": "./packages/auth-client/mod.ts",
-    "@packages/ui-lib": "./packages/ui-lib/mod.ts"
+    "fresh": "jsr:@fresh/core@^2.0.0-alpha.34"
   },
   "tasks": {
     "dev": "deno task --config packages/compiler/deno.json dev",

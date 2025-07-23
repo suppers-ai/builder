@@ -109,14 +109,6 @@ export function extractAuthToken(request: Request): string | null {
 }
 
 /**
- * Validate email format
- */
-export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-/**
  * Create auth middleware for routes
  */
 export function requirePermissions(permissions: string[]) {

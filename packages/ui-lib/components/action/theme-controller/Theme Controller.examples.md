@@ -31,6 +31,10 @@ apiProps:
     name: "class"
     type: "string"
     description: "Additional CSS classes"
+demoInfo:
+  variants: ["dropdown", "toggle", "button grid", "modal selector"]
+  interactions: ["theme change", "preview", "persistence", "smooth transitions"]
+  useCases: ["User preferences", "Theme showcase", "Customization", "Brand switching"]
 usageNotes:
   - "Theme Controller manages DaisyUI theme switching across the application"
   - "Themes are applied via the 'data-theme' attribute on the html element"

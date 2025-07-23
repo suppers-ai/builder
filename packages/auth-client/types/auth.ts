@@ -1,3 +1,7 @@
+// Import canonical types from shared package
+import type { AuthUser } from "../../shared/types/auth.ts";
+export type { AuthUser } from "../../shared/types/auth.ts";
+
 export interface AuthClientConfig {
   storeUrl: string;
   clientId?: string;
@@ -6,21 +10,12 @@ export interface AuthClientConfig {
   storageKey?: string;
 }
 
-export interface AuthSession {
+// Auth-client specific session interface (different from Supabase-based AuthSession in shared)
+export interface AuthClientSession {
   accessToken: string;
   refreshToken?: string;
   expiresAt: number;
   user: AuthUser;
-}
-
-export interface AuthUser {
-  id: string;
-  email: string;
-  name?: string;
-  avatar_url?: string;
-  first_name?: string;
-  last_name?: string;
-  display_name?: string;
 }
 
 export interface TokenResponse {

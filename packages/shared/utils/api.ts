@@ -166,32 +166,6 @@ export function buildQueryString(params: QueryParams): string {
 }
 
 /**
- * Validate email format
- */
-export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-/**
- * Validate UUID format
- */
-export function isValidUuid(uuid: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(uuid);
-}
-
-/**
- * Sanitize string input
- */
-export function sanitizeString(input: string): string {
-  return input
-    .trim()
-    .replace(/[<>]/g, "") // Remove potential HTML tags
-    .substring(0, 1000); // Limit length
-}
-
-/**
  * Create HTTP error from response
  */
 export function createHttpError(status: number, message: string, details?: any): ApiError {

@@ -1,6 +1,6 @@
 import { type PageProps } from "fresh";
-import { useAuthClient } from "@packages/ui-lib/shared/providers/AuthClientProvider.tsx";
-import { SSOClientLogin } from "@packages/ui-lib/shared/components/SSOClientLogin.tsx";
+import { useAuthClient } from "@suppers/ui-lib/shared/providers/AuthClientProvider.tsx";
+import { SSOClientLogin } from "@suppers/ui-lib/shared/components/SSOClientLogin.tsx";
 
 export default function Login(props: PageProps) {
   const { user, loading } = useAuthClient();

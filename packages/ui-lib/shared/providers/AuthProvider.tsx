@@ -3,9 +3,11 @@ import { useContext, useEffect, useState } from "preact/hooks";
 import type { ComponentChildren } from "preact";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import { ApiHelpers } from "../lib/api-helpers.ts";
-import type { AuthState, SignInData, SignUpData } from "../lib/auth-helpers.ts";
+import type { SignInData, SignUpData } from "../lib/auth-helpers.ts";
+import type { AuthState, AuthUser } from "../../../shared/types/auth.ts";
 import type { User as DBUser } from "../lib/api-helpers.ts";
 import type { Session, User } from "@supabase/supabase-js";
+import { TypeMappers } from "../../../shared/utils/type-mappers.ts";
 
 interface AuthContextType extends AuthState {
   dbUser: DBUser | null;
@@ -34,7 +36,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [dbUser, setDbUser] = useState<DBUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,11 +49,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const currentUser = await AuthHelpers.getCurrentUser();
 
         setSession(currentSession);
-        setUser(currentUser);
-
+        
         if (currentUser) {
           const userData = await ApiHelpers.getUser(currentUser.id);
+          const authUser = TypeMappers.supabaseUserToAuthUser(currentUser, userData || undefined);
+          setUser(authUser);
           setDbUser(userData);
+        } else {
+          setUser(null);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -65,7 +70,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Listen for auth changes
     const { data: { subscription } } = AuthHelpers.onAuthStateChange(async (event, session) => {
       setSession(session);
-      setUser(session?.user || null);
 
       if (session?.user) {
         // Get or create user data
@@ -81,8 +85,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
             avatar_url: session.user.user_metadata?.avatar_url || null,
           });
         }
+        
+        // Convert Supabase user to our AuthUser format
+        const authUser = TypeMappers.supabaseUserToAuthUser(session.user, userData || undefined);
+        setUser(authUser);
         setDbUser(userData);
       } else {
+        setUser(null);
         setDbUser(null);
       }
     });

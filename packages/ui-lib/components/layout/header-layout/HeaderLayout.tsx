@@ -22,7 +22,7 @@ import {
   toggleGlobalSidebar,
   updateScrollTop,
 } from "../../../utils/signals.ts";
-import { defaultUISidebarConfig, type SidebarConfig } from "../../../utils/sidebar-config.tsx";
+import type { SidebarConfig } from "../../../utils/sidebar-config.tsx";
 
 export interface HeaderLayoutProps extends BaseComponentProps {
   title?: string;
@@ -44,7 +44,7 @@ export interface HeaderLayoutProps extends BaseComponentProps {
   onLogout?: () => void;
   searchResults?: SearchResult[];
   searchLoading?: boolean;
-  sidebarConfig?: SidebarConfig;
+  sidebarConfig: SidebarConfig;
   currentPath?: string;
   // Interactive features
   showControls?: boolean;
@@ -70,7 +70,7 @@ export function HeaderLayout({
   onLogout,
   searchResults = [],
   searchLoading = false,
-  sidebarConfig = defaultUISidebarConfig,
+  sidebarConfig,
   currentPath = "",
   showControls = false,
   allowKeyboardShortcuts = true,

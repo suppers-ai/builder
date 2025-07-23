@@ -1,4 +1,4 @@
-import type { AuthSession } from "../types/auth.ts";
+import type { AuthClientSession } from "../types/auth.ts";
 
 export class AuthStorage {
   private storageKey: string;
@@ -10,7 +10,7 @@ export class AuthStorage {
   /**
    * Get session from storage
    */
-  getSession(): AuthSession | null {
+  getSession(): AuthClientSession | null {
     try {
       // Try localStorage first (browser)
       if (typeof localStorage !== "undefined") {
@@ -46,7 +46,7 @@ export class AuthStorage {
   /**
    * Save session to storage
    */
-  setSession(session: AuthSession): void {
+  setSession(session: AuthClientSession): void {
     try {
       const serialized = JSON.stringify(session);
 
@@ -88,7 +88,7 @@ export class AuthStorage {
   /**
    * Check if session is expired
    */
-  isSessionExpired(session: AuthSession): boolean {
+  isSessionExpired(session: AuthClientSession): boolean {
     const now = Date.now();
     const expiresAt = session.expiresAt;
 
@@ -100,7 +100,7 @@ export class AuthStorage {
   /**
    * Get valid session (not expired)
    */
-  getValidSession(): AuthSession | null {
+  getValidSession(): AuthClientSession | null {
     const session = this.getSession();
     if (!session) return null;
 

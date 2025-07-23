@@ -34,6 +34,62 @@ apiProps:
   - name: "onClick"
     type: "(event: Event) => void"
     description: "Click event handler (Islands only)"
+demoInfo:
+  variants: ["primary", "secondary", "accent", "ghost", "link", "outline"]
+  interactions: ["hover", "click", "focus", "disabled"]
+  useCases: ["Form submission", "Navigation", "Actions", "Loading states"]
+previewData:
+  - title: "Basic Colors"
+    description: "Standard button colors and variants"
+    buttons:
+      - content: "Default"
+        props: {}
+      - content: "Primary"
+        props: { color: "primary" }
+      - content: "Secondary"
+        props: { color: "secondary" }
+      - content: "Accent"
+        props: { color: "accent" }
+  - title: "Button Variants"
+    description: "Different visual styles"
+    buttons:
+      - content: "Outline"
+        props: { variant: "outline", color: "primary" }
+      - content: "Ghost"
+        props: { variant: "ghost", color: "primary" }
+      - content: "Link"
+        props: { variant: "link", color: "primary" }
+  - title: "Button Sizes"
+    description: "Various sizes for different use cases"
+    buttons:
+      - content: "Extra Small"
+        props: { size: "xs", color: "primary" }
+      - content: "Small"
+        props: { size: "sm", color: "primary" }
+      - content: "Medium"
+        props: { color: "primary" }
+      - content: "Large"
+        props: { size: "lg", color: "primary" }
+  - title: "Button States"
+    description: "Different states and interactions"
+    buttons:
+      - content: "Normal"
+        props: { color: "primary" }
+      - content: "Active"
+        props: { color: "primary", active: true }
+      - content: "Disabled"
+        props: { color: "primary", disabled: true }
+      - content: "Loading"
+        props: { color: "primary", loading: true }
+  - title: "Interactive Buttons"
+    description: "Buttons with click handlers"
+    buttons:
+      - content: "Click Me"
+        props: { color: "primary" }
+        isInteractive: true
+      - content: "Show Alert"
+        props: { color: "secondary", variant: "outline" }
+        isInteractive: true
 usageNotes:
   - "Use Button component for server-side rendered buttons without interactivity"
   - "Use Button island for client-side interactive buttons with event handlers"
@@ -43,7 +99,7 @@ usageNotes:
   - "Loading state automatically disables the button to prevent multiple submissions"
 ---
 
-## Basic Buttons
+## Basic Colors
 
 Standard button colors and variants
 

@@ -19,12 +19,12 @@ export { AuthHelpers } from "../ui-lib/src/lib/auth-helpers.ts";
 export { ApiHelpers, UserNameHelpers } from "../ui-lib/src/lib/api-helpers.ts";
 
 export type {
-  AuthState,
   ResetPasswordData,
   SignInData,
   SignUpData,
   UpdateUserData,
 } from "../ui-lib/src/lib/auth-helpers.ts";
+export type { AuthState } from "../shared/types/auth.ts";
 
 export type {
   Application,

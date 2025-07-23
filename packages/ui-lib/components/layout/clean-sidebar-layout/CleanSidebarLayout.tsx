@@ -4,7 +4,6 @@ import { BaseComponentProps } from "../../types.ts";
 import { Sidebar } from "../../navigation/sidebar/Sidebar.tsx";
 import { Button } from "../../action/button/Button.tsx";
 import {
-  defaultUISidebarConfig,
   type SidebarConfig,
   type SidebarLink,
 } from "../../../utils/sidebar-config.tsx";
@@ -12,7 +11,7 @@ import {
 export interface CleanSidebarLayoutProps extends BaseComponentProps {
   isOpen: boolean;
   onClose: () => void;
-  config?: SidebarConfig;
+  config: SidebarConfig;
   currentPath?: string;
   // Interactive features
   showControls?: boolean;
@@ -30,7 +29,7 @@ export function CleanSidebarLayout({
   class: className = "",
   isOpen,
   onClose,
-  config = defaultUISidebarConfig,
+  config,
   currentPath = "",
   showControls = false,
   allowKeyboardNav = true,

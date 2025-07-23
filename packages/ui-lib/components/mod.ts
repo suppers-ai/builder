@@ -186,10 +186,6 @@ export type * from "./types.ts";
 
 // Export utilities and configurations
 export {
-  createSidebarConfig,
-  defaultUISidebarConfig,
-  fullSidebarConfig,
-  minimalSidebarConfig,
   type SidebarConfig,
   type SidebarLink,
   type SidebarSection,

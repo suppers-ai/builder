@@ -18,6 +18,10 @@ apiProps:
   - name: "class"
     type: "string"
     description: "Additional CSS classes for styling"
+demoInfo:
+  variants: ["horizontal", "vertical", "with dropdown", "with search"]
+  interactions: ["menu toggle", "dropdown", "search", "responsive collapse"]
+  useCases: ["Site navigation", "App header", "User menu", "Brand display"]
 usageNotes:
   - "Use start/center/end for structured three-section layout"
   - "Use children for simple single-content layout"

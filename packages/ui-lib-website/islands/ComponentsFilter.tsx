@@ -5,7 +5,8 @@ import {
   Avatar,
   Toggle,
 } from "@suppers/ui-lib";
-import { useState } from "preact/hooks";
+import { useState, useEffect } from "preact/hooks";
+import { getComponentPreviewData } from "@suppers/shared/utils/preview-generator.ts";
 
 interface ComponentMeta {
   name: string;
@@ -28,8 +29,70 @@ interface ComponentsFilterProps {
   initialCategory?: string;
 }
 
-// Create preview JSX based on component name
-function getComponentPreview(componentName: string) {
+// Component to render preview from examples.md data
+function ComponentPreview({ componentName }: { componentName: string }) {
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPreview() {
+      try {
+        const data = await getComponentPreviewData(componentName);
+        setPreviewData(data);
+      } catch (error) {
+        console.warn(`Failed to load preview for ${componentName}:`, error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadPreview();
+  }, [componentName]);
+
+  if (loading) {
+    return <div class="text-xs opacity-50">Loading...</div>;
+  }
+
+  if (!previewData || previewData.length === 0) {
+    // Fallback to hardcoded previews for components without preview data
+    return getHardcodedPreview(componentName);
+  }
+
+  // Render first preview from examples.md
+  const firstPreview = previewData[0];
+  
+  if (firstPreview.buttons) {
+    return (
+      <div class="flex gap-2 flex-wrap">
+        {firstPreview.buttons.slice(0, 3).map((btn: any, index: number) => (
+          <Button key={index} {...btn.props}>
+            {btn.content}
+          </Button>
+        ))}
+      </div>
+    );
+  }
+  
+  if (firstPreview.components) {
+    return (
+      <div class="flex gap-2 flex-wrap">
+        {firstPreview.components.slice(0, 2).map((comp: any, index: number) => {
+          // This would need component-specific rendering logic
+          // For now, show a simplified preview
+          return (
+            <div key={index} class="text-xs bg-base-200 rounded px-2 py-1">
+              {comp.children || componentName}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+  
+  return <div class="text-xs opacity-50">Preview available</div>;
+}
+
+// Fallback hardcoded previews for components without preview data
+function getHardcodedPreview(componentName: string) {
   switch (componentName) {
     case "Button":
       return (
@@ -61,7 +124,7 @@ function getComponentPreview(componentName: string) {
         </div>
       );
     default:
-      return <div class="text-xs opacity-50">Preview</div>;
+      return <div class="text-xs opacity-50">Preview not available</div>;
   }
 }
 
@@ -122,7 +185,7 @@ export default function ComponentsFilterInteractive({ components, categories, in
             description={component.description}
             path={component.path}
             category={component.category}
-            preview={getComponentPreview(component.name)}
+            preview={<ComponentPreview componentName={component.name} />}
             color={component.categoryColor}
           />
         ))}

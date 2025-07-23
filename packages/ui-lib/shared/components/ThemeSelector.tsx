@@ -1,5 +1,4 @@
-import type { User } from "../lib/api-helpers.ts";
-import type { CustomTheme } from "../lib/theme-types.ts";
+import type { User, CustomTheme } from "@suppers/shared/utils/type-mappers.ts";
 import { Loading } from "../../components/feedback/loading/Loading.tsx";
 import { Button } from "../../components/action/button/Button.tsx";
 import { Badge } from "../../components/display/badge/Badge.tsx";

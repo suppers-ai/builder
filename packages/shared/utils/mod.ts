@@ -32,3 +32,9 @@ export * from "./preview-generator.ts";
 
 // Component route generation utilities
 // Note: Import component-route-generator.tsx directly in route files to avoid JSX runtime issues
+
+// Type mapping utilities
+export * from "./type-mappers.ts";
+
+// Deprecation warning utilities
+export * from "./deprecation-warnings.ts";

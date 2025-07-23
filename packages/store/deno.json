@@ -1,5 +1,5 @@
 {
-  "name": "@packages/store",
+  "name": "@suppers/store",
   "version": "1.0.0",
   "exports": "./mod.ts",
   "tasks": {

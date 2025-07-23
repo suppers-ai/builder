@@ -1,8 +1,8 @@
 import { ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
-import { AuthClient } from "@packages/auth-client";
-import type { AuthSession, AuthUser } from "@packages/auth-client";
+import { AuthClient } from "@suppers/auth-client";
+import type { AuthSession, AuthUser } from "@suppers/auth-client";
 
 export interface AuthClientContextType {
   authClient: AuthClient;

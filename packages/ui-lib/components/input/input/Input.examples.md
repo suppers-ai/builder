@@ -54,6 +54,30 @@ apiProps:
     name: "class"
     type: "string"
     description: "Additional CSS classes"
+demoInfo:
+  variants: ["text", "email", "password", "search", "textarea"]
+  interactions: ["focus", "validation", "error states", "helper text"]
+  useCases: ["Forms", "Search", "User input", "Data entry"]
+previewData:
+  - title: "Basic Inputs"
+    description: "Standard input fields"
+    components:
+      - props: { placeholder: "Type here..." }
+      - props: { placeholder: "Email", type: "email" }
+      - props: { placeholder: "Password", type: "password" }
+  - title: "Input Colors"
+    description: "Validation states and colors"
+    components:
+      - props: { color: "primary", placeholder: "Primary input" }
+      - props: { color: "success", placeholder: "Success input" }
+      - props: { color: "error", placeholder: "Error input" }
+  - title: "Input Sizes"
+    description: "Different sizes"
+    components:
+      - props: { size: "xs", placeholder: "Extra small" }
+      - props: { size: "sm", placeholder: "Small" }
+      - props: { placeholder: "Medium (default)" }
+      - props: { size: "lg", placeholder: "Large" }
 usageNotes:
   - "Use Input for server-side rendered forms"
   - "For interactive inputs with onChange handlers, create an island component"

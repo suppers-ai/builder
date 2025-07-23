@@ -6,7 +6,7 @@ import { Alert } from "../../feedback/alert/Alert.tsx";
 import { Card } from "../../display/card/Card.tsx";
 import { Divider } from "../../layout/divider/Divider.tsx";
 import { SSOClientLogin } from "../../../shared/components/SSOClientLogin.tsx";
-import type { AuthUser } from "@packages/auth-client";
+import type { AuthUser } from "@suppers/auth-client";
 
 interface FormData {
   email: string;

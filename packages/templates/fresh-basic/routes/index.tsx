@@ -1,5 +1,5 @@
-import { useAuthClient } from "@packages/ui-lib/shared/providers/AuthClientProvider.tsx";
-import { UserClientAvatar } from "@packages/ui-lib/shared/components/UserClientAvatar.tsx";
+import { useAuthClient } from "@suppers/ui-lib/shared/providers/AuthClientProvider.tsx";
+import { UserClientAvatar } from "@suppers/ui-lib/shared/components/UserClientAvatar.tsx";
 
 export default function Home() {
   const { user, loading, login, logout, isAuthenticated } = useAuthClient();

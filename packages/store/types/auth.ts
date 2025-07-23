@@ -1,10 +1,7 @@
 import type { Session, User } from "@supabase/supabase-js";
 
-export interface AuthState {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-}
+// AuthState is now imported from shared package - see packages/shared/types/auth.ts
+export type { AuthState } from "../../shared/types/auth.ts";
 
 export interface SignUpData {
   email: string;

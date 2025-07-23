@@ -1,19 +1,10 @@
 import { useEffect, useState } from "preact/hooks";
 import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
 import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
-
-interface User {
-  id: string;
-  email: string;
-  first_name?: string | null;
-  middle_names?: string | null;
-  last_name?: string | null;
-  display_name?: string | null;
-  avatar_url?: string | null;
-}
+import type { AuthUser } from "@suppers/shared/types/auth.ts";
 
 interface EditUserModalProps {
-  user: User;
+  user: AuthUser;
   isOpen: boolean;
   onClose: () => void;
   onSave: (
@@ -30,7 +21,7 @@ interface EditUserModalProps {
 export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalProps) {
   const [formData, setFormData] = useState({
     firstName: user?.first_name || "",
-    middleNames: user?.middle_names || "",
+    middleNames: "", // AuthUser doesn't have middle_names field
     lastName: user?.last_name || "",
     displayName: user?.display_name || "",
     avatarUrl: user?.avatar_url || "",
@@ -44,7 +35,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
     if (isOpen && user) {
       setFormData({
         firstName: user.first_name || "",
-        middleNames: user.middle_names || "",
+        middleNames: "", // AuthUser doesn't have middle_names field
         lastName: user.last_name || "",
         displayName: user.display_name || "",
         avatarUrl: user.avatar_url || "",
@@ -252,7 +243,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 {isLoading
                   ? (
                     <>
-                      <LoaderSpinner size="small" className="mr-2" />
+                      <LoaderSpinner size="sm" className="mr-2" />
                       Saving...
                     </>
                   )

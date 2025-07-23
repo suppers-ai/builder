@@ -3,6 +3,8 @@
  * Common types for API requests, responses, and data structures
  */
 
+import type { UsersTable, ApplicationsTable } from './database.ts';
+
 // Generic API Response
 export interface ApiResponse<T = any> {
   data?: T;
@@ -17,6 +19,25 @@ export interface ApiResponse<T = any> {
     hasMore?: boolean;
   };
 }
+
+// Derived API Response Types (based on database schema)
+export type UserResponse = Pick<UsersTable, 'id' | 'email' | 'display_name' | 'avatar_url' | 'created_at'>;
+
+export interface UserResponseExtended extends UserResponse {
+  full_name: string;
+  initials: string;
+}
+
+export type ApplicationResponse = Pick<ApplicationsTable, 'id' | 'name' | 'description' | 'status' | 'created_at' | 'updated_at'>;
+
+export interface ApplicationResponseExtended extends ApplicationResponse {
+  owner_name?: string;
+  review_count?: number;
+}
+
+// Update Data Types (derived from database schema)
+export type UserUpdateData = Pick<UsersTable, 'first_name' | 'middle_names' | 'last_name' | 'display_name' | 'avatar_url'>;
+export type ApplicationUpdateData = Pick<ApplicationsTable, 'name' | 'description' | 'configuration' | 'status'>;
 
 // API Error Response
 export interface ApiError {

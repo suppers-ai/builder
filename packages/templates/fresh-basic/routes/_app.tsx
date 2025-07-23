@@ -1,5 +1,5 @@
 import { type PageProps } from "fresh";
-import { AuthClientProvider } from "@packages/ui-lib/shared/providers/AuthClientProvider.tsx";
+import { AuthClientProvider } from "@suppers/ui-lib/shared/providers/AuthClientProvider.tsx";
 
 export default function App({ Component }: PageProps) {
   const Comp = Component as any;

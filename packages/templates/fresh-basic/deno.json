@@ -15,9 +15,7 @@
     "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
     "@preact/signals": "npm:@preact/signals@2.2.1",
     "@preact/signals-core": "npm:@preact/signals-core@1.11.0",
-    "tailwindcss": "npm:tailwindcss@^4.1.11",
-    "@packages/auth-client": "../../auth-client/mod.ts",
-    "@packages/ui-lib": "../../ui-lib/mod.ts"
+    "tailwindcss": "npm:tailwindcss@^4.1.11"
   },
   "tasks": {
     "dev": "deno run -A --watch=static/,routes/,islands/ dev.ts",

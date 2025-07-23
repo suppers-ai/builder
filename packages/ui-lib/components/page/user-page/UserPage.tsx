@@ -1,5 +1,6 @@
 import { BaseComponentProps } from "../../types.ts";
 import { Loading } from "../../feedback/loading/Loading.tsx";
+import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
 import { Button } from "../../action/button/Button.tsx";
 import { Card } from "../../display/card/Card.tsx";
 import { Badge } from "../../display/badge/Badge.tsx";
@@ -7,6 +8,8 @@ import { Stat } from "../../display/stat/Stat.tsx";
 import { EditUserModal } from "./EditUserModal.tsx";
 import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
 import type { Application, User } from "../../../shared/lib/api-helpers.ts";
+import type { AuthUser } from "@suppers/shared/types/auth.ts";
+import { TypeMappers } from "@suppers/shared/utils";
 
 interface UserStats {
   totalApplications: number;
@@ -65,12 +68,8 @@ export function UserPage({
   ...props
 }: UserPageProps) {
   const getFullName = () => {
-    if (user?.display_name) {
-      return user.display_name;
-    }
-
-    const parts = [user?.first_name, user?.middle_names, user?.last_name].filter(Boolean);
-    return parts.length > 0 ? parts.join(" ") : "User";
+    if (!user) return "User";
+    return TypeMappers.getDisplayName(user);
   };
 
   const formatDate = (dateString: string) => {
@@ -97,7 +96,7 @@ export function UserPage({
   if (isLoading) {
     return (
       <div class="flex items-center justify-center min-h-screen">
-        <LoaderSpinner size="large" />
+        <LoaderSpinner size="lg" />
       </div>
     );
   }
@@ -125,7 +124,7 @@ export function UserPage({
       <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
         <div class="p-6">
           <div class="flex items-center gap-6">
-            <UserAvatar user={user} size="lg" />
+            <UserAvatar user={TypeMappers.userToAuthUser(user)} size="lg" />
             <div class="flex-1">
               <div class="flex items-center gap-3 mb-2">
                 <h1 class="text-2xl font-bold text-gray-900">
@@ -176,7 +175,7 @@ export function UserPage({
                   {isSigningOut
                     ? (
                       <>
-                        <LoaderSpinner size="small" />
+                        <LoaderSpinner size="sm" />
                         Signing Out...
                       </>
                     )
@@ -528,7 +527,7 @@ export function UserPage({
       {/* Edit User Modal */}
       {showEditModal && (
         <EditUserModal
-          user={user}
+          user={TypeMappers.userToAuthUser(user)}
           isOpen={showEditModal}
           onClose={onHideEditModal}
           onSave={onUpdateUser}

@@ -1,10 +1,10 @@
 import { useState } from "preact/hooks";
 import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
 import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
-import type { User } from "../../../shared/lib/api-helpers.ts";
+import type { AuthUser } from "@suppers/shared/types/auth.ts";
 
 interface SimpleEditUserModalProps {
-  user: User;
+  user: AuthUser;
   isOpen: boolean;
   onClose: () => void;
   onSave: (
@@ -131,7 +131,7 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
                 {loading
                   ? (
                     <>
-                      <LoaderSpinner size="small" className="mr-2" />
+                      <LoaderSpinner size="sm" className="mr-2" />
                       Saving...
                     </>
                   )

@@ -1,15 +1,9 @@
 // No React import needed for simple components
+import type { AuthUser } from "@suppers/shared/types/auth.ts";
+import { TypeMappers } from "@suppers/shared/utils";
 
 interface UserAvatarProps {
-  user: {
-    id: string;
-    email: string;
-    first_name?: string | null;
-    middle_names?: string | null;
-    last_name?: string | null;
-    display_name?: string | null;
-    avatar_url?: string | null;
-  };
+  user: AuthUser;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -21,27 +15,8 @@ export function UserAvatar({ user, size = "md", className = "" }: UserAvatarProp
     lg: "w-16 h-16 text-lg",
   };
 
-  const getDisplayName = () => {
-    if (user.display_name) {
-      return user.display_name;
-    }
-
-    const parts = [user.first_name, user.middle_names, user.last_name].filter(Boolean);
-    if (parts.length > 0) {
-      return parts.join(" ");
-    }
-
-    return user.email.split("@")[0];
-  };
-
-  const getInitials = () => {
-    const displayName = getDisplayName();
-    return displayName
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join("");
-  };
+  const getDisplayName = () => TypeMappers.getDisplayName(user);
+  const getInitials = () => TypeMappers.getInitials(user as any);
 
   if (user.avatar_url) {
     return (

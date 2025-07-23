@@ -3,20 +3,11 @@ import { useState } from "preact/hooks";
 import { ChevronDown, LogOut, Settings, Shield, User } from "lucide-preact";
 import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
 import { Dropdown } from "../../action/dropdown/Dropdown.tsx";
-
-export interface UserProfileDropdownUser {
-  id: string;
-  email: string;
-  first_name?: string | null;
-  middle_names?: string | null;
-  last_name?: string | null;
-  display_name?: string | null;
-  avatar_url?: string | null;
-  role?: string;
-}
+import type { AuthUser } from "@suppers/shared/types/auth.ts";
+import { TypeMappers } from "@suppers/shared/utils";
 
 export interface UserProfileDropdownProps {
-  user: UserProfileDropdownUser;
+  user: AuthUser;
   onLogout?: () => void;
   onProfile?: () => void;
   onSettings?: () => void;
@@ -42,22 +33,8 @@ export function UserProfileDropdown({
   class: className = "",
   children,
 }: UserProfileDropdownProps) {
-  const getDisplayName = () => {
-    if (user.display_name) {
-      return user.display_name;
-    }
-
-    const parts = [user.first_name, user.middle_names, user.last_name].filter(Boolean);
-    if (parts.length > 0) {
-      return parts.join(" ");
-    }
-
-    return user.email.split("@")[0];
-  };
-
-  const getDisplayEmail = () => {
-    return user.email;
-  };
+  const getDisplayName = () => TypeMappers.getDisplayName(user);
+  const getDisplayEmail = () => user.email;
 
   const handleMenuItemClick = (callback?: () => void, href?: string) => {
     if (callback) {

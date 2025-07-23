@@ -3,11 +3,22 @@
  * Common types for authentication and user management across packages
  */
 
-import type { Session, User } from "@supabase/supabase-js";
+import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
+import type { UsersTable } from './database.ts';
+
+// Derived Auth Types (based on database schema)
+export type AuthUser = Pick<UsersTable, 'id' | 'email' | 'first_name' | 'last_name' | 'display_name' | 'avatar_url' | 'role'>;
+
+// Auth Session with our user type
+export interface AuthSession {
+  user: AuthUser;
+  session: Session;
+  supabaseUser: SupabaseUser;
+}
 
 // Auth State
 export interface AuthState {
-  user: User | null;
+  user: AuthUser | null;
   session: Session | null;
   loading: boolean;
 }
@@ -67,7 +78,7 @@ export interface AuthResponse<T = any> {
 
 // Session Data
 export interface SessionData {
-  user: User;
+  user: AuthUser;
   session: Session;
   accessToken: string;
   refreshToken: string;

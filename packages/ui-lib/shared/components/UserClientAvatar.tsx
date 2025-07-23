@@ -1,4 +1,5 @@
-import type { AuthUser } from "@packages/auth-client";
+import type { AuthUser } from "@suppers/shared/types/auth.ts";
+import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
 
 interface UserClientAvatarProps {
   user: AuthUser;
@@ -13,31 +14,8 @@ export function UserClientAvatar({ user, size = "md", className = "" }: UserClie
     lg: "w-16 h-16 text-lg",
   };
 
-  const getDisplayName = () => {
-    if (user.display_name) {
-      return user.display_name;
-    }
-
-    if (user.name) {
-      return user.name;
-    }
-
-    const parts = [user.first_name, user.last_name].filter(Boolean);
-    if (parts.length > 0) {
-      return parts.join(" ");
-    }
-
-    return user.email.split("@")[0];
-  };
-
-  const getInitials = () => {
-    const displayName = getDisplayName();
-    return displayName
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join("");
-  };
+  const getDisplayName = () => TypeMappers.getDisplayName(user);
+  const getInitials = () => TypeMappers.getInitials(user as any);
 
   if (user.avatar_url) {
     return (
@@ -51,9 +29,8 @@ export function UserClientAvatar({ user, size = "md", className = "" }: UserClie
 
   return (
     <div
-      className={`${
-        sizeClasses[size]
-      } rounded-full bg-blue-500 text-white flex items-center justify-center font-medium ${className}`}
+      className={`${sizeClasses[size]
+        } rounded-full bg-blue-500 text-white flex items-center justify-center font-medium ${className}`}
     >
       {getInitials()}
     </div>

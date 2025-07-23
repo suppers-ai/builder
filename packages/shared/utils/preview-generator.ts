@@ -1,7 +1,8 @@
 /**
  * Preview generation utilities
- * Returns configuration objects for generating component previews
+ * Reads from examples.md files to generate component previews
  */
+import { parse as parseYaml } from "https://deno.land/std@0.224.0/yaml/mod.ts";
 
 export interface PreviewConfig {
   wrapperClass?: string;
@@ -11,6 +12,28 @@ export interface PreviewConfig {
 export interface PreviewSpec {
   type: 'buttons' | 'components' | 'code' | 'error';
   wrapperClass?: string;
+  previews?: Array<{
+    title: string;
+    description: string;
+    buttons?: Array<{
+      content: string;
+      props?: Record<string, any>;
+      isInteractive?: boolean;
+    }>;
+    components?: Array<{
+      props?: Record<string, any>;
+      children?: string;
+    }>;
+    type?: 'buttons' | 'components' | 'code';
+    showCode?: boolean;
+  }>;
+  code?: string;
+  error?: string;
+}
+
+interface PreviewData {
+  title: string;
+  description: string;
   buttons?: Array<{
     content: string;
     props?: Record<string, any>;
@@ -20,8 +43,113 @@ export interface PreviewSpec {
     props?: Record<string, any>;
     children?: string;
   }>;
-  code?: string;
-  error?: string;
+  type?: 'buttons' | 'components' | 'code';
+  showCode?: boolean;
+}
+
+interface ComponentExample {
+  title: string;
+  description: string;
+  code: string;
+}
+
+// Component path mappings
+const COMPONENT_PATHS: Record<string, string> = {
+  "Button": "../ui-lib/components/action/button/Button.examples.md",
+  "Card": "../ui-lib/components/display/card/Card.examples.md",
+  "Modal": "../ui-lib/components/action/modal/Modal.examples.md",
+  "Navbar": "../ui-lib/components/layout/navbar/Navbar.examples.md",
+  "Input": "../ui-lib/components/input/input/Input.examples.md",
+  "ThemeController": "../ui-lib/components/action/theme-controller/Theme Controller.examples.md",
+  "Badge": "../ui-lib/components/display/badge/Badge.examples.md",
+  "Avatar": "../ui-lib/components/display/avatar/Avatar.examples.md",
+  "Alert": "../ui-lib/components/feedback/alert/Alert.examples.md",
+  "Loading": "../ui-lib/components/feedback/loading/Loading.examples.md",
+  "Progress": "../ui-lib/components/feedback/progress/Progress.examples.md",
+  "Dropdown": "../ui-lib/components/action/dropdown/Dropdown.examples.md",
+  "Checkbox": "../ui-lib/components/input/checkbox/Checkbox.examples.md",
+  "BrowserMockup": "../ui-lib/components/mockup/browser/BrowserMockup.examples.md",
+  "CodeMockup": "../ui-lib/components/mockup/code/CodeMockup.examples.md",
+  "PhoneMockup": "../ui-lib/components/mockup/phone/PhoneMockup.examples.md",
+  "WindowMockup": "../ui-lib/components/mockup/window/WindowMockup.examples.md",
+};
+
+// Cache for loaded data
+const examplesCache = new Map<string, ComponentExample[]>();
+const previewCache = new Map<string, PreviewData[]>();
+
+/**
+ * Load preview data from a component's examples.md file
+ */
+async function loadComponentPreviewData(componentName: string): Promise<PreviewData[]> {
+  const cached = previewCache.get(componentName);
+  if (cached) return cached;
+
+  const filePath = COMPONENT_PATHS[componentName];
+  if (!filePath) return [];
+
+  try {
+    const content = await Deno.readTextFile(filePath);
+    const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+    
+    if (!frontmatterMatch) return [];
+    
+    const frontmatter = parseYaml(frontmatterMatch[1]) as any;
+    const previewData = frontmatter.previewData || [];
+    
+    previewCache.set(componentName, previewData);
+    return previewData;
+  } catch (error) {
+    console.warn(`Could not load preview data for ${componentName}:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * Load examples from a component's examples.md file
+ */
+async function loadComponentExamples(componentName: string): Promise<ComponentExample[]> {
+  const cached = examplesCache.get(componentName);
+  if (cached) return cached;
+
+  const filePath = COMPONENT_PATHS[componentName];
+  if (!filePath) return [];
+
+  try {
+    const content = await Deno.readTextFile(filePath);
+    const examples = extractExamplesFromMarkdown(content);
+    examplesCache.set(componentName, examples);
+    return examples;
+  } catch (error) {
+    console.warn(`Could not load examples for ${componentName}:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * Extract examples from markdown content
+ */
+function extractExamplesFromMarkdown(content: string): ComponentExample[] {
+  const examples: ComponentExample[] = [];
+  
+  // Remove frontmatter
+  const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, '');
+  
+  // Match all sections with ## headers and code blocks
+  const sectionRegex = /## ([^\n]+)\n\n([^#]*?)```tsx\n([\s\S]*?)```/g;
+  let match;
+  
+  while ((match = sectionRegex.exec(contentWithoutFrontmatter)) !== null) {
+    const title = match[1].trim();
+    const description = match[2].trim();
+    const code = match[3].trim();
+    
+    if (code) {
+      examples.push({ title, description, code });
+    }
+  }
+  
+  return examples;
 }
 
 /**
@@ -36,7 +164,11 @@ export function generatePreview(
   const { wrapperClass = "flex flex-wrap gap-4" } = config;
 
   try {
-    return generatePreviewSpec(code, wrapperClass);
+    return {
+      type: 'code',
+      code,
+      wrapperClass,
+    };
   } catch (error) {
     return {
       type: 'error',
@@ -47,381 +179,78 @@ export function generatePreview(
 
 /**
  * Create a preview generator function for a specific component
- * This allows for component-specific preview logic
+ * Reads preview data from the component's examples.md file
  */
 export function createComponentPreviewGenerator(
   componentName: string,
   component: any,
   config: PreviewConfig = {}
 ) {
-  return (code: string): PreviewSpec => {
-    // Component-specific preview logic can be added here
-    switch (componentName) {
-      case "Button":
-        return generateButtonPreviewSpec(code, config);
-      case "Card":
-        return generateCardPreviewSpec(code, config);
-      case "Badge":
-        return generateBadgePreviewSpec(code, config);
-      case "Avatar":
-        return generateAvatarPreviewSpec(code, config);
-      case "Alert":
-        return generateAlertPreviewSpec(code, config);
-      case "Loading":
-        return generateLoadingPreviewSpec(code, config);
-      case "Progress":
-        return generateProgressPreviewSpec(code, config);
-      case "Modal":
-        return generateModalPreviewSpec(code, config);
-      case "Dropdown":
-        return generateDropdownPreviewSpec(code, config);
-      case "Input":
-        return generateInputPreviewSpec(code, config);
-      case "Checkbox":
-        return generateCheckboxPreviewSpec(code, config);
-      case "BrowserMockup":
-        return generateMockupPreviewSpec(code, "Browser Mockup", config);
-      case "CodeMockup":
-        return generateMockupPreviewSpec(code, "Code Mockup", config);
-      case "PhoneMockup":
-        return generateMockupPreviewSpec(code, "Phone Mockup", config);
-      case "WindowMockup":
-        return generateMockupPreviewSpec(code, "Window Mockup", config);
-      default:
-        return generateGenericComponentPreviewSpec(code, componentName, config);
+  return async (code: string): Promise<PreviewSpec> => {
+    const { wrapperClass = "flex flex-wrap gap-4" } = config;
+    
+    try {
+      const previewData = await loadComponentPreviewData(componentName);
+      
+      if (previewData.length > 0) {
+        // Determine the primary type based on the first preview
+        const primaryType = previewData[0]?.type || 
+          (previewData[0]?.buttons ? 'buttons' : 'components');
+        
+        return {
+          type: primaryType,
+          wrapperClass,
+          previews: previewData,
+        };
+      } else {
+        // Fallback to code display if no preview data found
+        return {
+          type: 'code',
+          code,
+          wrapperClass,
+        };
+      }
+    } catch (error) {
+      return {
+        type: 'error',
+        error: `Failed to load preview data for ${componentName}: ${error.message}`,
+      };
     }
   };
 }
 
 /**
- * Button-specific preview generator
- * Handles common Button patterns and layouts
+ * Get preview data for a specific component
+ * Public API for accessing component preview data
  */
-function generateButtonPreviewSpec(
-  code: string,
-  config: PreviewConfig = {}
-): PreviewSpec {
-  const { wrapperClass = "flex flex-wrap gap-4" } = config;
-
-  // Detect common button patterns and generate appropriate previews
-  if (code.includes('color="primary"') && code.includes('color="secondary"')) {
-    // Multiple color buttons
-    return {
-      type: 'buttons',
-      wrapperClass,
-      buttons: [
-        { content: 'Default', props: {} },
-        { content: 'Primary', props: { color: 'primary' } },
-        { content: 'Secondary', props: { color: 'secondary' } },
-        { content: 'Accent', props: { color: 'accent' } },
-      ],
-    };
-  }
-
-  if (code.includes('variant="outline"') && code.includes('variant="ghost"')) {
-    // Variant buttons
-    return {
-      type: 'buttons',
-      wrapperClass,
-      buttons: [
-        { content: 'Outline', props: { variant: 'outline', color: 'primary' } },
-        { content: 'Ghost', props: { variant: 'ghost', color: 'primary' } },
-        { content: 'Link', props: { variant: 'link', color: 'primary' } },
-      ],
-    };
-  }
-
-  if (code.includes('size="xs"') && code.includes('size="sm"')) {
-    // Size buttons
-    return {
-      type: 'buttons',
-      wrapperClass: "flex flex-wrap items-center gap-4",
-      buttons: [
-        { content: 'Extra Small', props: { size: 'xs', color: 'primary' } },
-        { content: 'Small', props: { size: 'sm', color: 'primary' } },
-        { content: 'Medium', props: { color: 'primary' } },
-        { content: 'Large', props: { size: 'lg', color: 'primary' } },
-      ],
-    };
-  }
-
-  if (code.includes('disabled') && code.includes('loading')) {
-    // State buttons
-    return {
-      type: 'buttons',
-      wrapperClass,
-      buttons: [
-        { content: 'Normal', props: { color: 'primary' } },
-        { content: 'Active', props: { color: 'primary', active: true } },
-        { content: 'Disabled', props: { color: 'primary', disabled: true } },
-        { content: 'Loading', props: { color: 'primary', loading: true } },
-      ],
-    };
-  }
-
-  if (code.includes('onClick')) {
-    // Interactive buttons
-    return {
-      type: 'buttons',
-      wrapperClass,
-      buttons: [
-        {
-          content: 'Click Me',
-          props: { color: 'primary' },
-          isInteractive: true,
-        },
-        {
-          content: 'Log to Console',
-          props: { color: 'secondary', variant: 'outline' },
-          isInteractive: true,
-        },
-      ],
-    };
-  }
-
-  // Fallback: single button
-  return {
-    type: 'buttons',
-    wrapperClass,
-    buttons: [
-      { content: 'Default Button', props: {} },
-    ],
-  };
+export async function getComponentPreviewData(componentName: string): Promise<PreviewData[]> {
+  return await loadComponentPreviewData(componentName);
 }
 
 /**
- * Generate preview spec from arbitrary code
+ * Get examples for a specific component
+ * Public API for accessing component examples
  */
-function generatePreviewSpec(code: string, wrapperClass: string): PreviewSpec {
-  // For arbitrary code, return code display
-  return {
-    type: 'code',
-    code,
-    wrapperClass,
-  };
+export async function getComponentExamples(componentName: string): Promise<ComponentExample[]> {
+  return await loadComponentExamples(componentName);
 }
 
 /**
- * Card-specific preview generator
+ * Generate preview from code (fallback method)
  */
-function generateCardPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "flex flex-wrap gap-4" } = config;
-
-  if (code.includes('title="Card Title"') && code.includes('<p>This is a basic card')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [{ props: { title: "Card Title" }, children: "This is a basic card with some content." }],
-    };
-  }
-
-  if (code.includes('image=') && code.includes('title="Shoes!"')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [{
-        props: {
-          image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg",
-          imageAlt: "Shoes",
-          title: "Shoes!"
-        },
-        children: "If a dog chews shoes whose shoes does he choose?"
-      }],
-    };
-  }
-
-  return { type: 'code', code, wrapperClass };
-}
-
-/**
- * Badge-specific preview generator
- */
-function generateBadgePreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "flex flex-wrap gap-2" } = config;
-
-  if (code.includes('color=') && code.includes('Badge')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [
-        { props: {}, children: "Default" },
-        { props: { color: "primary" }, children: "Primary" },
-        { props: { color: "secondary" }, children: "Secondary" },
-        { props: { color: "accent" }, children: "Accent" },
-      ],
-    };
-  }
-
-  return { type: 'code', code, wrapperClass };
-}
-
-/**
- * Avatar-specific preview generator
- */
-function generateAvatarPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "flex gap-4" } = config;
-
-  if (code.includes('src=') || code.includes('Avatar')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [
-        { props: { src: "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" } },
-      ],
-    };
-  }
-
-  return { type: 'code', code, wrapperClass };
-}
-
-/**
- * Alert-specific preview generator
- */
-function generateAlertPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "space-y-4" } = config;
-
-  if (code.includes('type=') && code.includes('Alert')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [
-        { props: { type: "info" }, children: "Info alert message" },
-        { props: { type: "success" }, children: "Success alert message" },
-        { props: { type: "warning" }, children: "Warning alert message" },
-        { props: { type: "error" }, children: "Error alert message" },
-      ],
-    };
-  }
-
-  return { type: 'code', code, wrapperClass };
-}
-
-/**
- * Loading-specific preview generator
- */
-function generateLoadingPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "flex gap-4" } = config;
-
-  return {
-    type: 'components',
-    wrapperClass,
-    components: [
-      { props: {} },
-    ],
-  };
-}
-
-/**
- * Progress-specific preview generator
- */
-function generateProgressPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "space-y-4" } = config;
-
-  if (code.includes('value=')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [
-        { props: { value: 25, max: 100 } },
-        { props: { value: 50, max: 100 } },
-        { props: { value: 75, max: 100 } },
-      ],
-    };
-  }
-
-  return { type: 'code', code, wrapperClass };
-}
-
-/**
- * Modal-specific preview generator
- */
-function generateModalPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  return { type: 'code', code, wrapperClass: config.wrapperClass || "flex gap-4" };
-}
-
-/**
- * Dropdown-specific preview generator
- */
-function generateDropdownPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  return { type: 'code', code, wrapperClass: config.wrapperClass || "flex gap-4" };
-}
-
-/**
- * Input-specific preview generator
- */
-function generateInputPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "space-y-4" } = config;
-
-  if (code.includes('placeholder=')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [
-        { props: { placeholder: "Type here..." } },
-        { props: { placeholder: "Email", type: "email" } },
-        { props: { placeholder: "Password", type: "password" } },
-      ],
-    };
-  }
-
-  return { type: 'code', code, wrapperClass };
-}
-
-/**
- * Checkbox-specific preview generator
- */
-function generateCheckboxPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
-  const { wrapperClass = "space-y-2" } = config;
-
-  return {
-    type: 'components',
-    wrapperClass,
-    components: [
-      { props: { checked: false }, children: "Unchecked" },
-      { props: { checked: true }, children: "Checked" },
-      { props: { disabled: true }, children: "Disabled" },
-    ],
-  };
-}
-
-/**
- * Mockup component preview generator
- */
-function generateMockupPreviewSpec(
-  code: string,
-  mockupType: string,
-  config: PreviewConfig = {}
-): PreviewSpec {
-  const { wrapperClass = "flex justify-center" } = config;
-
-  // For mockup components, show the code since they contain complex nested content
-  // The actual mockup rendering is best shown via code examples
-  return {
-    type: 'code',
-    code,
-    wrapperClass: wrapperClass + " max-w-4xl mx-auto"
-  };
-}
-
-/**
- * Generic component preview generator for unknown components
- */
-function generateGenericComponentPreviewSpec(
-  code: string,
+export async function generatePreviewFromCode(
   componentName: string,
+  code: string,
   config: PreviewConfig = {}
-): PreviewSpec {
-  const { wrapperClass = "flex gap-4" } = config;
-
-  // Try to extract common patterns
-  if (code.includes('color=') || code.includes('variant=') || code.includes('size=')) {
-    return {
-      type: 'components',
-      wrapperClass,
-      components: [{ props: {} }],
-    };
-  }
-
-  // Fallback to code display
-  return { type: 'code', code, wrapperClass };
+): Promise<PreviewSpec> {
+  const generator = createComponentPreviewGenerator(componentName, null, config);
+  return await generator(code);
 }
+
+// All the hardcoded component-specific generators have been removed
+// The new system reads examples directly from the examples.md files
+
+// All hardcoded component-specific preview generators have been removed
+// The preview system now reads real examples from component examples.md files
+// This ensures that previews always show actual, documented usage patterns
+// rather than artificial or outdated examples

@@ -1,5 +1,5 @@
 import { Input } from "@suppers/ui-lib";
-import { createSimpleComponentRoute } from "@suppers/shared/utils/component-route-generator.tsx";
+import { createSimpleComponentRoute } from "../../../shared/lib/component-route-generator.tsx";
 
 // Use the generic component route generator
 export default createSimpleComponentRoute("Input", "input", Input);

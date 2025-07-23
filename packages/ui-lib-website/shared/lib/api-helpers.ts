@@ -1,40 +1,38 @@
 import { supabase } from "./supabase-client.ts";
-import type { Tables, TablesInsert, TablesUpdate } from "./supabase-client.ts";
+import type { TablesInsert, TablesUpdate } from "./supabase-client.ts";
+import type { 
+  User, 
+  Application, 
+  UserAccess, 
+  ApplicationReview, 
+  CustomTheme,
+  UserUpdateData,
+  UserResponse,
+  AuthUser
+} from "../../../shared/utils/type-mappers.ts";
+import { TypeMappers } from "../../../shared/utils/type-mappers.ts";
+import { showFunctionDeprecationWarning } from "../../../shared/utils/deprecation-warnings.ts";
+import type { 
+  CreateApplicationData,
+  UpdateApplicationData,
+  CreateReviewData,
+  GrantAccessData,
+  CreateCustomThemeData,
+  UpdateCustomThemeData
+} from "../../../shared/types/api.ts";
 
-export type User = Tables<"users">;
-export type Application = Tables<"applications">;
-export type UserAccess = Tables<"user_access">;
-export type ApplicationReview = Tables<"application_reviews">;
-export type CustomTheme = Tables<"custom_themes">;
+// Re-export types from shared package for backward compatibility
+export type { 
+  CreateApplicationData,
+  UpdateApplicationData,
+  CreateReviewData,
+  GrantAccessData,
+  CreateCustomThemeData,
+  UpdateCustomThemeData
+} from "../../../shared/types/api.ts";
+export type { UserUpdateData } from "../../../shared/utils/type-mappers.ts";
 
-export interface CreateApplicationData {
-  name: string;
-  description?: string;
-  templateId: string;
-  configuration: Record<string, unknown>;
-  status?: "draft" | "pending" | "published" | "archived";
-}
-
-export interface UpdateApplicationData {
-  name?: string;
-  description?: string;
-  templateId?: string;
-  configuration?: Record<string, unknown>;
-  status?: "draft" | "pending" | "published" | "archived";
-}
-
-export interface CreateReviewData {
-  applicationId: string;
-  action: "approved" | "rejected";
-  feedback?: string;
-}
-
-export interface GrantAccessData {
-  applicationId: string;
-  userId: string;
-  accessLevel: "read" | "write" | "admin";
-}
-
+// Legacy UpdateUserData interface for backward compatibility
 export interface UpdateUserData {
   email?: string;
   firstName?: string;
@@ -44,43 +42,52 @@ export interface UpdateUserData {
   avatarUrl?: string;
 }
 
-export interface CreateCustomThemeData {
-  name: string;
-  label: string;
-  description?: string;
-  variables: Record<string, string | number>;
-  is_public?: boolean;
-}
+// Re-export TypeMappers for backward compatibility
+export { TypeMappers } from "../../../shared/utils/type-mappers.ts";
 
-export interface UpdateCustomThemeData {
-  name?: string;
-  label?: string;
-  description?: string;
-  variables?: Record<string, string | number>;
-  is_public?: boolean;
+/**
+ * @deprecated Use TypeMappers.userToApiResponse instead
+ * Legacy function for backward compatibility
+ */
+export function userToApiResponse(user: User): UserResponse {
+  showFunctionDeprecationWarning(
+    'userToApiResponse',
+    'TypeMappers.userToApiResponse',
+    'packages/shared/utils/type-mappers.ts'
+  );
+  return TypeMappers.userToApiResponse(user);
 }
 
 /**
- * Helper functions for user name handling
+ * @deprecated Use TypeMappers.userToAuthUser instead
+ * Legacy function for backward compatibility
+ */
+export function userToAuthUser(user: User): AuthUser {
+  showFunctionDeprecationWarning(
+    'userToAuthUser',
+    'TypeMappers.userToAuthUser',
+    'packages/shared/utils/type-mappers.ts'
+  );
+  return TypeMappers.userToAuthUser(user);
+}
+
+/**
+ * @deprecated Use TypeMappers from shared package instead
+ * Helper functions for user name handling - kept for backward compatibility
  */
 export class UserNameHelpers {
   /**
-   * Get full name from user object
+   * @deprecated Use TypeMappers.getFullName instead
    */
   static getFullName(user: User): string {
-    if (user.display_name) {
-      return user.display_name;
-    }
-
-    const parts = [user.first_name, user.middle_names, user.last_name].filter(Boolean);
-    return parts.length > 0 ? parts.join(" ") : user.email;
+    return TypeMappers.getFullName(user);
   }
 
   /**
-   * Get display name or fallback to computed name
+   * @deprecated Use TypeMappers.getDisplayName instead
    */
   static getDisplayName(user: User): string {
-    return user.display_name || this.getFullName(user) || user.email;
+    return TypeMappers.getDisplayName(user);
   }
 
   /**
@@ -92,15 +99,10 @@ export class UserNameHelpers {
   }
 
   /**
-   * Get initials from user name
+   * @deprecated Use TypeMappers.getInitials instead
    */
   static getInitials(user: User): string {
-    const name = this.getDisplayName(user);
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join("");
+    return TypeMappers.getInitials(user);
   }
 
   /**
@@ -175,6 +177,40 @@ export class ApiHelpers {
     if (updates.avatarUrl !== undefined) updateData.avatar_url = updates.avatarUrl;
 
     updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("users")
+      .update(updateData)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  /**
+   * Update user information using canonical types
+   */
+  static async updateUserCanonical(userId: string, updates: UserUpdateData): Promise<User> {
+    const updateData: TablesUpdate<"users"> = {
+      first_name: updates.first_name,
+      middle_names: updates.middle_names,
+      last_name: updates.last_name,
+      display_name: updates.display_name,
+      avatar_url: updates.avatar_url,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key as keyof typeof updateData] === undefined) {
+        delete updateData[key as keyof typeof updateData];
+      }
+    });
 
     const { data, error } = await supabase
       .from("users")

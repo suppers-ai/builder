@@ -35,6 +35,23 @@ apiProps:
     name: "id"
     type: "string"
     description: "HTML id attribute"
+demoInfo:
+  variants: ["default", "bottom sheet", "full screen", "confirmation"]
+  interactions: ["open", "close", "backdrop click", "keyboard navigation"]
+  useCases: ["User forms", "Confirmations", "Image gallery", "Settings"]
+previewData:
+  - title: "Basic Modal"
+    description: "Simple modal dialog"
+    type: "code"
+    showCode: true
+  - title: "Modal with Form"
+    description: "Modal containing form elements"
+    type: "code"
+    showCode: true
+  - title: "Confirmation Modal"
+    description: "Modal for dangerous actions"
+    type: "code"
+    showCode: true
 usageNotes:
   - "Use Modal for server-side rendered modals that show static content"
   - "For interactive modals with close handlers, create an island component"

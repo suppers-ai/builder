@@ -57,20 +57,15 @@ export const categoryIcons: Record<string, any> = {
 // Default configuration for UI Library site (clean, like Ionic)
 export const defaultUISidebarConfig: SidebarConfig = {
   showSearch: false,
-  showQuickLinks: false,
-  sections: [
+  showQuickLinks: true,
+  quickLinks: [
     {
-      id: "getting-started",
-      title: "Getting Started",
-      icon: categoryIcons["Getting Started"],
-      defaultOpen: true,
-      links: [
-        {
-          name: "UI Components",
-          path: "/components",
-        },
-      ],
+      name: "UI Components",
+      path: "/components",
+      icon: categoryIcons["Components"],
     },
+  ],
+  sections: [
     {
       id: "actions",
       title: "Actions",

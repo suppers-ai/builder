@@ -49,8 +49,8 @@ async function generateAuthUtils(libDir: string): Promise<void> {
  * Provides auth helpers and permission checking
  */
 
-import { AuthClient } from "@packages/auth-client";
-import type { AuthUser } from "@packages/auth-client";
+import { AuthClient } from "@suppers/auth-client";
+import type { AuthUser } from "@suppers/auth-client";
 
 export interface User {
   id: string;

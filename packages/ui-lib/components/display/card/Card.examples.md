@@ -48,6 +48,33 @@ apiProps:
     name: "class"
     type: "string"
     description: "Additional CSS classes"
+demoInfo:
+  variants: ["default", "compact", "side", "image-overlay"]
+  interactions: ["hover effects", "clickable", "expandable"]
+  useCases: ["Product showcase", "User profiles", "Content preview", "Information display"]
+previewData:
+  - title: "Basic Cards"
+    description: "Simple cards with different content"
+    components:
+      - props: { title: "Card Title" }
+        children: "This is a basic card with some content."
+      - props: { title: "Product Card" }
+        children: "A great product with amazing features."
+  - title: "Cards with Images"
+    description: "Cards featuring images"
+    components:
+      - props:
+          image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+          imageAlt: "Shoes"
+          title: "Shoes!"
+        children: "If a dog chews shoes whose shoes does he choose?"
+  - title: "Card Variants"
+    description: "Different card styles"
+    components:
+      - props: { title: "Compact Card", compact: true }
+        children: "This is a compact card with less padding."
+      - props: { title: "Side Card", side: true, image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" }
+        children: "This card uses a horizontal layout."
 usageNotes:
   - "Cards are perfect for grouping related content together"
   - "Use card-body class for proper content padding"

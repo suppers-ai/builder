@@ -13,7 +13,7 @@ A lightweight TypeScript client for integrating with the Suppers Store SSO authe
 ## Installation
 
 ```typescript
-import { AuthClient } from "@packages/auth-client";
+import { AuthClient } from "@suppers/auth-client";
 ```
 
 ## Usage
@@ -170,7 +170,7 @@ The client automatically manages session storage across different environments:
 
 ```typescript
 import { useEffect, useState } from "react";
-import { AuthClient } from "@packages/auth-client";
+import { AuthClient } from "@suppers/auth-client";
 
 const authClient = new AuthClient({
   storeUrl: "https://auth.yourdomain.com",
@@ -218,7 +218,7 @@ function App() {
 
 ```typescript
 // islands/AuthProvider.tsx
-import { AuthClient } from "@packages/auth-client";
+import { AuthClient } from "@suppers/auth-client";
 
 const authClient = new AuthClient({
   storeUrl: "https://auth.yourdomain.com",

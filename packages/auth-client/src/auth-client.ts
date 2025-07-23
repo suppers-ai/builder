@@ -1,9 +1,9 @@
 import type {
   AuthClientConfig,
+  AuthClientSession,
   AuthError,
   AuthEventCallback,
   AuthEventType,
-  AuthSession,
   AuthUser,
   LoginOptions,
   RefreshTokenResponse,
@@ -117,7 +117,7 @@ export class AuthClient {
   /**
    * Get current session
    */
-  getSession(): AuthSession | null {
+  getSession(): AuthClientSession | null {
     return this.storage.getValidSession();
   }
 
@@ -158,7 +158,7 @@ export class AuthClient {
 
       const tokenData: RefreshTokenResponse = await response.json();
 
-      const newSession: AuthSession = {
+      const newSession: AuthClientSession = {
         ...session,
         accessToken: tokenData.access_token,
         expiresAt: Date.now() + (tokenData.expires_in * 1000),
@@ -244,7 +244,7 @@ export class AuthClient {
 
     const tokenData: TokenResponse = await response.json();
 
-    const session: AuthSession = {
+    const session: AuthClientSession = {
       accessToken: tokenData.access_token,
       refreshToken: tokenData.refresh_token,
       expiresAt: Date.now() + (tokenData.expires_in * 1000),

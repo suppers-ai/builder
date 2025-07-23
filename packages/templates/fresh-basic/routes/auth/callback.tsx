@@ -1,6 +1,6 @@
 import { type PageProps } from "fresh";
 import { useEffect } from "preact/hooks";
-import { useAuthClient } from "@packages/ui-lib/shared/providers/AuthClientProvider.tsx";
+import { useAuthClient } from "@suppers/ui-lib/shared/providers/AuthClientProvider.tsx";
 
 export default function AuthCallback(props: PageProps) {
   const { authClient } = useAuthClient();

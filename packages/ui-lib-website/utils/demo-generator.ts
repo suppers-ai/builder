@@ -1,4 +1,6 @@
 // Demo Video/GIF Generator Utilities for Component Showcase
+// Reads component metadata from examples.md files
+import { parse as parseYaml } from "https://deno.land/std@0.224.0/yaml/mod.ts";
 
 interface ComponentDemo {
   name: string;
@@ -7,6 +9,13 @@ interface ComponentDemo {
   variants: string[];
   interactions: string[];
   useCases: string[];
+  examples: ComponentExample[];
+}
+
+interface ComponentExample {
+  title: string;
+  description: string;
+  code: string;
 }
 
 interface DemoScript {
@@ -20,116 +29,115 @@ interface DemoScript {
   totalDuration: number;
 }
 
+// Component path mappings
+const COMPONENT_PATHS: Record<string, string> = {
+  "Button": "../ui-lib/components/action/button/Button.examples.md",
+  "Card": "../ui-lib/components/display/card/Card.examples.md",
+  "Modal": "../ui-lib/components/action/modal/Modal.examples.md",
+  "Navbar": "../ui-lib/components/layout/navbar/Navbar.examples.md",
+  "Input": "../ui-lib/components/input/input/Input.examples.md",
+  "ThemeController": "../ui-lib/components/action/theme-controller/Theme Controller.examples.md",
+};
+
 export class DemoGenerator {
-  private components: ComponentDemo[] = [
-    {
-      name: "Button",
-      category: "Action",
-      description: "Interactive button component with multiple variants",
-      variants: ["primary", "secondary", "accent", "ghost", "link", "outline"],
-      interactions: ["hover", "click", "focus", "disabled"],
-      useCases: ["Form submission", "Navigation", "Actions", "Loading states"],
-    },
-    {
-      name: "Card",
-      category: "Display",
-      description: "Content container with flexible layout options",
-      variants: ["default", "compact", "side", "image-overlay"],
-      interactions: ["hover effects", "clickable", "expandable"],
-      useCases: ["Product showcase", "User profiles", "Content preview", "Information display"],
-    },
-    {
-      name: "Modal",
-      category: "Action",
-      description: "Dialog overlay for focused interactions",
-      variants: ["default", "bottom sheet", "full screen", "confirmation"],
-      interactions: ["open", "close", "backdrop click", "keyboard navigation"],
-      useCases: ["User forms", "Confirmations", "Image gallery", "Settings"],
-    },
-    {
-      name: "Navbar",
-      category: "Navigation",
-      description: "Top navigation bar with responsive design",
-      variants: ["horizontal", "vertical", "with dropdown", "with search"],
-      interactions: ["menu toggle", "dropdown", "search", "responsive collapse"],
-      useCases: ["Site navigation", "App header", "User menu", "Brand display"],
-    },
-    {
-      name: "Input",
-      category: "Data Input",
-      description: "Text input field with validation and styling",
-      variants: ["text", "email", "password", "search", "textarea"],
-      interactions: ["focus", "validation", "error states", "helper text"],
-      useCases: ["Forms", "Search", "User input", "Data entry"],
-    },
-    {
-      name: "ThemeController",
-      category: "Action",
-      description: "Theme switching interface with live preview",
-      variants: ["dropdown", "toggle", "button grid", "modal selector"],
-      interactions: ["theme change", "preview", "persistence", "smooth transitions"],
-      useCases: ["User preferences", "Theme showcase", "Customization", "Brand switching"],
-    },
-  ];
+  private componentsCache: Map<string, ComponentDemo> = new Map();
 
-  // Generate demo script for a component
-  generateDemoScript(componentName: string): DemoScript | null {
-    const component = this.components.find((c) => c.name === componentName);
-    if (!component) return null;
+  // Load component data from examples.md file
+  private async loadComponentData(componentName: string): Promise<ComponentDemo | null> {
+    const cached = this.componentsCache.get(componentName);
+    if (cached) return cached;
 
-    const scenes = [
-      {
-        name: "Introduction",
-        duration: 3000,
-        actions: [
-          "Show component in default state",
-          "Display component name and description",
-          "Highlight key features",
-        ],
-        description: `Introduce the ${component.name} component`,
-      },
-      {
-        name: "Variants Showcase",
-        duration: 5000,
-        actions: [
-          "Cycle through all variants",
-          "Show side-by-side comparison",
-          "Highlight unique features of each variant",
-        ],
-        description: "Demonstrate different component variants",
-      },
-      {
-        name: "Interactive Demo",
-        duration: 6000,
-        actions: [
-          "Show hover states",
-          "Demonstrate click interactions",
-          "Show focus and keyboard navigation",
-          "Display loading and disabled states",
-        ],
-        description: "Interactive features and states",
-      },
-      {
-        name: "Use Cases",
-        duration: 4000,
-        actions: [
-          "Show real-world examples",
-          "Demonstrate in different contexts",
-          "Show responsive behavior",
-        ],
-        description: "Practical usage examples",
-      },
-      {
-        name: "Code Preview",
-        duration: 3000,
-        actions: [
-          "Show code snippet",
-          "Highlight key props",
-          "Show TypeScript types",
-        ],
-        description: "Code implementation example",
-      },
-    ];
+    const filePath = COMPONENT_PATHS[componentName];
+    if (!filePath) return null;
+
+    try {
+      const content = await Deno.readTextFile(filePath);
+      const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
+      
+      if (!frontmatterMatch) return null;
+      
+      const frontmatter = parseYaml(frontmatterMatch[1]) as any;
+      
+      const examples = this.extractExamplesFromMarkdown(content);
+      
+      const componentData: ComponentDemo = {
+        name: componentName,
+        category: frontmatter.category || "Unknown",
+        description: frontmatter.description || "",
+        variants: frontmatter.demoInfo?.variants || [],
+        interactions: frontmatter.demoInfo?.interactions || [],
+        useCases: frontmatter.demoInfo?.useCases || [],
+        examples,
+      };
+      
+      this.componentsCache.set(componentName, componentData);
+      return componentData;
+    } catch (error) {
+      console.error(`Failed to load component data for ${componentName}:`, error);
+      return null;
+    }
+  }
+
+  // Extract examples from markdown content
+  private extractExamplesFromMarkdown(content: string): ComponentExample[] {
+    const examples: ComponentExample[] = [];
+    
+    // Remove frontmatter
+    const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, '');
+    
+    // Match all sections with ## headers and code blocks
+    const sectionRegex = /## ([^\n]+)\n\n([^#]*?)```tsx\n([\s\S]*?)```/g;
+    let match;
+    
+    while ((match = sectionRegex.exec(contentWithoutFrontmatter)) !== null) {
+      const title = match[1].trim();
+      const description = match[2].trim();
+      const code = match[3].trim();
+      
+      if (code) {
+        examples.push({ title, description, code });
+      }
+    }
+    
+    return examples;
+  }
+
+  // Get all available components
+  async getAllComponents(): Promise<ComponentDemo[]> {
+    const components = await Promise.all(
+      Object.keys(COMPONENT_PATHS).map(name => this.loadComponentData(name))
+    );
+    return components.filter(Boolean) as ComponentDemo[];
+  }
+
+  // Generate demo script based on actual examples
+  async generateDemoScript(componentName: string): Promise<DemoScript | null> {
+    const component = await this.loadComponentData(componentName);
+    if (!component || !component.examples.length) return null;
+
+    const scenes = component.examples.map((example, index) => ({
+      name: example.title,
+      duration: 4000, // 4 seconds per example
+      actions: [
+        `Show ${example.title.toLowerCase()}`,
+        "Demonstrate functionality",
+        "Highlight key features",
+        "Show code implementation"
+      ],
+      description: example.description || `Demonstrate ${example.title}`,
+    }));
+    
+    // Add introduction scene
+    scenes.unshift({
+      name: "Introduction",
+      duration: 3000,
+      actions: [
+        "Show component overview",
+        "Display component name and description",
+        "Highlight category and purpose",
+      ],
+      description: `Introduce the ${component.name} component`,
+    });
 
     return {
       component: componentName,
@@ -139,8 +147,8 @@ export class DemoGenerator {
   }
 
   // Generate storyboard for demo video
-  generateStoryboard(componentName: string): string {
-    const script = this.generateDemoScript(componentName);
+  async generateStoryboard(componentName: string): Promise<string> {
+    const script = await this.generateDemoScript(componentName);
     if (!script) return "";
 
     let storyboard = `# ${script.component} Component Demo Storyboard\n\n`;
@@ -166,208 +174,68 @@ export class DemoGenerator {
     return storyboard;
   }
 
-  // Generate CSS animations for demo
-  generateDemoAnimations(componentName: string): string {
-    return `/* Demo Animations for ${componentName} Component */
-
-.demo-container {
-  position: relative;
-  padding: 2rem;
-  background: linear-gradient(135deg, hsl(var(--p)/0.1), hsl(var(--s)/0.1));
-  border-radius: 1rem;
-  overflow: hidden;
+  // Generate minimal CSS for demo display (no hardcoded animations)
+  generateBasicDemoStyles(): string {
+    return `/* Basic Demo Styles */
+.demo-preview {
+  border: 1px solid hsl(var(--border));
+  transition: all 0.2s ease;
 }
 
-.demo-spotlight {
-  position: relative;
+.demo-preview:hover {
+  border-color: hsl(var(--primary));
 }
 
-.demo-spotlight::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: spotlight-rotate 8s linear infinite;
+.example-content {
+  transition: opacity 0.3s ease;
+}
+
+.example-content.hidden {
+  opacity: 0;
   pointer-events: none;
-}
-
-@keyframes spotlight-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.demo-fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-@keyframes fadeIn {
-  from { 
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.demo-scale-in {
-  animation: scaleIn 0.4s ease-out forwards;
-  transform: scale(0.9);
-  opacity: 0;
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.demo-slide-in {
-  animation: slideIn 0.5s ease-out forwards;
-  transform: translateX(-30px);
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(-30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.demo-pulse {
-  animation: demoPulse 2s ease-in-out infinite;
-}
-
-@keyframes demoPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-.demo-hover-effect {
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.demo-hover-effect:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-.demo-loading {
-  position: relative;
-  overflow: hidden;
-}
-
-.demo-loading::after {
-  content: '';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: loading-shimmer 1.5s infinite;
+  left: -9999px;
 }
 
-@keyframes loading-shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.demo-variant-transition {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.demo-code-highlight {
-  animation: codeHighlight 2s ease-in-out;
-}
-
-@keyframes codeHighlight {
-  0%, 100% { background-color: transparent; }
-  50% { background-color: rgba(var(--p), 0.1); }
-}
-
-/* Interactive Demo Specific Animations */
-.demo-interaction-ripple {
+.example-content.active {
+  opacity: 1;
+  pointer-events: auto;
   position: relative;
-  overflow: hidden;
-}
-
-.demo-interaction-ripple::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(var(--p), 0.3);
-  transform: translate(-50%, -50%);
-  animation: ripple 0.6s linear;
-}
-
-@keyframes ripple {
-  to {
-    width: 200px;
-    height: 200px;
-    opacity: 0;
-  }
-}
-
-/* Responsive Demo Animations */
-@media (max-width: 768px) {
-  .demo-container {
-    padding: 1rem;
-  }
-  
-  .demo-spotlight::before {
-    animation-duration: 6s;
-  }
-}
-
-/* Theme-aware animations */
-[data-theme="dark"] .demo-spotlight::before {
-  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+  left: auto;
 }
 
 /* Accessibility: Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .demo-spotlight::before,
-  .demo-pulse,
-  .demo-loading::after {
+  * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-  
-  .demo-fade-in,
-  .demo-scale-in,
-  .demo-slide-in {
-    animation: none;
-    opacity: 1;
-    transform: none;
+    transition-duration: 0.01ms !important;
   }
 }`;
   }
 
-  // Generate HTML template for demo recording
-  generateDemoHTML(componentName: string): string {
-    const component = this.components.find((c) => c.name === componentName);
-    if (!component) return "";
+  // Generate HTML template for demo recording using actual examples
+  async generateDemoHTML(componentName: string): Promise<string> {
+    const component = await this.loadComponentData(componentName);
+    if (!component || !component.examples.length) return "";
+
+    const exampleTabs = component.examples.map((example, index) => 
+      `<button class="tab tab-lifted ${index === 0 ? 'tab-active' : ''}" onclick="showExample(${index})">${example.title}</button>`
+    ).join('');
+    
+    const exampleContents = component.examples.map((example, index) => 
+      `<div id="example-${index}" class="example-content ${index === 0 ? 'active' : 'hidden'}">
+        <div class="mb-4">
+          <p class="text-base-content/70">${example.description}</p>
+        </div>
+        <div class="demo-preview bg-base-200 rounded-lg p-8 mb-4">
+          ${this.convertTsxToHtml(example.code)}
+        </div>
+        <div class="mockup-code">
+          <pre><code>${this.escapeHtml(example.code)}</code></pre>
+        </div>
+      </div>`
+    ).join('');
 
     return `<!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -377,111 +245,94 @@ export class DemoGenerator {
   <title>${component.name} Component Demo</title>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.24/dist/full.min.css" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    ${this.generateDemoAnimations(componentName)}
-  </style>
 </head>
 <body class="bg-base-100">
-  <div class="min-h-screen flex items-center justify-center p-8">
-    <div class="demo-container max-w-4xl w-full">
-      <!-- Demo Header -->
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-base-content mb-2">${component.name}</h1>
-        <p class="text-lg text-base-content/70">${component.description}</p>
-        <div class="badge badge-primary mt-2">${component.category}</div>
-      </div>
+  <div class="container mx-auto p-8">
+    <!-- Demo Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-base-content mb-2">${component.name}</h1>
+      <p class="text-lg text-base-content/70">${component.description}</p>
+      <div class="badge badge-primary mt-2">${component.category}</div>
+    </div>
 
-      <!-- Component Showcase Area -->
-      <div id="demo-stage" class="demo-spotlight bg-base-200 rounded-lg p-8 mb-8 min-h-[300px] flex items-center justify-center">
-        <!-- Dynamic component content will be inserted here -->
-        <div id="component-container" class="w-full text-center">
-          <!-- Component examples will be dynamically loaded -->
+    <!-- Example Tabs -->
+    <div class="tabs tabs-lifted mb-4">
+      ${exampleTabs}
+    </div>
+
+    <!-- Example Contents -->
+    <div id="examples-container">
+      ${exampleContents}
+    </div>
+
+    <!-- Component Info -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+      <div class="card bg-base-100 shadow">
+        <div class="card-body">
+          <h3 class="card-title">Variants</h3>
+          <ul class="list-disc list-inside space-y-1">
+            ${component.variants.map((variant) => `<li>${variant}</li>`).join("")}
+          </ul>
         </div>
       </div>
-
-      <!-- Demo Controls -->
-      <div class="flex flex-wrap gap-4 justify-center mb-8">
-        <button class="btn btn-primary" onclick="showVariants()">Show Variants</button>
-        <button class="btn btn-secondary" onclick="showInteractions()">Interactions</button>
-        <button class="btn btn-accent" onclick="showUseCases()">Use Cases</button>
-        <button class="btn btn-ghost" onclick="showCode()">View Code</button>
-      </div>
-
-      <!-- Info Panel -->
-      <div id="info-panel" class="card bg-base-100 shadow-lg">
+      <div class="card bg-base-100 shadow">
         <div class="card-body">
-          <h3 class="card-title">Component Information</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h4 class="font-semibold mb-2">Variants</h4>
-              <ul class="list-disc list-inside space-y-1">
-                ${component.variants.map((variant) => `<li>${variant}</li>`).join("")}
-              </ul>
-            </div>
-            <div>
-              <h4 class="font-semibold mb-2">Use Cases</h4>
-              <ul class="list-disc list-inside space-y-1">
-                ${component.useCases.map((useCase) => `<li>${useCase}</li>`).join("")}
-              </ul>
-            </div>
-          </div>
+          <h3 class="card-title">Use Cases</h3>
+          <ul class="list-disc list-inside space-y-1">
+            ${component.useCases.map((useCase) => `<li>${useCase}</li>`).join("")}
+          </ul>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Demo orchestration script
-    let currentDemo = 'default';
-    
-    function showVariants() {
-      // Implementation for showing component variants
-      updateDemoContent('variants');
-    }
-    
-    function showInteractions() {
-      // Implementation for showing interactions
-      updateDemoContent('interactions');
-    }
-    
-    function showUseCases() {
-      // Implementation for showing use cases
-      updateDemoContent('useCases');
-    }
-    
-    function showCode() {
-      // Implementation for showing code examples
-      updateDemoContent('code');
-    }
-    
-    function updateDemoContent(type) {
-      const container = document.getElementById('component-container');
-      container.classList.add('demo-fade-in');
+    function showExample(index) {
+      // Hide all examples
+      document.querySelectorAll('.example-content').forEach(el => {
+        el.classList.add('hidden');
+        el.classList.remove('active');
+      });
       
-      // Content would be dynamically updated based on type
-      setTimeout(() => {
-        container.classList.remove('demo-fade-in');
-      }, 600);
-    }
-    
-    // Auto-play demo sequence
-    function autoPlayDemo() {
-      const sequence = ['variants', 'interactions', 'useCases', 'code'];
-      let currentIndex = 0;
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('tab-active');
+      });
       
-      setInterval(() => {
-        updateDemoContent(sequence[currentIndex]);
-        currentIndex = (currentIndex + 1) % sequence.length;
-      }, 4000);
+      // Show selected example
+      const selectedExample = document.getElementById('example-' + index);
+      if (selectedExample) {
+        selectedExample.classList.remove('hidden');
+        selectedExample.classList.add('active');
+      }
+      
+      // Activate selected tab
+      const selectedTab = document.querySelectorAll('.tab')[index];
+      if (selectedTab) {
+        selectedTab.classList.add('tab-active');
+      }
     }
-    
-    // Start auto-play after page load
-    window.addEventListener('load', () => {
-      setTimeout(autoPlayDemo, 2000);
-    });
   </script>
 </body>
 </html>`;
+  }
+
+  // Helper method to convert TSX to HTML (basic conversion)
+  private convertTsxToHtml(tsxCode: string): string {
+    // This is a basic conversion - in a real implementation you'd want a proper JSX parser
+    return tsxCode
+      .replace(/class=/g, 'class=')
+      .replace(/{([^}]+)}/g, '$1')
+      .replace(/className=/g, 'class=')
+      .replace(/<([A-Z]\w+)([^>]*)>/g, '<div$2>') // Convert components to divs for demo
+      .replace(/<\/[A-Z]\w+>/g, '</div>');
+  }
+
+  // Helper method to escape HTML
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   // Generate demo recording instructions
@@ -658,40 +509,36 @@ demos/
   }
 
   // Generate all demo assets for a component
-  generateComponentDemoAssets(componentName: string): {
+  async generateComponentDemoAssets(componentName: string): Promise<{
     storyboard: string;
     html: string;
     css: string;
     instructions: string;
-  } {
+  }> {
     return {
-      storyboard: this.generateStoryboard(componentName),
-      html: this.generateDemoHTML(componentName),
-      css: this.generateDemoAnimations(componentName),
+      storyboard: await this.generateStoryboard(componentName),
+      html: await this.generateDemoHTML(componentName),
+      css: this.generateBasicDemoStyles(),
       instructions: this.generateRecordingInstructions(),
     };
   }
 
-  // Get list of all components that need demos
-  getAllComponents(): ComponentDemo[] {
-    return this.components;
-  }
 }
 
 // Usage example
-export function generateAllDemoAssets(): void {
+export async function generateAllDemoAssets(): Promise<void> {
   const generator = new DemoGenerator();
-  const components = generator.getAllComponents();
+  const components = await generator.getAllComponents();
 
-  components.forEach((component) => {
-    const assets = generator.generateComponentDemoAssets(component.name);
+  for (const component of components) {
+    const assets = await generator.generateComponentDemoAssets(component.name);
 
     console.log(`\n=== ${component.name} Demo Assets ===`);
     console.log("Storyboard generated ✓");
     console.log("HTML template generated ✓");
     console.log("CSS animations generated ✓");
     console.log("Recording instructions ready ✓");
-  });
+  }
 }
 
 // Auto-run when imported

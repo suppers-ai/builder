@@ -1,6 +1,7 @@
 import { HeaderLayout } from "@suppers/ui-lib";
 import type { SearchResult, UserProfileDropdownUser } from "@suppers/ui-lib";
 import { useEffect, useState } from "preact/hooks";
+import { defaultUISidebarConfig } from "../utils/sidebar-config.tsx";
 
 export interface HeaderLayoutIslandProps {
   currentPath?: string;
@@ -123,6 +124,7 @@ export default function HeaderLayoutIsland({
       onLogout={handleLogout}
       searchResults={searchResults}
       searchLoading={searchLoading}
+      sidebarConfig={defaultUISidebarConfig}
       showScrollToTop={true}
       autoInitializeSidebar={true}
       allowKeyboardShortcuts={true}
