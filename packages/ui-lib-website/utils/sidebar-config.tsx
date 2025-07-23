@@ -2,15 +2,11 @@ import {
   BarChart3,
   BookOpen,
   Building2,
-  Code2,
   Edit3,
   FileText,
   Home,
-  Layers,
-  Layout,
   MessageCircle,
   Navigation,
-  Palmtree,
   Puzzle,
   Smartphone,
   Zap,
@@ -53,8 +49,6 @@ export const categoryIcons: Record<string, any> = {
   "Feedback": <MessageCircle size={16} />,
   "Mockup": <Smartphone size={16} />,
   "Components": <Puzzle size={16} />,
-  "Islands": <Palmtree size={16} />,
-  "Pages": <Layout size={16} />,
   "Getting Started": <BookOpen size={16} />,
   "Documentation": <FileText size={16} />,
   "Home": <Home size={16} />,
@@ -74,14 +68,6 @@ export const defaultUISidebarConfig: SidebarConfig = {
         {
           name: "UI Components",
           path: "/components",
-        },
-        {
-          name: "Interactive Islands",
-          path: "/islands",
-        },
-        {
-          name: "Page Templates",
-          path: "/pages",
         },
       ],
     },
@@ -362,7 +348,7 @@ export const defaultUISidebarConfig: SidebarConfig = {
 
 // Full-featured sidebar configuration (with search and quick links)
 export const fullSidebarConfig: SidebarConfig = {
-  showSearch: true,
+  showSearch: false,
   showQuickLinks: true,
   quickLinks: [
     {
@@ -374,16 +360,6 @@ export const fullSidebarConfig: SidebarConfig = {
       name: "Components",
       path: "/components",
       icon: categoryIcons["Components"],
-    },
-    {
-      name: "Islands",
-      path: "/islands",
-      icon: categoryIcons["Islands"],
-    },
-    {
-      name: "Pages",
-      path: "/pages",
-      icon: categoryIcons["Pages"],
     },
     {
       name: "Getting Started",
@@ -407,10 +383,6 @@ export const minimalSidebarConfig: SidebarConfig = {
         {
           name: "Components",
           path: "/components",
-        },
-        {
-          name: "Islands",
-          path: "/islands",
         },
         {
           name: "Documentation",

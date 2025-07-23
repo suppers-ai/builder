@@ -29,7 +29,7 @@ export interface PreviewSpec {
  * Returns a configuration object that can be used to render the preview
  */
 export function generatePreview(
-  code: string, 
+  code: string,
   imports: Record<string, any> = {},
   config: PreviewConfig = {}
 ): PreviewSpec {
@@ -98,7 +98,7 @@ export function createComponentPreviewGenerator(
  * Handles common Button patterns and layouts
  */
 function generateButtonPreviewSpec(
-  code: string, 
+  code: string,
   config: PreviewConfig = {}
 ): PreviewSpec {
   const { wrapperClass = "flex flex-wrap gap-4" } = config;
@@ -117,7 +117,7 @@ function generateButtonPreviewSpec(
       ],
     };
   }
-  
+
   if (code.includes('variant="outline"') && code.includes('variant="ghost"')) {
     // Variant buttons
     return {
@@ -130,7 +130,7 @@ function generateButtonPreviewSpec(
       ],
     };
   }
-  
+
   if (code.includes('size="xs"') && code.includes('size="sm"')) {
     // Size buttons
     return {
@@ -144,7 +144,7 @@ function generateButtonPreviewSpec(
       ],
     };
   }
-  
+
   if (code.includes('disabled') && code.includes('loading')) {
     // State buttons
     return {
@@ -158,27 +158,27 @@ function generateButtonPreviewSpec(
       ],
     };
   }
-  
+
   if (code.includes('onClick')) {
     // Interactive buttons
     return {
       type: 'buttons',
       wrapperClass,
       buttons: [
-        { 
-          content: 'Click Me', 
+        {
+          content: 'Click Me',
           props: { color: 'primary' },
           isInteractive: true,
         },
-        { 
-          content: 'Log to Console', 
+        {
+          content: 'Log to Console',
           props: { color: 'secondary', variant: 'outline' },
           isInteractive: true,
         },
       ],
     };
   }
-  
+
   // Fallback: single button
   return {
     type: 'buttons',
@@ -206,7 +206,7 @@ function generatePreviewSpec(code: string, wrapperClass: string): PreviewSpec {
  */
 function generateCardPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "flex flex-wrap gap-4" } = config;
-  
+
   if (code.includes('title="Card Title"') && code.includes('<p>This is a basic card')) {
     return {
       type: 'components',
@@ -214,7 +214,7 @@ function generateCardPreviewSpec(code: string, config: PreviewConfig = {}): Prev
       components: [{ props: { title: "Card Title" }, children: "This is a basic card with some content." }],
     };
   }
-  
+
   if (code.includes('image=') && code.includes('title="Shoes!"')) {
     return {
       type: 'components',
@@ -229,7 +229,7 @@ function generateCardPreviewSpec(code: string, config: PreviewConfig = {}): Prev
       }],
     };
   }
-  
+
   return { type: 'code', code, wrapperClass };
 }
 
@@ -238,7 +238,7 @@ function generateCardPreviewSpec(code: string, config: PreviewConfig = {}): Prev
  */
 function generateBadgePreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "flex flex-wrap gap-2" } = config;
-  
+
   if (code.includes('color=') && code.includes('Badge')) {
     return {
       type: 'components',
@@ -251,7 +251,7 @@ function generateBadgePreviewSpec(code: string, config: PreviewConfig = {}): Pre
       ],
     };
   }
-  
+
   return { type: 'code', code, wrapperClass };
 }
 
@@ -260,7 +260,7 @@ function generateBadgePreviewSpec(code: string, config: PreviewConfig = {}): Pre
  */
 function generateAvatarPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "flex gap-4" } = config;
-  
+
   if (code.includes('src=') || code.includes('Avatar')) {
     return {
       type: 'components',
@@ -270,7 +270,7 @@ function generateAvatarPreviewSpec(code: string, config: PreviewConfig = {}): Pr
       ],
     };
   }
-  
+
   return { type: 'code', code, wrapperClass };
 }
 
@@ -279,7 +279,7 @@ function generateAvatarPreviewSpec(code: string, config: PreviewConfig = {}): Pr
  */
 function generateAlertPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "space-y-4" } = config;
-  
+
   if (code.includes('type=') && code.includes('Alert')) {
     return {
       type: 'components',
@@ -292,7 +292,7 @@ function generateAlertPreviewSpec(code: string, config: PreviewConfig = {}): Pre
       ],
     };
   }
-  
+
   return { type: 'code', code, wrapperClass };
 }
 
@@ -301,7 +301,7 @@ function generateAlertPreviewSpec(code: string, config: PreviewConfig = {}): Pre
  */
 function generateLoadingPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "flex gap-4" } = config;
-  
+
   return {
     type: 'components',
     wrapperClass,
@@ -316,7 +316,7 @@ function generateLoadingPreviewSpec(code: string, config: PreviewConfig = {}): P
  */
 function generateProgressPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "space-y-4" } = config;
-  
+
   if (code.includes('value=')) {
     return {
       type: 'components',
@@ -328,7 +328,7 @@ function generateProgressPreviewSpec(code: string, config: PreviewConfig = {}): 
       ],
     };
   }
-  
+
   return { type: 'code', code, wrapperClass };
 }
 
@@ -351,7 +351,7 @@ function generateDropdownPreviewSpec(code: string, config: PreviewConfig = {}): 
  */
 function generateInputPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "space-y-4" } = config;
-  
+
   if (code.includes('placeholder=')) {
     return {
       type: 'components',
@@ -363,7 +363,7 @@ function generateInputPreviewSpec(code: string, config: PreviewConfig = {}): Pre
       ],
     };
   }
-  
+
   return { type: 'code', code, wrapperClass };
 }
 
@@ -372,7 +372,7 @@ function generateInputPreviewSpec(code: string, config: PreviewConfig = {}): Pre
  */
 function generateCheckboxPreviewSpec(code: string, config: PreviewConfig = {}): PreviewSpec {
   const { wrapperClass = "space-y-2" } = config;
-  
+
   return {
     type: 'components',
     wrapperClass,
@@ -388,18 +388,18 @@ function generateCheckboxPreviewSpec(code: string, config: PreviewConfig = {}): 
  * Mockup component preview generator
  */
 function generateMockupPreviewSpec(
-  code: string, 
+  code: string,
   mockupType: string,
   config: PreviewConfig = {}
 ): PreviewSpec {
   const { wrapperClass = "flex justify-center" } = config;
-  
+
   // For mockup components, show the code since they contain complex nested content
   // The actual mockup rendering is best shown via code examples
-  return { 
-    type: 'code', 
-    code, 
-    wrapperClass: wrapperClass + " max-w-4xl mx-auto" 
+  return {
+    type: 'code',
+    code,
+    wrapperClass: wrapperClass + " max-w-4xl mx-auto"
   };
 }
 
@@ -407,12 +407,12 @@ function generateMockupPreviewSpec(
  * Generic component preview generator for unknown components
  */
 function generateGenericComponentPreviewSpec(
-  code: string, 
-  componentName: string, 
+  code: string,
+  componentName: string,
   config: PreviewConfig = {}
 ): PreviewSpec {
   const { wrapperClass = "flex gap-4" } = config;
-  
+
   // Try to extract common patterns
   if (code.includes('color=') || code.includes('variant=') || code.includes('size=')) {
     return {
@@ -421,7 +421,7 @@ function generateGenericComponentPreviewSpec(
       components: [{ props: {} }],
     };
   }
-  
+
   // Fallback to code display
   return { type: 'code', code, wrapperClass };
 }

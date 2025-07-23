@@ -58,10 +58,26 @@ relatedComponents:
 Different size variants for various contexts
 
 ```tsx
-<Select size="xs" options={sampleOptions} placeholder="Extra small" />
-<Select size="sm" options={sampleOptions} placeholder="Small" />
-<Select size="md" options={sampleOptions} placeholder="Medium" />
-<Select size="lg" options={sampleOptions} placeholder="Large" />
+<Select size="xs" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Extra small" />
+<Select size="sm" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Small" />
+<Select size="md" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Medium" />
+<Select size="lg" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Large" />
 ```
 
 ## Select Colors
@@ -69,12 +85,36 @@ Different size variants for various contexts
 Various color themes for different states and purposes
 
 ```tsx
-<Select color="primary" options={sampleOptions} placeholder="Primary" />
-<Select color="secondary" options={sampleOptions} placeholder="Secondary" />
-<Select color="accent" options={sampleOptions} placeholder="Accent" />
-<Select color="success" options={sampleOptions} placeholder="Success" />
-<Select color="warning" options={sampleOptions} placeholder="Warning" />
-<Select color="error" options={sampleOptions} placeholder="Error" />
+<Select color="primary" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Primary" />
+<Select color="secondary" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Secondary" />
+<Select color="accent" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Accent" />
+<Select color="success" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Success" />
+<Select color="warning" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Warning" />
+<Select color="error" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Error" />
 ```
 
 ## Select Variants
@@ -82,9 +122,21 @@ Various color themes for different states and purposes
 Different visual styles and appearances
 
 ```tsx
-<Select bordered options={sampleOptions} placeholder="Bordered (default)" />
-<Select ghost options={sampleOptions} placeholder="Ghost style" />
-<Select bordered={false} options={sampleOptions} placeholder="No border" />
+<Select bordered options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Bordered (default)" />
+<Select ghost options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Ghost style" />
+<Select bordered={false} options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="No border" />
 ```
 
 ## Select States
@@ -92,8 +144,16 @@ Different visual styles and appearances
 Different component states and conditions
 
 ```tsx
-<Select disabled options={sampleOptions} placeholder="Disabled" />
-<Select value="option2" options={sampleOptions} />
+<Select disabled options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} placeholder="Disabled" />
+<Select value="option2" options={[
+  { value: "option1", label: "Option 1" },
+  { value: "option2", label: "Option 2" },
+  { value: "option3", label: "Option 3" }
+]} />
 ```
 
 ## Interactive Select

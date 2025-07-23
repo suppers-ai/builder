@@ -11,16 +11,13 @@ apiProps:
     type: "'sm' | 'md' | 'lg'"
     default: "'md'"
     description: "Size variant of the breadcrumbs"
-  - name: "separator"
-    type: "JSX.Element"
-    description: "Custom separator element between breadcrumb items"
   - name: "class"
     type: "string"
     description: "Additional CSS classes"
 usageNotes:
   - "Items with active: true are displayed as current page (no link)"
   - "Items with disabled: true are shown but not clickable"
-  - "Custom separators can be text, icons, or any JSX element"
+  - "Uses default DaisyUI breadcrumb separators (>)"
   - "Responsive behavior can be controlled with CSS classes"
   - "Perfect for deep navigation hierarchies and user orientation"
 accessibilityNotes:
@@ -71,40 +68,6 @@ Different size variants for various contexts
 ]} />
 ```
 
-## Custom Separators
-
-Different separator styles for visual variety
-
-```tsx
-<Breadcrumbs
-  items={[
-    { label: "Home", href: "/" },
-    { label: "Components", href: "/components" },
-    { label: "Breadcrumbs", active: true }
-  ]}
-  separator={<span>/</span>}
-/>
-<Breadcrumbs
-  items={[
-    { label: "Home", href: "/" },
-    { label: "Components", href: "/components" },
-    { label: "Breadcrumbs", active: true }
-  ]}
-  separator={<span>•</span>}
-/>
-<Breadcrumbs
-  items={[
-    { label: "Home", href: "/" },
-    { label: "Components", href: "/components" },
-    { label: "Breadcrumbs", active: true }
-  ]}
-  separator={
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-    </svg>
-  }
-/>
-```
 
 ## Complex Navigation
 

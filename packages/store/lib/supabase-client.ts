@@ -1,62 +1,87 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database-types.ts";
-import { loadSync } from "@std/dotenv";
 
-console.log("🔍 Store package - Current working directory:", Deno.cwd());
-const cwd = Deno.cwd();
-const envLocalPath = `${cwd}/../../.env.local`;
-const envPath = `${cwd}/../../.env`;
+// Initialize environment variables
+let supabaseUrl = "";
+let supabaseAnonKey = "";
 
-console.log("🔍 Store package - Environment variables:");
-console.log("  envLocalPath:", envLocalPath);
-console.log("  envPath:", envPath);
-
-loadSync({
-  envPath: envLocalPath,
-  defaultsPath: envPath,
-  export: true,
-});
-
-// Get environment variables
-const supabaseUrl = globalThis.Deno?.env?.get("SUPABASE_URL") || "";
-const supabaseAnonKey = globalThis.Deno?.env?.get("SUPABASE_ANON_KEY") || "";
-
-// Debug environment variables
-console.log("🔍 Store package - Supabase client initialization:");
-console.log("  SUPABASE_URL:", supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : "❌ MISSING");
-console.log(
-  "  SUPABASE_ANON_KEY:",
-  supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : "❌ MISSING",
-);
-
-// Validate required environment variables
-if (!supabaseUrl) {
-  throw new Error(`
-❌ SUPABASE_URL environment variable is required!
-
-Please make sure you have a .env.local file in packages/store/ with:
-SUPABASE_URL=https://your-project.supabase.co
-
-Current working directory: ${globalThis.Deno?.cwd?.() || "unknown"}
-  `);
+if (typeof globalThis.Deno !== "undefined") {
+  // Server-side: Environment variables should already be loaded by dev.ts
+  supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+  
+  console.log("🔍 Store package - Supabase client initialization (Server):");
+  console.log("  SUPABASE_URL:", supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : "❌ MISSING");
+  console.log("  SUPABASE_ANON_KEY:", supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : "❌ MISSING");
+} else {
+  // Browser-side: Get from global variables (injected by server)
+  supabaseUrl = (globalThis as any).SUPABASE_URL || "";
+  supabaseAnonKey = (globalThis as any).SUPABASE_ANON_KEY || "";
+  
+  console.log("🔍 Store package - Supabase client initialization (Browser):");
+  console.log("  SUPABASE_URL:", supabaseUrl ? "✓ Set" : "❌ Missing");
+  console.log("  SUPABASE_ANON_KEY:", supabaseAnonKey ? "✓ Set" : "❌ Missing");
 }
 
-if (!supabaseAnonKey) {
-  throw new Error(`
-❌ SUPABASE_ANON_KEY environment variable is required!
-
-Please make sure you have a .env.local file in packages/store/ with:
-SUPABASE_ANON_KEY=your-anon-key
-  `);
+// Validate required environment variables (only on server-side)
+if (typeof globalThis.Deno !== "undefined") {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("⚠️  Supabase environment variables not found, they should be loaded by dev.ts");
+    console.warn("  SUPABASE_URL:", supabaseUrl ? "✓ Set" : "❌ Missing");
+    console.warn("  SUPABASE_ANON_KEY:", supabaseAnonKey ? "✓ Set" : "❌ Missing");
+  } else {
+    console.log("✅ Environment variables loaded");
+  }
 }
 
-// Create Supabase client
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
+// Function to get or create Supabase client (lazy initialization)
+let _supabase: ReturnType<typeof createClient<Database>> | null = null;
+
+function getSupabaseClient() {
+  if (!_supabase) {
+    // Get latest environment variables
+    let url = supabaseUrl;
+    let key = supabaseAnonKey;
+    
+    if (typeof globalThis.Deno !== "undefined") {
+      url = Deno.env.get("SUPABASE_URL") || url;
+      key = Deno.env.get("SUPABASE_ANON_KEY") || key;
+    } else {
+      url = (globalThis as any).SUPABASE_URL || url;
+      key = (globalThis as any).SUPABASE_ANON_KEY || key;
+    }
+    
+    if (!url || !key) {
+      console.error("❌ Supabase client cannot be initialized without URL and key");
+      // Return a mock client to prevent errors
+      return null as any;
+    }
+    
+    _supabase = createClient<Database>(url, key, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+      // Disable realtime to avoid WebSocket dependencies
+      realtime: {
+        params: {
+          eventsPerSecond: 0,
+        },
+      },
+    });
+  }
+  
+  return _supabase;
+}
+
+export const supabase = new Proxy({} as ReturnType<typeof createClient<Database>>, {
+  get(target, prop) {
+    const client = getSupabaseClient();
+    if (!client) return undefined;
+    const value = (client as any)[prop];
+    return typeof value === 'function' ? value.bind(client) : value;
+  }
 });
 
 // Export types for convenience

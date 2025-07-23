@@ -21,30 +21,6 @@ export const allPages: PageComponent[] = [
     layoutUsed: "MainLayout",
     features: ["application-showcase", "search", "filters", "responsive"],
   },
-  {
-    name: "Components Page",
-    description: "Interactive component library browser and showcase",
-    category: "Main Routes",
-    tags: ["components", "library", "showcase", "interactive"],
-    path: "/components",
-    keywords: ["components", "library", "showcase", "demo"],
-    type: "route",
-    authRequired: false,
-    layoutUsed: "MainLayout",
-    features: ["component-browser", "search", "categories", "live-demos"],
-  },
-  {
-    name: "Theme Islands Demo",
-    description: "Demonstration of theme system with interactive islands",
-    category: "Demo Routes",
-    tags: ["theme", "islands", "demo", "interactive"],
-    path: "/demo/theme-islands",
-    keywords: ["theme", "islands", "demo", "showcase"],
-    type: "demo",
-    authRequired: false,
-    layoutUsed: "MainLayout",
-    features: ["theme-switching", "island-demos", "live-preview"],
-  },
 
   // Page Routes
   {

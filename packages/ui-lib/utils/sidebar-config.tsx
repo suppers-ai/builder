@@ -75,14 +75,6 @@ export const defaultUISidebarConfig: SidebarConfig = {
           name: "UI Components",
           path: "/components",
         },
-        {
-          name: "Interactive Islands",
-          path: "/islands",
-        },
-        {
-          name: "Page Templates",
-          path: "/pages",
-        },
       ],
     },
     {

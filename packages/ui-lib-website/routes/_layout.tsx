@@ -12,7 +12,7 @@ export default function Layout({ Component, url }: PageProps) {
       <HeaderLayoutIsland
         title="Suppers Software"
         currentPath={currentPath}
-        showSearch={true}
+        showSearch={false}
         showLogin={true}
         showProfile={false}
         user={undefined}

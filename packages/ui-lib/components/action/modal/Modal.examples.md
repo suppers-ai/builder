@@ -94,17 +94,17 @@ Modal containing form elements and inputs
     <label class="label">
       <span class="label-text">Username</span>
     </label>
-    <Input type="text" bordered fullWidth />
+    <Input type="text" bordered class="w-full" />
     
     <label class="label">
       <span class="label-text">Email</span>
     </label>
-    <Input type="email" bordered fullWidth />
+    <Input type="email" bordered class="w-full" />
     
     <label class="label">
       <span class="label-text">Password</span>
     </label>
-    <Input type="password" bordered fullWidth />
+    <Input type="password" bordered class="w-full" />
   </div>
   
   <div class="modal-action">

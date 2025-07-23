@@ -22,7 +22,7 @@
     "@suppers/auth-client": "../auth-client/mod.ts",
     "@suppers/ui-lib": "../ui-lib/mod.ts",
     "@suppers/shared": "../shared/mod.ts",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.3",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.8?target=deno",
     "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
     "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
     "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",

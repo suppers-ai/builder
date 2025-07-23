@@ -1,121 +1,143 @@
 ---
-title: "Code Mockup"
-description: "Terminal-style code display component for showcasing commands and code snippets"
+title: "CodeMockup"
+description: "Code editor mockup for displaying code snippets with syntax highlighting and line numbers"
 category: "Mockup"
 apiProps:
-  - name: "children"
-    type: "ComponentChildren"
-    description: "Code lines as pre elements with data-prefix attributes"
-    required: true
-  - name: "class"
+  - name: "code"
     type: "string"
-    description: "Additional CSS classes"
+    default: "'console.log('Hello World!');'"
+    description: "Code content to display"
+  - name: "language"
+    type: "'javascript' | 'typescript' | 'python' | 'html' | 'css' | 'json' | 'bash' | 'sql'"
+    default: "'javascript'"
+    description: "Programming language for syntax highlighting"
+  - name: "showLineNumbers"
+    type: "boolean"
+    default: "false"
+    description: "Whether to show line numbers"
+  - name: "variant"
+    type: "'default' | 'dark' | 'terminal'"
+    default: "'default'"
+    description: "Visual theme variant"
+  - name: "filename"
+    type: "string"
+    description: "File name/title to display at the top"
+  - name: "onMockupClick"
+    type: "() => void"
+    description: "Click handler for the mockup"
+  - name: "onCopy"
+    type: "(code: string) => void"
+    description: "Copy to clipboard handler"
 usageNotes:
-  - "Use data-prefix attribute on pre elements for line prefixes"
-  - "Support for terminal prompts ($, >), status indicators (✓, ❌, →), and line numbers"
-  - "Add text-error and text-success classes for colored output"
-  - "Perfect for documentation, tutorials, and command examples"
-  - "Use backticks and template literals for code formatting"
+  - "Perfect for documentation and code examples"
+  - "Supports multiple programming languages"
+  - "Line numbers help with code reference"
+  - "Terminal variant great for command line examples"
+  - "Filename prop adds context to code snippets"
 accessibilityNotes:
-  - "Code content should be properly structured for screen readers"
-  - "Consider providing descriptions for complex code examples"
-  - "Ensure sufficient color contrast for syntax highlighting"
+  - "Code content is properly structured for screen readers"
+  - "High contrast maintained across all variants"
+  - "Keyboard navigation supported for interactive elements"
 relatedComponents:
-  - name: "Browser Mockup"
-    path: "/components/mockup/browser-mockup"
-  - name: "Window Mockup"
-    path: "/components/mockup/window-mockup"
+  - name: "BrowserMockup"
+    path: "/components/mockup/browser"
+  - name: "PhoneMockup"
+    path: "/components/mockup/phone"
+  - name: "WindowMockup"
+    path: "/components/mockup/window"
 ---
 
 ## Basic Code Mockup
 
-Simple terminal-style code display
+Simple code snippet with default styling
 
 ```tsx
-<CodeMockup>
-  <pre data-prefix="$"><code>npm install daisyui</code></pre>
-  <pre data-prefix=">"><code>Installing...</code></pre>
-  <pre data-prefix=">"><code>Success! Installed daisyui</code></pre>
-</CodeMockup>
+<CodeMockup code="console.log('Hello World!');" />
 ```
 
-## Code Mockup with Different Prefixes
+## Code with Line Numbers
 
-Terminal commands with various status prefixes
+Code display with line numbers for reference
 
 ```tsx
-<CodeMockup>
-  <pre data-prefix="$"><code>npm create fresh@latest</code></pre>
-  <pre data-prefix=">"><code>Creating new Fresh project...</code></pre>
-  <pre data-prefix=">"><code>Installing dependencies...</code></pre>
-  <pre data-prefix="✓"><code>Project created successfully!</code></pre>
-  <pre data-prefix="→"><code>cd my-fresh-app</code></pre>
-  <pre data-prefix="$"><code>deno task start</code></pre>
-</CodeMockup>
+<CodeMockup 
+  code={`function greet(name) {
+  return \`Hello, \${name}!\`;
+}
+
+console.log(greet('World'));`}
+  showLineNumbers={true}
+  language="javascript"
+/>
 ```
 
-## Code Mockup with TypeScript
+## Code with Filename
 
-TypeScript code with line numbers
+Code mockup with file header
 
 ```tsx
-<CodeMockup>
-  <pre data-prefix="1"><code>interface User {`{`}</code></pre>
-  <pre data-prefix="2"><code>  id: number;</code></pre>
-  <pre data-prefix="3"><code>  name: string;</code></pre>
-  <pre data-prefix="4"><code>  email: string;</code></pre>
-  <pre data-prefix="5"><code>{`}`}</code></pre>
-  <pre data-prefix="6"><code></code></pre>
-  <pre data-prefix="7"><code>const user: User = {`{`}</code></pre>
-  <pre data-prefix="8"><code>  id: 1,</code></pre>
-  <pre data-prefix="9"><code>  name: "John Doe",</code></pre>
-  <pre data-prefix="10"><code>  email: "john@example.com"</code></pre>
-  <pre data-prefix="11"><code>{`}`};</code></pre>
-</CodeMockup>
+<CodeMockup 
+  filename="app.js"
+  code={`import { serve } from "https://deno.land/std/http/server.ts";
+
+serve((req) => new Response("Hello World!"), { port: 8000 });`}
+  language="javascript"
+/>
 ```
 
-## Code Mockup with Git Commands
+## Terminal Variant
 
-Git workflow commands and output
+Terminal-style code display for command line examples
 
 ```tsx
-<CodeMockup>
-  <pre data-prefix="$"><code>git init</code></pre>
-  <pre data-prefix=">"><code>Initialized empty Git repository</code></pre>
-  <pre data-prefix="$"><code>git add .</code></pre>
-  <pre data-prefix="$"><code>git commit -m "Initial commit"</code></pre>
-  <pre data-prefix=">"><code>[main (root-commit) a1b2c3d] Initial commit</code></pre>
-  <pre data-prefix=">"><code>5 files changed, 100 insertions(+)</code></pre>
-</CodeMockup>
+<CodeMockup 
+  variant="terminal"
+  code={`npm create fresh-app my-app
+cd my-app
+deno task start`}
+  language="bash"
+/>
 ```
 
-## Code Mockup with Errors
+## Dark Theme Code
 
-Error handling and success states with colored output
+Dark theme variant for better readability
 
 ```tsx
-<CodeMockup>
-  <pre data-prefix="$"><code>deno run app.ts</code></pre>
-  <pre data-prefix="❌" class="text-error"><code>error: Uncaught ReferenceError: foo is not defined</code></pre>
-  <pre data-prefix="" class="text-error"><code>    at file:///app.ts:5:13</code></pre>
-  <pre data-prefix="$"><code>deno run --allow-read app.ts</code></pre>
-  <pre data-prefix="✅" class="text-success"><code>App running successfully!</code></pre>
-</CodeMockup>
+<CodeMockup 
+  variant="dark"
+  filename="types.ts"
+  code={`interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const user: User = {
+  id: 1,
+  name: "John Doe",
+  email: "john@example.com"
+};`}
+  language="typescript"
+  showLineNumbers={true}
+/>
 ```
 
-## Code Mockup with JSON
+## Python Code Example
 
-JSON configuration file display
+Python code with syntax highlighting
 
 ```tsx
-<CodeMockup>
-  <pre data-prefix="1"><code>{`{`}</code></pre>
-  <pre data-prefix="2"><code>  "name": "my-app",</code></pre>
-  <pre data-prefix="3"><code>  "version": "1.0.0",</code></pre>
-  <pre data-prefix="4"><code>  "scripts": {`{`}</code></pre>
-  <pre data-prefix="5"><code>    "start": "deno run --allow-all main.ts",</code></pre>
-  <pre data-prefix="6"><code>    "dev": "deno run --allow-all --watch main.ts"</code></pre>
-  <pre data-prefix="7"><code>  {`}`}</code></pre>
-  <pre data-prefix="8"><code>{`}`}</code></pre>
-</CodeMockup>
+<CodeMockup 
+  filename="main.py"
+  code={`def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+for i in range(10):
+    print(f"F({i}) = {fibonacci(i)}")`}
+  language="python"
+  showLineNumbers={true}
+/>
 ```
