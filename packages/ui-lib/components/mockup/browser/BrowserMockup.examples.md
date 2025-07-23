@@ -43,7 +43,7 @@ Simple browser mockup with basic content
     </p>
     <button class="btn btn-primary">Get Started</button>
   </div>
-</BrowserMockup>
+</BrowserMockup>;
 ```
 
 ## Browser Mockup with Website Content
@@ -64,7 +64,7 @@ Browser mockup displaying website landing page content
       </div>
     </div>
   </div>
-</BrowserMockup>
+</BrowserMockup>;
 ```
 
 ## Browser Mockup with Dashboard
@@ -99,5 +99,5 @@ Browser mockup showing a dashboard interface
       </div>
     </div>
   </div>
-</BrowserMockup>
+</BrowserMockup>;
 ```

@@ -1,34 +1,34 @@
 import { supabase } from "./supabase-client.ts";
 import type { TablesInsert, TablesUpdate } from "./supabase-client.ts";
-import type { 
-  User, 
-  Application, 
-  UserAccess, 
-  ApplicationReview, 
+import type {
+  Application,
+  ApplicationReview,
+  AuthUser,
   CustomTheme,
-  UserUpdateData,
+  User,
+  UserAccess,
   UserResponse,
-  AuthUser
+  UserUpdateData,
 } from "../../../shared/utils/type-mappers.ts";
 import { TypeMappers } from "../../../shared/utils/type-mappers.ts";
 import { showFunctionDeprecationWarning } from "../../../shared/utils/deprecation-warnings.ts";
-import type { 
+import type {
   CreateApplicationData,
-  UpdateApplicationData,
+  CreateCustomThemeData,
   CreateReviewData,
   GrantAccessData,
-  CreateCustomThemeData,
-  UpdateCustomThemeData
+  UpdateApplicationData,
+  UpdateCustomThemeData,
 } from "../../../shared/types/api.ts";
 
 // Re-export types from shared package for backward compatibility
-export type { 
+export type {
   CreateApplicationData,
-  UpdateApplicationData,
+  CreateCustomThemeData,
   CreateReviewData,
   GrantAccessData,
-  CreateCustomThemeData,
-  UpdateCustomThemeData
+  UpdateApplicationData,
+  UpdateCustomThemeData,
 } from "../../../shared/types/api.ts";
 export type { UserUpdateData } from "../../../shared/utils/type-mappers.ts";
 
@@ -51,9 +51,9 @@ export { TypeMappers } from "../../../shared/utils/type-mappers.ts";
  */
 export function userToApiResponse(user: User): UserResponse {
   showFunctionDeprecationWarning(
-    'userToApiResponse',
-    'TypeMappers.userToApiResponse',
-    'packages/shared/utils/type-mappers.ts'
+    "userToApiResponse",
+    "TypeMappers.userToApiResponse",
+    "packages/shared/utils/type-mappers.ts",
   );
   return TypeMappers.userToApiResponse(user);
 }
@@ -64,9 +64,9 @@ export function userToApiResponse(user: User): UserResponse {
  */
 export function userToAuthUser(user: User): AuthUser {
   showFunctionDeprecationWarning(
-    'userToAuthUser',
-    'TypeMappers.userToAuthUser',
-    'packages/shared/utils/type-mappers.ts'
+    "userToAuthUser",
+    "TypeMappers.userToAuthUser",
+    "packages/shared/utils/type-mappers.ts",
   );
   return TypeMappers.userToAuthUser(user);
 }
@@ -206,7 +206,7 @@ export class ApiHelpers {
     };
 
     // Remove undefined values
-    Object.keys(updateData).forEach(key => {
+    Object.keys(updateData).forEach((key) => {
       if (updateData[key as keyof typeof updateData] === undefined) {
         delete updateData[key as keyof typeof updateData];
       }

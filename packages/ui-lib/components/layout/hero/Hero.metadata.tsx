@@ -16,7 +16,7 @@ export const heroMetadata: ComponentMetadata = {
         subtitle="Build amazing things with our platform"
         primaryCTA={{
           text: "Get Started",
-          onClick: () => {}
+          onClick: () => {},
         }}
         className="h-48"
       />

@@ -52,7 +52,7 @@ relatedComponents:
 Simple code snippet with default styling
 
 ```tsx
-<CodeMockup code="console.log('Hello World!');" />
+<CodeMockup code="console.log('Hello World!');" />;
 ```
 
 ## Code with Line Numbers
@@ -60,7 +60,7 @@ Simple code snippet with default styling
 Code display with line numbers for reference
 
 ```tsx
-<CodeMockup 
+<CodeMockup
   code={`function greet(name) {
   return \`Hello, \${name}!\`;
 }
@@ -68,7 +68,7 @@ Code display with line numbers for reference
 console.log(greet('World'));`}
   showLineNumbers={true}
   language="javascript"
-/>
+/>;
 ```
 
 ## Code with Filename
@@ -76,13 +76,13 @@ console.log(greet('World'));`}
 Code mockup with file header
 
 ```tsx
-<CodeMockup 
+<CodeMockup
   filename="app.js"
   code={`import { serve } from "https://deno.land/std/http/server.ts";
 
 serve((req) => new Response("Hello World!"), { port: 8000 });`}
   language="javascript"
-/>
+/>;
 ```
 
 ## Terminal Variant
@@ -90,13 +90,13 @@ serve((req) => new Response("Hello World!"), { port: 8000 });`}
 Terminal-style code display for command line examples
 
 ```tsx
-<CodeMockup 
+<CodeMockup
   variant="terminal"
   code={`npm create fresh-app my-app
 cd my-app
 deno task start`}
   language="bash"
-/>
+/>;
 ```
 
 ## Dark Theme Code
@@ -104,7 +104,7 @@ deno task start`}
 Dark theme variant for better readability
 
 ```tsx
-<CodeMockup 
+<CodeMockup
   variant="dark"
   filename="types.ts"
   code={`interface User {
@@ -120,7 +120,7 @@ const user: User = {
 };`}
   language="typescript"
   showLineNumbers={true}
-/>
+/>;
 ```
 
 ## Python Code Example
@@ -128,7 +128,7 @@ const user: User = {
 Python code with syntax highlighting
 
 ```tsx
-<CodeMockup 
+<CodeMockup
   filename="main.py"
   code={`def fibonacci(n):
     if n <= 1:
@@ -139,5 +139,5 @@ for i in range(10):
     print(f"F({i}) = {fibonacci(i)}")`}
   language="python"
   showLineNumbers={true}
-/>
+/>;
 ```

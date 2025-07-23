@@ -46,7 +46,7 @@ Simple desktop application window
       <button class="btn btn-outline">Secondary Action</button>
     </div>
   </div>
-</WindowMockup>
+</WindowMockup>;
 ```
 
 ## Window Mockup with Code Editor
@@ -69,7 +69,7 @@ Code editor interface with syntax-highlighted content
     <div class="mb-2"></div>
     <div class="text-secondary">export default App;</div>
   </div>
-</WindowMockup>
+</WindowMockup>;
 ```
 
 ## Window Mockup with Form
@@ -111,5 +111,5 @@ User registration form in a desktop application window
       </div>
     </form>
   </div>
-</WindowMockup>
+</WindowMockup>;
 ```

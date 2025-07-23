@@ -65,12 +65,18 @@ Simple dropdown menu with button trigger and list items
   trigger={<button class="btn">Click me</button>}
   content={
     <>
-      <li><a>Item 1</a></li>
-      <li><a>Item 2</a></li>
-      <li><a>Item 3</a></li>
+      <li>
+        <a>Item 1</a>
+      </li>
+      <li>
+        <a>Item 2</a>
+      </li>
+      <li>
+        <a>Item 3</a>
+      </li>
     </>
   }
-/>
+/>;
 ```
 
 ## Dropdown with Styled Button
@@ -82,15 +88,27 @@ Dropdown triggered by a primary button
   trigger={<button class="btn btn-primary">Primary Menu</button>}
   content={
     <>
-      <li><a>Dashboard</a></li>
-      <li><a>Profile</a></li>
-      <li><a>Settings</a></li>
-      <li class="disabled"><a>Disabled Item</a></li>
-      <li><hr class="my-2" /></li>
-      <li><a>Logout</a></li>
+      <li>
+        <a>Dashboard</a>
+      </li>
+      <li>
+        <a>Profile</a>
+      </li>
+      <li>
+        <a>Settings</a>
+      </li>
+      <li class="disabled">
+        <a>Disabled Item</a>
+      </li>
+      <li>
+        <hr class="my-2" />
+      </li>
+      <li>
+        <a>Logout</a>
+      </li>
     </>
   }
-/>
+/>;
 ```
 
 ## Dropdown Positions
@@ -104,34 +122,46 @@ Different dropdown positions relative to the trigger
     trigger={<button class="btn">Top</button>}
     content={
       <>
-        <li><a>Item 1</a></li>
-        <li><a>Item 2</a></li>
+        <li>
+          <a>Item 1</a>
+        </li>
+        <li>
+          <a>Item 2</a>
+        </li>
       </>
     }
   />
-  
+
   <Dropdown
     position="bottom-end"
     trigger={<button class="btn">End</button>}
     content={
       <>
-        <li><a>Item 1</a></li>
-        <li><a>Item 2</a></li>
+        <li>
+          <a>Item 1</a>
+        </li>
+        <li>
+          <a>Item 2</a>
+        </li>
       </>
     }
   />
-  
+
   <Dropdown
     position="left"
     trigger={<button class="btn">Left</button>}
     content={
       <>
-        <li><a>Item 1</a></li>
-        <li><a>Item 2</a></li>
+        <li>
+          <a>Item 1</a>
+        </li>
+        <li>
+          <a>Item 2</a>
+        </li>
       </>
     }
   />
-</div>
+</div>;
 ```
 
 ## Hover Dropdown
@@ -144,12 +174,18 @@ Dropdown that opens on hover instead of click
   trigger={<button class="btn btn-outline">Hover Me</button>}
   content={
     <>
-      <li><a>Quick Action 1</a></li>
-      <li><a>Quick Action 2</a></li>
-      <li><a>Quick Action 3</a></li>
+      <li>
+        <a>Quick Action 1</a>
+      </li>
+      <li>
+        <a>Quick Action 2</a>
+      </li>
+      <li>
+        <a>Quick Action 3</a>
+      </li>
     </>
   }
-/>
+/>;
 ```
 
 ## User Profile Dropdown
@@ -162,7 +198,10 @@ Real-world example with user profile actions
   trigger={
     <div class="btn btn-ghost btn-circle avatar">
       <div class="w-10 rounded-full">
-        <img alt="User avatar" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+        <img
+          alt="User avatar"
+          src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+        />
       </div>
     </div>
   }
@@ -171,15 +210,27 @@ Real-world example with user profile actions
       <li class="menu-title">
         <span>John Doe</span>
       </li>
-      <li><a>Profile</a></li>
-      <li><a>Settings</a></li>
-      <li><a>Billing</a></li>
-      <li><hr class="my-2" /></li>
-      <li><a>Help & Support</a></li>
-      <li><a class="text-error">Sign out</a></li>
+      <li>
+        <a>Profile</a>
+      </li>
+      <li>
+        <a>Settings</a>
+      </li>
+      <li>
+        <a>Billing</a>
+      </li>
+      <li>
+        <hr class="my-2" />
+      </li>
+      <li>
+        <a>Help & Support</a>
+      </li>
+      <li>
+        <a class="text-error">Sign out</a>
+      </li>
     </>
   }
-/>
+/>;
 ```
 
 ## Interactive Dropdown
@@ -191,15 +242,27 @@ Dropdown with event handlers for state management
   trigger={<button class="btn btn-secondary">Interactive Menu</button>}
   content={
     <>
-      <li><a>View Details</a></li>
-      <li><a>Edit Item</a></li>
-      <li><a>Share</a></li>
-      <li><hr class="my-2" /></li>
-      <li><a class="text-warning">Archive</a></li>
-      <li><a class="text-error">Delete</a></li>
+      <li>
+        <a>View Details</a>
+      </li>
+      <li>
+        <a>Edit Item</a>
+      </li>
+      <li>
+        <a>Share</a>
+      </li>
+      <li>
+        <hr class="my-2" />
+      </li>
+      <li>
+        <a class="text-warning">Archive</a>
+      </li>
+      <li>
+        <a class="text-error">Delete</a>
+      </li>
     </>
   }
   onOpen={() => console.log("Dropdown opened")}
   onClose={() => console.log("Dropdown closed")}
-/>
+/>;
 ```

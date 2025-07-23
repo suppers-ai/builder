@@ -32,7 +32,7 @@ export interface ComponentExamplesData {
 export function parseComponentExamplesMarkdown(content: string): ComponentExamplesData {
   const { attrs, body } = extractYaml(content);
   const metadata = attrs as Record<string, unknown>;
-  
+
   // Parse the frontmatter metadata
   const title = metadata.title as string;
   const description = metadata.description as string;
@@ -59,55 +59,55 @@ export function parseComponentExamplesMarkdown(content: string): ComponentExampl
  */
 function parseExamplesFromMarkdown(markdown: string): ExampleSection[] {
   const examples: ExampleSection[] = [];
-  
+
   // Split by ## headings to get sections
   const sections = markdown.split(/^## /gm).filter(Boolean);
-  
+
   for (const section of sections) {
-    const lines = section.trim().split('\n');
+    const lines = section.trim().split("\n");
     if (lines.length < 3) continue;
-    
+
     const title = lines[0].trim();
-    
+
     // Find the description (everything before the first code block)
     let descriptionLines: string[] = [];
     let codeBlockStart = -1;
-    
+
     for (let i = 1; i < lines.length; i++) {
-      if (lines[i].trim().startsWith('```')) {
+      if (lines[i].trim().startsWith("```")) {
         codeBlockStart = i;
         break;
       }
       descriptionLines.push(lines[i]);
     }
-    
-    const description = descriptionLines.join('\n').trim();
-    
+
+    const description = descriptionLines.join("\n").trim();
+
     // Extract code from the first code block
     if (codeBlockStart === -1) continue;
-    
+
     let codeBlockEnd = -1;
     for (let i = codeBlockStart + 1; i < lines.length; i++) {
-      if (lines[i].trim() === '```') {
+      if (lines[i].trim() === "```") {
         codeBlockEnd = i;
         break;
       }
     }
-    
+
     if (codeBlockEnd === -1) continue;
-    
+
     const code = lines
       .slice(codeBlockStart + 1, codeBlockEnd)
-      .join('\n')
+      .join("\n")
       .trim();
-    
+
     examples.push({
       title,
       description,
       code,
     });
   }
-  
+
   return examples;
 }
 

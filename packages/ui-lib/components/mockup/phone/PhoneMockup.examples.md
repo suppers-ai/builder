@@ -43,7 +43,7 @@ Simple mobile app mockup with centered content
       </div>
     </div>
   </PhoneMockup>
-</div>
+</div>;
 ```
 
 ## Phone Mockup with Chat App
@@ -76,7 +76,7 @@ Chat application interface with header, messages, and input
       </div>
     </div>
   </PhoneMockup>
-</div>
+</div>;
 ```
 
 ## Multiple Phone Mockups
@@ -120,5 +120,5 @@ Settings and Profile screens side by side
       </div>
     </div>
   </PhoneMockup>
-</div>
+</div>;
 ```

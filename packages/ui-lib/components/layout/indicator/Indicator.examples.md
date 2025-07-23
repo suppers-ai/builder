@@ -171,7 +171,7 @@ Navigation menu items enhanced with notification counts
       <a>⚙️ Settings</a>
     </Indicator>
   </li>
-</div>
+</div>;
 ```
 
 ## Shopping Cart Example
@@ -182,10 +182,21 @@ E-commerce cart button with item count indicator
 <Indicator content="8" color="primary" position="top-end">
   <Button variant="ghost" circle={true}>
     <div class="indicator">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6"
+        />
       </svg>
     </div>
   </Button>
-</Indicator>
+</Indicator>;
 ```

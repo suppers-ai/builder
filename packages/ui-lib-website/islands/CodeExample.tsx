@@ -5,7 +5,7 @@ import SyntaxHighlighter, { CodeFile } from "./SyntaxHighlighter.tsx";
 export interface CodeExampleProps {
   code?: string;
   files?: CodeFile[];
-  language?: 'tsx' | 'json' | 'javascript' | 'typescript' | 'css' | 'html' | 'jsx' | 'ts';
+  language?: "tsx" | "json" | "javascript" | "typescript" | "css" | "html" | "jsx" | "ts";
   title?: string;
   showCopy?: boolean;
   maxHeight?: string;
@@ -14,10 +14,10 @@ export interface CodeExampleProps {
 export default function CodeExample({
   code,
   files,
-  language = 'tsx',
+  language = "tsx",
   title,
   showCopy = true,
-  maxHeight = '400px',
+  maxHeight = "400px",
 }: CodeExampleProps) {
   // If files are provided, use the new SyntaxHighlighter component
   if (files && files.length > 0) {

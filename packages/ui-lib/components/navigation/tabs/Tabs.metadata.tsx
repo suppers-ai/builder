@@ -15,7 +15,7 @@ export const tabsMetadata: ComponentMetadata = {
         tabs={[
           { id: "tab1", label: "Overview", content: "Overview content" },
           { id: "tab2", label: "Details", content: "Details content" },
-          { id: "tab3", label: "Settings", content: "Settings content" }
+          { id: "tab3", label: "Settings", content: "Settings content" },
         ]}
         activeTab="tab1"
         bordered

@@ -75,7 +75,7 @@ Simple swap between two states
 <Swap
   on={<Eye size={24} />}
   off={<EyeOff size={24} />}
-/>
+/>;
 ```
 
 ## Rotate Animation
@@ -87,7 +87,7 @@ Swap with rotating animation effect
   rotate
   on={<Sun size={24} />}
   off={<Moon size={24} />}
-/>
+/>;
 ```
 
 ## Flip Animation
@@ -99,7 +99,7 @@ Swap with flipping animation effect
   flip
   on={<Heart size={24} className="text-red-500" />}
   off={<Heart size={24} className="text-gray-400" />}
-/>
+/>;
 ```
 
 ## Text Swap
@@ -110,7 +110,7 @@ Swap between text content
 <Swap
   on={<span class="text-green-500 font-bold">ON</span>}
   off={<span class="text-red-500 font-bold">OFF</span>}
-/>
+/>;
 ```
 
 ## Button Swap
@@ -121,6 +121,5 @@ Swap between different button states
 <Swap
   on={<button class="btn btn-primary">Save</button>}
   off={<button class="btn btn-outline">Edit</button>}
-/>
+/>;
 ```
-

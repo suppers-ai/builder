@@ -47,12 +47,14 @@ relatedComponents:
 Simple vertical menu with active and disabled states
 
 ```tsx
-<Menu items={[
-  { label: "Home", href: "/", active: true },
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
-  { label: "Contact", href: "/contact", disabled: true }
-]} />
+<Menu
+  items={[
+    { label: "Home", href: "/", active: true },
+    { label: "About", href: "/about" },
+    { label: "Services", href: "/services" },
+    { label: "Contact", href: "/contact", disabled: true },
+  ]}
+/>;
 ```
 
 ## Menu Sizes
@@ -79,12 +81,15 @@ Different size variants for various contexts
 Menu layout for top navigation bars
 
 ```tsx
-<Menu horizontal items={[
-  { label: "File", href: "#" },
-  { label: "Edit", href: "#" },
-  { label: "View", href: "#", active: true },
-  { label: "Help", href: "#" }
-]} />
+<Menu
+  horizontal
+  items={[
+    { label: "File", href: "#" },
+    { label: "Edit", href: "#" },
+    { label: "View", href: "#", active: true },
+    { label: "Help", href: "#" },
+  ]}
+/>;
 ```
 
 ## Compact Menu
@@ -92,12 +97,15 @@ Menu layout for top navigation bars
 Space-efficient menu for tight layouts
 
 ```tsx
-<Menu compact items={[
-  { label: "Home", href: "/", active: true },
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
-  { label: "Contact", href: "/contact" }
-]} />
+<Menu
+  compact
+  items={[
+    { label: "Home", href: "/", active: true },
+    { label: "About", href: "/about" },
+    { label: "Services", href: "/services" },
+    { label: "Contact", href: "/contact" },
+  ]}
+/>;
 ```
 
 ## Nested Menu
@@ -105,32 +113,34 @@ Space-efficient menu for tight layouts
 Multi-level navigation with collapsible sections
 
 ```tsx
-<Menu items={[
-  { label: "Dashboard", href: "/dashboard", active: true },
-  {
-    label: "Products",
-    children: [
-      { label: "All Products", href: "/products" },
-      { label: "New Product", href: "/products/new" },
-      { label: "Categories", href: "/products/categories" }
-    ]
-  },
-  {
-    label: "Settings",
-    children: [
-      { label: "Profile", href: "/settings/profile" },
-      { label: "Account", href: "/settings/account" },
-      {
-        label: "Security",
-        children: [
-          { label: "Password", href: "/settings/security/password" },
-          { label: "Two-Factor", href: "/settings/security/2fa" }
-        ]
-      }
-    ]
-  },
-  { label: "Logout", href: "/logout" }
-]} />
+<Menu
+  items={[
+    { label: "Dashboard", href: "/dashboard", active: true },
+    {
+      label: "Products",
+      children: [
+        { label: "All Products", href: "/products" },
+        { label: "New Product", href: "/products/new" },
+        { label: "Categories", href: "/products/categories" },
+      ],
+    },
+    {
+      label: "Settings",
+      children: [
+        { label: "Profile", href: "/settings/profile" },
+        { label: "Account", href: "/settings/account" },
+        {
+          label: "Security",
+          children: [
+            { label: "Password", href: "/settings/security/password" },
+            { label: "Two-Factor", href: "/settings/security/2fa" },
+          ],
+        },
+      ],
+    },
+    { label: "Logout", href: "/logout" },
+  ]}
+/>;
 ```
 
 ## Horizontal + Compact
@@ -138,10 +148,14 @@ Multi-level navigation with collapsible sections
 Combined layout options for specialized use cases
 
 ```tsx
-<Menu horizontal compact items={[
-  { label: "File", href: "#" },
-  { label: "Edit", href: "#" },
-  { label: "View", href: "#", active: true },
-  { label: "Help", href: "#" }
-]} />
+<Menu
+  horizontal
+  compact
+  items={[
+    { label: "File", href: "#" },
+    { label: "Edit", href: "#" },
+    { label: "View", href: "#", active: true },
+    { label: "Help", href: "#" },
+  ]}
+/>;
 ```

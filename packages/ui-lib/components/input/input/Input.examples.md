@@ -114,7 +114,7 @@ relatedComponents:
 Standard text input field
 
 ```tsx
-<Input placeholder="Enter text..." />
+<Input placeholder="Enter text..." />;
 ```
 
 ## Input Colors
@@ -132,7 +132,7 @@ Different color variants for validation states
 Different sizes from xs to lg
 
 ```tsx
-<Input size="lg" placeholder="Large input" />
+<Input size="lg" placeholder="Large input" />;
 ```
 
 ## Input Types
@@ -158,6 +158,5 @@ Form inputs with proper labels
   <label class="label">
     <span class="label-text-alt">Must be unique</span>
   </label>
-</div>
+</div>;
 ```
-

@@ -87,7 +87,7 @@ Different color variants for various use cases
 Different sizes from xs to lg
 
 ```tsx
-<Badge size="lg" color="primary">Large</Badge>
+<Badge size="lg" color="primary">Large</Badge>;
 ```
 
 ## Badge Variants
@@ -117,7 +117,7 @@ Badges containing icons and text
   <span class="flex items-center gap-1">
     <Check size={16} /> Verified
   </span>
-</Badge>
+</Badge>;
 ```
 
 ## Status Badges
@@ -129,4 +129,3 @@ Badges for showing various status states
 <Badge color="warning">Pending</Badge>
 <Badge color="error">Offline</Badge>
 ```
-

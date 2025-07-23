@@ -1,28 +1,28 @@
 /**
  * @fileoverview Deprecated type aliases for backward compatibility
  * @deprecated This file contains deprecated type aliases. Use types from packages/shared instead.
- * 
+ *
  * Migration Guide:
  * - Replace imports from this file with imports from packages/shared/types/auth.ts
  * - Update your code to use the canonical types from the shared package
  * - This file will be removed in a future version
  */
 
-import type { 
-  AuthUser as CanonicalAuthUser,
-  AuthState as CanonicalAuthState,
+import type {
+  AccessLevel as CanonicalAccessLevel,
   AuthSession as CanonicalAuthSession,
+  AuthState as CanonicalAuthState,
+  AuthUser as CanonicalAuthUser,
   UpdateUserData as CanonicalUpdateUserData,
   UserRole as CanonicalUserRole,
-  AccessLevel as CanonicalAccessLevel
 } from "../../shared/types/auth.ts";
 
 import { showPackageDeprecationWarning } from "../../shared/utils/deprecation-warnings.ts";
 
 // Show deprecation warning
 showPackageDeprecationWarning(
-  'packages/auth-client/types/deprecated.ts',
-  'packages/shared/types/auth.ts'
+  "packages/auth-client/types/deprecated.ts",
+  "packages/shared/types/auth.ts",
 );
 
 /**
@@ -30,8 +30,8 @@ showPackageDeprecationWarning(
  * @example
  * // Before
  * import type { AuthUser } from "packages/auth-client/types/deprecated.ts";
- * 
- * // After  
+ *
+ * // After
  * import type { AuthUser } from "packages/shared/types/auth.ts";
  */
 export type AuthUser = CanonicalAuthUser;
@@ -41,7 +41,7 @@ export type AuthUser = CanonicalAuthUser;
  * @example
  * // Before
  * import type { AuthState } from "packages/auth-client/types/deprecated.ts";
- * 
+ *
  * // After
  * import type { AuthState } from "packages/shared/types/auth.ts";
  */
@@ -52,7 +52,7 @@ export type AuthState = CanonicalAuthState;
  * @example
  * // Before
  * import type { AuthSession } from "packages/auth-client/types/deprecated.ts";
- * 
+ *
  * // After
  * import type { AuthSession } from "packages/shared/types/auth.ts";
  */
@@ -63,7 +63,7 @@ export type AuthSession = CanonicalAuthSession;
  * @example
  * // Before
  * import type { UpdateUserData } from "packages/auth-client/types/deprecated.ts";
- * 
+ *
  * // After
  * import type { UpdateUserData } from "packages/shared/types/auth.ts";
  */
@@ -74,7 +74,7 @@ export type UpdateUserData = CanonicalUpdateUserData;
  * @example
  * // Before
  * import type { UserRole } from "packages/auth-client/types/deprecated.ts";
- * 
+ *
  * // After
  * import type { UserRole } from "packages/shared/types/auth.ts";
  */
@@ -85,7 +85,7 @@ export type UserRole = CanonicalUserRole;
  * @example
  * // Before
  * import type { AccessLevel } from "packages/auth-client/types/deprecated.ts";
- * 
+ *
  * // After
  * import type { AccessLevel } from "packages/shared/types/auth.ts";
  */

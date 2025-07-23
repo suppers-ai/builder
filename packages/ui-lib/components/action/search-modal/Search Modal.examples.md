@@ -12,4 +12,3 @@ Full-featured search modal with keyboard navigation
 // SearchModal is typically used in header layouts
 // See HeaderLayout component for usage example
 ```
-

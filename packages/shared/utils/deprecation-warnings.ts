@@ -13,22 +13,21 @@ const shownWarnings = new Set<string>();
  */
 export function showDeprecationWarning(message: string, key?: string): void {
   // Only show warnings in development mode
-  const isDevelopment = 
-    typeof Deno !== 'undefined' || 
-    (typeof globalThis !== 'undefined' && 
-     (globalThis.location?.hostname === 'localhost' || 
-      globalThis.location?.hostname === '127.0.0.1' ||
-      globalThis.location?.port !== ''));
+  const isDevelopment = typeof Deno !== "undefined" ||
+    (typeof globalThis !== "undefined" &&
+      (globalThis.location?.hostname === "localhost" ||
+        globalThis.location?.hostname === "127.0.0.1" ||
+        globalThis.location?.port !== ""));
 
   if (!isDevelopment) return;
 
   const warningKey = key || message;
-  
+
   // Don't show the same warning multiple times
   if (shownWarnings.has(warningKey)) return;
-  
+
   shownWarnings.add(warningKey);
-  
+
   console.warn(`⚠️  DEPRECATION WARNING: ${message}`);
 }
 
@@ -39,15 +38,14 @@ export function showDeprecationWarning(message: string, key?: string): void {
  * @param packageName - The package containing the deprecated type
  */
 export function showTypeDeprecationWarning(
-  oldType: string, 
-  newLocation: string, 
-  packageName: string
+  oldType: string,
+  newLocation: string,
+  packageName: string,
 ): void {
-  const message = 
-    `Type '${oldType}' from '${packageName}' is deprecated.\n` +
+  const message = `Type '${oldType}' from '${packageName}' is deprecated.\n` +
     `Please import from '${newLocation}' instead.\n` +
     `See migration guide: https://github.com/your-org/your-repo/blob/main/MIGRATION.md`;
-  
+
   showDeprecationWarning(message, `${packageName}:${oldType}`);
 }
 
@@ -60,13 +58,12 @@ export function showTypeDeprecationWarning(
 export function showFunctionDeprecationWarning(
   oldFunction: string,
   newFunction: string,
-  newLocation: string
+  newLocation: string,
 ): void {
-  const message = 
-    `Function '${oldFunction}' is deprecated.\n` +
+  const message = `Function '${oldFunction}' is deprecated.\n` +
     `Please use '${newFunction}' from '${newLocation}' instead.\n` +
     `See migration guide: https://github.com/your-org/your-repo/blob/main/MIGRATION.md`;
-  
+
   showDeprecationWarning(message, `function:${oldFunction}`);
 }
 
@@ -77,13 +74,12 @@ export function showFunctionDeprecationWarning(
  */
 export function showPackageDeprecationWarning(
   packagePath: string,
-  newPackagePath: string
+  newPackagePath: string,
 ): void {
-  const message = 
-    `Package '${packagePath}' is deprecated.\n` +
+  const message = `Package '${packagePath}' is deprecated.\n` +
     `Please import from '${newPackagePath}' instead.\n` +
     `See migration guide: https://github.com/your-org/your-repo/blob/main/MIGRATION.md`;
-  
+
   showDeprecationWarning(message, `package:${packagePath}`);
 }
 

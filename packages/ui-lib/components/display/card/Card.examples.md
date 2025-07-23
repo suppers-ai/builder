@@ -113,7 +113,7 @@ Simple card with title and content
 ```tsx
 <Card title="Card Title">
   <p>This is a basic card with some content.</p>
-</Card>
+</Card>;
 ```
 
 ## Card with Image
@@ -127,7 +127,7 @@ Card featuring an image at the top
   title="Shoes!"
 >
   <p>If a dog chews shoes whose shoes does he choose?</p>
-</Card>
+</Card>;
 ```
 
 ## Card with Actions
@@ -145,7 +145,7 @@ Card with action buttons at the bottom
   }
 >
   <p>A great product with amazing features.</p>
-</Card>
+</Card>;
 ```
 
 ## Card Variants
@@ -155,7 +155,7 @@ Different card styles and layouts
 ```tsx
 <Card compact title="Compact Card">
   <p>This is a compact card with less padding.</p>
-</Card>
+</Card>;
 ```
 
 ## Side Layout Card
@@ -169,6 +169,5 @@ Horizontal card layout with side image
   title="Side Card"
 >
   <p>This card uses a horizontal layout with the image on the side.</p>
-</Card>
+</Card>;
 ```
-

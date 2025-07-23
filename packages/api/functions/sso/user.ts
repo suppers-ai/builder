@@ -83,10 +83,10 @@ serve(async (req) => {
     try {
       // Convert Supabase user to canonical database user format
       const canonicalUser = TypeMappers.supabaseUserToUser(user, userData || undefined);
-      
+
       // Convert to API response format using type mapper
       const response = TypeMappers.userToApiResponse(canonicalUser);
-      
+
       if (!response) {
         throw new Error("Failed to convert user to API response format");
       }
@@ -100,7 +100,7 @@ serve(async (req) => {
       });
     } catch (typeConversionError) {
       console.error("Type conversion error:", typeConversionError);
-      
+
       // Fallback: try safe conversion
       const safeResponse = TypeMappers.safeUserToApiResponse({
         id: user.id,
@@ -109,7 +109,7 @@ serve(async (req) => {
         last_name: userData?.last_name || user.user_metadata?.last_name,
         display_name: userData?.display_name || user.user_metadata?.display_name,
         avatar_url: userData?.avatar_url || user.user_metadata?.avatar_url,
-        role: userData?.role || 'user',
+        role: userData?.role || "user",
         created_at: userData?.created_at || user.created_at,
         updated_at: userData?.updated_at || user.updated_at || user.created_at,
       });

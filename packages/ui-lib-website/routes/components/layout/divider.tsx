@@ -5,5 +5,5 @@ export default createComponentRoute({
   component: Divider,
   componentName: "Divider",
   category: "layout",
-  directoryName: "divider"
+  directoryName: "divider",
 });

@@ -91,9 +91,9 @@ export default function SidebarMenuPage() {
             <div>
               <h3 class="text-lg font-semibold mb-2">Bordered Style</h3>
               <div class="bg-base-200 p-4 rounded-lg">
-                <Menu 
-                  items={menuWithIcons.slice(0, 4)} 
-                  orientation="vertical" 
+                <Menu
+                  items={menuWithIcons.slice(0, 4)}
+                  orientation="vertical"
                   variant="bordered"
                 />
               </div>
@@ -101,9 +101,9 @@ export default function SidebarMenuPage() {
             <div>
               <h3 class="text-lg font-semibold mb-2">Rounded Style</h3>
               <div class="bg-base-200 p-4 rounded-lg">
-                <Menu 
-                  items={menuWithIcons.slice(0, 4)} 
-                  orientation="vertical" 
+                <Menu
+                  items={menuWithIcons.slice(0, 4)}
+                  orientation="vertical"
                   variant="rounded"
                 />
               </div>
@@ -117,28 +117,28 @@ export default function SidebarMenuPage() {
             <div>
               <h3 class="text-lg font-semibold mb-2">With Active Item</h3>
               <div class="bg-base-200 p-4 rounded-lg">
-                <Menu 
+                <Menu
                   items={[
                     { label: "Dashboard", href: "/dashboard", icon: "📊" },
                     { label: "Projects", href: "/projects", icon: "📁", active: true },
                     { label: "Team", href: "/team", icon: "👥" },
                     { label: "Settings", href: "/settings", icon: "⚙️" },
-                  ]} 
-                  orientation="vertical" 
+                  ]}
+                  orientation="vertical"
                 />
               </div>
             </div>
             <div>
               <h3 class="text-lg font-semibold mb-2">With Disabled Items</h3>
               <div class="bg-base-200 p-4 rounded-lg">
-                <Menu 
+                <Menu
                   items={[
                     { label: "Dashboard", href: "/dashboard", icon: "📊" },
                     { label: "Projects", href: "/projects", icon: "📁" },
                     { label: "Team", href: "/team", icon: "👥", disabled: true },
                     { label: "Settings", href: "/settings", icon: "⚙️" },
-                  ]} 
-                  orientation="vertical" 
+                  ]}
+                  orientation="vertical"
                 />
               </div>
             </div>
@@ -156,7 +156,7 @@ export default function SidebarMenuPage() {
                     <div class="mb-4">
                       <h4 class="font-bold text-lg">Admin Panel</h4>
                     </div>
-                    <Menu 
+                    <Menu
                       items={[
                         { label: "Dashboard", href: "/admin", icon: "📊", active: true },
                         { label: "Users", href: "/admin/users", icon: "👥", badge: "1,234" },
@@ -164,8 +164,8 @@ export default function SidebarMenuPage() {
                         { label: "Analytics", href: "/admin/analytics", icon: "📈" },
                         { label: "Settings", href: "/admin/settings", icon: "⚙️" },
                         { label: "Help", href: "/admin/help", icon: "❓" },
-                      ]} 
-                      orientation="vertical" 
+                      ]}
+                      orientation="vertical"
                     />
                   </div>
                   <div class="flex-1 p-6">
@@ -184,23 +184,23 @@ export default function SidebarMenuPage() {
                     <div class="mb-4">
                       <h4 class="font-bold text-lg">Store Manager</h4>
                     </div>
-                    <Menu 
+                    <Menu
                       items={[
                         { label: "Orders", href: "/orders", icon: "🛒", badge: "5" },
-                        { 
-                          label: "Products", 
+                        {
+                          label: "Products",
                           icon: "📦",
                           children: [
                             { label: "All Products", href: "/products" },
                             { label: "Categories", href: "/products/categories" },
                             { label: "Inventory", href: "/products/inventory" },
-                          ]
+                          ],
                         },
                         { label: "Customers", href: "/customers", icon: "👤" },
                         { label: "Reports", href: "/reports", icon: "📊" },
                         { label: "Settings", href: "/settings", icon: "⚙️" },
-                      ]} 
-                      orientation="vertical" 
+                      ]}
+                      orientation="vertical"
                     />
                   </div>
                   <div class="flex-1 p-6">

@@ -15,7 +15,7 @@ export const breadcrumbsMetadata: ComponentMetadata = {
         { label: "Home", href: "/" },
         { label: "Products", href: "/products" },
         { label: "Laptops", href: "/products/laptops" },
-        { label: "MacBook Pro", active: true }
+        { label: "MacBook Pro", active: true },
       ]}
     />
   ),

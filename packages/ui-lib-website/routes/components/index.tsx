@@ -4,10 +4,10 @@ import ComponentsFilterInteractive from "../../islands/ComponentsFilter.tsx";
 
 // Import metadata using the new organized structure
 import {
-  flatComponentsMetadata,
   actionComponentsMetadata,
   displayComponentsMetadata,
   feedbackComponentsMetadata,
+  flatComponentsMetadata,
   inputComponentsMetadata,
   layoutComponentsMetadata,
   mockupComponentsMetadata,

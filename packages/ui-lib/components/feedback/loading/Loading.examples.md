@@ -76,7 +76,7 @@ Different loading animation styles
 Different sizes from xs to xl
 
 ```tsx
-<Loading size="xl" type="spinner" />
+<Loading size="xl" type="spinner" />;
 ```
 
 ## Loading with Text
@@ -87,7 +87,7 @@ Loading indicators with descriptive text
 <div class="flex items-center gap-2">
   <Loading size="sm" />
   <span>Loading...</span>
-</div>
+</div>;
 ```
 
 ## Loading States
@@ -101,6 +101,5 @@ Loading in different contexts and layouts
     <h2 class="card-title">Loading Content</h2>
     <p>Please wait while we fetch your data...</p>
   </div>
-</div>
+</div>;
 ```
-

@@ -14,9 +14,15 @@ export const drawerMetadata: ComponentMetadata = {
       <Drawer
         sidebarContent={
           <ul class="menu p-4 w-48 bg-base-200">
-            <li><a>Home</a></li>
-            <li><a>About</a></li>
-            <li><a>Contact</a></li>
+            <li>
+              <a>Home</a>
+            </li>
+            <li>
+              <a>About</a>
+            </li>
+            <li>
+              <a>Contact</a>
+            </li>
           </ul>
         }
         open

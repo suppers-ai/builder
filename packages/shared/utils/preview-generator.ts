@@ -10,7 +10,7 @@ export interface PreviewConfig {
 }
 
 export interface PreviewSpec {
-  type: 'buttons' | 'components' | 'code' | 'error';
+  type: "buttons" | "components" | "code" | "error";
   wrapperClass?: string;
   previews?: Array<{
     title: string;
@@ -24,7 +24,7 @@ export interface PreviewSpec {
       props?: Record<string, any>;
       children?: string;
     }>;
-    type?: 'buttons' | 'components' | 'code';
+    type?: "buttons" | "components" | "code";
     showCode?: boolean;
   }>;
   code?: string;
@@ -43,7 +43,7 @@ interface PreviewData {
     props?: Record<string, any>;
     children?: string;
   }>;
-  type?: 'buttons' | 'components' | 'code';
+  type?: "buttons" | "components" | "code";
   showCode?: boolean;
 }
 
@@ -91,12 +91,12 @@ async function loadComponentPreviewData(componentName: string): Promise<PreviewD
   try {
     const content = await Deno.readTextFile(filePath);
     const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-    
+
     if (!frontmatterMatch) return [];
-    
+
     const frontmatter = parseYaml(frontmatterMatch[1]) as any;
     const previewData = frontmatter.previewData || [];
-    
+
     previewCache.set(componentName, previewData);
     return previewData;
   } catch (error) {
@@ -131,24 +131,24 @@ async function loadComponentExamples(componentName: string): Promise<ComponentEx
  */
 function extractExamplesFromMarkdown(content: string): ComponentExample[] {
   const examples: ComponentExample[] = [];
-  
+
   // Remove frontmatter
-  const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, '');
-  
+  const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, "");
+
   // Match all sections with ## headers and code blocks
   const sectionRegex = /## ([^\n]+)\n\n([^#]*?)```tsx\n([\s\S]*?)```/g;
   let match;
-  
+
   while ((match = sectionRegex.exec(contentWithoutFrontmatter)) !== null) {
     const title = match[1].trim();
     const description = match[2].trim();
     const code = match[3].trim();
-    
+
     if (code) {
       examples.push({ title, description, code });
     }
   }
-  
+
   return examples;
 }
 
@@ -159,19 +159,19 @@ function extractExamplesFromMarkdown(content: string): ComponentExample[] {
 export function generatePreview(
   code: string,
   imports: Record<string, any> = {},
-  config: PreviewConfig = {}
+  config: PreviewConfig = {},
 ): PreviewSpec {
   const { wrapperClass = "flex flex-wrap gap-4" } = config;
 
   try {
     return {
-      type: 'code',
+      type: "code",
       code,
       wrapperClass,
     };
   } catch (error) {
     return {
-      type: 'error',
+      type: "error",
       error: `Failed to generate preview: ${error.message}`,
     };
   }
@@ -184,19 +184,19 @@ export function generatePreview(
 export function createComponentPreviewGenerator(
   componentName: string,
   component: any,
-  config: PreviewConfig = {}
+  config: PreviewConfig = {},
 ) {
   return async (code: string): Promise<PreviewSpec> => {
     const { wrapperClass = "flex flex-wrap gap-4" } = config;
-    
+
     try {
       const previewData = await loadComponentPreviewData(componentName);
-      
+
       if (previewData.length > 0) {
         // Determine the primary type based on the first preview
-        const primaryType = previewData[0]?.type || 
-          (previewData[0]?.buttons ? 'buttons' : 'components');
-        
+        const primaryType = previewData[0]?.type ||
+          (previewData[0]?.buttons ? "buttons" : "components");
+
         return {
           type: primaryType,
           wrapperClass,
@@ -205,14 +205,14 @@ export function createComponentPreviewGenerator(
       } else {
         // Fallback to code display if no preview data found
         return {
-          type: 'code',
+          type: "code",
           code,
           wrapperClass,
         };
       }
     } catch (error) {
       return {
-        type: 'error',
+        type: "error",
         error: `Failed to load preview data for ${componentName}: ${error.message}`,
       };
     }
@@ -241,7 +241,7 @@ export async function getComponentExamples(componentName: string): Promise<Compo
 export async function generatePreviewFromCode(
   componentName: string,
   code: string,
-  config: PreviewConfig = {}
+  config: PreviewConfig = {},
 ): Promise<PreviewSpec> {
   const generator = createComponentPreviewGenerator(componentName, null, config);
   return await generator(code);

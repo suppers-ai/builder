@@ -5,5 +5,5 @@ export default createComponentRoute({
   component: Breadcrumbs,
   componentName: "Breadcrumbs",
   category: "navigation",
-  directoryName: "breadcrumbs"
+  directoryName: "breadcrumbs",
 });

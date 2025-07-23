@@ -9,15 +9,18 @@ if (typeof globalThis.Deno !== "undefined") {
   // Server-side: Environment variables should already be loaded by dev.ts
   supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
   supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-  
+
   console.log("🔍 Store package - Supabase client initialization (Server):");
   console.log("  SUPABASE_URL:", supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : "❌ MISSING");
-  console.log("  SUPABASE_ANON_KEY:", supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : "❌ MISSING");
+  console.log(
+    "  SUPABASE_ANON_KEY:",
+    supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : "❌ MISSING",
+  );
 } else {
   // Browser-side: Get from global variables (injected by server)
   supabaseUrl = (globalThis as any).SUPABASE_URL || "";
   supabaseAnonKey = (globalThis as any).SUPABASE_ANON_KEY || "";
-  
+
   console.log("🔍 Store package - Supabase client initialization (Browser):");
   console.log("  SUPABASE_URL:", supabaseUrl ? "✓ Set" : "❌ Missing");
   console.log("  SUPABASE_ANON_KEY:", supabaseAnonKey ? "✓ Set" : "❌ Missing");
@@ -42,7 +45,7 @@ function getSupabaseClient() {
     // Get latest environment variables
     let url = supabaseUrl;
     let key = supabaseAnonKey;
-    
+
     if (typeof globalThis.Deno !== "undefined") {
       url = Deno.env.get("SUPABASE_URL") || url;
       key = Deno.env.get("SUPABASE_ANON_KEY") || key;
@@ -50,13 +53,13 @@ function getSupabaseClient() {
       url = (globalThis as any).SUPABASE_URL || url;
       key = (globalThis as any).SUPABASE_ANON_KEY || key;
     }
-    
+
     if (!url || !key) {
       console.error("❌ Supabase client cannot be initialized without URL and key");
       // Return a mock client to prevent errors
       return null as any;
     }
-    
+
     _supabase = createClient<Database>(url, key, {
       auth: {
         autoRefreshToken: true,
@@ -71,7 +74,7 @@ function getSupabaseClient() {
       },
     });
   }
-  
+
   return _supabase;
 }
 
@@ -80,8 +83,8 @@ export const supabase = new Proxy({} as ReturnType<typeof createClient<Database>
     const client = getSupabaseClient();
     if (!client) return undefined;
     const value = (client as any)[prop];
-    return typeof value === 'function' ? value.bind(client) : value;
-  }
+    return typeof value === "function" ? value.bind(client) : value;
+  },
 });
 
 // Export types for convenience

@@ -249,11 +249,11 @@ export { windowMetadata } from "./mockup/window/Window.metadata.tsx";
 
 // Export organized metadata collections
 export {
-  allComponentsMetadata,
-  flatComponentsMetadata,
   actionComponentsMetadata,
+  allComponentsMetadata,
   displayComponentsMetadata,
   feedbackComponentsMetadata,
+  flatComponentsMetadata,
   inputComponentsMetadata,
   layoutComponentsMetadata,
   mockupComponentsMetadata,

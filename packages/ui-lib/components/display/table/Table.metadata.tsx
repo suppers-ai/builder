@@ -15,11 +15,11 @@ export const tableMetadata: ComponentMetadata = {
         columns={[
           { key: "name", title: "Name" },
           { key: "role", title: "Role" },
-          { key: "status", title: "Status" }
+          { key: "status", title: "Status" },
         ]}
         data={[
           { name: "John Doe", role: "Admin", status: "Active" },
-          { name: "Jane Smith", role: "User", status: "Active" }
+          { name: "Jane Smith", role: "User", status: "Active" },
         ]}
         zebra
         compact

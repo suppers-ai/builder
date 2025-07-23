@@ -58,7 +58,7 @@ Different text alignment options
 Vertical separators for horizontal layouts
 
 ```tsx
-<Divider vertical />
+<Divider vertical />;
 ```
 
 ## Login Form Example
@@ -72,7 +72,7 @@ Real-world usage in authentication forms
   <button class="btn btn-primary w-full">Sign In</button>
   <Divider text="OR" />
   <button class="btn btn-outline w-full">Sign Up</button>
-</div>
+</div>;
 ```
 
 ## Content Sections
@@ -85,7 +85,7 @@ Separating feature sections with responsive behavior
   <Divider vertical class="hidden md:block" />
   <Divider class="md:hidden" />
   <div class="p-4">Section 2</div>
-</div>
+</div>;
 ```
 
 ## Timeline Example
@@ -102,7 +102,7 @@ Using vertical dividers in timeline layouts
     <h4 class="font-semibold">Event Title</h4>
     <p class="text-sm opacity-70">Event description</p>
   </div>
-</div>
+</div>;
 ```
 
 ## Pricing Table
@@ -121,5 +121,5 @@ Dividers in pricing cards with special styling
       <li>Feature 2</li>
     </ul>
   </div>
-</div>
+</div>;
 ```

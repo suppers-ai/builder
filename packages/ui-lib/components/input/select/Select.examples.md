@@ -166,9 +166,9 @@ Select with change handlers for form integration
     { value: "apple", label: "Apple" },
     { value: "banana", label: "Banana" },
     { value: "orange", label: "Orange" },
-    { value: "grape", label: "Grape", disabled: true }
+    { value: "grape", label: "Grape", disabled: true },
   ]}
   placeholder="Choose a fruit"
   onChange={(value) => console.log("Selected fruit:", value)}
-/>
+/>;
 ```

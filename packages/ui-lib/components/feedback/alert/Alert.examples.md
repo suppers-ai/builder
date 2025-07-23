@@ -63,7 +63,7 @@ Simple alert with text content
 ```tsx
 <Alert>
   <span>Default alert message</span>
-</Alert>
+</Alert>;
 ```
 
 ## Alert Colors
@@ -74,7 +74,7 @@ Different alert types for various messages
 <Alert color="success">
   <CheckCircle size={20} />
   <span>Success! Your changes have been saved.</span>
-</Alert>
+</Alert>;
 ```
 
 ## Alert with Actions
@@ -89,7 +89,7 @@ Alerts containing action buttons
     <button class="btn btn-sm">Dismiss</button>
     <button class="btn btn-sm btn-primary">Extend Session</button>
   </div>
-</Alert>
+</Alert>;
 ```
 
 ## Alert Variants
@@ -103,7 +103,7 @@ Different visual styles and layouts
     <h3 class="font-bold">Success!</h3>
     <div class="text-xs">Your account has been created successfully.</div>
   </div>
-</Alert>
+</Alert>;
 ```
 
 ## Compact Alerts
@@ -114,6 +114,5 @@ Smaller alerts for inline messages
 <Alert color="info" class="py-2">
   <Info size={16} />
   <span class="text-sm">Compact info message</span>
-</Alert>
+</Alert>;
 ```
-

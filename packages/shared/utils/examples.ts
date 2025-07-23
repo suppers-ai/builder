@@ -3,8 +3,12 @@
  * Handles loading and processing of component example markdown files
  */
 
-import { loadComponentExamples, type ComponentExamplesData, type ExampleSection } from "./markdown.ts";
-import { join, dirname } from "jsr:@std/path@^1.0.8";
+import {
+  type ComponentExamplesData,
+  type ExampleSection,
+  loadComponentExamples,
+} from "./markdown.ts";
+import { dirname, join } from "jsr:@std/path@^1.0.8";
 
 export interface ProcessedExample {
   title: string;
@@ -37,15 +41,15 @@ export async function loadComponentPageData(componentPath: string): Promise<Comp
   const componentDir = dirname(componentPath);
   const componentName = extractComponentName(componentPath);
   const examplesPath = join(componentDir, `${componentName}.examples.md`);
-  
+
   try {
     const examplesData = await loadComponentExamples(examplesPath);
-    
+
     return {
       title: examplesData.title,
       description: examplesData.description,
       category: examplesData.category,
-      examples: examplesData.examples.map(example => ({
+      examples: examplesData.examples.map((example) => ({
         title: example.title,
         description: example.description,
         code: example.code,
@@ -68,7 +72,7 @@ export async function hasComponentExamples(componentPath: string): Promise<boole
   const componentDir = dirname(componentPath);
   const componentName = extractComponentName(componentPath);
   const examplesPath = join(componentDir, `${componentName}.examples.md`);
-  
+
   try {
     await Deno.stat(examplesPath);
     return true;
@@ -94,8 +98,8 @@ export function getComponentExamplesPath(componentPath: string): string {
  * @returns Component name like "Button"
  */
 function extractComponentName(filePath: string): string {
-  const basename = filePath.split('/').pop() || '';
-  const nameWithoutExt = basename.split('.')[0];
+  const basename = filePath.split("/").pop() || "";
+  const nameWithoutExt = basename.split(".")[0];
   return nameWithoutExt;
 }
 
@@ -112,17 +116,17 @@ const examplesCache = new Map<string, ComponentPageData>();
  */
 export async function loadComponentPageDataCached(
   componentPath: string,
-  useCache = true
+  useCache = true,
 ): Promise<ComponentPageData> {
   const cacheKey = componentPath;
-  
+
   if (useCache && examplesCache.has(cacheKey)) {
     return examplesCache.get(cacheKey)!;
   }
-  
+
   const data = await loadComponentPageData(componentPath);
   examplesCache.set(cacheKey, data);
-  
+
   return data;
 }
 

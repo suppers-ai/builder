@@ -1,11 +1,5 @@
-import {
-  Badge,
-  Button,
-  ComponentPreviewCard,
-  Avatar,
-  Toggle,
-} from "@suppers/ui-lib";
-import { useState, useEffect } from "preact/hooks";
+import { Avatar, Badge, Button, ComponentPreviewCard, Toggle } from "@suppers/ui-lib";
+import { useEffect, useState } from "preact/hooks";
 import { getComponentPreviewData } from "@suppers/shared/utils/preview-generator.ts";
 
 interface ComponentMeta {
@@ -59,7 +53,7 @@ function ComponentPreview({ componentName }: { componentName: string }) {
 
   // Render first preview from examples.md
   const firstPreview = previewData[0];
-  
+
   if (firstPreview.buttons) {
     return (
       <div class="flex gap-2 flex-wrap">
@@ -71,7 +65,7 @@ function ComponentPreview({ componentName }: { componentName: string }) {
       </div>
     );
   }
-  
+
   if (firstPreview.components) {
     return (
       <div class="flex gap-2 flex-wrap">
@@ -87,7 +81,7 @@ function ComponentPreview({ componentName }: { componentName: string }) {
       </div>
     );
   }
-  
+
   return <div class="text-xs opacity-50">Preview available</div>;
 }
 
@@ -128,7 +122,9 @@ function getHardcodedPreview(componentName: string) {
   }
 }
 
-export default function ComponentsFilterInteractive({ components, categories, initialCategory = "All" }: ComponentsFilterProps) {
+export default function ComponentsFilterInteractive(
+  { components, categories, initialCategory = "All" }: ComponentsFilterProps,
+) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
   // Filter components based on selected category

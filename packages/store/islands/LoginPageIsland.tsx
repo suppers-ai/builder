@@ -2,7 +2,16 @@ import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import type { User } from "@supabase/supabase-js";
-import { Input, EmailInput, PasswordInput, Button, Card, Alert, Loading, Toast } from "@suppers/ui-lib";
+import {
+  Alert,
+  Button,
+  Card,
+  EmailInput,
+  Input,
+  Loading,
+  PasswordInput,
+  Toast,
+} from "@suppers/ui-lib";
 
 // Signals for reactive state
 const userSignal = signal<User | null>(null);
@@ -209,7 +218,10 @@ export default function LoginPageIsland({
               /* Forgot Password Form */
               <form onSubmit={handleForgotPassword} className="space-y-6">
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-base-content mb-1">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-base-content mb-1"
+                  >
                     Email address
                   </label>
                   <EmailInput
@@ -289,7 +301,10 @@ export default function LoginPageIsland({
                 )}
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-base-content mb-1">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-base-content mb-1"
+                  >
                     Email address
                   </label>
                   <EmailInput

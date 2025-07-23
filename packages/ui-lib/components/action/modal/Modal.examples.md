@@ -91,14 +91,14 @@ Simple modal dialog with title and content
 ```tsx
 <Modal open={true} title="Modal Title">
   <p class="py-4">
-    This is a basic modal dialog. It contains some content and demonstrates
-    the default modal styling and layout.
+    This is a basic modal dialog. It contains some content and demonstrates the default modal
+    styling and layout.
   </p>
   <div class="modal-action">
     <Button>Close</Button>
     <Button color="primary">Save</Button>
   </div>
-</Modal>
+</Modal>;
 ```
 
 ## Modal with Form
@@ -112,23 +112,23 @@ Modal containing form elements and inputs
       <span class="label-text">Username</span>
     </label>
     <Input type="text" bordered class="w-full" />
-    
+
     <label class="label">
       <span class="label-text">Email</span>
     </label>
     <Input type="email" bordered class="w-full" />
-    
+
     <label class="label">
       <span class="label-text">Password</span>
     </label>
     <Input type="password" bordered class="w-full" />
   </div>
-  
+
   <div class="modal-action">
     <Button>Cancel</Button>
     <Button color="primary">Create Account</Button>
   </div>
-</Modal>
+</Modal>;
 ```
 
 ## Confirmation Modal
@@ -138,22 +138,32 @@ Modal for dangerous actions requiring confirmation
 ```tsx
 <Modal open={true} title="Confirm Deletion">
   <div class="alert alert-warning">
-    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="stroke-current shrink-0 h-6 w-6"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z"
+      />
     </svg>
     <span>Warning: This action cannot be undone!</span>
   </div>
-  
+
   <p class="py-4">
-    Are you sure you want to delete this item? This action is permanent and cannot be reversed.
-    All associated data will be permanently removed.
+    Are you sure you want to delete this item? This action is permanent and cannot be reversed. All
+    associated data will be permanently removed.
   </p>
-  
+
   <div class="modal-action">
     <Button>Cancel</Button>
     <Button color="error">Delete</Button>
   </div>
-</Modal>
+</Modal>;
 ```
 
 ## Wide Modal
@@ -177,22 +187,25 @@ Responsive modal that adapts to content width
           <td>John Doe</td>
           <td>john@example.com</td>
           <td>Admin</td>
-          <td><Badge color="success">Active</Badge></td>
+          <td>
+            <Badge color="success">Active</Badge>
+          </td>
         </tr>
         <tr>
           <td>Jane Smith</td>
           <td>jane@example.com</td>
           <td>User</td>
-          <td><Badge color="warning">Pending</Badge></td>
+          <td>
+            <Badge color="warning">Pending</Badge>
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
-  
+
   <div class="modal-action">
     <Button>Close</Button>
     <Button color="primary">Export</Button>
   </div>
-</Modal>
+</Modal>;
 ```
-

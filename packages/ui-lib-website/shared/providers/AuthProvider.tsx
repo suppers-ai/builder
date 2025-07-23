@@ -49,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const currentUser = await AuthHelpers.getCurrentUser();
 
         setSession(currentSession);
-        
+
         if (currentUser) {
           const userData = await ApiHelpers.getUser(currentUser.id);
           const authUser = TypeMappers.supabaseUserToAuthUser(currentUser, userData || undefined);
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             avatar_url: session.user.user_metadata?.avatar_url || null,
           });
         }
-        
+
         // Convert Supabase user to our AuthUser format
         const authUser = TypeMappers.supabaseUserToAuthUser(session.user, userData || undefined);
         setUser(authUser);

@@ -147,10 +147,10 @@ Different button states and interactions
 Client-side interactive buttons with event handlers
 
 ```tsx
-<Button 
-  color="primary" 
-  onClick={() => alert('Clicked!')}
+<Button
+  color="primary"
+  onClick={() => alert("Clicked!")}
 >
   Click Me
-</Button>
+</Button>;
 ```

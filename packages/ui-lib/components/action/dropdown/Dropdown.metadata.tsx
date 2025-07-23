@@ -14,9 +14,15 @@ export const dropdownMetadata: ComponentMetadata = {
       trigger={<button class="btn btn-primary">Open Menu</button>}
       content={
         <>
-          <li><a>Item 1</a></li>
-          <li><a>Item 2</a></li>
-          <li><a>Item 3</a></li>
+          <li>
+            <a>Item 1</a>
+          </li>
+          <li>
+            <a>Item 2</a>
+          </li>
+          <li>
+            <a>Item 3</a>
+          </li>
         </>
       }
     />

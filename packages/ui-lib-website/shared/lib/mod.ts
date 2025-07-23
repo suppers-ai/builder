@@ -11,12 +11,7 @@ export type { Database, Tables, TablesInsert, TablesUpdate } from "./supabase-cl
 
 // Authentication helpers
 export { AuthHelpers } from "./auth-helpers.ts";
-export type {
-  ResetPasswordData,
-  SignInData,
-  SignUpData,
-  UpdateUserData,
-} from "./auth-helpers.ts";
+export type { ResetPasswordData, SignInData, SignUpData, UpdateUserData } from "./auth-helpers.ts";
 export type { AuthState } from "../../../shared/types/auth.ts";
 
 // API helpers

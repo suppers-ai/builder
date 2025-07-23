@@ -90,7 +90,7 @@ Different color variants
 Different sizes from xs to lg
 
 ```tsx
-<Checkbox size="lg" checked color="primary" />
+<Checkbox size="lg" checked color="primary" />;
 ```
 
 ## Checkbox with Labels
@@ -101,7 +101,7 @@ Checkboxes with accompanying text labels
 <label class="label cursor-pointer">
   <span class="label-text">Remember me</span>
   <Checkbox checked />
-</label>
+</label>;
 ```
 
 ## Form Checkbox Groups
@@ -114,6 +114,5 @@ Multiple checkboxes for form selections
     <span class="label-text">JavaScript</span>
     <Checkbox color="primary" checked />
   </label>
-</div>
+</div>;
 ```
-

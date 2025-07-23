@@ -5,25 +5,29 @@
 
 import type { ComponentChildren } from "preact";
 import type { PageProps } from "fresh";
-import { loadComponentPageDataCached, createComponentPreviewGenerator, type PreviewSpec } from "@suppers/shared";
+import {
+  createComponentPreviewGenerator,
+  loadComponentPageDataCached,
+  type PreviewSpec,
+} from "@suppers/shared";
 import { join } from "jsr:@std/path@^1.0.8";
 
 export interface ComponentRouteConfig {
   /** Component name (e.g., "Button") */
   componentName: string;
-  
+
   /** Component category (e.g., "action", "display") */
   category: string;
-  
+
   /** Static component for server-side rendering */
   StaticComponent: any;
-  
+
   /** Interactive component for islands (optional) */
   InteractiveComponent?: any;
-  
+
   /** Custom preview renderer (optional) */
   customPreviewRenderer?: (previewSpec: PreviewSpec, components: any) => ComponentChildren;
-  
+
   /** Page title suffix */
   titleSuffix?: string;
 }
@@ -53,21 +57,21 @@ export function createComponentRoute(config: ComponentRouteConfig) {
     if (category === "mockup") {
       directoryName = componentName.toLowerCase().replace("mockup", "");
     }
-    
+
     const componentPath = join(
       Deno.cwd(),
-      `../ui-lib/components/${category}/${directoryName}/${componentName}.tsx`
+      `../ui-lib/components/${category}/${directoryName}/${componentName}.tsx`,
     );
-    
+
     const pageData = await loadComponentPageDataCached(componentPath);
 
     // Create automatic preview generator
     const generatePreviewSpec = createComponentPreviewGenerator(componentName, StaticComponent);
 
     // Generate preview components for each example using the code from markdown
-    const examples = pageData.examples.map(example => {
+    const examples = pageData.examples.map((example) => {
       const previewSpec = generatePreviewSpec(example.code);
-      
+
       // Use custom preview renderer if provided
       if (customPreviewRenderer) {
         return {
@@ -113,19 +117,19 @@ export function createComponentRoute(config: ComponentRouteConfig) {
  */
 function renderPreview(
   previewSpec: PreviewSpec,
-  components: { Static: any; Interactive?: any; componentName: string }
+  components: { Static: any; Interactive?: any; componentName: string },
 ): ComponentChildren {
   const { Static, Interactive, componentName } = components;
 
-  if (previewSpec.type === 'buttons' && previewSpec.buttons && componentName === 'Button') {
+  if (previewSpec.type === "buttons" && previewSpec.buttons && componentName === "Button") {
     return (
       <div class={previewSpec.wrapperClass || "flex flex-wrap gap-4"}>
         {previewSpec.buttons.map((buttonSpec, index) => {
           const Component = buttonSpec.isInteractive && Interactive ? Interactive : Static;
           const props = { ...buttonSpec.props };
-          
+
           if (buttonSpec.isInteractive && Interactive) {
-            if (buttonSpec.content === 'Click Me') {
+            if (buttonSpec.content === "Click Me") {
               props.onClick = () => alert("Button clicked!");
             } else {
               props.onClick = () => console.log("Logged to console");
@@ -137,8 +141,8 @@ function renderPreview(
       </div>
     );
   }
-  
-  if (previewSpec.type === 'components' && previewSpec.components) {
+
+  if (previewSpec.type === "components" && previewSpec.components) {
     return (
       <div class={previewSpec.wrapperClass || "flex flex-wrap gap-4"}>
         {previewSpec.components.map((componentSpec, index) => {
@@ -152,8 +156,8 @@ function renderPreview(
       </div>
     );
   }
-  
-  if (previewSpec.type === 'code') {
+
+  if (previewSpec.type === "code") {
     return (
       <div class={previewSpec.wrapperClass || "flex flex-wrap gap-4"}>
         <div class="mockup-code text-sm">
@@ -162,15 +166,15 @@ function renderPreview(
       </div>
     );
   }
-  
-  if (previewSpec.type === 'error') {
+
+  if (previewSpec.type === "error") {
     return (
       <div class="alert alert-error">
         <span>{previewSpec.error}</span>
       </div>
     );
   }
-  
+
   return <div class="text-gray-500">Preview not available</div>;
 }
 
@@ -192,7 +196,7 @@ export function createButtonRoute(StaticButton: any, InteractiveButton: any) {
 export function createSimpleComponentRoute(
   componentName: string,
   category: string,
-  Component: any
+  Component: any,
 ) {
   return createComponentRoute({
     componentName,

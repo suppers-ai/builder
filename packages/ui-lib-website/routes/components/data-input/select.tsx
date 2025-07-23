@@ -5,5 +5,5 @@ export default createComponentRoute({
   component: Select,
   componentName: "Select",
   category: "input",
-  directoryName: "select"
+  directoryName: "select",
 });

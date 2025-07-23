@@ -3,9 +3,9 @@
  */
 
 export const API_ENDPOINTS = {
-  AUTH: '/auth',
-  USERS: '/users',
-  APPLICATIONS: '/applications',
+  AUTH: "/auth",
+  USERS: "/users",
+  APPLICATIONS: "/applications",
 } as const;
 
 export const HTTP_STATUS = {

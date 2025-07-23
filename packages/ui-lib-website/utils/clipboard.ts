@@ -21,7 +21,7 @@ export async function copyToClipboard(text: string): Promise<ClipboardResult> {
       return fallbackCopyToClipboard(text);
     }
   } catch (error) {
-    console.error('Clipboard API failed:', error);
+    console.error("Clipboard API failed:", error);
     // Try fallback method
     return fallbackCopyToClipboard(text);
   }
@@ -32,40 +32,40 @@ export async function copyToClipboard(text: string): Promise<ClipboardResult> {
  */
 function fallbackCopyToClipboard(text: string): ClipboardResult {
   try {
-    const textArea = document.createElement('textarea');
+    const textArea = document.createElement("textarea");
     textArea.value = text;
-    
+
     // Make the textarea invisible but still focusable
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    textArea.style.opacity = '0';
-    textArea.style.pointerEvents = 'none';
-    textArea.setAttribute('readonly', '');
-    
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    textArea.style.opacity = "0";
+    textArea.style.pointerEvents = "none";
+    textArea.setAttribute("readonly", "");
+
     document.body.appendChild(textArea);
-    
+
     // Focus and select the text
     textArea.focus();
     textArea.select();
     textArea.setSelectionRange(0, text.length);
-    
+
     // Try to copy
-    const successful = document.execCommand('copy');
+    const successful = document.execCommand("copy");
     document.body.removeChild(textArea);
-    
+
     if (successful) {
       return { success: true };
     } else {
-      return { 
-        success: false, 
-        error: 'Copy command failed. Please copy manually.' 
+      return {
+        success: false,
+        error: "Copy command failed. Please copy manually.",
       };
     }
   } catch (error) {
-    return { 
-      success: false, 
-      error: `Copy failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    return {
+      success: false,
+      error: `Copy failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     };
   }
 }
@@ -74,8 +74,8 @@ function fallbackCopyToClipboard(text: string): ClipboardResult {
  * Check if clipboard API is available
  */
 export function isClipboardSupported(): boolean {
-  return !!(navigator.clipboard && window.isSecureContext) || 
-         document.queryCommandSupported?.('copy') === true;
+  return !!(navigator.clipboard && window.isSecureContext) ||
+    document.queryCommandSupported?.("copy") === true;
 }
 
 /**
@@ -83,16 +83,16 @@ export function isClipboardSupported(): boolean {
  */
 export function getClipboardErrorMessage(error?: string): string {
   if (!error) {
-    return 'Failed to copy to clipboard';
+    return "Failed to copy to clipboard";
   }
-  
-  if (error.includes('not allowed')) {
-    return 'Clipboard access not allowed. Please copy manually.';
+
+  if (error.includes("not allowed")) {
+    return "Clipboard access not allowed. Please copy manually.";
   }
-  
-  if (error.includes('not supported')) {
-    return 'Clipboard not supported in this browser. Please copy manually.';
+
+  if (error.includes("not supported")) {
+    return "Clipboard not supported in this browser. Please copy manually.";
   }
-  
+
   return error;
 }

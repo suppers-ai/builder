@@ -3,8 +3,18 @@
  * Comprehensive tests for all type mapping functions
  */
 
-import { assertEquals, assertExists, assertThrows } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { TypeMappers, type User, type AuthUser, type UserResponse, type UserResponseExtended } from "../utils/type-mappers.ts";
+import {
+  assertEquals,
+  assertExists,
+  assertThrows,
+} from "https://deno.land/std@0.208.0/assert/mod.ts";
+import {
+  type AuthUser,
+  TypeMappers,
+  type User,
+  type UserResponse,
+  type UserResponseExtended,
+} from "../utils/type-mappers.ts";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Test data
@@ -57,20 +67,20 @@ const mockSupabaseUser: SupabaseUser = {
 
 Deno.test("TypeMappers - userToApiResponse", () => {
   const result = TypeMappers.userToApiResponse(mockUser);
-  
+
   assertEquals(result.id, mockUser.id);
   assertEquals(result.email, mockUser.email);
   assertEquals(result.display_name, mockUser.display_name);
   assertEquals(result.avatar_url, mockUser.avatar_url);
   assertEquals(result.created_at, mockUser.created_at);
-  
+
   // Should not include other fields
   assertEquals(Object.keys(result).length, 5);
 });
 
 Deno.test("TypeMappers - userToApiResponse with minimal data", () => {
   const result = TypeMappers.userToApiResponse(mockUserMinimal);
-  
+
   assertEquals(result.id, mockUserMinimal.id);
   assertEquals(result.email, mockUserMinimal.email);
   assertEquals(result.display_name, undefined);
@@ -80,7 +90,7 @@ Deno.test("TypeMappers - userToApiResponse with minimal data", () => {
 
 Deno.test("TypeMappers - userToExtendedApiResponse", () => {
   const result = TypeMappers.userToExtendedApiResponse(mockUser);
-  
+
   assertEquals(result.id, mockUser.id);
   assertEquals(result.email, mockUser.email);
   assertEquals(result.display_name, mockUser.display_name);
@@ -92,14 +102,14 @@ Deno.test("TypeMappers - userToExtendedApiResponse", () => {
 
 Deno.test("TypeMappers - userToExtendedApiResponse with minimal data", () => {
   const result = TypeMappers.userToExtendedApiResponse(mockUserMinimal);
-  
+
   assertEquals(result.full_name, "jane.smith");
   assertEquals(result.initials, "J");
 });
 
 Deno.test("TypeMappers - userToAuthUser", () => {
   const result = TypeMappers.userToAuthUser(mockUser);
-  
+
   assertEquals(result.id, mockUser.id);
   assertEquals(result.email, mockUser.email);
   assertEquals(result.first_name, mockUser.first_name);
@@ -107,14 +117,14 @@ Deno.test("TypeMappers - userToAuthUser", () => {
   assertEquals(result.display_name, mockUser.display_name);
   assertEquals(result.avatar_url, mockUser.avatar_url);
   assertEquals(result.role, mockUser.role);
-  
+
   // Should not include timestamps
   assertEquals(Object.keys(result).length, 7);
 });
 
 Deno.test("TypeMappers - supabaseUserToUser", () => {
   const result = TypeMappers.supabaseUserToUser(mockSupabaseUser);
-  
+
   assertEquals(result.id, mockSupabaseUser.id);
   assertEquals(result.email, mockSupabaseUser.email);
   assertEquals(result.first_name, "Supabase");
@@ -132,9 +142,9 @@ Deno.test("TypeMappers - supabaseUserToUser with database user data", () => {
     role: "admin" as const,
     created_at: "2022-01-01T00:00:00Z",
   };
-  
+
   const result = TypeMappers.supabaseUserToUser(mockSupabaseUser, dbUserData);
-  
+
   assertEquals(result.first_name, "Override"); // Should use db data
   assertEquals(result.last_name, "User"); // Should use supabase data when db data not provided
   assertEquals(result.role, "admin"); // Should use db data
@@ -143,34 +153,34 @@ Deno.test("TypeMappers - supabaseUserToUser with database user data", () => {
 
 Deno.test("TypeMappers - getFullName", () => {
   assertEquals(TypeMappers.getFullName(mockUser), "John Doe");
-  
+
   const userWithoutDisplayName = { ...mockUser, display_name: undefined };
   assertEquals(TypeMappers.getFullName(userWithoutDisplayName), "John Michael Doe");
-  
-  const userWithOnlyFirstName = { 
-    ...mockUser, 
-    display_name: undefined, 
-    middle_names: undefined, 
-    last_name: undefined 
+
+  const userWithOnlyFirstName = {
+    ...mockUser,
+    display_name: undefined,
+    middle_names: undefined,
+    last_name: undefined,
   };
   assertEquals(TypeMappers.getFullName(userWithOnlyFirstName), "John");
-  
+
   assertEquals(TypeMappers.getFullName(mockUserMinimal), "jane.smith");
 });
 
 Deno.test("TypeMappers - getInitials", () => {
   assertEquals(TypeMappers.getInitials(mockUser), "JD");
-  
+
   const userWithoutDisplayName = { ...mockUser, display_name: undefined };
   assertEquals(TypeMappers.getInitials(userWithoutDisplayName), "JM");
-  
+
   assertEquals(TypeMappers.getInitials(mockUserMinimal), "J");
 });
 
 Deno.test("TypeMappers - isAdmin", () => {
   assertEquals(TypeMappers.isAdmin(mockUser), false);
   assertEquals(TypeMappers.isAdmin(mockUserMinimal), true);
-  
+
   const authUser: AuthUser = TypeMappers.userToAuthUser(mockUserMinimal);
   assertEquals(TypeMappers.isAdmin(authUser), true);
 });
@@ -178,7 +188,7 @@ Deno.test("TypeMappers - isAdmin", () => {
 Deno.test("TypeMappers - isModerator", () => {
   assertEquals(TypeMappers.isModerator(mockUser), false);
   assertEquals(TypeMappers.isModerator(mockUserMinimal), true);
-  
+
   const moderatorUser = { ...mockUser, role: "moderator" as const };
   assertEquals(TypeMappers.isModerator(moderatorUser), true);
 });
@@ -186,7 +196,7 @@ Deno.test("TypeMappers - isModerator", () => {
 Deno.test("TypeMappers - getDisplayName", () => {
   assertEquals(TypeMappers.getDisplayName(mockUser), "John Doe");
   assertEquals(TypeMappers.getDisplayName(mockUserMinimal), "jane.smith");
-  
+
   const userWithoutDisplayName = { ...mockUser, display_name: undefined };
   assertEquals(TypeMappers.getDisplayName(userWithoutDisplayName), "John Michael Doe");
 });
@@ -195,7 +205,7 @@ Deno.test("TypeMappers - safeUserToApiResponse", () => {
   const result = TypeMappers.safeUserToApiResponse(mockUser);
   assertExists(result);
   assertEquals(result!.id, mockUser.id);
-  
+
   // Test with invalid data
   assertEquals(TypeMappers.safeUserToApiResponse(null), null);
   assertEquals(TypeMappers.safeUserToApiResponse(undefined), null);
@@ -209,7 +219,7 @@ Deno.test("TypeMappers - safeUserToAuthUser", () => {
   assertExists(result);
   assertEquals(result!.id, mockUser.id);
   assertEquals(result!.role, mockUser.role);
-  
+
   // Test with invalid data
   assertEquals(TypeMappers.safeUserToAuthUser(null), null);
   assertEquals(TypeMappers.safeUserToAuthUser(undefined), null);
@@ -219,12 +229,12 @@ Deno.test("TypeMappers - safeUserToAuthUser", () => {
 
 Deno.test("TypeMappers - batch operations", () => {
   const users = [mockUser, mockUserMinimal];
-  
+
   const apiResponses = TypeMappers.usersToApiResponses(users);
   assertEquals(apiResponses.length, 2);
   assertEquals(apiResponses[0].id, mockUser.id);
   assertEquals(apiResponses[1].id, mockUserMinimal.id);
-  
+
   const extendedResponses = TypeMappers.usersToExtendedApiResponses(users);
   assertEquals(extendedResponses.length, 2);
   assertEquals(extendedResponses[0].full_name, "John Doe");
@@ -235,7 +245,7 @@ Deno.test("TypeMappers - edge cases", () => {
   // Test user with empty email
   const userWithEmptyEmail = { ...mockUser, email: "" };
   assertEquals(TypeMappers.getFullName(userWithEmptyEmail), "John Doe");
-  
+
   // Test user with only email
   const emailOnlyUser: User = {
     id: "test-id",
@@ -249,7 +259,7 @@ Deno.test("TypeMappers - edge cases", () => {
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z",
   };
-  
+
   assertEquals(TypeMappers.getFullName(emailOnlyUser), "test");
   assertEquals(TypeMappers.getInitials(emailOnlyUser), "T");
   assertEquals(TypeMappers.getDisplayName(emailOnlyUser), "test");
@@ -267,7 +277,7 @@ Deno.test("TypeMappers - application mapping", () => {
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z",
   };
-  
+
   const apiResponse = TypeMappers.applicationToApiResponse(mockApplication);
   assertEquals(apiResponse.id, mockApplication.id);
   assertEquals(apiResponse.name, mockApplication.name);
@@ -275,14 +285,14 @@ Deno.test("TypeMappers - application mapping", () => {
   assertEquals(apiResponse.status, mockApplication.status);
   assertEquals(apiResponse.created_at, mockApplication.created_at);
   assertEquals(apiResponse.updated_at, mockApplication.updated_at);
-  
+
   // Should not include template_id, configuration, owner_id
   assertEquals(Object.keys(apiResponse).length, 6);
-  
+
   const extendedResponse = TypeMappers.applicationToExtendedApiResponse(
-    mockApplication, 
-    "John Doe", 
-    5
+    mockApplication,
+    "John Doe",
+    5,
   );
   assertEquals(extendedResponse.owner_name, "John Doe");
   assertEquals(extendedResponse.review_count, 5);
@@ -306,7 +316,7 @@ Deno.test("TypeMappers - error handling in supabaseUserToUser", () => {
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z",
   };
-  
+
   const result = TypeMappers.supabaseUserToUser(minimalSupabaseUser);
   assertEquals(result.id, "minimal-id");
   assertEquals(result.email, ""); // Should default to empty string
@@ -322,7 +332,7 @@ Deno.test("TypeMappers - type safety with malformed data", () => {
     // Missing email
     first_name: "Test",
   };
-  
+
   assertEquals(TypeMappers.safeUserToApiResponse(malformedUser), null);
   assertEquals(TypeMappers.safeUserToAuthUser(malformedUser), null);
 });
@@ -334,7 +344,7 @@ Deno.test("TypeMappers - initials with special characters", () => {
     first_name: "José",
     last_name: "María-González",
   };
-  
+
   assertEquals(TypeMappers.getInitials(userWithSpecialChars), "JM");
   assertEquals(TypeMappers.getFullName(userWithSpecialChars), "José Michael María-González");
 });
@@ -347,7 +357,7 @@ Deno.test("TypeMappers - empty and whitespace handling", () => {
     last_name: "   ",
     display_name: undefined,
   };
-  
+
   // Should fall back to email local part when names are empty/whitespace
   assertEquals(TypeMappers.getFullName(userWithWhitespace), "john.doe");
   assertEquals(TypeMappers.getInitials(userWithWhitespace), "J");
@@ -359,11 +369,11 @@ Deno.test("TypeMappers - role validation helpers", () => {
     { ...mockUser, role: "admin" as const },
     { ...mockUser, role: "moderator" as const },
   ];
-  
+
   assertEquals(TypeMappers.isAdmin(users[0]), false);
   assertEquals(TypeMappers.isAdmin(users[1]), true);
   assertEquals(TypeMappers.isAdmin(users[2]), false);
-  
+
   assertEquals(TypeMappers.isModerator(users[0]), false);
   assertEquals(TypeMappers.isModerator(users[1]), true);
   assertEquals(TypeMappers.isModerator(users[2]), true);
@@ -387,11 +397,11 @@ Deno.test("TypeMappers - application mapping with minimal data", () => {
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z",
   };
-  
+
   const result = TypeMappers.applicationToApiResponse(minimalApp);
   assertEquals(result.description, undefined);
   assertEquals(result.status, "draft");
-  
+
   const extended = TypeMappers.applicationToExtendedApiResponse(minimalApp);
   assertEquals(extended.owner_name, undefined);
   assertEquals(extended.review_count, undefined);

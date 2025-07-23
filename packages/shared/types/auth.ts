@@ -4,10 +4,13 @@
  */
 
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
-import type { UsersTable } from './database.ts';
+import type { UsersTable } from "./database.ts";
 
 // Derived Auth Types (based on database schema)
-export type AuthUser = Pick<UsersTable, 'id' | 'email' | 'first_name' | 'last_name' | 'display_name' | 'avatar_url' | 'role'>;
+export type AuthUser = Pick<
+  UsersTable,
+  "id" | "email" | "first_name" | "last_name" | "display_name" | "avatar_url" | "role"
+>;
 
 // Auth Session with our user type
 export interface AuthSession {

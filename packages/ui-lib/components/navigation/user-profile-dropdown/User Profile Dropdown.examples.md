@@ -11,8 +11,7 @@ Profile dropdown with avatar and menu options
 ```tsx
 <UserProfileDropdown
   user={user}
-  onLogout={() => console.log('Logout')}
-  onProfile={() => console.log('Profile')}
-/>
+  onLogout={() => console.log("Logout")}
+  onProfile={() => console.log("Profile")}
+/>;
 ```
-

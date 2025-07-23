@@ -16,18 +16,18 @@ export const timelineMetadata: ComponentMetadata = {
           {
             title: "Project started",
             content: "Initial planning phase",
-            timestamp: "Jan 1, 2024"
+            timestamp: "Jan 1, 2024",
           },
           {
             title: "Development",
             content: "Core features implemented",
-            timestamp: "Feb 15, 2024"
+            timestamp: "Feb 15, 2024",
           },
           {
             title: "Testing",
             content: "Quality assurance phase",
-            timestamp: "Mar 1, 2024"
-          }
+            timestamp: "Mar 1, 2024",
+          },
         ]}
       />
     </div>

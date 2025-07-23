@@ -86,7 +86,7 @@ Different color variants for various states
 Different heights for various contexts
 
 ```tsx
-<Progress value={60} max={100} size="lg" color="primary" />
+<Progress value={60} max={100} size="lg" color="primary" />;
 ```
 
 ## Progress with Labels
@@ -100,7 +100,7 @@ Progress bars with descriptive text
     <span>75%</span>
   </div>
   <Progress value={75} max={100} color="primary" />
-</div>
+</div>;
 ```
 
 ## Indeterminate Progress
@@ -108,6 +108,5 @@ Progress bars with descriptive text
 Progress bars for unknown completion time
 
 ```tsx
-<Progress indeterminate color="primary" />
+<Progress indeterminate color="primary" />;
 ```
-

@@ -53,13 +53,13 @@ export class DemoGenerator {
     try {
       const content = await Deno.readTextFile(filePath);
       const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
-      
+
       if (!frontmatterMatch) return null;
-      
+
       const frontmatter = parseYaml(frontmatterMatch[1]) as any;
-      
+
       const examples = this.extractExamplesFromMarkdown(content);
-      
+
       const componentData: ComponentDemo = {
         name: componentName,
         category: frontmatter.category || "Unknown",
@@ -69,7 +69,7 @@ export class DemoGenerator {
         useCases: frontmatter.demoInfo?.useCases || [],
         examples,
       };
-      
+
       this.componentsCache.set(componentName, componentData);
       return componentData;
     } catch (error) {
@@ -81,31 +81,31 @@ export class DemoGenerator {
   // Extract examples from markdown content
   private extractExamplesFromMarkdown(content: string): ComponentExample[] {
     const examples: ComponentExample[] = [];
-    
+
     // Remove frontmatter
-    const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, '');
-    
+    const contentWithoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, "");
+
     // Match all sections with ## headers and code blocks
     const sectionRegex = /## ([^\n]+)\n\n([^#]*?)```tsx\n([\s\S]*?)```/g;
     let match;
-    
+
     while ((match = sectionRegex.exec(contentWithoutFrontmatter)) !== null) {
       const title = match[1].trim();
       const description = match[2].trim();
       const code = match[3].trim();
-      
+
       if (code) {
         examples.push({ title, description, code });
       }
     }
-    
+
     return examples;
   }
 
   // Get all available components
   async getAllComponents(): Promise<ComponentDemo[]> {
     const components = await Promise.all(
-      Object.keys(COMPONENT_PATHS).map(name => this.loadComponentData(name))
+      Object.keys(COMPONENT_PATHS).map((name) => this.loadComponentData(name)),
     );
     return components.filter(Boolean) as ComponentDemo[];
   }
@@ -122,11 +122,11 @@ export class DemoGenerator {
         `Show ${example.title.toLowerCase()}`,
         "Demonstrate functionality",
         "Highlight key features",
-        "Show code implementation"
+        "Show code implementation",
       ],
       description: example.description || `Demonstrate ${example.title}`,
     }));
-    
+
     // Add introduction scene
     scenes.unshift({
       name: "Introduction",
@@ -219,12 +219,14 @@ export class DemoGenerator {
     const component = await this.loadComponentData(componentName);
     if (!component || !component.examples.length) return "";
 
-    const exampleTabs = component.examples.map((example, index) => 
-      `<button class="tab tab-lifted ${index === 0 ? 'tab-active' : ''}" onclick="showExample(${index})">${example.title}</button>`
-    ).join('');
-    
-    const exampleContents = component.examples.map((example, index) => 
-      `<div id="example-${index}" class="example-content ${index === 0 ? 'active' : 'hidden'}">
+    const exampleTabs = component.examples.map((example, index) =>
+      `<button class="tab tab-lifted ${
+        index === 0 ? "tab-active" : ""
+      }" onclick="showExample(${index})">${example.title}</button>`
+    ).join("");
+
+    const exampleContents = component.examples.map((example, index) =>
+      `<div id="example-${index}" class="example-content ${index === 0 ? "active" : "hidden"}">
         <div class="mb-4">
           <p class="text-base-content/70">${example.description}</p>
         </div>
@@ -235,7 +237,7 @@ export class DemoGenerator {
           <pre><code>${this.escapeHtml(example.code)}</code></pre>
         </div>
       </div>`
-    ).join('');
+    ).join("");
 
     return `<!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -321,16 +323,16 @@ export class DemoGenerator {
   private convertTsxToHtml(tsxCode: string): string {
     // This is a basic conversion - in a real implementation you'd want a proper JSX parser
     return tsxCode
-      .replace(/class=/g, 'class=')
-      .replace(/{([^}]+)}/g, '$1')
-      .replace(/className=/g, 'class=')
-      .replace(/<([A-Z]\w+)([^>]*)>/g, '<div$2>') // Convert components to divs for demo
-      .replace(/<\/[A-Z]\w+>/g, '</div>');
+      .replace(/class=/g, "class=")
+      .replace(/{([^}]+)}/g, "$1")
+      .replace(/className=/g, "class=")
+      .replace(/<([A-Z]\w+)([^>]*)>/g, "<div$2>") // Convert components to divs for demo
+      .replace(/<\/[A-Z]\w+>/g, "</div>");
   }
 
   // Helper method to escape HTML
   private escapeHtml(text: string): string {
-    const div = document.createElement('div');
+    const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
@@ -522,7 +524,6 @@ demos/
       instructions: this.generateRecordingInstructions(),
     };
   }
-
 }
 
 // Usage example

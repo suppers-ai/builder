@@ -29,8 +29,9 @@ export function UserClientAvatar({ user, size = "md", className = "" }: UserClie
 
   return (
     <div
-      className={`${sizeClasses[size]
-        } rounded-full bg-blue-500 text-white flex items-center justify-center font-medium ${className}`}
+      className={`${
+        sizeClasses[size]
+      } rounded-full bg-blue-500 text-white flex items-center justify-center font-medium ${className}`}
     >
       {getInitials()}
     </div>

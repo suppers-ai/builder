@@ -5,5 +5,5 @@ export default createComponentRoute({
   component: Navbar,
   componentName: "Navbar",
   category: "layout",
-  directoryName: "navbar"
+  directoryName: "navbar",
 });

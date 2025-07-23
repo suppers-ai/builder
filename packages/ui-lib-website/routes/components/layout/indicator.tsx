@@ -5,5 +5,5 @@ export default createComponentRoute({
   component: Indicator,
   componentName: "Indicator",
   category: "layout",
-  directoryName: "indicator"
+  directoryName: "indicator",
 });

@@ -5,16 +5,16 @@ export default function Home(props: PageProps) {
   return (
     <div class="min-h-screen">
       {/* Hero Section */}
-      <Hero 
+      <Hero
         title="🚀 Suppers Store"
         subtitle="Your centralized authentication hub. Secure, fast, and seamless login for all your applications."
         primaryCTA={{
           text: "Sign In",
-          href: "/login"
+          href: "/login",
         }}
         secondaryCTA={{
           text: "Create Account",
-          href: "/login?mode=register"
+          href: "/login?mode=register",
         }}
         class="min-h-screen bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20"
         variant="centered"
@@ -29,8 +29,8 @@ export default function Home(props: PageProps) {
               Why Choose Suppers Store?
             </h2>
             <p class="text-xl text-base-content/80 max-w-3xl mx-auto leading-relaxed">
-              Built for developers, designed for users. Experience seamless authentication 
-              with enterprise-grade security and lightning-fast performance.
+              Built for developers, designed for users. Experience seamless authentication with
+              enterprise-grade security and lightning-fast performance.
             </p>
           </div>
 
@@ -39,7 +39,7 @@ export default function Home(props: PageProps) {
               <div class="text-6xl mb-6">🔒</div>
               <h3 class="text-2xl font-bold mb-4 text-primary">Secure</h3>
               <p class="text-base-content/70 leading-relaxed text-lg">
-                Enterprise-grade security with OAuth 2.0, JWT tokens, and multi-factor 
+                Enterprise-grade security with OAuth 2.0, JWT tokens, and multi-factor
                 authentication support. Your data is protected at every level.
               </p>
             </Card>
@@ -48,8 +48,8 @@ export default function Home(props: PageProps) {
               <div class="text-6xl mb-6">⚡</div>
               <h3 class="text-2xl font-bold mb-4 text-secondary">Fast</h3>
               <p class="text-base-content/70 leading-relaxed text-lg">
-                Lightning-fast authentication with optimized session management and 
-                intelligent token refresh. No waiting, just seamless access.
+                Lightning-fast authentication with optimized session management and intelligent
+                token refresh. No waiting, just seamless access.
               </p>
             </Card>
 
@@ -57,8 +57,8 @@ export default function Home(props: PageProps) {
               <div class="text-6xl mb-6">🔗</div>
               <h3 class="text-2xl font-bold mb-4 text-accent">Connected</h3>
               <p class="text-base-content/70 leading-relaxed text-lg">
-                Single sign-on across all your applications. One login, unlimited access 
-                to your entire ecosystem of tools and services.
+                Single sign-on across all your applications. One login, unlimited access to your
+                entire ecosystem of tools and services.
               </p>
             </Card>
           </div>
@@ -74,8 +74,8 @@ export default function Home(props: PageProps) {
                 Ready to Get Started?
               </h3>
               <p class="text-xl text-base-content/80 mb-8 leading-relaxed">
-                Join thousands of developers and users who trust Suppers Store 
-                for their authentication needs. Get started in minutes.
+                Join thousands of developers and users who trust Suppers Store for their
+                authentication needs. Get started in minutes.
               </p>
               <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button

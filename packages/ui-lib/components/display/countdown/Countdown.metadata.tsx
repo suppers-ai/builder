@@ -17,7 +17,7 @@ export const countdownMetadata: ComponentMetadata = {
           hours: 10,
           minutes: 24,
           seconds: 58,
-          totalSeconds: 1000
+          totalSeconds: 1000,
         }}
         showLabels
       />
@@ -27,7 +27,7 @@ export const countdownMetadata: ComponentMetadata = {
           hours: 2,
           minutes: 30,
           seconds: 15,
-          totalSeconds: 500
+          totalSeconds: 500,
         }}
         size="sm"
       />

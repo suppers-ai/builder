@@ -15,13 +15,13 @@ export const accordionMetadata: ComponentMetadata = {
         {
           id: "1",
           title: "Getting Started",
-          content: "Learn the basics of our platform"
+          content: "Learn the basics of our platform",
         },
         {
-          id: "2", 
+          id: "2",
           title: "Advanced Features",
-          content: "Explore advanced functionality"
-        }
+          content: "Explore advanced functionality",
+        },
       ]}
       defaultOpen={["1"]}
     />

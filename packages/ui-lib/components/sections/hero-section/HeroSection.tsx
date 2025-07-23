@@ -28,8 +28,6 @@ export function HeroSection() {
         Your browser does not support the video tag.
       </video>
 
-
-
       {/* Background decoration */}
       <div class="absolute inset-0 bg-grid-pattern opacity-3 z-20"></div>
       <div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-2xl -translate-y-32 translate-x-32 z-20">

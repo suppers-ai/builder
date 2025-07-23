@@ -16,7 +16,7 @@ export const menuMetadata: ComponentMetadata = {
           { id: "dashboard", label: "Dashboard", active: true },
           { id: "projects", label: "Projects" },
           { id: "team", label: "Team" },
-          { id: "settings", label: "Settings" }
+          { id: "settings", label: "Settings" },
         ]}
         variant="bordered"
       />

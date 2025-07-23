@@ -234,14 +234,25 @@ export default function TextInputPage() {
               <h3 class="text-lg font-semibold mb-4">Search Interface</h3>
               <div class="space-y-4">
                 <div class="join w-full">
-                  <Input 
-                    type="text" 
-                    placeholder="Search products, categories, brands..." 
-                    class="join-item flex-1" 
+                  <Input
+                    type="text"
+                    placeholder="Search products, categories, brands..."
+                    class="join-item flex-1"
                   />
                   <button class="btn btn-primary join-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
                     </svg>
                   </button>
                 </div>

@@ -15,7 +15,7 @@ export const stepsMetadata: ComponentMetadata = {
         { id: "1", label: "Register", completed: true },
         { id: "2", label: "Choose plan", completed: true },
         { id: "3", label: "Purchase", active: true },
-        { id: "4", label: "Receive product" }
+        { id: "4", label: "Receive product" },
       ]}
     />
   ),

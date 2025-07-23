@@ -39,11 +39,13 @@ relatedComponents:
 Simple breadcrumb navigation with current page indicator
 
 ```tsx
-<Breadcrumbs items={[
-  { label: "Home", href: "/" },
-  { label: "Components", href: "/components" },
-  { label: "Breadcrumbs", active: true }
-]} />
+<Breadcrumbs
+  items={[
+    { label: "Home", href: "/" },
+    { label: "Components", href: "/components" },
+    { label: "Breadcrumbs", active: true },
+  ]}
+/>;
 ```
 
 ## Breadcrumb Sizes
@@ -68,19 +70,20 @@ Different size variants for various contexts
 ]} />
 ```
 
-
 ## Complex Navigation
 
 Multi-level navigation paths with deep hierarchies
 
 ```tsx
-<Breadcrumbs items={[
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Projects", href: "/projects" },
-  { label: "Website Redesign", href: "/projects/website-redesign" },
-  { label: "Design System", href: "/projects/website-redesign/design-system" },
-  { label: "Components", active: true }
-]} />
+<Breadcrumbs
+  items={[
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Projects", href: "/projects" },
+    { label: "Website Redesign", href: "/projects/website-redesign" },
+    { label: "Design System", href: "/projects/website-redesign/design-system" },
+    { label: "Components", active: true },
+  ]}
+/>;
 ```
 
 ## With Disabled Items
@@ -88,12 +91,14 @@ Multi-level navigation paths with deep hierarchies
 Breadcrumbs with some items disabled or inaccessible
 
 ```tsx
-<Breadcrumbs items={[
-  { label: "Home", href: "/" },
-  { label: "Archive", disabled: true },
-  { label: "2023", href: "/archive/2023" },
-  { label: "December", active: true }
-]} />
+<Breadcrumbs
+  items={[
+    { label: "Home", href: "/" },
+    { label: "Archive", disabled: true },
+    { label: "2023", href: "/archive/2023" },
+    { label: "December", active: true },
+  ]}
+/>;
 ```
 
 ## E-commerce Example
@@ -101,11 +106,13 @@ Breadcrumbs with some items disabled or inaccessible
 Real-world usage in product catalog navigation
 
 ```tsx
-<Breadcrumbs items={[
-  { label: "Home", href: "/" },
-  { label: "Electronics", href: "/electronics" },
-  { label: "Computers", href: "/electronics/computers" },
-  { label: "Laptops", href: "/electronics/computers/laptops" },
-  { label: "MacBook Pro", active: true }
-]} />
+<Breadcrumbs
+  items={[
+    { label: "Home", href: "/" },
+    { label: "Electronics", href: "/electronics" },
+    { label: "Computers", href: "/electronics/computers" },
+    { label: "Laptops", href: "/electronics/computers/laptops" },
+    { label: "MacBook Pro", active: true },
+  ]}
+/>;
 ```

@@ -5,5 +5,5 @@ export default createComponentRoute({
   component: Textarea,
   componentName: "Textarea",
   category: "input",
-  directoryName: "textarea"
+  directoryName: "textarea",
 });

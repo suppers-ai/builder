@@ -3,13 +3,13 @@
  * Functions to convert between database types and API/auth formats
  */
 
-import type { 
-  UsersTable, 
-  ApplicationsTable, 
-  UserAccessTable,
+import type {
   ApplicationReviewsTable,
-  CustomThemesTable 
-} from '../types/database.ts';
+  ApplicationsTable,
+  CustomThemesTable,
+  UserAccessTable,
+  UsersTable,
+} from "../types/database.ts";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Re-export database types as canonical types
@@ -20,14 +20,20 @@ export type ApplicationReview = ApplicationReviewsTable;
 export type CustomTheme = CustomThemesTable;
 
 // API Response Types (derived from database types)
-export type UserResponse = Pick<User, 'id' | 'email' | 'display_name' | 'avatar_url' | 'created_at'>;
+export type UserResponse = Pick<
+  User,
+  "id" | "email" | "display_name" | "avatar_url" | "created_at"
+>;
 
 export interface UserResponseExtended extends UserResponse {
   full_name: string;
   initials: string;
 }
 
-export type ApplicationResponse = Pick<Application, 'id' | 'name' | 'description' | 'status' | 'created_at' | 'updated_at'>;
+export type ApplicationResponse = Pick<
+  Application,
+  "id" | "name" | "description" | "status" | "created_at" | "updated_at"
+>;
 
 export interface ApplicationResponseExtended extends ApplicationResponse {
   owner_name?: string;
@@ -35,7 +41,10 @@ export interface ApplicationResponseExtended extends ApplicationResponse {
 }
 
 // Auth Types (derived from database types)
-export type AuthUser = Pick<User, 'id' | 'email' | 'first_name' | 'last_name' | 'display_name' | 'avatar_url' | 'role'>;
+export type AuthUser = Pick<
+  User,
+  "id" | "email" | "first_name" | "last_name" | "display_name" | "avatar_url" | "role"
+>;
 
 export interface AuthSession {
   user: AuthUser;
@@ -44,11 +53,17 @@ export interface AuthSession {
 }
 
 // AuthState is defined in packages/shared/types/auth.ts
-export type { AuthState } from '../types/auth.ts';
+export type { AuthState } from "../types/auth.ts";
 
 // Update operation types (derived from database types)
-export type UserUpdateData = Pick<User, 'first_name' | 'middle_names' | 'last_name' | 'display_name' | 'avatar_url'>;
-export type ApplicationUpdateData = Pick<Application, 'name' | 'description' | 'configuration' | 'status'>;
+export type UserUpdateData = Pick<
+  User,
+  "first_name" | "middle_names" | "last_name" | "display_name" | "avatar_url"
+>;
+export type ApplicationUpdateData = Pick<
+  Application,
+  "name" | "description" | "configuration" | "status"
+>;
 
 /**
  * Type Mapping Utilities Class
@@ -100,14 +115,14 @@ export class TypeMappers {
   static supabaseUserToAuthUser(supabaseUser: SupabaseUser, dbUser?: any): AuthUser {
     return {
       id: supabaseUser.id,
-      email: supabaseUser.email || '',
+      email: supabaseUser.email || "",
       first_name: dbUser?.first_name || supabaseUser.user_metadata?.first_name || undefined,
       last_name: dbUser?.last_name || supabaseUser.user_metadata?.last_name || undefined,
-      display_name: dbUser?.display_name || 
-                   supabaseUser.user_metadata?.display_name || 
-                   supabaseUser.user_metadata?.full_name || undefined,
+      display_name: dbUser?.display_name ||
+        supabaseUser.user_metadata?.display_name ||
+        supabaseUser.user_metadata?.full_name || undefined,
       avatar_url: dbUser?.avatar_url || supabaseUser.user_metadata?.avatar_url || undefined,
-      role: dbUser?.role || 'user',
+      role: dbUser?.role || "user",
     };
   }
 
@@ -116,18 +131,18 @@ export class TypeMappers {
    */
   static supabaseUserToUser(supabaseUser: SupabaseUser, dbUser?: Partial<User>): User {
     const now = new Date().toISOString();
-    
+
     return {
       id: supabaseUser.id,
-      email: supabaseUser.email || '',
+      email: supabaseUser.email || "",
       first_name: dbUser?.first_name || supabaseUser.user_metadata?.first_name,
       middle_names: dbUser?.middle_names,
       last_name: dbUser?.last_name || supabaseUser.user_metadata?.last_name,
-      display_name: dbUser?.display_name || 
-                   supabaseUser.user_metadata?.display_name || 
-                   supabaseUser.user_metadata?.full_name,
+      display_name: dbUser?.display_name ||
+        supabaseUser.user_metadata?.display_name ||
+        supabaseUser.user_metadata?.full_name,
       avatar_url: dbUser?.avatar_url || supabaseUser.user_metadata?.avatar_url,
-      role: dbUser?.role || 'user',
+      role: dbUser?.role || "user",
       created_at: dbUser?.created_at || supabaseUser.created_at || now,
       updated_at: dbUser?.updated_at || supabaseUser.updated_at || supabaseUser.created_at || now,
     };
@@ -151,9 +166,9 @@ export class TypeMappers {
    * Convert database application to extended API response
    */
   static applicationToExtendedApiResponse(
-    application: Application, 
-    ownerName?: string, 
-    reviewCount?: number
+    application: Application,
+    ownerName?: string,
+    reviewCount?: number,
   ): ApplicationResponseExtended {
     const baseResponse = this.applicationToApiResponse(application);
     return {
@@ -168,14 +183,14 @@ export class TypeMappers {
    */
   static safeUserToApiResponse(user: unknown): UserResponse | null {
     try {
-      if (!user || typeof user !== 'object') return null;
-      
+      if (!user || typeof user !== "object") return null;
+
       const u = user as User;
       if (!u.id || !u.email) return null;
-      
+
       return this.userToApiResponse(u);
     } catch (error) {
-      console.error('Failed to convert user to API response:', error);
+      console.error("Failed to convert user to API response:", error);
       return null;
     }
   }
@@ -185,14 +200,14 @@ export class TypeMappers {
    */
   static safeUserToAuthUser(user: unknown): AuthUser | null {
     try {
-      if (!user || typeof user !== 'object') return null;
-      
+      if (!user || typeof user !== "object") return null;
+
       const u = user as User;
       if (!u.id || !u.email) return null;
-      
+
       return this.userToAuthUser(u);
     } catch (error) {
-      console.error('Failed to convert user to auth user:', error);
+      console.error("Failed to convert user to auth user:", error);
       return null;
     }
   }
@@ -202,15 +217,15 @@ export class TypeMappers {
    */
   static getFullName(user: User): string {
     if (user.display_name?.trim()) return user.display_name.trim();
-    
+
     const parts = [user.first_name, user.middle_names, user.last_name]
-      .filter(part => part && part.trim().length > 0)
-      .map(part => part!.trim());
-    
-    if (parts.length > 0) return parts.join(' ');
-    
+      .filter((part) => part && part.trim().length > 0)
+      .map((part) => part!.trim());
+
+    if (parts.length > 0) return parts.join(" ");
+
     // Fallback to email local part
-    return user.email.split('@')[0];
+    return user.email.split("@")[0];
   }
 
   /**
@@ -219,24 +234,24 @@ export class TypeMappers {
   static getInitials(user: User): string {
     const name = this.getFullName(user);
     return name
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase())
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase())
       .slice(0, 2)
-      .join('');
+      .join("");
   }
 
   /**
    * Helper: Check if user has admin role
    */
   static isAdmin(user: User | AuthUser): boolean {
-    return user.role === 'admin';
+    return user.role === "admin";
   }
 
   /**
    * Helper: Check if user has moderator or admin role
    */
   static isModerator(user: User | AuthUser): boolean {
-    return user.role === 'moderator' || user.role === 'admin';
+    return user.role === "moderator" || user.role === "admin";
   }
 
   /**
@@ -250,20 +265,20 @@ export class TypeMappers {
    * Batch convert users to API responses
    */
   static usersToApiResponses(users: User[]): UserResponse[] {
-    return users.map(user => this.userToApiResponse(user));
+    return users.map((user) => this.userToApiResponse(user));
   }
 
   /**
    * Batch convert users to extended API responses
    */
   static usersToExtendedApiResponses(users: User[]): UserResponseExtended[] {
-    return users.map(user => this.userToExtendedApiResponse(user));
+    return users.map((user) => this.userToExtendedApiResponse(user));
   }
 
   /**
    * Batch convert applications to API responses
    */
   static applicationsToApiResponses(applications: Application[]): ApplicationResponse[] {
-    return applications.map(app => this.applicationToApiResponse(app));
+    return applications.map((app) => this.applicationToApiResponse(app));
   }
 }

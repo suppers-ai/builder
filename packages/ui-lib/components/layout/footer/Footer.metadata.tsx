@@ -19,9 +19,9 @@ export const footerMetadata: ComponentMetadata = {
             title: "Product",
             links: [
               { text: "Features", href: "/features" },
-              { text: "Pricing", href: "/pricing" }
-            ]
-          }
+              { text: "Pricing", href: "/pricing" },
+            ],
+          },
         ]}
       />
     </div>

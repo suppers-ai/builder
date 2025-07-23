@@ -4,74 +4,71 @@
  */
 
 import { assertEquals, assertExists } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { 
-  clearDeprecationWarnings, 
+import {
+  clearDeprecationWarnings,
   hasWarningBeenShown,
   showDeprecationWarning,
-  showTypeDeprecationWarning,
   showFunctionDeprecationWarning,
-  showPackageDeprecationWarning
+  showPackageDeprecationWarning,
+  showTypeDeprecationWarning,
 } from "../utils/deprecation-warnings.ts";
 
 // Test deprecated types from auth-client
-import type { 
+import type {
+  AuthState as DeprecatedAuthState,
   AuthUser as DeprecatedAuthUser,
-  AuthState as DeprecatedAuthState 
 } from "../../auth-client/types/deprecated.ts";
 
 // Test deprecated types from store
-import type { 
+import type {
   AuthState as StoreDeprecatedAuthState,
-  UpdateUserData as StoreDeprecatedUpdateUserData
+  UpdateUserData as StoreDeprecatedUpdateUserData,
 } from "../../store/types/deprecated.ts";
 
 // Test deprecated types from ui-lib
-import type { 
+import type {
   User as UILibDeprecatedUser,
-  UserResponse as UILibDeprecatedUserResponse
+  UserResponse as UILibDeprecatedUserResponse,
 } from "../../ui-lib/types/deprecated.ts";
 
 // Test deprecated types from ui-lib-website
-import type { 
+import type {
+  AuthUser as WebsiteDeprecatedAuthUser,
   User as WebsiteDeprecatedUser,
-  AuthUser as WebsiteDeprecatedAuthUser
 } from "../../ui-lib-website/types/deprecated.ts";
 
 // Test deprecated types from api
-import type { 
-  UserResponse as APIDeprecatedUserResponse
-} from "../../api/types/deprecated.ts";
+import type { UserResponse as APIDeprecatedUserResponse } from "../../api/types/deprecated.ts";
 
 // Import canonical types for comparison
-import type { 
-  AuthUser as CanonicalAuthUser,
+import type {
   AuthState as CanonicalAuthState,
-  UpdateUserData as CanonicalUpdateUserData
+  AuthUser as CanonicalAuthUser,
+  UpdateUserData as CanonicalUpdateUserData,
 } from "../types/auth.ts";
 
-import type { 
+import type {
   User as CanonicalUser,
-  UserResponse as CanonicalUserResponse
+  UserResponse as CanonicalUserResponse,
 } from "../utils/type-mappers.ts";
 
 Deno.test("Deprecation Warning Utilities", async (t) => {
   await t.step("should show deprecation warnings in development", () => {
     clearDeprecationWarnings();
-    
+
     // Mock console.warn to capture warnings
     const originalWarn = console.warn;
     const warnings: string[] = [];
     console.warn = (message: string) => warnings.push(message);
-    
+
     try {
       showDeprecationWarning("Test deprecation message", "test-key");
       assertEquals(warnings.length, 1);
       assertEquals(warnings[0], "⚠️  DEPRECATION WARNING: Test deprecation message");
-      
+
       // Should not show the same warning twice
       showDeprecationWarning("Test deprecation message", "test-key");
       assertEquals(warnings.length, 1);
-      
     } finally {
       console.warn = originalWarn;
     }
@@ -86,11 +83,11 @@ Deno.test("Deprecation Warning Utilities", async (t) => {
 
   await t.step("should show type deprecation warnings", () => {
     clearDeprecationWarnings();
-    
+
     const originalWarn = console.warn;
     const warnings: string[] = [];
     console.warn = (message: string) => warnings.push(message);
-    
+
     try {
       showTypeDeprecationWarning("OldType", "new/location", "old/package");
       assertEquals(warnings.length, 1);
@@ -103,16 +100,19 @@ Deno.test("Deprecation Warning Utilities", async (t) => {
 
   await t.step("should show function deprecation warnings", () => {
     clearDeprecationWarnings();
-    
+
     const originalWarn = console.warn;
     const warnings: string[] = [];
     console.warn = (message: string) => warnings.push(message);
-    
+
     try {
       showFunctionDeprecationWarning("oldFunction", "newFunction", "new/location");
       assertEquals(warnings.length, 1);
       assertEquals(warnings[0].includes("Function 'oldFunction' is deprecated"), true);
-      assertEquals(warnings[0].includes("Please use 'newFunction' from 'new/location' instead"), true);
+      assertEquals(
+        warnings[0].includes("Please use 'newFunction' from 'new/location' instead"),
+        true,
+      );
     } finally {
       console.warn = originalWarn;
     }
@@ -120,11 +120,11 @@ Deno.test("Deprecation Warning Utilities", async (t) => {
 
   await t.step("should show package deprecation warnings", () => {
     clearDeprecationWarnings();
-    
+
     const originalWarn = console.warn;
     const warnings: string[] = [];
     console.warn = (message: string) => warnings.push(message);
-    
+
     try {
       showPackageDeprecationWarning("old/package", "new/package");
       assertEquals(warnings.length, 1);
@@ -146,7 +146,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
       last_name: "User",
       display_name: "Test User",
       avatar_url: "https://example.com/avatar.jpg",
-      role: "user"
+      role: "user",
     };
 
     const canonicalAuthUser: CanonicalAuthUser = authUser;
@@ -155,7 +155,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
     const authState: DeprecatedAuthState = {
       user: authUser,
       session: null,
-      loading: false
+      loading: false,
     };
 
     const canonicalAuthState: CanonicalAuthState = authState;
@@ -166,7 +166,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
     const authState: StoreDeprecatedAuthState = {
       user: null,
       session: null,
-      loading: true
+      loading: true,
     };
 
     const canonicalAuthState: CanonicalAuthState = authState;
@@ -174,7 +174,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
 
     const updateUserData: StoreDeprecatedUpdateUserData = {
       firstName: "Updated",
-      lastName: "Name"
+      lastName: "Name",
     };
 
     const canonicalUpdateUserData: CanonicalUpdateUserData = updateUserData;
@@ -191,7 +191,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
       avatar_url: "https://example.com/avatar.jpg",
       role: "user",
       created_at: "2023-01-01T00:00:00Z",
-      updated_at: "2023-01-01T00:00:00Z"
+      updated_at: "2023-01-01T00:00:00Z",
     };
 
     const canonicalUser: CanonicalUser = user;
@@ -202,7 +202,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
       email: "test@example.com",
       display_name: "Test User",
       avatar_url: "https://example.com/avatar.jpg",
-      created_at: "2023-01-01T00:00:00Z"
+      created_at: "2023-01-01T00:00:00Z",
     };
 
     const canonicalUserResponse: CanonicalUserResponse = userResponse;
@@ -219,7 +219,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
       avatar_url: "https://example.com/avatar.jpg",
       role: "user",
       created_at: "2023-01-01T00:00:00Z",
-      updated_at: "2023-01-01T00:00:00Z"
+      updated_at: "2023-01-01T00:00:00Z",
     };
 
     const canonicalUser: CanonicalUser = user;
@@ -232,7 +232,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
       last_name: "User",
       display_name: "Test User",
       avatar_url: "https://example.com/avatar.jpg",
-      role: "user"
+      role: "user",
     };
 
     const canonicalAuthUser: CanonicalAuthUser = authUser;
@@ -245,7 +245,7 @@ Deno.test("Deprecated Type Compatibility", async (t) => {
       email: "test@example.com",
       display_name: "Test User",
       avatar_url: "https://example.com/avatar.jpg",
-      created_at: "2023-01-01T00:00:00Z"
+      created_at: "2023-01-01T00:00:00Z",
     };
 
     const canonicalUserResponse: CanonicalUserResponse = userResponse;
@@ -257,11 +257,11 @@ Deno.test("Deprecated Function Compatibility", async (t) => {
   await t.step("deprecated functions should show warnings", () => {
     // Test that the deprecation warning system works for functions
     clearDeprecationWarnings();
-    
+
     const originalWarn = console.warn;
     const warnings: string[] = [];
     console.warn = (message: string) => warnings.push(message);
-    
+
     try {
       showFunctionDeprecationWarning("oldFunction", "newFunction", "new/location");
       assertEquals(warnings.length, 1);
@@ -275,7 +275,7 @@ Deno.test("Deprecated Function Compatibility", async (t) => {
 Deno.test("Migration Guide Examples", async (t) => {
   await t.step("migration examples should compile correctly", () => {
     // Example from migration guide - should compile without errors
-    
+
     // Before (using deprecated types)
     const deprecatedUser: UILibDeprecatedUser = {
       id: "test-id",
@@ -286,12 +286,12 @@ Deno.test("Migration Guide Examples", async (t) => {
       avatar_url: "https://example.com/avatar.jpg",
       role: "user",
       created_at: "2023-01-01T00:00:00Z",
-      updated_at: "2023-01-01T00:00:00Z"
+      updated_at: "2023-01-01T00:00:00Z",
     };
-    
+
     // After (using canonical types)
     const canonicalUser: CanonicalUser = deprecatedUser;
-    
+
     // Should be the same object
     assertEquals(canonicalUser, deprecatedUser);
     assertExists(canonicalUser.id);

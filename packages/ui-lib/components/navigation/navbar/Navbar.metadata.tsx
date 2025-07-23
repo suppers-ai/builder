@@ -16,7 +16,7 @@ export const navbarMetadata: ComponentMetadata = {
         items={[
           { label: "Home", href: "/", active: true },
           { label: "About", href: "/about" },
-          { label: "Contact", href: "/contact" }
+          { label: "Contact", href: "/contact" },
         ]}
       />
     </div>

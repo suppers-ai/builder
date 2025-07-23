@@ -5,5 +5,5 @@ export default createComponentRoute({
   component: Menu,
   componentName: "Menu",
   category: "navigation",
-  directoryName: "menu"
+  directoryName: "menu",
 });

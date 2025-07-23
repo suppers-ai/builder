@@ -82,7 +82,7 @@ Simple avatar with image, ring, and initials
 <Avatar
   src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
   alt="Profile"
-/>
+/>;
 ```
 
 ## Avatar Sizes
@@ -94,7 +94,7 @@ Different avatar sizes from xs to xl
   size="lg"
   src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
   alt="Large Avatar"
-/>
+/>;
 ```
 
 ## Avatar with Status
@@ -106,7 +106,7 @@ Online and offline status indicators
   src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
   alt="Online User"
   online
-/>
+/>;
 ```
 
 ## Avatar with Initials
@@ -117,7 +117,7 @@ Placeholder avatars using initials
 <Avatar
   initials="AB"
   size="lg"
-/>
+/>;
 ```
 
 ## Avatar Groups
@@ -130,6 +130,5 @@ Overlapping avatars for team displays
   <Avatar src="user2.jpg" ring />
   <Avatar src="user3.jpg" ring />
   <Avatar initials="+3" ring />
-</div>
+</div>;
 ```
-
