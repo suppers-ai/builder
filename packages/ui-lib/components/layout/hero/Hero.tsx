@@ -59,9 +59,9 @@ export function Hero({
 }: HeroProps) {
   // Build background classes
   const backgroundClasses = {
-    default: "bg-base-200",
-    gradient: "bg-gradient-to-br from-primary to-secondary",
-    image: backgroundImage ? `bg-cover bg-center bg-no-repeat` : "bg-base-200",
+    default: "bg-base-100",
+    gradient: "bg-gradient-to-br from-primary/20 to-secondary/20",
+    image: backgroundImage ? `bg-cover bg-center bg-no-repeat` : "bg-base-100",
     video: "relative overflow-hidden",
   };
 
