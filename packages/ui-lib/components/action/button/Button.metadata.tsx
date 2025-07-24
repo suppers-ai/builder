@@ -61,18 +61,7 @@ const buttonExamples: ComponentExample[] = [
 </div>`,
     showCode: true,
   },
-  {
-    title: "Interactive Buttons",
-    description: "Buttons with click handlers",
-    code: `<Button
-  color="primary"
-  onClick={() => alert("Clicked!")}
->
-  Click Me
-</Button>`,
-    interactive: true,
-    showCode: true,
-  },
+
 ];
 
 export const buttonMetadata: ComponentMetadata = {
