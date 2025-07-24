@@ -28,6 +28,7 @@ pre {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -78,7 +79,7 @@ pre {
 }
 
 /* Ensure grid items don't overflow */
-.card-grid-responsive > * {
+.card-grid-responsive>* {
   min-width: 0;
   overflow: hidden;
 }
@@ -111,17 +112,21 @@ pre {
   position: relative;
   z-index: 1;
 }
+
 /* Sidebar aware layout - CSS-only approach to prevent flickering */
 .sidebar-aware-layout {
   /* Default: assume sidebar is open on desktop */
   margin-left: 0;
+  /* Add smooth transition for sidebar open/close */
+  transition: margin-left 200ms ease-out;
 }
 
 @media (min-width: 1024px) {
   .sidebar-aware-layout {
-    margin-left: 320px; /* 80 * 4 = 320px (w-80) */
+    margin-left: 320px;
+    /* 80 * 4 = 320px (w-80) */
   }
-  
+
   /* When sidebar is closed, remove the margin */
   body.sidebar-closed .sidebar-aware-layout {
     margin-left: 0;

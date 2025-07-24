@@ -31,7 +31,7 @@ const ComponentPageTemplateSpecificPropsSchema = z.object({
   title: z.string().describe("Component page title"),
   description: z.string().describe("Component description"),
   category: z.string().describe("Component category"),
-  
+
   examples: withMetadata(
     z.array(ExampleSchema).describe("Array of component examples"),
     { examples: ['[{ title: "Basic Usage", code: "<Component />", preview: <Component /> }]'], since: "1.0.0" },
