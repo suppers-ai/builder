@@ -41,7 +41,7 @@ export default function ComponentsPage({ url }: PageProps) {
       {/* Page Header */}
       <header class="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-base-300">
         <div class="px-4 lg:px-6 pt-20 pb-8">
-          <div class="max-w-4xl">
+          <div class="max-w-7xl mx-auto">
             <h1 class="text-3xl lg:text-4xl font-bold text-base-content mb-2">
               Component Library
             </h1>
@@ -55,13 +55,15 @@ export default function ComponentsPage({ url }: PageProps) {
       {/* Breadcrumbs */}
       <nav class="bg-base-200/50 border-b border-base-300">
         <div class="px-4 lg:px-6 py-3">
-          <Breadcrumbs
-            size="sm"
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Components", active: true },
-            ]}
-          />
+          <div class="max-w-7xl mx-auto">
+            <Breadcrumbs
+              size="sm"
+              items={[
+                { label: "Home", href: "/" },
+                { label: "Components", active: true },
+              ]}
+            />
+          </div>
         </div>
       </nav>
   

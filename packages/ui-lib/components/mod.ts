@@ -128,8 +128,6 @@ export type { HomePageProps } from "./page/home-page/HomePage.tsx";
 
 // Export missing components
 export { MainLayout } from "./layout/MainLayout.tsx";
-export { ComponentPageTemplate } from "./templates/component-page-template/ComponentPageTemplate.tsx";
-export type { ComponentPageProps } from "./templates/component-page-template/ComponentPageTemplate.tsx";
 export { BenefitsSection } from "./sections/benefits-section/BenefitsSection.tsx";
 export { StatsSection } from "./sections/stats-section/StatsSection.tsx";
 export { ComponentPreviewCard } from "./display/ComponentPreviewCard.tsx";

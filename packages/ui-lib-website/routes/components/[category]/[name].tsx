@@ -7,6 +7,7 @@
 import type { PageProps } from "fresh";
 import { createComponentRoute } from "../../../utils/component-route-generator.tsx";
 import { ComponentMetadata, flatComponentsMetadata } from "@suppers/ui-lib";
+import { Breadcrumbs } from "@suppers/ui-lib";
 
 /**
  * Convert URL-friendly component name to PascalCase component name
@@ -101,17 +102,31 @@ export default async function DynamicComponentPage(props: PageProps) {
       <>
         {/* Page Header */}
         <header class="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-base-300">
-          <div class="px-4 lg:px-6 pt-8 pb-8">
-            <div class="max-w-4xl">
+          <div class="px-4 lg:px-6 pt-20 pb-8">
+            <div class="max-w-7xl mx-auto">
               <h1 class="text-3xl lg:text-4xl font-bold text-base-content mb-2">
-                {pageData.title}
+              {pageData.title}
               </h1>
-              <p class="text-lg text-base-content/70">
-                {pageData.description}
-              </p>
+              <p class="text-lg text-base-content/70 max-w-2xl">
+                {pageData.description}            </p>
             </div>
           </div>
         </header>
+
+        {/* Breadcrumbs */}
+        <nav class="bg-base-200/50 border-b border-base-300">
+          <div class="px-4 lg:px-6 py-3">
+            <div class="max-w-7xl mx-auto">
+              <Breadcrumbs
+                size="sm"
+                items={[
+                  { label: "Home", href: "/" },
+                  { label: "Components", active: true },
+                ]}
+              />
+            </div>
+          </div>
+        </nav>
 
         {/* Main Content */}
         <div class="px-4 lg:px-6 py-8">

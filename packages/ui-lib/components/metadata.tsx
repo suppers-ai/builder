@@ -7,7 +7,6 @@ import { mockupComponentsMetadata } from "./mockup/metadata.tsx";
 import { navigationComponentsMetadata } from "./navigation/metadata.tsx";
 import { pageComponentsMetadata } from "./page/metadata.tsx";
 import { sectionComponentsMetadata } from "./sections/metadata.tsx";
-import { templateComponentsMetadata } from "./templates/metadata.tsx";
 
 export const componentsMetadata = {
   action: actionComponentsMetadata,
@@ -19,7 +18,6 @@ export const componentsMetadata = {
   navigation: navigationComponentsMetadata,
   page: pageComponentsMetadata,
   sections: sectionComponentsMetadata,
-  templates: templateComponentsMetadata,
 };
 
 export const flatComponentsMetadata = Object.values(componentsMetadata).flat();
