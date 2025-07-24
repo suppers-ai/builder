@@ -1,7 +1,7 @@
 import { BaseComponentProps } from "../../types.ts";
-import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
+import { Loading } from "../../feedback/loading/Loading.tsx";
 import { EditUserModal } from "./EditUserModal.tsx";
-import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
+import { UserAvatar } from "../../display/avatar/UserAvatar.tsx";
 import type { Application, User } from "../../../shared/lib/api-helpers.ts";
 import { TypeMappers } from "@suppers/shared/utils";
 
@@ -90,7 +90,7 @@ export function UserPage({
   if (isLoading) {
     return (
       <div class="flex items-center justify-center min-h-screen">
-        <LoaderSpinner size="lg" />
+        <Loading size="lg" variant="spinner" />
       </div>
     );
   }
@@ -169,7 +169,7 @@ export function UserPage({
                   {isSigningOut
                     ? (
                       <>
-                        <LoaderSpinner size="sm" />
+                        <Loading size="sm" variant="spinner" />
                         Signing Out...
                       </>
                     )

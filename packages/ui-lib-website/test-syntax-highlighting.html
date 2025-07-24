@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Syntax Highlighting Test</title>
+    <style>
+        .text-primary { color: #3b82f6; }
+        .text-secondary { color: #8b5cf6; }
+        .text-accent { color: #f59e0b; }
+        .text-info { color: #06b6d4; }
+        .text-warning { color: #eab308; }
+        .text-base-content\/50 { color: rgba(0,0,0,0.5); }
+        .text-base-content\/60 { color: rgba(0,0,0,0.6); }
+        .italic { font-style: italic; }
+        .font-semibold { font-weight: 600; }
+        .bg-warning\/10 { background-color: rgba(234, 179, 8, 0.1); }
+        .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+        .rounded { border-radius: 0.25rem; }
+        pre { background: #f8f9fa; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+        code { font-family: 'Monaco', 'Menlo', monospace; font-size: 14px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <h1>Syntax Highlighting Test</h1>
+    <h2>Before (Original Code):</h2>
+    <pre><code>&lt;Button&gt;Default&lt;/Button&gt;
+&lt;Button color="primary"&gt;Primary&lt;/Button&gt;
+&lt;Button color="secondary"&gt;Secondary&lt;/Button&gt;
+&lt;Button color="accent"&gt;Accent&lt;/Button&gt;</code></pre>
+
+    <h2>After (Improved with Container & Syntax Highlighting):</h2>
+    <pre><code><span class="text-secondary">&lt;div class=<span class="text-accent">&quot;flex gap-2&quot;</span>&gt;</span>
+  <span class="text-info font-semibold">&lt;Button&gt;</span>Default<span class="text-info font-semibold">&lt;/Button&gt;</span>
+  <span class="text-info font-semibold">&lt;Button color=<span class="text-accent">&quot;primary&quot;</span>&gt;</span>Primary<span class="text-info font-semibold">&lt;/Button&gt;</span>
+  <span class="text-info font-semibold">&lt;Button color=<span class="text-accent">&quot;secondary&quot;</span>&gt;</span>Secondary<span class="text-info font-semibold">&lt;/Button&gt;</span>
+  <span class="text-info font-semibold">&lt;Button color=<span class="text-accent">&quot;accent&quot;</span>&gt;</span>Accent<span class="text-info font-semibold">&lt;/Button&gt;</span>
+<span class="text-secondary">&lt;/div&gt;</span></code></pre>
+
+    <h2>Key Improvements Made:</h2>
+    <ul>
+        <li><strong>Fixed Syntax Highlighting:</strong> HTML entities are now escaped before applying syntax patterns, ensuring proper color highlighting works</li>
+        <li><strong>Enhanced Patterns:</strong> Better recognition of JSX components (blue), attributes (yellow), strings (orange), and elements (purple)</li>
+        <li><strong>Reduced Repetition:</strong> Code examples now use container divs to group related buttons, making the code more realistic and less repetitive</li>
+        <li><strong>Better Styling:</strong> Component names are now bold and use distinct colors to stand out from regular HTML elements</li>
+        <li><strong>More Readable:</strong> Examples show proper JSX formatting with proper indentation and structure</li>
+    </ul>
+</body>
+</html>

@@ -5,7 +5,8 @@ import { Button } from "../../action/button/Button.tsx";
 import { Alert } from "../../feedback/alert/Alert.tsx";
 import { Card } from "../../display/card/Card.tsx";
 import { Divider } from "../../layout/divider/Divider.tsx";
-import { SSOClientLogin } from "../../../shared/components/SSOClientLogin.tsx";
+// TODO: SSOClientLogin component was removed - need to implement or restore
+// import { SSOClientLogin } from "../../../shared/components/SSOClientLogin.tsx";
 import type { AuthUser } from "@suppers/auth-client";
 
 interface FormData {
@@ -128,12 +129,13 @@ export function AuthClientLoginPage({
           {/* OAuth Buttons */}
           {showOAuth && !showForgotPassword && (
             <div class="mb-6">
-              <SSOClientLogin
+              {/* TODO: Restore SSOClientLogin component */}
+              {/* <SSOClientLogin
                 providers={oauthProviders}
                 redirectUri={redirectUri}
-                onSuccess={() => {}}
-                onError={(error) => console.error("OAuth error:", error)}
-              />
+                onSuccess={() => {}} */}
+                onError={(error) => console.error("OAuth error:", error)} */}
+              {/* </SSOClientLogin> */}
             </div>
           )}
 

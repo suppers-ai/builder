@@ -1,5 +1,5 @@
-import { ApplicationCard } from "../../../shared/components/ApplicationCard.tsx";
-import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
+import { ApplicationCard } from "../../display/card/ApplicationCard.tsx";
+import { Loading } from "../../feedback/loading/Loading.tsx";
 import type {
   Application,
   CreateApplicationData,
@@ -193,7 +193,7 @@ export function HomePage({
       {isLoading
         ? (
           <div class="flex items-center justify-center py-12">
-            <LoaderSpinner size="lg" />
+            <Loading size="lg" variant="spinner" />
           </div>
         )
         : filteredApplications.length === 0

@@ -9,6 +9,11 @@ export interface CodeFile {
   language: "tsx" | "ts" | "json" | "javascript" | "typescript" | "css" | "html" | "jsx";
 }
 
+interface SyntaxPattern {
+  pattern: RegExp;
+  className: string;
+}
+
 export interface SyntaxHighlighterProps {
   files: CodeFile[];
   title?: string;
@@ -17,23 +22,23 @@ export interface SyntaxHighlighterProps {
   defaultFile?: number;
 }
 
-// Simple syntax highlighting patterns for TypeScript/JSX
-const syntaxPatterns = {
+// Simple, non-overlapping syntax highlighting patterns
+const syntaxPatterns: Record<string, SyntaxPattern[]> = {
   tsx: [
-    { pattern: /(\/\*[\s\S]*?\*\/|\/\/.*$)/gm, className: "text-base-content/60" }, // Comments
-    {
-      pattern:
-        /\b(import|export|from|as|default|const|let|var|function|class|interface|type|enum|namespace)\b/g,
-      className: "text-primary font-semibold",
-    }, // Keywords
-    {
-      pattern: /\b(string|number|boolean|object|undefined|null|void|any|unknown|never)\b/g,
-      className: "text-secondary font-semibold",
-    }, // Types
-    { pattern: /"([^"\\]|\\.)*"|'([^'\\]|\\.)*'|`([^`\\]|\\.)*`/g, className: "text-accent" }, // Strings
-    { pattern: /\b\d+(\.\d+)?\b/g, className: "text-info" }, // Numbers
-    { pattern: /(<\/?[a-zA-Z][^>]*>)/g, className: "text-secondary" }, // JSX tags
-    { pattern: /\{[^}]*\}/g, className: "text-warning" }, // JSX expressions
+    // Comments
+    { pattern: /(\/\*[\s\S]*?\*\/|\/\/.*$)/gm, className: "text-base-content/50 italic" },
+    
+    // String literals first to avoid conflicts
+    { pattern: /&quot;[^&]*&quot;/g, className: "text-accent" },
+    
+    // Complete JSX opening/closing tags for React components (capitalized)
+    { pattern: /&lt;\/?[A-Z][a-zA-Z0-9]*[^&]*?&gt;/g, className: "text-info font-semibold" },
+    
+    // Complete JSX opening/closing tags for HTML elements (lowercase)  
+    { pattern: /&lt;\/?[a-z][a-zA-Z0-9-]*[^&]*?&gt;/g, className: "text-secondary" },
+    
+    // JavaScript keywords (excluding "class" to avoid HTML class attribute conflicts)
+    { pattern: /\b(import|export|from|as|default|const|let|var|function|interface|type|enum|namespace|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|async|await)\b/g, className: "text-primary font-semibold" },
   ],
   ts: [
     { pattern: /(\/\*[\s\S]*?\*\/|\/\/.*$)/gm, className: "text-base-content/60" }, // Comments
@@ -69,26 +74,41 @@ const syntaxPatterns = {
 };
 
 function highlightCode(code: string, language: string): string {
-  const patterns = syntaxPatterns[language as keyof typeof syntaxPatterns] || [];
+  if (language !== 'tsx' && language !== 'jsx') {
+    // For non-JSX languages, use simple escaping
+    return code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
-  let highlightedCode = code;
-
-  // Apply syntax highlighting patterns first
-  patterns.forEach(({ pattern, className }) => {
-    highlightedCode = highlightedCode.replace(pattern, (match) => {
-      return `<span class="${className}">${match}</span>`;
-    });
-  });
-
-  // Then escape HTML entities to prevent rendering
-  highlightedCode = highlightedCode
+  // First escape HTML entities
+  let escaped = code
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-  return highlightedCode;
+  // Simple JSX-specific highlighting - process tags before strings to avoid conflicts
+  let highlighted = escaped;
+
+  // 1. Highlight React Component tags first (capitalized)
+  highlighted = highlighted.replace(/&lt;\/?[A-Z][a-zA-Z0-9]*(?:\s[^<>]*?)?&gt;/g, (match) => {
+    return `<span class="text-info font-semibold">${match}</span>`;
+  });
+
+  // 2. Highlight HTML element tags (lowercase)
+  highlighted = highlighted.replace(/&lt;\/?[a-z][a-zA-Z0-9-]*(?:\s[^<>]*?)?&gt;/g, (match) => {
+    return `<span class="text-secondary">${match}</span>`;
+  });
+
+  // 3. Highlight strings last (after tags to avoid interfering with tag matching)
+  highlighted = highlighted.replace(/&quot;([^&]*)&quot;/g, '<span class="text-accent">&quot;$1&quot;</span>');
+
+  return highlighted;
 }
 
 export default function SyntaxHighlighter({

@@ -21,36 +21,44 @@ const buttonExamples: ComponentExample[] = [
   {
     title: "Basic Colors",
     description: "Standard button colors and variants",
-    code: `<Button>Default</Button>
-<Button color="primary">Primary</Button>
-<Button color="secondary">Secondary</Button>
-<Button color="accent">Accent</Button>`,
+    code: `<div class="flex gap-2">
+  <Button>Default</Button>
+  <Button color="primary">Primary</Button>
+  <Button color="secondary">Secondary</Button>
+  <Button color="accent">Accent</Button>
+</div>`,
     showCode: true,
   },
   {
     title: "Button Variants",
     description: "Different visual styles",
-    code: `<Button variant="outline" color="primary">Outline</Button>
-<Button variant="ghost" color="primary">Ghost</Button>
-<Button variant="link" color="primary">Link</Button>`,
+    code: `<div class="flex gap-2">
+  <Button variant="outline" color="primary">Outline</Button>
+  <Button variant="ghost" color="primary">Ghost</Button>
+  <Button variant="link" color="primary">Link</Button>
+</div>`,
     showCode: true,
   },
   {
     title: "Button Sizes",
     description: "Various sizes for different use cases",
-    code: `<Button size="xs" color="primary">Extra Small</Button>
-<Button size="sm" color="primary">Small</Button>
-<Button color="primary">Medium</Button>
-<Button size="lg" color="primary">Large</Button>`,
+    code: `<div class="flex items-center gap-2">
+  <Button size="xs" color="primary">XS</Button>
+  <Button size="sm" color="primary">SM</Button>
+  <Button color="primary">MD</Button>
+  <Button size="lg" color="primary">LG</Button>
+</div>`,
     showCode: true,
   },
   {
     title: "Button States",
     description: "Different states and interactions",
-    code: `<Button color="primary">Normal</Button>
-<Button color="primary" active>Active</Button>
-<Button color="primary" disabled>Disabled</Button>
-<Button color="primary" loading>Loading</Button>`,
+    code: `<div class="flex gap-2">
+  <Button color="primary">Normal</Button>
+  <Button color="primary" active>Active</Button>
+  <Button color="primary" disabled>Disabled</Button>
+  <Button color="primary" loading>Loading</Button>
+</div>`,
     showCode: true,
   },
   {

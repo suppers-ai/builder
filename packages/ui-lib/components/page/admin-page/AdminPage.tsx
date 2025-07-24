@@ -13,8 +13,8 @@ import { Table } from "../../display/table/Table.tsx";
 import { Pagination } from "../../navigation/pagination/Pagination.tsx";
 
 // These would need to be moved to ui-lib components eventually
-import { ApplicationCard } from "../../../shared/components/ApplicationCard.tsx";
-import { EnhancedSearchBar } from "../../../shared/components/EnhancedSearchBar.tsx";
+import { ApplicationCard } from "../../display/card/ApplicationCard.tsx";
+import { EnhancedSearchBar } from "../../input/enhanced-search-bar/EnhancedSearchBar.tsx";
 import type { Application, ApplicationReview } from "../../../shared/lib/api-helpers.ts";
 
 type TabType = "pending" | "all-apps" | "users";
@@ -96,7 +96,7 @@ export function AdminPage({
   if (authLoading || isLoading) {
     return (
       <div class="flex items-center justify-center min-h-screen">
-        <Loading size="lg" />
+        <Loading size="lg" variant="spinner" />
       </div>
     );
   }
@@ -539,7 +539,7 @@ export function AdminPage({
                       }`}
                     >
                       {isSubmittingReview
-                        ? <LoaderSpinner size="sm" />
+                        ? <Loading size="sm" variant="spinner" />
                         : reviewAction === "approved"
                         ? (
                           "✅ Approve Application"

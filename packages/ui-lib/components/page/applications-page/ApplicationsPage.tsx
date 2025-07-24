@@ -1,8 +1,8 @@
 // No hooks needed - this is a controlled component
-import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
-import { ApplicationCard } from "../../../shared/components/ApplicationCard.tsx";
-import { ApplicationForm } from "../../../shared/components/ApplicationForm.tsx";
-import { EnhancedSearchBar } from "../../../shared/components/EnhancedSearchBar.tsx";
+import { Loading } from "../../feedback/loading/Loading.tsx";
+import { ApplicationCard } from "../../display/card/ApplicationCard.tsx";
+import { ApplicationForm } from "../../input/entity-form/ApplicationForm.tsx";
+import { EnhancedSearchBar } from "../../input/enhanced-search-bar/EnhancedSearchBar.tsx";
 import type {
   Application,
   CreateApplicationData,
@@ -145,7 +145,7 @@ export function ApplicationsPage({
       {isLoading
         ? (
           <div class="flex items-center justify-center py-12">
-            <LoaderSpinner size="lg" />
+            <Loading size="lg" variant="spinner" />
           </div>
         )
         : filteredApplications.length === 0

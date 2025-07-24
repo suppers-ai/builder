@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
-import { LoaderSpinner } from "../../../shared/components/LoaderSpinner.tsx";
-import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
+import { Loading } from "../../feedback/loading/Loading.tsx";
+import { UserAvatar } from "../../display/avatar/UserAvatar.tsx";
 import type { AuthUser } from "@suppers/shared/types/auth.ts";
 
 interface EditUserModalProps {
@@ -243,7 +243,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 {isLoading
                   ? (
                     <>
-                      <LoaderSpinner size="sm" className="mr-2" />
+                      <Loading size="sm" variant="spinner" class="mr-2" />
                       Saving...
                     </>
                   )
