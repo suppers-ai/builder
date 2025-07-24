@@ -5,15 +5,17 @@ import {
   Edit3,
   FileText,
   Home,
+  LogIn,
   MessageCircle,
   Navigation,
+  Palette,
   Puzzle,
+  Settings,
   Smartphone,
+  User,
   Zap,
 } from "lucide-preact";
-import {
-  SidebarConfig,
-} from "@suppers/ui-lib";
+import { SidebarConfig } from "@suppers/ui-lib";
 import { componentsMetadata } from "@suppers/ui-lib/components/metadata.tsx";
 
 // Icon mapping for categories
@@ -29,6 +31,10 @@ export const categoryIcons: Record<string, any> = {
   "Getting Started": <BookOpen size={16} />,
   "Documentation": <FileText size={16} />,
   "Home": <Home size={16} />,
+  "Login": <LogIn size={16} />,
+  "Theme": <Palette size={16} />,
+  "Profile": <User size={16} />,
+  "Settings": <Settings size={16} />,
 };
 
 // Default configuration for UI Library site (clean, like Ionic)
