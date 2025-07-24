@@ -111,19 +111,19 @@ pre {
   position: relative;
   z-index: 1;
 }
+/* Sidebar aware layout - CSS-only approach to prevent flickering */
+.sidebar-aware-layout {
+  /* Default: assume sidebar is open on desktop */
+  margin-left: 0;
+}
 
-/* Dark theme adjustments - add darker overlay */
-[data-theme="dark"] .hero-gradient-bg::before,
-[data-theme="night"] .hero-gradient-bg::before,
-[data-theme="halloween"] .hero-gradient-bg::before,
-[data-theme="forest"] .hero-gradient-bg::before,
-[data-theme="black"] .hero-gradient-bg::before,
-[data-theme="luxury"] .hero-gradient-bg::before,
-[data-theme="dracula"] .hero-gradient-bg::before,
-[data-theme="synthwave"] .hero-gradient-bg::before,
-[data-theme="cyberpunk"] .hero-gradient-bg::before,
-[data-theme="dim"] .hero-gradient-bg::before,
-[data-theme="coffee"] .hero-gradient-bg::before,
-[data-theme="business"] .hero-gradient-bg::before {
-  background: rgba(0, 0, 0, 0.4);
+@media (min-width: 1024px) {
+  .sidebar-aware-layout {
+    margin-left: 320px; /* 80 * 4 = 320px (w-80) */
+  }
+  
+  /* When sidebar is closed, remove the margin */
+  body.sidebar-closed .sidebar-aware-layout {
+    margin-left: 0;
+  }
 }

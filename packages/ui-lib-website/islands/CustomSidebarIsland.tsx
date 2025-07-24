@@ -57,7 +57,30 @@ export default function CustomSidebarIsland({
       setCurrentTheme(newTheme);
     });
 
-    return unsubscribe;
+    // Subscribe to sidebar state changes and update body class
+    const sidebarUnsubscribe = globalSidebarOpen.subscribe((isOpen) => {
+      if (typeof document !== "undefined") {
+        if (isOpen) {
+          document.body.classList.remove("sidebar-closed");
+        } else {
+          document.body.classList.add("sidebar-closed");
+        }
+      }
+    });
+
+    // Set initial body class based on current sidebar state
+    if (typeof document !== "undefined") {
+      if (globalSidebarOpen.value) {
+        document.body.classList.remove("sidebar-closed");
+      } else {
+        document.body.classList.add("sidebar-closed");
+      }
+    }
+
+    return () => {
+      unsubscribe();
+      sidebarUnsubscribe();
+    };
   }, []);
 
   const handleLogin = () => {
