@@ -116,6 +116,7 @@ export function Drawer({
         )}
 
         <button
+          type="button"
           class="btn btn-primary btn-block mb-4"
           onClick={handleToggle}
         >
@@ -140,12 +141,11 @@ export function Drawer({
 
   return (
     <div class={drawerClasses} {...props}>
+      {/* Pure DaisyUI checkbox - no React state interference */}
       <input
         id={drawerId}
         type="checkbox"
         class="drawer-toggle"
-        checked={currentOpen}
-        onChange={handleToggle}
       />
 
       <div class="drawer-content flex flex-col">
@@ -163,11 +163,9 @@ export function Drawer({
             for={drawerId}
             aria-label="close sidebar"
             class="drawer-overlay"
-            onClick={handleOverlayClick}
-          >
-          </label>
+          />
         )}
-        <aside class="bg-base-200 min-h-full w-80 p-4">
+        <aside class="bg-base-200 min-h-full w-80 p-4 overflow-y-auto">
           {controlsPosition === "sidebar" && renderControls()}
           {sidebarContent}
         </aside>

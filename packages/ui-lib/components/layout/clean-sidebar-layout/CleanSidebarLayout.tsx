@@ -186,6 +186,8 @@ export function CleanSidebarLayout({
         : "translate-x-full lg:translate-x-0"),
     // Hide sidebar on desktop when closed
     activeOpen ? "lg:block" : "lg:hidden",
+    // Ensure proper scrolling
+    "overflow-hidden",
     className,
   ].filter(Boolean).join(" ");
 

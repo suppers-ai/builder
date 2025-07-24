@@ -46,8 +46,7 @@ export default function Layout({ Component, url }: PageProps) {
                 title: "Resources",
                 links: [
                   { text: "Documentation", href: "/docs" },
-                  { text: "Deno", href: "https://deno.com" },
-                  { text: "Fresh", href: "https://fresh.deno.dev" },
+                  { text: "Deno", href: "https://fresh.deno.dev" },
                   { text: "daisyUI", href: "https://daisyui.com" },
                 ],
               },

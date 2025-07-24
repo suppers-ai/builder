@@ -32,10 +32,10 @@ export function Sidebar({
   };
 
   return (
-    <div class={`sidebar-container ${className}`}>
+    <div class={`h-full flex flex-col ${className}`}>
       {/* Header */}
       {(config.title || config.logo) && (
-        <div class="p-4 border-b border-base-300">
+        <div class="p-4 border-b border-base-300 flex-shrink-0">
           <div class="flex items-center gap-3">
             {config.logo}
             {config.title && (
@@ -47,7 +47,7 @@ export function Sidebar({
 
       {/* Quick Links */}
       {config.showQuickLinks && config.quickLinks && config.quickLinks.length > 0 && (
-        <div class="p-4">
+        <div class="p-4 flex-shrink-0">
           <h3 class="text-sm font-medium text-base-content/70 mb-3">Quick Links</h3>
           <ul class="space-y-1">
             {config.quickLinks.map((link) => (
@@ -75,7 +75,7 @@ export function Sidebar({
 
       {/* Search */}
       {config.showSearch && (
-        <div class="p-4 border-b border-base-300">
+        <div class="p-4 border-b border-base-300 flex-shrink-0">
           <input
             type="text"
             placeholder="Search..."
@@ -85,16 +85,18 @@ export function Sidebar({
         </div>
       )}
 
-      {/* Sections */}
-      <div class="flex-1 overflow-y-auto">
-        {config.sections.map((section) => (
-          <SidebarSection
-            key={section.id}
-            section={section}
-            currentPath={currentPath}
-            onLinkClick={handleLinkClick}
-          />
-        ))}
+      {/* Sections - Scrollable content */}
+      <div class="flex-1 overflow-y-auto min-h-0">
+        <div class="pb-4">
+          {config.sections.map((section) => (
+            <SidebarSection
+              key={section.id}
+              section={section}
+              currentPath={currentPath}
+              onLinkClick={handleLinkClick}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
