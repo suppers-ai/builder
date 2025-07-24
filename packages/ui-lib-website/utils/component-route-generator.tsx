@@ -10,6 +10,7 @@ import {
   type ApiProp,
   extractApiPropsFromSchema,
 } from "../../ui-lib/components/schemas/extractor.ts";
+import CodeExample from "../islands/CodeExample.tsx";
 
 export interface ComponentRouteConfig {
   /** Component name (e.g., "Button") */
@@ -285,9 +286,7 @@ export function createComponentRoute(config: ComponentRouteConfig) {
                   <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
                     Show Code
                   </summary>
-                  <pre class="bg-gray-900 text-white p-4 rounded mt-2 overflow-x-auto">
-                    <code>{example.code}</code>
-                  </pre>
+                  <CodeExample code={example.code} />
                 </details>
               )}
             </div>

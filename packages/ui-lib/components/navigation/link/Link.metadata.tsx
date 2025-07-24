@@ -1,10 +1,10 @@
-import { ComponentMetadata } from "../../types.ts";
+import { ComponentCategory, ComponentMetadata } from "../../types.ts";
 import { Link } from "../../layout/link/Link.tsx";
 
 export const linkMetadata: ComponentMetadata = {
   name: "Link",
   description: "Styled hyperlinks",
-  category: "Navigation",
+  category: ComponentCategory.NAVIGATION,
   path: "/components/navigation/link",
   tags: ["link", "anchor", "hyperlink", "navigation", "url", "href"],
   examples: ["basic", "colors", "hover", "neutral", "disabled"],

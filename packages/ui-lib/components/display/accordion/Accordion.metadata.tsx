@@ -1,13 +1,106 @@
-import { ComponentMetadata } from "../../types.ts";
+import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
 import { Accordion } from "./Accordion.tsx";
+
+const accordionExamples: ComponentExample[] = [
+  {
+    title: "Basic Accordion",
+    description: "Simple collapsible content sections",
+    code: `<Accordion
+  items={[
+    {
+      id: "1",
+      title: "What is your return policy?",
+      content: "We offer a 30-day return policy for all unused items in original packaging."
+    },
+    {
+      id: "2", 
+      title: "How long does shipping take?",
+      content: "Standard shipping takes 3-5 business days. Express options are available."
+    },
+    {
+      id: "3",
+      title: "Do you offer international shipping?",
+      content: "Yes, we ship to most countries worldwide with varying costs and delivery times."
+    }
+  ]}
+/>`,
+    showCode: true,
+  },
+  {
+    title: "Multiple Open Sections",
+    description: "Accordion allowing multiple sections to be expanded simultaneously",
+    code: `<Accordion
+  items={[
+    {
+      id: "getting-started",
+      title: "Getting Started",
+      content: "Welcome to our platform! Create your account, complete your profile, and explore the dashboard."
+    },
+    {
+      id: "account-settings",
+      title: "Account Settings", 
+      content: "Manage your account preferences, update personal information, and change notification settings."
+    },
+    {
+      id: "billing",
+      title: "Billing Information",
+      content: "View and update your billing details, payment methods, and subscription plans."
+    }
+  ]}
+  allowMultiple
+  defaultOpen={["getting-started", "account-settings"]}
+/>`,
+    showCode: true,
+  },
+  {
+    title: "Arrow Icon Style",
+    description: "Accordion with arrow indicators",
+    code: `<Accordion
+  items={[
+    {
+      id: "features",
+      title: "Product Features",
+      content: "Advanced analytics, real-time collaboration, and seamless integrations."
+    },
+    {
+      id: "pricing", 
+      title: "Pricing Plans",
+      content: "Starter ($9/month), Professional ($29/month), or Enterprise (custom pricing)."
+    }
+  ]}
+  variant="arrow"
+/>`,
+    showCode: true,
+  },
+  {
+    title: "Plus/Minus Icon Style",
+    description: "Accordion with plus/minus toggle indicators",
+    code: `<Accordion
+  items={[
+    {
+      id: "specs",
+      title: "Technical Specifications",
+      content: "Cross-platform support, 4GB RAM minimum, 10GB storage required."
+    },
+    {
+      id: "requirements",
+      title: "System Requirements", 
+      content: "Modern web browser, internet connection, JavaScript enabled."
+    }
+  ]}
+  variant="plus-minus"
+/>`,
+    showCode: true,
+  },
+];
 
 export const accordionMetadata: ComponentMetadata = {
   name: "Accordion",
   description: "Collapsible content",
-  category: "Data Display",
+  category: ComponentCategory.DISPLAY,
   path: "/components/display/accordion",
   tags: ["collapsible", "expand", "collapse", "foldable", "sections"],
-  examples: ["basic", "multiple", "arrow", "plus-minus"],
+  examples: accordionExamples,
   relatedComponents: ["collapse", "card", "details"],
   preview: (
     <Accordion

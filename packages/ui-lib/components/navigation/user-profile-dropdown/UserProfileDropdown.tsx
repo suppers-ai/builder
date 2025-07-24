@@ -3,8 +3,8 @@ import { useState } from "preact/hooks";
 import { ChevronDown, LogOut, Settings, Shield, User } from "lucide-preact";
 import { UserAvatar } from "../../../shared/components/UserAvatar.tsx";
 import { Dropdown } from "../../action/dropdown/Dropdown.tsx";
-import type { AuthUser } from "@suppers/shared/types/auth.ts";
-import { TypeMappers } from "@suppers/shared/utils";
+import type { AuthUser } from "../../../../shared/types/auth.ts";
+import { TypeMappers } from "../../../../shared/utils/type-mappers.ts";
 
 export interface UserProfileDropdownProps {
   user: AuthUser;

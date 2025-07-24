@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { Button } from "@suppers/ui-lib";
 import ToastNotification from "./ToastNotification.tsx";
-import { copyToClipboard, getClipboardErrorMessage } from "../utils/clipboard.ts";
+import { copyToClipboard, getClipboardErrorMessage } from "@suppers/shared/utils/clipboard.ts";
 
 export interface CodeFile {
   filename: string;
@@ -73,12 +73,20 @@ function highlightCode(code: string, language: string): string {
 
   let highlightedCode = code;
 
-  // Apply syntax highlighting patterns
+  // Apply syntax highlighting patterns first
   patterns.forEach(({ pattern, className }) => {
     highlightedCode = highlightedCode.replace(pattern, (match) => {
       return `<span class="${className}">${match}</span>`;
     });
   });
+
+  // Then escape HTML entities to prevent rendering
+  highlightedCode = highlightedCode
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
   return highlightedCode;
 }
@@ -218,7 +226,15 @@ export default function SyntaxHighlighter({
                   color={copied ? "success" : copyError ? "error" : undefined}
                   onClick={handleCopy}
                   class="gap-1"
-                  title="Copy code (Ctrl+C or Cmd+C)"
+                  type="button"
+                  active={false}
+                  loading={false}
+                  disabled={false}
+                  wide={false}
+                  square={false}
+                  glass={false}
+                  noAnimation={false}
+                  circle={false}
                 >
                   {copied
                     ? (

@@ -1,5 +1,5 @@
-import type { AuthUser } from "@suppers/shared/types/auth.ts";
-import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
+import type { AuthUser } from "../../../shared/types/auth.ts";
+import { TypeMappers } from "../../../shared/utils/type-mappers.ts";
 
 interface UserClientAvatarProps {
   user: AuthUser;

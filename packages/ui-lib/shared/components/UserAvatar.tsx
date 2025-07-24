@@ -1,6 +1,6 @@
 // No React import needed for simple components
-import type { AuthUser } from "@suppers/shared/types/auth.ts";
-import { TypeMappers } from "@suppers/shared/utils";
+import type { AuthUser } from "../../../shared/types/auth.ts";
+import { TypeMappers } from "../../../shared/utils/type-mappers.ts";
 
 interface UserAvatarProps {
   user: AuthUser;
