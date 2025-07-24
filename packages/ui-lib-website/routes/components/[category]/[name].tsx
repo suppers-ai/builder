@@ -5,7 +5,7 @@
  */
 
 import type { PageProps } from "fresh";
-import { createComponentRoute } from "../../../shared/lib/component-route-generator.tsx";
+import { createComponentRoute } from "../../../utils/component-route-generator.tsx";
 import { ComponentMetadata, flatComponentsMetadata } from "@suppers/ui-lib";
 
 /**

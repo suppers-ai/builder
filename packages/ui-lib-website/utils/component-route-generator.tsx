@@ -9,7 +9,7 @@ import { join } from "jsr:@std/path@^1.0.8";
 import {
   type ApiProp,
   extractApiPropsFromSchema,
-} from "../../../ui-lib/components/schemas/extractor.ts";
+} from "../../ui-lib/components/schemas/extractor.ts";
 
 export interface ComponentRouteConfig {
   /** Component name (e.g., "Button") */
@@ -78,6 +78,12 @@ async function loadComponentPageData(
 
     if (metadata) {
       // Use rich metadata if available
+      console.log("Component metadata found:", {
+        name: metadata.name,
+        hasSchema: !!metadata.schema,
+        schemaType: metadata.schema?.schema?.constructor?.name,
+      });
+
       return {
         title: metadata.name,
         description: metadata.description,
@@ -88,7 +94,20 @@ async function loadComponentPageData(
           showCode: example.showCode,
           interactive: example.interactive,
         })),
-        apiProps: metadata.schema ? await extractApiPropsFromSchema(componentPath) : [],
+        apiProps: await (async () => {
+          try {
+            if (metadata.schema?.schema) {
+              console.log("Extracting API props from schema:", metadata.schema.schema);
+              const props = extractApiPropsFromSchema(metadata.schema.schema);
+              console.log("Extracted API props:", props);
+              return props;
+            }
+            return [];
+          } catch (error) {
+            console.warn(`Failed to extract API props for ${metadata.name}:`, error);
+            return [];
+          }
+        })(),
         usageNotes: metadata.usageNotes || [],
         previewData: metadata.examples.map((example) => ({
           title: example.title,
@@ -283,6 +302,65 @@ export function createComponentRoute(config: ComponentRouteConfig) {
                 <li key={index} class="text-gray-700">{note}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {pageData.apiProps.length > 0 && (
+          <div class="mt-8">
+            <h3 class="text-2xl font-semibold mb-6">API Props</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full border border-gray-300 rounded-lg">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Prop</th>
+                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Type</th>
+                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Required</th>
+                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Default</th>
+                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageData.apiProps.map((prop, index) => (
+                    <tr key={index} class="hover:bg-gray-50">
+                      <td class="px-4 py-3 text-sm font-mono text-gray-900 border-b">
+                        {prop.name}
+                        {prop.required && <span class="text-red-500 ml-1">*</span>}
+                      </td>
+                      <td class="px-4 py-3 text-sm font-mono text-gray-700 border-b">
+                        <code class="bg-gray-100 px-2 py-1 rounded">{prop.type}</code>
+                      </td>
+                      <td class="px-4 py-3 text-sm text-gray-700 border-b">
+                        {prop.required ? (
+                          <span class="text-red-500 font-medium">Yes</span>
+                        ) : (
+                          <span class="text-gray-500">No</span>
+                        )}
+                      </td>
+                      <td class="px-4 py-3 text-sm font-mono text-gray-700 border-b">
+                        {prop.default ? (
+                          <code class="bg-gray-100 px-2 py-1 rounded">{prop.default}</code>
+                        ) : (
+                          <span class="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td class="px-4 py-3 text-sm text-gray-700 border-b">
+                        {prop.description}
+                        {prop.examples && prop.examples.length > 0 && (
+                          <div class="mt-1 text-xs text-gray-500">
+                            Examples: {prop.examples.join(", ")}
+                          </div>
+                        )}
+                        {prop.since && (
+                          <div class="mt-1 text-xs text-blue-500">
+                            Since: {prop.since}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
