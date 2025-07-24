@@ -8,6 +8,7 @@ import type { PageProps } from "fresh";
 import { createComponentRoute } from "../../../utils/component-route-generator.tsx";
 import { ComponentMetadata, flatComponentsMetadata } from "@suppers/ui-lib";
 import { Breadcrumbs } from "@suppers/ui-lib";
+import CodeExample from "../../../islands/CodeExample.tsx";
 
 /**
  * Convert URL-friendly component name to PascalCase component name
@@ -26,6 +27,92 @@ function urlToComponentName(urlName: string): string {
 function findComponentMetadata(category: string, name: string): ComponentMetadata | null {
   const expectedPath = `/components/${category}/${name}`;
   return flatComponentsMetadata.find((meta) => meta.path === expectedPath) || null;
+}
+
+/**
+ * Parse JSX code and extract component props and content
+ */
+function parseJSXExample(code: string, componentName: string): Array<{
+  props: Record<string, any>;
+  content: string;
+}> {
+  const components: Array<{ props: Record<string, any>; content: string }> = [];
+
+  // Improved regex to handle multiline JSX and various prop formats
+  const componentRegex = new RegExp(
+    `<${componentName}([^>]*?)>([\\s\\S]*?)<\\/${componentName}>`,
+    "g",
+  );
+  const selfClosingRegex = new RegExp(`<${componentName}([^>]*?)\\s*\\/>`, "g");
+
+  let match;
+
+  // Match components with content (e.g., <Button color="primary">Primary</Button>)
+  while ((match = componentRegex.exec(code)) !== null) {
+    const propsString = match[1];
+    const content = match[2].trim();
+    const props = parseProps(propsString);
+
+    components.push({
+      props,
+      content: content || (props.children as string) || "Button",
+    });
+  }
+
+  // Reset regex lastIndex for self-closing components
+  selfClosingRegex.lastIndex = 0;
+
+  // Match self-closing components (e.g., <Button color="primary" />)
+  while ((match = selfClosingRegex.exec(code)) !== null) {
+    const propsString = match[1];
+    const props = parseProps(propsString);
+
+    components.push({
+      props,
+      content: (props.children as string) || "Button",
+    });
+  }
+
+  return components;
+}
+
+/**
+ * Parse props string and return props object
+ */
+function parseProps(propsString: string): Record<string, any> {
+  const props: Record<string, any> = {};
+
+  // Handle different prop formats: prop="value", prop={value}, prop={true}, prop
+  const propsRegex = /(\w+)(?:=(?:"([^"]*)"|{([^}]*)}|([^\s>]+)))?/g;
+
+  let propMatch;
+  while ((propMatch = propsRegex.exec(propsString)) !== null) {
+    const [, key, quotedValue, bracedValue, unquotedValue] = propMatch;
+
+    if (quotedValue !== undefined) {
+      // String value: prop="value"
+      props[key] = quotedValue;
+    } else if (bracedValue !== undefined) {
+      // Expression value: prop={value}
+      const value = bracedValue.trim();
+      if (value === "true") props[key] = true;
+      else if (value === "false") props[key] = false;
+      else if (value.match(/^\d+$/)) props[key] = parseInt(value);
+      else if (value.startsWith('"') && value.endsWith('"')) {
+        props[key] = value.slice(1, -1);
+      } else {
+        props[key] = value;
+      }
+    } else if (unquotedValue !== undefined) {
+      // Unquoted value: prop=value
+      props[key] = unquotedValue;
+    } else {
+      // Boolean prop: prop (defaults to true)
+      props[key] = true;
+    }
+  }
+
+  return props;
 }
 
 /**
@@ -105,7 +192,7 @@ export default async function DynamicComponentPage(props: PageProps) {
           <div class="px-4 lg:px-6 pt-20 pb-8">
             <div class="max-w-7xl mx-auto">
               <h1 class="text-3xl lg:text-4xl font-bold text-base-content mb-2">
-              {pageData.title}
+                {pageData.title}
               </h1>
               <p class="text-lg text-base-content/70 max-w-2xl">
                 {pageData.description}            </p>
@@ -140,9 +227,20 @@ export default async function DynamicComponentPage(props: PageProps) {
                   <div class="bg-gray-50 p-4 rounded mb-4">
                     <div class="flex flex-wrap gap-4">
                       {(() => {
-                        // Simple component rendering for now
-                        const Component = components.Static;
-                        return <Component>Example</Component>;
+                        // Parse the JSX code to get component instances
+                        const parsedComponents = parseJSXExample(example.code, componentName);
+
+                        return parsedComponents.map((comp, compIndex) => {
+                          const Component = (example.interactive && components.Interactive)
+                            ? components.Interactive
+                            : components.Static;
+
+                          return (
+                            <Component key={compIndex} {...comp.props}>
+                              {comp.content}
+                            </Component>
+                          );
+                        });
                       })()}
                     </div>
                   </div>
@@ -152,9 +250,7 @@ export default async function DynamicComponentPage(props: PageProps) {
                       <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
                         Show Code
                       </summary>
-                      <pre class="bg-gray-100 p-4 rounded mt-2 overflow-x-auto">
-                        <code>{example.code}</code>
-                      </pre>
+                      <CodeExample code={example.code} />
                     </details>
                   )}
                 </div>
