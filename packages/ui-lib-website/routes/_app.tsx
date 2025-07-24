@@ -63,11 +63,6 @@ export default function App({ Component, state }: PageProps) {
 
         {/* Custom CSS files */}
         <link rel="stylesheet" href={asset("/styles.css")} />
-        <link rel="stylesheet" href={asset("/theme-transitions.css")} />
-        <link rel="stylesheet" href={asset("/spacing-system.css")} />
-        <link rel="stylesheet" href={asset("/page-transitions.css")} />
-        <link rel="stylesheet" href={asset("/responsive-design.css")} />
-        <link rel="stylesheet" href={asset("/performance-optimizations.css")} />
 
         {/* Theme initialization script - runs before page render to prevent flash */}
         <script
