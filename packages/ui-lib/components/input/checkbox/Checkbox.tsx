@@ -1,11 +1,4 @@
-import { BaseComponentProps, ColorProps, DisabledProps, SizeProps } from "../../types.ts";
-
-export interface CheckboxProps extends BaseComponentProps, SizeProps, ColorProps, DisabledProps {
-  checked?: boolean;
-  indeterminate?: boolean;
-  label?: string;
-  onChange?: (event: Event) => void;
-}
+import { CheckboxProps } from "./Checkbox.schema.ts";
 
 export function Checkbox({
   class: className = "",

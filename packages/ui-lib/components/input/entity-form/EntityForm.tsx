@@ -1,5 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import type { JSX } from "preact";
+import { Input } from "../input/Input.tsx";
+import { Textarea } from "../textarea/Textarea.tsx";
+import { Select } from "../select/Select.tsx";
 
 export interface FormField {
   key: string;
@@ -175,11 +178,11 @@ export function EntityForm({
     switch (field.type) {
       case "textarea":
         return (
-          <textarea
+          <Textarea
             value={value}
             onChange={(e) => handleInputChange(field, (e.target as HTMLTextAreaElement).value)}
             rows={3}
-            class={baseInputClasses}
+            bordered
             placeholder={field.placeholder}
             disabled={isLoading}
           />
@@ -188,18 +191,13 @@ export function EntityForm({
       case "select":
         return (
           <div>
-            <select
+            <Select
               value={value}
               onChange={(e) => handleInputChange(field, (e.target as HTMLSelectElement).value)}
-              class={baseInputClasses}
+              options={field.options || []}
+              bordered
               disabled={isLoading}
-            >
-              {field.options?.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
             {field.options?.find(opt => opt.value === value)?.description && (
               <p class="mt-1 text-sm text-gray-500">
                 {field.options.find(opt => opt.value === value)?.description}
@@ -211,11 +209,12 @@ export function EntityForm({
       case "json":
         return (
           <div>
-            <textarea
+            <Textarea
               value={value}
               onChange={(e) => handleInputChange(field, (e.target as HTMLTextAreaElement).value)}
               rows={8}
-              class={`${baseInputClasses} font-mono text-sm`}
+              bordered
+              class="font-mono text-sm"
               placeholder={field.placeholder || '{"key": "value"}'}
               disabled={isLoading}
             />
@@ -227,11 +226,11 @@ export function EntityForm({
 
       default:
         return (
-          <input
+          <Input
             type="text"
             value={value}
             onChange={(e) => handleInputChange(field, (e.target as HTMLInputElement).value)}
-            class={baseInputClasses}
+            bordered
             placeholder={field.placeholder}
             disabled={isLoading}
           />

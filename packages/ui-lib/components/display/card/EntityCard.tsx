@@ -1,3 +1,5 @@
+import { Button } from "../../action/button/Button.tsx";
+
 interface EntityStatus {
   value: string;
   icon: string;
@@ -155,18 +157,19 @@ export function EntityCard({
           {/* Primary Actions */}
           <div class="flex gap-2">
             {onView && (
-              <button class="btn btn-primary btn-sm" onClick={onView}>
+              <Button color="primary" size="sm" onClick={onView}>
                 View
-              </button>
+              </Button>
             )}
             {showOwnerActions && visibleActions.map((action, index) => (
-              <button
+              <Button
                 key={index}
-                class={`btn btn-${action.variant || 'neutral'} btn-sm`}
+                color={action.variant as any || 'neutral'}
+                size="sm"
                 onClick={action.onClick}
               >
                 {action.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

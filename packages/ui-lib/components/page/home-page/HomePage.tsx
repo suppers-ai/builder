@@ -1,5 +1,7 @@
 import { ApplicationCard } from "../../display/card/ApplicationCard.tsx";
 import { Loading } from "../../feedback/loading/Loading.tsx";
+import { Button } from "../../action/button/Button.tsx";
+import { Input } from "../../input/input/Input.tsx";
 import type {
   Application,
   CreateApplicationData,
@@ -23,12 +25,12 @@ function LazyApplicationForm(props: {
       <p class="text-gray-600 mb-4">
         Form would load here in client context (island component)
       </p>
-      <button
+      <Button
         onClick={props.onCancel}
-        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+        color="neutral"
       >
         Back to Applications
-      </button>
+      </Button>
     </div>
   );
 }
@@ -76,12 +78,13 @@ export function HomePage({
   const SimpleSearchBar = () => (
     <div class="max-w-2xl">
       <div class="relative">
-        <input
+        <Input
           type="text"
           placeholder="Search applications..."
           value={searchQuery}
           onInput={(e) => onSearch((e.target as HTMLInputElement).value, searchFilters)}
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          bordered
+          class="w-full"
         />
         <div class="absolute right-3 top-2.5 text-gray-400">
           🔍
@@ -90,48 +93,42 @@ export function HomePage({
 
       {/* Simple filter buttons */}
       <div class="mt-3 flex flex-wrap gap-2">
-        <button
+        <Button
           onClick={() =>
             onSearch(searchQuery, {
               ...searchFilters,
               status: searchFilters.status === "draft" ? "" : "draft",
             })}
-          class={`px-3 py-1 rounded-full text-sm ${
-            searchFilters.status === "draft"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
+          color={searchFilters.status === "draft" ? "primary" : "neutral"}
+          variant={searchFilters.status === "draft" ? undefined : "outline"}
+          size="sm"
         >
           Draft
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() =>
             onSearch(searchQuery, {
               ...searchFilters,
               status: searchFilters.status === "published" ? "" : "published",
             })}
-          class={`px-3 py-1 rounded-full text-sm ${
-            searchFilters.status === "published"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
+          color={searchFilters.status === "published" ? "primary" : "neutral"}
+          variant={searchFilters.status === "published" ? undefined : "outline"}
+          size="sm"
         >
           Published
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() =>
             onSearch(searchQuery, {
               ...searchFilters,
               status: searchFilters.status === "archived" ? "" : "archived",
             })}
-          class={`px-3 py-1 rounded-full text-sm ${
-            searchFilters.status === "archived"
-              ? "bg-blue-500 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          }`}
+          color={searchFilters.status === "archived" ? "primary" : "neutral"}
+          variant={searchFilters.status === "archived" ? undefined : "outline"}
+          size="sm"
         >
           Archived
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -142,12 +139,13 @@ export function HomePage({
         <div class="text-center">
           <h1 class="text-2xl font-bold mb-4">Welcome to the App Builder</h1>
           <p class="text-gray-600 mb-4">Please log in to manage your applications.</p>
-          <a
+          <Button
+            as="a"
             href="/auth/login"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+            color="primary"
           >
             Log In
-          </a>
+          </Button>
         </div>
       </div>
     );
@@ -176,12 +174,13 @@ export function HomePage({
             Build and manage your web applications
           </p>
         </div>
-        <button
+        <Button
           onClick={onShowCreateForm}
-          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+          color="primary"
+          size="lg"
         >
           ➕ Create Application
-        </button>
+        </Button>
       </div>
 
       {/* Search and Filters */}
@@ -209,12 +208,13 @@ export function HomePage({
                   <p class="text-gray-600 mb-6">
                     Create your first application to get started
                   </p>
-                  <button
+                  <Button
                     onClick={onShowCreateForm}
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                    color="primary"
+                    size="lg"
                   >
                     Create Application
-                  </button>
+                  </Button>
                 </div>
               )
               : (

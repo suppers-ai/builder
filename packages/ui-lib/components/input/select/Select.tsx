@@ -1,19 +1,4 @@
-import { BaseComponentProps, ColorProps, DisabledProps, SizeProps } from "../../types.ts";
-
-export interface SelectProps extends BaseComponentProps, SizeProps, ColorProps, DisabledProps {
-  value?: string;
-  options: SelectOption[];
-  placeholder?: string;
-  bordered?: boolean;
-  ghost?: boolean;
-  onChange?: (event: Event) => void;
-}
-
-export interface SelectOption {
-  value: string;
-  label: string;
-  disabled?: boolean;
-}
+import { SelectProps, SelectOption } from "./Select.schema.ts";
 
 export function Select({
   class: className = "",
@@ -27,6 +12,18 @@ export function Select({
   ghost = false,
   onChange,
   id,
+  // Extract schema-specific props that conflict with HTML attributes
+  children,
+  name,
+  defaultValue,
+  required,
+  // Extract accessibility props to avoid type conflicts
+  role,
+  tabIndex,
+  "aria-label": ariaLabel,
+  "aria-describedby": ariaDescribedby,
+  "aria-expanded": ariaExpanded,
+  "aria-hidden": ariaHidden,
   ...props
 }: SelectProps) {
   const selectClasses = [
@@ -44,8 +41,11 @@ export function Select({
       class={selectClasses}
       value={value}
       disabled={disabled}
-      onChange={onChange}
       id={id}
+      name={name}
+      defaultValue={defaultValue}
+      required={required}
+      onChange={onChange}
       {...props}
     >
       {placeholder && (

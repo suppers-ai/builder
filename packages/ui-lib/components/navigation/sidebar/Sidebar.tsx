@@ -3,6 +3,7 @@ import {
   type SidebarLink,
   type SidebarSection,
 } from "../../../../shared/types/sidebar.tsx";
+import { Input } from "../../input/input/Input.tsx";
 import { Badge } from "../../display/badge/Badge.tsx";
 import { ChevronRight } from "lucide-preact";
 import { useState } from "preact/hooks";
@@ -76,10 +77,12 @@ export function Sidebar({
       {/* Search */}
       {config.showSearch && (
         <div class="p-4 border-b border-base-300 flex-shrink-0">
-          <input
+          <Input
             type="text"
             placeholder="Search..."
-            class="input input-bordered input-sm w-full"
+            size="sm"
+            bordered
+            class="w-full"
             aria-label="Search"
           />
         </div>

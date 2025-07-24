@@ -9,17 +9,17 @@ import { InputBaseSchema, withMetadata } from "../../schemas/base.ts";
 // Input-specific props
 const InputSpecificPropsSchema = z.object({
   type: withMetadata(
-    z.string().default("text").describe("HTML input type attribute"),
-    { examples: ["text", "email", "password", "number", "tel"], since: "1.0.0" },
+    z.enum(["text", "email", "password", "number", "date", "time", "datetime-local", "color", "tel", "url", "search"]).default("text").describe("HTML input type attribute"),
+    { examples: ["text", "email", "password", "number", "date", "time", "color"], since: "1.0.0" },
   ),
 
   placeholder: z.string()
     .default("")
     .describe("Placeholder text for the input"),
 
-  value: z.string()
-    .default("")
-    .describe("Input value"),
+  value: z.union([z.string(), z.number()])
+    .optional()
+    .describe("Input value (string for text inputs, number for number inputs)"),
 
   bordered: z.boolean()
     .default(true)
@@ -29,6 +29,34 @@ const InputSpecificPropsSchema = z.object({
     z.boolean().default(false).describe("Ghost style input"),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
+
+  // Number input specific props
+  min: z.union([z.string(), z.number()])
+    .optional()
+    .describe("Minimum value (for number, date, time inputs)"),
+
+  max: z.union([z.string(), z.number()])
+    .optional()
+    .describe("Maximum value (for number, date, time inputs)"),
+
+  step: z.union([z.string(), z.number()])
+    .optional()
+    .describe("Step value (for number, time inputs)"),
+
+  // Password input specific props
+  showPasswordToggle: z.boolean()
+    .default(false)
+    .describe("Show password visibility toggle button (password type only)"),
+
+  // Color input specific props
+  showColorPreview: z.boolean()
+    .default(true)
+    .describe("Show color preview swatch (color type only)"),
+
+  // Auto-complete attribute
+  autoComplete: z.string()
+    .optional()
+    .describe("HTML autocomplete attribute"),
 });
 
 // Complete Input Props Schema

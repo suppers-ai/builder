@@ -11,6 +11,7 @@ import {
   Target,
   Zap,
 } from "lucide-preact";
+import { Button } from "../../action/button/Button.tsx";
 
 interface Benefit {
   icon: any;
@@ -80,7 +81,7 @@ const features = [
   },
   {
     icon: <Palette size={24} />,
-    title: "29 Built-in Themes",
+    title: "30+ Built-in Themes",
     description: "Switch between themes instantly with built-in theme controller",
   },
   {
@@ -179,19 +180,24 @@ export function BenefitsSection() {
             Join thousands of developers building amazing applications with our component library.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
+            <Button
+              as="a"
               href="/components"
-              class="btn btn-primary btn-lg group"
+              color="primary"
+              size="lg"
+              class="group"
             >
               Explore Components
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </a>
-            <a
+            </Button>
+            <Button
+              as="a"
               href="/docs/installation"
-              class="btn btn-outline btn-lg"
+              variant="outline"
+              size="lg"
             >
               Installation Guide
-            </a>
+            </Button>
           </div>
         </div>
       </div>

@@ -1,71 +1,14 @@
-import { BaseComponentProps, ColorProps, DisabledProps, SizeProps } from "../../types.ts";
-import { DaisyUIColor } from "../../types.ts";
+import { Input } from "../input/Input.tsx";
+import { InputProps } from "../input/Input.schema.ts";
 
-export interface ColorInputProps extends BaseComponentProps, SizeProps, ColorProps, DisabledProps {
-  value?: string;
-  placeholder?: string;
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
-  color?: DaisyUIColor;
-  bordered?: boolean;
-  ghost?: boolean;
-  required?: boolean;
+// Compatibility wrapper - use Input with type="color" instead
+export interface ColorInputProps extends Omit<InputProps, 'type'> {
   showPreview?: boolean;
-  onChange?: (event: Event) => void;
-  onFocus?: (event: FocusEvent) => void;
-  onBlur?: (event: FocusEvent) => void;
-  onInput?: (event: Event) => void;
 }
 
-export function ColorInput({
-  value = "#000000",
-  placeholder,
-  size = "md",
-  color,
-  disabled = false,
-  bordered = true,
-  ghost = false,
-  required = false,
-  showPreview = true,
-  class: className,
-  onChange,
-  onFocus,
-  onBlur,
-  onInput,
-  ...props
-}: ColorInputProps) {
-  // Build input classes
-  const inputClasses = [
-    "input",
-    `input-${size}`,
-    color && `input-${color}`,
-    bordered && "input-bordered",
-    ghost && "input-ghost",
-    disabled && "input-disabled",
-    showPreview && "pl-12",
-    className,
-  ].filter(Boolean).join(" ");
-
-  return (
-    <div className="relative">
-      {showPreview && (
-        <div
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded border border-base-300"
-          style={{ backgroundColor: value }}
-        />
-      )}
-      <input
-        type="color"
-        className={inputClasses}
-        value={value}
-        placeholder={placeholder}
-        disabled={disabled}
-        required={required}
-        onChange={onChange}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        onInput={onInput}
-        {...props}
-      />
-    </div>
-  );
+export function ColorInput(props: ColorInputProps) {
+  // Extract ColorInput-specific props and pass everything else to Input
+  const { showPreview = true, showColorPreview, ...inputProps } = props;
+  
+  return <Input type="color" showColorPreview={showPreview} {...inputProps} />;
 }

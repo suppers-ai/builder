@@ -1,65 +1,14 @@
-import {
-  BaseComponentProps,
-  ColorProps,
-  DisabledProps,
-  EventProps,
-  SizeProps,
-} from "../../types.ts";
+import { Input } from "../input/Input.tsx";
+import { InputProps } from "../input/Input.schema.ts";
 
-export interface EmailInputProps
-  extends BaseComponentProps, EventProps, SizeProps, ColorProps, DisabledProps {
-  value?: string;
-  placeholder?: string;
-  bordered?: boolean;
-  ghost?: boolean;
-  required?: boolean;
-  autoComplete?: string;
-  onChange?: (value: string) => void;
+// Compatibility wrapper - use Input with type="email" instead
+export interface EmailInputProps extends Omit<InputProps, 'type'> {
   onValidationChange?: (isValid: boolean) => void;
 }
 
-export function EmailInput({
-  value,
-  placeholder = "your@email.com",
-  size = "md",
-  color,
-  disabled = false,
-  bordered = true,
-  ghost = false,
-  required = false,
-  autoComplete = "email",
-  class: className,
-  onChange,
-  onFocus,
-  onBlur,
-  onInput,
-  ...props
-}: EmailInputProps) {
-  // Build input classes
-  const inputClasses = [
-    "input",
-    `input-${size}`,
-    color && `input-${color}`,
-    bordered && "input-bordered",
-    ghost && "input-ghost",
-    disabled && "input-disabled",
-    className,
-  ].filter(Boolean).join(" ");
-
-  return (
-    <input
-      type="email"
-      className={inputClasses}
-      value={value}
-      placeholder={placeholder}
-      disabled={disabled}
-      required={required}
-      autoComplete={autoComplete}
-      onChange={onChange}
-      onFocus={onFocus}
-      onBlur={onBlur}
-      onInput={onInput}
-      {...props}
-    />
-  );
+export function EmailInput(props: EmailInputProps) {
+  // Extract EmailInput-specific props and pass everything else to Input
+  const { onValidationChange, ...inputProps } = props;
+  
+  return <Input type="email" {...inputProps} />;
 }

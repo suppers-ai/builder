@@ -79,7 +79,7 @@ test.describe("BenefitsSection E2E Tests", () => {
 
     // Test that all feature items are visible
     await expect(page.getByText("Component Islands")).toBeVisible();
-    await expect(page.getByText("29 Built-in Themes")).toBeVisible();
+    await expect(page.getByText("30+ Themes")).toBeVisible();
     await expect(page.getByText("Mobile First")).toBeVisible();
     await expect(page.getByText("Accessibility")).toBeVisible();
   });

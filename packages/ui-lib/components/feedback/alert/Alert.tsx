@@ -1,5 +1,6 @@
 import { BaseComponentProps, ColorProps } from "../../types.ts";
 import { ComponentChildren } from "preact";
+import { Button } from "../../action/button/Button.tsx";
 
 export interface AlertProps extends BaseComponentProps, ColorProps {
   icon?: ComponentChildren;
@@ -33,9 +34,9 @@ export function Alert({
       <span>{children}</span>
       {actions && <div>{actions}</div>}
       {dismissible && (
-        <button type="button" class="btn btn-sm btn-circle btn-ghost" onClick={onDismiss}>
+        <Button type="button" size="sm" circle variant="ghost" onClick={onDismiss}>
           ✕
-        </button>
+        </Button>
       )}
     </div>
   );

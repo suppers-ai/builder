@@ -6,6 +6,9 @@ import { Alert } from "../../feedback/alert/Alert.tsx";
 import { Card } from "../../display/card/Card.tsx";
 import { Divider } from "../../layout/divider/Divider.tsx";
 
+// Import AuthUser type for typed components
+export type { AuthUser } from "@suppers/auth-client";
+
 interface FormData {
   email: string;
   password: string;
@@ -14,8 +17,8 @@ interface FormData {
   lastName: string;
 }
 
-export interface LoginPageProps extends BaseComponentProps {
-  user: any;
+export interface LoginPageProps<TUser = any> extends BaseComponentProps {
+  user: TUser | null;
   authLoading: boolean;
   isLogin: boolean;
   isLoading: boolean;
@@ -28,7 +31,7 @@ export interface LoginPageProps extends BaseComponentProps {
   onHideForgotPassword: () => void;
   onInputChange: (field: string, value: string) => void;
   onSubmit: (e: Event) => void;
-  onOAuthLogin: (provider: "google" | "github") => void;
+  onOAuthLogin?: (provider: "google" | "github") => void;
   onForgotPassword: (e: Event) => void;
   // Additional props for customization
   appName?: string;
@@ -37,9 +40,10 @@ export interface LoginPageProps extends BaseComponentProps {
   oauthProviders?: ("google" | "github")[];
   showBackToHome?: boolean;
   homeUrl?: string;
+  redirectUri?: string;
 }
 
-export function LoginPage({
+export function LoginPage<TUser = any>({
   class: className = "",
   user,
   authLoading,
@@ -62,9 +66,10 @@ export function LoginPage({
   oauthProviders = ["google", "github"],
   showBackToHome = true,
   homeUrl = "/",
+  redirectUri,
   id,
   ...props
-}: LoginPageProps) {
+}: LoginPageProps<TUser>) {
   // Show loading while checking auth status
   if (authLoading) {
     return (
@@ -172,7 +177,7 @@ export function LoginPage({
             : (
               <>
                 {/* OAuth Buttons */}
-                {showOAuth && (
+                {showOAuth && onOAuthLogin && (
                   <div class="space-y-3">
                     {oauthProviders.includes("google") && (
                       <Button
@@ -219,7 +224,7 @@ export function LoginPage({
                   </div>
                 )}
 
-                {showOAuth && (
+                {showOAuth && onOAuthLogin && (
                   <div class="mt-6">
                     <Divider>Or continue with email</Divider>
                   </div>

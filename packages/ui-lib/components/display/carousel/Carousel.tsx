@@ -1,6 +1,7 @@
 import { BaseComponentProps } from "../../types.ts";
 import { ComponentChildren } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { Button } from "../../action/button/Button.tsx";
 
 export interface CarouselProps extends BaseComponentProps {
   vertical?: boolean;
@@ -180,8 +181,8 @@ export function Carousel({
 
         {navigation && slideCount > 1 && (
           <div class="flex justify-between transform -translate-y-1/2 absolute left-5 right-5 top-1/2">
-            <button onClick={handlePrev} class="btn btn-circle">❮</button>
-            <button onClick={handleNext} class="btn btn-circle">❯</button>
+            <Button onClick={handlePrev} circle>❮</Button>
+            <Button onClick={handleNext} circle>❯</Button>
           </div>
         )}
 

@@ -1,5 +1,6 @@
 import { ComponentChildren } from "preact";
 import { BaseComponentProps } from "../../types.ts";
+import { Button } from "../../action/button/Button.tsx";
 
 export interface ToastProps extends BaseComponentProps {
   message: string;
@@ -107,7 +108,7 @@ export function Toast({
       <span>{message}</span>
       {dismissible && (
         <div>
-          <button type="button" class="btn btn-sm btn-circle btn-ghost">
+          <Button type="button" size="sm" circle variant="ghost">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-4 w-4"
@@ -122,7 +123,7 @@ export function Toast({
                 d="M6 18L18 6M6 6l12 12"
               />
             </svg>
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -65,7 +65,7 @@ export interface ComponentPageData {
 /**
  * Load component page data from metadata system
  */
-async function loadComponentPageData(
+export async function loadComponentPageData(
   componentPath: string,
 ): Promise<ComponentPageData & { previewData: any[] }> {
   try {
@@ -250,119 +250,135 @@ export function createComponentRoute(config: ComponentRouteConfig) {
     const pageData = await loadComponentPageData(componentPath);
 
     return (
-      <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-4">{pageData.title}</h1>
-        <p class="text-lg text-gray-600 mb-8">{pageData.description}</p>
+      <>
+        {/* Page Header */}
+        <header class="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-base-300">
+          <div class="px-4 lg:px-6 pt-8 pb-8">
+            <div class="max-w-4xl">
+              <h1 class="text-3xl lg:text-4xl font-bold text-base-content mb-2">
+                {pageData.title}
+              </h1>
+              <p class="text-lg text-base-content/70">
+                {pageData.description}
+              </p>
+            </div>
+          </div>
+        </header>
 
-        <div class="space-y-8">
-          {pageData.examples.map((example, index) => (
-            <div key={index} class="border rounded-lg p-6">
-              <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
-              <p class="text-gray-600 mb-4">{example.description}</p>
+        {/* Main Content */}
+        <div class="px-4 lg:px-6 py-8">
+          <div class="max-w-7xl mx-auto">
+            <div class="space-y-8">
+              {pageData.examples.map((example, index) => (
+                <div key={index} class="border rounded-lg p-6">
+                  <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
+                  <p class="text-gray-600 mb-4">{example.description}</p>
 
-              <div class="bg-gray-50 p-4 rounded mb-4">
-                <div class="flex flex-wrap gap-4">
-                  {(() => {
-                    // Parse the JSX code to get component instances
-                    const parsedComponents = parseJSXExample(example.code, componentName);
+                  <div class="bg-gray-50 p-4 rounded mb-4">
+                    <div class="flex flex-wrap gap-4">
+                      {(() => {
+                        // Parse the JSX code to get component instances
+                        const parsedComponents = parseJSXExample(example.code, componentName);
 
-                    return parsedComponents.map((comp, compIndex) => {
-                      const Component = (example.interactive && InteractiveComponent)
-                        ? InteractiveComponent
-                        : StaticComponent;
+                        return parsedComponents.map((comp, compIndex) => {
+                          const Component = (example.interactive && InteractiveComponent)
+                            ? InteractiveComponent
+                            : StaticComponent;
 
-                      return (
-                        <Component key={compIndex} {...comp.props}>
-                          {comp.content}
-                        </Component>
-                      );
-                    });
-                  })()}
+                          return (
+                            <Component key={compIndex} {...comp.props}>
+                              {comp.content}
+                            </Component>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+
+                  {(example.showCode !== false) && (
+                    <details class="mt-4">
+                      <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
+                        Show Code
+                      </summary>
+                      <CodeExample code={example.code} />
+                    </details>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {pageData.usageNotes.length > 0 && (
+              <div class="mt-8 p-6 bg-blue-50 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4">Usage Notes</h3>
+                <ul class="list-disc list-inside space-y-2">
+                  {pageData.usageNotes.map((note, index) => (
+                    <li key={index} class="text-gray-700">{note}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {pageData.apiProps.length > 0 && (
+              <div class="mt-8">
+                <h3 class="text-2xl font-semibold mb-6">API Props</h3>
+                <div class="overflow-x-auto">
+                  <table class="min-w-full border border-gray-300 rounded-lg">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Prop</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Type</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Required</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Default</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pageData.apiProps.map((prop, index) => (
+                        <tr key={index} class="hover:bg-gray-50">
+                          <td class="px-4 py-3 text-sm font-mono text-gray-900 border-b">
+                            {prop.name}
+                            {prop.required && <span class="text-red-500 ml-1">*</span>}
+                          </td>
+                          <td class="px-4 py-3 text-sm font-mono text-gray-700 border-b">
+                            <code class="bg-gray-100 px-2 py-1 rounded">{prop.type}</code>
+                          </td>
+                          <td class="px-4 py-3 text-sm text-gray-700 border-b">
+                            {prop.required ? (
+                              <span class="text-red-500 font-medium">Yes</span>
+                            ) : (
+                              <span class="text-gray-500">No</span>
+                            )}
+                          </td>
+                          <td class="px-4 py-3 text-sm font-mono text-gray-700 border-b">
+                            {prop.default ? (
+                              <code class="bg-gray-100 px-2 py-1 rounded">{prop.default}</code>
+                            ) : (
+                              <span class="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td class="px-4 py-3 text-sm text-gray-700 border-b">
+                            {prop.description}
+                            {prop.examples && prop.examples.length > 0 && (
+                              <div class="mt-1 text-xs text-gray-500">
+                                Examples: {prop.examples.join(", ")}
+                              </div>
+                            )}
+                            {prop.since && (
+                              <div class="mt-1 text-xs text-blue-500">
+                                Since: {prop.since}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-
-              {(example.showCode !== false) && (
-                <details class="mt-4">
-                  <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
-                    Show Code
-                  </summary>
-                  <CodeExample code={example.code} />
-                </details>
-              )}
-            </div>
-          ))}
+            )}
+          </div>
         </div>
-
-        {pageData.usageNotes.length > 0 && (
-          <div class="mt-8 p-6 bg-blue-50 rounded-lg">
-            <h3 class="text-xl font-semibold mb-4">Usage Notes</h3>
-            <ul class="list-disc list-inside space-y-2">
-              {pageData.usageNotes.map((note, index) => (
-                <li key={index} class="text-gray-700">{note}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {pageData.apiProps.length > 0 && (
-          <div class="mt-8">
-            <h3 class="text-2xl font-semibold mb-6">API Props</h3>
-            <div class="overflow-x-auto">
-              <table class="min-w-full border border-gray-300 rounded-lg">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Prop</th>
-                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Type</th>
-                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Required</th>
-                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Default</th>
-                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pageData.apiProps.map((prop, index) => (
-                    <tr key={index} class="hover:bg-gray-50">
-                      <td class="px-4 py-3 text-sm font-mono text-gray-900 border-b">
-                        {prop.name}
-                        {prop.required && <span class="text-red-500 ml-1">*</span>}
-                      </td>
-                      <td class="px-4 py-3 text-sm font-mono text-gray-700 border-b">
-                        <code class="bg-gray-100 px-2 py-1 rounded">{prop.type}</code>
-                      </td>
-                      <td class="px-4 py-3 text-sm text-gray-700 border-b">
-                        {prop.required ? (
-                          <span class="text-red-500 font-medium">Yes</span>
-                        ) : (
-                          <span class="text-gray-500">No</span>
-                        )}
-                      </td>
-                      <td class="px-4 py-3 text-sm font-mono text-gray-700 border-b">
-                        {prop.default ? (
-                          <code class="bg-gray-100 px-2 py-1 rounded">{prop.default}</code>
-                        ) : (
-                          <span class="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td class="px-4 py-3 text-sm text-gray-700 border-b">
-                        {prop.description}
-                        {prop.examples && prop.examples.length > 0 && (
-                          <div class="mt-1 text-xs text-gray-500">
-                            Examples: {prop.examples.join(", ")}
-                          </div>
-                        )}
-                        {prop.since && (
-                          <div class="mt-1 text-xs text-blue-500">
-                            Since: {prop.since}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
+      </>
     );
   };
 }

@@ -35,7 +35,7 @@ Deno.test("BenefitsSection - contains additional features", () => {
   // Check for additional features section
   assertStringIncludes(html, "Everything You Need");
   assertStringIncludes(html, "Component Islands");
-  assertStringIncludes(html, "29 Built-in Themes");
+  assertStringIncludes(html, "30+ Themes");
   assertStringIncludes(html, "Mobile First");
   assertStringIncludes(html, "Accessibility");
 });

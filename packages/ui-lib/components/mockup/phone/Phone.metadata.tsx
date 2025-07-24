@@ -6,7 +6,7 @@ const phoneExamples: ComponentExample[] = [
     title: "Basic Phone Mockup",
     description: "Simple mobile device frame mockup",
     code: `<PhoneMockup>
-  <div class="bg-gradient-to-br from-purple-500 to-pink-500 h-full flex items-center justify-center text-white">
+  <div class="bg-gradient-to-br from-primary to-secondary h-full flex items-center justify-center text-primary-content">
     <div class="text-center">
       <h1 class="text-2xl font-bold mb-2">My App</h1>
       <p>Welcome to mobile</p>
@@ -19,21 +19,21 @@ const phoneExamples: ComponentExample[] = [
     title: "iPhone with Camera",
     description: "iPhone mockup with camera cutout detail",
     code: `<PhoneMockup variant="iphone" color="black">
-  <div class="bg-white h-full">
-    <div class="bg-blue-500 text-white p-4">
+  <div class="bg-base-100 h-full">
+    <div class="bg-info text-info-content p-4">
       <h2 class="text-xl font-bold">Social App</h2>
     </div>
     <div class="p-4 space-y-4">
       <div class="flex items-center gap-3">
         <div class="avatar">
-          <div class="w-10 h-10 rounded-full bg-gray-300"></div>
+          <div class="w-10 h-10 rounded-full bg-base-300"></div>
         </div>
         <div>
-          <p class="font-semibold">John Doe</p>
-          <p class="text-sm text-gray-500">2 hours ago</p>
+          <p class="font-semibold text-base-content">John Doe</p>
+          <p class="text-sm text-base-content/60">2 hours ago</p>
         </div>
       </div>
-      <p>Just launched our new app! 🚀</p>
+      <p class="text-base-content">Just launched our new app! 🚀</p>
     </div>
   </div>
 </PhoneMockup>`,
@@ -44,17 +44,17 @@ const phoneExamples: ComponentExample[] = [
     description: "Phone mockups with different frame colors",
     code: `<div class="flex gap-4">
   <PhoneMockup variant="iphone" color="black">
-    <div class="bg-black text-white h-full flex items-center justify-center">
+    <div class="bg-neutral text-neutral-content h-full flex items-center justify-center">
       <p>Dark Theme</p>
     </div>
   </PhoneMockup>
   <PhoneMockup variant="iphone" color="white">
-    <div class="bg-white text-black h-full flex items-center justify-center">
+    <div class="bg-base-100 text-base-content h-full flex items-center justify-center">
       <p>Light Theme</p>
     </div>
   </PhoneMockup>
   <PhoneMockup variant="android" color="blue">
-    <div class="bg-blue-50 h-full flex items-center justify-center">
+    <div class="bg-info/20 text-info-content h-full flex items-center justify-center">
       <p>Android</p>
     </div>
   </PhoneMockup>
@@ -66,17 +66,17 @@ const phoneExamples: ComponentExample[] = [
     description: "Phone mockups in various sizes",
     code: `<div class="flex items-end gap-4">
   <PhoneMockup size="sm">
-    <div class="bg-green-500 text-white h-full flex items-center justify-center text-sm">
+    <div class="bg-success text-success-content h-full flex items-center justify-center text-sm">
       <p>Small</p>
     </div>
   </PhoneMockup>
   <PhoneMockup size="md">
-    <div class="bg-blue-500 text-white h-full flex items-center justify-center">
+    <div class="bg-info text-info-content h-full flex items-center justify-center">
       <p>Medium</p>
     </div>
   </PhoneMockup>
   <PhoneMockup size="lg">
-    <div class="bg-purple-500 text-white h-full flex items-center justify-center text-lg">
+    <div class="bg-accent text-accent-content h-full flex items-center justify-center text-lg">
       <p>Large</p>
     </div>
   </PhoneMockup>
@@ -87,24 +87,24 @@ const phoneExamples: ComponentExample[] = [
     title: "Responsive E-commerce App",
     description: "Phone mockup showcasing a mobile app interface",
     code: `<PhoneMockup variant="iphone" class="mx-auto">
-  <div class="bg-white h-full flex flex-col">
-    <div class="bg-indigo-600 text-white p-4 text-center">
+  <div class="bg-base-100 h-full flex flex-col">
+    <div class="bg-primary text-primary-content p-4 text-center">
       <h3 class="text-lg font-bold">E-Commerce</h3>
     </div>
     <div class="flex-1 p-4 space-y-3">
       <div class="grid grid-cols-2 gap-3">
-        <div class="bg-gray-100 p-3 rounded text-center">
-          <div class="w-full h-16 bg-gray-300 rounded mb-2"></div>
-          <p class="text-sm font-medium">Product 1</p>
-          <p class="text-xs text-gray-500">$29.99</p>
+        <div class="bg-base-200 p-3 rounded text-center">
+          <div class="w-full h-16 bg-base-300 rounded mb-2"></div>
+          <p class="text-sm font-medium text-base-content">Product 1</p>
+          <p class="text-xs text-base-content/60">$29.99</p>
         </div>
-        <div class="bg-gray-100 p-3 rounded text-center">
-          <div class="w-full h-16 bg-gray-300 rounded mb-2"></div>
-          <p class="text-sm font-medium">Product 2</p>
-          <p class="text-xs text-gray-500">$39.99</p>
+        <div class="bg-base-200 p-3 rounded text-center">
+          <div class="w-full h-16 bg-base-300 rounded mb-2"></div>
+          <p class="text-sm font-medium text-base-content">Product 2</p>
+          <p class="text-xs text-base-content/60">$39.99</p>
         </div>
       </div>
-      <button class="w-full bg-indigo-600 text-white py-2 rounded">
+      <button class="w-full bg-primary text-primary-content py-2 rounded">
         View All
       </button>
     </div>

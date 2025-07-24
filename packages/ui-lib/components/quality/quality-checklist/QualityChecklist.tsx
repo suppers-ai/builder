@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle, Info, XCircle } from "lucide-preact";
+import { Button } from "../../action/button/Button.tsx";
 
 interface QualityCheckItem {
   id: string;
@@ -178,12 +179,12 @@ export function QualityChecklist({
             Last updated: {new Date().toLocaleDateString()}
           </div>
           <div class="flex gap-2">
-            <button type="button" class="btn btn-sm btn-outline">
+            <Button type="button" variant="outline" size="sm">
               Export Report
-            </button>
-            <button type="button" class="btn btn-sm btn-primary">
+            </Button>
+            <Button type="button" color="primary" size="sm">
               Run Tests
-            </button>
+            </Button>
           </div>
         </div>
       </div>
