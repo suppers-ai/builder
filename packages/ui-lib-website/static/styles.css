@@ -82,3 +82,48 @@ pre {
   min-width: 0;
   overflow: hidden;
 }
+
+/* Hero background using actual image */
+.hero-gradient-bg {
+  background-image: url('/backgrounds/hero-gradient.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add subtle overlay for better text readability */
+.hero-gradient-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* Ensure text remains readable over the image */
+.hero-gradient-bg .hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark theme adjustments - add darker overlay */
+[data-theme="dark"] .hero-gradient-bg::before,
+[data-theme="night"] .hero-gradient-bg::before,
+[data-theme="halloween"] .hero-gradient-bg::before,
+[data-theme="forest"] .hero-gradient-bg::before,
+[data-theme="black"] .hero-gradient-bg::before,
+[data-theme="luxury"] .hero-gradient-bg::before,
+[data-theme="dracula"] .hero-gradient-bg::before,
+[data-theme="synthwave"] .hero-gradient-bg::before,
+[data-theme="cyberpunk"] .hero-gradient-bg::before,
+[data-theme="dim"] .hero-gradient-bg::before,
+[data-theme="coffee"] .hero-gradient-bg::before,
+[data-theme="business"] .hero-gradient-bg::before {
+  background: rgba(0, 0, 0, 0.4);
+}

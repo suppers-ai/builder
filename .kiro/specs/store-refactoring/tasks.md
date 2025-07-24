@@ -100,7 +100,7 @@
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 6.1_
 
 - [ ] 5.3 Test theme consistency across all daisyUI themes
-  - Create automated tests to verify component rendering across all 29 themes
+  - Create automated tests to verify component rendering across all 30+ themes
   - Test theme token application in light and dark theme variants
   - Test component visual consistency across different theme categories
   - Verify no hardcoded colors remain that break theme switching

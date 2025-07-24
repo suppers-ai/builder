@@ -5,7 +5,8 @@ export default function Home() {
     <>
       <Hero
         title="Build Beautiful User Interfaces with Fresh"
-        subtitle="A comprehensive UI component library built for Fresh applications. 90+ components, 29 themes, and TypeScript-first design."
+        subtitle="A comprehensive UI component library built for Fresh applications. 90+ components, 30+ themes, and TypeScript-first design."
+        titleColor="white"
         primaryCTA={{
           text: "Browse Components",
           href: "/components",
@@ -17,7 +18,7 @@ export default function Home() {
         variant="centered"
         background="gradient"
         size="lg"
-        className="bg-gradient-to-br from-base-100 to-base-200"
+        className="hero-gradient-bg"
       />
 
       {/* Technology Stack Section */}

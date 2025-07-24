@@ -7,6 +7,10 @@ export interface HeroProps extends BaseComponentProps {
   title: string;
   /** Hero subtitle/description */
   subtitle?: string;
+  /** Title text color */
+  titleColor?: string;
+  /** Subtitle text color */
+  subtitleColor?: string;
   /** Primary call-to-action button */
   primaryCTA?: {
     text: string;
@@ -44,6 +48,8 @@ export interface HeroProps extends BaseComponentProps {
 export function Hero({
   title,
   subtitle,
+  titleColor,
+  subtitleColor,
   primaryCTA,
   secondaryCTA,
   content,
@@ -143,11 +149,17 @@ export function Hero({
 
   const renderTextContent = () => (
     <div className={variant === "split" ? "flex-1" : "max-w-4xl"}>
-      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+      <h1 
+        className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6"
+        style={titleColor ? { color: titleColor } : {}}
+      >
         {title}
       </h1>
       {subtitle && (
-        <p className="text-lg sm:text-xl lg:text-2xl opacity-80 mb-8 leading-relaxed">
+        <p 
+          className="text-lg sm:text-xl lg:text-2xl opacity-80 mb-8 leading-relaxed"
+          style={subtitleColor ? { color: subtitleColor } : {}}
+        >
           {subtitle}
         </p>
       )}

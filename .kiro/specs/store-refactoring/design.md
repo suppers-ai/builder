@@ -8,7 +8,7 @@ This design document outlines the architecture and implementation approach for r
 
 ### Current Architecture
 - **Framework**: Fresh 2.0 (alpha) with Preact
-- **Styling**: TailwindCSS + daisyUI with 29 themes
+- **Styling**: TailwindCSS + daisyUI with 30+ themes
 - **Authentication**: Supabase Auth with OAuth providers
 - **UI Library**: Partial integration with `@suppers/ui-lib`
 - **SSO Role**: Centralized authentication provider for client applications

@@ -8,12 +8,19 @@ export interface SidebarAwareLayoutProps {
 
 export default function SidebarAwareLayout({ children }: SidebarAwareLayoutProps) {
   const [mounted, setMounted] = useState(false);
-  const sidebarOpen = globalSidebarOpen.value;
+  const [sidebarOpen, setSidebarOpen] = useState(globalSidebarOpen.value);
 
   useEffect(() => {
     setMounted(true);
     // Initialize sidebar state based on screen size
     initializeSidebar();
+    
+    // Subscribe to sidebar state changes
+    const unsubscribe = globalSidebarOpen.subscribe((isOpen) => {
+      setSidebarOpen(isOpen);
+    });
+
+    return unsubscribe;
   }, []);
 
   // Don't apply layout shifts until mounted to prevent hydration issues
