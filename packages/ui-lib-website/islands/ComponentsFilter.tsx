@@ -2,11 +2,10 @@ import {
     Badge,
     Button,
     ComponentPreviewCard,
-    Avatar,
-    Toggle,
   } from "@suppers/ui-lib";
-  import { useState, useEffect } from "preact/hooks";
-  import { getComponentPreviewData } from "@suppers/shared/utils/preview-generator.ts";
+  import type { ButtonProps } from "@suppers/ui-lib";
+  import { useState } from "preact/hooks";
+  import { flatComponentsMetadata } from "../../ui-lib/components/metadata.tsx";
   
   interface ComponentMeta {
     name: string;
@@ -30,7 +29,7 @@ import {
   }
 
   // Helper function to provide default Button props
-  function getDefaultButtonProps(overrides: Partial<any> = {}) {
+  function getDefaultButtonProps(overrides: Partial<ButtonProps> = {}) {
     return {
       size: "sm" as const,
       type: "button" as const,
@@ -46,86 +45,20 @@ import {
     };
   }
   
-  // Component to render preview from examples.md data
+  // Component to render preview from metadata files
   function ComponentPreview({ componentName }: { componentName: string }) {
-    const [previewData, setPreviewData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-  
-    useEffect(() => {
-      async function loadPreview() {
-        try {
-          const data = await getComponentPreviewData(componentName);
-          setPreviewData(data);
-        } catch (error) {
-          console.warn(`Failed to load preview for ${componentName}:`, error);
-        } finally {
-          setLoading(false);
-        }
-      }
-      loadPreview();
-    }, [componentName]);
-  
-    if (loading) {
-      return <div class="text-xs opacity-50">Loading...</div>;
-    }
-  
-    if (!previewData || previewData.length === 0) {
-      // Fallback to hardcoded previews for components without preview data
-      return getHardcodedPreview(componentName);
-    }
-  
-    // Render first preview from examples.md
-    const firstPreview = previewData[0];
+    // Find the component metadata
+    const componentMetadata = flatComponentsMetadata.find(comp => comp.name === componentName);
     
-    // Check if it's an interactive example
-    if (firstPreview.interactive) {
-      return <div class="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Interactive</div>;
+    if (componentMetadata && componentMetadata.preview) {
+      // Use the preview from metadata
+      return componentMetadata.preview;
     }
     
-    // For static examples, show a simplified preview based on the component name
-    return getHardcodedPreview(componentName);
+    // Fallback if no metadata preview is found
+    return <div class="text-xs opacity-50">Preview not available</div>;
   }
   
-  // Fallback hardcoded previews for components without preview data
-  function getHardcodedPreview(componentName: string) {
-    switch (componentName) {
-      case "Button":
-        return (
-          <div class="flex gap-2">
-            <Button {...getDefaultButtonProps({ color: "primary" })}>
-              Primary
-            </Button>
-            <Button {...getDefaultButtonProps({ variant: "outline" })}>
-              Outline
-            </Button>
-          </div>
-        );
-      case "Avatar":
-        return (
-          <div class="flex gap-2">
-            <Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-            <Avatar initials="AB" />
-          </div>
-        );
-      case "Badge":
-        return (
-          <div class="flex gap-2">
-            <Badge color="primary">New</Badge>
-            <Badge color="success">Active</Badge>
-            <Badge variant="outline">Badge</Badge>
-          </div>
-        );
-      case "Toggle":
-        return (
-          <div class="flex gap-2">
-            <Toggle checked />
-            <Toggle color="primary" checked />
-          </div>
-        );
-      default:
-        return <div class="text-xs opacity-50">Preview not available</div>;
-    }
-  }
   
   export default function ComponentsFilterInteractive({ components, categories, initialCategory = "All" }: ComponentsFilterProps) {
     const [selectedCategory, setSelectedCategory] = useState(initialCategory);
