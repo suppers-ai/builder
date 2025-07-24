@@ -1,6 +1,6 @@
 import { useEffect } from "preact/hooks";
 import { Menu, X } from "lucide-preact";
-import { toggleGlobalSidebar, globalSidebarOpen } from "@suppers/ui-lib";
+import { globalSidebarOpen, toggleGlobalSidebar } from "@suppers/ui-lib";
 
 export interface FloatingMenuButtonProps {
   className?: string;
@@ -28,22 +28,23 @@ export default function FloatingMenuButton({ className = "" }: FloatingMenuButto
 
   return (
     <button
+      type="button"
       onClick={handleToggle}
-      class={`fixed top-4 z-50 btn btn-primary btn-circle shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out ${
-        sidebarOpen ? "left-[264px]" : "left-4"
+      class={`fixed top-4 z-[60] btn btn-primary btn-circle shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out ${
+        sidebarOpen ? "left-[264px] lg:left-[264px]" : "left-4"
       } ${className}`}
       aria-label={sidebarOpen ? "Close menu (Ctrl+B)" : "Open menu (Ctrl+B)"}
       title={sidebarOpen ? "Close menu (Ctrl+B)" : "Open menu (Ctrl+B)"}
     >
       <div class="relative w-5 h-5">
-        <Menu 
-          size={20} 
+        <Menu
+          size={20}
           class={`absolute inset-0 transition-all duration-300 ease-in-out ${
             sidebarOpen ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
           }`}
         />
-        <X 
-          size={20} 
+        <X
+          size={20}
           class={`absolute inset-0 transition-all duration-300 ease-in-out ${
             sidebarOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
           }`}
