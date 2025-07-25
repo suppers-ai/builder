@@ -40,36 +40,31 @@ function parseJSXExample(code: string, componentName: string): Array<{
 
   // Improved regex to handle multiline JSX and various prop formats
   const componentRegex = new RegExp(
-    `<${componentName}([^>]*?)>([\\s\\S]*?)<\\/${componentName}>`,
+    `<${componentName}([\\s\\S]*?)\\/>|<${componentName}([\\s\\S]*?)>([\\s\\S]*?)<\\/${componentName}>`,
     "g",
   );
-  const selfClosingRegex = new RegExp(`<${componentName}([^>]*?)\\s*\\/>`, "g");
 
   let match;
 
-  // Match components with content (e.g., <Button color="primary">Primary</Button>)
   while ((match = componentRegex.exec(code)) !== null) {
-    const propsString = match[1];
-    const content = match[2].trim();
-    const props = parseProps(propsString);
+    let propsString: string;
+    let content: string;
+
+    if (match[1] !== undefined) {
+      // Self-closing component: <Component props... />
+      propsString = match[1];
+      content = "";
+    } else {
+      // Component with content: <Component props...>content</Component>
+      propsString = match[2];
+      content = match[3]?.trim() || "";
+    }
+
+    const props = parseComplexProps(propsString);
 
     components.push({
       props,
-      content: content || (props.children as string) || "Button",
-    });
-  }
-
-  // Reset regex lastIndex for self-closing components
-  selfClosingRegex.lastIndex = 0;
-
-  // Match self-closing components (e.g., <Button color="primary" />)
-  while ((match = selfClosingRegex.exec(code)) !== null) {
-    const propsString = match[1];
-    const props = parseProps(propsString);
-
-    components.push({
-      props,
-      content: (props.children as string) || "Button",
+      content: content || (props.children as string) || componentName,
     });
   }
 
@@ -77,43 +72,45 @@ function parseJSXExample(code: string, componentName: string): Array<{
 }
 
 /**
- * Parse props string and return props object
+ * Parse complex props including nested JSX
  */
-function parseProps(propsString: string): Record<string, any> {
+function parseComplexProps(propsString: string): Record<string, any> {
   const props: Record<string, any> = {};
-
-  // Handle different prop formats: prop="value", prop={value}, prop={true}, prop
-  const propsRegex = /(\w+)(?:=(?:"([^"]*)"|{([^}]*)}|([^\s>]+)))?/g;
-
-  let propMatch;
-  while ((propMatch = propsRegex.exec(propsString)) !== null) {
-    const [, key, quotedValue, bracedValue, unquotedValue] = propMatch;
-
+  
+  // Remove extra whitespace and newlines
+  const cleanProps = propsString.replace(/\s+/g, ' ').trim();
+  
+  // Simple regex for basic props (will expand this as needed)
+  const simplePropsRegex = /(\w+)=(?:"([^"]*)"|{([^}]*)}|(\w+))/g;
+  
+  let match;
+  while ((match = simplePropsRegex.exec(cleanProps)) !== null) {
+    const [, key, quotedValue, bracedValue, unquotedValue] = match;
+    
     if (quotedValue !== undefined) {
-      // String value: prop="value"
       props[key] = quotedValue;
     } else if (bracedValue !== undefined) {
-      // Expression value: prop={value}
       const value = bracedValue.trim();
       if (value === "true") props[key] = true;
       else if (value === "false") props[key] = false;
       else if (value.match(/^\d+$/)) props[key] = parseInt(value);
-      else if (value.startsWith('"') && value.endsWith('"')) {
-        props[key] = value.slice(1, -1);
-      } else {
-        props[key] = value;
-      }
+      else props[key] = value;
     } else if (unquotedValue !== undefined) {
-      // Unquoted value: prop=value
       props[key] = unquotedValue;
-    } else {
-      // Boolean prop: prop (defaults to true)
-      props[key] = true;
     }
   }
-
+  
+  // For now, handle complex JSX props by setting placeholder values
+  if (cleanProps.includes('trigger={')) {
+    props.trigger = "Button"; // Placeholder - will be handled by component
+  }
+  if (cleanProps.includes('content={')) {
+    props.content = "Menu Items"; // Placeholder - will be handled by component  
+  }
+  
   return props;
 }
+
 
 /**
  * Dynamically import component from UI library based on component name and metadata
@@ -224,11 +221,44 @@ export default async function DynamicComponentPage(props: PageProps) {
                   <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
                   <p class="text-gray-600 mb-4">{example.description}</p>
 
-                  <div class="p-4 rounded mb-4">
+                  <div class="p-6 bg-base-100 border border-base-300 rounded-lg mb-4">
                     <div class="flex flex-wrap gap-4">
                       {(() => {
-                        // Parse the JSX code to get component instances
+                        // Check if example has predefined props data
+                        if (example.props) {
+                          const Component = (example.interactive && components.Interactive)
+                            ? components.Interactive
+                            : components.Static;
+
+                          // Handle array of props (multiple component instances)
+                          if (Array.isArray(example.props)) {
+                            return example.props.map((propSet, propIndex) => (
+                              <Component key={propIndex} {...propSet} />
+                            ));
+                          }
+                          
+                          // Handle single props object
+                          return <Component {...example.props} />;
+                        }
+
+                        // Fallback: Parse the JSX code to get component instances
                         const parsedComponents = parseJSXExample(example.code, componentName);
+
+                        // If no components were parsed, render as raw HTML (for daisyUI examples)
+                        if (parsedComponents.length === 0) {
+                          return (
+                            <div class="w-full">
+                              <div 
+                                dangerouslySetInnerHTML={{ 
+                                  __html: example.code
+                                    .replace(/{(\d+)}/g, '$1') // Replace {0}, {1} with 0, 1
+                                    .replace(/tabIndex=\{0\}/g, 'tabindex="0"') // Fix tabIndex
+                                    .replace(/class="/g, 'class="') // Ensure proper class syntax
+                                }} 
+                              />
+                            </div>
+                          );
+                        }
 
                         return parsedComponents.map((comp, compIndex) => {
                           const Component = (example.interactive && components.Interactive)

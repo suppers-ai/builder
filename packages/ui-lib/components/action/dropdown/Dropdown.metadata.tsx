@@ -2,16 +2,21 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
+  ComponentSchema,
 } from "../../types.ts";
 import { Dropdown } from "./Dropdown.tsx";
+import {
+  DropdownPropsSchema,
+  safeValidateDropdownProps,
+  validateDropdownProps,
+} from "./Dropdown.schema.ts";
 
 const dropdownExamples: ComponentExample[] = [
   {
     title: "Basic Dropdown",
     description: "Simple dropdown menu with button trigger",
     code: `<div class="dropdown">
-  <div tabIndex={0} role="button" class="btn m-1">Click me</div>
+  <div tabIndex={0} role="button" class="btn btn-primary m-1">Click me</div>
   <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
     <li><a>Item 1</a></li>
     <li><a>Item 2</a></li>
@@ -24,14 +29,14 @@ const dropdownExamples: ComponentExample[] = [
     title: "Dropdown Positions",
     description: "Different dropdown positions",
     code: `<div class="dropdown dropdown-top">
-  <div tabIndex={0} role="button" class="btn m-1">Top</div>
+  <div tabIndex={0} role="button" class="btn btn-secondary m-1">Top</div>
   <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
     <li><a>Item 1</a></li>
     <li><a>Item 2</a></li>
   </ul>
 </div>
 <div class="dropdown dropdown-end">
-  <div tabIndex={0} role="button" class="btn m-1">End</div>
+  <div tabIndex={0} role="button" class="btn btn-accent m-1">End</div>
   <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
     <li><a>Item 1</a></li>
     <li><a>Item 2</a></li>
@@ -73,45 +78,11 @@ const dropdownExamples: ComponentExample[] = [
   },
 ];
 
-const dropdownProps: ComponentProp[] = [
-  {
-    name: "trigger",
-    type: "ComponentChildren",
-    description: "Element that triggers the dropdown",
-    required: true,
-  },
-  {
-    name: "content",
-    type: "ComponentChildren",
-    description: "Dropdown menu content",
-    required: true,
-  },
-  {
-    name: "position",
-    type:
-      "'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'",
-    description: "Position of dropdown relative to trigger",
-    default: "bottom",
-  },
-  {
-    name: "hover",
-    type: "boolean",
-    description: "Whether to trigger on hover",
-    default: "false",
-  },
-  {
-    name: "open",
-    type: "boolean",
-    description: "Control dropdown open state",
-    default: "false",
-  },
-  {
-    name: "forceOpen",
-    type: "boolean",
-    description: "Force dropdown to stay open",
-    default: "false",
-  },
-];
+const dropdownSchema: ComponentSchema = {
+  schema: DropdownPropsSchema,
+  validateFn: validateDropdownProps,
+  safeValidateFn: safeValidateDropdownProps,
+};
 
 export const dropdownMetadata: ComponentMetadata = {
   name: "Dropdown",
@@ -140,7 +111,7 @@ export const dropdownMetadata: ComponentMetadata = {
     />
   ),
   examples: dropdownExamples,
-  props: dropdownProps,
+  schema: dropdownSchema,
   variants: ["basic", "hover", "position", "user-profile"],
   useCases: ["Navigation menus", "User actions", "Context menus", "Filter options"],
   usageNotes: [
