@@ -3646,6 +3646,16 @@
           "npm:preact@10.26.9"
         ]
       },
+      "packages/docs": {
+        "dependencies": [
+          "jsr:@fresh/core@^2.0.0-alpha.34",
+          "jsr:@pakornv/fresh-plugin-tailwindcss@^1.0.3",
+          "npm:daisyui@^4.12.0",
+          "npm:preact@10.26.9",
+          "npm:tailwindcss@^3.4.0",
+          "npm:zod@^3.23.8"
+        ]
+      },
       "packages/shared": {
         "dependencies": [
           "npm:preact@10.26.9"
@@ -3674,16 +3684,6 @@
       "packages/ui-lib": {
         "dependencies": [
           "npm:preact@10.26.9",
-          "npm:zod@^3.23.8"
-        ]
-      },
-      "packages/ui-lib-website": {
-        "dependencies": [
-          "jsr:@fresh/core@^2.0.0-alpha.34",
-          "jsr:@pakornv/fresh-plugin-tailwindcss@^1.0.3",
-          "npm:daisyui@^4.12.0",
-          "npm:preact@10.26.9",
-          "npm:tailwindcss@^3.4.0",
           "npm:zod@^3.23.8"
         ]
       }
