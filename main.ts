@@ -1,15 +1,18 @@
-// Root-level entry that re-exports the Fresh `app` for Deno Deploy *and*
-// starts the server automatically when this file is executed locally.
+const pkgRelative = Deno.env.get("APP_PACKAGE");
+if (!pkgRelative) {
+  throw new Error("APP_PACKAGE is not set");
+}
 
-import * as ui from "./packages/ui-lib-website/main.ts";
+const pkgMainPath = `./${pkgRelative}/main.ts` as const;
 
-// Re-export the application object for Deno Deploy warm-up.
-export const app = ui.app;
+// Dynamically import the chosen package’s main module.
+const mod = await import(pkgMainPath);
 
-// When you run `deno run main.ts` locally, start the listener so you can
-// verify the build output. Deploy’s builder just imports this file, so
-// `import.meta.main` will be false in production and the server will not
-// attempt to listen twice.
+export const app = mod.app;
+
+// If executed directly (not just imported by Deploy), start the server so you
+// can test the built bundle locally.
 if (import.meta.main) {
-  await ui.app.listen({ port: 8000 });
+  const port = Number(Deno.env.get("PORT") ?? "8000");
+  await mod.app.listen({ port });
 } 
