@@ -274,7 +274,7 @@ export function createComponentRoute(config: ComponentRouteConfig) {
                   <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
                   <p class="text-gray-600 mb-4">{example.description}</p>
 
-                  <div class="bg-gray-50 p-4 rounded mb-4">
+                  <div class="p-4 rounded mb-4">
                     <div class="flex flex-wrap gap-4">
                       {(() => {
                         // Parse the JSX code to get component instances
