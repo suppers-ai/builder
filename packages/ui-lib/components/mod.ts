@@ -184,7 +184,7 @@ export {
   type SidebarSection,
 } from "../../shared/types/sidebar.tsx";
 
-// Export metadata files for ui-lib-website
+// Export metadata files for docs
 export { buttonMetadata } from "./action/button/Button.metadata.tsx";
 export { dropdownMetadata } from "./action/dropdown/Dropdown.metadata.tsx";
 export { loginButtonMetadata } from "./action/login-button/LoginButton.metadata.tsx";

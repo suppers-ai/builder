@@ -1,5 +1,5 @@
 {
-  "name": "@suppers/ui-lib-website",
+  "name": "@suppers/docs",
   "version": "1.0.0",
   "exports": "./mod.ts",
   "imports": {

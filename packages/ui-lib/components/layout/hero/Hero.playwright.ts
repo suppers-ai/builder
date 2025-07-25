@@ -128,7 +128,7 @@ test.describe("Hero Visual Tests", () => {
     });
 
     const container = page.locator("div").last();
-    await expect(container).toHaveScreenshot("hero-gradients.png");
+    await expect(container).toHaveScreenshot("hero-gradient.webp");
   });
 
   test("hero overlay effects", async ({ page }) => {
