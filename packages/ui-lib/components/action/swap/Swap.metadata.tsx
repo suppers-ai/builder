@@ -10,6 +10,11 @@ const swapExamples: ComponentExample[] = [
   on={<span>📄</span>}
   off={<span>📁</span>}
 />`,
+    props: {
+      rotate: true,
+      on: <span>📄</span>,
+      off: <span>📁</span>,
+    },
     showCode: true,
   },
   {
@@ -20,6 +25,11 @@ const swapExamples: ComponentExample[] = [
   on={<span>😄</span>}
   off={<span>😐</span>}
 />`,
+    props: {
+      flip: true,
+      on: <span>😄</span>,
+      off: <span>😐</span>,
+    },
     showCode: true,
   },
   {
@@ -29,6 +39,10 @@ const swapExamples: ComponentExample[] = [
   on={<span>🌞</span>}
   off={<span>🌙</span>}
 />`,
+    props: {
+      on: <span>🌞</span>,
+      off: <span>🌙</span>,
+    },
     showCode: true,
   },
   {
@@ -39,6 +53,11 @@ const swapExamples: ComponentExample[] = [
   on={<span class="text-lg font-bold">ON</span>}
   off={<span class="text-lg font-bold">OFF</span>}
 />`,
+    props: {
+      rotate: true,
+      on: <span class="text-lg font-bold">ON</span>,
+      off: <span class="text-lg font-bold">OFF</span>,
+    },
     showCode: true,
   },
 ];

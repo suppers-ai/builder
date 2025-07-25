@@ -11,6 +11,15 @@ const searchButtonExamples: ComponentExample[] = [
     description: "Simple search button with default styling",
     code: `<SearchButton onClick={() => console.log('Search clicked')} />
 <SearchButton onClick={() => console.log('Search clicked')} variant="primary" />`,
+    props: [
+      {
+        onClick: () => console.log('Search clicked'),
+      },
+      {
+        onClick: () => console.log('Search clicked'),
+        variant: "primary" as const,
+      },
+    ],
     showCode: true,
     interactive: true,
   },
@@ -21,6 +30,24 @@ const searchButtonExamples: ComponentExample[] = [
 <SearchButton onClick={() => {}} variant="primary" />
 <SearchButton onClick={() => {}} variant="secondary" />
 <SearchButton onClick={() => {}} variant="outline" />`,
+    props: [
+      {
+        onClick: () => {},
+        variant: "ghost" as const,
+      },
+      {
+        onClick: () => {},
+        variant: "primary" as const,
+      },
+      {
+        onClick: () => {},
+        variant: "secondary" as const,
+      },
+      {
+        onClick: () => {},
+        variant: "outline" as const,
+      },
+    ],
     showCode: true,
     interactive: true,
   },
@@ -30,6 +57,22 @@ const searchButtonExamples: ComponentExample[] = [
     code: `<SearchButton onClick={() => {}} shape="square" size="sm" />
 <SearchButton onClick={() => {}} shape="circle" />
 <SearchButton onClick={() => {}} shape="square" size="lg" />`,
+    props: [
+      {
+        onClick: () => {},
+        shape: "square" as const,
+        size: "sm" as const,
+      },
+      {
+        onClick: () => {},
+        shape: "circle" as const,
+      },
+      {
+        onClick: () => {},
+        shape: "square" as const,
+        size: "lg" as const,
+      },
+    ],
     showCode: true,
     interactive: true,
   },
@@ -51,6 +94,21 @@ const searchButtonExamples: ComponentExample[] = [
 >
   Search
 </SearchButton>`,
+    props: [
+      {
+        onClick: () => {},
+        showKeyboardHint: true,
+        keyboardHint: "⌘K",
+        children: "Search",
+      },
+      {
+        onClick: () => {},
+        showKeyboardHint: true,
+        keyboardHint: "Ctrl+K",
+        variant: "outline" as const,
+        children: "Search",
+      },
+    ],
     showCode: true,
     interactive: true,
   },
@@ -66,6 +124,17 @@ const searchButtonExamples: ComponentExample[] = [
   tooltip="Open search modal (⌘K)" 
   variant="primary"
 />`,
+    props: [
+      {
+        onClick: () => {},
+        tooltip: "Search for anything",
+      },
+      {
+        onClick: () => {},
+        tooltip: "Open search modal (⌘K)",
+        variant: "primary" as const,
+      },
+    ],
     showCode: true,
     interactive: true,
   },

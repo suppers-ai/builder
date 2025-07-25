@@ -111,6 +111,117 @@ export function SearchModal({
 
   const displayedResults = searchResults.slice(0, maxResults);
 
+  // For documentation purposes, show modal content as a static card
+  const isDocumentationMode = typeof window === 'undefined' || window.location?.pathname?.includes('/components/');
+  
+  if (isDocumentationMode && !isOpen) {
+    return (
+      <div class={`w-full max-w-2xl mx-auto bg-base-100 rounded-lg shadow-lg border border-base-300 ${className}`}>
+        <div class="p-6 border-b border-base-300">
+          <div class="flex items-center gap-4">
+            <div class="flex-1 relative">
+              <div class="flex items-center">
+                <Search size={20} class="absolute left-3 text-base-content/60" />
+                <input
+                  type="text"
+                  placeholder={placeholder}
+                  value=""
+                  class="input pl-10 pr-4 w-full border-0 focus:ring-0 bg-transparent text-lg"
+                  disabled
+                />
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              {showKeyboardShortcut && (
+                <div class="hidden sm:flex items-center gap-1 text-xs text-base-content/60">
+                  <div class="kbd kbd-sm">⌘</div>
+                  <div class="kbd kbd-sm">K</div>
+                </div>
+              )}
+              <button class="btn btn-ghost btn-square text-base-content/60">
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="max-h-96 overflow-y-auto">
+          {loading && (
+            <div class="p-4 text-center">
+              <div class="loading loading-spinner loading-md mx-auto"></div>
+              <p class="text-sm text-base-content/60 mt-2">Searching...</p>
+            </div>
+          )}
+
+          {!loading && displayedResults.length > 0 && (
+            <div class="py-2">
+              {displayedResults.map((result, index) => (
+                <div
+                  key={result.id}
+                  class={`flex items-center gap-4 p-4 hover:bg-base-200 cursor-pointer border-l-4 transition-colors ${
+                    index === 0
+                      ? "bg-base-200 border-l-primary"
+                      : "border-l-transparent"
+                  }`}
+                >
+                  {result.icon && (
+                    <div class="flex-shrink-0 text-base-content/60">
+                      {result.icon}
+                    </div>
+                  )}
+
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                      <h3 class="font-medium text-base-content truncate">
+                        {result.title}
+                      </h3>
+                      {result.category && (
+                        <span class="badge badge-ghost badge-sm">
+                          {result.category}
+                        </span>
+                      )}
+                    </div>
+                    {result.description && (
+                      <p class="text-sm text-base-content/60 mt-1 line-clamp-2">
+                        {result.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <ArrowRight size={16} class="text-base-content/40 flex-shrink-0" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!loading && displayedResults.length === 0 && (
+            <div class="p-8 text-center">
+              <Search size={48} class="mx-auto text-base-content/30 mb-4" />
+              <p class="text-base-content/60">Start typing to search</p>
+              {showKeyboardShortcut && (
+                <p class="text-sm text-base-content/40 mt-1">
+                  Use <kbd class="kbd kbd-sm">↑</kbd> <kbd class="kbd kbd-sm">↓</kbd> to navigate,
+                  {" "}
+                  <kbd class="kbd kbd-sm">Enter</kbd> to select
+                </p>
+              )}
+            </div>
+          )}
+
+          {children}
+        </div>
+
+        {displayedResults.length === maxResults && searchResults.length > maxResults && (
+          <div class="p-4 border-t border-base-300 text-center">
+            <p class="text-sm text-base-content/60">
+              Showing {maxResults} of {searchResults.length} results
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <Modal
       open={isOpen}

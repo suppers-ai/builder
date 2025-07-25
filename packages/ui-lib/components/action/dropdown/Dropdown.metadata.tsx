@@ -15,65 +15,144 @@ const dropdownExamples: ComponentExample[] = [
   {
     title: "Basic Dropdown",
     description: "Simple dropdown menu with button trigger",
-    code: `<div class="dropdown">
-  <div tabIndex={0} role="button" class="btn btn-primary m-1">Click me</div>
-  <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-    <li><a>Item 1</a></li>
-    <li><a>Item 2</a></li>
-    <li><a>Item 3</a></li>
-  </ul>
-</div>`,
+    code: `<Dropdown
+  trigger={<button class="btn btn-primary">Click me</button>}
+  content={
+    <>
+      <li><a>Item 1</a></li>
+      <li><a>Item 2</a></li>
+      <li><a>Item 3</a></li>
+    </>
+  }
+/>`,
+    props: {
+      trigger: <button class="btn btn-primary">Click me</button>,
+      content: (
+        <>
+          <li><a>Item 1</a></li>
+          <li><a>Item 2</a></li>
+          <li><a>Item 3</a></li>
+        </>
+      ),
+    },
     showCode: true,
   },
   {
     title: "Dropdown Positions",
     description: "Different dropdown positions",
-    code: `<div class="dropdown dropdown-top">
-  <div tabIndex={0} role="button" class="btn btn-secondary m-1">Top</div>
-  <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-    <li><a>Item 1</a></li>
-    <li><a>Item 2</a></li>
-  </ul>
-</div>
-<div class="dropdown dropdown-end">
-  <div tabIndex={0} role="button" class="btn btn-accent m-1">End</div>
-  <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-    <li><a>Item 1</a></li>
-    <li><a>Item 2</a></li>
-  </ul>
-</div>`,
+    code: `<Dropdown
+  trigger={<button class="btn btn-secondary">Top</button>}
+  content={
+    <>
+      <li><a>Item 1</a></li>
+      <li><a>Item 2</a></li>
+    </>
+  }
+  position="top"
+/>
+
+<Dropdown
+  trigger={<button class="btn btn-accent">Bottom End</button>}
+  content={
+    <>
+      <li><a>Item 1</a></li>
+      <li><a>Item 2</a></li>
+    </>
+  }
+  position="bottom-end"
+/>`,
+    props: [
+      {
+        trigger: <button class="btn btn-secondary">Top</button>,
+        content: (
+          <>
+            <li><a>Item 1</a></li>
+            <li><a>Item 2</a></li>
+          </>
+        ),
+        position: "top" as const,
+      },
+      {
+        trigger: <button class="btn btn-accent">Bottom End</button>,
+        content: (
+          <>
+            <li><a>Item 1</a></li>
+            <li><a>Item 2</a></li>
+          </>
+        ),
+        position: "bottom-end" as const,
+      },
+    ],
     showCode: true,
   },
   {
     title: "Hover Dropdown",
     description: "Dropdown that opens on hover",
-    code: `<div class="dropdown dropdown-hover">
-  <div tabIndex={0} role="button" class="btn btn-outline m-1">Hover Me</div>
-  <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-    <li><a>Quick Action 1</a></li>
-    <li><a>Quick Action 2</a></li>
-    <li><a>Quick Action 3</a></li>
-  </ul>
-</div>`,
+    code: `<Dropdown
+  trigger={<button class="btn btn-outline">Hover Me</button>}
+  content={
+    <>
+      <li><a>Quick Action 1</a></li>
+      <li><a>Quick Action 2</a></li>
+      <li><a>Quick Action 3</a></li>
+    </>
+  }
+  hover
+/>`,
+    props: {
+      trigger: <button class="btn btn-outline">Hover Me</button>,
+      content: (
+        <>
+          <li><a>Quick Action 1</a></li>
+          <li><a>Quick Action 2</a></li>
+          <li><a>Quick Action 3</a></li>
+        </>
+      ),
+      hover: true,
+    },
     showCode: true,
   },
   {
     title: "User Profile Dropdown",
     description: "Real-world example with avatar and actions",
-    code: `<div class="dropdown dropdown-end">
-  <div tabIndex={0} role="button" class="btn btn-ghost btn-circle avatar">
-    <div class="w-10 rounded-full">
-      <img alt="User" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+    code: `<Dropdown
+  trigger={
+    <div class="btn btn-ghost btn-circle avatar">
+      <div class="w-10 rounded-full">
+        <img alt="User" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+      </div>
     </div>
-  </div>
-  <ul tabIndex={0} class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-    <li class="menu-title"><span>John Doe</span></li>
-    <li><a>Profile</a></li>
-    <li><a>Settings</a></li>
-    <li><hr class="my-2" /></li>
-    <li><a class="text-error">Sign out</a></li>
-  </ul>
-</div>`,
+  }
+  content={
+    <>
+      <li class="menu-title"><span>John Doe</span></li>
+      <li><a>Profile</a></li>
+      <li><a>Settings</a></li>
+      <li><hr class="my-2" /></li>
+      <li><a class="text-error">Sign out</a></li>
+    </>
+  }
+  position="bottom-end"
+/>`,
+    props: {
+      trigger: (
+        <div class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full">
+            <img alt="User" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+          </div>
+        </div>
+      ),
+      content: (
+        <>
+          <li class="menu-title"><span>John Doe</span></li>
+          <li><a>Profile</a></li>
+          <li><a>Settings</a></li>
+          <li><hr class="my-2" /></li>
+          <li><a class="text-error">Sign out</a></li>
+        </>
+      ),
+      position: "bottom-end" as const,
+    },
     showCode: true,
   },
 ];

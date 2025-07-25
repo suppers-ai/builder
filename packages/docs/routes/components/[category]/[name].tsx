@@ -224,6 +224,11 @@ export default async function DynamicComponentPage(props: PageProps) {
                   <div class="p-6 bg-base-100 border border-base-300 rounded-lg mb-4">
                     <div class="flex flex-wrap gap-4">
                       {(() => {
+                        // Check if example has static render override
+                        if (example.staticRender) {
+                          return example.staticRender;
+                        }
+                        
                         // Check if example has predefined props data
                         if (example.props) {
                           const Component = (example.interactive && components.Interactive)

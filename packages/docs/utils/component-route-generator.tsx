@@ -94,6 +94,8 @@ export async function loadComponentPageData(
           code: example.code,
           showCode: example.showCode,
           interactive: example.interactive,
+          props: example.props,
+          staticRender: example.staticRender,
         })),
         apiProps: await (async () => {
           try {

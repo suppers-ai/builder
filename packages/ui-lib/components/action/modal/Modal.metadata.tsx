@@ -3,62 +3,185 @@ import {
   ComponentExample,
   ComponentMetadata,
   ComponentProp,
+  ComponentSchema,
 } from "../../types.ts";
+import { Modal } from "./Modal.tsx";
+import {
+  ModalPropsSchema,
+  safeValidateModalProps,
+  validateModalProps,
+} from "./Modal.schema.ts";
 
 const modalExamples: ComponentExample[] = [
   {
-    title: "Basic Modal Trigger",
-    description: "Button that would open a basic modal dialog",
-    code: `<button class="btn btn-primary">Open Basic Modal</button>`,
-    showCode: true,
-  },
-  {
-    title: "Form Modal Trigger", 
-    description: "Button that would open a form modal",
-    code: `<button class="btn btn-secondary">Create Account</button>`,
-    showCode: true,
-  },
-  {
-    title: "Confirmation Modal Trigger",
-    description: "Button that would open a dangerous action confirmation",
-    code: `<button class="btn btn-error">Delete Item</button>`,
-    showCode: true,
-  },
-  {
-    title: "Modal Content Preview",
-    description: "What modal content looks like when opened",
-    code: `<div class="mockup-window border bg-base-300 w-full max-w-md mx-auto">
-  <div class="bg-base-200 px-6 py-8">
-    <h3 class="font-bold text-lg mb-4">Modal Title</h3>
-    <p class="py-2">
-      This is what the modal content looks like when displayed.
-    </p>
-    <div class="modal-action pt-4">
-      <button class="btn btn-sm">Close</button>
-      <button class="btn btn-primary btn-sm">Save</button>
-    </div>
+    title: "Basic Modal",
+    description: "Simple modal dialog with title and content",
+    code: `<Modal open title="Basic Modal">
+  <p class="py-4">
+    This is a basic modal with some content. You can put any content here.
+  </p>
+  <div class="modal-action">
+    <button class="btn">Close</button>
+    <button class="btn btn-primary">Save</button>
   </div>
-</div>`,
+</Modal>`,
+    props: {
+      open: false,
+      title: "Basic Modal",
+      children: (
+        <>
+          <p class="py-4">
+            This is a basic modal with some content. You can put any content here.
+          </p>
+          <div class="modal-action">
+            <button class="btn">Close</button>
+            <button class="btn btn-primary">Save</button>
+          </div>
+        </>
+      ),
+    },
     showCode: true,
   },
   {
-    title: "Complete Modal Implementation",
-    description: "Full modal implementation with trigger and content",
-    code: `{/* Trigger Button */}
-<button class="btn btn-primary" onclick="document.getElementById('my_modal').showModal()">
-  Open Modal
-</button>
-
-{/* Modal Dialog */}
-<dialog id="my_modal" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg">Hello!</h3>
-    <p class="py-4">Press ESC key or click the button below to close</p>
-    <div class="modal-action">
-      <button class="btn" onclick="document.getElementById('my_modal').close()">Close</button>
+    title: "Form Modal",
+    description: "Modal containing a form for user input",
+    code: `<Modal open title="Create Account">
+  <form class="space-y-4">
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">Name</span>
+      </label>
+      <input type="text" placeholder="Enter your name" class="input input-bordered" />
     </div>
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">Email</span>
+      </label>
+      <input type="email" placeholder="Enter your email" class="input input-bordered" />
+    </div>
+  </form>
+  <div class="modal-action">
+    <button class="btn">Cancel</button>
+    <button class="btn btn-primary">Create Account</button>
   </div>
-</dialog>`,
+</Modal>`,
+    props: {
+      open: false,
+      title: "Create Account",
+      children: (
+        <>
+          <form class="space-y-4">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Name</span>
+              </label>
+              <input type="text" placeholder="Enter your name" class="input input-bordered" />
+            </div>
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Email</span>
+              </label>
+              <input type="email" placeholder="Enter your email" class="input input-bordered" />
+            </div>
+          </form>
+          <div class="modal-action">
+            <button class="btn">Cancel</button>
+            <button class="btn btn-primary">Create Account</button>
+          </div>
+        </>
+      ),
+    },
+    showCode: true,
+  },
+  {
+    title: "Confirmation Modal",
+    description: "Modal for confirming dangerous actions",
+    code: `<Modal open title="Delete Item">
+  <div class="alert alert-warning">
+    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+    </svg>
+    <span>This action cannot be undone. Are you sure you want to delete this item?</span>
+  </div>
+  <div class="modal-action">
+    <button class="btn">Cancel</button>
+    <button class="btn btn-error">Delete</button>
+  </div>
+</Modal>`,
+    props: {
+      open: false,
+      title: "Delete Item",
+      children: (
+        <>
+          <div class="alert alert-warning">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <span>This action cannot be undone. Are you sure you want to delete this item?</span>
+          </div>
+          <div class="modal-action">
+            <button class="btn">Cancel</button>
+            <button class="btn btn-error">Delete</button>
+          </div>
+        </>
+      ),
+    },
+    showCode: true,
+  },
+  {
+    title: "Modal without Backdrop",
+    description: "Modal that doesn't show a backdrop overlay",
+    code: `<Modal open title="No Backdrop" backdrop={false}>
+  <p class="py-4">
+    This modal doesn't have a backdrop, so the background remains interactive.
+  </p>
+  <div class="modal-action">
+    <button class="btn btn-primary">Got it</button>
+  </div>
+</Modal>`,
+    props: {
+      open: false,
+      title: "No Backdrop",
+      backdrop: false,
+      children: (
+        <>
+          <p class="py-4">
+            This modal doesn't have a backdrop, so the background remains interactive.
+          </p>
+          <div class="modal-action">
+            <button class="btn btn-primary">Got it</button>
+          </div>
+        </>
+      ),
+    },
+    showCode: true,
+  },
+  {
+    title: "Non-Responsive Modal",
+    description: "Modal with fixed width, not responsive",
+    code: `<Modal open title="Fixed Width" responsive={false}>
+  <p class="py-4">
+    This modal has a fixed width and doesn't adapt to screen size.
+  </p>
+  <div class="modal-action">
+    <button class="btn btn-primary">Close</button>
+  </div>
+</Modal>`,
+    props: {
+      open: false,
+      title: "Fixed Width",
+      responsive: false,
+      children: (
+        <>
+          <p class="py-4">
+            This modal has a fixed width and doesn't adapt to screen size.
+          </p>
+          <div class="modal-action">
+            <button class="btn btn-primary">Close</button>
+          </div>
+        </>
+      ),
+    },
     showCode: true,
   },
 ];
@@ -105,6 +228,12 @@ const modalProps: ComponentProp[] = [
   },
 ];
 
+const modalSchema: ComponentSchema = {
+  schema: ModalPropsSchema,
+  validateFn: validateModalProps,
+  safeValidateFn: safeValidateModalProps,
+};
+
 export const modalMetadata: ComponentMetadata = {
   name: "Modal",
   description: "Dialog boxes and overlays for displaying content and capturing user input",
@@ -118,12 +247,17 @@ export const modalMetadata: ComponentMetadata = {
       <div class="flex justify-center px-4 py-16 bg-base-200">
         <div class="text-center">
           <h3 class="font-bold text-lg">Modal Dialog</h3>
-          <p class="py-4">This is a modal example</p>
+          <p class="py-4">Dialog box for displaying content and capturing user input</p>
+          <div class="flex gap-2 justify-center">
+            <button class="btn btn-sm">Close</button>
+            <button class="btn btn-primary btn-sm">Save</button>
+          </div>
         </div>
       </div>
     </div>
   ),
   examples: modalExamples,
+  schema: modalSchema,
   props: modalProps,
   variants: ["default", "bottom sheet", "full screen", "confirmation"],
   useCases: ["User forms", "Confirmations", "Image gallery", "Settings"],

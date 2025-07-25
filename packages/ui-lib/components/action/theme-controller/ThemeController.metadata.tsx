@@ -3,54 +3,46 @@ import { ThemeController } from "./ThemeController.tsx";
 
 const themeControllerExamples: ComponentExample[] = [
   {
-    title: "Dropdown Theme Selector",
-    description: "Dropdown with multiple theme options and color previews",
+    title: "Basic Example",
+    description: "Basic usage of the component",
+    code: `<ThemeController />`,
+    props: {},
+    showCode: true,
+  },
+  {
+    title: "With Selected Themes",
+    description: "Theme controller with a subset of available themes",
     code: `<ThemeController
-  variant="dropdown"
   themes={["light", "dark", "cupcake", "cyberpunk", "synthwave"]}
   currentTheme="light"
   showLabel={true}
 />`,
+    props: {
+      themes: ["light", "dark", "cupcake", "cyberpunk", "synthwave"],
+      currentTheme: "light",
+      showLabel: true,
+    },
     showCode: true,
   },
   {
-    title: "Toggle Switch",
-    description: "Simple toggle for light/dark mode switching",
+    title: "Without Label",
+    description: "Theme controller button without text label",
     code: `<ThemeController
-  variant="toggle"
-  themes={["light", "dark"]}
+  themes={["light", "dark", "corporate", "luxury"]}
   currentTheme="light"
-  showLabel={true}
+  showLabel={false}
 />`,
-    showCode: true,
-  },
-  {
-    title: "Radio Button Group",
-    description: "Radio buttons for theme selection",
-    code: `<ThemeController
-  variant="radio"
-  themes={["light", "dark", "cupcake", "emerald"]}
-  currentTheme="light"
-  showLabel={true}
-/>`,
-    showCode: true,
-  },
-  {
-    title: "Card-style Theme Picker",
-    description: "Rich theme selector with preview cards",
-    code: `<ThemeController
-  variant="dropdown"
-  themes={["corporate", "business", "luxury", "wireframe"]}
-  currentTheme="corporate"
-  showPreview={true}
-  size="lg"
-/>`,
+    props: {
+      themes: ["light", "dark", "corporate", "luxury"],
+      currentTheme: "light",
+      showLabel: false,
+    },
     showCode: true,
   },
 ];
 
 export const themeControllerMetadata: ComponentMetadata = {
-  name: "Theme Controller",
+  name: "ThemeController",
   description: "Theme switching",
   category: ComponentCategory.ACTION,
   path: "/components/action/theme-controller",

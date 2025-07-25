@@ -15,6 +15,12 @@ const searchModalExamples: ComponentExample[] = [
   onSearch={(query) => console.log('Search:', query)}
   placeholder="Search components..."
 />`,
+    props: {
+      isOpen: false,
+      onClose: () => console.log('Closed'),
+      onSearch: (query: string) => console.log('Search:', query),
+      placeholder: "Search components...",
+    },
     showCode: true,
     interactive: true,
   },
@@ -42,6 +48,27 @@ const searchModalExamples: ComponentExample[] = [
     }
   ]}
 />`,
+    props: {
+      isOpen: false,
+      onClose: () => {},
+      onSearch: () => {},
+      searchResults: [
+        {
+          id: "1",
+          title: "Button Component", 
+          description: "Interactive buttons with multiple variants",
+          url: "/components/action/button",
+          category: "Action"
+        },
+        {
+          id: "2", 
+          title: "Input Component",
+          description: "Text input fields for user data",
+          url: "/components/input/input",
+          category: "Input"
+        }
+      ]
+    },
     showCode: true,
     interactive: true,
   },
@@ -55,6 +82,13 @@ const searchModalExamples: ComponentExample[] = [
   loading={true}
   placeholder="Searching..."
 />`,
+    props: {
+      isOpen: false,
+      onClose: () => {},
+      onSearch: () => {},
+      loading: true,
+      placeholder: "Searching...",
+    },
     showCode: true,
     interactive: true,
   },
@@ -70,6 +104,15 @@ const searchModalExamples: ComponentExample[] = [
   maxResults={5}
   autoFocus={false}
 />`,
+    props: {
+      isOpen: false,
+      onClose: () => {},
+      onSearch: () => {},
+      placeholder: "Find documentation...",
+      showKeyboardShortcut: false,
+      maxResults: 5,
+      autoFocus: false,
+    },
     showCode: true,
     interactive: true,
   },
