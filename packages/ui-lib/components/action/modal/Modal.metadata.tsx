@@ -7,63 +7,58 @@ import {
 
 const modalExamples: ComponentExample[] = [
   {
-    title: "Basic Modal",
-    description: "Simple modal dialog with title and content",
-    code: `<Modal open={true} title="Modal Title">
-  <p class="py-4">
-    This is a basic modal dialog. It contains some content and demonstrates the default modal
-    styling and layout.
-  </p>
-  <div class="modal-action">
-    <button class="btn">Close</button>
-    <button class="btn btn-primary">Save</button>
-  </div>
-</Modal>`,
+    title: "Basic Modal Trigger",
+    description: "Button that would open a basic modal dialog",
+    code: `<button class="btn btn-primary">Open Basic Modal</button>`,
     showCode: true,
   },
   {
-    title: "Modal with Form",
-    description: "Modal containing form elements and inputs",
-    code: `<Modal open={true} title="Create Account">
-  <div class="form-control w-full">
-    <label class="label">
-      <span class="label-text">Username</span>
-    </label>
-    <input type="text" class="input input-bordered w-full" />
-
-    <label class="label">
-      <span class="label-text">Email</span>
-    </label>
-    <input type="email" class="input input-bordered w-full" />
-  </div>
-
-  <div class="modal-action">
-    <button class="btn">Cancel</button>
-    <button class="btn btn-primary">Create Account</button>
-  </div>
-</Modal>`,
+    title: "Form Modal Trigger", 
+    description: "Button that would open a form modal",
+    code: `<button class="btn btn-secondary">Create Account</button>`,
     showCode: true,
   },
   {
-    title: "Confirmation Modal",
-    description: "Modal for dangerous actions requiring confirmation",
-    code: `<Modal open={true} title="Confirm Deletion">
-  <div class="alert alert-warning">
-    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
-    </svg>
-    <span>Warning: This action cannot be undone!</span>
+    title: "Confirmation Modal Trigger",
+    description: "Button that would open a dangerous action confirmation",
+    code: `<button class="btn btn-error">Delete Item</button>`,
+    showCode: true,
+  },
+  {
+    title: "Modal Content Preview",
+    description: "What modal content looks like when opened",
+    code: `<div class="mockup-window border bg-base-300 w-full max-w-md mx-auto">
+  <div class="bg-base-200 px-6 py-8">
+    <h3 class="font-bold text-lg mb-4">Modal Title</h3>
+    <p class="py-2">
+      This is what the modal content looks like when displayed.
+    </p>
+    <div class="modal-action pt-4">
+      <button class="btn btn-sm">Close</button>
+      <button class="btn btn-primary btn-sm">Save</button>
+    </div>
   </div>
+</div>`,
+    showCode: true,
+  },
+  {
+    title: "Complete Modal Implementation",
+    description: "Full modal implementation with trigger and content",
+    code: `{/* Trigger Button */}
+<button class="btn btn-primary" onclick="document.getElementById('my_modal').showModal()">
+  Open Modal
+</button>
 
-  <p class="py-4">
-    Are you sure you want to delete this item? This action is permanent and cannot be reversed.
-  </p>
-
-  <div class="modal-action">
-    <button class="btn">Cancel</button>
-    <button class="btn btn-error">Delete</button>
+{/* Modal Dialog */}
+<dialog id="my_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Hello!</h3>
+    <p class="py-4">Press ESC key or click the button below to close</p>
+    <div class="modal-action">
+      <button class="btn" onclick="document.getElementById('my_modal').close()">Close</button>
+    </div>
   </div>
-</Modal>`,
+</dialog>`,
     showCode: true,
   },
 ];

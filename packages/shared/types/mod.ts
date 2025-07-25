@@ -7,9 +7,9 @@
 export type * from "./auth.ts";
 export * from "./auth.ts";
 
-// Database types
-export type * from "./database.ts";
-export * from "./database.ts";
+// Database types (now centralized in generated folder)
+export type * from "../generated/database-types.ts";
+export * from "../generated/database-types.ts";
 
 // API types
 export type * from "./api.ts";

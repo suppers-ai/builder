@@ -4,7 +4,10 @@
  */
 
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
-import type { UsersTable } from "./database.ts";
+import type { Database } from "../generated/database-types.ts";
+
+// Database table types
+type UsersTable = Database["public"]["Tables"]["users"]["Row"];
 
 // Derived Auth Types (based on database schema)
 export type AuthUser = Pick<

@@ -20,7 +20,7 @@
     "logs": "npx supabase functions logs api",
     "logs:authorize": "npx supabase functions logs authorize",
     "logs:callback": "npx supabase functions logs callback",
-    "types": "npx supabase gen types typescript --local > ../ui-lib/src/lib/database-types.ts"
+    "types": "npx supabase gen types typescript --local > ../shared/generated/database-types.ts"
   },
   "compilerOptions": {
     "lib": ["deno.ns", "dom"],

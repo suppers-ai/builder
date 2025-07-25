@@ -56,6 +56,7 @@ create table if not exists public.users (
   last_name text,
   display_name text,
   avatar_url text,
+  theme_id text, -- This could be a default theme id or a custom theme id
   role user_role default 'user'::user_role not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -386,14 +387,15 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.users (id, email, first_name, last_name, display_name, avatar_url)
+  insert into public.users (id, email, first_name, last_name, display_name, avatar_url, theme_id)
   values (
     new.id,
     new.email,
     new.raw_user_meta_data->>'first_name',
     new.raw_user_meta_data->>'last_name',
     new.raw_user_meta_data->>'display_name',
-    new.raw_user_meta_data->>'avatar_url'
+    new.raw_user_meta_data->>'avatar_url',
+    new.raw_user_meta_data->>'theme_id'
   );
   return new;
 end;
