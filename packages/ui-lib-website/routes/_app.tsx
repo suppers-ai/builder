@@ -8,7 +8,7 @@ function MockAuthProvider({ children }: { children: any }) {
 
 export default function App({ Component, state }: PageProps) {
   const Comp = Component as any;
-  const title = (state as any)?.title || "daisyUI Component Library - Fresh 2.0";
+  const title = (state as any)?.title || "Suppers Component Library - Fresh 2.0";
 
   return (
     <html>
@@ -20,38 +20,39 @@ export default function App({ Component, state }: PageProps) {
         {/* SEO Meta Tags */}
         <meta
           name="description"
-          content="Professional DaisyUI component library built for Fresh 2.0. 65+ production-ready components with TypeScript support, responsive design, and accessibility features."
+          content="Professional Suppers component library built for Fresh 2.0. 65+ production-ready components with TypeScript support, responsive design, and accessibility features."
         />
         <meta
           name="keywords"
           content="daisyUI, Fresh, components, TypeScript, Preact, Tailwind CSS, UI library, web components, responsive design"
         />
-        <meta name="author" content="daisyUI Component Library" />
+        <meta name="author" content="Suppers Component Library" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://your-domain.com/" />
 
         {/* Open Graph Meta Tags */}
-        <meta property="og:title" content="daisyUI Component Library - Fresh 2.0" />
+        <meta property="og:title" content="Suppers Component Library - Fresh 2.0" />
         <meta
           property="og:description"
-          content="Professional DaisyUI component library with 65+ components built for Fresh 2.0"
+          content="Professional Suppers component library with 65+ components built for Fresh 2.0"
         />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://your-domain.com/" />
         <meta property="og:image" content="https://your-domain.com/og-image.png" />
-        <meta property="og:site_name" content="daisyUI Component Library" />
+        <meta property="og:site_name" content="Suppers Component Library" />
 
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="daisyUI Component Library - Fresh 2.0" />
+        <meta name="twitter:title" content="Suppers Component Library - Fresh 2.0" />
         <meta
           name="twitter:description"
-          content="Professional DaisyUI component library with 65+ components built for Fresh 2.0"
+          content="Professional Suppers component library with 65+ components built for Fresh 2.0"
         />
         <meta name="twitter:image" content="https://your-domain.com/twitter-image.png" />
 
         {/* Favicon and Icons */}
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        {/* Theme-aware favicon: defaults to light icon, updated via script */}
+        <link id="site-favicon" rel="icon" type="image/x-icon" href={asset("/favicon_light.ico")} />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -64,17 +65,36 @@ export default function App({ Component, state }: PageProps) {
         {/* Custom CSS files */}
         <link rel="stylesheet" href={asset("/styles.css")} />
 
-        {/* Theme initialization script - runs before page render to prevent flash */}
+        {/* Theme initialization script – sets theme and swaps favicons accordingly */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
+              (function () {
+                const lightFavicon = "${asset('/favicon_light.ico')}";
+                const darkFavicon = "${asset('/favicon_dark.ico')}";
+
+                function setFavicon(theme) {
+                  var link = document.getElementById('site-favicon');
+                  if (!link) return;
+                  link.setAttribute('href', theme === 'dark' ? darkFavicon : lightFavicon);
+                }
+
                 try {
                   const savedTheme = localStorage.getItem('theme') || 'light';
                   document.documentElement.setAttribute('data-theme', savedTheme);
+                  setFavicon(savedTheme);
+
+                  // Observe future theme changes
+                  new MutationObserver(function (m) {
+                    m.forEach(function (record) {
+                      if (record.attributeName === 'data-theme') {
+                        setFavicon(document.documentElement.getAttribute('data-theme'));
+                      }
+                    });
+                  }).observe(document.documentElement, { attributes: true });
                 } catch (e) {
-                  // Fallback to light theme if localStorage is not available
                   document.documentElement.setAttribute('data-theme', 'light');
+                  setFavicon('light');
                 }
               })();
             `,

@@ -64,7 +64,7 @@ export const defaultSocialLinks: SocialLink[] = [
 ];
 
 export const defaultFooterCopyright =
-  "© 2024 DaisyUI Component Library. Built with Fresh 2.0 and Preact.";
+  "© 2025 Suppers Software. Built with Fresh 2.0 and Preact.";
 
 // Utility function to create custom footer configurations
 export function createFooterConfig(options: {
