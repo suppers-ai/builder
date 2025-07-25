@@ -256,6 +256,76 @@ export default async function DynamicComponentPage(props: PageProps) {
                 </div>
               ))}
             </div>
+
+            {pageData.usageNotes.length > 0 && (
+              <div class="mt-8 p-6 bg-info/10 border border-info/20 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4 text-base-content">Usage Notes</h3>
+                <ul class="list-disc list-inside space-y-2">
+                  {pageData.usageNotes.map((note, index) => (
+                    <li key={index} class="text-base-content/80">{note}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {pageData.apiProps.length > 0 && (
+              <div class="mt-8">
+                <h3 class="text-2xl font-semibold mb-6 text-base-content">API Props</h3>
+                <div class="overflow-x-auto">
+                  <table class="table table-zebra w-full border border-base-300 rounded-lg">
+                    <thead>
+                      <tr class="border-base-300">
+                        <th class="text-base-content font-medium">Prop</th>
+                        <th class="text-base-content font-medium">Type</th>
+                        <th class="text-base-content font-medium">Required</th>
+                        <th class="text-base-content font-medium">Default</th>
+                        <th class="text-base-content font-medium">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pageData.apiProps.map((prop, index) => (
+                        <tr key={index} class="border-base-300">
+                          <td class="font-mono text-base-content">
+                            {prop.name}
+                            {prop.required && <span class="text-error ml-1">*</span>}
+                          </td>
+                          <td class="font-mono">
+                            <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">{prop.type}</code>
+                          </td>
+                          <td class="text-base-content">
+                            {prop.required ? (
+                              <span class="text-error font-medium">Yes</span>
+                            ) : (
+                              <span class="text-base-content/60">No</span>
+                            )}
+                          </td>
+                          <td class="font-mono">
+                            {prop.default ? (
+                              <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">{prop.default}</code>
+                            ) : (
+                              <span class="text-base-content/40">-</span>
+                            )}
+                          </td>
+                          <td class="text-base-content">
+                            {prop.description}
+                            {prop.examples && prop.examples.length > 0 && (
+                              <div class="mt-1 text-xs text-base-content/60">
+                                Examples: {prop.examples.join(", ")}
+                              </div>
+                            )}
+                            {prop.since && (
+                              <div class="mt-1 text-xs text-info">
+                                Since: {prop.since}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </>
