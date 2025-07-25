@@ -1,5 +1,6 @@
 #!/usr/bin/env deno run -A
 import { loadSync } from "@std/dotenv";
+import { dirname, fromFileUrl } from "@std/path/mod.ts";
 // import { start } from "fresh";
 // import manifest from "./fresh.gen.ts";
 // // Load environment variables from .env.local, .env files
@@ -15,6 +16,9 @@ loadSync({
 
 // main.ts
 import { App, fsRoutes, staticFiles } from "fresh";
+
+// Ensure the working directory is the same directory as this file
+Deno.chdir(dirname(fromFileUrl(import.meta.url)));
 
 export const app = new App()
   // Add static file serving middleware with CSS support
