@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Select } from "./Select.tsx";
 
 const selectExamples: ComponentExample[] = [
   {
@@ -11,11 +12,12 @@ const selectExamples: ComponentExample[] = [
     description: "Simple select with options and placeholder",
     code: `<Select 
   options={[
-    { value: "option1", label: "Option 1" },
-    { value: "option2", label: "Option 2" },
-    { value: "option3", label: "Option 3" }
+    { value: "us", label: "🇺🇸 United States" },
+    { value: "uk", label: "🇬🇧 United Kingdom" },
+    { value: "ca", label: "🇨🇦 Canada" },
+    { value: "au", label: "🇦🇺 Australia" }
   ]} 
-  placeholder="Choose an option" 
+  placeholder="Select your country" 
 />`,
     showCode: true,
   },

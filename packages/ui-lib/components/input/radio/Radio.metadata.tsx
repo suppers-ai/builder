@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Radio } from "./Radio.tsx";
 
 const radioExamples: ComponentExample[] = [
   {
@@ -47,12 +48,12 @@ const radioExamples: ComponentExample[] = [
     title: "Radio Group Form",
     description: "Real-world example in a form context",
     code: `<div class="form-control">
-  <div class="font-semibold mb-3">Choose your preferred contact method:</div>
+  <div class="font-semibold mb-3">How would you like us to contact you?</div>
   <div class="space-y-2">
-    <Radio name="contact" label="📧 Email" value="email" checked />
-    <Radio name="contact" label="📱 Phone call" value="phone" />
-    <Radio name="contact" label="💬 Text message" value="sms" />
-    <Radio name="contact" label="📮 Physical mail" value="mail" />
+    <Radio name="contact" label="📧 Email (fastest response)" value="email" checked />
+    <Radio name="contact" label="📱 Phone call (business hours)" value="phone" />
+    <Radio name="contact" label="💬 Text message (urgent only)" value="sms" />
+    <Radio name="contact" label="📮 Physical mail (slower response)" value="mail" />
   </div>
 </div>`,
     showCode: true,

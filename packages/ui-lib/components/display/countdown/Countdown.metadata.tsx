@@ -11,9 +11,18 @@ const countdownExamples: ComponentExample[] = [
     hours: 10,
     minutes: 24,
     seconds: 58,
-    totalSeconds: 1338298
+    totalSeconds: 1333498
   }}
 />`,
+    props: {
+      timeLeft: {
+        days: 15,
+        hours: 10,
+        minutes: 24,
+        seconds: 58,
+        totalSeconds: 1333498
+      }
+    },
     showCode: true,
   },
   {
@@ -25,16 +34,25 @@ const countdownExamples: ComponentExample[] = [
     hours: 3,
     minutes: 45,
     seconds: 22,
-    totalSeconds: 2160322
+    totalSeconds: 2173522
   }}
   size="lg"
-  title="Christmas Countdown"
 />`,
+    props: {
+      timeLeft: {
+        days: 25,
+        hours: 3,
+        minutes: 45,
+        seconds: 22,
+        totalSeconds: 2173522
+      },
+      size: "lg"
+    },
     showCode: true,
   },
   {
-    title: "Clock Style",
-    description: "Countdown displayed in clock format",
+    title: "Different Sizes",
+    description: "Countdown timers in various sizes",
     code: `<Countdown 
   timeLeft={{
     days: 5,
@@ -43,9 +61,18 @@ const countdownExamples: ComponentExample[] = [
     seconds: 15,
     totalSeconds: 484215
   }}
-  format="clock"
-  title="Event Starts In"
+  size="sm"
 />`,
+    props: {
+      timeLeft: {
+        days: 5,
+        hours: 14,
+        minutes: 30,
+        seconds: 15,
+        totalSeconds: 484215
+      },
+      size: "sm"
+    },
     showCode: true,
   },
   {
@@ -57,42 +84,45 @@ const countdownExamples: ComponentExample[] = [
     hours: 8,
     minutes: 15,
     seconds: 42,
-    totalSeconds: 2607342
+    totalSeconds: 2621742
   }}
   showLabels
 />`,
+    props: {
+      timeLeft: {
+        days: 30,
+        hours: 8,
+        minutes: 15,
+        seconds: 42,
+        totalSeconds: 2621742
+      },
+      showLabels: true
+    },
     showCode: true,
   },
   {
-    title: "Colored Countdown",
-    description: "Countdown with different color themes and sizes",
-    code: `<div class="space-y-4">
-  <Countdown 
-    timeLeft={{
-      days: 7,
-      hours: 12,
-      minutes: 30,
-      seconds: 45,
-      totalSeconds: 649845
-    }}
-    color="primary"
-    showLabels
-    title="Product Launch"
-  />
-  <Countdown 
-    timeLeft={{
-      days: 1,
-      hours: 6,
-      minutes: 15,
-      seconds: 30,
-      totalSeconds: 109530
-    }}
-    color="success"
-    size="sm"
-    showLabels
-    title="Sale Ends"
-  />
-</div>`,
+    title: "Without Labels",
+    description: "Clean countdown display without time unit labels",
+    code: `<Countdown 
+  timeLeft={{
+    days: 7,
+    hours: 12,
+    minutes: 30,
+    seconds: 45,
+    totalSeconds: 649845
+  }}
+  showLabels={false}
+/>`,
+    props: {
+      timeLeft: {
+        days: 7,
+        hours: 12,
+        minutes: 30,
+        seconds: 45,
+        totalSeconds: 649845
+      },
+      showLabels: false
+    },
     showCode: true,
   },
 ];

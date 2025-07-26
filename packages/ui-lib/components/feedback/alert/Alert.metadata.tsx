@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Alert } from "./Alert.tsx";
 
 const alertExamples: ComponentExample[] = [
   {
@@ -60,7 +61,7 @@ const alertExamples: ComponentExample[] = [
   </svg>
   <span>Your session will expire in 5 minutes.</span>
   <div>
-    <button class="btn btn-sm">Dismiss</button>
+    <button class="btn btn-sm btn-ghost">Dismiss</button>
     <button class="btn btn-sm btn-primary">Extend Session</button>
   </div>
 </Alert>`,

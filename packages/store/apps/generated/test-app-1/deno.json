@@ -1,0 +1,8 @@
+{
+  "name": "test-app-1",
+  "version": "1.0.0",
+  "tasks": {
+    "start": "deno run --allow-all main.ts",
+    "dev": "deno run --allow-all --watch main.ts"
+  }
+}

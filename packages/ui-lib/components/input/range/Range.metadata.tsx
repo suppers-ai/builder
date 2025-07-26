@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Range } from "./Range.tsx";
 
 const rangeExamples: ComponentExample[] = [
   {

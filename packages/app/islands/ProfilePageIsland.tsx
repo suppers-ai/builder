@@ -161,8 +161,8 @@ export default function ProfilePageIsland() {
       onUploadAvatar={handleUploadAvatar}
       onChangePassword={handleChangePassword}
       onSignOut={handleSignOut}
-      appName="Suppers Store"
-      appIcon="🚀"
+      appName="Suppers Auth"
+      appIcon="🔐"
       showBackToHome
       homeUrl="/"
     />

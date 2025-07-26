@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Link } from "./Link.tsx";
 
 const linkExamples: ComponentExample[] = [
   {
@@ -112,7 +113,7 @@ export const linkMetadata: ComponentMetadata = {
   name: "Link",
   description:
     "Styled navigation links with support for external links, custom styles, and interaction handlers",
-  category: ComponentCategory.NAVIGATION,
+  category: ComponentCategory.LAYOUT,
   path: "/components/layout/link",
   tags: ["link", "navigation", "anchor", "url", "routing"],
   relatedComponents: ["button", "navbar", "breadcrumbs"],

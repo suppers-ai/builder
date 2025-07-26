@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { Alert, Button, Card, Loading } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
-import type { OAuthProvider } from "../types/auth.ts";
+import type { OAuthProvider } from "@suppers/shared/schemas/auth";
 
 interface OAuthHandlerProps {
   url: string;

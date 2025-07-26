@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Loading } from "./Loading.tsx";
 
 const loadingExamples: ComponentExample[] = [
   {
@@ -51,15 +52,15 @@ const loadingExamples: ComponentExample[] = [
     description: "Loading indicators with accompanying text",
     code: `<div class="flex items-center gap-2">
   <Loading variant="spinner" size="sm" />
-  <span>Loading...</span>
+  <span>Saving changes...</span>
 </div>
 <div class="flex items-center gap-2">
   <Loading variant="dots" color="primary" />
-  <span>Please wait</span>
+  <span>Loading content</span>
 </div>
 <div class="flex flex-col items-center gap-2">
   <Loading variant="ring" size="lg" color="accent" />
-  <span class="text-sm">Processing your request</span>
+  <span class="text-sm">Uploading file (45%)</span>
 </div>`,
     showCode: true,
   },

@@ -4,13 +4,14 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Avatar } from "./Avatar.tsx";
 
 const avatarExamples: ComponentExample[] = [
   {
     title: "Basic Avatar",
     description: "Simple avatars with images and placeholders",
     code:
-      `<Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+      `<Avatar src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" />
 <Avatar initials="JD" />
 <Avatar placeholder="?" />`,
     showCode: true,
@@ -19,19 +20,19 @@ const avatarExamples: ComponentExample[] = [
     title: "Avatar Sizes",
     description: "Different sizes for various contexts",
     code:
-      `<Avatar size="xs" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="sm" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="md" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="lg" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="xl" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />`,
+      `<Avatar size="xs" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face" />
+<Avatar size="sm" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
+<Avatar size="md" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" />
+<Avatar size="lg" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" />
+<Avatar size="xl" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" />`,
     showCode: true,
   },
   {
     title: "Avatar with Status Indicators",
     description: "Online/offline status indicators",
     code:
-      `<Avatar online src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar offline src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+      `<Avatar online src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" />
+<Avatar offline src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" />
 <Avatar online initials="JD" />
 <Avatar offline initials="SM" />`,
     showCode: true,
@@ -40,18 +41,18 @@ const avatarExamples: ComponentExample[] = [
     title: "Avatar with Ring",
     description: "Avatars with decorative rings",
     code:
-      `<Avatar ring src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+      `<Avatar ring src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
 <Avatar ring initials="AB" />
-<Avatar ring online src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />`,
+<Avatar ring online src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face" />`,
     showCode: true,
   },
   {
     title: "Avatar Group",
     description: "Multiple avatars grouped together",
-    code: `<div class="avatar-group -space-x-6 rtl:space-x-reverse">
-  <Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-  <Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-  <Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+    code: `<div class="flex -space-x-4">
+  <Avatar src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" />
+  <Avatar src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
+  <Avatar src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face" />
   <Avatar initials="+3" />
 </div>`,
     showCode: true,
@@ -123,7 +124,7 @@ export const avatarMetadata: ComponentMetadata = {
     <div class="flex gap-2">
       <div class="avatar">
         <div class="w-12 h-12 rounded-full">
-          <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" />
         </div>
       </div>
       <div class="avatar placeholder">
@@ -133,7 +134,7 @@ export const avatarMetadata: ComponentMetadata = {
       </div>
       <div class="avatar online">
         <div class="w-12 h-12 rounded-full">
-          <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" />
         </div>
       </div>
     </div>

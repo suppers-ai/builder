@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { DateInput } from "./DateInput.tsx";
 
 const dateInputExamples: ComponentExample[] = [
   {

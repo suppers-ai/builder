@@ -5,4 +5,4 @@
  */
 
 export * from "./supabase-client.ts";
-export * from "./auth-helpers.ts";
+export * from "./compiler-service.ts";

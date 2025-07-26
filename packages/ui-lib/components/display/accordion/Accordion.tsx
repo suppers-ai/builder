@@ -28,7 +28,6 @@ export function Accordion({
   ...props
 }: AccordionProps) {
   const accordionClasses = [
-    "collapse-container",
     className,
   ].filter(Boolean).join(" ");
 
@@ -43,9 +42,12 @@ export function Accordion({
     onToggle(itemId, !isCurrentlyOpen);
   };
 
+  // Ensure items is always an array
+  const safeItems = Array.isArray(items) ? items : [];
+
   return (
     <div class={accordionClasses} id={id} {...props}>
-      {items.map((item, index) => {
+      {safeItems.map((item, index) => {
         const isOpen = currentOpenItems.includes(item.id);
         const collapseId = `collapse-${item.id}`;
 
@@ -54,18 +56,17 @@ export function Accordion({
           return (
             <div
               key={item.id}
-              class="collapse collapse-arrow bg-base-200 mb-2 [&>.collapse-title:after]:top-[1.7rem]"
+              class="collapse collapse-arrow !mb-0"
             >
               <input
                 type="checkbox"
                 checked={isOpen}
                 onChange={() => !item.disabled && handleToggle(item.id)}
                 disabled={item.disabled}
-                class="sr-only"
               />
               <div
-                class={`collapse-title text-xl font-medium flex items-center ${
-                  item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                class={`collapse-title text-xl font-medium ${
+                  item.disabled ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 onClick={() => !item.disabled && handleToggle(item.id)}
                 onKeyDown={(e) => {
@@ -81,13 +82,9 @@ export function Accordion({
               >
                 {item.title}
               </div>
-              {isOpen && (
-                <div class="collapse-content">
-                  <div class="pb-2">
-                    {item.content}
-                  </div>
-                </div>
-              )}
+              <div class="collapse-content">
+                <div>{item.content}</div>
+              </div>
             </div>
           );
         } else {
@@ -95,7 +92,7 @@ export function Accordion({
           return (
             <div
               key={item.id}
-              class="collapse collapse-arrow bg-base-200 mb-2 [&>.collapse-title:after]:top-[1.7rem]"
+              class="collapse collapse-arrow !mb-0"
             >
               <input
                 type={multiple ? "checkbox" : "radio"}
@@ -104,18 +101,20 @@ export function Accordion({
                 defaultChecked={isOpen}
                 disabled={item.disabled}
               />
-              <label
-                for={collapseId}
-                class={`collapse-title text-xl font-medium flex items-center ${
-                  item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+              <div
+                class={`collapse-title text-xl font-medium ${
+                  item.disabled ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                {item.title}
-              </label>
+                <label
+                  for={collapseId}
+                  class="cursor-pointer"
+                >
+                  {item.title}
+                </label>
+              </div>
               <div class="collapse-content">
-                <div class="pb-2">
-                  {item.content}
-                </div>
+                <div>{item.content}</div>
               </div>
             </div>
           );

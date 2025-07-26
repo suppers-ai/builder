@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Tooltip } from "./Tooltip.tsx";
 
 const tooltipExamples: ComponentExample[] = [
   {

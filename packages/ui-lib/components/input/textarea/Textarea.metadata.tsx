@@ -4,14 +4,15 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Textarea } from "./Textarea.tsx";
 
 const textareaExamples: ComponentExample[] = [
   {
     title: "Basic Textarea",
     description: "Simple multi-line text inputs with different configurations",
-    code: `<Textarea placeholder="Enter your message..." rows={3} />
-<Textarea placeholder="Enter description..." rows={4} />
-<Textarea placeholder="Comments..." rows={2} />`,
+    code: `<Textarea placeholder="Tell us about your experience..." rows={3} />
+<Textarea placeholder="Describe your project requirements..." rows={4} />
+<Textarea placeholder="Additional comments or questions..." rows={2} />`,
     showCode: true,
   },
   {

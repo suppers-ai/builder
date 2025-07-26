@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Kbd } from "./Kbd.tsx";
 
 const kbdExamples: ComponentExample[] = [
   {

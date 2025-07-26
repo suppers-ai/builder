@@ -44,11 +44,11 @@ console.log('Total:', total);"
     title: "Inline Diff Mode",
     description: "Changes displayed inline within unified view",
     code: `<Diff
-  oldContent="The quick brown fox jumps over the lazy dog."
-  newContent="The quick red fox leaps over the sleeping dog."
+  oldContent="Welcome to our website! We offer great services."
+  newContent="Welcome to our platform! We offer amazing services and support."
   mode="inline"
-  oldLabel="Original"
-  newLabel="Modified"
+  oldLabel="Old Version"
+  newLabel="New Version"
 />`,
     showCode: true,
   },

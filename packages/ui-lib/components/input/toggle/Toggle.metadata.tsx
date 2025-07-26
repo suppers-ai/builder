@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Toggle } from "./Toggle.tsx";
 
 const toggleExamples: ComponentExample[] = [
   {
@@ -47,12 +48,13 @@ const toggleExamples: ComponentExample[] = [
     title: "Toggle Groups",
     description: "Multiple toggles for settings panels",
     code: `<div class="space-y-4">
-  <div class="font-semibold">Privacy Settings</div>
-  <Toggle checked>Show profile publicly</Toggle>
-  <Toggle>Allow friend requests</Toggle>
-  <Toggle checked>Email notifications</Toggle>
-  <Toggle>SMS notifications</Toggle>
-  <Toggle>Marketing emails</Toggle>
+  <div class="font-semibold">Account Settings</div>
+  <Toggle checked>🌍 Make profile public</Toggle>
+  <Toggle>🔔 Email notifications</Toggle>
+  <Toggle checked>🔒 Two-factor authentication</Toggle>
+  <Toggle>📱 SMS alerts for logins</Toggle>
+  <Toggle>📊 Allow usage analytics</Toggle>
+  <Toggle>📧 Marketing communications</Toggle>
 </div>`,
     showCode: true,
   },

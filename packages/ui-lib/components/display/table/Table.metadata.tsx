@@ -64,23 +64,26 @@ const tableExamples: ComponentExample[] = [
     code: `<Table
   columns={[
     { key: "name", title: "User" },
+    { key: "email", title: "Email" },
     { key: "status", title: "Status" },
     { 
       key: "actions", 
       title: "Actions",
       render: (_, row) => (
         <div class="flex gap-2">
-          <button class="btn btn-xs btn-primary">Edit</button>
-          <button class="btn btn-xs btn-error">Delete</button>
+          <button class="btn btn-xs btn-primary">View</button>
+          <button class="btn btn-xs btn-secondary">Edit</button>
         </div>
       )
     }
   ]}
   data={[
-    { name: "Alice Cooper", status: "Active" },
-    { name: "Bob Wilson", status: "Inactive" }
+    { name: "Alice Cooper", email: "alice@company.com", status: "Active" },
+    { name: "Bob Wilson", email: "bob@company.com", status: "Inactive" },
+    { name: "Carol Davis", email: "carol@company.com", status: "Active" }
   ]}
   hover
+  zebra
 />`,
     showCode: true,
   },

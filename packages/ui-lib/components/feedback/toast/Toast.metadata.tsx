@@ -5,7 +5,7 @@ const toastExamples: ComponentExample[] = [
   {
     title: "Basic Toast",
     description: "Simple toast notification message",
-    code: `<Toast message="Your changes have been saved!" />`,
+    code: `<Toast message="Your changes have been saved!" type="success" dismissible />`,
     showCode: true,
   },
   {
@@ -28,20 +28,20 @@ const toastExamples: ComponentExample[] = [
   {
     title: "Color Variants",
     description: "Toast notifications with different types",
-    code: `<Toast message="Success operation!" type="success" />
-<Toast message="Warning: Please check your input" type="warning" />
-<Toast message="Error occurred while processing" type="error" />
-<Toast message="Information update available" type="info" />`,
+    code: `<Toast message="File uploaded successfully!" type="success" dismissible />
+<Toast message="Session expires in 5 minutes" type="warning" action="Extend" dismissible />
+<Toast message="Failed to save changes" type="error" action="Retry" dismissible />
+<Toast message="New version available" type="info" action="Update" dismissible />`,
     showCode: true,
   },
   {
     title: "Toast with Actions",
     description: "Toast notifications with action buttons",
     code: `<Toast 
-  message="New message received"
+  message="You have 3 unread messages"
   type="info"
-  action="View"
-  onAction={() => console.log("Action clicked")}
+  action="View All"
+  onAction={() => console.log("Navigate to messages")}
   dismissible
 />`,
     showCode: true,

@@ -3,65 +3,28 @@ import { ThemeController } from "./ThemeController.tsx";
 
 const themeControllerExamples: ComponentExample[] = [
   {
-    title: "Basic Example",
-    description: "Basic usage of the component",
-    code: `<ThemeController />`,
-    props: {},
-    showCode: true,
-  },
-  {
-    title: "With Selected Themes",
-    description: "Theme controller with a subset of available themes",
-    code: `<ThemeController
-  themes={["light", "dark", "cupcake", "cyberpunk", "synthwave"]}
-  currentTheme="light"
-  showLabel={true}
-/>`,
-    props: {
-      themes: ["light", "dark", "cupcake", "cyberpunk", "synthwave"],
-      currentTheme: "light",
-      showLabel: true,
-    },
-    showCode: true,
-  },
-  {
-    title: "Without Label",
-    description: "Theme controller button without text label",
-    code: `<ThemeController
-  themes={["light", "dark", "corporate", "luxury"]}
-  currentTheme="light"
-  showLabel={false}
-/>`,
-    props: {
-      themes: ["light", "dark", "corporate", "luxury"],
-      currentTheme: "light",
-      showLabel: false,
-    },
+    title: "Theme Modal Interface",
+    description: "Interactive theme selection modal with organized theme categories",
+    code: `<ThemeController showButton={false} />`,
+    props: { showButton: false },
     showCode: true,
   },
 ];
 
 export const themeControllerMetadata: ComponentMetadata = {
   name: "ThemeController",
-  description: "Theme switching",
+  description: "Interactive theme selection modal with organized light and dark theme categories",
   category: ComponentCategory.ACTION,
   path: "/components/action/theme-controller",
-  tags: ["theme", "dark", "light", "mode", "appearance", "switch"],
+  tags: ["theme", "dark", "light", "mode", "appearance", "switch", "modal"],
   examples: themeControllerExamples,
-  relatedComponents: ["swap", "dropdown", "radio"],
+  relatedComponents: ["modal", "dropdown", "swap"],
   preview: (
-    <div class="flex gap-4 items-center">
+    <div class="flex items-center justify-center">
       <ThemeController
-        variant="toggle"
-        themes={["light", "dark"]}
         currentTheme="light"
-        size="sm"
-      />
-      <ThemeController
-        variant="dropdown"
-        themes={["light", "dark", "cupcake", "cyberpunk"]}
-        currentTheme="light"
-        size="sm"
+        showButton={true}
+        showLabel={true}
       />
     </div>
   ),

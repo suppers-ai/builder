@@ -4,14 +4,15 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Input } from "./Input.tsx";
 
 const inputExamples: ComponentExample[] = [
   {
     title: "Basic Input",
     description: "Simple text input with different types",
-    code: `<Input type="text" placeholder="Type here" />
-<Input type="email" placeholder="Email" />
-<Input type="password" placeholder="Password" />`,
+    code: `<Input type="text" placeholder="Enter your full name" />
+<Input type="email" placeholder="Enter your email address" />
+<Input type="password" placeholder="Create a password" />`,
     showCode: true,
   },
   {

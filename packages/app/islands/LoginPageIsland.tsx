@@ -184,9 +184,9 @@ export default function LoginPageIsland({
         <Card bordered class="bg-base-100 shadow-xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="text-4xl mb-4">🚀</div>
+            <div className="text-4xl mb-4">🔐</div>
             <h1 className="text-2xl font-bold text-base-content mb-2">
-              Suppers Store
+              Suppers Auth
             </h1>
             <p className="text-base-content/70">
               {showForgotPassword

@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Progress } from "./Progress.tsx";
 
 const progressExamples: ComponentExample[] = [
   {

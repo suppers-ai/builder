@@ -4,11 +4,12 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Skeleton } from "./Skeleton.tsx";
 
 const skeletonExamples: ComponentExample[] = [
   {
     title: "Basic Skeleton",
-    description: "Simple rectangular skeleton loaders",
+    description: "Simple rectangular skeleton loaders for text content",
     code: `<div class="space-y-3">
   <Skeleton width="100%" height={20} />
   <Skeleton width="80%" height={16} />

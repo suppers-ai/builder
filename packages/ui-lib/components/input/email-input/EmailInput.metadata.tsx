@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { EmailInput } from "./EmailInput.tsx";
 
 const emailInputExamples: ComponentExample[] = [
   {

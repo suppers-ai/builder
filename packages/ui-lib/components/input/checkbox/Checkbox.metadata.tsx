@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Checkbox } from "./Checkbox.tsx";
 
 const checkboxExamples: ComponentExample[] = [
   {
@@ -46,11 +47,12 @@ const checkboxExamples: ComponentExample[] = [
     title: "Checkbox Group",
     description: "Group of related checkboxes",
     code: `<div class="space-y-2">
-  <div class="font-semibold">Select your preferences:</div>
-  <Checkbox label="Email notifications" />
-  <Checkbox label="SMS notifications" />
-  <Checkbox label="Push notifications" checked />
-  <Checkbox label="Marketing emails" />
+  <div class="font-semibold">Notification Preferences:</div>
+  <Checkbox label="📧 Email notifications for account updates" />
+  <Checkbox label="📱 SMS notifications for security alerts" />
+  <Checkbox label="🔔 Push notifications for new messages" checked />
+  <Checkbox label="📈 Marketing emails and product updates" />
+  <Checkbox label="🎯 Personalized content recommendations" />
 </div>`,
     showCode: true,
   },

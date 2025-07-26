@@ -7,6 +7,7 @@
     "packages/api",
     "packages/auth-client",
     "packages/store",
+    "packages/app",
     "packages/templates/fresh-basic"
   ],
   "imports": {
@@ -43,6 +44,7 @@
     "dev:ui": "cd packages/docs && deno task start",
     "dev:api-local": "cd packages/api && deno task dev",
     "dev:store": "cd packages/store && deno task dev",
+    "dev:app": "cd packages/app && deno task start",
     "ui:build:root": "deno task ui:build && deno task ui:copy",
     "ui:build": "cd packages/docs && deno task build",
     "ui:copy": "cp -r packages/docs/_fresh ./_fresh",

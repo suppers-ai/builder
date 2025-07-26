@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Rating } from "./Rating.tsx";
 
 const ratingExamples: ComponentExample[] = [
   {

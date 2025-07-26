@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { PasswordInput } from "./PasswordInput.tsx";
 
 const passwordInputExamples: ComponentExample[] = [
   {

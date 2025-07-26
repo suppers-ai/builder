@@ -16,18 +16,34 @@ const cardExamples: ComponentExample[] = [
 <Card title="Product Card">
   A great product with amazing features.
 </Card>`,
+    props: [
+      {
+        title: "Card Title",
+        children: "This is a basic card with some content."
+      },
+      {
+        title: "Product Card", 
+        children: "A great product with amazing features."
+      }
+    ],
     showCode: true,
   },
   {
     title: "Cards with Images",
     description: "Cards featuring images",
     code: `<Card
-  image="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+  image="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
   imageAlt="Shoes"
   title="Shoes!"
 >
   If a dog chews shoes whose shoes does he choose?
 </Card>`,
+    props: {
+      image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
+      imageAlt: "Shoes",
+      title: "Shoes!",
+      children: "If a dog chews shoes whose shoes does he choose?"
+    },
     showCode: true,
   },
   {
@@ -40,6 +56,16 @@ const cardExamples: ComponentExample[] = [
     <button class="btn btn-outline">Add to Cart</button>
   </div>
 </Card>`,
+    props: {
+      title: "Product Card",
+      children: "A great product with amazing features.",
+      actions: (
+        <>
+          <button class="btn btn-primary">Buy Now</button>
+          <button class="btn btn-outline">Add to Cart</button>
+        </>
+      )
+    },
     showCode: true,
   },
   {
@@ -54,6 +80,23 @@ const cardExamples: ComponentExample[] = [
 <Card glass title="Glass Card">
   This card has a glass morphism effect.
 </Card>`,
+    props: [
+      {
+        compact: true,
+        title: "Compact Card",
+        children: "This is a compact card with less padding."
+      },
+      {
+        bordered: true,
+        title: "Bordered Card",
+        children: "This card has a border."
+      },
+      {
+        glass: true,
+        title: "Glass Card",
+        children: "This card has a glass morphism effect."
+      }
+    ],
     showCode: true,
   },
   {
@@ -61,11 +104,17 @@ const cardExamples: ComponentExample[] = [
     description: "Horizontal card layout with side image",
     code: `<Card
   side
-  image="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg"
+  image="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
   title="Side Card"
 >
   This card uses a horizontal layout with the image on the side.
 </Card>`,
+    props: {
+      side: true,
+      image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
+      title: "Side Card",
+      children: "This card uses a horizontal layout with the image on the side."
+    },
     showCode: true,
   },
 ];

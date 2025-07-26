@@ -4,6 +4,7 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Badge } from "./Badge.tsx";
 
 const badgeExamples: ComponentExample[] = [
   {

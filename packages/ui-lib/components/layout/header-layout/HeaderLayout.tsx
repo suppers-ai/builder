@@ -335,37 +335,6 @@ export function HeaderLayout({
 
       {/* Theme controller */}
       <GlobalThemeController
-        themes={[
-          "light",
-          "dark",
-          "cupcake",
-          "bumblebee",
-          "emerald",
-          "corporate",
-          "synthwave",
-          "retro",
-          "cyberpunk",
-          "valentine",
-          "halloween",
-          "garden",
-          "forest",
-          "aqua",
-          "lofi",
-          "pastel",
-          "fantasy",
-          "wireframe",
-          "black",
-          "luxury",
-          "dracula",
-          "cmyk",
-          "autumn",
-          "business",
-          "acid",
-          "lemonade",
-          "night",
-          "coffee",
-          "winter",
-        ]}
         variant="dropdown"
         size="sm"
         showPreview
@@ -434,37 +403,6 @@ export function HeaderLayout({
             class="bg-black/20 backdrop-blur-md border border-white/20 text-white hover:bg-black/30 shadow-lg p-0"
           >
             <GlobalThemeController
-              themes={[
-                "light",
-                "dark",
-                "cupcake",
-                "bumblebee",
-                "emerald",
-                "corporate",
-                "synthwave",
-                "retro",
-                "cyberpunk",
-                "valentine",
-                "halloween",
-                "garden",
-                "forest",
-                "aqua",
-                "lofi",
-                "pastel",
-                "fantasy",
-                "wireframe",
-                "black",
-                "luxury",
-                "dracula",
-                "cmyk",
-                "autumn",
-                "business",
-                "acid",
-                "lemonade",
-                "night",
-                "coffee",
-                "winter",
-              ]}
               variant="dropdown"
               size="sm"
               showPreview

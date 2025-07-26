@@ -7,8 +7,9 @@ import {
   loadSavedTheme,
   LoginButton,
   UserProfileDropdown,
+  Accordion,
 } from "@suppers/ui-lib";
-import type { UserProfileDropdownUser } from "@suppers/ui-lib";
+import type { UserProfileDropdownUser, AccordionItemProps } from "@suppers/ui-lib";
 import { defaultUISidebarConfig } from "../utils/sidebar-config.tsx";
 import ThemeModal from "./ThemeModal.tsx";
 
@@ -29,7 +30,7 @@ export default function CustomSidebarIsland({
   onLogin,
   onLogout,
 }: CustomSidebarIslandProps) {
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
+  const [openSections, setOpenSections] = useState<string[]>([]);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(() => {
     // Initialize with actual theme from DOM/localStorage on first render
@@ -47,7 +48,7 @@ export default function CustomSidebarIsland({
 
   useEffect(() => {
     // Initialize all sections as open by default
-    setOpenSections(new Set(defaultUISidebarConfig.sections.map((s) => s.id)));
+    setOpenSections(defaultUISidebarConfig.sections.map((s) => s.id));
 
     // Load the saved theme to sync the signal with DOM
     loadSavedTheme();
@@ -105,12 +106,13 @@ export default function CustomSidebarIsland({
     }
   };
 
-  const toggleSection = (sectionId: string) => {
-    const newOpenSections = new Set(openSections);
-    if (newOpenSections.has(sectionId)) {
-      newOpenSections.delete(sectionId);
-    } else {
-      newOpenSections.add(sectionId);
+  const handleAccordionToggle = (sectionId: string, isOpen: boolean) => {
+    const newOpenSections = [...openSections];
+    if (isOpen && !newOpenSections.includes(sectionId)) {
+      newOpenSections.push(sectionId);
+    } else if (!isOpen && newOpenSections.includes(sectionId)) {
+      const index = newOpenSections.indexOf(sectionId);
+      newOpenSections.splice(index, 1);
     }
     setOpenSections(newOpenSections);
   };
@@ -189,51 +191,42 @@ export default function CustomSidebarIsland({
               </div>
             )}
 
-            {/* Component Categories - Accordion Style */}
-            <div class="space-y-2">
-              {defaultUISidebarConfig.sections.map((section) => {
-                const isOpen = openSections.has(section.id);
-                return (
-                  <div key={section.id} class="border border-base-300 rounded-lg">
-                    {/* Accordion Header */}
-                    <button
-                      onClick={() => toggleSection(section.id)}
-                      class="w-full flex items-center justify-between p-3 text-left hover:bg-base-200 transition-colors rounded-t-lg"
-                    >
-                      <div class="flex items-center gap-2">
-                        {section.icon}
-                        <span class="text-sm font-medium text-base-content">{section.title}</span>
-                        {section.badge && (
-                          <span class="badge badge-primary badge-xs">{section.badge}</span>
-                        )}
-                      </div>
-                      {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                    </button>
-
-                    {/* Accordion Content */}
-                    {isOpen && (
-                      <div class="border-t border-base-300 bg-base-50">
-                        <div class="p-2 space-y-1">
-                          {section.links.map((link) => (
-                            <a
-                              key={link.path || link.name}
-                              href={link.path}
-                              class={`block px-3 py-2 rounded text-sm transition-colors ${
-                                currentPath === link.path
-                                  ? "bg-primary text-primary-content font-medium"
-                                  : "text-base-content/80 hover:text-base-content hover:bg-base-200"
-                              }`}
-                            >
-                              {link.name}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
+            {/* Component Categories - Accordion */}
+            <Accordion
+              items={defaultUISidebarConfig.sections.map((section): AccordionItemProps => ({
+                id: section.id,
+                title: (
+                  <div class="flex items-center gap-2">
+                    {section.icon}
+                    <span class="text-sm font-medium text-base-content">{section.title}</span>
+                    {section.badge && (
+                      <span class="badge badge-primary badge-xs">{section.badge}</span>
                     )}
                   </div>
-                );
-              })}
-            </div>
+                ),
+                content: (
+                  <div class="space-y-1">
+                    {section.links.map((link) => (
+                      <a
+                        key={link.path || link.name}
+                        href={link.path}
+                        class={`block px-3 py-2 rounded text-sm transition-colors ${
+                          currentPath === link.path
+                            ? "bg-primary text-primary-content font-medium"
+                            : "text-base-content/80 hover:text-base-content hover:bg-base-200"
+                        }`}
+                      >
+                        {link.name}
+                      </a>
+                    ))}
+                  </div>
+                ),
+              }))}
+              multiple={true}
+              openItems={openSections}
+              onToggle={handleAccordionToggle}
+              class="space-y-1"
+            />
           </div>
         </div>
 

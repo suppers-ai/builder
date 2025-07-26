@@ -5,7 +5,7 @@ const chatBubbleExamples: ComponentExample[] = [
   {
     title: "Basic Chat Bubble",
     description: "Simple chat message bubble",
-    code: `<ChatBubble message="Hello! How are you doing today?" />`,
+    code: `<ChatBubble message="Hello! How are you doing today?" name="Sarah" time="2:45 PM" />`,
     showCode: true,
   },
   {
@@ -32,28 +32,38 @@ const chatBubbleExamples: ComponentExample[] = [
   },
   {
     title: "Different Colors",
-    description: "Chat bubbles with various color themes",
-    code: `<ChatBubble message="This is a primary message" color="primary" name="User" />
-<ChatBubble message="This is a secondary message" color="secondary" name="User" />
-<ChatBubble message="This is an accent message" color="accent" name="User" />`,
+    description: "Chat bubbles with various color themes for different message types",
+    code: `<ChatBubble message="Meeting starts in 10 minutes!" color="primary" name="Assistant" time="9:50 AM" position="start" />
+<ChatBubble message="Thanks for the reminder" color="secondary" name="You" time="9:51 AM" position="end" />
+<ChatBubble message="File uploaded successfully ✅" color="success" name="System" time="9:52 AM" position="start" />`,
     showCode: true,
   },
   {
     title: "Start and End Positions",
-    description: "Chat bubbles aligned to different sides",
-    code: `<ChatBubble 
-  message="Message from the start (left side)"
-  position="start"
-  name="Alice"
-  time="12:45"
-/>
-<ChatBubble 
-  message="Message from the end (right side)"
-  position="end"
-  name="You"
-  time="12:46"
-  color="primary"
-/>`,
+    description: "Conversation flow with alternating message positions",
+    code: `<div class="space-y-2">
+  <ChatBubble 
+    message="Hey, did you see the new design mockups?"
+    position="start"
+    name="Alice"
+    time="12:45"
+    avatar="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+  />
+  <ChatBubble 
+    message="Yes! They look amazing. I especially love the color scheme."
+    position="end"
+    name="You"
+    time="12:46"
+    color="primary"
+  />
+  <ChatBubble 
+    message="Right? The gradient backgrounds really make it pop! 🎨"
+    position="start"
+    name="Alice"
+    time="12:47"
+    avatar="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+  />
+</div>`,
     showCode: true,
   },
 ];
