@@ -1,9 +1,11 @@
 import { corsHeaders } from "../lib/cors.ts";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function handleApplicationsRequest(
+export async function handleApplications(
   request: Request,
-  supabase: unknown,
+  context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }
 ): Promise<Response> {
+  const { supabase } = context;
   const url = new URL(request.url);
   const method = request.method;
 
@@ -25,14 +27,14 @@ export async function handleApplicationsRequest(
     }
   } catch (error) {
     console.error("Applications handler error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 }
 
-async function getApplications(supabase: unknown, url: URL): Promise<Response> {
+async function getApplications(supabase: SupabaseClient, url: URL): Promise<Response> {
   const ownerId = url.searchParams.get("owner_id");
   const applicationId = url.searchParams.get("application_id");
 
@@ -92,7 +94,7 @@ async function getApplications(supabase: unknown, url: URL): Promise<Response> {
   }
 }
 
-async function createApplication(request: Request, supabase: unknown): Promise<Response> {
+async function createApplication(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const {
     ownerId,
@@ -141,7 +143,7 @@ async function createApplication(request: Request, supabase: unknown): Promise<R
   });
 }
 
-async function updateApplication(request: Request, supabase: unknown): Promise<Response> {
+async function updateApplication(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const {
     id,
@@ -189,7 +191,7 @@ async function updateApplication(request: Request, supabase: unknown): Promise<R
   });
 }
 
-async function deleteApplication(request: Request, supabase: unknown): Promise<Response> {
+async function deleteApplication(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const { id } = body;
 

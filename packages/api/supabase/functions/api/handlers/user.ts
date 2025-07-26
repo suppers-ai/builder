@@ -1,6 +1,7 @@
 import { corsHeaders } from "../lib/cors.ts";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function handleUserRequest(request: Request, supabase: unknown): Promise<Response> {
+export async function handleUserRequest(request: Request, supabase: SupabaseClient): Promise<Response> {
   const url = new URL(request.url);
   const method = request.method;
 
@@ -20,14 +21,14 @@ export async function handleUserRequest(request: Request, supabase: unknown): Pr
     }
   } catch (error) {
     console.error("User handler error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 }
 
-async function getUser(supabase: unknown, url: URL): Promise<Response> {
+async function getUser(supabase: SupabaseClient, url: URL): Promise<Response> {
   const userId = url.searchParams.get("user_id");
 
   if (!userId) {
@@ -63,7 +64,7 @@ async function getUser(supabase: unknown, url: URL): Promise<Response> {
   });
 }
 
-async function createUser(request: Request, supabase: unknown): Promise<Response> {
+async function createUser(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const {
     id,
@@ -111,7 +112,7 @@ async function createUser(request: Request, supabase: unknown): Promise<Response
   });
 }
 
-async function updateUser(request: Request, supabase: unknown): Promise<Response> {
+async function updateUser(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const {
     id,

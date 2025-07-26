@@ -1,6 +1,8 @@
 import { corsHeaders } from "../lib/cors.ts";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function handleAccessRequest(request: Request, supabase: unknown): Promise<Response> {
+export async function handleAccess(request: Request, context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }): Promise<Response> {
+  const { supabase } = context;
   const url = new URL(request.url);
   const method = request.method;
 
@@ -20,14 +22,14 @@ export async function handleAccessRequest(request: Request, supabase: unknown): 
     }
   } catch (error) {
     console.error("Access handler error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 }
 
-async function getAccess(supabase: unknown, url: URL): Promise<Response> {
+async function getAccess(supabase: SupabaseClient, url: URL): Promise<Response> {
   const applicationId = url.searchParams.get("application_id");
   const userId = url.searchParams.get("user_id");
 
@@ -75,7 +77,7 @@ async function getAccess(supabase: unknown, url: URL): Promise<Response> {
   );
 }
 
-async function grantAccess(request: Request, supabase: unknown): Promise<Response> {
+async function grantAccess(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const { applicationId, userId, accessLevel, grantedBy } = body;
 
@@ -139,7 +141,7 @@ async function grantAccess(request: Request, supabase: unknown): Promise<Respons
   });
 }
 
-async function revokeAccess(request: Request, supabase: unknown): Promise<Response> {
+async function revokeAccess(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const { applicationId, userId } = body;
 

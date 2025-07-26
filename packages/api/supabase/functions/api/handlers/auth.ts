@@ -1,6 +1,8 @@
 import { corsHeaders } from "../lib/cors.ts";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function handleAuthRequest(request: Request, supabase: unknown): Promise<Response> {
+export async function handleAuth(request: Request, context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }): Promise<Response> {
+  const { supabase } = context;
   const url = new URL(request.url);
   const path = url.pathname.split("/").pop();
 
@@ -24,14 +26,14 @@ export async function handleAuthRequest(request: Request, supabase: unknown): Pr
     }
   } catch (error) {
     console.error("Auth handler error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 }
 
-async function getCurrentUser(_request: Request, supabase: unknown): Promise<Response> {
+async function getCurrentUser(_request: Request, supabase: SupabaseClient): Promise<Response> {
   const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
 
   if (userError || !authUser) {
@@ -57,10 +59,7 @@ async function getCurrentUser(_request: Request, supabase: unknown): Promise<Res
 
   return new Response(
     JSON.stringify({
-      user: {
-        ...user,
-        user,
-      },
+      user: user || authUser,
     }),
     {
       status: 200,
@@ -69,7 +68,7 @@ async function getCurrentUser(_request: Request, supabase: unknown): Promise<Res
   );
 }
 
-async function registerUser(request: Request, supabase: unknown): Promise<Response> {
+async function registerUser(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const {
     email,
@@ -119,7 +118,7 @@ async function registerUser(request: Request, supabase: unknown): Promise<Respon
   );
 }
 
-async function loginUser(request: Request, supabase: unknown): Promise<Response> {
+async function loginUser(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const { email, password } = body;
 
@@ -154,7 +153,7 @@ async function loginUser(request: Request, supabase: unknown): Promise<Response>
   );
 }
 
-async function logoutUser(_request: Request, supabase: unknown): Promise<Response> {
+async function logoutUser(_request: Request, supabase: SupabaseClient): Promise<Response> {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
@@ -170,7 +169,7 @@ async function logoutUser(_request: Request, supabase: unknown): Promise<Respons
   });
 }
 
-async function refreshToken(request: Request, supabase: unknown): Promise<Response> {
+async function refreshToken(request: Request, supabase: SupabaseClient): Promise<Response> {
   const body = await request.json();
   const { refreshToken } = body;
 
