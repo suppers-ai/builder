@@ -9,6 +9,7 @@ import { createComponentRoute } from "../../../utils/component-route-generator.t
 import { ComponentMetadata, flatComponentsMetadata } from "@suppers/ui-lib";
 import { Breadcrumbs } from "@suppers/ui-lib";
 import CodeExample from "../../../islands/CodeExample.tsx";
+import { h } from "preact";
 
 /**
  * Convert URL-friendly component name to PascalCase component name
@@ -77,35 +78,185 @@ function parseJSXExample(code: string, componentName: string): Array<{
 function parseComplexProps(propsString: string): Record<string, any> {
   const props: Record<string, any> = {};
   
-  // Remove extra whitespace and newlines
-  const cleanProps = propsString.replace(/\s+/g, ' ').trim();
+  // First, remove any problematic arrow functions from the string
+  let cleanedPropsString = propsString;
   
-  // Simple regex for basic props (will expand this as needed)
-  const simplePropsRegex = /(\w+)=(?:"([^"]*)"|{([^}]*)}|(\w+))/g;
+  // Replace arrow functions in JSX props with placeholders
+  cleanedPropsString = cleanedPropsString.replace(
+    /(\w+)=\{[^}]*=>[^}]*\}/g,
+    '$1={null}'
+  );
   
+  // Handle boolean props (props without values)  
+  const booleanPropsRegex = /\b(\w+)\b(?!\s*=)/g;
   let match;
-  while ((match = simplePropsRegex.exec(cleanProps)) !== null) {
-    const [, key, quotedValue, bracedValue, unquotedValue] = match;
-    
-    if (quotedValue !== undefined) {
-      props[key] = quotedValue;
-    } else if (bracedValue !== undefined) {
-      const value = bracedValue.trim();
-      if (value === "true") props[key] = true;
-      else if (value === "false") props[key] = false;
-      else if (value.match(/^\d+$/)) props[key] = parseInt(value);
-      else props[key] = value;
-    } else if (unquotedValue !== undefined) {
-      props[key] = unquotedValue;
+  while ((match = booleanPropsRegex.exec(cleanedPropsString)) !== null) {
+    const [, key] = match;
+    // Skip if this is part of an object key or other structure
+    if (!cleanedPropsString.slice(0, match.index).includes(`${key}=`)) {
+      props[key] = true;
     }
   }
   
-  // For now, handle complex JSX props by setting placeholder values
-  if (cleanProps.includes('trigger={')) {
-    props.trigger = "Button"; // Placeholder - will be handled by component
-  }
-  if (cleanProps.includes('content={')) {
-    props.content = "Menu Items"; // Placeholder - will be handled by component  
+  // Handle props with values
+  let i = 0;
+  while (i < cleanedPropsString.length) {
+    // Skip whitespace
+    while (i < cleanedPropsString.length && /\s/.test(cleanedPropsString[i])) i++;
+    if (i >= cleanedPropsString.length) break;
+    
+    // Find prop name
+    let propStart = i;
+    while (i < cleanedPropsString.length && /\w/.test(cleanedPropsString[i])) i++;
+    if (i === propStart) {
+      i++;
+      continue;
+    }
+    
+    const propName = cleanedPropsString.slice(propStart, i);
+    
+    // Skip whitespace
+    while (i < cleanedPropsString.length && /\s/.test(cleanedPropsString[i])) i++;
+    
+    // Check for equals sign
+    if (i >= cleanedPropsString.length || cleanedPropsString[i] !== '=') {
+      continue;
+    }
+    i++; // Skip '='
+    
+    // Skip whitespace
+    while (i < cleanedPropsString.length && /\s/.test(cleanedPropsString[i])) i++;
+    
+    if (i >= cleanedPropsString.length) break;
+    
+    let value;
+    
+    if (cleanedPropsString[i] === '"') {
+      // String value
+      i++; // Skip opening quote
+      const valueStart = i;
+      while (i < cleanedPropsString.length && cleanedPropsString[i] !== '"') {
+        if (cleanedPropsString[i] === '\\') i++; // Skip escaped character
+        i++;
+      }
+      value = cleanedPropsString.slice(valueStart, i);
+      i++; // Skip closing quote
+    } else if (cleanedPropsString[i] === '{') {
+      // JavaScript expression - handle balanced braces
+      const valueStart = i;
+      let braceCount = 0;
+      let inString = false;
+      let stringChar = '';
+      
+      while (i < cleanedPropsString.length) {
+        const char = cleanedPropsString[i];
+        
+        if (!inString) {
+          if (char === '"' || char === "'" || char === '`') {
+            inString = true;
+            stringChar = char;
+          } else if (char === '{') {
+            braceCount++;
+          } else if (char === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+              i++; // Include closing brace
+              break;
+            }
+          }
+        } else {
+          if (char === stringChar && cleanedPropsString[i - 1] !== '\\') {
+            inString = false;
+          }
+        }
+        i++;
+      }
+      
+      const jsCode = cleanedPropsString.slice(valueStart + 1, i - 1); // Remove outer braces
+      
+      try {
+        // Handle various types of function props
+        let processedCode = jsCode;
+        
+        // Handle JSX render functions first
+        if (jsCode.includes('render:') && jsCode.includes('=>') && jsCode.includes('<')) {
+          processedCode = jsCode.replace(
+            /render:\s*\([^)]*\)\s*=>\s*\([^)]*<[^)]+>[^)]*\)/g,
+            'render: (value, row) => "View | Edit"'
+          );
+        }
+        
+        // Handle all types of arrow function props more comprehensively
+        // This handles onClick={(e) => console.log('...')} type patterns
+        processedCode = processedCode.replace(
+          /\b(\w+)\s*=\s*\{[^}]*=>[^}]*\}/g,
+          '$1={() => {}}'
+        );
+        
+        // Also handle object property syntax like onClick: (e) => ...
+        processedCode = processedCode.replace(
+          /\b(\w+):\s*\([^)]*\)\s*=>[^,}]+/g,
+          '$1: () => {}'
+        );
+        
+        // Special case: if we replaced a function with null, create a dummy function
+        if (jsCode === 'null' && (propName.startsWith('on') || propName.includes('Click') || propName.includes('Navigate'))) {
+          value = () => {};
+        } else {
+          // Try to evaluate the processed code
+          value = eval(`(${processedCode})`);
+        }
+        
+      } catch (e) {
+        // If evaluation still fails, try progressively simpler approaches
+        if (jsCode.includes('render:')) {
+          try {
+            const simplified = jsCode.replace(
+              /render:\s*\([^)]*\)\s*=>\s*\([^)]*\)/g,
+              'render: () => "Actions"'
+            );
+            value = eval(`(${simplified})`);
+          } catch (e2) {
+            try {
+              const withoutRender = jsCode.replace(
+                /,?\s*render:\s*\([^)]*\)\s*=>\s*\([^)]*\)/g,
+                ''
+              );
+              value = eval(`(${withoutRender})`);
+            } catch (e3) {
+              value = jsCode;
+            }
+          }
+        } else if (jsCode.includes('=>')) {
+          // Handle any remaining arrow functions
+          try {
+            const withoutFunctions = jsCode.replace(
+              /\([^)]*\)\s*=>\s*[^,}]+/g,
+              '() => {}'
+            );
+            value = eval(`(${withoutFunctions})`);
+          } catch (e2) {
+            value = jsCode;
+          }
+        } else {
+          value = jsCode;
+        }
+      }
+    } else {
+      // Unquoted value
+      const valueStart = i;
+      while (i < cleanedPropsString.length && !/\s/.test(cleanedPropsString[i])) i++;
+      const rawValue = cleanedPropsString.slice(valueStart, i);
+      
+      // Try to parse as boolean or number
+      if (rawValue === 'true') value = true;
+      else if (rawValue === 'false') value = false;
+      else if (/^\d+$/.test(rawValue)) value = parseInt(rawValue);
+      else if (/^\d*\.\d+$/.test(rawValue)) value = parseFloat(rawValue);
+      else value = rawValue;
+    }
+    
+    props[propName] = value;
   }
   
   return props;

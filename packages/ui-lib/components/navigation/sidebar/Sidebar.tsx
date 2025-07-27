@@ -9,14 +9,14 @@ import { ChevronRight } from "lucide-preact";
 import { useState } from "preact/hooks";
 
 export interface SidebarProps {
-  config: SidebarConfig;
+  config?: SidebarConfig;
   currentPath?: string;
   onLinkClick?: (link: SidebarLink) => void;
   class?: string;
 }
 
 export function Sidebar({
-  config,
+  config = { sections: [] },
   currentPath = "",
   onLinkClick,
   class: className = "",
@@ -91,14 +91,14 @@ export function Sidebar({
       {/* Sections - Scrollable content */}
       <div class="flex-1 overflow-y-auto min-h-0">
         <div class="pb-4">
-          {config.sections.map((section) => (
+          {config.sections?.map((section) => (
             <SidebarSection
               key={section.id}
               section={section}
               currentPath={currentPath}
               onLinkClick={handleLinkClick}
             />
-          ))}
+          )) || null}
         </div>
       </div>
     </div>
@@ -120,7 +120,7 @@ function SidebarSection({ section, currentPath, onLinkClick }: SidebarSectionPro
     return false;
   };
 
-  const hasActiveLink = section.links.some((link) => isLinkActive(link));
+  const hasActiveLink = section.links?.some((link) => isLinkActive(link)) || false;
 
   const toggleSection = () => {
     setIsOpen(!isOpen);
@@ -159,7 +159,7 @@ function SidebarSection({ section, currentPath, onLinkClick }: SidebarSectionPro
       <div class={`overflow-hidden transition-all duration-200 ${isOpen ? "max-h-96" : "max-h-0"}`}>
         <div class="px-4 pb-2 bg-transparent">
           <ul class="space-y-0.5">
-            {section.links.map((link) => {
+            {section.links?.map((link) => {
               const isActive = isLinkActive(link);
               return (
                 <li key={link.path}>
@@ -193,7 +193,7 @@ function SidebarSection({ section, currentPath, onLinkClick }: SidebarSectionPro
                   </a>
                 </li>
               );
-            })}
+            }) || null}
           </ul>
         </div>
       </div>

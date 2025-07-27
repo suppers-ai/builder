@@ -8,6 +8,10 @@ const indicatorExamples: ComponentExample[] = [
     code: `<Indicator item="5">
   <button class="btn">Messages</button>
 </Indicator>`,
+    props: {
+      item: "5",
+      children: <button class="btn">Messages</button>
+    },
     showCode: true,
   },
   {

@@ -58,7 +58,7 @@ const stepsExamples: ComponentExample[] = [
     { id: "4", label: "Review" },
     { id: "5", label: "Complete" }
   ]}
-  responsive
+  responsive="true"
 />`,
     showCode: true,
   },

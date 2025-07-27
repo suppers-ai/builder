@@ -17,6 +17,14 @@ const tabsExamples: ComponentExample[] = [
   ]}
   activeTab="tab1"
 />`,
+    props: {
+      tabs: [
+        { id: "tab1", label: "Home", content: "Welcome to the home page!" },
+        { id: "tab2", label: "About", content: "Learn more about us here." },
+        { id: "tab3", label: "Contact", content: "Get in touch with our team." }
+      ],
+      activeTab: "tab1"
+    },
     showCode: true,
   },
   {
@@ -43,6 +51,29 @@ const tabsExamples: ComponentExample[] = [
     { id: "tab2", label: "Layout", content: "Boxed tab layout" }
   ]}
 />`,
+    props: [
+      {
+        bordered: true,
+        tabs: [
+          { id: "tab1", label: "Bordered", content: "This tab has borders" },
+          { id: "tab2", label: "Style", content: "Different tab styling" }
+        ]
+      },
+      {
+        lifted: true,
+        tabs: [
+          { id: "tab1", label: "Lifted", content: "This tab appears lifted" },
+          { id: "tab2", label: "Design", content: "Elevated tab design" }
+        ]
+      },
+      {
+        boxed: true,
+        tabs: [
+          { id: "tab1", label: "Boxed", content: "This tab has a boxed style" },
+          { id: "tab2", label: "Layout", content: "Boxed tab layout" }
+        ]
+      }
+    ],
     showCode: true,
   },
   {
@@ -109,6 +140,41 @@ const tabsExamples: ComponentExample[] = [
     }
   ]}
 />`,
+    props: {
+      bordered: true,
+      tabs: [
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          content: (
+            <div class="space-y-4">
+              <div class="stats shadow">
+                <div class="stat">
+                  <div class="stat-title">Total Users</div>
+                  <div class="stat-value">1,234</div>
+                </div>
+              </div>
+              <p>Welcome to your dashboard overview.</p>
+            </div>
+          )
+        },
+        {
+          id: "settings",
+          label: "Settings",
+          content: (
+            <div class="form-control w-full max-w-xs">
+              <label class="label">
+                <span class="label-text">Theme</span>
+              </label>
+              <select class="select select-bordered">
+                <option>Light</option>
+                <option>Dark</option>
+              </select>
+            </div>
+          )
+        }
+      ]
+    },
     showCode: true,
   },
   {
@@ -122,6 +188,14 @@ const tabsExamples: ComponentExample[] = [
   ]}
   activeTab="available"
 />`,
+    props: {
+      tabs: [
+        { id: "available", label: "Available", content: "This tab is available and active." },
+        { id: "disabled", label: "Disabled", content: "This content won't show.", disabled: true },
+        { id: "enabled", label: "Enabled", content: "This tab is also available." }
+      ],
+      activeTab: "available"
+    },
     showCode: true,
   },
 ];

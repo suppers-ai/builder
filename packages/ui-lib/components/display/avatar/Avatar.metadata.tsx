@@ -31,19 +31,19 @@ const avatarExamples: ComponentExample[] = [
     title: "Avatar with Status Indicators",
     description: "Online/offline status indicators",
     code:
-      `<Avatar online src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" />
-<Avatar offline src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" />
-<Avatar online initials="JD" />
-<Avatar offline initials="SM" />`,
+      `<Avatar online="true" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" />
+<Avatar offline="true" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" />
+<Avatar online="true" initials="JD" />
+<Avatar offline="true" initials="SM" />`,
     showCode: true,
   },
   {
     title: "Avatar with Ring",
     description: "Avatars with decorative rings",
     code:
-      `<Avatar ring src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
-<Avatar ring initials="AB" />
-<Avatar ring online src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face" />`,
+      `<Avatar ring="true" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" />
+<Avatar ring="true" initials="AB" />
+<Avatar ring="true" online="true" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&crop=face" />`,
     showCode: true,
   },
   {

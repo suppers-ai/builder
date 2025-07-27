@@ -4,6 +4,8 @@ import {
   ComponentMetadata,
   ComponentProp,
 } from "../../types.ts";
+import { Sidebar } from "./Sidebar.tsx";
+import { Home, Settings, User, FileText, BarChart3 } from "lucide-preact";
 
 const sidebarExamples: ComponentExample[] = [
   {
@@ -15,6 +17,7 @@ const sidebarExamples: ComponentExample[] = [
     {
       id: "main",
       title: "Main",
+      defaultOpen: true,
       links: [
         { name: "Dashboard", path: "/dashboard" },
         { name: "Settings", path: "/settings" }
@@ -25,6 +28,24 @@ const sidebarExamples: ComponentExample[] = [
 
 <Sidebar config={config} currentPath="/dashboard" />`,
     showCode: true,
+    props: {
+      config: {
+        title: "My App",
+        sections: [
+          {
+            id: "main",
+            title: "Main",
+            defaultOpen: true,
+            icon: <Home size={16} />,
+            links: [
+              { name: "Dashboard", path: "/dashboard" },
+              { name: "Settings", path: "/settings" }
+            ]
+          }
+        ]
+      },
+      currentPath: "/dashboard"
+    },
   },
   {
     title: "Sidebar with Quick Links",
@@ -33,13 +54,14 @@ const sidebarExamples: ComponentExample[] = [
   title: "My App",
   showQuickLinks: true,
   quickLinks: [
-    { name: "Home", path: "/", icon: <HomeIcon /> },
-    { name: "Profile", path: "/profile", icon: <UserIcon /> }
+    { name: "Home", path: "/", icon: <Home /> },
+    { name: "Profile", path: "/profile", icon: <User /> }
   ],
   sections: [
     {
       id: "tools",
       title: "Tools",
+      defaultOpen: true,
       links: [
         { name: "Analytics", path: "/analytics" },
         { name: "Reports", path: "/reports" }
@@ -50,6 +72,28 @@ const sidebarExamples: ComponentExample[] = [
 
 <Sidebar config={config} />`,
     showCode: true,
+    props: {
+      config: {
+        title: "My App",
+        showQuickLinks: true,
+        quickLinks: [
+          { name: "Home", path: "/", icon: <Home size={16} /> },
+          { name: "Profile", path: "/profile", icon: <User size={16} /> }
+        ],
+        sections: [
+          {
+            id: "tools",
+            title: "Tools",
+            defaultOpen: true,
+            icon: <BarChart3 size={16} />,
+            links: [
+              { name: "Analytics", path: "/analytics" },
+              { name: "Reports", path: "/reports" }
+            ]
+          }
+        ]
+      }
+    },
   },
   {
     title: "Sidebar with Search",
@@ -72,6 +116,25 @@ const sidebarExamples: ComponentExample[] = [
 
 <Sidebar config={config} />`,
     showCode: true,
+    props: {
+      config: {
+        title: "Documentation",
+        showSearch: true,
+        sections: [
+          {
+            id: "docs",
+            title: "Documentation",
+            defaultOpen: true,
+            icon: <FileText size={16} />,
+            links: [
+              { name: "Getting Started", path: "/docs/start" },
+              { name: "API Reference", path: "/docs/api" },
+              { name: "Examples", path: "/docs/examples" }
+            ]
+          }
+        ]
+      }
+    },
   },
   {
     title: "Interactive Sidebar",
@@ -82,6 +145,7 @@ const sidebarExamples: ComponentExample[] = [
       id: "main",
       title: "Main",
       badge: "3",
+      defaultOpen: true,
       links: [
         { 
           name: "Messages", 
@@ -103,6 +167,37 @@ const sidebarExamples: ComponentExample[] = [
   onLinkClick={(link) => console.log('Clicked:', link)}
 />`,
     showCode: true,
+    props: {
+      config: {
+        sections: [
+          {
+            id: "main",
+            title: "Main",
+            badge: "3",
+            defaultOpen: true,
+            icon: <Settings size={16} />,
+            links: [
+              { 
+                name: "Messages", 
+                path: "/messages",
+                badge: "5"
+              },
+              { 
+                name: "Notifications", 
+                path: "/notifications",
+                badge: "2"
+              },
+              { 
+                name: "External Link", 
+                path: "https://example.com",
+                external: true 
+              }
+            ]
+          }
+        ]
+      },
+      onLinkClick: (link) => console.log('Clicked:', link)
+    },
   },
 ];
 

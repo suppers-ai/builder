@@ -10,6 +10,11 @@ const footerExamples: ComponentExample[] = [
   description="Building amazing products since 2024"
   copyright="© 2024 My Company. All rights reserved."
 />`,
+    props: {
+      title: "My Company",
+      description: "Building amazing products since 2024",
+      copyright: "© 2024 My Company. All rights reserved."
+    },
     showCode: true,
   },
   {

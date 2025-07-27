@@ -10,6 +10,14 @@ const maskExamples: ComponentExample[] = [
     Squircle
   </div>
 </Mask>`,
+    props: {
+      variant: "squircle",
+      children: (
+        <div class="bg-primary w-20 h-20 flex items-center justify-center text-primary-content">
+          Squircle
+        </div>
+      )
+    },
     showCode: true,
   },
   {

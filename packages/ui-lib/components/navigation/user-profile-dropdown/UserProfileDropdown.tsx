@@ -7,7 +7,7 @@ import type { AuthUser } from "../../../../shared/types/auth.ts";
 import { TypeMappers } from "../../../../shared/utils/type-mappers.ts";
 
 export interface UserProfileDropdownProps {
-  user: AuthUser;
+  user?: AuthUser;
   onLogout?: () => void;
   onProfile?: () => void;
   onSettings?: () => void;
@@ -33,8 +33,12 @@ export function UserProfileDropdown({
   class: className = "",
   children,
 }: UserProfileDropdownProps) {
+  if (!user) {
+    return null;
+  }
+
   const getDisplayName = () => TypeMappers.getDisplayName(user);
-  const getDisplayEmail = () => user.email;
+  const getDisplayEmail = () => user.email || "No email";
 
   const handleMenuItemClick = (callback?: () => void, href?: string) => {
     if (callback) {

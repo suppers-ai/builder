@@ -18,21 +18,18 @@ const paginationExamples: ComponentExample[] = [
     code: `<Pagination
   currentPage={5}
   totalPages={15}
-  showPageNumbers
   maxVisiblePages={5}
   onPageChange={(page) => console.log('Go to page:', page)}
 />`,
     showCode: true,
   },
   {
-    title: "Responsive Pagination",
-    description: "Pagination that adapts to screen size",
+    title: "Without First/Last Buttons",
+    description: "Pagination without first and last page buttons",
     code: `<Pagination
   currentPage={8}
   totalPages={20}
-  showPageNumbers
-  responsive
-  showFirstLast
+  showFirstLast={false}
   onPageChange={(page) => console.log('Go to page:', page)}
 />`,
     showCode: true,
@@ -40,50 +37,66 @@ const paginationExamples: ComponentExample[] = [
   {
     title: "Different Sizes",
     description: "Pagination in various sizes",
-    code: `<div class="space-y-4">
-  <Pagination
-    currentPage={2}
-    totalPages={5}
-    size="sm"
-    showPageNumbers
-  />
-  <Pagination
-    currentPage={2}
-    totalPages={5}
-    size="md"
-    showPageNumbers
-  />
-  <Pagination
-    currentPage={2}
-    totalPages={5}
-    size="lg"
-    showPageNumbers
-  />
+    code: `<div class="flex flex-col gap-6">
+  <div>
+    <h4 class="text-sm font-medium mb-2">Small</h4>
+    <Pagination
+      currentPage={2}
+      totalPages={5}
+      size="sm"
+      onPageChange={(page) => console.log('Small pagination:', page)}
+    />
+  </div>
+  <div>
+    <h4 class="text-sm font-medium mb-2">Medium (Default)</h4>
+    <Pagination
+      currentPage={2}
+      totalPages={5}
+      size="md"
+      onPageChange={(page) => console.log('Medium pagination:', page)}
+    />
+  </div>
+  <div>
+    <h4 class="text-sm font-medium mb-2">Large</h4>
+    <Pagination
+      currentPage={2}
+      totalPages={5}
+      size="lg"
+      onPageChange={(page) => console.log('Large pagination:', page)}
+    />
+  </div>
 </div>`,
     showCode: true,
   },
   {
-    title: "Disabled States",
-    description: "Pagination with various disabled states",
-    code: `<div class="space-y-4">
-  <Pagination
-    currentPage={1}
-    totalPages={10}
-    showPageNumbers
-    onPageChange={(page) => console.log('First page:', page)}
-  />
-  <Pagination
-    currentPage={10}
-    totalPages={10}
-    showPageNumbers
-    onPageChange={(page) => console.log('Last page:', page)}
-  />
-  <Pagination
-    currentPage={5}
-    totalPages={10}
-    showPageNumbers
-    disabled
-  />
+    title: "Edge Cases",
+    description: "Pagination showing first page, last page, and single page behavior",
+    code: `<div class="flex flex-col gap-6">
+  <div>
+    <h4 class="text-sm font-medium mb-2">First Page</h4>
+    <Pagination
+      currentPage={1}
+      totalPages={10}
+      onPageChange={(page) => console.log('First page:', page)}
+    />
+  </div>
+  <div>
+    <h4 class="text-sm font-medium mb-2">Last Page</h4>
+    <Pagination
+      currentPage={10}
+      totalPages={10}
+      onPageChange={(page) => console.log('Last page:', page)}
+    />
+  </div>
+  <div>
+    <h4 class="text-sm font-medium mb-2">Single Page (Hidden)</h4>
+    <Pagination
+      currentPage={1}
+      totalPages={1}
+      onPageChange={(page) => console.log('Single page:', page)}
+    />
+    <p class="text-sm text-gray-500 mt-2">Pagination is hidden when there's only one page</p>
+  </div>
 </div>`,
     showCode: true,
   },
@@ -101,7 +114,6 @@ export const paginationMetadata: ComponentMetadata = {
     <Pagination
       currentPage={3}
       totalPages={10}
-      showPageNumbers
       size="sm"
     />
   ),

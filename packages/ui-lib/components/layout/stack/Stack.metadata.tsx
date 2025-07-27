@@ -10,6 +10,13 @@ const stackExamples: ComponentExample[] = [
   <div class="bg-secondary text-secondary-content p-6 rounded-lg">Layer 2</div>
   <div class="bg-accent text-accent-content p-6 rounded-lg">Layer 3</div>
 </Stack>`,
+    props: {
+      children: [
+        <div class="bg-primary text-primary-content p-6 rounded-lg">Layer 1</div>,
+        <div class="bg-secondary text-secondary-content p-6 rounded-lg">Layer 2</div>,
+        <div class="bg-accent text-accent-content p-6 rounded-lg">Layer 3</div>
+      ]
+    },
     showCode: true,
   },
   {

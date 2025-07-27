@@ -117,7 +117,7 @@ export function Pagination({
   const visiblePages = getVisiblePages();
 
   return (
-    <div class={`join ${className}`} id={id} {...props}>
+    <div class={`join ${className} flex flex-wrap gap-4`} id={id} {...props}>
       {showFirstLast && (
         <button
           type="button"
