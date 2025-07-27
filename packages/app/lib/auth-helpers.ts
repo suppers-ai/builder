@@ -1,13 +1,13 @@
 import { supabase } from "./supabase-client.ts";
 import type { Session, User } from "@supabase/supabase-js";
-import type { OAuthProvider } from "@suppers/shared/schemas/auth";
+import type { OAuthProvider } from "@suppers/shared";
 import type {
   ResetPasswordData,
   SignInData,
   SignUpData,
   UpdateUserData,
   AuthState,
-} from "@suppers/shared/types/auth";
+} from "@suppers/shared";
 
 export class AuthHelpers {
   /**

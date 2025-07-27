@@ -13,5 +13,10 @@ await fsRoutes(app, {
 
 // If this module is called directly, start the server
 if (import.meta.main) {
-  await app.listen();
+  // Configure port from environment variable (default to 8000)
+  const port = parseInt(Deno.env.get("STORE_PORT") || "8000");
+  const hostname = Deno.env.get("STORE_HOST") || "localhost";
+  
+  console.log(`🚀 Store package starting on http://${hostname}:${port}`);
+  await app.listen({ port, hostname });
 }

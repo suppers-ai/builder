@@ -106,51 +106,51 @@
   - Create token validation and refresh endpoints
   - _Requirements: 2.4, 2.5_
 
-- [ ] 6.3 Add authentication middleware and security
+- [x] 6.3 Add authentication middleware and security
   - Implement OAuth state parameter validation for CSRF protection
   - Add rate limiting for authentication endpoints
   - Create session management using Tables<"oauth_tokens"> types
   - Implement proper token expiration and refresh logic
   - _Requirements: 2.5, 5.5_
 
-- [ ] 7. Configure package environments and dependencies
-- [ ] 7.1 Set up app package configuration
+- [x] 7. Configure package environments and dependencies
+- [x] 7.1 Set up app package configuration
   - Configure app package deno.json with proper dependencies
   - Set up environment variables for Supabase and OAuth configuration
   - Create separate port configuration for app package (8001)
   - Configure CORS settings for cross-origin authentication requests
   - _Requirements: 6.1, 6.4, 6.5_
 
-- [ ] 7.2 Update store package configuration
+- [x] 7.2 Update store package configuration
   - Remove authentication-related dependencies from store deno.json
   - Add compiler package dependency for programmatic access
   - Configure store to run on port 8000 (default)
   - Update environment configuration for compiler integration
   - _Requirements: 6.1, 6.4_
 
-- [ ] 7.3 Update shared package integration
+- [x] 7.3 Update shared package integration
   - Ensure both packages properly import from shared package
   - Update database types usage across both packages
   - Configure shared constants and utilities access
   - Test cross-package type compatibility
   - _Requirements: 6.2, 6.3_
 
-- [ ] 8. Create development and deployment scripts
-- [ ] 8.1 Update development scripts
+- [x] 8. Create development and deployment scripts
+- [x] 8.1 Update development scripts
   - Create separate dev scripts for app and store packages
   - Update root deno.json to include both package dev commands
   - Create concurrent development script to run both packages
   - Add package-specific task commands (start, build, test)
   - _Requirements: 6.5_
 
-- [ ] 8.2 Create package documentation
+- [x] 8.2 Create package documentation
   - Update README.md for app package with authentication setup
   - Update README.md for store package with marketplace functionality
   - Create migration guide for existing authentication users
   - Document OAuth integration steps for external applications
   - _Requirements: 6.5_
 
-- [ ] 8.3 Implement testing for both packages
+- [x] 8.3 Implement testing for both packages
   - Create unit tests for app package authentication flows
   - Add integration tests for store package compiler integration
   - Test cross-package communication and OAuth flows

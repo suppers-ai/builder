@@ -226,7 +226,12 @@ export class TypeMappers {
     if (parts.length > 0) return parts.join(" ");
 
     // Fallback to email local part
-    return user.email.split("@")[0];
+    if (user.email) {
+      return user.email.split("@")[0];
+    }
+    
+    // Final fallback
+    return "Anonymous User";
   }
 
   /**
@@ -259,7 +264,7 @@ export class TypeMappers {
    * Helper: Get user display name with fallback
    */
   static getDisplayName(user: User | AuthUser): string {
-    return user.display_name || this.getFullName(user as User) || user.email;
+    return user.display_name || this.getFullName(user as User) || user.email || "Anonymous User";
   }
 
   /**

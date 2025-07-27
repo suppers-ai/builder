@@ -1,7 +1,8 @@
 import { supabase, type Tables, type TablesInsert, type TablesUpdate } from "./supabase-client.ts";
 import { AuthHelpers } from "./auth-helpers.ts";
 import type { User } from "@supabase/supabase-js";
-import type { OAuthProvider } from "@suppers/shared/schemas/auth";
+import type { OAuthProvider } from "@suppers/shared";
+import { AUTH_SCOPES } from "@suppers/shared";
 
 export interface OAuthParams {
   clientId: string;
@@ -621,9 +622,50 @@ export class OAuthService {
   }
 
   /**
-   * Generate secure state parameter
+   * Generate secure state parameter with timestamp for expiration
    */
   static generateState(): string {
     return crypto.randomUUID();
+  }
+
+  /**
+   * Enhanced state validation with timing attack protection
+   */
+  static secureValidateState(providedState: string, expectedState: string): boolean {
+    if (!providedState || !expectedState) {
+      return false;
+    }
+    
+    // Use constant-time comparison to prevent timing attacks
+    if (providedState.length !== expectedState.length) {
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < providedState.length; i++) {
+      result |= providedState.charCodeAt(i) ^ expectedState.charCodeAt(i);
+    }
+    
+    return result === 0;
+  }
+
+  /**
+   * Validate state parameter format for security
+   */
+  static isValidStateFormat(state: string): boolean {
+    if (!state) return false;
+    
+    // State should be a UUID for security
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(state);
+  }
+
+  /**
+   * Generate cryptographically secure random string
+   */
+  static generateSecureRandomString(length: number = 32): string {
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
   }
 }

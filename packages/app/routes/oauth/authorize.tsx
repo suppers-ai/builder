@@ -46,6 +46,14 @@ export const handler: Handlers<AuthorizeData> = {
       });
     }
 
+    // Validate state parameter format for CSRF protection
+    if (state && !OAuthService.isValidStateFormat(state)) {
+      return ctx.render({
+        request: { clientId, redirectUri, scope, state, responseType },
+        error: "Invalid state parameter format. State must be a valid UUID for CSRF protection.",
+      });
+    }
+
     try {
       // Get client information
       const client = await OAuthService.getOAuthClient(clientId);

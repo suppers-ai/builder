@@ -40,11 +40,30 @@
     "clean": "deno run --allow-all scripts/clean.ts",
     "check": "deno check **/*.ts **/*.tsx",
     "check:all": "deno task check && deno task lint && deno task fmt:check",
+    
     "dev:basic": "cd packages/templates/fresh-basic && deno task start",
     "dev:ui": "cd packages/docs && deno task start",
     "dev:api-local": "cd packages/api && deno task dev",
+    
     "dev:store": "cd packages/store && deno task dev",
-    "dev:app": "cd packages/app && deno task start",
+    "dev:app": "cd packages/app && deno task dev",
+    "dev:both": "deno run --allow-all scripts/dev-concurrent.ts",
+    
+    "start:store": "cd packages/store && deno task start",
+    "start:app": "cd packages/app && deno task start",
+    
+    "build:store": "cd packages/store && deno task build",
+    "build:app": "cd packages/app && deno task build",
+    "build:both": "deno task build:store && deno task build:app",
+    
+    "test:store": "cd packages/store && deno task test",
+    "test:app": "cd packages/app && deno task test",
+    "test:both": "deno task test:store && deno task test:app",
+    
+    "check:store": "cd packages/store && deno task check",
+    "check:app": "cd packages/app && deno task check",
+    "check:both": "deno task check:store && deno task check:app",
+    
     "ui:build:root": "deno task ui:build && deno task ui:copy",
     "ui:build": "cd packages/docs && deno task build",
     "ui:copy": "cp -r packages/docs/_fresh ./_fresh",

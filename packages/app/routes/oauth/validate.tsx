@@ -1,17 +1,19 @@
 import { Handlers } from "$fresh/server.ts";
 import { OAuthService } from "../../lib/oauth-service.ts";
-
-interface ValidateRequest {
-  token: string;
-}
+import { TokenManager } from "../../lib/token-manager.ts";
 
 interface ValidateResponse {
-  active: boolean;
-  sub?: string;
+  valid: boolean;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+    avatar_url?: string;
+  };
+  expires_in?: number;
+  should_refresh?: boolean;
   client_id?: string;
   scope?: string;
-  exp?: number;
-  iat?: number;
 }
 
 interface ErrorResponse {
@@ -22,90 +24,80 @@ interface ErrorResponse {
 export const handler: Handlers = {
   async POST(req) {
     try {
-      const contentType = req.headers.get("content-type");
-      let validateRequest: ValidateRequest;
-
-      if (contentType?.includes("application/json")) {
-        validateRequest = await req.json();
-      } else {
-        // Parse form data
-        const formData = await req.formData();
-        validateRequest = {
-          token: formData.get("token")?.toString() || "",
-        };
-      }
-
-      if (!validateRequest.token) {
+      // Extract Bearer token from Authorization header
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
         const errorResponse: ErrorResponse = {
           error: "invalid_request",
-          error_description: "token parameter is required",
+          error_description: "Bearer token required in Authorization header",
         };
         return new Response(JSON.stringify(errorResponse), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
+          status: 401,
+          headers: { 
+            "Content-Type": "application/json",
+            "WWW-Authenticate": 'Bearer realm="oauth"',
+          },
         });
       }
 
+      const token = authHeader.substring(7);
+
       try {
-        // Get token information from database
-        const { supabase } = await import("../../lib/supabase-client.ts");
-        const { data: tokenData, error: tokenError } = await supabase
-          .from("oauth_tokens")
-          .select("*")
-          .eq("access_token", validateRequest.token)
-          .single();
-
-        if (tokenError || !tokenData) {
-          // Token not found - return inactive
-          const response: ValidateResponse = {
-            active: false,
+        // Use enhanced token validation with timing information
+        const validation = await TokenManager.validateTokenWithTiming(token);
+        
+        if (!validation.valid) {
+          const errorResponse: ErrorResponse = {
+            error: "invalid_token",
+            error_description: "Token is invalid or expired",
           };
-          return new Response(JSON.stringify(response), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
+          return new Response(JSON.stringify(errorResponse), {
+            status: 401,
+            headers: { 
+              "Content-Type": "application/json",
+              "WWW-Authenticate": 'Bearer realm="oauth"',
+            },
           });
         }
 
-        // Check if token has expired
-        const isExpired = new Date(tokenData.expires_at) < new Date();
-        if (isExpired) {
-          // Clean up expired token
-          await supabase
-            .from("oauth_tokens")
-            .delete()
-            .eq("access_token", validateRequest.token);
-
-          const response: ValidateResponse = {
-            active: false,
-          };
-          return new Response(JSON.stringify(response), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-
-        // Token is active
+        // Get token info for additional details
+        const tokenInfo = await TokenManager.getTokenInfo(token);
+        
         const response: ValidateResponse = {
-          active: true,
-          sub: tokenData.user_id || undefined,
-          client_id: tokenData.client_id,
-          scope: tokenData.scope,
-          exp: Math.floor(new Date(tokenData.expires_at).getTime() / 1000),
-          iat: Math.floor(new Date(tokenData.created_at).getTime() / 1000),
+          valid: true,
+          user: {
+            id: validation.user!.id,
+            email: validation.user!.email,
+            name: validation.user!.display_name || 
+                  `${validation.user!.first_name || ""} ${validation.user!.last_name || ""}`.trim() || 
+                  validation.user!.email,
+            avatar_url: validation.user!.avatar_url || undefined,
+          },
+          expires_in: validation.expiresIn,
+          should_refresh: validation.shouldRefresh,
+          client_id: tokenInfo?.token.client_id || undefined,
+          scope: tokenInfo?.token.scope || undefined,
         };
 
         return new Response(JSON.stringify(response), {
           status: 200,
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store",
+            "Pragma": "no-cache",
+          },
         });
       } catch (error) {
         const errorResponse: ErrorResponse = {
-          error: "server_error",
-          error_description: "Failed to validate token",
+          error: "invalid_token",
+          error_description: error instanceof Error ? error.message : "Token validation failed",
         };
         return new Response(JSON.stringify(errorResponse), {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
+          status: 401,
+          headers: { 
+            "Content-Type": "application/json",
+            "WWW-Authenticate": 'Bearer realm="oauth"',
+          },
         });
       }
     } catch (error) {

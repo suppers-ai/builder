@@ -1,8 +1,13 @@
-import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { MiddlewareHandlerContext } from "fresh";
 import { OAuthService } from "./oauth-service.ts";
+import { SECURITY_CONFIG, SECURITY_HEADERS, OAUTH_ERRORS } from "./security-config.ts";
 
 // Rate limiting store (in production, use Redis or similar)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+// Session state store for CSRF protection (in production, use Redis or similar)
+const sessionStateStore = new Map<string, { state: string; timestamp: number }>();
+const STATE_EXPIRY_MS = SECURITY_CONFIG.session.stateExpiry;
 
 interface RateLimitOptions {
   windowMs: number; // Time window in milliseconds
@@ -81,11 +86,7 @@ export function rateLimit(options: RateLimitOptions) {
  */
 export function securityHeaders(customHeaders: SecurityHeaders = {}) {
   const defaultHeaders: SecurityHeaders = {
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
-    "X-XSS-Protection": "1; mode=block",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;",
+    ...SECURITY_HEADERS,
     ...customHeaders,
   };
 
@@ -95,6 +96,12 @@ export function securityHeaders(customHeaders: SecurityHeaders = {}) {
     // Add security headers
     for (const [header, value] of Object.entries(defaultHeaders)) {
       response.headers.set(header, value);
+    }
+    
+    // Add HTTPS enforcement in production
+    if (SECURITY_CONFIG.security.requireHttps && !req.url.startsWith("https://")) {
+      const httpsUrl = req.url.replace("http://", "https://");
+      return Response.redirect(httpsUrl, 301);
     }
     
     return response;
@@ -137,7 +144,7 @@ export function corsMiddleware(allowedOrigins: string[] = ["*"]) {
 }
 
 /**
- * OAuth state validation middleware
+ * OAuth state validation middleware with CSRF protection
  */
 export function validateOAuthState() {
   return async (req: Request, ctx: MiddlewareHandlerContext) => {
@@ -146,17 +153,55 @@ export function validateOAuthState() {
       const state = url.searchParams.get("state");
       
       if (state) {
-        // Store state in session or validate against stored state
-        // For now, we'll just validate that it's a valid UUID format
+        // Validate state parameter format (should be a UUID for CSRF protection)
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!uuidRegex.test(state)) {
           return new Response(JSON.stringify({
             error: "invalid_request",
-            error_description: "Invalid state parameter format",
+            error_description: "Invalid state parameter format. State must be a valid UUID for CSRF protection.",
           }), {
             status: 400,
             headers: { "Content-Type": "application/json" },
           });
+        }
+
+        // Store state in session for validation during callback
+        const sessionId = getSessionId(req);
+        if (sessionId) {
+          await storeStateForSession(sessionId, state);
+        }
+      } else {
+        // State parameter is required for CSRF protection
+        return new Response(JSON.stringify({
+          error: "invalid_request",
+          error_description: "State parameter is required for CSRF protection",
+        }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    // Validate state on callback
+    if (req.method === "POST" && req.url.includes("/oauth/authorize")) {
+      const formData = await req.clone().formData();
+      const state = formData.get("state")?.toString();
+      
+      if (state) {
+        const sessionId = getSessionId(req);
+        if (sessionId) {
+          const isValidState = await validateStateForSession(sessionId, state);
+          if (!isValidState) {
+            return new Response(JSON.stringify({
+              error: "invalid_request",
+              error_description: "Invalid state parameter - possible CSRF attack",
+            }), {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            });
+          }
+          // Clean up used state
+          await clearStateForSession(sessionId);
         }
       }
     }
@@ -318,6 +363,179 @@ function getClientIP(req: Request): string {
   
   // Fallback to a default value since we can't get the actual IP in this context
   return "unknown";
+}
+
+/**
+ * Session state management functions for CSRF protection
+ */
+function getSessionId(req: Request): string | null {
+  // Try to get session ID from cookie or create a temporary one based on IP + User-Agent
+  const cookies = req.headers.get("Cookie");
+  if (cookies) {
+    const sessionMatch = cookies.match(/session_id=([^;]+)/);
+    if (sessionMatch) {
+      return sessionMatch[1];
+    }
+  }
+  
+  // Fallback: create temporary session ID based on client info
+  const clientIP = getClientIP(req);
+  const userAgent = req.headers.get("User-Agent") || "";
+  return btoa(`${clientIP}:${userAgent}`).replace(/[^a-zA-Z0-9]/g, "").substring(0, 32);
+}
+
+async function storeStateForSession(sessionId: string, state: string): Promise<void> {
+  // Clean up expired states
+  const now = Date.now();
+  for (const [key, value] of sessionStateStore.entries()) {
+    if (value.timestamp + STATE_EXPIRY_MS < now) {
+      sessionStateStore.delete(key);
+    }
+  }
+  
+  sessionStateStore.set(sessionId, { state, timestamp: now });
+}
+
+async function validateStateForSession(sessionId: string, state: string): Promise<boolean> {
+  const stored = sessionStateStore.get(sessionId);
+  if (!stored) {
+    return false;
+  }
+  
+  // Check if state has expired
+  if (stored.timestamp + STATE_EXPIRY_MS < Date.now()) {
+    sessionStateStore.delete(sessionId);
+    return false;
+  }
+  
+  return stored.state === state;
+}
+
+async function clearStateForSession(sessionId: string): Promise<void> {
+  sessionStateStore.delete(sessionId);
+}
+
+/**
+ * Enhanced session management middleware with token expiration and refresh logic
+ */
+export function enhancedSessionManagement() {
+  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+    // Clean up expired tokens and session states periodically
+    if (Math.random() < 0.01) { // 1% chance to run cleanup
+      try {
+        const { supabase } = await import("./supabase-client.ts");
+        const { TokenManager } = await import("./token-manager.ts");
+        
+        // Clean up expired OAuth tokens and codes
+        await TokenManager.cleanupExpiredTokens();
+        
+        // Clean up expired session states
+        const now = Date.now();
+        for (const [key, value] of sessionStateStore.entries()) {
+          if (value.timestamp + STATE_EXPIRY_MS < now) {
+            sessionStateStore.delete(key);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to clean up expired tokens and states:", error);
+      }
+    }
+    
+    return await ctx.next();
+  };
+}
+
+/**
+ * Token expiration and refresh middleware
+ */
+export function tokenExpirationMiddleware() {
+  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+    const authHeader = req.headers.get("Authorization");
+    
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      
+      try {
+        const { TokenManager } = await import("./token-manager.ts");
+        const validation = await TokenManager.validateTokenWithTiming(token);
+        
+        if (validation.valid && validation.shouldRefresh) {
+          // Add refresh suggestion to response headers
+          const response = await ctx.next();
+          response.headers.set("X-Token-Refresh-Suggested", "true");
+          response.headers.set("X-Token-Expires-In", validation.expiresIn?.toString() || "0");
+          return response;
+        }
+      } catch (error) {
+        // Token validation failed, let the next middleware handle it
+      }
+    }
+    
+    return await ctx.next();
+  };
+}
+
+/**
+ * Brute force protection middleware for authentication endpoints
+ */
+export function bruteForceProtection() {
+  const attemptStore = new Map<string, { attempts: number; lastAttempt: number; blockedUntil?: number }>();
+  const MAX_ATTEMPTS = SECURITY_CONFIG.oauth.maxAuthAttempts;
+  const BLOCK_DURATION_MS = SECURITY_CONFIG.oauth.blockDuration;
+  const ATTEMPT_WINDOW_MS = SECURITY_CONFIG.oauth.authAttemptWindow;
+  
+  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+    if (req.method === "POST" && (req.url.includes("/login") || req.url.includes("/oauth/token"))) {
+      const clientIP = getClientIP(req);
+      const now = Date.now();
+      const attempts = attemptStore.get(clientIP);
+      
+      // Check if IP is currently blocked
+      if (attempts?.blockedUntil && attempts.blockedUntil > now) {
+        return new Response(JSON.stringify({
+          error: "too_many_attempts",
+          error_description: "Too many failed attempts. Please try again later.",
+          retry_after: Math.ceil((attempts.blockedUntil - now) / 1000),
+        }), {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": Math.ceil((attempts.blockedUntil - now) / 1000).toString(),
+          },
+        });
+      }
+      
+      const response = await ctx.next();
+      
+      // Track failed attempts (4xx responses except 429)
+      if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+        const current = attemptStore.get(clientIP) || { attempts: 0, lastAttempt: 0 };
+        
+        // Reset attempts if last attempt was more than the window ago
+        if (now - current.lastAttempt > ATTEMPT_WINDOW_MS) {
+          current.attempts = 1;
+        } else {
+          current.attempts++;
+        }
+        
+        current.lastAttempt = now;
+        
+        // Block if too many attempts
+        if (current.attempts >= MAX_ATTEMPTS) {
+          current.blockedUntil = now + BLOCK_DURATION_MS;
+        }
+        
+        attemptStore.set(clientIP, current);
+      } else if (response.status >= 200 && response.status < 300) {
+        // Clear attempts on successful authentication
+        attemptStore.delete(clientIP);
+      }
+      
+      return response;
+    }
+    
+    return await ctx.next();
+  };
 }
 
 /**

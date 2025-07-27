@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@suppers/shared/generated/database-types.ts";
+import type { Database } from "@suppers/shared/generated/database-types";
 
 // Initialize environment variables
 let supabaseUrl = "";
@@ -83,7 +83,7 @@ export const supabase = new Proxy({} as ReturnType<typeof createClient<Database>
 });
 
 // Export types for convenience
-export type { Database } from "@suppers/shared/generated/database-types.ts";
+export type { Database } from "@suppers/shared/generated/database-types";
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
 export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
