@@ -11,6 +11,7 @@ import { kbdMetadata } from "./kbd/Kbd.metadata.tsx";
 import { statMetadata } from "./stat/Stat.metadata.tsx";
 import { tableMetadata } from "./table/Table.metadata.tsx";
 import { timelineMetadata } from "./timeline/Timeline.metadata.tsx";
+import { userInfoMetadata } from "./user-info/UserInfo.metadata.tsx";
 
 export const displayComponentsMetadata = [
   accordionMetadata,
@@ -26,4 +27,5 @@ export const displayComponentsMetadata = [
   statMetadata,
   tableMetadata,
   timelineMetadata,
+  userInfoMetadata,
 ];

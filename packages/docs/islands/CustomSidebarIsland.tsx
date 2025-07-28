@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { ChevronDown, ChevronRight, LogIn, LogOut, Palette } from "lucide-preact";
+import { ChevronDown, ChevronRight, LogIn, LogOut, Palette, User } from "lucide-preact";
 import {
   closeGlobalSidebar,
   globalSidebarOpen,

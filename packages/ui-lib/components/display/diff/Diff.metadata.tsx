@@ -3,99 +3,45 @@ import { Diff, DiffItem, DiffResizer } from "./Diff.tsx";
 
 const diffExamples: ComponentExample[] = [
   {
-    title: "Text Comparison",
-    description: "Compare text content with draggable divider",
+    title: "Basic Diff",
+    description: "Simple before and after comparison",
     props: {
-      children: [
-        <DiffItem item={1}>
-          <DiffResizer class="bg-primary text-primary-content font-bold text-xl flex items-center justify-center">
-            BEFORE
-          </DiffResizer>
-        </DiffItem>,
-        <DiffItem item={2}>
-          <DiffResizer class="bg-secondary text-secondary-content font-bold text-xl flex items-center justify-center">
-            AFTER
-          </DiffResizer>
-        </DiffItem>
-      ]
+      item1Content: "BEFORE",
+      item2Content: "AFTER"
     }
   },
   {
-    title: "Code Comparison",
-    description: "Side-by-side code comparison",
+    title: "Custom Content",
+    description: "Diff with custom text content",
     props: {
-      children: [
-        <DiffItem item={1}>
-          <DiffResizer class="bg-base-200 p-4">
-            <pre class="text-sm">
-              <code>{`function hello() {
-  console.log('Hello');
-}`}</code>
-            </pre>
-          </DiffResizer>
-        </DiffItem>,
-        <DiffItem item={2}>
-          <DiffResizer class="bg-base-200 p-4">
-            <pre class="text-sm">
-              <code>{`function hello() {
-  console.log('Hello World!');
-  return true;
-}`}</code>
-            </pre>
-          </DiffResizer>
-        </DiffItem>
-      ]
+      item1Content: "Original Version",
+      item2Content: "Updated Version",
+      item1Label: "Old",
+      item2Label: "New"
     }
   },
   {
     title: "Custom Styling",
     description: "Diff with custom background colors",
     props: {
-      class: "border border-base-300 rounded-lg overflow-hidden",
-      children: [
-        <DiffItem item={1}>
-          <DiffResizer class="bg-error/20 text-error-content p-8 flex items-center justify-center">
-            <div class="text-center">
-              <h3 class="text-lg font-bold">Old Version</h3>
-              <p>This is the previous state</p>
-            </div>
-          </DiffResizer>
-        </DiffItem>,
-        <DiffItem item={2}>
-          <DiffResizer class="bg-success/20 text-success-content p-8 flex items-center justify-center">
-            <div class="text-center">
-              <h3 class="text-lg font-bold">New Version</h3>
-              <p>This is the updated state</p>
-            </div>
-          </DiffResizer>
-        </DiffItem>
-      ]
+      item1Content: "Error State",
+      item2Content: "Success State",
+      item1Class: "bg-error text-error-content font-bold text-lg flex items-center justify-center",
+      item2Class: "bg-success text-success-content font-bold text-lg flex items-center justify-center"
     }
   },
   {
-    title: "Content Comparison",
-    description: "Compare different content areas",
+    title: "Code Comparison",
+    description: "Compare code snippets",
     props: {
-      children: [
-        <DiffItem item={1}>
-          <DiffResizer class="bg-base-100 p-6 flex items-center justify-center">
-            <div class="text-center">
-              <div class="w-16 h-16 bg-primary rounded-full mx-auto mb-2"></div>
-              <p class="font-semibold">Original Design</p>
-            </div>
-          </DiffResizer>
-        </DiffItem>,
-        <DiffItem item={2}>
-          <DiffResizer class="bg-base-100 p-6 flex items-center justify-center">
-            <div class="text-center">
-              <div class="w-16 h-16 bg-secondary rounded-square mx-auto mb-2"></div>
-              <p class="font-semibold">Updated Design</p>
-            </div>
-          </DiffResizer>
-        </DiffItem>
-      ]
+      item1Content: "console.log('Hello');",
+      item2Content: "console.log('Hello World!');",
+      item1Class: "bg-base-200 p-4 font-mono text-sm flex items-center justify-center",
+      item2Class: "bg-base-200 p-4 font-mono text-sm flex items-center justify-center",
+      item1Label: "Before",
+      item2Label: "After"
     }
-  },
+  }
 ];
 
 export const diffMetadata: ComponentMetadata = {
@@ -108,18 +54,12 @@ export const diffMetadata: ComponentMetadata = {
   relatedComponents: ["carousel", "mockup"],
   preview: (
     <div class="w-full max-w-md">
-      <Diff>
-        <DiffItem item={1}>
-          <DiffResizer class="bg-primary text-primary-content font-bold text-sm flex items-center justify-center">
-            BEFORE
-          </DiffResizer>
-        </DiffItem>
-        <DiffItem item={2}>
-          <DiffResizer class="bg-secondary text-secondary-content font-bold text-sm flex items-center justify-center">
-            AFTER
-          </DiffResizer>
-        </DiffItem>
-      </Diff>
+      <Diff
+        item1Content="BEFORE"
+        item2Content="AFTER"
+        item1Class="bg-primary text-primary-content font-bold text-sm flex items-center justify-center"
+        item2Class="bg-secondary text-secondary-content font-bold text-sm flex items-center justify-center"
+      />
     </div>
   )
 };
