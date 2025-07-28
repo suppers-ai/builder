@@ -1,4 +1,10 @@
-import { MiddlewareHandlerContext } from "fresh";
+// Fresh 2.0 middleware types
+type FreshContext = {
+  next(): Promise<Response>;
+  state: Record<string, unknown>;
+};
+
+type MiddlewareHandler = (req: Request, ctx: FreshContext) => Promise<Response>;
 import { OAuthService } from "./oauth-service.ts";
 import { SECURITY_CONFIG, SECURITY_HEADERS, OAUTH_ERRORS } from "./security-config.ts";
 
@@ -22,10 +28,10 @@ interface SecurityHeaders {
 /**
  * Rate limiting middleware
  */
-export function rateLimit(options: RateLimitOptions) {
+export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
   const { windowMs, maxRequests, keyGenerator = (req) => getClientIP(req) } = options;
 
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+  return async (req: Request, ctx: FreshContext) => {
     const key = keyGenerator(req);
     const now = Date.now();
     
@@ -84,13 +90,13 @@ export function rateLimit(options: RateLimitOptions) {
 /**
  * Security headers middleware
  */
-export function securityHeaders(customHeaders: SecurityHeaders = {}) {
+export const securityHeaders = (customHeaders: SecurityHeaders = {}) => {
   const defaultHeaders: SecurityHeaders = {
     ...SECURITY_HEADERS,
     ...customHeaders,
   };
 
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+  return async (req: Request, ctx: any) => {
     const response = await ctx.next();
     
     // Add security headers
@@ -111,8 +117,8 @@ export function securityHeaders(customHeaders: SecurityHeaders = {}) {
 /**
  * CORS middleware for OAuth endpoints
  */
-export function corsMiddleware(allowedOrigins: string[] = ["*"]) {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function corsMiddleware(allowedOrigins: string[] = ["*"]): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     const origin = req.headers.get("Origin");
     
     // Handle preflight requests
@@ -146,8 +152,8 @@ export function corsMiddleware(allowedOrigins: string[] = ["*"]) {
 /**
  * OAuth state validation middleware with CSRF protection
  */
-export function validateOAuthState() {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function validateOAuthState(): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     if (req.method === "GET" && req.url.includes("/oauth/authorize")) {
       const url = new URL(req.url);
       const state = url.searchParams.get("state");
@@ -213,8 +219,8 @@ export function validateOAuthState() {
 /**
  * Token validation middleware for protected endpoints
  */
-export function requireValidToken() {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function requireValidToken(): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     const authHeader = req.headers.get("Authorization");
     
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -255,24 +261,17 @@ export function requireValidToken() {
 /**
  * Session management middleware
  */
-export function sessionManagement() {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function sessionManagement(): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     // Clean up expired tokens periodically
     if (Math.random() < 0.01) { // 1% chance to run cleanup
       try {
-        const { supabase } = await import("./supabase-client.ts");
+        // TODO: Replace with API client calls
+        const { apiClient } = await import("./api-client.ts");
         
-        // Clean up expired OAuth tokens
-        await supabase
-          .from("oauth_tokens")
-          .delete()
-          .lt("expires_at", new Date().toISOString());
-        
-        // Clean up expired OAuth codes
-        await supabase
-          .from("oauth_codes")
-          .delete()
-          .lt("expires_at", new Date().toISOString());
+        // TODO: Implement cleanup through API endpoints
+        // Clean up expired OAuth tokens and codes should use API endpoints
+        console.log("TODO: Implement token cleanup through API endpoints");
       } catch (error) {
         console.error("Failed to clean up expired tokens:", error);
       }
@@ -285,8 +284,8 @@ export function sessionManagement() {
 /**
  * Client validation middleware for OAuth endpoints
  */
-export function validateOAuthClient() {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function validateOAuthClient(): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     if (req.method === "POST" && (req.url.includes("/oauth/token") || req.url.includes("/oauth/revoke"))) {
       try {
         const contentType = req.headers.get("content-type");
@@ -418,12 +417,12 @@ async function clearStateForSession(sessionId: string): Promise<void> {
 /**
  * Enhanced session management middleware with token expiration and refresh logic
  */
-export function enhancedSessionManagement() {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function enhancedSessionManagement(): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     // Clean up expired tokens and session states periodically
     if (Math.random() < 0.01) { // 1% chance to run cleanup
       try {
-        const { supabase } = await import("./supabase-client.ts");
+        // TODO: Replace with API client calls
         const { TokenManager } = await import("./token-manager.ts");
         
         // Clean up expired OAuth tokens and codes
@@ -448,8 +447,8 @@ export function enhancedSessionManagement() {
 /**
  * Token expiration and refresh middleware
  */
-export function tokenExpirationMiddleware() {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function tokenExpirationMiddleware(): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     const authHeader = req.headers.get("Authorization");
     
     if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -478,13 +477,13 @@ export function tokenExpirationMiddleware() {
 /**
  * Brute force protection middleware for authentication endpoints
  */
-export function bruteForceProtection() {
+export function bruteForceProtection(): MiddlewareHandler {
   const attemptStore = new Map<string, { attempts: number; lastAttempt: number; blockedUntil?: number }>();
   const MAX_ATTEMPTS = SECURITY_CONFIG.oauth.maxAuthAttempts;
   const BLOCK_DURATION_MS = SECURITY_CONFIG.oauth.blockDuration;
   const ATTEMPT_WINDOW_MS = SECURITY_CONFIG.oauth.authAttemptWindow;
   
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+  return async (req: Request, ctx: FreshContext) => {
     if (req.method === "POST" && (req.url.includes("/login") || req.url.includes("/oauth/token"))) {
       const clientIP = getClientIP(req);
       const now = Date.now();
@@ -541,8 +540,8 @@ export function bruteForceProtection() {
 /**
  * Logging middleware for OAuth endpoints
  */
-export function oauthLogging() {
-  return async (req: Request, ctx: MiddlewareHandlerContext) => {
+export function oauthLogging(): MiddlewareHandler {
+  return async (req: Request, ctx: FreshContext) => {
     const start = Date.now();
     const method = req.method;
     const url = new URL(req.url);

@@ -1,4 +1,4 @@
-import { Handlers, PageProps } from "$fresh/server.ts";
+import { PageProps } from "$fresh/runtime";
 import { OAuthService, type AuthorizationRequest } from "../../lib/oauth-service.ts";
 import { AuthHelpers } from "../../lib/auth-helpers.ts";
 import { Button, Card, Input, Alert } from "@suppers/ui-lib";
@@ -22,7 +22,7 @@ interface AuthorizeData {
   error?: string;
 }
 
-export const handler: Handlers<AuthorizeData> = {
+export const handler = {
   async GET(req, ctx) {
     const url = new URL(req.url);
     const clientId = url.searchParams.get("client_id");

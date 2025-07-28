@@ -1,4 +1,3 @@
-import { Handlers } from "$fresh/server.ts";
 import { OAuthService } from "../../lib/oauth-service.ts";
 
 interface RevokeRequest {
@@ -13,7 +12,7 @@ interface ErrorResponse {
   error_description?: string;
 }
 
-export const handler: Handlers = {
+export const handler = {
   async POST(req) {
     try {
       const contentType = req.headers.get("content-type");
@@ -75,7 +74,8 @@ export const handler: Handlers = {
 
         // Revoke the token
         // Try both access_token and refresh_token columns
-        const { supabase } = await import("../../lib/supabase-client.ts");
+        // TODO: Replace with API client calls
+        const { apiClient } = await import("../../lib/api-client.ts");
         const { error: accessTokenError } = await supabase
           .from("oauth_tokens")
           .delete()

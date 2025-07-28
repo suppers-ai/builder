@@ -59,17 +59,8 @@ export default function LoginPageIsland({
 
     checkAuth();
 
-    // Listen for auth state changes
-    const { data: { subscription } } = AuthHelpers.onAuthStateChange(
-      (event, session) => {
-        userSignal.value = session?.user ?? null;
-        if (session?.user) {
-          globalThis.location.href = redirectTo;
-        }
-      },
-    );
-
-    return () => subscription.unsubscribe();
+    // Note: Auth state changes are not implemented yet
+    // TODO: Implement proper auth state listening when API supports it
   }, [redirectTo]);
 
   const handleToggleMode = () => {

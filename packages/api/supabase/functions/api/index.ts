@@ -17,6 +17,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 Deno.serve(async (req: Request) => {
+  console.log('---------------------------', req);
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -24,6 +25,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url);
+    console.log('url', url);
     const pathSegments = url.pathname.split("/").filter((segment) => segment);
 
     // Extract API version and resource from path
@@ -40,39 +42,53 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get JWT token from Authorization header
+    // Check if this is a public auth endpoint that doesn't require authentication
+    const isPublicAuthEndpoint = resource === "auth" && 
+      (rest[0] === "register" || rest[0] === "login" || rest[0] === "refresh");
+
+    // Get JWT token from Authorization header (not required for public endpoints)
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
 
-    if (!token) {
-      return new Response(
-        JSON.stringify({ error: "Authorization token required" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+    let user = null;
+    let supabase = supabaseAdmin; // Default to admin client
+    console.log("isPublicAuthEndpoint", isPublicAuthEndpoint);
+
+    if (!isPublicAuthEndpoint) {
+      // Require authentication for protected endpoints
+      if (!token) {
+        console.log("token", token);
+        return new Response(
+          JSON.stringify({ error: "Authorization token required" }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      // Verify JWT and get user
+      const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+      if (authError || !authUser) {
+        return new Response(
+          JSON.stringify({ error: "Invalid or expired token" }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      user = authUser;
+
+      // Create user-scoped Supabase client for authenticated requests
+      supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+        global: {
+          headers: { Authorization: authHeader! },
         },
-      );
+      });
     }
-
-    // Verify JWT and get user
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: "Invalid or expired token" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    // Create user-scoped Supabase client
-    const supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: {
-        headers: { Authorization: authHeader! },
-      },
-    });
 
     // Route to appropriate handler based on resource
     let response: Response;

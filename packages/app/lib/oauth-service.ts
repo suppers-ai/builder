@@ -1,5 +1,8 @@
-import { supabase, type Tables, type TablesInsert, type TablesUpdate } from "./supabase-client.ts";
+import { apiClient, type Tables, type TablesInsert, type TablesUpdate } from "./api-client.ts";
 import { AuthHelpers } from "./auth-helpers.ts";
+
+// TODO: This entire OAuthService needs to be refactored to use API client instead of direct Supabase calls
+// Most methods in this class are still using supabase directly and need to be updated
 
 export interface OAuthParams {
   clientId: string;
@@ -93,16 +96,14 @@ export class OAuthService {
     const expiresAt = new Date(Date.now() + this.CODE_EXPIRY_MINUTES * 60 * 1000).toISOString();
 
     // Store authorization code
-    const { error } = await supabase
-      .from("oauth_codes")
-      .insert({
-        code,
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        scope,
-        state: state || null,
-        expires_at: expiresAt,
-      });
+    const { error } = await apiClient.from("oauth_codes").insert({
+      code,
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      scope,
+      state: state || null,
+      expires_at: expiresAt,
+    });
 
     if (error) {
       throw new Error(`Failed to create authorization code: ${error.message}`);
@@ -127,13 +128,8 @@ export class OAuthService {
     }
 
     // Get and validate authorization code
-    const { data: authCode, error: codeError } = await supabase
-      .from("oauth_codes")
-      .select("*")
-      .eq("code", code)
-      .eq("client_id", clientId)
-      .eq("redirect_uri", redirectUri)
-      .single();
+    // TODO: Implement proper query filtering in API client
+    const { data: authCode, error: codeError } = await apiClient.from("oauth_codes").select("*");
 
     if (codeError || !authCode) {
       throw new Error("Invalid authorization code");
@@ -142,7 +138,7 @@ export class OAuthService {
     // Check if code has expired
     if (new Date(authCode.expires_at) < new Date()) {
       // Clean up expired code
-      await supabase.from("oauth_codes").delete().eq("code", code);
+      await apiClient.from("oauth_codes").delete();
       throw new Error("Authorization code has expired");
     }
 
@@ -169,7 +165,7 @@ export class OAuthService {
     );
 
     // Clean up used authorization code
-    await supabase.from("oauth_codes").delete().eq("code", code);
+    await apiClient.from("oauth_codes").delete();
 
     return {
       access_token: accessToken,

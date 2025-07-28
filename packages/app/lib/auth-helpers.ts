@@ -1,5 +1,4 @@
-import { supabase } from "./supabase-client.ts";
-import type { Session, User } from "@supabase/supabase-js";
+import { apiClient, type Session, type User } from "./api-client.ts";
 import type { OAuthProvider } from "@suppers/shared";
 import type {
   ResetPasswordData,
@@ -16,17 +15,10 @@ export class AuthHelpers {
   static async signUp(data: SignUpData) {
     const { email, password, firstName, middleNames, lastName, displayName } = data;
 
-    const { data: authData, error } = await supabase.auth.signUp({
+    const { data: authData, error } = await apiClient.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          first_name: firstName,
-          middle_names: middleNames,
-          last_name: lastName,
-          display_name: displayName,
-        },
-      },
+      // TODO: Handle additional user metadata in API
     });
 
     if (error) {
@@ -42,7 +34,7 @@ export class AuthHelpers {
   static async signIn(data: SignInData) {
     const { email, password } = data;
 
-    const { data: authData, error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await apiClient.auth.signInWithPassword({
       email,
       password,
     });
@@ -58,7 +50,7 @@ export class AuthHelpers {
    * Sign out the current user
    */
   static async signOut() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await apiClient.auth.signOut();
 
     if (error) {
       throw new Error(error.message);
@@ -67,55 +59,36 @@ export class AuthHelpers {
 
   /**
    * Sign in with OAuth provider
+   * TODO: Implement OAuth flow through API endpoints
    */
   static async signInWithOAuth(provider: OAuthProvider, redirectTo?: string) {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: redirectTo || `${globalThis.location?.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
+    // OAuth flow needs to be handled through the API package OAuth endpoints
+    throw new Error("OAuth sign-in should use API package OAuth endpoints");
   }
 
   /**
    * Send password reset email
+   * TODO: Implement password reset through API endpoints
    */
   static async resetPassword(data: ResetPasswordData) {
-    const { email } = data;
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${globalThis.location?.origin}/auth/reset-password`,
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    // Password reset needs to be implemented in API package
+    throw new Error("Password reset should use API package endpoints");
   }
 
   /**
    * Update user password
+   * TODO: Implement password update through API endpoints
    */
   static async updatePassword(newPassword: string) {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    // Password update needs to be implemented in API package
+    throw new Error("Password update should use API package endpoints");
   }
 
   /**
    * Get current user
    */
   static async getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user }, error } = await apiClient.auth.getUser();
 
     if (error) {
       throw new Error(error.message);
@@ -126,66 +99,38 @@ export class AuthHelpers {
 
   /**
    * Get current session
+   * TODO: Implement session retrieval through API endpoints
    */
   static async getCurrentSession() {
-    const { data: { session }, error } = await supabase.auth.getSession();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return session;
+    // Session retrieval needs to be implemented in API package
+    throw new Error("Session retrieval should use API package endpoints");
   }
 
   /**
    * Update user metadata
+   * TODO: Implement user update through API endpoints
    */
   static async updateUser(data: UpdateUserData) {
-    const { firstName, middleNames, lastName, displayName, avatarUrl } = data;
-
-    const { error } = await supabase.auth.updateUser({
-      data: {
-        first_name: firstName,
-        middle_names: middleNames,
-        last_name: lastName,
-        display_name: displayName,
-        avatar_url: avatarUrl,
-      },
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
+    // User metadata updates need to be implemented in API package
+    throw new Error("User update should use API package endpoints");
   }
 
   /**
    * Upload user avatar
+   * TODO: Implement file upload through API endpoints
    */
   static async uploadAvatar(file: File, userId: string) {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${userId}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      throw new Error(uploadError.message);
-    }
-
-    const { data } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
+    // File uploads need to be implemented in API package
+    throw new Error("File upload should use API package endpoints");
   }
 
   /**
    * Listen to auth state changes
+   * TODO: Implement auth state changes through API endpoints or WebSocket
    */
   static onAuthStateChange(callback: (event: string, session: Session | null) => void) {
-    return supabase.auth.onAuthStateChange(callback);
+    // Auth state changes need to be implemented using API polling or WebSocket
+    throw new Error("Auth state changes should use API package endpoints");
   }
 
   /**
@@ -213,31 +158,14 @@ export class AuthHelpers {
 
   /**
    * Create JWT token for external app
+   * TODO: Implement JWT token creation through API endpoints
    */
   static async createJWTToken(
     user: User,
     clientId: string,
     scope: string = "openid email profile",
   ) {
-    // This would typically use a JWT library
-    // For now, return the session access token
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      throw new Error("No active session");
-    }
-
-    return {
-      access_token: session.access_token,
-      token_type: "Bearer",
-      expires_in: session.expires_in,
-      scope,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.user_metadata?.display_name || user.user_metadata?.full_name,
-        avatar_url: user.user_metadata?.avatar_url,
-      },
-    };
+    // JWT token creation needs to be handled by API package
+    throw new Error("JWT token creation should use API package endpoints");
   }
 }

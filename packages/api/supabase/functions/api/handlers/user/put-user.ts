@@ -13,6 +13,8 @@ export async function updateUser(request: Request, supabase: SupabaseClient): Pr
     avatarUrl,
   } = body;
 
+  console.log(body);
+
   if (!id) {
     return new Response(JSON.stringify({ error: "User ID is required" }), {
       status: 400,

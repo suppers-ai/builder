@@ -1,4 +1,3 @@
-import { Handlers } from "$fresh/server.ts";
 import { OAuthService } from "../../lib/oauth-service.ts";
 
 interface TokenRequest {
@@ -23,7 +22,7 @@ interface TokenErrorResponse {
   error_description?: string;
 }
 
-export const handler: Handlers = {
+export const handler = {
   async POST(req) {
     try {
       const contentType = req.headers.get("content-type");

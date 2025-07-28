@@ -1,4 +1,3 @@
-import { Handlers } from "$fresh/server.ts";
 import { OAuthService } from "../../lib/oauth-service.ts";
 
 interface UserInfoResponse {
@@ -17,7 +16,7 @@ interface ErrorResponse {
   error_description?: string;
 }
 
-export const handler: Handlers = {
+export const handler = {
   async GET(req) {
     try {
       // Extract Bearer token from Authorization header

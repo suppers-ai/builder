@@ -1,4 +1,4 @@
-import { type PageProps } from "fresh";
+import { type PageProps } from "$fresh/runtime";
 import { OAuthHandler } from "../../islands/OAuthHandler.tsx";
 
 export default function OAuth(props: PageProps) {

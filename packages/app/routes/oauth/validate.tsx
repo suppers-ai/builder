@@ -1,4 +1,3 @@
-import { Handlers } from "$fresh/server.ts";
 import { OAuthService } from "../../lib/oauth-service.ts";
 import { TokenManager } from "../../lib/token-manager.ts";
 
@@ -21,7 +20,7 @@ interface ErrorResponse {
   error_description?: string;
 }
 
-export const handler: Handlers = {
+export const handler = {
   async POST(req) {
     try {
       // Extract Bearer token from Authorization header

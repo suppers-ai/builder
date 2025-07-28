@@ -1,5 +1,3 @@
-import { Handlers } from "$fresh/server.ts";
-
 interface OpenIDConfiguration {
   issuer: string;
   authorization_endpoint: string;
@@ -17,7 +15,7 @@ interface OpenIDConfiguration {
   code_challenge_methods_supported: string[];
 }
 
-export const handler: Handlers = {
+export const handler = {
   async GET(req) {
     const url = new URL(req.url);
     const baseUrl = `${url.protocol}//${url.host}`;

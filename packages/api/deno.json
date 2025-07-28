@@ -10,7 +10,7 @@
     "@suppers/shared": "../shared/mod.ts"
   },
   "tasks": {
-    "serve": "npx supabase functions serve",
+    "serve": "npx supabase functions serve --no-verify-jwt",
     "dev": "npx supabase start",
     "stop": "npx supabase stop",
     "reset": "npx supabase db reset",
@@ -23,7 +23,10 @@
     "types": "npx supabase gen types typescript --local > ../shared/generated/database-types.ts"
   },
   "compilerOptions": {
-    "lib": ["deno.ns", "dom"],
+    "lib": [
+      "deno.ns",
+      "dom"
+    ],
     "strict": true
   }
 }

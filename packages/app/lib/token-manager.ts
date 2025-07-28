@@ -1,4 +1,7 @@
-import { supabase, type Tables, type TablesInsert, type TablesUpdate } from "./supabase-client.ts";
+import { apiClient, type Tables, type TablesInsert, type TablesUpdate } from "./api-client.ts";
+
+// TODO: This entire TokenManager needs to be refactored to use API client instead of direct Supabase calls
+// All methods in this class are using supabase directly and need to be updated
 
 export interface TokenInfo {
   token: Tables<"oauth_tokens">;

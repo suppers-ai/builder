@@ -5,8 +5,8 @@ import { tailwind } from "@fresh/plugin-tailwind";
 import { app } from "./main.ts";
 
 const cwd = Deno.cwd();
-const envLocalPath = `${cwd}/../../.env.local`;
-const envPath = `${cwd}/../../.env`;
+const envLocalPath = `${cwd}/.env.local`;
+const envPath = `${cwd}/.env`;
 
 // Load environment variables from .env.local, .env files
 try {
@@ -32,8 +32,7 @@ try {
 const builder = new Builder({ target: "safari12" });
 
 // Configure the tailwind plugin for Fresh
-// Note: Tailwind plugin configuration will be added in future tasks
-// tailwind(builder, app);
+tailwind(builder, app);
 
 // Create optimized assets for the browser when
 // running `deno run -A dev.ts build`
@@ -41,7 +40,7 @@ if (Deno.args.includes("build")) {
   await builder.build(app);
 } else {
   // ...otherwise start the development server
-  const port = parseInt(Deno.env.get("APP_PORT") || "8001"); // Different port from store (8000) as per requirements
+  const port = parseInt(Deno.env.get("APP_PORT") || "8000"); // Different port from store (8000) as per requirements
   const hostname = Deno.env.get("APP_HOST") || "localhost";
   
   console.log(`🚀 App package (dev) starting on http://${hostname}:${port}`);
