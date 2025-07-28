@@ -5,62 +5,38 @@ const swapExamples: ComponentExample[] = [
   {
     title: "Rotate Animation",
     description: "Swap with rotate animation between states",
-    code: `<Swap
-  rotate
-  on={<span>📄</span>}
-  off={<span>📁</span>}
-/>`,
     props: {
       rotate: true,
       on: <span>📄</span>,
-      off: <span>📁</span>,
-    },
-    showCode: true,
+      off: <span>📁</span>
+    }
   },
   {
     title: "Flip Animation", 
     description: "Swap with flip animation between states",
-    code: `<Swap
-  flip
-  on={<span>😄</span>}
-  off={<span>😐</span>}
-/>`,
     props: {
       flip: true,
       on: <span>😄</span>,
-      off: <span>😐</span>,
-    },
-    showCode: true,
+      off: <span>😐</span>
+    }
   },
   {
     title: "On/Off Toggle",
     description: "Simple on/off state toggle",
-    code: `<Swap
-  on={<span>🌞</span>}
-  off={<span>🌙</span>}
-/>`,
     props: {
       on: <span>🌞</span>,
-      off: <span>🌙</span>,
-    },
-    showCode: true,
+      off: <span>🌙</span>
+    }
   },
   {
     title: "Animated Text",
     description: "Text-based swap with animation",
-    code: `<Swap
-  rotate
-  on={<span class="text-lg font-bold">ON</span>}
-  off={<span class="text-lg font-bold">OFF</span>}
-/>`,
     props: {
       rotate: true,
       on: <span class="text-lg font-bold">ON</span>,
-      off: <span class="text-lg font-bold">OFF</span>,
-    },
-    showCode: true,
-  },
-];
+      off: <span class="text-lg font-bold">OFF</span>}
+        }
+      ];;
 
 export const swapMetadata: ComponentMetadata = {
   name: "Swap",
@@ -83,5 +59,4 @@ export const swapMetadata: ComponentMetadata = {
         off={<span>😐</span>}
       />
     </div>
-  ),
-};
+  )};

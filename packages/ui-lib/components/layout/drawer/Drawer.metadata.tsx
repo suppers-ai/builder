@@ -3,28 +3,12 @@ import { Drawer } from "./Drawer.tsx";
 import {
   DrawerPropsSchema,
   safeValidateDrawerProps,
-  validateDrawerProps,
-} from "./Drawer.schema.ts";
+  validateDrawerProps} from "./Drawer.schema.ts";
 
 const drawerExamples: ComponentExample[] = [
   {
     title: "Basic Drawer",
     description: "Simple sliding drawer panel",
-    code: `<Drawer
-  sidebarContent={
-    <ul class="menu p-4 w-80 bg-base-200">
-      <li><a>Home</a></li>
-      <li><a>Projects</a></li>
-      <li><a>Settings</a></li>
-    </ul>
-  }
-  open
->
-  <div class="p-4">
-    <h2 class="text-2xl font-bold">Main Content</h2>
-    <p>This is the main content area.</p>
-  </div>
-</Drawer>`,
     props: {
       sidebarContent: (
         <ul class="menu p-4 w-80 bg-base-200">
@@ -39,31 +23,12 @@ const drawerExamples: ComponentExample[] = [
           <h2 class="text-2xl font-bold">Main Content</h2>
           <p>This is the main content area.</p>
         </div>
-      ),
-    },
-    showCode: true,
+      )
+    }
   },
   {
     title: "Drawer with Overlay",
     description: "Drawer with background overlay",
-    code: `<Drawer
-  sidebarContent={
-    <div class="p-4 w-80 bg-base-200">
-      <h3 class="text-lg font-bold mb-4">Navigation</h3>
-      <nav class="space-y-2">
-        <a href="#" class="block py-2 px-4 hover:bg-base-300 rounded">Dashboard</a>
-        <a href="#" class="block py-2 px-4 hover:bg-base-300 rounded">Analytics</a>
-        <a href="#" class="block py-2 px-4 hover:bg-base-300 rounded">Reports</a>
-      </nav>
-    </div>
-  }
-  open
-  showOverlay
->
-  <div class="p-4">
-    <p>Main content with overlay drawer.</p>
-  </div>
-</Drawer>`,
     props: {
       sidebarContent: (
         <div class="p-4 w-80 bg-base-200">
@@ -81,34 +46,12 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Main content with overlay drawer.</p>
         </div>
-      ),
-    },
-    showCode: true,
+      )
+    }
   },
   {
     title: "Responsive Drawer",
     description: "Drawer that adapts to screen size",
-    code: `<Drawer
-  sidebarContent={
-    <div class="p-4 w-80 bg-base-200">
-      <h3 class="text-lg font-bold mb-4">Mobile Menu</h3>
-      <div class="space-y-2">
-        <button class="btn btn-ghost justify-start w-full">
-          🏠 Home
-        </button>
-        <button class="btn btn-ghost justify-start w-full">
-          📊 Projects
-        </button>
-      </div>
-    </div>
-  }
-  responsive
-  breakpoint="lg"
->
-  <div class="p-4">
-    <p>Content that works on mobile and desktop.</p>
-  </div>
-</Drawer>`,
     props: {
       sidebarContent: (
         <div class="p-4 w-80 bg-base-200">
@@ -129,39 +72,12 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Content that works on mobile and desktop.</p>
         </div>
-      ),
-    },
-    showCode: true,
+      )
+    }
   },
   {
     title: "Drawer with Navbar",
     description: "Drawer integrated with navigation bar",
-    code: `<Drawer
-  sidebarContent={
-    <ul class="menu p-4 w-80 bg-base-200">
-      <li><a>Dashboard</a></li>
-      <li><a>Users</a></li>
-      <li><a>Settings</a></li>
-      <li><a>Logout</a></li>
-    </ul>
-  }
-  navbar={
-    <div class="navbar bg-base-300">
-      <div class="flex-none">
-        <button class="btn btn-square btn-ghost">
-          ☰
-        </button>
-      </div>
-      <div class="flex-1">
-        <a class="btn btn-ghost text-xl">My App</a>
-      </div>
-    </div>
-  }
->
-  <div class="p-4">
-    <p>Main content with integrated navbar.</p>
-  </div>
-</Drawer>`,
     props: {
       sidebarContent: (
         <ul class="menu p-4 w-80 bg-base-200">
@@ -187,41 +103,12 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Main content with integrated navbar.</p>
         </div>
-      ),
-    },
-    showCode: true,
+      )
+    }
   },
   {
     title: "End Drawer",
     description: "Drawer that slides from the right side",
-    code: `<Drawer
-  sidebarContent={
-    <div class="p-4 w-80 bg-base-200">
-      <h3 class="text-lg font-bold mb-4">Settings Panel</h3>
-      <div class="space-y-4">
-        <div class="form-control">
-          <label class="label cursor-pointer">
-            <span class="label-text">Dark Mode</span>
-            <input type="checkbox" class="toggle toggle-primary" />
-          </label>
-        </div>
-        <div class="form-control">
-          <label class="label cursor-pointer">
-            <span class="label-text">Notifications</span>
-            <input type="checkbox" class="toggle toggle-primary" checked />
-          </label>
-        </div>
-        <button class="btn btn-primary w-full">Save Settings</button>
-      </div>
-    </div>
-  }
-  position="right"
-  open
->
-  <div class="p-4">
-    <p>Main content with right-side drawer.</p>
-  </div>
-</Drawer>`,
     props: {
       sidebarContent: (
         <div class="p-4 w-80 bg-base-200">
@@ -249,17 +136,14 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Main content with right-side drawer.</p>
         </div>
-      ),
-    },
-    showCode: true,
-  },
-];
+      )}
+        }
+      ];;
 
 const drawerSchema: ComponentSchema = {
   schema: DrawerPropsSchema,
   validateFn: validateDrawerProps,
-  safeValidateFn: safeValidateDrawerProps,
-};
+  safeValidateFn: safeValidateDrawerProps};
 
 export const drawerMetadata: ComponentMetadata = {
   name: "Drawer",
@@ -291,5 +175,4 @@ export const drawerMetadata: ComponentMetadata = {
         <div class="p-4">Main content area</div>
       </Drawer>
     </div>
-  ),
-};
+  )};

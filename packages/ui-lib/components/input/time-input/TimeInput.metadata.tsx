@@ -2,51 +2,34 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 
 const timeInputExamples: ComponentExample[] = [
   {
     title: "Basic Time Input",
     description: "Simple time input for time selection",
-    code: `<TimeInput placeholder="Select time" />
-<TimeInput value="14:30" />
-<TimeInput value="09:00" required />`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "14:30"
+    }
+  },  {
     title: "Time Input with Range",
     description: "Time input with min/max constraints",
-    code: `<TimeInput 
-  min="09:00" 
-  max="17:00" 
-  placeholder="Business hours" 
-/>
-<TimeInput 
-  min="00:00" 
-  max="23:59" 
-  step="15" 
-  placeholder="15-minute steps" 
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "14:30"
+    }
+  },  {
     title: "Time Input Sizes",
     description: "Different time input sizes",
-    code: `<TimeInput size="xs" value="14:30" />
-<TimeInput size="sm" value="14:30" />
-<TimeInput value="14:30" />
-<TimeInput size="lg" value="14:30" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "14:30",
+      size: "lg"
+    }
+  },  {
     title: "Time Input States",
     description: "Different input states and colors",
-    code: `<TimeInput placeholder="Default" />
-<TimeInput color="primary" value="14:30" />
-<TimeInput color="success" value="14:30" />
-<TimeInput disabled value="14:30" />`,
-    showCode: true,
+    props: {
+      value: "14:30"
+    }
   },
 ];
 
@@ -54,73 +37,60 @@ const timeInputProps: ComponentProp[] = [
   {
     name: "value",
     type: "string",
-    description: "The time value in HH:MM format",
-  },
+    description: "The time value in HH:MM format"},
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text for the input",
-  },
+    description: "Placeholder text for the input"},
   {
     name: "min",
     type: "string",
-    description: "Minimum allowed time in HH:MM format",
-  },
+    description: "Minimum allowed time in HH:MM format"},
   {
     name: "max",
     type: "string",
-    description: "Maximum allowed time in HH:MM format",
-  },
+    description: "Maximum allowed time in HH:MM format"},
   {
     name: "step",
     type: "string",
-    description: "Step value for time increments (in minutes)",
-  },
+    description: "Step value for time increments (in minutes)"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the time input",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "color",
     type: "DaisyUIColor",
-    description: "Color theme for the input",
-  },
+    description: "Color theme for the input"},
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true",
-  },
+    default: "true"},
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "required",
     type: "boolean",
     description: "Mark input as required",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Callback when time value changes",
-  },
+    description: "Callback when time value changes"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const timeInputMetadata: ComponentMetadata = {
@@ -146,5 +116,4 @@ export const timeInputMetadata: ComponentMetadata = {
     "Use min/max props to restrict selectable time range",
     "Step prop controls time increment precision (in minutes)",
     "Automatically handles 12/24 hour format based on user locale",
-  ],
-};
+  ]};

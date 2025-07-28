@@ -2,50 +2,34 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 
 const datetimeInputExamples: ComponentExample[] = [
   {
     title: "Basic DateTime Input",
     description: "Simple datetime input for date and time selection",
-    code: `<DatetimeInput placeholder="Select date and time" />
-<DatetimeInput value="2024-01-15T14:30" />
-<DatetimeInput required placeholder="Required datetime" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "2024-01-15T14:30"
+    }
+  },  {
     title: "DateTime Input with Range",
     description: "DateTime input with min/max constraints",
-    code: `<DatetimeInput 
-  min="2024-01-01T00:00" 
-  max="2024-12-31T23:59" 
-  placeholder="2024 only" 
-/>
-<DatetimeInput 
-  min="2024-01-15T09:00" 
-  max="2024-01-15T17:00" 
-  placeholder="Business hours" 
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "2024-01-15T14:30"
+    }
+  },  {
     title: "DateTime Input Sizes",
     description: "Different datetime input sizes",
-    code: `<DatetimeInput size="xs" value="2024-01-15T14:30" />
-<DatetimeInput size="sm" value="2024-01-15T14:30" />
-<DatetimeInput value="2024-01-15T14:30" />
-<DatetimeInput size="lg" value="2024-01-15T14:30" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "2024-01-15T14:30",
+      size: "lg"
+    }
+  },  {
     title: "DateTime Input States",
     description: "Different input states and colors",
-    code: `<DatetimeInput placeholder="Default" />
-<DatetimeInput color="primary" value="2024-01-15T14:30" />
-<DatetimeInput color="success" value="2024-01-15T14:30" />
-<DatetimeInput disabled value="2024-01-15T14:30" />`,
-    showCode: true,
+    props: {
+      value: "2024-01-15T14:30"
+    }
   },
 ];
 
@@ -53,73 +37,60 @@ const datetimeInputProps: ComponentProp[] = [
   {
     name: "value",
     type: "string",
-    description: "The datetime value in ISO format (YYYY-MM-DDTHH:MM)",
-  },
+    description: "The datetime value in ISO format (YYYY-MM-DDTHH:MM)"},
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text for the input",
-  },
+    description: "Placeholder text for the input"},
   {
     name: "min",
     type: "string",
-    description: "Minimum allowed datetime in ISO format",
-  },
+    description: "Minimum allowed datetime in ISO format"},
   {
     name: "max",
     type: "string",
-    description: "Maximum allowed datetime in ISO format",
-  },
+    description: "Maximum allowed datetime in ISO format"},
   {
     name: "step",
     type: "string",
-    description: "Step value for datetime increments",
-  },
+    description: "Step value for datetime increments"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the datetime input",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "color",
     type: "DaisyUIColor",
-    description: "Color theme for the input",
-  },
+    description: "Color theme for the input"},
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true",
-  },
+    default: "true"},
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "required",
     type: "boolean",
     description: "Mark input as required",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Callback when datetime value changes",
-  },
+    description: "Callback when datetime value changes"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const datetimeInputMetadata: ComponentMetadata = {
@@ -145,5 +116,4 @@ export const datetimeInputMetadata: ComponentMetadata = {
     "Use min/max props to restrict selectable date/time range",
     "Step prop can control time increment precision",
     "Consider timezone handling for international applications",
-  ],
-};
+  ]};

@@ -1,7 +1,37 @@
 /**
- * Dynamic component route handler
+ * Dynamic component route handler for the simplified metadata system
+ * 
+ * This route handler processes component documentation using a simplified, props-based approach.
+ * All component examples are now defined purely through props objects, with automatic JSX code
+ * generation and consistent presentation.
+ * 
+ * Key features of the simplified system:
+ * - Props-based examples: All examples use `props` objects instead of raw JSX strings
+ * - Automatic code generation: JSX code is generated from props using `generateJSXFromProps`
+ * - Consistent presentation: All examples show rendered component + generated code
+ * - Single rendering path: No more complex parsing or multiple rendering approaches
+ * 
  * Handles URLs like /components/action/button, /components/display/card, etc.
- * Uses metadata-driven approach for automatic component discovery
+ * Uses metadata-driven approach for automatic component discovery.
+ * 
+ * @example
+ * // Example metadata structure (simplified)
+ * {
+ *   title: "Primary Button",
+ *   description: "A button with primary styling",
+ *   props: { color: "primary", children: "Click me" }
+ * }
+ * 
+ * @example
+ * // Multiple component example
+ * {
+ *   title: "Button Colors",
+ *   description: "Various button color options", 
+ *   props: [
+ *     { color: "primary", children: "Primary" },
+ *     { color: "secondary", children: "Secondary" }
+ *   ]
+ * }
  */
 
 import type { PageProps } from "fresh";
@@ -9,6 +39,7 @@ import { createComponentRoute } from "../../../utils/component-route-generator.t
 import { ComponentMetadata, flatComponentsMetadata } from "@suppers/ui-lib";
 import { Breadcrumbs } from "@suppers/ui-lib";
 import CodeExample from "../../../islands/CodeExample.tsx";
+import { generateJSXFromProps } from "../../../utils/props-to-jsx.ts";
 import { h } from "preact";
 
 /**
@@ -28,238 +59,6 @@ function urlToComponentName(urlName: string): string {
 function findComponentMetadata(category: string, name: string): ComponentMetadata | null {
   const expectedPath = `/components/${category}/${name}`;
   return flatComponentsMetadata.find((meta) => meta.path === expectedPath) || null;
-}
-
-/**
- * Parse JSX code and extract component props and content
- */
-function parseJSXExample(code: string, componentName: string): Array<{
-  props: Record<string, any>;
-  content: string;
-}> {
-  const components: Array<{ props: Record<string, any>; content: string }> = [];
-
-  // Improved regex to handle multiline JSX and various prop formats
-  const componentRegex = new RegExp(
-    `<${componentName}([\\s\\S]*?)\\/>|<${componentName}([\\s\\S]*?)>([\\s\\S]*?)<\\/${componentName}>`,
-    "g",
-  );
-
-  let match;
-
-  while ((match = componentRegex.exec(code)) !== null) {
-    let propsString: string;
-    let content: string;
-
-    if (match[1] !== undefined) {
-      // Self-closing component: <Component props... />
-      propsString = match[1];
-      content = "";
-    } else {
-      // Component with content: <Component props...>content</Component>
-      propsString = match[2];
-      content = match[3]?.trim() || "";
-    }
-
-    const props = parseComplexProps(propsString);
-
-    components.push({
-      props,
-      content: content || (props.children as string) || componentName,
-    });
-  }
-
-  return components;
-}
-
-/**
- * Parse complex props including nested JSX
- */
-function parseComplexProps(propsString: string): Record<string, any> {
-  const props: Record<string, any> = {};
-  
-  // First, remove any problematic arrow functions from the string
-  let cleanedPropsString = propsString;
-  
-  // Replace arrow functions in JSX props with placeholders
-  cleanedPropsString = cleanedPropsString.replace(
-    /(\w+)=\{[^}]*=>[^}]*\}/g,
-    '$1={null}'
-  );
-  
-  // Handle boolean props (props without values)  
-  const booleanPropsRegex = /\b(\w+)\b(?!\s*=)/g;
-  let match;
-  while ((match = booleanPropsRegex.exec(cleanedPropsString)) !== null) {
-    const [, key] = match;
-    // Skip if this is part of an object key or other structure
-    if (!cleanedPropsString.slice(0, match.index).includes(`${key}=`)) {
-      props[key] = true;
-    }
-  }
-  
-  // Handle props with values
-  let i = 0;
-  while (i < cleanedPropsString.length) {
-    // Skip whitespace
-    while (i < cleanedPropsString.length && /\s/.test(cleanedPropsString[i])) i++;
-    if (i >= cleanedPropsString.length) break;
-    
-    // Find prop name
-    let propStart = i;
-    while (i < cleanedPropsString.length && /\w/.test(cleanedPropsString[i])) i++;
-    if (i === propStart) {
-      i++;
-      continue;
-    }
-    
-    const propName = cleanedPropsString.slice(propStart, i);
-    
-    // Skip whitespace
-    while (i < cleanedPropsString.length && /\s/.test(cleanedPropsString[i])) i++;
-    
-    // Check for equals sign
-    if (i >= cleanedPropsString.length || cleanedPropsString[i] !== '=') {
-      continue;
-    }
-    i++; // Skip '='
-    
-    // Skip whitespace
-    while (i < cleanedPropsString.length && /\s/.test(cleanedPropsString[i])) i++;
-    
-    if (i >= cleanedPropsString.length) break;
-    
-    let value;
-    
-    if (cleanedPropsString[i] === '"') {
-      // String value
-      i++; // Skip opening quote
-      const valueStart = i;
-      while (i < cleanedPropsString.length && cleanedPropsString[i] !== '"') {
-        if (cleanedPropsString[i] === '\\') i++; // Skip escaped character
-        i++;
-      }
-      value = cleanedPropsString.slice(valueStart, i);
-      i++; // Skip closing quote
-    } else if (cleanedPropsString[i] === '{') {
-      // JavaScript expression - handle balanced braces
-      const valueStart = i;
-      let braceCount = 0;
-      let inString = false;
-      let stringChar = '';
-      
-      while (i < cleanedPropsString.length) {
-        const char = cleanedPropsString[i];
-        
-        if (!inString) {
-          if (char === '"' || char === "'" || char === '`') {
-            inString = true;
-            stringChar = char;
-          } else if (char === '{') {
-            braceCount++;
-          } else if (char === '}') {
-            braceCount--;
-            if (braceCount === 0) {
-              i++; // Include closing brace
-              break;
-            }
-          }
-        } else {
-          if (char === stringChar && cleanedPropsString[i - 1] !== '\\') {
-            inString = false;
-          }
-        }
-        i++;
-      }
-      
-      const jsCode = cleanedPropsString.slice(valueStart + 1, i - 1); // Remove outer braces
-      
-      try {
-        // Handle various types of function props
-        let processedCode = jsCode;
-        
-        // Handle JSX render functions first
-        if (jsCode.includes('render:') && jsCode.includes('=>') && jsCode.includes('<')) {
-          processedCode = jsCode.replace(
-            /render:\s*\([^)]*\)\s*=>\s*\([^)]*<[^)]+>[^)]*\)/g,
-            'render: (value, row) => "View | Edit"'
-          );
-        }
-        
-        // Handle all types of arrow function props more comprehensively
-        // This handles onClick={(e) => console.log('...')} type patterns
-        processedCode = processedCode.replace(
-          /\b(\w+)\s*=\s*\{[^}]*=>[^}]*\}/g,
-          '$1={() => {}}'
-        );
-        
-        // Also handle object property syntax like onClick: (e) => ...
-        processedCode = processedCode.replace(
-          /\b(\w+):\s*\([^)]*\)\s*=>[^,}]+/g,
-          '$1: () => {}'
-        );
-        
-        // Special case: if we replaced a function with null, create a dummy function
-        if (jsCode === 'null' && (propName.startsWith('on') || propName.includes('Click') || propName.includes('Navigate'))) {
-          value = () => {};
-        } else {
-          // Try to evaluate the processed code
-          value = eval(`(${processedCode})`);
-        }
-        
-      } catch (e) {
-        // If evaluation still fails, try progressively simpler approaches
-        if (jsCode.includes('render:')) {
-          try {
-            const simplified = jsCode.replace(
-              /render:\s*\([^)]*\)\s*=>\s*\([^)]*\)/g,
-              'render: () => "Actions"'
-            );
-            value = eval(`(${simplified})`);
-          } catch (e2) {
-            try {
-              const withoutRender = jsCode.replace(
-                /,?\s*render:\s*\([^)]*\)\s*=>\s*\([^)]*\)/g,
-                ''
-              );
-              value = eval(`(${withoutRender})`);
-            } catch (e3) {
-              value = jsCode;
-            }
-          }
-        } else if (jsCode.includes('=>')) {
-          // Handle any remaining arrow functions
-          try {
-            const withoutFunctions = jsCode.replace(
-              /\([^)]*\)\s*=>\s*[^,}]+/g,
-              '() => {}'
-            );
-            value = eval(`(${withoutFunctions})`);
-          } catch (e2) {
-            value = jsCode;
-          }
-        } else {
-          value = jsCode;
-        }
-      }
-    } else {
-      // Unquoted value
-      const valueStart = i;
-      while (i < cleanedPropsString.length && !/\s/.test(cleanedPropsString[i])) i++;
-      const rawValue = cleanedPropsString.slice(valueStart, i);
-      
-      // Try to parse as boolean or number
-      if (rawValue === 'true') value = true;
-      else if (rawValue === 'false') value = false;
-      else if (/^\d+$/.test(rawValue)) value = parseInt(rawValue);
-      else if (/^\d*\.\d+$/.test(rawValue)) value = parseFloat(rawValue);
-      else value = rawValue;
-    }
-    
-    props[propName] = value;
-  }
-  
-  return props;
 }
 
 
@@ -375,70 +174,38 @@ export default async function DynamicComponentPage(props: PageProps) {
                   <div class="p-6 bg-base-100 border border-base-300 rounded-lg mb-4">
                     <div class="flex flex-wrap gap-4">
                       {(() => {
-                        // Check if example has static render override
-                        if (example.staticRender) {
-                          return example.staticRender;
-                        }
-                        
-                        // Check if example has predefined props data
-                        if (example.props) {
-                          const Component = (example.interactive && components.Interactive)
-                            ? components.Interactive
-                            : components.Static;
-
-                          // Handle array of props (multiple component instances)
-                          if (Array.isArray(example.props)) {
-                            return example.props.map((propSet, propIndex) => (
-                              <Component key={propIndex} {...propSet} />
-                            ));
-                          }
-                          
-                          // Handle single props object
-                          return <Component {...example.props} />;
-                        }
-
-                        // Fallback: Parse the JSX code to get component instances
-                        const parsedComponents = parseJSXExample(example.code, componentName);
-
-                        // If no components were parsed, render as raw HTML (for daisyUI examples)
-                        if (parsedComponents.length === 0) {
+                        // Only handle props-based rendering
+                        if (!example.props) {
                           return (
-                            <div class="w-full">
-                              <div 
-                                dangerouslySetInnerHTML={{ 
-                                  __html: example.code
-                                    .replace(/{(\d+)}/g, '$1') // Replace {0}, {1} with 0, 1
-                                    .replace(/tabIndex=\{0\}/g, 'tabindex="0"') // Fix tabIndex
-                                    .replace(/class="/g, 'class="') // Ensure proper class syntax
-                                }} 
-                              />
+                            <div class="text-error">
+                              Example missing props data. Please update to use props-based format.
                             </div>
                           );
                         }
 
-                        return parsedComponents.map((comp, compIndex) => {
-                          const Component = (example.interactive && components.Interactive)
-                            ? components.Interactive
-                            : components.Static;
+                        const Component = (example.interactive && components.Interactive)
+                          ? components.Interactive
+                          : components.Static;
 
-                          return (
-                            <Component key={compIndex} {...comp.props}>
-                              {comp.content}
-                            </Component>
-                          );
-                        });
+                        // Handle array of props (multiple component instances)
+                        if (Array.isArray(example.props)) {
+                          return example.props.map((propSet, propIndex) => (
+                            <Component key={propIndex} {...propSet} />
+                          ));
+                        }
+
+                        // Handle single props object
+                        return <Component {...example.props} />;
                       })()}
                     </div>
                   </div>
 
-                  {(example.showCode !== false) && (
-                    <details class="mt-4">
-                      <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
-                        Show Code
-                      </summary>
-                      <CodeExample code={example.code} />
-                    </details>
-                  )}
+                  <details class="mt-4">
+                    <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
+                      Show Code
+                    </summary>
+                    <CodeExample code={generateJSXFromProps(componentName, example.props || {})} />
+                  </details>
                 </div>
               ))}
             </div>

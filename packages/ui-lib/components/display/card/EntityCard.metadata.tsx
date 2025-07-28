@@ -67,6 +67,6 @@ export const componentMetadata = {
   }}
 />`,
       props: {}
-    }
-  ]
+        }
+      ]
 };

@@ -5,133 +5,99 @@ const timelineExamples: ComponentExample[] = [
   {
     title: "Basic Timeline",
     description: "Simple chronological event timeline",
-    code: `<Timeline
-  items={[
-    {
-      title: "Project Started",
-      content: "Initial project setup and planning completed.",
-      timestamp: "Jan 15, 2024"
-    },
-    {
-      title: "Design Phase",
-      content: "UI/UX design mockups created and approved.",
-      timestamp: "Feb 2, 2024"
-    },
-    {
-      title: "Development",
-      content: "Core functionality implementation in progress.",
-      timestamp: "Feb 20, 2024"
+    props: {
+      items: [
+        {
+          id: "1",
+      title: "Event 1",
+      description: "First event description",
+      date: "2024-01-01"
+        },
+        {
+          id: "2",
+      title: "Event 2",
+      description: "Second event description",
+      date: "2024-01-15"
+        }
+      ]
     }
-  ]}
-/>`,
-    showCode: true,
-  },
-  {
+  },  {
     title: "Timeline with Icons",
     description: "Timeline events with custom icons",
-    code: `<Timeline
-  items={[
-    {
-      title: "Order Placed",
-      content: "Your order has been successfully placed.",
-      timestamp: "2 hours ago",
-      icon: "shopping-cart",
-      status: "completed"
-    },
-    {
-      title: "Payment Confirmed", 
-      content: "Payment processing completed.",
-      timestamp: "1 hour ago",
-      icon: "credit-card",
-      status: "completed"
-    },
-    {
-      title: "Preparing Order",
-      content: "Your order is being prepared for shipment.",
-      timestamp: "30 min ago",
-      icon: "package",
-      status: "active"
+    props: {
+      items: [
+        {
+          id: "1",
+      title: "Event 1",
+      description: "First event description",
+      date: "2024-01-01"
+        },
+        {
+          id: "2",
+      title: "Event 2",
+      description: "Second event description",
+      date: "2024-01-15"
+        }
+      ]
     }
-  ]}
-/>`,
-    showCode: true,
-  },
-  {
+  },  {
     title: "Horizontal Timeline",
     description: "Timeline displayed in horizontal layout",
-    code: `<Timeline
-  items={[
-    {
-      title: "Q1 2024",
-      content: "Research & Planning",
-      timestamp: "Jan - Mar"
-    },
-    {
-      title: "Q2 2024",
-      content: "Design & Prototyping", 
-      timestamp: "Apr - Jun"
-    },
-    {
-      title: "Q3 2024",
-      content: "Development",
-      timestamp: "Jul - Sep"
+    props: {
+      items: [
+        {
+          id: "1",
+      title: "Event 1",
+      description: "First event description",
+      date: "2024-01-01"
+        },
+        {
+          id: "2",
+      title: "Event 2",
+      description: "Second event description",
+      date: "2024-01-15"
+        }
+      ]
     }
-  ]}
-  orientation="horizontal"
-/>`,
-    showCode: true,
-  },
-  {
+  },  {
     title: "Responsive Timeline",
     description: "Timeline that adapts to different screen sizes",
-    code: `<Timeline
-  items={[
-    {
-      title: "Company Founded",
-      content: "Started with a small team and big dreams.",
-      timestamp: "2020"
-    },
-    {
-      title: "First Product Launch",
-      content: "Released our flagship product to market.",
-      timestamp: "2021"
-    },
-    {
-      title: "Global Expansion",
-      content: "Opened offices in 5 new countries.",
-      timestamp: "2023"
+    props: {
+      items: [
+        {
+          id: "1",
+      title: "Event 1",
+      description: "First event description",
+      date: "2024-01-01"
+        },
+        {
+          id: "2",
+      title: "Event 2",
+      description: "Second event description",
+      date: "2024-01-15"
+        }
+      ]
     }
-  ]}
-  responsive
-/>`,
-    showCode: true,
-  },
-  {
+  },  {
     title: "Colored Timeline",
     description: "Timeline with different colors for event types",
-    code: `<Timeline
-  items={[
-    {
-      title: "System Update",
-      content: "Security patches applied successfully.",
-      timestamp: "Today",
-      color: "success"
-    },
-    {
-      title: "Maintenance Window",
-      content: "Scheduled maintenance completed.",
-      timestamp: "Yesterday", 
-      color: "warning"
-    },
-    {
-      title: "Feature Release",
-      content: "New dashboard features available.",
-      timestamp: "1 week ago",
-      color: "info"
+    props: {
+      items: [
+        {
+          id: "1",
+      title: "Event 1",
+      description: "First event description",
+      date: "2024-01-01"
+        },
+        {
+          id: "2",
+      title: "Event 2",
+      description: "Second event description",
+      date: "2024-01-15"
+        }
+      ],
+      color: "primary"
     }
-  ]}
-/>`,
-    showCode: true,
   },
 ];
 
@@ -150,20 +116,16 @@ export const timelineMetadata: ComponentMetadata = {
           {
             title: "Project started",
             content: "Initial planning phase",
-            timestamp: "Jan 1, 2024",
-          },
+            timestamp: "Jan 1, 2024"},
           {
             title: "Development",
             content: "Core features implemented",
-            timestamp: "Feb 15, 2024",
-          },
+            timestamp: "Feb 15, 2024"},
           {
             title: "Testing",
             content: "Quality assurance phase",
-            timestamp: "Mar 1, 2024",
-          },
+            timestamp: "Mar 1, 2024"},
         ]}
       />
     </div>
-  ),
-};
+  )};

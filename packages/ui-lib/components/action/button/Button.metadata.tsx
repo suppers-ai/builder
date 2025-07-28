@@ -2,64 +2,64 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentSchema,
+  ComponentSchema
 } from "../../types.ts";
 import { Button } from "./Button.tsx";
 import {
   ButtonPropsSchema,
   safeValidateButtonProps,
-  validateButtonProps,
+  validateButtonProps
 } from "./Button.schema.ts";
 
 const buttonSchema: ComponentSchema = {
   schema: ButtonPropsSchema,
   validateFn: validateButtonProps,
-  safeValidateFn: safeValidateButtonProps,
+  safeValidateFn: safeValidateButtonProps
 };
 
 const buttonExamples: ComponentExample[] = [
   {
     title: "Basic Colors",
     description: "Standard button colors and variants",
-    code: `<div class="flex gap-2">
-  <Button>Default</Button>
-  <Button color="primary">Primary</Button>
-  <Button color="secondary">Secondary</Button>
-  <Button color="accent">Accent</Button>
-</div>`,
-    showCode: true,
+    props: [
+      { children: "Default" },
+      { color: "primary", children: "Primary" },
+      { color: "secondary", children: "Secondary" },
+      { color: "accent", children: "Accent"
+        }
+      ]
   },
   {
     title: "Button Variants",
     description: "Different visual styles",
-    code: `<div class="flex gap-2">
-  <Button variant="outline" color="primary">Outline</Button>
-  <Button variant="ghost" color="primary">Ghost</Button>
-  <Button variant="link" color="primary">Link</Button>
-</div>`,
-    showCode: true,
+    props: [
+      { variant: "outline", color: "primary", children: "Outline" },
+      { variant: "ghost", color: "primary", children: "Ghost" },
+      { variant: "link", color: "primary", children: "Link"
+        }
+      ]
   },
   {
     title: "Button Sizes",
     description: "Various sizes for different use cases",
-    code: `<div class="flex items-center gap-2">
-  <Button size="xs" color="primary">XS</Button>
-  <Button size="sm" color="primary">SM</Button>
-  <Button color="primary">MD</Button>
-  <Button size="lg" color="primary">LG</Button>
-</div>`,
-    showCode: true,
+    props: [
+      { size: "xs", color: "primary", children: "XS" },
+      { size: "sm", color: "primary", children: "SM" },
+      { color: "primary", children: "MD" },
+      { size: "lg", color: "primary", children: "LG"
+        }
+      ]
   },
   {
     title: "Button States",
     description: "Different states and interactions",
-    code: `<div class="flex gap-2">
-  <Button color="primary">Normal</Button>
-  <Button color="primary" active>Active</Button>
-  <Button color="primary" disabled>Disabled</Button>
-  <Button color="primary" loading>Loading</Button>
-</div>`,
-    showCode: true,
+    props: [
+      { color: "primary", children: "Normal" },
+      { color: "primary", active: true, children: "Active" },
+      { color: "primary", disabled: true, children: "Disabled" },
+      { color: "primary", loading: true, children: "Loading"
+        }
+      ]
   },
 
 ];
@@ -89,5 +89,5 @@ export const buttonMetadata: ComponentMetadata = {
     "Outline buttons work well for secondary actions",
     "Ghost buttons are ideal for tertiary actions or navigation",
     "Loading state automatically disables the button to prevent multiple submissions",
-  ],
+  ]
 };

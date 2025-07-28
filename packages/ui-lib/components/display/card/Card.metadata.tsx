@@ -2,20 +2,13 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 import { Card } from "./Card.tsx";
 
 const cardExamples: ComponentExample[] = [
   {
     title: "Basic Cards",
     description: "Simple cards with different content",
-    code: `<Card title="Card Title">
-  This is a basic card with some content.
-</Card>
-<Card title="Product Card">
-  A great product with amazing features.
-</Card>`,
     props: [
       {
         title: "Card Title",
@@ -24,38 +17,21 @@ const cardExamples: ComponentExample[] = [
       {
         title: "Product Card", 
         children: "A great product with amazing features."
-      }
-    ],
-    showCode: true,
-  },
+        }
+      ]},
   {
     title: "Cards with Images",
     description: "Cards featuring images",
-    code: `<Card
-  image="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-  imageAlt="Shoes"
-  title="Shoes!"
->
-  If a dog chews shoes whose shoes does he choose?
-</Card>`,
     props: {
       image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
       imageAlt: "Shoes",
       title: "Shoes!",
       children: "If a dog chews shoes whose shoes does he choose?"
-    },
-    showCode: true,
+    }
   },
   {
     title: "Card with Actions",
     description: "Card with action buttons at the bottom",
-    code: `<Card title="Product Card">
-  A great product with amazing features.
-  <div slot="actions" class="card-actions justify-end">
-    <button class="btn btn-primary">Buy Now</button>
-    <button class="btn btn-outline">Add to Cart</button>
-  </div>
-</Card>`,
     props: {
       title: "Product Card",
       children: "A great product with amazing features.",
@@ -65,21 +41,11 @@ const cardExamples: ComponentExample[] = [
           <button class="btn btn-outline">Add to Cart</button>
         </>
       )
-    },
-    showCode: true,
+    }
   },
   {
     title: "Card Variants",
     description: "Different card styles and layouts",
-    code: `<Card compact title="Compact Card">
-  This is a compact card with less padding.
-</Card>
-<Card bordered title="Bordered Card">
-  This card has a border.
-</Card>
-<Card glass title="Glass Card">
-  This card has a glass morphism effect.
-</Card>`,
     props: [
       {
         compact: true,
@@ -95,86 +61,66 @@ const cardExamples: ComponentExample[] = [
         glass: true,
         title: "Glass Card",
         children: "This card has a glass morphism effect."
-      }
-    ],
-    showCode: true,
-  },
+        }
+      ]},
   {
     title: "Side Layout Card",
     description: "Horizontal card layout with side image",
-    code: `<Card
-  side
-  image="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-  title="Side Card"
->
-  This card uses a horizontal layout with the image on the side.
-</Card>`,
     props: {
       side: true,
       image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
       title: "Side Card",
       children: "This card uses a horizontal layout with the image on the side."
-    },
-    showCode: true,
-  },
-];
+    }
+        }
+      ];;
 
 const cardProps: ComponentProp[] = [
   {
     name: "children",
     type: "ComponentChildren",
     description: "Card content",
-    required: true,
-  },
+    required: true},
   {
     name: "title",
     type: "string",
-    description: "Card title displayed prominently",
-  },
+    description: "Card title displayed prominently"},
   {
     name: "image",
     type: "string",
-    description: "Image URL to display in card header",
-  },
+    description: "Image URL to display in card header"},
   {
     name: "imageAlt",
     type: "string",
-    description: "Alt text for the image",
-  },
+    description: "Alt text for the image"},
   {
     name: "actions",
     type: "ComponentChildren",
-    description: "Action buttons displayed at bottom",
-  },
+    description: "Action buttons displayed at bottom"},
   {
     name: "compact",
     type: "boolean",
     description: "Use compact padding",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "side",
     type: "boolean",
     description: "Horizontal layout with side image",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "glass",
     type: "boolean",
     description: "Glass morphism effect",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "bordered",
     type: "boolean",
     description: "Show card border",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const cardMetadata: ComponentMetadata = {
@@ -211,5 +157,4 @@ export const cardMetadata: ComponentMetadata = {
     "Side layout works well for horizontal displays",
     "Compact variant reduces padding for dense layouts",
     "Glass effect requires backdrop blur support",
-  ],
-};
+  ]};

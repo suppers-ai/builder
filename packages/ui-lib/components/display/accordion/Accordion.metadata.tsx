@@ -5,25 +5,6 @@ const accordionExamples: ComponentExample[] = [
   {
     title: "Basic Accordion",
     description: "Simple collapsible content sections",
-    code: `<Accordion
-  items={[
-    {
-      id: "1",
-      title: "What is your return policy?",
-      content: "We offer a 30-day return policy for all unused items in original packaging."
-    },
-    {
-      id: "2", 
-      title: "How long does shipping take?",
-      content: "Standard shipping takes 3-5 business days. Express options are available."
-    },
-    {
-      id: "3",
-      title: "Do you offer international shipping?",
-      content: "Yes, we ship to most countries worldwide with varying costs and delivery times."
-    }
-  ]}
-/>`,
     props: {
       items: [
         {
@@ -42,33 +23,11 @@ const accordionExamples: ComponentExample[] = [
           content: "Yes, we ship to most countries worldwide with varying costs and delivery times."
         }
       ]
-    },
-    showCode: true,
+    }
   },
   {
     title: "Multiple Open Sections",
     description: "Accordion allowing multiple sections to be expanded simultaneously",
-    code: `<Accordion
-  items={[
-    {
-      id: "getting-started",
-      title: "Getting Started",
-      content: "Welcome to our platform! Create your account, complete your profile, and explore the dashboard."
-    },
-    {
-      id: "account-settings",
-      title: "Account Settings", 
-      content: "Manage your account preferences, update personal information, and change notification settings."
-    },
-    {
-      id: "billing",
-      title: "Billing Information",
-      content: "View and update your billing details, payment methods, and subscription plans."
-    }
-  ]}
-  multiple={true}
-  defaultOpen={["getting-started", "account-settings"]}
-/>`,
     props: {
       items: [
         {
@@ -89,10 +48,9 @@ const accordionExamples: ComponentExample[] = [
       ],
       multiple: true,
       defaultOpen: ["getting-started", "account-settings"]
-    },
-    showCode: true,
-  },
-];
+    }
+        }
+      ];;
 
 export const accordionMetadata: ComponentMetadata = {
   name: "Accordion",
@@ -108,15 +66,12 @@ export const accordionMetadata: ComponentMetadata = {
         {
           id: "1",
           title: "Getting Started",
-          content: "Learn the basics of our platform",
-        },
+          content: "Learn the basics of our platform"},
         {
           id: "2",
           title: "Advanced Features",
-          content: "Explore advanced functionality",
-        },
+          content: "Explore advanced functionality"},
       ]}
       defaultOpen={["1"]}
     />
-  ),
-};
+  )};

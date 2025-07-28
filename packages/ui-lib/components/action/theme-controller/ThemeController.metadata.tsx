@@ -5,11 +5,9 @@ const themeControllerExamples: ComponentExample[] = [
   {
     title: "Theme Modal Interface",
     description: "Interactive theme selection modal with organized theme categories",
-    code: `<ThemeController showButton={false} />`,
-    props: { showButton: false },
-    showCode: true,
-  },
-];
+    props: { showButton: false }
+        }
+      ];;
 
 export const themeControllerMetadata: ComponentMetadata = {
   name: "ThemeController",
@@ -27,5 +25,4 @@ export const themeControllerMetadata: ComponentMetadata = {
         showLabel={true}
       />
     </div>
-  ),
-};
+  )};

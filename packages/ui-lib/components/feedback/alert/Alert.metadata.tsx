@@ -2,98 +2,45 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 import { Alert } from "./Alert.tsx";
 
 const alertExamples: ComponentExample[] = [
   {
     title: "Basic Alert",
     description: "Simple alert with icon and message",
-    code: `<Alert color="info">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 16v-4"/>
-    <path d="M12 8h.01"/>
-  </svg>
-  <span>This is an informational alert message.</span>
-</Alert>`,
-    showCode: true,
-  },
-  {
+    props: {
+      type: "info",
+      children: "This is an informational alert message."
+    }
+  },  {
     title: "Alert Types",
     description: "Different alert types for various messages",
-    code: `<Alert color="success">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
-  <span>Success! Your changes have been saved.</span>
-</Alert>
-
-<Alert color="warning">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
-  </svg>
-  <span>Warning: Please review your settings.</span>
-</Alert>
-
-<Alert color="error">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="10"/>
-    <line x1="15" y1="9" x2="9" y2="15"/>
-    <line x1="9" y1="9" x2="15" y2="15"/>
-  </svg>
-  <span>Error: Something went wrong.</span>
-</Alert>`,
-    showCode: true,
-  },
-  {
+    props: {
+      type: "info",
+      children: "This is an informational alert message."
+    }
+  },  {
     title: "Alert with Actions",
     description: "Alerts containing action buttons",
-    code: `<Alert color="warning">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/>
-    <line x1="12" y1="17" x2="12.01" y2="17"/>
-  </svg>
-  <span>Your session will expire in 5 minutes.</span>
-  <div>
-    <button class="btn btn-sm btn-ghost">Dismiss</button>
-    <button class="btn btn-sm btn-primary">Extend Session</button>
-  </div>
-</Alert>`,
-    showCode: true,
-  },
-  {
+    props: {
+      type: "info",
+      children: "This is an informational alert message."
+    }
+  },  {
     title: "Rich Content Alert",
     description: "Alert with title and detailed content",
-    code: `<Alert color="success" class="shadow-lg">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-    <polyline points="22,4 12,14.01 9,11.01"/>
-  </svg>
-  <div>
-    <h3 class="font-bold">Success!</h3>
-    <div class="text-xs">Your account has been created successfully.</div>
-  </div>
-</Alert>`,
-    showCode: true,
-  },
-  {
+    props: {
+      type: "info",
+      children: "This is an informational alert message."
+    }
+  },  {
     title: "Compact Alert",
     description: "Smaller alert for inline messages",
-    code: `<Alert color="info" class="py-2">
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M12 16v-4"/>
-    <path d="M12 8h.01"/>
-  </svg>
-  <span class="text-sm">Compact info message</span>
-</Alert>`,
-    showCode: true,
+    props: {
+      type: "info",
+      children: "This is an informational alert message."
+    }
   },
 ];
 
@@ -102,35 +49,29 @@ const alertProps: ComponentProp[] = [
     name: "children",
     type: "ComponentChildren",
     description: "Alert content including icon, text, and actions",
-    required: true,
-  },
+    required: true},
   {
     name: "color",
     type: "'info' | 'success' | 'warning' | 'error'",
-    description: "Alert color theme indicating message type",
-  },
+    description: "Alert color theme indicating message type"},
   {
     name: "variant",
     type: "'filled' | 'outline'",
     description: "Visual style variant",
-    default: "filled",
-  },
+    default: "filled"},
   {
     name: "dismissible",
     type: "boolean",
     description: "Whether alert can be dismissed by user",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "onDismiss",
     type: "() => void",
-    description: "Function called when alert is dismissed",
-  },
+    description: "Function called when alert is dismissed"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const alertMetadata: ComponentMetadata = {
@@ -188,5 +129,4 @@ export const alertMetadata: ComponentMetadata = {
     "Consider dismissible alerts for non-critical messages",
     "Use proper heading hierarchy for rich content alerts",
     "Ensure sufficient color contrast for accessibility",
-  ],
-};
+  ]};

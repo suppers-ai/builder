@@ -3,101 +3,47 @@ import {
   ComponentExample,
   ComponentMetadata,
   ComponentProp,
-  ComponentSchema,
-} from "../../types.ts";
+  ComponentSchema} from "../../types.ts";
 import { Collapse } from "./Collapse.tsx";
 import {
   CollapsePropsSchema,
   safeValidateCollapseProps,
-  validateCollapseProps,
-} from "./Collapse.schema.ts";
+  validateCollapseProps} from "./Collapse.schema.ts";
 
 const collapseExamples: ComponentExample[] = [
   {
     title: "Basic Collapse",
     description: "Simple expandable content with different trigger styles",
-    code: `<Collapse title="Click to expand">
-  This content is hidden by default and can be expanded by clicking the title above.
-</Collapse>
-<Collapse title="Arrow style" arrow>
-  This collapse uses an arrow indicator to show expand/collapse state.
-</Collapse>
-<Collapse title="Plus/minus style" plus>
-  This collapse uses plus/minus icons to indicate the state.
-</Collapse>`,
     props: [
       {
         title: "Click to expand",
-        children: "This content is hidden by default and can be expanded by clicking the title above.",
-      },
+        children: "This content is hidden by default and can be expanded by clicking the title above."},
       {
         title: "Arrow style",
         arrow: true,
-        children: "This collapse uses an arrow indicator to show expand/collapse state.",
-      },
+        children: "This collapse uses an arrow indicator to show expand/collapse state."},
       {
         title: "Plus/minus style",
         plus: true,
-        children: "This collapse uses plus/minus icons to indicate the state.",
-      },
-    ],
-    showCode: true,
-  },
+        children: "This collapse uses plus/minus icons to indicate the state."},
+    ]},
   {
     title: "Collapse with Checkbox",
     description: "Checkbox-controlled collapse for form-like interfaces",
-    code: `<Collapse title="Checkbox controlled" checkbox>
-  This collapse is controlled by a checkbox, which can be useful in forms or settings.
-</Collapse>
-<Collapse title="Pre-opened collapse" checkbox open>
-  This collapse starts in an open state and can be closed by unchecking.
-</Collapse>`,
     props: [
       {
         title: "Checkbox controlled",
         checkbox: true,
-        children: "This collapse is controlled by a checkbox, which can be useful in forms or settings.",
-      },
+        children: "This collapse is controlled by a checkbox, which can be useful in forms or settings."},
       {
         title: "Pre-opened collapse",
         checkbox: true,
         open: true,
-        children: "This collapse starts in an open state and can be closed by unchecking.",
-      },
-    ],
-    showCode: true,
-  },
+        children: "This collapse starts in an open state and can be closed by unchecking."},
+    ]},
   {
     title: "Collapse with Rich Content",
     description: "Collapses containing complex content and components",
-    code: `<Collapse title="📊 Statistics Overview" arrow>
-  <div class="stats stats-vertical lg:stats-horizontal shadow">
-    <div class="stat">
-      <div class="stat-title">Total Users</div>
-      <div class="stat-value">31,547</div>
-      <div class="stat-desc">+12% from last month</div>
-    </div>
-    <div class="stat">
-      <div class="stat-title">Revenue</div>
-      <div class="stat-value">$89,400</div>
-      <div class="stat-desc">+18% from last month</div>
-    </div>
-  </div>
-</Collapse>
-
-<Collapse title="⚙️ Advanced Settings" plus>
-  <div class="form-control w-full max-w-xs">
-    <label class="label">
-      <span class="label-text">API Endpoint</span>
-    </label>
-    <input type="text" class="input input-bordered" value="https://api.example.com" />
-    
-    <label class="label mt-4">
-      <span class="label-text">Timeout (seconds)</span>
-    </label>
-    <input type="number" class="input input-bordered" value="30" />
-  </div>
-</Collapse>`,
     props: [
       {
         title: "📊 Statistics Overview",
@@ -115,8 +61,7 @@ const collapseExamples: ComponentExample[] = [
               <div class="stat-desc">+18% from last month</div>
             </div>
           </div>
-        ),
-      },
+        )},
       {
         title: "⚙️ Advanced Settings",
         plus: true,
@@ -132,96 +77,32 @@ const collapseExamples: ComponentExample[] = [
             </label>
             <input type="number" class="input input-bordered" value="30" />
           </div>
-        ),
-      },
-    ],
-    showCode: true,
-  },
+        )},
+    ]},
   {
     title: "FAQ-style Collapses",
     description: "Multiple collapses for FAQ or help sections",
-    code: `<div class="space-y-2">
-  <Collapse title="What is this component library?" arrow>
-    This is a comprehensive UI component library built with Deno, Fresh, and daisyUI, 
-    providing reusable components for building modern web applications.
-  </Collapse>
-  
-  <Collapse title="How do I customize the styling?" arrow>
-    You can customize styling by passing additional CSS classes through the 'class' prop,
-    or by modifying the daisyUI theme configuration.
-  </Collapse>
-  
-  <Collapse title="Is it mobile responsive?" arrow>
-    Yes! All components are built with responsive design in mind and work great on 
-    mobile, tablet, and desktop devices.
-  </Collapse>
-  
-  <Collapse title="Can I use custom icons?" arrow>
-    Absolutely! You can pass custom icons through the 'icon' prop to replace the 
-    default arrow, plus, or checkbox indicators.
-  </Collapse>
-</div>`,
     props: [
       {
         title: "What is this component library?",
         arrow: true,
-        children: "This is a comprehensive UI component library built with Deno, Fresh, and daisyUI, providing reusable components for building modern web applications.",
-      },
+        children: "This is a comprehensive UI component library built with Deno, Fresh, and daisyUI, providing reusable components for building modern web applications."},
       {
         title: "How do I customize the styling?",
         arrow: true,
-        children: "You can customize styling by passing additional CSS classes through the 'class' prop, or by modifying the daisyUI theme configuration.",
-      },
+        children: "You can customize styling by passing additional CSS classes through the 'class' prop, or by modifying the daisyUI theme configuration."},
       {
         title: "Is it mobile responsive?",
         arrow: true,
-        children: "Yes! All components are built with responsive design in mind and work great on mobile, tablet, and desktop devices.",
-      },
+        children: "Yes! All components are built with responsive design in mind and work great on mobile, tablet, and desktop devices."},
       {
         title: "Can I use custom icons?",
         arrow: true,
-        children: "Absolutely! You can pass custom icons through the 'icon' prop to replace the default arrow, plus, or checkbox indicators.",
-      },
-    ],
-    showCode: true,
-  },
+        children: "Absolutely! You can pass custom icons through the 'icon' prop to replace the default arrow, plus, or checkbox indicators."},
+    ]},
   {
     title: "Nested Collapses",
     description: "Collapses containing other collapses for hierarchical content",
-    code: `<Collapse title="🏢 Company Information" arrow open>
-  <div class="space-y-4">
-    <p>Welcome to our company overview section.</p>
-    
-    <Collapse title="📍 Locations" plus>
-      <div class="space-y-2">
-        <Collapse title="🇺🇸 United States" checkbox>
-          <ul class="list-disc list-inside pl-4">
-            <li>New York - Headquarters</li>
-            <li>San Francisco - Engineering</li>
-            <li>Austin - Sales</li>
-          </ul>
-        </Collapse>
-        
-        <Collapse title="🇪🇺 Europe" checkbox>
-          <ul class="list-disc list-inside pl-4">
-            <li>London - European HQ</li>
-            <li>Berlin - R&D</li>
-            <li>Amsterdam - Operations</li>
-          </ul>
-        </Collapse>
-      </div>
-    </Collapse>
-    
-    <Collapse title="👥 Departments" plus>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="badge badge-primary">Engineering</div>
-        <div class="badge badge-secondary">Marketing</div>
-        <div class="badge badge-accent">Sales</div>
-        <div class="badge badge-success">Support</div>
-      </div>
-    </Collapse>
-  </div>
-</Collapse>`,
     props: {
       title: "🏢 Company Information",
       arrow: true,
@@ -274,76 +155,63 @@ const collapseExamples: ComponentExample[] = [
             </div>
           </div>
         </div>
-      ),
-    },
-    showCode: true,
-  },
-];
+      )}
+        }
+      ];;
 
 const collapseProps: ComponentProp[] = [
   {
     name: "title",
     type: "ComponentChildren",
     description: "Title/header content that triggers the collapse",
-    required: true,
-  },
+    required: true},
   {
     name: "children",
     type: "ComponentChildren",
     description: "Content to show/hide when toggling",
-    required: true,
-  },
+    required: true},
   {
     name: "open",
     type: "boolean",
     description: "Whether the collapse starts open",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "arrow",
     type: "boolean",
     description: "Show arrow indicator",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "plus",
     type: "boolean",
     description: "Show plus/minus indicator",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "checkbox",
     type: "boolean",
     description: "Use checkbox control style",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "icon",
     type: "ComponentChildren",
-    description: "Custom icon to display in the header",
-  },
+    description: "Custom icon to display in the header"},
   {
     name: "isOpen",
     type: "boolean",
-    description: "Controlled mode: current open state",
-  },
+    description: "Controlled mode: current open state"},
   {
     name: "onToggle",
     type: "(open: boolean) => void",
-    description: "Controlled mode: callback when state changes",
-  },
+    description: "Controlled mode: callback when state changes"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 const collapseSchema: ComponentSchema = {
   schema: CollapsePropsSchema,
   validateFn: validateCollapseProps,
-  safeValidateFn: safeValidateCollapseProps,
-};
+  safeValidateFn: safeValidateCollapseProps};
 
 export const collapseMetadata: ComponentMetadata = {
   name: "Collapse",
@@ -378,5 +246,4 @@ export const collapseMetadata: ComponentMetadata = {
     "Custom icons can be used to match your design system",
     "Nested collapses create hierarchical content organization",
     "Consider accessibility by ensuring keyboard navigation works properly",
-  ],
-};
+  ]};

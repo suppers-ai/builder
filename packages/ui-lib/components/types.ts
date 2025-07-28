@@ -86,14 +86,44 @@ export enum ComponentCategory {
   TEMPLATES = "templates",
 }
 
-// Component example interface for rich examples
+/**
+ * Component example interface for simplified props-based examples.
+ * 
+ * This interface defines the structure for component examples in the documentation.
+ * Examples are now purely props-based, with automatic code generation and consistent
+ * presentation. The JSX code is automatically generated from the provided props.
+ * 
+ * @example
+ * // Single component example
+ * {
+ *   title: "Primary Button",
+ *   description: "A button with primary styling",
+ *   props: { color: "primary", children: "Click me" }
+ * }
+ * 
+ * @example
+ * // Multiple component example
+ * {
+ *   title: "Button Colors",
+ *   description: "Various button color options",
+ *   props: [
+ *     { color: "primary", children: "Primary" },
+ *     { color: "secondary", children: "Secondary" }
+ *   ]
+ * }
+ */
 export interface ComponentExample {
+  /** Display title for the example */
   title: string;
+  /** Description explaining what the example demonstrates */
   description: string;
-  code: string;
-  props?: Record<string, any>;
+  /** 
+   * Props to pass to the component(s). Can be a single props object for one component,
+   * or an array of props objects for multiple component instances.
+   */
+  props: Record<string, any> | Array<Record<string, any>>;
+  /** Whether to use the interactive version of the component (for islands) */
   interactive?: boolean;
-  showCode?: boolean;
 }
 
 // Component prop documentation interface

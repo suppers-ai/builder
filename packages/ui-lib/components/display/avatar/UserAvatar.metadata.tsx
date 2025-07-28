@@ -36,17 +36,19 @@ export const componentMetadata = {
     {
       name: "Basic User Avatar",
       code: `<UserAvatar user={user} />`,
-      props: {}
-    },
+      props: {
+    }
+  },
     {
       name: "Large User Avatar with Ring",
       code: `<UserAvatar user={user} size="lg" ring />`,
-      props: {}
-    },
+      props: {
+    }
+  },
     {
       name: "Online Status Avatar",
       code: `<UserAvatar user={user} online />`,
       props: {}
-    }
-  ]
+        }
+      ]
 };

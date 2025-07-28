@@ -1,102 +1,125 @@
 import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
-import { Diff } from "./Diff.tsx";
+import { Diff, DiffItem, DiffResizer } from "./Diff.tsx";
 
 const diffExamples: ComponentExample[] = [
   {
-    title: "Basic Diff",
-    description: "Simple code difference comparison",
-    code: `<Diff
-  oldContent="function hello() {
+    title: "Text Comparison",
+    description: "Compare text content with draggable divider",
+    props: {
+      children: [
+        <DiffItem item={1}>
+          <DiffResizer class="bg-primary text-primary-content font-bold text-xl flex items-center justify-center">
+            BEFORE
+          </DiffResizer>
+        </DiffItem>,
+        <DiffItem item={2}>
+          <DiffResizer class="bg-secondary text-secondary-content font-bold text-xl flex items-center justify-center">
+            AFTER
+          </DiffResizer>
+        </DiffItem>
+      ]
+    }
+  },
+  {
+    title: "Code Comparison",
+    description: "Side-by-side code comparison",
+    props: {
+      children: [
+        <DiffItem item={1}>
+          <DiffResizer class="bg-base-200 p-4">
+            <pre class="text-sm">
+              <code>{`function hello() {
   console.log('Hello');
-}"
-  newContent="function hello() {
+}`}</code>
+            </pre>
+          </DiffResizer>
+        </DiffItem>,
+        <DiffItem item={2}>
+          <DiffResizer class="bg-base-200 p-4">
+            <pre class="text-sm">
+              <code>{`function hello() {
   console.log('Hello World!');
   return true;
-}"
-  oldLabel="Before"
-  newLabel="After"
-/>`,
-    showCode: true,
+}`}</code>
+            </pre>
+          </DiffResizer>
+        </DiffItem>
+      ]
+    }
   },
   {
-    title: "Diff with Line Numbers",
-    description: "Code comparison with line number display",
-    code: `<Diff
-  oldContent="const items = [1, 2, 3];
-let total = 0;
-for (let item of items) {
-  total += item;
-}
-console.log(total);"
-  newContent="const items = [1, 2, 3, 4, 5];
-let total = 0;
-for (let item of items) {
-  total += item * 2;
-}
-console.log('Total:', total);"
-  showLineNumbers
-  oldLabel="Version 1"
-  newLabel="Version 2"
-/>`,
-    showCode: true,
+    title: "Custom Styling",
+    description: "Diff with custom background colors",
+    props: {
+      class: "border border-base-300 rounded-lg overflow-hidden",
+      children: [
+        <DiffItem item={1}>
+          <DiffResizer class="bg-error/20 text-error-content p-8 flex items-center justify-center">
+            <div class="text-center">
+              <h3 class="text-lg font-bold">Old Version</h3>
+              <p>This is the previous state</p>
+            </div>
+          </DiffResizer>
+        </DiffItem>,
+        <DiffItem item={2}>
+          <DiffResizer class="bg-success/20 text-success-content p-8 flex items-center justify-center">
+            <div class="text-center">
+              <h3 class="text-lg font-bold">New Version</h3>
+              <p>This is the updated state</p>
+            </div>
+          </DiffResizer>
+        </DiffItem>
+      ]
+    }
   },
   {
-    title: "Inline Diff Mode",
-    description: "Changes displayed inline within unified view",
-    code: `<Diff
-  oldContent="Welcome to our website! We offer great services."
-  newContent="Welcome to our platform! We offer amazing services and support."
-  mode="inline"
-  oldLabel="Old Version"
-  newLabel="New Version"
-/>`,
-    showCode: true,
-  },
-  {
-    title: "Side-by-Side Diff",
-    description: "Split view showing changes side by side",
-    code: `<Diff
-  oldContent="function validateEmail(email) {
-  const regex = /\S+@\S+\.\S+/;
-  return regex.test(email);
-}"
-  newContent="function validateEmail(email) {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) return false;
-  return regex.test(email);
-}"
-  mode="split"
-  showLineNumbers
-  oldLabel="Old Implementation"
-  newLabel="New Implementation"
-  size="lg"
-/>`,
-    showCode: true,
+    title: "Content Comparison",
+    description: "Compare different content areas",
+    props: {
+      children: [
+        <DiffItem item={1}>
+          <DiffResizer class="bg-base-100 p-6 flex items-center justify-center">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-primary rounded-full mx-auto mb-2"></div>
+              <p class="font-semibold">Original Design</p>
+            </div>
+          </DiffResizer>
+        </DiffItem>,
+        <DiffItem item={2}>
+          <DiffResizer class="bg-base-100 p-6 flex items-center justify-center">
+            <div class="text-center">
+              <div class="w-16 h-16 bg-secondary rounded-square mx-auto mb-2"></div>
+              <p class="font-semibold">Updated Design</p>
+            </div>
+          </DiffResizer>
+        </DiffItem>
+      ]
+    }
   },
 ];
 
 export const diffMetadata: ComponentMetadata = {
   name: "Diff",
-  description: "Code difference display",
+  description: "Visual comparison component with draggable resizer",
   category: ComponentCategory.DISPLAY,
   path: "/components/display/diff",
-  tags: ["diff", "comparison", "code", "changes", "additions", "deletions"],
+  tags: ["diff", "comparison", "before", "after", "resizer", "visual"],
   examples: diffExamples,
-  relatedComponents: ["code", "mockup", "pre"],
+  relatedComponents: ["carousel", "mockup"],
   preview: (
     <div class="w-full max-w-md">
-      <Diff
-        oldContent="function hello() {
-  console.log('Hello');
-}"
-        newContent="function hello() {
-  console.log('Hello World!');
-  return true;
-}"
-        oldLabel="Before"
-        newLabel="After"
-        size="sm"
-      />
+      <Diff>
+        <DiffItem item={1}>
+          <DiffResizer class="bg-primary text-primary-content font-bold text-sm flex items-center justify-center">
+            BEFORE
+          </DiffResizer>
+        </DiffItem>
+        <DiffItem item={2}>
+          <DiffResizer class="bg-secondary text-secondary-content font-bold text-sm flex items-center justify-center">
+            AFTER
+          </DiffResizer>
+        </DiffItem>
+      </Diff>
     </div>
-  ),
+  )
 };

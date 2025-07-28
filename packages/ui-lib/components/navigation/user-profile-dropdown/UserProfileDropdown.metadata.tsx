@@ -2,88 +2,105 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 
 const userProfileDropdownExamples: ComponentExample[] = [
   {
     title: "Basic User Profile Dropdown",
     description: "Simple user profile dropdown with standard menu items",
-    code: `const user = {
-  id: "1",
-  email: "john@example.com",
-  name: "John Doe",
-  avatar_url: "https://example.com/avatar.jpg"
-};
-
-<UserProfileDropdown 
-  user={user}
-  onLogout={() => console.log('Logging out...')}
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      user: {
+                "name": "John Doe",
+      email: "john@example.com",
+      avatar: "https://via.placeholder.com/32"
+          },
+      items: [
+        {
+          label: "Profile",
+      href: "/profile"
+        },
+        {
+          label: "Settings",
+      href: "/settings"
+        },
+        {
+          label: "Logout",
+      href: "/logout"
+        }
+      ]
+    }
+  },  {
     title: "Admin User Dropdown",
     description: "User dropdown with admin access",
-    code: `const adminUser = {
-  id: "1",
-  email: "admin@example.com",
-  name: "Admin User",
-  avatar_url: "https://example.com/admin-avatar.jpg"
-};
-
-<UserProfileDropdown 
-  user={adminUser}
-  showAdmin={true}
-  onLogout={() => console.log('Logging out...')}
-  onAdmin={() => console.log('Going to admin...')}
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      user: {
+                "name": "John Doe",
+      email: "john@example.com",
+      avatar: "https://via.placeholder.com/32"
+          },
+      items: [
+        {
+          label: "Profile",
+      href: "/profile"
+        },
+        {
+          label: "Settings",
+      href: "/settings"
+        },
+        {
+          label: "Logout",
+      href: "/logout"
+        }
+      ]
+    }
+  },  {
     title: "Custom Handlers Dropdown",
     description: "User dropdown with custom navigation handlers",
-    code: `const user = {
-  id: "1",
-  email: "user@example.com",
-  name: "Regular User"
-};
-
-<UserProfileDropdown 
-  user={user}
-  onProfile={() => navigate('/my-profile')}
-  onSettings={() => navigate('/account-settings')}
-  onLogout={() => {
-    logout();
-    navigate('/login');
-  }}
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      user: {
+                "name": "John Doe",
+      email: "john@example.com",
+      avatar: "https://via.placeholder.com/32"
+          },
+      items: [
+        {
+          label: "Profile",
+      href: "/profile"
+        },
+        {
+          label: "Settings",
+      href: "/settings"
+        },
+        {
+          label: "Logout",
+      href: "/logout"
+        }
+      ]
+    }
+  },  {
     title: "Custom Menu Items",
     description: "User dropdown with additional custom menu items",
-    code: `const user = {
-  id: "1",
-  email: "user@example.com",
-  name: "Pro User"
-};
-
-<UserProfileDropdown user={user}>
-  <li>
-    <a href="/billing" class="flex items-center gap-3">
-      <CreditCard size={16} />
-      Billing
-    </a>
-  </li>
-  <li>
-    <a href="/help" class="flex items-center gap-3">
-      <HelpCircle size={16} />
-      Help & Support
-    </a>
-  </li>
-</UserProfileDropdown>`,
-    showCode: true,
+    props: {
+      user: {
+                "name": "John Doe",
+      email: "john@example.com",
+      avatar: "https://via.placeholder.com/32"
+          },
+      items: [
+        {
+          label: "Profile",
+      href: "/profile"
+        },
+        {
+          label: "Settings",
+      href: "/settings"
+        },
+        {
+          label: "Logout",
+      href: "/logout"
+        }
+      ]
+    }
   },
 ];
 
@@ -92,62 +109,51 @@ const userProfileDropdownProps: ComponentProp[] = [
     name: "user",
     type: "AuthUser",
     description: "User object containing profile information",
-    required: true,
-  },
+    required: true},
   {
     name: "onLogout",
     type: "() => void",
-    description: "Callback when logout is clicked",
-  },
+    description: "Callback when logout is clicked"},
   {
     name: "onProfile",
     type: "() => void",
-    description: "Callback when profile menu item is clicked",
-  },
+    description: "Callback when profile menu item is clicked"},
   {
     name: "onSettings",
     type: "() => void",
-    description: "Callback when settings menu item is clicked",
-  },
+    description: "Callback when settings menu item is clicked"},
   {
     name: "onAdmin",
     type: "() => void",
-    description: "Callback when admin menu item is clicked",
-  },
+    description: "Callback when admin menu item is clicked"},
   {
     name: "showAdmin",
     type: "boolean",
     description: "Whether to show admin menu item",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "profileHref",
     type: "string",
     description: "URL for profile page navigation",
-    default: "/profile",
-  },
+    default: "/profile"},
   {
     name: "settingsHref",
     type: "string",
     description: "URL for settings page navigation",
-    default: "/settings",
-  },
+    default: "/settings"},
   {
     name: "adminHref",
     type: "string",
     description: "URL for admin page navigation",
-    default: "/admin",
-  },
+    default: "/admin"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Additional menu items to insert before logout",
-  },
+    description: "Additional menu items to insert before logout"},
 ];
 
 export const userProfileDropdownMetadata: ComponentMetadata = {
@@ -184,5 +190,4 @@ export const userProfileDropdownMetadata: ComponentMetadata = {
     "Custom menu items can be added through children prop",
     "Use callback handlers for custom navigation logic",
     "Automatically handles responsive display of user name",
-  ],
-};
+  ]};

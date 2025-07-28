@@ -5,62 +5,39 @@ const toastExamples: ComponentExample[] = [
   {
     title: "Basic Toast",
     description: "Simple toast notification message",
-    code: `<Toast message="Your changes have been saved!" type="success" dismissible />`,
-    showCode: true,
-  },
-  {
+    props: {
+      message: "Operation completed successfully!",
+      type: "success"
+    }
+  },  {
     title: "Different Positions",
     description: "Toast notifications in various screen positions",
-    code: `<Toast 
-  message="Top center notification" 
-  position="top-center" 
-/>
-<Toast 
-  message="Bottom right notification" 
-  position="bottom-right" 
-/>
-<Toast 
-  message="Top left notification" 
-  position="top-left" 
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      message: "Operation completed successfully!",
+      type: "success"
+    }
+  },  {
     title: "Color Variants",
     description: "Toast notifications with different types",
-    code: `<Toast message="File uploaded successfully!" type="success" dismissible />
-<Toast message="Session expires in 5 minutes" type="warning" action="Extend" dismissible />
-<Toast message="Failed to save changes" type="error" action="Retry" dismissible />
-<Toast message="New version available" type="info" action="Update" dismissible />`,
-    showCode: true,
-  },
-  {
+    props: {
+      message: "Operation completed successfully!",
+      type: "success",
+      color: "primary"
+    }
+  },  {
     title: "Toast with Actions",
     description: "Toast notifications with action buttons",
-    code: `<Toast 
-  message="You have 3 unread messages"
-  type="info"
-  action="View All"
-  onAction={() => console.log("Navigate to messages")}
-  dismissible
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      message: "Operation completed successfully!",
+      type: "success"
+    }
+  },  {
     title: "Stacked Toasts",
     description: "Multiple toast notifications displayed together",
-    code: `<div class="toast toast-top toast-end">
-  <div class="alert alert-success">
-    <span>First notification</span>
-  </div>
-  <div class="alert alert-info">
-    <span>Second notification</span>
-  </div>
-  <div class="alert alert-warning">
-    <span>Third notification</span>
-  </div>
-</div>`,
-    showCode: true,
+    props: {
+      message: "Operation completed successfully!",
+      type: "success"
+    }
   },
 ];
 
@@ -78,5 +55,4 @@ export const toastMetadata: ComponentMetadata = {
       <Toast message="Warning: Please check your input" type="warning" />
       <Toast message="Information: Update available" type="info" />
     </div>
-  ),
-};
+  )};

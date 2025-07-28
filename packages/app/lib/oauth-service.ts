@@ -1,8 +1,5 @@
 import { supabase, type Tables, type TablesInsert, type TablesUpdate } from "./supabase-client.ts";
 import { AuthHelpers } from "./auth-helpers.ts";
-import type { User } from "@supabase/supabase-js";
-import type { OAuthProvider } from "@suppers/shared";
-import { AUTH_SCOPES } from "@suppers/shared";
 
 export interface OAuthParams {
   clientId: string;

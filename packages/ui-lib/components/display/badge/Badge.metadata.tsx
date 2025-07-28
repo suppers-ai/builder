@@ -2,55 +2,43 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 import { Badge } from "./Badge.tsx";
 
 const badgeExamples: ComponentExample[] = [
   {
     title: "Basic Badges",
     description: "Simple badges with text content",
-    code: `<Badge>Default</Badge>
-<Badge color="primary">Primary</Badge>
-<Badge color="secondary">Secondary</Badge>`,
-    showCode: true,
-  },
-  {
+    props: {
+      children: "New"
+    }
+  },  {
     title: "Badge Colors",
     description: "Different color variants for various use cases",
-    code: `<Badge color="primary">Primary</Badge>
-<Badge color="success">Success</Badge>
-<Badge color="warning">Warning</Badge>
-<Badge color="error">Error</Badge>
-<Badge color="info">Info</Badge>`,
-    showCode: true,
-  },
-  {
+    props: {
+      children: "New",
+      color: "primary"
+    }
+  },  {
     title: "Badge Sizes",
     description: "Different sizes from xs to lg",
-    code: `<Badge size="xs" color="primary">Extra Small</Badge>
-<Badge size="sm" color="primary">Small</Badge>
-<Badge size="md" color="primary">Medium</Badge>
-<Badge size="lg" color="primary">Large</Badge>`,
-    showCode: true,
-  },
-  {
+    props: {
+      children: "New",
+      size: "lg"
+    }
+  },  {
     title: "Badge Variants",
-    description: "Filled and outline styles",
-    code: `<Badge color="primary">Filled</Badge>
-<Badge color="primary" variant="outline">Outline</Badge>
-<Badge color="success">Filled Success</Badge>
-<Badge color="success" variant="outline">Outline Success</Badge>`,
-    showCode: true,
-  },
-  {
+    description: "Filled and dashed styles",
+    props: {
+      children: "New",
+      variant: "dash"
+    }
+  },  {
     title: "Status Badges",
     description: "Badges for showing various status states",
-    code: `<Badge color="success">Online</Badge>
-<Badge color="warning">Pending</Badge>
-<Badge color="error">Offline</Badge>
-<Badge color="info">Away</Badge>`,
-    showCode: true,
+    props: {
+      children: "New"
+    }
   },
 ];
 
@@ -58,40 +46,33 @@ const badgeProps: ComponentProp[] = [
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Badge content (text, icons, etc.)",
-  },
+    description: "Badge content (text, icons, etc.)"},
   {
     name: "content",
     type: "string | number",
-    description: "Alternative way to set badge content",
-  },
+    description: "Alternative way to set badge content"},
   {
     name: "color",
     type:
       "'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Badge color variant",
-  },
+    description: "Badge color variant"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Badge size",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "variant",
     type: "'outline'",
-    description: "Badge style variant",
-  },
+    description: "Badge style variant"},
   {
     name: "position",
     type: "'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'",
-    description: "Position when used as indicator",
-  },
+    description: "Position when used as indicator"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const badgeMetadata: ComponentMetadata = {
@@ -121,5 +102,4 @@ export const badgeMetadata: ComponentMetadata = {
     "Outline variant provides a subtle alternative to filled badges",
     "Position prop creates indicator-style badges",
     "Keep badge text concise for better readability",
-  ],
-};
+  ]};
