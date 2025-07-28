@@ -1,10 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "./lib/cors.ts";
-import { handleAuth } from "./handlers/auth.ts";
-import { handleApplications } from "./handlers/applications.ts";
-import { handleUserRequest } from "./handlers/user.ts";
-import { handleAccess } from "./handlers/access.ts";
+import { handleAuth } from "./handlers/auth/index.ts";
+import { handleApplications } from "./handlers/applications/index.ts";
+import { handleUserRequest } from "./handlers/user/index.ts";
+import { handleAccess } from "./handlers/access/index.ts";
 
 console.log("🚀 API Edge Function loaded");
 
