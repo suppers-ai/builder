@@ -1,0 +1,58 @@
+{
+  "name": "@suppers/profile",
+  "version": "1.0.0",
+  "description": "Profile & SSO Authentication Service - OAuth 2.0 endpoints, user authentication flows, and profile management",
+  "exports": "./mod.ts",
+  "tasks": {
+    "dev": "deno run --allow-all --watch=static/,routes/,islands/,lib/ dev.ts",
+    "build": "deno run --allow-all main.ts build",
+    "start": "deno run --allow-all main.ts",
+    "preview": "deno run --allow-all main.ts",
+    "update": "deno run --allow-all -r https://fresh.deno.dev/update .",
+    "test": "deno test --allow-all",
+    "test:watch": "deno test --allow-all --watch",
+    "test:coverage": "deno test --allow-all --coverage=coverage",
+    "check": "deno check **/*.ts",
+    "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "lint": "deno lint"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  },
+  "imports": {
+    "@/": "./",
+    "@suppers/auth-client": "../auth-client/mod.ts",
+    "@suppers/ui-lib": "../ui-lib/mod.ts",
+    "@suppers/shared": "../shared/mod.ts",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.8?target=deno",
+    "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
+    "@std/crypto": "https://deno.land/std@0.224.0/crypto/mod.ts",
+    "@std/encoding": "https://deno.land/std@0.224.0/encoding/mod.ts",
+    "@std/uuid": "https://deno.land/std@0.224.0/uuid/mod.ts",
+    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
+    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
+    "@preact/signals": "npm:@preact/signals@2.2.1",
+    "@preact/signals-core": "npm:@preact/signals-core@1.8.0",
+    "tailwindcss": "npm:tailwindcss@3.4.0",
+    "tailwindcss/": "npm:tailwindcss@3.4.0/",
+    "tailwindcss/plugin": "npm:tailwindcss@3.4.0/plugin.js",
+    "fresh": "jsr:@fresh/core@^2.0.0-alpha.34",
+    "fresh/": "jsr:@fresh/core@^2.0.0-alpha.34/",
+    "fresh/dev": "jsr:@fresh/core@^2.0.0-alpha.34/dev",
+    "$fresh/": "jsr:@fresh/core@^2.0.0-alpha.34/",
+    "$fresh/runtime": "jsr:@fresh/core@^2.0.0-alpha.34/runtime",
+    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
+    "preact-render-to-string": "https://esm.sh/preact-render-to-string@6.2.2",
+    "zod": "https://esm.sh/zod@3.25.1",
+    "lucide-preact": "https://esm.sh/lucide-preact@0.460.0",
+    "jose": "https://esm.sh/jose@5.2.0"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["fresh", "recommended"]
+    }
+  },
+  "exclude": ["**/_fresh/*"]
+}

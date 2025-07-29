@@ -3,7 +3,11 @@
  * Common types for API requests, responses, and data structures
  */
 
-import type { ApplicationsTable, UsersTable } from "./database.ts";
+import type { Database } from "../generated/database-types.ts";
+
+// Database table types
+type UsersTable = Database["public"]["Tables"]["users"]["Row"];
+type ApplicationsTable = Database["public"]["Tables"]["applications"]["Row"];
 
 // Generic API Response
 export interface ApiResponse<T = any> {
@@ -112,18 +116,8 @@ export interface RequestConfig {
   timeout?: number;
 }
 
-// Application Data Types
-export interface Application {
-  id: string;
-  name: string;
-  description?: string;
-  template_id: string;
-  configuration: Record<string, unknown>;
-  status: "draft" | "pending" | "published" | "archived";
-  owner_id: string;
-  created_at: string;
-  updated_at: string;
-}
+// Application Data Types (use database types as base)
+export type Application = ApplicationsTable;
 
 export interface CreateApplicationData {
   name: string;
@@ -141,29 +135,11 @@ export interface UpdateApplicationData {
   status?: "draft" | "pending" | "published" | "archived";
 }
 
-// User Data Types
-export interface User {
-  id: string;
-  email: string;
-  first_name?: string;
-  middle_names?: string;
-  last_name?: string;
-  display_name?: string;
-  avatar_url?: string;
-  role: "user" | "admin" | "moderator";
-  created_at: string;
-  updated_at: string;
-}
+// User Data Types (use database types as base)
+export type User = UsersTable;
 
-// User Access Types
-export interface UserAccess {
-  id: string;
-  application_id: string;
-  user_id: string;
-  access_level: "read" | "write" | "admin";
-  granted_by: string;
-  granted_at: string;
-}
+// User Access Types (use database types as base)
+export type UserAccess = Database["public"]["Tables"]["user_access"]["Row"];
 
 export interface GrantAccessData {
   applicationId: string;
@@ -171,15 +147,8 @@ export interface GrantAccessData {
   accessLevel: "read" | "write" | "admin";
 }
 
-// Application Review Types
-export interface ApplicationReview {
-  id: string;
-  application_id: string;
-  reviewer_id: string;
-  action: "approved" | "rejected";
-  feedback?: string;
-  reviewed_at: string;
-}
+// Application Review Types (use database types as base)
+export type ApplicationReview = Database["public"]["Tables"]["application_reviews"]["Row"];
 
 export interface CreateReviewData {
   applicationId: string;
@@ -187,18 +156,8 @@ export interface CreateReviewData {
   feedback?: string;
 }
 
-// Custom Theme Types
-export interface CustomTheme {
-  id: string;
-  name: string;
-  label: string;
-  description?: string;
-  variables: Record<string, string | number>;
-  is_public: boolean;
-  created_by: string;
-  created_at: string;
-  updated_at: string;
-}
+// Custom Theme Types (use database types as base)
+export type CustomTheme = Database["public"]["Tables"]["custom_themes"]["Row"];
 
 export interface CreateCustomThemeData {
   name: string;

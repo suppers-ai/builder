@@ -3,13 +3,14 @@
  * Functions to convert between database types and API/auth formats
  */
 
-import type {
-  ApplicationReviewsTable,
-  ApplicationsTable,
-  CustomThemesTable,
-  UserAccessTable,
-  UsersTable,
-} from "../types/database.ts";
+import type { Database } from "../generated/database-types.ts";
+
+// Database table types
+type UsersTable = Database["public"]["Tables"]["users"]["Row"];
+type ApplicationsTable = Database["public"]["Tables"]["applications"]["Row"];
+type UserAccessTable = Database["public"]["Tables"]["user_access"]["Row"];
+type ApplicationReviewsTable = Database["public"]["Tables"]["application_reviews"]["Row"];
+type CustomThemesTable = Database["public"]["Tables"]["custom_themes"]["Row"];
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Re-export database types as canonical types
@@ -136,7 +137,7 @@ export class TypeMappers {
       id: supabaseUser.id,
       email: supabaseUser.email || "",
       first_name: dbUser?.first_name || supabaseUser.user_metadata?.first_name,
-      middle_names: dbUser?.middle_names,
+      middle_names: dbUser?.middle_names ?? null,
       last_name: dbUser?.last_name || supabaseUser.user_metadata?.last_name,
       display_name: dbUser?.display_name ||
         supabaseUser.user_metadata?.display_name ||
@@ -225,7 +226,12 @@ export class TypeMappers {
     if (parts.length > 0) return parts.join(" ");
 
     // Fallback to email local part
-    return user.email.split("@")[0];
+    if (user.email) {
+      return user.email.split("@")[0];
+    }
+    
+    // Final fallback
+    return "Anonymous User";
   }
 
   /**
@@ -248,17 +254,17 @@ export class TypeMappers {
   }
 
   /**
-   * Helper: Check if user has moderator or admin role
+   * Helper: Check if user has admin role (moderator role removed from schema)
    */
   static isModerator(user: User | AuthUser): boolean {
-    return user.role === "moderator" || user.role === "admin";
+    return user.role === "admin";
   }
 
   /**
    * Helper: Get user display name with fallback
    */
   static getDisplayName(user: User | AuthUser): string {
-    return user.display_name || this.getFullName(user as User) || user.email;
+    return user.display_name || this.getFullName(user as User) || user.email || "Anonymous User";
   }
 
   /**

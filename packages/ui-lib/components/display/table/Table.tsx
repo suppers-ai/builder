@@ -62,8 +62,8 @@ export interface PaginatedTableProps extends BaseComponentProps {
 
 export function Table({
   class: className = "",
-  columns,
-  data,
+  columns = [],
+  data = [],
   zebra = false,
   compact = false,
   hover = false,
@@ -88,11 +88,15 @@ export function Table({
   id,
   ...props
 }: TableProps) {
+  // Ensure columns and data are arrays
+  const safeColumns = Array.isArray(columns) ? columns : [];
+  const safeData = Array.isArray(data) ? data : [];
+
   // Calculate pagination values
-  const totalPages = paginated ? Math.ceil((totalItems || data.length) / itemsPerPage) : 1;
+  const totalPages = paginated ? Math.ceil((totalItems || safeData.length) / itemsPerPage) : 1;
   const startIndex = paginated ? (currentPage - 1) * itemsPerPage : 0;
-  const endIndex = paginated ? startIndex + itemsPerPage : data.length;
-  const displayData = paginated ? data.slice(startIndex, endIndex) : data;
+  const endIndex = paginated ? startIndex + itemsPerPage : safeData.length;
+  const displayData = paginated ? safeData.slice(startIndex, endIndex) : safeData;
 
   const tableClasses = [
     "table",
@@ -114,7 +118,7 @@ export function Table({
           <div class="stats stats-horizontal shadow">
             <div class="stat">
               <div class="stat-title">Total Items</div>
-              <div class="stat-value text-primary">{totalItems || data.length}</div>
+              <div class="stat-value text-primary">{totalItems || safeData.length}</div>
             </div>
             {paginated && (
               <>
@@ -159,8 +163,8 @@ export function Table({
     return (
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
         <div class="text-sm text-base-content/70">
-          Showing {startIndex + 1}-{Math.min(endIndex, totalItems || data.length)} of{" "}
-          {totalItems || data.length} items
+          Showing {startIndex + 1}-{Math.min(endIndex, totalItems || safeData.length)} of{" "}
+          {totalItems || safeData.length} items
         </div>
 
         <Pagination
@@ -176,7 +180,7 @@ export function Table({
   const handleSort = (columnKey: string) => {
     if (!sortable || !onSort) return;
 
-    const column = columns.find((c) => c.key === columnKey);
+    const column = safeColumns.find((c) => c.key === columnKey);
     if (!column?.sortable) return;
 
     let newDirection: "asc" | "desc" = "asc";
@@ -245,7 +249,7 @@ export function Table({
           <table class={tableClasses} id={id} {...props}>
             <thead>
               <tr>
-                {columns.map((column) => (
+                {safeColumns.map((column) => (
                   <th
                     key={column.key}
                     style={column.width ? { width: column.width } : {}}
@@ -259,7 +263,7 @@ export function Table({
             <tbody>
               {Array.from({ length: 5 }, (_, index) => (
                 <tr key={index}>
-                  {columns.map((column) => (
+                  {safeColumns.map((column) => (
                     <td key={column.key}>
                       <div class="skeleton h-4 w-full"></div>
                     </td>
@@ -281,7 +285,7 @@ export function Table({
         <table class={tableClasses} id={id} {...props}>
           <thead>
             <tr>
-              {columns.map((column) => (
+              {safeColumns.map((column) => (
                 <th
                   key={column.key}
                   style={column.width ? { width: column.width } : {}}
@@ -300,10 +304,10 @@ export function Table({
             </tr>
           </thead>
           <tbody>
-            {data.length === 0
+            {safeData.length === 0
               ? (
                 <tr>
-                  <td colSpan={columns.length} class="text-center py-8 text-base-content/70">
+                  <td colSpan={safeColumns.length} class="text-center py-8 text-base-content/70">
                     {emptyMessage}
                   </td>
                 </tr>
@@ -311,12 +315,12 @@ export function Table({
               : (
                 displayData.map((row, index) => (
                   <tr key={index}>
-                    {columns.map((column) => (
+                    {safeColumns.map((column) => (
                       <td
                         key={column.key}
                         class={column.align ? `text-${column.align}` : ""}
                       >
-                        {column.render ? column.render(row[column.key], row) : row[column.key]}
+                        {column.render ? column.render(row[column.key], row) : String(row[column.key] ?? "")}
                       </td>
                     ))}
                   </tr>
@@ -332,8 +336,8 @@ export function Table({
 
 export function PaginatedTable({
   class: className = "",
-  columns,
-  data,
+  columns = [],
+  data = [],
   zebra = false,
   compact = false,
   hover = false,
@@ -351,18 +355,27 @@ export function PaginatedTable({
 }: PaginatedTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
-  const [sortColumn, setSortColumn] = useState(columns[0]?.key || "");
+  // Ensure columns and data are arrays
+  const safeColumns = Array.isArray(columns) ? columns : [];
+  const safeData = Array.isArray(data) ? data : [];
+  
+  const [sortColumn, setSortColumn] = useState(safeColumns[0]?.key || "");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   // Sort data
   const sortedData = allowSorting
-    ? [...data].sort((a, b) => {
+    ? [...safeData].sort((a, b) => {
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
-      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      
+      // Convert to strings for comparison
+      const aStr = String(aValue ?? "");
+      const bStr = String(bValue ?? "");
+      
+      const comparison = aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
       return sortDirection === "asc" ? comparison : -comparison;
     })
-    : data;
+    : safeData;
 
   const handleSort = (column: string, direction: "asc" | "desc") => {
     setSortColumn(column);
@@ -382,7 +395,7 @@ export function PaginatedTable({
   return (
     <Table
       class={className}
-      columns={columns}
+      columns={safeColumns}
       data={sortedData}
       zebra={zebra}
       compact={compact}
@@ -393,7 +406,7 @@ export function PaginatedTable({
       paginated
       currentPage={currentPage}
       itemsPerPage={itemsPerPage}
-      totalItems={data.length}
+      totalItems={safeData.length}
       onPageChange={handlePageChange}
       onItemsPerPageChange={handleItemsPerPageChange}
       showControls={showControls}

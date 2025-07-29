@@ -9,19 +9,22 @@ import { ButtonBaseSchema, LinkPropsSchema, withMetadata } from "../../schemas/b
 // Button-specific props
 const ButtonSpecificPropsSchema = z.object({
   type: z.enum(["button", "submit", "reset"])
+    .optional()
     .default("button")
     .describe("HTML button type attribute"),
 
   wide: withMetadata(
-    z.boolean().default(false).describe("Make button full width"),
+    z.boolean().optional().default(false).describe("Make button full width"),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 
   circle: z.boolean()
+    .optional()
     .default(false)
     .describe("Make button circular (requires fixed dimensions)"),
 
   square: z.boolean()
+    .optional()
     .default(false)
     .describe("Make button square (equal width and height)"),
 
@@ -30,11 +33,12 @@ const ButtonSpecificPropsSchema = z.object({
     .describe("Button shape (alternative to circle/square props)"),
 
   glass: withMetadata(
-    z.boolean().default(false).describe("Apply glass morphism effect"),
+    z.boolean().optional().default(false).describe("Apply glass morphism effect"),
     { examples: ["true"], since: "1.1.0" },
   ),
 
   noAnimation: z.boolean()
+    .optional()
     .default(false)
     .describe("Disable button animations and transitions"),
 
@@ -49,8 +53,10 @@ export const ButtonPropsSchema = ButtonBaseSchema
   .merge(LinkPropsSchema)
   .describe("Interactive buttons with multiple variants, sizes, and states for user actions");
 
-// Infer TypeScript type from schema
-export type ButtonProps = z.infer<typeof ButtonPropsSchema>;
+// Infer TypeScript type from schema and make properties with defaults optional
+export type ButtonProps = Partial<z.infer<typeof ButtonPropsSchema>> & {
+  children?: any; // ComponentChildren from preact
+};
 
 // Export validation function
 export const validateButtonProps = (props: unknown): ButtonProps => {

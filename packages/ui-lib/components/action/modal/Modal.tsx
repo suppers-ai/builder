@@ -20,8 +20,29 @@ export function Modal({
   id,
   ...props
 }: ModalProps) {
-  if (!open) return null;
+  // For documentation purposes, show modal content even when closed
+  const isDocumentationMode = typeof window === 'undefined' || window.location?.pathname?.includes('/components/');
+  
+  if (!open && !isDocumentationMode) return null;
 
+  // In documentation mode, render as a static card-like modal
+  if (isDocumentationMode && !open) {
+    const modalBoxClasses = [
+      "modal-box",
+      "border border-base-300 shadow-lg bg-base-100 max-w-md",
+      responsive ? "w-11/12" : "",
+      className,
+    ].filter(Boolean).join(" ");
+
+    return (
+      <div class={modalBoxClasses} id={id} {...props}>
+        {title && <h3 class="font-bold text-lg mb-4">{title}</h3>}
+        {children}
+      </div>
+    );
+  }
+
+  // Normal modal behavior
   const modalClasses = [
     "modal",
     open ? "modal-open" : "",

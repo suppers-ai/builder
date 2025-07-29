@@ -2,133 +2,142 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
+import { Sidebar } from "./Sidebar.tsx";
+import { Home, Settings, User, FileText, BarChart3 } from "lucide-preact";
 
 const sidebarExamples: ComponentExample[] = [
   {
     title: "Basic Sidebar",
     description: "Simple sidebar with sections and links",
-    code: `const config = {
-  title: "My App",
-  sections: [
-    {
-      id: "main",
-      title: "Main",
-      links: [
-        { name: "Dashboard", path: "/dashboard" },
-        { name: "Settings", path: "/settings" }
+    props: {
+      config: {
+        title: "My App",
+        sections: [
+          {
+            id: "main",
+            title: "Main",
+            defaultOpen: true,
+            icon: <Home size={16} />,
+            links: [
+              { name: "Dashboard", path: "/dashboard" },
+              { name: "Settings", path: "/settings"
+        }
       ]
+        }
+      ]
+      },
+      currentPath: "/dashboard"
     }
-  ]
-};
-
-<Sidebar config={config} currentPath="/dashboard" />`,
-    showCode: true,
   },
   {
     title: "Sidebar with Quick Links",
     description: "Sidebar with header and quick access links",
-    code: `const config = {
-  title: "My App",
-  showQuickLinks: true,
-  quickLinks: [
-    { name: "Home", path: "/", icon: <HomeIcon /> },
-    { name: "Profile", path: "/profile", icon: <UserIcon /> }
-  ],
-  sections: [
-    {
-      id: "tools",
-      title: "Tools",
-      links: [
-        { name: "Analytics", path: "/analytics" },
-        { name: "Reports", path: "/reports" }
+    props: {
+      config: {
+        title: "My App",
+        showQuickLinks: true,
+        quickLinks: [
+          { name: "Home", path: "/", icon: <Home size={16} /> },
+          { name: "Profile", path: "/profile", icon: <User size={16} />
+        }
+      ],
+        sections: [
+          {
+            id: "tools",
+            title: "Tools",
+            defaultOpen: true,
+            icon: <BarChart3 size={16} />,
+            links: [
+              { name: "Analytics", path: "/analytics" },
+              { name: "Reports", path: "/reports"
+        }
       ]
+        }
+      ]
+      }
     }
-  ]
-};
-
-<Sidebar config={config} />`,
-    showCode: true,
   },
   {
     title: "Sidebar with Search",
     description: "Sidebar with integrated search functionality",
-    code: `const config = {
-  title: "Documentation",
-  showSearch: true,
-  sections: [
-    {
-      id: "docs",
-      title: "Documentation",
-      defaultOpen: true,
-      links: [
-        { name: "Getting Started", path: "/docs/start" },
-        { name: "API Reference", path: "/docs/api" }
+    props: {
+      config: {
+        title: "Documentation",
+        showSearch: true,
+        sections: [
+          {
+            id: "docs",
+            title: "Documentation",
+            defaultOpen: true,
+            icon: <FileText size={16} />,
+            links: [
+              { name: "Getting Started", path: "/docs/start" },
+              { name: "API Reference", path: "/docs/api" },
+              { name: "Examples", path: "/docs/examples"
+        }
       ]
+        }
+      ]
+      }
     }
-  ]
-};
-
-<Sidebar config={config} />`,
-    showCode: true,
   },
   {
     title: "Interactive Sidebar",
     description: "Sidebar with click handlers and badges",
-    code: `const config = {
-  sections: [
-    {
-      id: "main",
-      title: "Main",
-      badge: "3",
-      links: [
-        { 
-          name: "Messages", 
-          path: "/messages",
-          badge: "5"
-        },
-        { 
-          name: "External", 
-          path: "https://example.com",
-          external: true 
+    props: {
+      config: {
+        sections: [
+          {
+            id: "main",
+            title: "Main",
+            badge: "3",
+            defaultOpen: true,
+            icon: <Settings size={16} />,
+            links: [
+              { 
+                name: "Messages", 
+                path: "/messages",
+                badge: "5"
+              },
+              { 
+                name: "Notifications", 
+                path: "/notifications",
+                badge: "2"
+              },
+              { 
+                name: "External Link", 
+                path: "https://example.com",
+                external: true
         }
       ]
+        }
+      ]
+      },
+      onLinkClick: (link) => console.log('Clicked:', link)
     }
-  ]
-};
-
-<Sidebar 
-  config={config} 
-  onLinkClick={(link) => console.log('Clicked:', link)}
-/>`,
-    showCode: true,
-  },
-];
+        }
+      ];;
 
 const sidebarProps: ComponentProp[] = [
   {
     name: "config",
     type: "SidebarConfig",
     description: "Configuration object defining sidebar structure and behavior",
-    required: true,
-  },
+    required: true},
   {
     name: "currentPath",
     type: "string",
     description: "Current active path for highlighting active links",
-    default: "''",
-  },
+    default: "''"},
   {
     name: "onLinkClick",
     type: "(link: SidebarLink) => void",
-    description: "Callback when a sidebar link is clicked",
-  },
+    description: "Callback when a sidebar link is clicked"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes for the sidebar container",
-  },
+    description: "Additional CSS classes for the sidebar container"},
 ];
 
 export const sidebarMetadata: ComponentMetadata = {
@@ -166,5 +175,4 @@ export const sidebarMetadata: ComponentMetadata = {
     "Quick links provide rapid access to important pages",
     "Badges can show counts or status indicators",
     "External links automatically show external indicators",
-  ],
-};
+  ]};

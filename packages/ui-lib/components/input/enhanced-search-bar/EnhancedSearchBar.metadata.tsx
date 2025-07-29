@@ -43,8 +43,9 @@ export const componentMetadata = {
       code: `<EnhancedSearchBar 
   onSearch={(query, filters) => console.log(query, filters)} 
 />`,
-      props: {}
-    },
+      props: {
+    }
+  },
     {
       name: "Search Bar with Filters",
       code: `<EnhancedSearchBar
@@ -55,12 +56,13 @@ export const componentMetadata = {
       label: "Status", 
       options: [
         { value: "active", label: "Active" },
-        { value: "inactive", label: "Inactive" }
+        { value: "inactive", label: "Inactive"
+        }
       ]
-    }
-  ]}
+        }
+      ]}
 />`,
       props: {}
-    }
-  ]
+        }
+      ]
 };

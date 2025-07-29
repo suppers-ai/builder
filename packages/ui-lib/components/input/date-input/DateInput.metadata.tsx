@@ -2,59 +2,42 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
+import { DateInput } from "./DateInput.tsx";
 
 const dateInputExamples: ComponentExample[] = [
   {
     title: "Basic Date Input",
     description: "Simple date input with default styling",
-    code: `<DateInput />
-<DateInput placeholder="Select date" />
-<DateInput value="2024-01-15" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "2024-01-15"
+    }
+  },  {
     title: "Date Input Sizes",
     description: "Different sizes for various contexts",
-    code: `<DateInput size="xs" />
-<DateInput size="sm" />
-<DateInput size="md" />
-<DateInput size="lg" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "2024-01-15",
+      size: "lg"
+    }
+  },  {
     title: "Date Input Colors",
     description: "Different color variants",
-    code: `<DateInput color="primary" />
-<DateInput color="secondary" />
-<DateInput color="accent" />
-<DateInput color="success" />
-<DateInput color="error" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "2024-01-15",
+      color: "primary"
+    }
+  },  {
     title: "Date Input with Constraints",
     description: "Date inputs with min/max restrictions",
-    code: `<DateInput 
-  min="2024-01-01" 
-  max="2024-12-31" 
-  placeholder="Select date in 2024"
-/>
-<DateInput 
-  min="2024-07-01"
-  placeholder="Future dates only"
-/>`,
-    showCode: true,
-  },
-  {
+    props: {
+      value: "2024-01-15"
+    }
+  },  {
     title: "Date Input States",
     description: "Different states and variants",
-    code: `<DateInput bordered />
-<DateInput ghost />
-<DateInput disabled value="2024-01-15" />
-<DateInput required />`,
-    showCode: true,
+    props: {
+      value: "2024-01-15"
+    }
   },
 ];
 
@@ -62,63 +45,52 @@ const dateInputProps: ComponentProp[] = [
   {
     name: "value",
     type: "string",
-    description: "Selected date value in YYYY-MM-DD format",
-  },
+    description: "Selected date value in YYYY-MM-DD format"},
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text when no date is selected",
-  },
+    description: "Placeholder text when no date is selected"},
   {
     name: "min",
     type: "string",
-    description: "Minimum selectable date (YYYY-MM-DD)",
-  },
+    description: "Minimum selectable date (YYYY-MM-DD)"},
   {
     name: "max",
     type: "string",
-    description: "Maximum selectable date (YYYY-MM-DD)",
-  },
+    description: "Maximum selectable date (YYYY-MM-DD)"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Input size",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Input color theme",
-  },
+    description: "Input color theme"},
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true",
-  },
+    default: "true"},
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "required",
     type: "boolean",
     description: "Mark as required field",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const dateInputMetadata: ComponentMetadata = {
@@ -147,5 +119,4 @@ export const dateInputMetadata: ComponentMetadata = {
     "Value should be in YYYY-MM-DD format",
     "Consider timezone implications for date handling",
     "Ghost variant works well in minimal form designs",
-  ],
-};
+  ]};

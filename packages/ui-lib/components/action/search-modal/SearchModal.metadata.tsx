@@ -2,77 +2,65 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 
 const searchModalExamples: ComponentExample[] = [
   {
     title: "Basic Search Modal",
     description: "Simple search modal with placeholder text",
-    code: `<SearchModal
-  isOpen={true}
-  onClose={() => console.log('Closed')}
-  onSearch={(query) => console.log('Search:', query)}
-  placeholder="Search components..."
-/>`,
-    showCode: true,
-    interactive: true,
-  },
+    props: {
+      isOpen: false,
+      onClose: () => console.log('Closed'),
+      onSearch: (query: string) => console.log('Search:', query),
+      placeholder: "Search components..."},
+    interactive: true},
   {
     title: "Search Modal with Results",
     description: "Search modal displaying search results",
-    code: `<SearchModal
-  isOpen={true}
-  onClose={() => {}}
-  onSearch={() => {}}  
-  searchResults={[
-    {
-      id: "1",
-      title: "Button Component", 
-      description: "Interactive buttons with multiple variants",
-      url: "/components/action/button",
-      category: "Action"
+    props: {
+      isOpen: false,
+      onClose: () => {},
+      onSearch: () => {},
+      searchResults: [
+        {
+          id: "1",
+          title: "Button Component", 
+          description: "Interactive buttons with multiple variants",
+          url: "/components/action/button",
+          category: "Action"
+        },
+        {
+          id: "2", 
+          title: "Input Component",
+          description: "Text input fields for user data",
+          url: "/components/input/input",
+          category: "Input"
+        }
+      ]
     },
-    {
-      id: "2", 
-      title: "Input Component",
-      description: "Text input fields for user data",
-      url: "/components/input/input",
-      category: "Input"
-    }
-  ]}
-/>`,
-    showCode: true,
-    interactive: true,
-  },
+    interactive: true},
   {
     title: "Loading Search Modal",
     description: "Search modal with loading state",
-    code: `<SearchModal
-  isOpen={true}
-  onClose={() => {}}
-  onSearch={() => {}}
-  loading={true}
-  placeholder="Searching..."
-/>`,
-    showCode: true,
-    interactive: true,
-  },
+    props: {
+      isOpen: false,
+      onClose: () => {},
+      onSearch: () => {},
+      loading: true,
+      placeholder: "Searching..."},
+    interactive: true},
   {
     title: "Customized Search Modal",
     description: "Search modal with custom settings",
-    code: `<SearchModal
-  isOpen={true}
-  onClose={() => {}}
-  onSearch={() => {}}
-  placeholder="Find documentation..."
-  showKeyboardShortcut={false}
-  maxResults={5}
-  autoFocus={false}
-/>`,
-    showCode: true,
-    interactive: true,
-  },
+    props: {
+      isOpen: false,
+      onClose: () => {},
+      onSearch: () => {},
+      placeholder: "Find documentation...",
+      showKeyboardShortcut: false,
+      maxResults: 5,
+      autoFocus: false},
+    interactive: true},
 ];
 
 const searchModalProps: ComponentProp[] = [
@@ -80,66 +68,55 @@ const searchModalProps: ComponentProp[] = [
     name: "isOpen",
     type: "boolean",
     description: "Controls modal visibility",
-    required: true,
-  },
+    required: true},
   {
     name: "onClose",
     type: "() => void",
     description: "Function called when modal is closed",
-    required: true,
-  },
+    required: true},
   {
     name: "onSearch",
     type: "(query: string) => void",
     description: "Function called when search is performed",
-    required: true,
-  },
+    required: true},
   {
     name: "placeholder",
     type: "string",
     description: "Search input placeholder text",
-    default: "Search components...",
-  },
+    default: "Search components..."},
   {
     name: "searchResults",
     type: "SearchResult[]",
     description: "Array of search results to display",
-    default: "[]",
-  },
+    default: "[]"},
   {
     name: "loading",
     type: "boolean",
     description: "Show loading state",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "autoFocus",
     type: "boolean",
     description: "Auto-focus search input when opened",
-    default: "true",
-  },
+    default: "true"},
   {
     name: "showKeyboardShortcut",
     type: "boolean",
     description: "Show keyboard shortcut hints",
-    default: "true",
-  },
+    default: "true"},
   {
     name: "maxResults",
     type: "number",
     description: "Maximum number of results to display",
-    default: "10",
-  },
+    default: "10"},
   {
     name: "className",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Additional content in results area",
-  },
+    description: "Additional content in results area"},
 ];
 
 export const searchModalMetadata: ComponentMetadata = {
@@ -186,5 +163,4 @@ export const searchModalMetadata: ComponentMetadata = {
     "Keyboard shortcuts are hidden on mobile for better responsive design",
     "Built on top of Modal component for consistent behavior",
     "Automatically clears search query when closed",
-  ],
-};
+  ]};

@@ -43,6 +43,6 @@ export const componentMetadata = {
   showOwnerActions={true}
 />`,
       props: {}
-    }
-  ]
+        }
+      ]
 };

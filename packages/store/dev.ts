@@ -32,7 +32,8 @@ try {
 const builder = new Builder({ target: "safari12" });
 
 // Configure the tailwind plugin for Fresh
-tailwind(builder, app);
+// Note: Tailwind plugin configuration will be added in future tasks
+// builder.use(tailwind());
 
 // Create optimized assets for the browser when
 // running `deno run -A dev.ts build`
@@ -40,7 +41,12 @@ if (Deno.args.includes("build")) {
   await builder.build(app);
 } else {
   // ...otherwise start the development server
+  const port = parseInt(Deno.env.get("STORE_PORT") || "8000"); // Default port for store package
+  const hostname = Deno.env.get("STORE_HOST") || "localhost";
+  
+  console.log(`🚀 Store package (dev) starting on http://${hostname}:${port}`);
   await builder.listen(app, {
-    port: 8002,
+    port,
+    hostname,
   });
 }

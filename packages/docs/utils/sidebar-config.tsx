@@ -11,6 +11,7 @@ import {
   Palette,
   Puzzle,
   Settings,
+  Shield,
   Smartphone,
   User,
   Zap,
@@ -21,6 +22,7 @@ import { componentsMetadata } from "@suppers/ui-lib/components/metadata.tsx";
 // Icon mapping for categories
 export const categoryIcons: Record<string, any> = {
   "Actions": <Zap size={16} />,
+  "Auth": <Shield size={16} />,
   "Data Display": <BarChart3 size={16} />,
   "Navigation": <Navigation size={16} />,
   "Data Input": <Edit3 size={16} />,
@@ -60,6 +62,16 @@ export const defaultUISidebarConfig: SidebarConfig = {
       icon: categoryIcons["Actions"],
       defaultOpen: true,
       links: componentsMetadata.action.map((value) => ({
+        name: value.name,
+        path: value.path,
+      })),
+    },
+    {
+      id: "auth",
+      title: "Authentication",
+      icon: categoryIcons["Auth"],
+      defaultOpen: true,
+      links: componentsMetadata.auth.map((value) => ({
         name: value.name,
         path: value.path,
       })),

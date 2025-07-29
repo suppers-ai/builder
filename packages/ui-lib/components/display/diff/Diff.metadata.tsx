@@ -1,102 +1,65 @@
 import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
-import { Diff } from "./Diff.tsx";
+import { Diff, DiffItem, DiffResizer } from "./Diff.tsx";
 
 const diffExamples: ComponentExample[] = [
   {
     title: "Basic Diff",
-    description: "Simple code difference comparison",
-    code: `<Diff
-  oldContent="function hello() {
-  console.log('Hello');
-}"
-  newContent="function hello() {
-  console.log('Hello World!');
-  return true;
-}"
-  oldLabel="Before"
-  newLabel="After"
-/>`,
-    showCode: true,
+    description: "Simple before and after comparison",
+    props: {
+      item1Content: "BEFORE",
+      item2Content: "AFTER"
+    }
   },
   {
-    title: "Diff with Line Numbers",
-    description: "Code comparison with line number display",
-    code: `<Diff
-  oldContent="const items = [1, 2, 3];
-let total = 0;
-for (let item of items) {
-  total += item;
-}
-console.log(total);"
-  newContent="const items = [1, 2, 3, 4, 5];
-let total = 0;
-for (let item of items) {
-  total += item * 2;
-}
-console.log('Total:', total);"
-  showLineNumbers
-  oldLabel="Version 1"
-  newLabel="Version 2"
-/>`,
-    showCode: true,
+    title: "Custom Content",
+    description: "Diff with custom text content",
+    props: {
+      item1Content: "Original Version",
+      item2Content: "Updated Version",
+      item1Label: "Old",
+      item2Label: "New"
+    }
   },
   {
-    title: "Inline Diff Mode",
-    description: "Changes displayed inline within unified view",
-    code: `<Diff
-  oldContent="The quick brown fox jumps over the lazy dog."
-  newContent="The quick red fox leaps over the sleeping dog."
-  mode="inline"
-  oldLabel="Original"
-  newLabel="Modified"
-/>`,
-    showCode: true,
+    title: "Custom Styling",
+    description: "Diff with custom background colors",
+    props: {
+      item1Content: "Error State",
+      item2Content: "Success State",
+      item1Class: "bg-error text-error-content font-bold text-lg flex items-center justify-center",
+      item2Class: "bg-success text-success-content font-bold text-lg flex items-center justify-center"
+    }
   },
   {
-    title: "Side-by-Side Diff",
-    description: "Split view showing changes side by side",
-    code: `<Diff
-  oldContent="function validateEmail(email) {
-  const regex = /\S+@\S+\.\S+/;
-  return regex.test(email);
-}"
-  newContent="function validateEmail(email) {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email) return false;
-  return regex.test(email);
-}"
-  mode="split"
-  showLineNumbers
-  oldLabel="Old Implementation"
-  newLabel="New Implementation"
-  size="lg"
-/>`,
-    showCode: true,
-  },
+    title: "Code Comparison",
+    description: "Compare code snippets",
+    props: {
+      item1Content: "console.log('Hello');",
+      item2Content: "console.log('Hello World!');",
+      item1Class: "bg-base-200 p-4 font-mono text-sm flex items-center justify-center",
+      item2Class: "bg-base-200 p-4 font-mono text-sm flex items-center justify-center",
+      item1Label: "Before",
+      item2Label: "After"
+    }
+  }
 ];
 
 export const diffMetadata: ComponentMetadata = {
   name: "Diff",
-  description: "Code difference display",
+  description: "Visual comparison component with draggable resizer",
   category: ComponentCategory.DISPLAY,
   path: "/components/display/diff",
-  tags: ["diff", "comparison", "code", "changes", "additions", "deletions"],
+  tags: ["diff", "comparison", "before", "after", "resizer", "visual"],
   examples: diffExamples,
-  relatedComponents: ["code", "mockup", "pre"],
+  relatedComponents: ["carousel", "mockup"],
   preview: (
     <div class="w-full max-w-md">
       <Diff
-        oldContent="function hello() {
-  console.log('Hello');
-}"
-        newContent="function hello() {
-  console.log('Hello World!');
-  return true;
-}"
-        oldLabel="Before"
-        newLabel="After"
-        size="sm"
+        item1Content="BEFORE"
+        item2Content="AFTER"
+        item1Class="bg-primary text-primary-content font-bold text-sm flex items-center justify-center"
+        item2Class="bg-secondary text-secondary-content font-bold text-sm flex items-center justify-center"
       />
     </div>
-  ),
+  )
 };

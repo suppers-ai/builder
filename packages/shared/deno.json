@@ -9,7 +9,8 @@
     "./utils/preview-generator.ts": "./utils/preview-generator.ts",
     "./utils/type-mappers.ts": "./utils/type-mappers.ts",
     "./constants": "./constants/mod.ts",
-    "./schemas": "./schemas/mod.ts"
+    "./schemas": "./schemas/mod.ts",
+    "./generated/database-types": "./generated/database-types.ts"
   },
   "imports": {
     "@std/": "https://deno.land/std@0.224.0/",

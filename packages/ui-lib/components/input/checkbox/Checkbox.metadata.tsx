@@ -2,57 +2,47 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
+import { Checkbox } from "./Checkbox.tsx";
 
 const checkboxExamples: ComponentExample[] = [
   {
     title: "Basic Checkbox",
     description: "Simple checkbox with labels",
-    code: `<Checkbox label="Accept terms and conditions" />
-<Checkbox label="Subscribe to newsletter" checked />
-<Checkbox label="Remember me" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Check me",
+      checked: false
+    }
+  },  {
     title: "Checkbox Sizes",
     description: "Different sizes for various contexts",
-    code: `<Checkbox size="xs" label="Extra small" />
-<Checkbox size="sm" label="Small" />
-<Checkbox size="md" label="Medium" />
-<Checkbox size="lg" label="Large" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Check me",
+      checked: false,
+      size: "lg"
+    }
+  },  {
     title: "Checkbox Colors",
     description: "Various color themes",
-    code: `<Checkbox color="primary" label="Primary" checked />
-<Checkbox color="secondary" label="Secondary" checked />
-<Checkbox color="accent" label="Accent" checked />
-<Checkbox color="success" label="Success" checked />
-<Checkbox color="warning" label="Warning" checked />`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Check me",
+      checked: false,
+      color: "primary"
+    }
+  },  {
     title: "Checkbox States",
     description: "Different states and variants",
-    code: `<Checkbox label="Normal checkbox" />
-<Checkbox label="Checked checkbox" checked />
-<Checkbox label="Disabled checkbox" disabled />
-<Checkbox label="Disabled checked" disabled checked />`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Check me",
+      checked: false
+    }
+  },  {
     title: "Checkbox Group",
     description: "Group of related checkboxes",
-    code: `<div class="space-y-2">
-  <div class="font-semibold">Select your preferences:</div>
-  <Checkbox label="Email notifications" />
-  <Checkbox label="SMS notifications" />
-  <Checkbox label="Push notifications" checked />
-  <Checkbox label="Marketing emails" />
-</div>`,
-    showCode: true,
+    props: {
+      label: "Check me",
+      checked: false
+    }
   },
 ];
 
@@ -60,57 +50,47 @@ const checkboxProps: ComponentProp[] = [
   {
     name: "label",
     type: "string",
-    description: "Checkbox label text",
-  },
+    description: "Checkbox label text"},
   {
     name: "checked",
     type: "boolean",
     description: "Whether checkbox is checked",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Checkbox size",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
-    description: "Checkbox color theme",
-  },
+    description: "Checkbox color theme"},
   {
     name: "disabled",
     type: "boolean",
     description: "Whether checkbox is disabled",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "indeterminate",
     type: "boolean",
     description: "Show indeterminate state",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "onChange",
     type: "(checked: boolean) => void",
-    description: "Function called when checkbox state changes",
-  },
+    description: "Function called when checkbox state changes"},
   {
     name: "name",
     type: "string",
-    description: "Form input name attribute",
-  },
+    description: "Form input name attribute"},
   {
     name: "value",
     type: "string",
-    description: "Form input value attribute",
-  },
+    description: "Form input value attribute"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const checkboxMetadata: ComponentMetadata = {
@@ -148,5 +128,4 @@ export const checkboxMetadata: ComponentMetadata = {
     "Consider using fieldsets for checkbox groups",
     "Ensure sufficient contrast for all color variants",
     "Support keyboard navigation with proper tabindex",
-  ],
-};
+  ]};

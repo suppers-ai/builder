@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <>
       <Hero
-        title="Build Beautiful User Interfaces with Fresh"
+        title="Build Beautiful Websites at scale and speed"
         subtitle="A comprehensive UI component library built for Fresh applications. 90+ components, 30+ themes, and TypeScript-first design."
         titleColor="white"
         primaryCTA={{

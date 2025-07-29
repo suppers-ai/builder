@@ -2,55 +2,41 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
 
 const loginButtonExamples: ComponentExample[] = [
   {
     title: "Basic Login Button",
     description: "Simple login button with default styling",
-    code: `<LoginButton />
-<LoginButton>Sign In</LoginButton>
-<LoginButton>Log In</LoginButton>`,
-    showCode: true,
-  },
-  {
+    props: {
+      children: "Login"
+    }
+  },  {
     title: "Login Button Variants",
     description: "Different visual styles for login buttons",
-    code: `<LoginButton variant="primary">Primary Login</LoginButton>
-<LoginButton variant="secondary">Secondary Login</LoginButton>
-<LoginButton variant="outline">Outline Login</LoginButton>
-<LoginButton variant="ghost">Ghost Login</LoginButton>`,
-    showCode: true,
-  },
-  {
+    props: {
+      children: "Login",
+      variant: "outlined"
+    }
+  },  {
     title: "Login Button Sizes",
     description: "Different sizes for various contexts",
-    code: `<LoginButton size="xs">Extra Small</LoginButton>
-<LoginButton size="sm">Small</LoginButton>
-<LoginButton size="md">Medium</LoginButton>
-<LoginButton size="lg">Large</LoginButton>`,
-    showCode: true,
-  },
-  {
+    props: {
+      children: "Login",
+      size: "lg"
+    }
+  },  {
     title: "Login Button States",
     description: "Different states and configurations",
-    code: `<LoginButton>Normal</LoginButton>
-<LoginButton loading>Logging in...</LoginButton>
-<LoginButton disabled>Disabled</LoginButton>
-<LoginButton showIcon={false}>No Icon</LoginButton>`,
-    showCode: true,
-  },
-  {
+    props: {
+      children: "Login"
+    }
+  },  {
     title: "Custom Login Buttons",
     description: "Customized login buttons for different use cases",
-    code: `<LoginButton href="/auth/google" variant="outline">
-  Sign in with Google
-</LoginButton>
-<LoginButton href="/auth/github" variant="secondary">
-  Sign in with GitHub
-</LoginButton>`,
-    showCode: true,
+    props: {
+      children: "Login"
+    }
   },
 ];
 
@@ -59,55 +45,46 @@ const loginButtonProps: ComponentProp[] = [
     name: "children",
     type: "ComponentChildren",
     description: "Button text content",
-    default: "Login",
-  },
+    default: "Login"},
   {
     name: "variant",
     type:
       "'primary' | 'secondary' | 'accent' | 'ghost' | 'link' | 'info' | 'success' | 'warning' | 'error'",
     description: "Visual style variant",
-    default: "primary",
-  },
+    default: "primary"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Button size",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "href",
     type: "string",
     description: "URL to navigate to (renders as link)",
-    default: "/login",
-  },
+    default: "/login"},
   {
     name: "onClick",
     type: "() => void",
-    description: "Click handler function",
-  },
+    description: "Click handler function"},
   {
     name: "loading",
     type: "boolean",
     description: "Show loading state",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the button",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "showIcon",
     type: "boolean",
     description: "Show login icon",
-    default: "true",
-  },
+    default: "true"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const loginButtonMetadata: ComponentMetadata = {
@@ -148,5 +125,4 @@ export const loginButtonMetadata: ComponentMetadata = {
     "Set showIcon={false} to hide the login icon",
     "Loading state automatically disables the button",
     "href prop makes it render as a navigation link",
-  ],
-};
+  ]};

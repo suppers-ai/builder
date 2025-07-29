@@ -54,12 +54,13 @@ export const componentMetadata = {
   title="Edit User"
   fields={[
     { key: "name", label: "Name", type: "text", required: true },
-    { key: "email", label: "Email", type: "text", required: true }
-  ]}
+    { key: "email", label: "Email", type: "text", required: true
+        }
+      ]}
   onSubmit={async (data) => console.log(data)}
   onCancel={() => console.log("cancelled")}
 />`,
       props: {}
-    }
-  ]
+        }
+      ]
 };

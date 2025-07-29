@@ -43,7 +43,7 @@ export const BaseComponentPropsSchema = z.object({
 }).describe("Base component properties");
 
 export const SizePropsSchema = z.object({
-  size: DaisyUISizeSchema.default("md").describe("Component size"),
+  size: DaisyUISizeSchema.optional().default("md").describe("Component size"),
 }).describe("Size-related properties");
 
 export const ColorPropsSchema = z.object({
@@ -55,15 +55,15 @@ export const VariantPropsSchema = z.object({
 }).describe("Variant-related properties");
 
 export const DisabledPropsSchema = z.object({
-  disabled: z.boolean().default(false).describe("Disable component interactions"),
+  disabled: z.boolean().optional().default(false).describe("Disable component interactions"),
 }).describe("Disabled state properties");
 
 export const LoadingPropsSchema = z.object({
-  loading: z.boolean().default(false).describe("Show loading state"),
+  loading: z.boolean().optional().default(false).describe("Show loading state"),
 }).describe("Loading state properties");
 
 export const ActivePropsSchema = z.object({
-  active: z.boolean().default(false).describe("Apply active state styling"),
+  active: z.boolean().optional().default(false).describe("Apply active state styling"),
 }).describe("Active state properties");
 
 // Event Handler Schemas

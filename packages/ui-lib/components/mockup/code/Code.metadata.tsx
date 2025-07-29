@@ -5,37 +5,31 @@ const codeExamples: ComponentExample[] = [
   {
     title: "Basic Code Block",
     description: "Simple code block with syntax highlighting",
-    code: `<CodeMockup
-  language="javascript"
-  filename="hello.js"
-  code={\`function hello() {
+    props: {
+      code: `function hello() {
   console.log('Hello World!');
   return true;
-}\`}
-/>`,
-    showCode: true,
+}`,
+      _language: "javascript",
+      showLineNumbers: true
+    }
   },
   {
     title: "Code with Prefix",
     description: "Terminal-style code block with command prefix",
-    code: `<CodeMockup
-  language="bash"
-  prefix="$"
-  code={\`npm install react
+    props: {
+      code: `npm install react
 npm start
-echo "Server running on port 3000"\`}
-  showLineNumbers={false}
-/>`,
-    showCode: true,
+echo "Server running on port 3000"`,
+      variant: "terminal",
+      showLineNumbers: false
+    }
   },
   {
     title: "Multi-line Code",
     description: "Complex code example with line numbers",
-    code: `<CodeMockup
-  language="typescript"
-  filename="api.ts"
-  showLineNumbers
-  code={\`interface User {
+    props: {
+      code: `interface User {
   id: number;
   name: string;
   email: string;
@@ -51,19 +45,17 @@ async function fetchUser(id: number): Promise<User> {
   return response.json();
 }
 
-export { User, fetchUser };\`}
-/>`,
-    showCode: true,
+export { User, fetchUser };`,
+      _language: "typescript",
+      filename: "user.ts",
+      showLineNumbers: true
+    }
   },
   {
-    title: "Colored Code Theme",
-    description: "Code block with custom color theme",
-    code: `<CodeMockup
-  language="python"
-  filename="data_analysis.py"
-  theme="dark"
-  showLineNumbers
-  code={\`import pandas as pd
+    title: "Python Code Theme",
+    description: "Code block with Python syntax",
+    props: {
+      code: `import pandas as pd
 import numpy as np
 
 def analyze_data(df):
@@ -80,18 +72,17 @@ def analyze_data(df):
 # Load and analyze data
 data = pd.read_csv('dataset.csv')
 results = analyze_data(data)
-print(f"Analysis complete: {results['count']} records processed")\`}
-/>`,
-    showCode: true,
+print(f"Analysis complete: {results['count']} records processed")`,
+      _language: "python",
+      filename: "analysis.py",
+      showLineNumbers: true
+    }
   },
   {
-    title: "Responsive Code Block",
-    description: "Code block that adapts to different screen sizes",
-    code: `<CodeMockup
-  language="css"
-  filename="responsive.css"
-  responsive
-  code={\`.container {
+    title: "CSS Code Block",
+    description: "Code block that shows CSS styling",
+    props: {
+      code: `.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
@@ -112,10 +103,12 @@ print(f"Analysis complete: {results['count']} records processed")\`}
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
   }
-}\`}
-/>`,
-    showCode: true,
-  },
+}`,
+      _language: "css",
+      filename: "styles.css",
+      showLineNumbers: true
+    }
+  }
 ];
 
 export const codeMetadata: ComponentMetadata = {
@@ -129,11 +122,11 @@ export const codeMetadata: ComponentMetadata = {
   preview: (
     <div class="w-80">
       <CodeMockup
-        language="javascript"
+        _language="javascript"
         filename="example.js"
         code={`function hello() {\n  console.log('Hello World!');\n  return true;\n}`}
         showLineNumbers
       />
     </div>
-  ),
+  )
 };

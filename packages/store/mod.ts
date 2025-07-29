@@ -1,9 +1,9 @@
 /**
- * @fileoverview Store Package - SSO Authentication Service
+ * @fileoverview Store Package - Application Marketplace
  *
- * This package serves as the centralized Single Sign-On (SSO) service for the
- * Suppers AI Builder platform. It handles authentication, user management,
- * and provides OAuth integration for other applications.
+ * This package serves as the application marketplace and generator interface for the
+ * Suppers AI Builder platform. It provides a web interface for creating and managing
+ * applications using the compiler, with template galleries and visual builders.
  */
 
 // Re-export main components and utilities

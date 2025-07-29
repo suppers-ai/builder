@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "exports": "./mod.ts",
   "tasks": {
-    "dev": "deno run --allow-all --watch=static/,routes/ dev.ts",
+    "dev": "deno run --allow-all --watch=static/,routes/,islands/,lib/ dev.ts",
     "build": "deno run --allow-all main.ts build",
     "start": "deno run --allow-all main.ts",
     "preview": "deno run --allow-all main.ts",
     "update": "deno run --allow-all -r https://fresh.deno.dev/update .",
-    "test": "deno test --allow-all",
+    "test": "deno test --allow-all --run",
+    "test:watch": "deno test --allow-all --watch",
+    "test:coverage": "deno test --allow-all --coverage=coverage",
     "check": "deno check **/*.ts",
     "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
     "lint": "deno lint"
   },
   "compilerOptions": {
@@ -19,9 +22,9 @@
   },
   "imports": {
     "@/": "./",
-    "@suppers/auth-client": "../auth-client/mod.ts",
     "@suppers/ui-lib": "../ui-lib/mod.ts",
     "@suppers/shared": "../shared/mod.ts",
+    "@suppers/compiler": "../compiler/mod.ts",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.8?target=deno",
     "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
     "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",

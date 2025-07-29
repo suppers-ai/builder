@@ -1,6 +1,21 @@
 /**
- * Generic component route generator
- * Uses metadata system for component documentation
+ * Generic component route generator for the simplified metadata system
+ * 
+ * This utility provides functions for generating component documentation routes using
+ * a simplified, props-based metadata system. The system has been streamlined to remove
+ * complex parsing logic and multiple rendering approaches in favor of a single,
+ * consistent props-based approach.
+ * 
+ * Key improvements in the simplified system:
+ * - Removed complex JSX parsing functions (parseJSXExample, parseProps)
+ * - Eliminated old properties: code, staticRender, showCode
+ * - Unified rendering approach using only props objects
+ * - Automatic JSX code generation from props
+ * - Consistent presentation across all components
+ * 
+ * @deprecated The createComponentRoute function is deprecated in favor of the
+ * direct route handler approach in [category]/[name].tsx for better performance
+ * and simpler maintenance.
  */
 
 import type { ComponentChildren } from "preact";
@@ -11,42 +26,9 @@ import {
   extractApiPropsFromSchema,
 } from "../../ui-lib/components/schemas/extractor.ts";
 import CodeExample from "../islands/CodeExample.tsx";
+import { generateJSXFromProps } from "./props-to-jsx.ts";
 
-export interface ComponentRouteConfig {
-  /** Component name (e.g., "Button") */
-  componentName: string;
 
-  /** Component category (e.g., "action", "display") */
-  category: string;
-
-  /** Static component for server-side rendering */
-  StaticComponent: any;
-
-  /** Interactive component for islands (optional) */
-  InteractiveComponent?: any;
-
-  /** Custom preview renderer (optional) */
-  customPreviewRenderer?: (previewSpec: PreviewSpec, components: any) => ComponentChildren;
-
-  /** Page title suffix */
-  titleSuffix?: string;
-}
-
-export interface PreviewSpec {
-  type: "buttons" | "components" | "code" | "error";
-  wrapperClass?: string;
-  buttons?: Array<{
-    props: Record<string, any>;
-    content: string;
-    isInteractive?: boolean;
-  }>;
-  components?: Array<{
-    props: Record<string, any>;
-    children?: string;
-  }>;
-  code?: string;
-  error?: string;
-}
 
 export interface ComponentPageData {
   title: string;
@@ -54,8 +36,7 @@ export interface ComponentPageData {
   examples: Array<{
     title: string;
     description: string;
-    code: string;
-    showCode?: boolean;
+    props: Record<string, any> | Array<Record<string, any>>;
     interactive?: boolean;
   }>;
   apiProps: ApiProp[];
@@ -91,8 +72,7 @@ export async function loadComponentPageData(
         examples: metadata.examples.map((example) => ({
           title: example.title,
           description: example.description,
-          code: example.code,
-          showCode: example.showCode,
+          props: example.props,
           interactive: example.interactive,
         })),
         apiProps: await (async () => {
@@ -113,8 +93,7 @@ export async function loadComponentPageData(
         previewData: metadata.examples.map((example) => ({
           title: example.title,
           description: example.description,
-          code: example.code,
-          showCode: example.showCode,
+          props: example.props,
           interactive: example.interactive,
           type: example.interactive ? "interactive" : "static",
         })),
@@ -128,7 +107,7 @@ export async function loadComponentPageData(
       examples: [{
         title: "Basic Example",
         description: "Basic usage of the component",
-        code: `<${componentName} />`,
+        props: {},
       }],
       apiProps: [],
       usageNotes: [],
@@ -140,96 +119,22 @@ export async function loadComponentPageData(
   }
 }
 
-/**
- * Parse JSX code and extract component props and content
- */
-function parseJSXExample(code: string, componentName: string): Array<{
-  props: Record<string, any>;
-  content: string;
-}> {
-  const components: Array<{ props: Record<string, any>; content: string }> = [];
 
-  // Improved regex to handle multiline JSX and various prop formats
-  const componentRegex = new RegExp(
-    `<${componentName}([^>]*?)>([\\s\\S]*?)<\\/${componentName}>`,
-    "g",
-  );
-  const selfClosingRegex = new RegExp(`<${componentName}([^>]*?)\\s*\\/>`, "g");
-
-  let match;
-
-  // Match components with content (e.g., <Button color="primary">Primary</Button>)
-  while ((match = componentRegex.exec(code)) !== null) {
-    const propsString = match[1];
-    const content = match[2].trim();
-    const props = parseProps(propsString);
-
-    components.push({
-      props,
-      content: content || (props.children as string) || "Button",
-    });
-  }
-
-  // Reset regex lastIndex for self-closing components
-  selfClosingRegex.lastIndex = 0;
-
-  // Match self-closing components (e.g., <Button color="primary" />)
-  while ((match = selfClosingRegex.exec(code)) !== null) {
-    const propsString = match[1];
-    const props = parseProps(propsString);
-
-    components.push({
-      props,
-      content: (props.children as string) || "Button",
-    });
-  }
-
-  return components;
-}
-
-/**
- * Parse props string and return props object
- */
-function parseProps(propsString: string): Record<string, any> {
-  const props: Record<string, any> = {};
-
-  // Handle different prop formats: prop="value", prop={value}, prop={true}, prop
-  const propsRegex = /(\w+)(?:=(?:"([^"]*)"|{([^}]*)}|([^\s>]+)))?/g;
-
-  let propMatch;
-  while ((propMatch = propsRegex.exec(propsString)) !== null) {
-    const [, key, quotedValue, bracedValue, unquotedValue] = propMatch;
-
-    if (quotedValue !== undefined) {
-      // String value: prop="value"
-      props[key] = quotedValue;
-    } else if (bracedValue !== undefined) {
-      // Expression value: prop={value}
-      const value = bracedValue.trim();
-      if (value === "true") props[key] = true;
-      else if (value === "false") props[key] = false;
-      else if (value.match(/^\d+$/)) props[key] = parseInt(value);
-      else if (value.startsWith('"') && value.endsWith('"')) {
-        props[key] = value.slice(1, -1);
-      } else {
-        props[key] = value;
-      }
-    } else if (unquotedValue !== undefined) {
-      // Unquoted value: prop=value
-      props[key] = unquotedValue;
-    } else {
-      // Boolean prop: prop (defaults to true)
-      props[key] = true;
-    }
-  }
-
-  return props;
-}
 
 /**
  * Create a component route with proper documentation
+ * 
+ * @deprecated This function is deprecated in favor of the direct route handler
+ * approach in [category]/[name].tsx for better performance and simpler maintenance.
  */
-export function createComponentRoute(config: ComponentRouteConfig) {
+export function createComponentRoute(config: {
+  componentName: string;
+  category: string;
+  StaticComponent: any;
+  InteractiveComponent?: any;
+  customPreviewRenderer?: any;
+  titleSuffix?: string;
+}) {
   const {
     componentName,
     category,
@@ -274,35 +179,41 @@ export function createComponentRoute(config: ComponentRouteConfig) {
                   <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
                   <p class="text-gray-600 mb-4">{example.description}</p>
 
-                  <div class="bg-gray-50 p-4 rounded mb-4">
+                  <div class="p-4 rounded mb-4">
                     <div class="flex flex-wrap gap-4">
                       {(() => {
-                        // Parse the JSX code to get component instances
-                        const parsedComponents = parseJSXExample(example.code, componentName);
-
-                        return parsedComponents.map((comp, compIndex) => {
-                          const Component = (example.interactive && InteractiveComponent)
-                            ? InteractiveComponent
-                            : StaticComponent;
-
+                        // Only handle props-based rendering
+                        if (!example.props) {
                           return (
-                            <Component key={compIndex} {...comp.props}>
-                              {comp.content}
-                            </Component>
+                            <div class="text-error">
+                              Example missing props data. Please update to use props-based format.
+                            </div>
                           );
-                        });
+                        }
+
+                        const Component = (example.interactive && InteractiveComponent)
+                          ? InteractiveComponent
+                          : StaticComponent;
+
+                        // Handle array of props (multiple component instances)
+                        if (Array.isArray(example.props)) {
+                          return example.props.map((propSet, propIndex) => (
+                            <Component key={propIndex} {...propSet} />
+                          ));
+                        }
+                        
+                        // Handle single props object
+                        return <Component {...example.props} />;
                       })()}
                     </div>
                   </div>
 
-                  {(example.showCode !== false) && (
-                    <details class="mt-4">
-                      <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
-                        Show Code
-                      </summary>
-                      <CodeExample code={example.code} />
-                    </details>
-                  )}
+                  <details class="mt-4">
+                    <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
+                      Show Code
+                    </summary>
+                    <CodeExample code={generateJSXFromProps(componentName, example.props || {})} />
+                  </details>
                 </div>
               ))}
             </div>

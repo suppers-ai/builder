@@ -1,7 +1,37 @@
 /**
- * Dynamic component route handler
+ * Dynamic component route handler for the simplified metadata system
+ * 
+ * This route handler processes component documentation using a simplified, props-based approach.
+ * All component examples are now defined purely through props objects, with automatic JSX code
+ * generation and consistent presentation.
+ * 
+ * Key features of the simplified system:
+ * - Props-based examples: All examples use `props` objects instead of raw JSX strings
+ * - Automatic code generation: JSX code is generated from props using `generateJSXFromProps`
+ * - Consistent presentation: All examples show rendered component + generated code
+ * - Single rendering path: No more complex parsing or multiple rendering approaches
+ * 
  * Handles URLs like /components/action/button, /components/display/card, etc.
- * Uses metadata-driven approach for automatic component discovery
+ * Uses metadata-driven approach for automatic component discovery.
+ * 
+ * @example
+ * // Example metadata structure (simplified)
+ * {
+ *   title: "Primary Button",
+ *   description: "A button with primary styling",
+ *   props: { color: "primary", children: "Click me" }
+ * }
+ * 
+ * @example
+ * // Multiple component example
+ * {
+ *   title: "Button Colors",
+ *   description: "Various button color options", 
+ *   props: [
+ *     { color: "primary", children: "Primary" },
+ *     { color: "secondary", children: "Secondary" }
+ *   ]
+ * }
  */
 
 import type { PageProps } from "fresh";
@@ -9,6 +39,8 @@ import { createComponentRoute } from "../../../utils/component-route-generator.t
 import { ComponentMetadata, flatComponentsMetadata } from "@suppers/ui-lib";
 import { Breadcrumbs } from "@suppers/ui-lib";
 import CodeExample from "../../../islands/CodeExample.tsx";
+import { generateJSXFromProps } from "../../../utils/props-to-jsx.ts";
+import { h } from "preact";
 
 /**
  * Convert URL-friendly component name to PascalCase component name
@@ -29,91 +61,6 @@ function findComponentMetadata(category: string, name: string): ComponentMetadat
   return flatComponentsMetadata.find((meta) => meta.path === expectedPath) || null;
 }
 
-/**
- * Parse JSX code and extract component props and content
- */
-function parseJSXExample(code: string, componentName: string): Array<{
-  props: Record<string, any>;
-  content: string;
-}> {
-  const components: Array<{ props: Record<string, any>; content: string }> = [];
-
-  // Improved regex to handle multiline JSX and various prop formats
-  const componentRegex = new RegExp(
-    `<${componentName}([^>]*?)>([\\s\\S]*?)<\\/${componentName}>`,
-    "g",
-  );
-  const selfClosingRegex = new RegExp(`<${componentName}([^>]*?)\\s*\\/>`, "g");
-
-  let match;
-
-  // Match components with content (e.g., <Button color="primary">Primary</Button>)
-  while ((match = componentRegex.exec(code)) !== null) {
-    const propsString = match[1];
-    const content = match[2].trim();
-    const props = parseProps(propsString);
-
-    components.push({
-      props,
-      content: content || (props.children as string) || "Button",
-    });
-  }
-
-  // Reset regex lastIndex for self-closing components
-  selfClosingRegex.lastIndex = 0;
-
-  // Match self-closing components (e.g., <Button color="primary" />)
-  while ((match = selfClosingRegex.exec(code)) !== null) {
-    const propsString = match[1];
-    const props = parseProps(propsString);
-
-    components.push({
-      props,
-      content: (props.children as string) || "Button",
-    });
-  }
-
-  return components;
-}
-
-/**
- * Parse props string and return props object
- */
-function parseProps(propsString: string): Record<string, any> {
-  const props: Record<string, any> = {};
-
-  // Handle different prop formats: prop="value", prop={value}, prop={true}, prop
-  const propsRegex = /(\w+)(?:=(?:"([^"]*)"|{([^}]*)}|([^\s>]+)))?/g;
-
-  let propMatch;
-  while ((propMatch = propsRegex.exec(propsString)) !== null) {
-    const [, key, quotedValue, bracedValue, unquotedValue] = propMatch;
-
-    if (quotedValue !== undefined) {
-      // String value: prop="value"
-      props[key] = quotedValue;
-    } else if (bracedValue !== undefined) {
-      // Expression value: prop={value}
-      const value = bracedValue.trim();
-      if (value === "true") props[key] = true;
-      else if (value === "false") props[key] = false;
-      else if (value.match(/^\d+$/)) props[key] = parseInt(value);
-      else if (value.startsWith('"') && value.endsWith('"')) {
-        props[key] = value.slice(1, -1);
-      } else {
-        props[key] = value;
-      }
-    } else if (unquotedValue !== undefined) {
-      // Unquoted value: prop=value
-      props[key] = unquotedValue;
-    } else {
-      // Boolean prop: prop (defaults to true)
-      props[key] = true;
-    }
-  }
-
-  return props;
-}
 
 /**
  * Dynamically import component from UI library based on component name and metadata
@@ -224,38 +171,114 @@ export default async function DynamicComponentPage(props: PageProps) {
                   <h2 class="text-2xl font-semibold mb-4">{example.title}</h2>
                   <p class="text-gray-600 mb-4">{example.description}</p>
 
-                  <div class="bg-gray-50 p-4 rounded mb-4">
+                  <div class="p-6 bg-base-100 border border-base-300 rounded-lg mb-4">
                     <div class="flex flex-wrap gap-4">
                       {(() => {
-                        // Parse the JSX code to get component instances
-                        const parsedComponents = parseJSXExample(example.code, componentName);
-
-                        return parsedComponents.map((comp, compIndex) => {
-                          const Component = (example.interactive && components.Interactive)
-                            ? components.Interactive
-                            : components.Static;
-
+                        // Only handle props-based rendering
+                        if (!example.props) {
                           return (
-                            <Component key={compIndex} {...comp.props}>
-                              {comp.content}
-                            </Component>
+                            <div class="text-error">
+                              Example missing props data. Please update to use props-based format.
+                            </div>
                           );
-                        });
+                        }
+
+                        const Component = (example.interactive && components.Interactive)
+                          ? components.Interactive
+                          : components.Static;
+
+                        // Handle array of props (multiple component instances)
+                        if (Array.isArray(example.props)) {
+                          return example.props.map((propSet, propIndex) => (
+                            <Component key={propIndex} {...propSet} />
+                          ));
+                        }
+
+                        // Handle single props object
+                        return <Component {...example.props} />;
                       })()}
                     </div>
                   </div>
 
-                  {(example.showCode !== false) && (
-                    <details class="mt-4">
-                      <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
-                        Show Code
-                      </summary>
-                      <CodeExample code={example.code} />
-                    </details>
-                  )}
+                  <details class="mt-4">
+                    <summary class="cursor-pointer text-blue-600 hover:text-blue-800">
+                      Show Code
+                    </summary>
+                    <CodeExample code={generateJSXFromProps(componentName, example.props || {})} />
+                  </details>
                 </div>
               ))}
             </div>
+
+            {pageData.usageNotes.length > 0 && (
+              <div class="mt-8 p-6 bg-info/10 border border-info/20 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4 text-base-content">Usage Notes</h3>
+                <ul class="list-disc list-inside space-y-2">
+                  {pageData.usageNotes.map((note, index) => (
+                    <li key={index} class="text-base-content/80">{note}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {pageData.apiProps.length > 0 && (
+              <div class="mt-8">
+                <h3 class="text-2xl font-semibold mb-6 text-base-content">API Props</h3>
+                <div class="overflow-x-auto">
+                  <table class="table table-zebra w-full border border-base-300 rounded-lg">
+                    <thead>
+                      <tr class="border-base-300">
+                        <th class="text-base-content font-medium">Prop</th>
+                        <th class="text-base-content font-medium">Type</th>
+                        <th class="text-base-content font-medium">Required</th>
+                        <th class="text-base-content font-medium">Default</th>
+                        <th class="text-base-content font-medium">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pageData.apiProps.map((prop, index) => (
+                        <tr key={index} class="border-base-300">
+                          <td class="font-mono text-base-content">
+                            {prop.name}
+                            {prop.required && <span class="text-error ml-1">*</span>}
+                          </td>
+                          <td class="font-mono">
+                            <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">{prop.type}</code>
+                          </td>
+                          <td class="text-base-content">
+                            {prop.required ? (
+                              <span class="text-error font-medium">Yes</span>
+                            ) : (
+                              <span class="text-base-content/60">No</span>
+                            )}
+                          </td>
+                          <td class="font-mono">
+                            {prop.default ? (
+                              <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">{prop.default}</code>
+                            ) : (
+                              <span class="text-base-content/40">-</span>
+                            )}
+                          </td>
+                          <td class="text-base-content">
+                            {prop.description}
+                            {prop.examples && prop.examples.length > 0 && (
+                              <div class="mt-1 text-xs text-base-content/60">
+                                Examples: {prop.examples.join(", ")}
+                              </div>
+                            )}
+                            {prop.since && (
+                              <div class="mt-1 text-xs text-info">
+                                Since: {prop.since}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </>

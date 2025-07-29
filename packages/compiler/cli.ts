@@ -9,10 +9,16 @@
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
 import { handleGenerate, handleHelp, handleValidate, handleVersion } from "./src/commands/mod.ts";
 
+export const CLI_METADATA = {
+  name: "builder",
+  version: "2.0.0",
+  description: "Suppers AI Builder - Generate modern applications with Supabase backend",
+} as const;
+
 await new Command()
-  .name("builder")
-  .version("2.0.0")
-  .description("Suppers AI Builder - Generate modern applications with Supabase backend")
+  .name(CLI_METADATA.name)
+  .version(CLI_METADATA.version)
+  .description(CLI_METADATA.description)
   .command("generate")
   .alias("g")
   .description("Generate a new site from a specification file")
@@ -33,7 +39,7 @@ await new Command()
   .alias("v")
   .description("Validate a specification file")
   .arguments("<name:string>")
-  .action(async (_options, name: string) => {
+  .action(async (_options: any, name: string) => {
     await handleValidate(name);
   })
   .command("version")

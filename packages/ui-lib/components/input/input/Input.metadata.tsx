@@ -2,54 +2,43 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
+import { Input } from "./Input.tsx";
 
 const inputExamples: ComponentExample[] = [
   {
     title: "Basic Input",
     description: "Simple text input with different types",
-    code: `<Input type="text" placeholder="Type here" />
-<Input type="email" placeholder="Email" />
-<Input type="password" placeholder="Password" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      placeholder: "Enter text..."
+    }
+  },  {
     title: "Input Sizes",
     description: "Different input sizes",
-    code: `<Input size="xs" placeholder="Extra small" />
-<Input size="sm" placeholder="Small" />
-<Input placeholder="Normal" />
-<Input size="lg" placeholder="Large" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      placeholder: "Enter text...",
+      size: "lg"
+    }
+  },  {
     title: "Input Colors",
     description: "Input with different colors",
-    code: `<Input placeholder="Default" />
-<Input color="primary" placeholder="Primary" />
-<Input color="secondary" placeholder="Secondary" />
-<Input color="accent" placeholder="Accent" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      placeholder: "Enter text...",
+      color: "primary"
+    }
+  },  {
     title: "Input States",
     description: "Different input states",
-    code: `<Input placeholder="Normal" />
-<Input color="info" placeholder="Info" />
-<Input color="success" placeholder="Success" />
-<Input color="warning" placeholder="Warning" />
-<Input color="error" placeholder="Error" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      placeholder: "Enter text..."
+    }
+  },  {
     title: "Input Variants",
     description: "Different visual styles",
-    code: `<Input placeholder="Bordered" />
-<Input ghost placeholder="Ghost" />
-<Input bordered={false} placeholder="No border" />
-<Input disabled placeholder="Disabled" />`,
-    showCode: true,
+    props: {
+      placeholder: "Enter text...",
+      variant: "outlined"
+    }
   },
 ];
 
@@ -58,52 +47,43 @@ const inputProps: ComponentProp[] = [
     name: "type",
     type: "string",
     description: "Input type (text, email, password, etc.)",
-    default: "text",
-  },
+    default: "text"},
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text",
-  },
+    description: "Placeholder text"},
   {
     name: "value",
     type: "string",
-    description: "Input value",
-  },
+    description: "Input value"},
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true",
-  },
+    default: "true"},
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Input size",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Input color theme",
-  },
+    description: "Input color theme"},
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const inputMetadata: ComponentMetadata = {
@@ -130,5 +110,4 @@ export const inputMetadata: ComponentMetadata = {
     "Combine with labels for better accessibility",
     "Use appropriate input types for better mobile keyboards",
     "Consider using validation states (success, error) for form feedback",
-  ],
-};
+  ]};

@@ -5,7 +5,6 @@ import { footerMetadata } from "./footer/Footer.metadata.tsx";
 import { heroMetadata } from "./hero/Hero.metadata.tsx";
 import { indicatorMetadata } from "./indicator/Indicator.metadata.tsx";
 import { joinMetadata } from "./join/Join.metadata.tsx";
-import { linkMetadata } from "./link/Link.metadata.tsx";
 import { maskMetadata } from "./mask/Mask.metadata.tsx";
 import { stackMetadata } from "./stack/Stack.metadata.tsx";
 
@@ -17,7 +16,6 @@ export const layoutComponentsMetadata = [
   heroMetadata,
   indicatorMetadata,
   joinMetadata,
-  linkMetadata,
   maskMetadata,
   stackMetadata,
 ];

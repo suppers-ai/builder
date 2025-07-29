@@ -79,10 +79,30 @@ export default function App({ Component, state }: PageProps) {
                   link.setAttribute('href', theme === 'dark' ? darkFavicon : lightFavicon);
                 }
 
+                function getSystemTheme() {
+                  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+
                 try {
-                  const savedTheme = localStorage.getItem('theme') || 'light';
-                  document.documentElement.setAttribute('data-theme', savedTheme);
-                  setFavicon(savedTheme);
+                  const savedTheme = localStorage.getItem('theme');
+                  const currentTheme = savedTheme || getSystemTheme();
+                  document.documentElement.setAttribute('data-theme', currentTheme);
+                  setFavicon(currentTheme);
+                  
+                  console.log('System theme:', getSystemTheme());
+                  console.log('Saved theme:', savedTheme);
+                  console.log('Using theme:', currentTheme);
+
+                  // Listen for system theme changes
+                  if (window.matchMedia) {
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                      if (!localStorage.getItem('theme')) {
+                        const systemTheme = e.matches ? 'dark' : 'light';
+                        document.documentElement.setAttribute('data-theme', systemTheme);
+                        setFavicon(systemTheme);
+                      }
+                    });
+                  }
 
                   // Observe future theme changes
                   new MutationObserver(function (m) {

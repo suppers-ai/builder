@@ -2,113 +2,86 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
+import { Avatar } from "./Avatar.tsx";
 
 const avatarExamples: ComponentExample[] = [
   {
     title: "Basic Avatar",
     description: "Simple avatars with images and placeholders",
-    code:
-      `<Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar initials="JD" />
-<Avatar placeholder="?" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+      alt: "User Avatar"
+    }
+  },  {
     title: "Avatar Sizes",
     description: "Different sizes for various contexts",
-    code:
-      `<Avatar size="xs" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="sm" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="md" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="lg" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar size="xl" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+      alt: "User Avatar",
+      size: "lg"
+    }
+  },  {
     title: "Avatar with Status Indicators",
     description: "Online/offline status indicators",
-    code:
-      `<Avatar online src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar offline src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar online initials="JD" />
-<Avatar offline initials="SM" />`,
-    showCode: true,
-  },
-  {
+    props: {
+      online: true,
+      src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face",
+      alt: "User Avatar"
+    }
+  },  {
     title: "Avatar with Ring",
     description: "Avatars with decorative rings",
-    code:
-      `<Avatar ring src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-<Avatar ring initials="AB" />
-<Avatar ring online src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />`,
-    showCode: true,
-  },
-  {
-    title: "Avatar Group",
-    description: "Multiple avatars grouped together",
-    code: `<div class="avatar-group -space-x-6 rtl:space-x-reverse">
-  <Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-  <Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-  <Avatar src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-  <Avatar initials="+3" />
-</div>`,
-    showCode: true,
-  },
+    props: {
+      ring: true,
+      src: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+      alt: "User Avatar"
+    }
+  }
 ];
 
 const avatarProps: ComponentProp[] = [
   {
     name: "src",
     type: "string",
-    description: "Image source URL for the avatar",
-  },
+    description: "Image source URL for the avatar"},
   {
     name: "alt",
     type: "string",
     description: "Alt text for the avatar image",
-    default: "''",
-  },
+    default: "''"},
   {
     name: "initials",
     type: "string",
-    description: "Text initials to display when no image is provided",
-  },
+    description: "Text initials to display when no image is provided"},
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text when no image or initials are provided",
-  },
+    description: "Placeholder text when no image or initials are provided"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
     description: "Size of the avatar",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "ring",
     type: "boolean",
     description: "Whether to show a decorative ring around the avatar",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "online",
     type: "boolean",
     description: "Show online status indicator",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "offline",
     type: "boolean",
     description: "Show offline status indicator",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const avatarMetadata: ComponentMetadata = {
@@ -123,7 +96,7 @@ export const avatarMetadata: ComponentMetadata = {
     <div class="flex gap-2">
       <div class="avatar">
         <div class="w-12 h-12 rounded-full">
-          <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" />
         </div>
       </div>
       <div class="avatar placeholder">
@@ -133,7 +106,7 @@ export const avatarMetadata: ComponentMetadata = {
       </div>
       <div class="avatar online">
         <div class="w-12 h-12 rounded-full">
-          <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face" />
         </div>
       </div>
     </div>
@@ -149,5 +122,4 @@ export const avatarMetadata: ComponentMetadata = {
     "Status indicators help show user availability in chat applications",
     "Avatar groups work well for showing team members or participants",
     "Ring variants add emphasis for important users or selected states",
-  ],
-};
+  ]};

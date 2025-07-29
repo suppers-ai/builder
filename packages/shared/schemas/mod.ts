@@ -12,7 +12,7 @@ export * from "./api.ts";
 // Auth schemas
 export * from "./auth.ts";
 
-// Database schemas
+// Database schemas (validation schemas, not type definitions)
 export * from "./database.ts";
 
 // UI schemas

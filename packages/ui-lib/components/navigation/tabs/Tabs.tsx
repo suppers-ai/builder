@@ -2,7 +2,7 @@ import { BaseComponentProps, SizeProps } from "../../types.ts";
 import { ComponentChildren } from "preact";
 
 export interface TabProps extends BaseComponentProps, SizeProps {
-  tabs: TabItemProps[];
+  tabs?: TabItemProps[];
   activeTab?: string;
   bordered?: boolean;
   lifted?: boolean;
@@ -21,7 +21,7 @@ export interface TabItemProps {
 export function Tabs({
   class: className = "",
   size = "md",
-  tabs,
+  tabs = [],
   activeTab,
   bordered = false,
   lifted = false,
@@ -38,6 +38,16 @@ export function Tabs({
     boxed ? "tabs-boxed" : "",
     className,
   ].filter(Boolean).join(" ");
+
+  if (!tabs || !Array.isArray(tabs) || tabs.length === 0) {
+    return (
+      <div class="w-full">
+        <div class={tabsClasses} role="tablist" id={id} {...props}>
+          <div class="text-center text-base-content/50 p-4">No tabs available</div>
+        </div>
+      </div>
+    );
+  }
 
   const currentActiveTab = activeTab || tabs[0]?.id;
   const activeTabData = tabs.find((tab) => tab.id === currentActiveTab);

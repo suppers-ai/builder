@@ -5,42 +5,6 @@
 
 import { z } from "zod";
 
-// daisyUI Theme Schema
-export const DaisyUIThemeSchema = z.enum([
-  "light",
-  "dark",
-  "cupcake",
-  "bumblebee",
-  "emerald",
-  "corporate",
-  "synthwave",
-  "retro",
-  "cyberpunk",
-  "valentine",
-  "halloween",
-  "garden",
-  "forest",
-  "aqua",
-  "lofi",
-  "pastel",
-  "fantasy",
-  "wireframe",
-  "black",
-  "luxury",
-  "dracula",
-  "cmyk",
-  "autumn",
-  "business",
-  "acid",
-  "lemonade",
-  "night",
-  "coffee",
-  "winter",
-  "dim",
-  "nord",
-  "sunset",
-]);
-
 // Custom Theme Variables Schema
 export const CustomThemeVariablesSchema = z.object({
   primary: z.string().optional(),
@@ -316,7 +280,6 @@ export const ChangeHandlerSchema = z.function().args(z.any()).returns(z.void());
 export const SubmitHandlerSchema = z.function().args(z.record(z.any())).returns(z.void());
 
 // Export inferred types
-export type DaisyUITheme = z.infer<typeof DaisyUIThemeSchema>;
 export type CustomThemeVariables = z.infer<typeof CustomThemeVariablesSchema>;
 export type CustomTheme = z.infer<typeof CustomThemeSchema>;
 export type ComponentSize = z.infer<typeof ComponentSizeSchema>;

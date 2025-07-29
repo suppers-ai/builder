@@ -2,59 +2,47 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp,
-} from "../../types.ts";
+  ComponentProp} from "../../types.ts";
+import { Toggle } from "./Toggle.tsx";
 
 const toggleExamples: ComponentExample[] = [
   {
     title: "Basic Toggle",
     description: "Simple on/off toggle switches",
-    code: `<Toggle>Enable notifications</Toggle>
-<Toggle checked>Auto-save enabled</Toggle>
-<Toggle>Dark mode</Toggle>`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Toggle me",
+      checked: false
+    }
+  },  {
     title: "Toggle Sizes",
     description: "Different sizes for various contexts",
-    code: `<Toggle size="xs">Extra small</Toggle>
-<Toggle size="sm">Small toggle</Toggle>
-<Toggle size="md">Medium toggle</Toggle>
-<Toggle size="lg">Large toggle</Toggle>`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Toggle me",
+      checked: false,
+      size: "lg"
+    }
+  },  {
     title: "Toggle Colors",
     description: "Various color themes",
-    code: `<Toggle color="primary" checked>Primary</Toggle>
-<Toggle color="secondary" checked>Secondary</Toggle>
-<Toggle color="accent" checked>Accent</Toggle>
-<Toggle color="success" checked>Success</Toggle>
-<Toggle color="warning" checked>Warning</Toggle>
-<Toggle color="error" checked>Error</Toggle>`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Toggle me",
+      checked: false,
+      color: "primary"
+    }
+  },  {
     title: "Toggle States",
     description: "Different states and configurations",
-    code: `<Toggle>Normal toggle</Toggle>
-<Toggle checked>Checked toggle</Toggle>
-<Toggle disabled>Disabled toggle</Toggle>
-<Toggle disabled checked>Disabled checked</Toggle>`,
-    showCode: true,
-  },
-  {
+    props: {
+      label: "Toggle me",
+      checked: false
+    }
+  },  {
     title: "Toggle Groups",
     description: "Multiple toggles for settings panels",
-    code: `<div class="space-y-4">
-  <div class="font-semibold">Privacy Settings</div>
-  <Toggle checked>Show profile publicly</Toggle>
-  <Toggle>Allow friend requests</Toggle>
-  <Toggle checked>Email notifications</Toggle>
-  <Toggle>SMS notifications</Toggle>
-  <Toggle>Marketing emails</Toggle>
-</div>`,
-    showCode: true,
+    props: {
+      label: "Toggle me",
+      checked: false
+    }
   },
 ];
 
@@ -63,41 +51,34 @@ const toggleProps: ComponentProp[] = [
     name: "checked",
     type: "boolean",
     description: "Whether the toggle is checked (on)",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the toggle",
-    default: "md",
-  },
+    default: "md"},
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
     description: "Color theme for the toggle",
-    default: "primary",
-  },
+    default: "primary"},
   {
     name: "disabled",
     type: "boolean",
     description: "Whether the toggle is disabled",
-    default: "false",
-  },
+    default: "false"},
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Change event handler",
-  },
+    description: "Change event handler"},
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Label text for the toggle",
-  },
+    description: "Label text for the toggle"},
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes",
-  },
+    description: "Additional CSS classes"},
 ];
 
 export const toggleMetadata: ComponentMetadata = {
@@ -147,5 +128,4 @@ export const toggleMetadata: ComponentMetadata = {
     "Consider grouping related toggles in settings panels",
     "Disabled state should be used when toggle cannot be changed",
     "Toggle automatically includes proper form control structure",
-  ],
-};
+  ]};

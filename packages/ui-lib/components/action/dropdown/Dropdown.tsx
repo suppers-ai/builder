@@ -31,6 +31,9 @@ export function Dropdown({
   hover = false,
   forceOpen = false,
   id,
+  onToggle,
+  onOpen,
+  onClose,
   ...props
 }: DropdownProps) {
   const dropdownClasses = [
@@ -52,7 +55,7 @@ export function Dropdown({
       </div>
       <ul
         tabindex={0}
-        class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+        class="dropdown-content menu bg-base-100 rounded-box z-[100] w-52 p-2 shadow"
       >
         {content}
       </ul>
