@@ -92,15 +92,18 @@ export const SECURITY_HEADERS = {
 export const OAUTH_ERRORS = {
   INVALID_REQUEST: {
     error: "invalid_request",
-    description: "The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed.",
+    description:
+      "The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed.",
   },
   INVALID_CLIENT: {
     error: "invalid_client",
-    description: "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method).",
+    description:
+      "Client authentication failed (e.g., unknown client, no client authentication included, or unsupported authentication method).",
   },
   INVALID_GRANT: {
     error: "invalid_grant",
-    description: "The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.",
+    description:
+      "The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.",
   },
   UNAUTHORIZED_CLIENT: {
     error: "unauthorized_client",
@@ -120,15 +123,18 @@ export const OAUTH_ERRORS = {
   },
   SERVER_ERROR: {
     error: "server_error",
-    description: "The authorization server encountered an unexpected condition that prevented it from fulfilling the request.",
+    description:
+      "The authorization server encountered an unexpected condition that prevented it from fulfilling the request.",
   },
   TEMPORARILY_UNAVAILABLE: {
     error: "temporarily_unavailable",
-    description: "The authorization server is currently unable to handle the request due to a temporary overloading or maintenance of the server.",
+    description:
+      "The authorization server is currently unable to handle the request due to a temporary overloading or maintenance of the server.",
   },
   INVALID_TOKEN: {
     error: "invalid_token",
-    description: "The access token provided is expired, revoked, malformed, or invalid for other reasons.",
+    description:
+      "The access token provided is expired, revoked, malformed, or invalid for other reasons.",
   },
   INSUFFICIENT_SCOPE: {
     error: "insufficient_scope",
@@ -151,19 +157,19 @@ export function validateSecurityConfig(config: SecurityConfig): void {
   if (config.oauth.stateExpiry < 60000) {
     throw new Error("State expiry must be at least 1 minute");
   }
-  
+
   if (config.oauth.codeExpiry < 60000) {
     throw new Error("Code expiry must be at least 1 minute");
   }
-  
+
   if (config.oauth.tokenExpiry < 300000) {
     throw new Error("Token expiry must be at least 5 minutes");
   }
-  
+
   if (config.oauth.maxAuthAttempts < 1) {
     throw new Error("Max auth attempts must be at least 1");
   }
-  
+
   for (const [endpoint, limits] of Object.entries(config.rateLimit)) {
     if (limits.windowMs < 1000) {
       throw new Error(`Rate limit window for ${endpoint} must be at least 1 second`);

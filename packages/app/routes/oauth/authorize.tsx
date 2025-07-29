@@ -1,7 +1,7 @@
 import { PageProps } from "$fresh/runtime";
-import { OAuthService, type AuthorizationRequest } from "../../lib/oauth-service.ts";
+import { type AuthorizationRequest, OAuthService } from "../../lib/oauth-service.ts";
 import { AuthHelpers } from "../../lib/auth-helpers.ts";
-import { Button, Card, Input, Alert } from "@suppers/ui-lib";
+import { Alert, Button, Card, Input } from "@suppers/ui-lib";
 
 interface AuthorizeData {
   client?: {
@@ -74,7 +74,7 @@ export const handler = {
 
       // Validate scopes
       const requestedScopes = scope.split(" ");
-      const invalidScopes = requestedScopes.filter(s => !client.allowed_scopes.includes(s));
+      const invalidScopes = requestedScopes.filter((s) => !client.allowed_scopes.includes(s));
       if (invalidScopes.length > 0) {
         return ctx.render({
           request: { clientId, redirectUri, scope, state, responseType },
@@ -113,7 +113,7 @@ export const handler = {
   async POST(req, ctx) {
     const url = new URL(req.url);
     const formData = await req.formData();
-    
+
     const clientId = formData.get("client_id")?.toString() || "";
     const redirectUri = formData.get("redirect_uri")?.toString() || "";
     const scope = formData.get("scope")?.toString() || "openid email profile";
@@ -162,7 +162,10 @@ export const handler = {
       // Redirect with error
       const errorUrl = new URL(redirectUri);
       errorUrl.searchParams.set("error", "server_error");
-      errorUrl.searchParams.set("error_description", error instanceof Error ? error.message : "An error occurred");
+      errorUrl.searchParams.set(
+        "error_description",
+        error instanceof Error ? error.message : "An error occurred",
+      );
       if (state) {
         errorUrl.searchParams.set("state", state);
       }
@@ -197,7 +200,7 @@ export default function AuthorizePage({ data }: PageProps<AuthorizeData>) {
       <Card class="w-full max-w-md">
         <div class="card-body">
           <h2 class="card-title">Authorize Application</h2>
-          
+
           <div class="space-y-4">
             <div>
               <p class="text-sm text-base-content/70">
@@ -238,7 +241,7 @@ export default function AuthorizePage({ data }: PageProps<AuthorizeData>) {
               <input type="hidden" name="redirect_uri" value={request.redirectUri} />
               <input type="hidden" name="scope" value={request.scope} />
               {request.state && <input type="hidden" name="state" value={request.state} />}
-              
+
               <div class="card-actions justify-between">
                 <Button
                   type="submit"
@@ -253,7 +256,6 @@ export default function AuthorizePage({ data }: PageProps<AuthorizeData>) {
                   type="submit"
                   name="action"
                   value="authorize"
-                  variant="solid"
                   color="primary"
                 >
                   Authorize

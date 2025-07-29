@@ -42,7 +42,7 @@ if (Deno.args.includes("build")) {
   // ...otherwise start the development server
   const port = parseInt(Deno.env.get("APP_PORT") || "8000"); // Different port from store (8000) as per requirements
   const hostname = Deno.env.get("APP_HOST") || "localhost";
-  
+
   console.log(`🚀 App package (dev) starting on http://${hostname}:${port}`);
   await builder.listen(app, {
     port,

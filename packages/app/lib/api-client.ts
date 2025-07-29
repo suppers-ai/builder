@@ -55,7 +55,7 @@ class ApiClient {
 
   setToken(token: string | null) {
     this.token = token;
-    
+
     // Persist token to localStorage on browser
     if (typeof globalThis.localStorage !== "undefined") {
       if (token) {
@@ -68,7 +68,7 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<{ data: T | null; error: Error | null }> {
     try {
       const headers: Record<string, string> = {
@@ -185,6 +185,50 @@ class ApiClient {
         error: result.error,
       };
     },
+
+    resetPassword: async (email: string): Promise<{ error: Error | null }> => {
+      const origin = globalThis.location?.origin || "http://localhost:8000";
+      const result = await this.request(`/api/v1/auth/reset-password?origin=${encodeURIComponent(origin)}`, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+
+      return { error: result.error };
+    },
+
+    updatePassword: async (password: string): Promise<{ error: Error | null }> => {
+      const result = await this.request("/api/v1/auth/update-password", {
+        method: "POST",
+        body: JSON.stringify({ password }),
+      });
+
+      return { error: result.error };
+    },
+
+    getSession: async (): Promise<{ data: { session: Session | null }; error: Error | null }> => {
+      const result = await this.request<{ session: Session }>("/api/v1/auth/session");
+
+      return {
+        data: { session: result.data?.session || null },
+        error: result.error,
+      };
+    },
+
+    signInWithOAuth: async (
+      provider: string,
+      redirectTo?: string,
+    ): Promise<{ data: any; error: Error | null }> => {
+      const origin = globalThis.location?.origin || "http://localhost:8000";
+      const result = await this.request(`/api/v1/auth/oauth?origin=${encodeURIComponent(origin)}`, {
+        method: "POST",
+        body: JSON.stringify({ provider, redirectTo }),
+      });
+
+      return {
+        data: result.data,
+        error: result.error,
+      };
+    },
   };
 
   // Database table methods
@@ -197,14 +241,16 @@ class TableClient<T extends keyof Database["public"]["Tables"]> {
   constructor(private client: ApiClient, private table: T) {}
 
   async select(
-    columns = "*"
+    columns = "*",
   ): Promise<{ data: Tables<T>[] | null; error: Error | null }> {
-    const result = await this.client.request<Tables<T>[]>(`/api/v1/${this.table}?select=${columns}`);
+    const result = await this.client.request<Tables<T>[]>(
+      `/api/v1/${this.table}?select=${columns}`,
+    );
     return result;
   }
 
   async insert(
-    data: TablesInsert<T>
+    data: TablesInsert<T>,
   ): Promise<{ data: Tables<T> | null; error: Error | null }> {
     const result = await this.client.request<Tables<T>>(`/api/v1/${this.table}`, {
       method: "POST",
@@ -214,7 +260,7 @@ class TableClient<T extends keyof Database["public"]["Tables"]> {
   }
 
   async update(
-    data: TablesUpdate<T>
+    data: TablesUpdate<T>,
   ): Promise<{ data: Tables<T> | null; error: Error | null }> {
     const result = await this.client.request<Tables<T>>(`/api/v1/${this.table}`, {
       method: "PUT",

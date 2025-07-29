@@ -1,4 +1,4 @@
-import { type PageProps } from "$fresh/runtime";
+import { type PageProps } from "fresh";
 import LoginPageIsland from "../islands/LoginPageIsland.tsx";
 
 export default function Login(props: PageProps) {

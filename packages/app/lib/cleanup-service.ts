@@ -24,10 +24,10 @@ export class CleanupService {
     }
 
     console.log("Starting OAuth token cleanup service");
-    
+
     // Run initial cleanup
     this.runCleanup();
-    
+
     // Schedule periodic cleanup
     this.cleanupInterval = setInterval(() => {
       this.runCleanup();
@@ -61,9 +61,7 @@ export class CleanupService {
    */
   getStatus(): { running: boolean; nextCleanup?: Date } {
     const running = this.cleanupInterval !== null;
-    const nextCleanup = running 
-      ? new Date(Date.now() + this.CLEANUP_INTERVAL_MS)
-      : undefined;
+    const nextCleanup = running ? new Date(Date.now() + this.CLEANUP_INTERVAL_MS) : undefined;
 
     return { running, nextCleanup };
   }
@@ -73,13 +71,13 @@ export class CleanupService {
 if (import.meta.main) {
   const cleanupService = CleanupService.getInstance();
   cleanupService.start();
-  
+
   // Graceful shutdown
   Deno.addSignalListener("SIGINT", () => {
     cleanupService.stop();
     Deno.exit(0);
   });
-  
+
   Deno.addSignalListener("SIGTERM", () => {
     cleanupService.stop();
     Deno.exit(0);

@@ -32,10 +32,10 @@ export class TokenManager {
     const now = new Date();
     const expiresAt = new Date(token.expires_at);
     const createdAt = new Date(token.created_at);
-    
+
     const isExpired = expiresAt <= now;
     const expiresIn = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
-    
+
     // Check if refresh token is still valid (30 days from creation)
     const refreshExpiryDate = new Date(createdAt);
     refreshExpiryDate.setDate(refreshExpiryDate.getDate() + this.REFRESH_TOKEN_EXPIRY_DAYS);
@@ -52,7 +52,10 @@ export class TokenManager {
   /**
    * Extend token expiration (for active sessions)
    */
-  static async extendToken(accessToken: string, extensionHours: number = 1): Promise<Tables<"oauth_tokens"> | null> {
+  static async extendToken(
+    accessToken: string,
+    extensionHours: number = 1,
+  ): Promise<Tables<"oauth_tokens"> | null> {
     const tokenInfo = await this.getTokenInfo(accessToken);
     if (!tokenInfo || tokenInfo.isExpired) {
       return null;
@@ -113,11 +116,11 @@ export class TokenManager {
     codesDeleted: number;
   }> {
     const now = new Date().toISOString();
-    
+
     // Clean up expired tokens in batches
     let tokensDeleted = 0;
     let hasMoreTokens = true;
-    
+
     while (hasMoreTokens) {
       const { data: expiredTokens, error: tokenSelectError } = await supabase
         .from("oauth_tokens")
@@ -130,7 +133,7 @@ export class TokenManager {
         break;
       }
 
-      const tokenIds = expiredTokens.map(token => token.id);
+      const tokenIds = expiredTokens.map((token) => token.id);
       const { error: tokenDeleteError } = await supabase
         .from("oauth_tokens")
         .delete()
@@ -148,7 +151,7 @@ export class TokenManager {
     // Clean up expired authorization codes
     let codesDeleted = 0;
     let hasMoreCodes = true;
-    
+
     while (hasMoreCodes) {
       const { data: expiredCodes, error: codeSelectError } = await supabase
         .from("oauth_codes")
@@ -161,7 +164,7 @@ export class TokenManager {
         break;
       }
 
-      const codeIds = expiredCodes.map(code => code.id);
+      const codeIds = expiredCodes.map((code) => code.id);
       const { error: codeDeleteError } = await supabase
         .from("oauth_codes")
         .delete()
@@ -274,7 +277,7 @@ export class TokenManager {
     shouldRefresh?: boolean;
   }> {
     const tokenInfo = await this.getTokenInfo(accessToken);
-    
+
     if (!tokenInfo || tokenInfo.isExpired) {
       return { valid: false };
     }
@@ -308,7 +311,9 @@ export class TokenManager {
     try {
       const stats = await this.cleanupExpiredTokens();
       if (stats.tokensDeleted > 0 || stats.codesDeleted > 0) {
-        console.log(`Cleaned up ${stats.tokensDeleted} expired tokens and ${stats.codesDeleted} expired codes`);
+        console.log(
+          `Cleaned up ${stats.tokensDeleted} expired tokens and ${stats.codesDeleted} expired codes`,
+        );
       }
     } catch (error) {
       console.error("Failed to run scheduled cleanup:", error);
@@ -322,7 +327,7 @@ export class TokenManager {
     userId: string,
     clientId: string,
     scope: string,
-    expiresInHours: number = this.TOKEN_EXPIRY_HOURS
+    expiresInHours: number = this.TOKEN_EXPIRY_HOURS,
   ): Promise<Tables<"oauth_tokens">> {
     const accessToken = crypto.randomUUID();
     const refreshToken = crypto.randomUUID();

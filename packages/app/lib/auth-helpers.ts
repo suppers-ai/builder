@@ -1,11 +1,11 @@
 import { apiClient, type Session, type User } from "./api-client.ts";
 import type { OAuthProvider } from "@suppers/shared";
 import type {
+  AuthState,
   ResetPasswordData,
   SignInData,
   SignUpData,
   UpdateUserData,
-  AuthState,
 } from "@suppers/shared";
 
 export class AuthHelpers {
@@ -18,7 +18,6 @@ export class AuthHelpers {
     const { data: authData, error } = await apiClient.auth.signUp({
       email,
       password,
-      // TODO: Handle additional user metadata in API
     });
 
     if (error) {
@@ -59,29 +58,46 @@ export class AuthHelpers {
 
   /**
    * Sign in with OAuth provider
-   * TODO: Implement OAuth flow through API endpoints
    */
   static async signInWithOAuth(provider: OAuthProvider, redirectTo?: string) {
-    // OAuth flow needs to be handled through the API package OAuth endpoints
-    throw new Error("OAuth sign-in should use API package OAuth endpoints");
+    const { data, error } = await apiClient.auth.signInWithOAuth(
+      provider,
+      redirectTo || `${globalThis.location?.origin}/auth/callback`,
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
   }
 
   /**
    * Send password reset email
-   * TODO: Implement password reset through API endpoints
    */
   static async resetPassword(data: ResetPasswordData) {
-    // Password reset needs to be implemented in API package
-    throw new Error("Password reset should use API package endpoints");
+    const { email } = data;
+
+    const { error } = await apiClient.auth.resetPassword(email);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { success: true };
   }
 
   /**
    * Update user password
-   * TODO: Implement password update through API endpoints
    */
   static async updatePassword(newPassword: string) {
-    // Password update needs to be implemented in API package
-    throw new Error("Password update should use API package endpoints");
+    const { error } = await apiClient.auth.updatePassword(newPassword);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { success: true };
   }
 
   /**
@@ -99,38 +115,87 @@ export class AuthHelpers {
 
   /**
    * Get current session
-   * TODO: Implement session retrieval through API endpoints
    */
   static async getCurrentSession() {
-    // Session retrieval needs to be implemented in API package
-    throw new Error("Session retrieval should use API package endpoints");
+    const { data: { session }, error } = await apiClient.auth.getSession();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return session;
   }
 
   /**
    * Update user metadata
-   * TODO: Implement user update through API endpoints
    */
   static async updateUser(data: UpdateUserData) {
-    // User metadata updates need to be implemented in API package
-    throw new Error("User update should use API package endpoints");
+    // Use direct Supabase client for user metadata updates
+    const { supabase } = await import("./supabase-client.ts");
+    
+    const { error } = await supabase.auth.updateUser({
+      data: data
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return { success: true };
   }
 
   /**
    * Upload user avatar
-   * TODO: Implement file upload through API endpoints
    */
   static async uploadAvatar(file: File, userId: string) {
-    // File uploads need to be implemented in API package
-    throw new Error("File upload should use API package endpoints");
+    // Use direct Supabase client for file uploads
+    const { supabase } = await import("./supabase-client.ts");
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    // Upload file to storage
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    // Update user metadata with avatar URL
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: { avatar_url: publicUrl }
+    });
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return publicUrl;
   }
 
   /**
    * Listen to auth state changes
-   * TODO: Implement auth state changes through API endpoints or WebSocket
    */
   static onAuthStateChange(callback: (event: string, session: Session | null) => void) {
-    // Auth state changes need to be implemented using API polling or WebSocket
-    throw new Error("Auth state changes should use API package endpoints");
+    // Use direct Supabase client for auth state changes
+    const initAuth = async () => {
+      const { supabase } = await import("./supabase-client.ts");
+
+      return supabase.auth.onAuthStateChange((event, session) => {
+        callback(event, session);
+      });
+    };
+
+    // Return a promise that resolves to the subscription
+    return initAuth();
   }
 
   /**

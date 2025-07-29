@@ -6,7 +6,7 @@
 
 import { OAuthService } from "./oauth-service.ts";
 import { TokenManager } from "./token-manager.ts";
-import { SECURITY_CONFIG, OAUTH_ERRORS } from "./security-config.ts";
+import { OAUTH_ERRORS, SECURITY_CONFIG } from "./security-config.ts";
 
 interface TestResult {
   name: string;
@@ -23,19 +23,19 @@ class SecurityTester {
 
     // Test OAuth state parameter validation
     await this.testStateValidation();
-    
+
     // Test rate limiting
     await this.testRateLimiting();
-    
+
     // Test token expiration and refresh logic
     await this.testTokenExpiration();
-    
+
     // Test session management
     await this.testSessionManagement();
-    
+
     // Test CSRF protection
     await this.testCSRFProtection();
-    
+
     // Test brute force protection
     await this.testBruteForceProtection();
 
@@ -70,7 +70,7 @@ class SecurityTester {
       const state2 = crypto.randomUUID();
       const sameStateResult = OAuthService.secureValidateState(state1, state1);
       const differentStateResult = OAuthService.secureValidateState(state1, state2);
-      
+
       this.addResult("Secure state validation - same", sameStateResult);
       this.addResult("Secure state validation - different", !differentStateResult);
     } catch (error) {
@@ -81,7 +81,7 @@ class SecurityTester {
     try {
       const emptyResult = OAuthService.secureValidateState("", "test");
       const nullResult = OAuthService.secureValidateState(null as any, "test");
-      
+
       this.addResult("Empty state rejection", !emptyResult && !nullResult);
     } catch (error) {
       this.addResult("Empty state rejection", false, error.message);
@@ -94,12 +94,12 @@ class SecurityTester {
     // Test rate limiting configuration
     try {
       const config = SECURITY_CONFIG.rateLimit;
-      const hasValidLimits = config.authorize.maxRequests > 0 && 
-                           config.token.maxRequests > 0 &&
-                           config.userinfo.maxRequests > 0 &&
-                           config.validate.maxRequests > 0 &&
-                           config.revoke.maxRequests > 0;
-      
+      const hasValidLimits = config.authorize.maxRequests > 0 &&
+        config.token.maxRequests > 0 &&
+        config.userinfo.maxRequests > 0 &&
+        config.validate.maxRequests > 0 &&
+        config.revoke.maxRequests > 0;
+
       this.addResult("Rate limit configuration valid", hasValidLimits);
     } catch (error) {
       this.addResult("Rate limit configuration valid", false, error.message);
@@ -108,12 +108,12 @@ class SecurityTester {
     // Test rate limiting windows
     try {
       const config = SECURITY_CONFIG.rateLimit;
-      const hasValidWindows = config.authorize.windowMs >= 1000 && 
-                            config.token.windowMs >= 1000 &&
-                            config.userinfo.windowMs >= 1000 &&
-                            config.validate.windowMs >= 1000 &&
-                            config.revoke.windowMs >= 1000;
-      
+      const hasValidWindows = config.authorize.windowMs >= 1000 &&
+        config.token.windowMs >= 1000 &&
+        config.userinfo.windowMs >= 1000 &&
+        config.validate.windowMs >= 1000 &&
+        config.revoke.windowMs >= 1000;
+
       this.addResult("Rate limit windows valid", hasValidWindows);
     } catch (error) {
       this.addResult("Rate limit windows valid", false, error.message);
@@ -127,8 +127,8 @@ class SecurityTester {
     try {
       const config = SECURITY_CONFIG.oauth;
       const hasValidExpiry = config.tokenExpiry >= 300000 && // At least 5 minutes
-                           config.refreshTokenExpiry >= 86400000; // At least 1 day
-      
+        config.refreshTokenExpiry >= 86400000; // At least 1 day
+
       this.addResult("Token expiry configuration valid", hasValidExpiry);
     } catch (error) {
       this.addResult("Token expiry configuration valid", false, error.message);
@@ -137,10 +137,10 @@ class SecurityTester {
     // Test token info validation
     try {
       // This would normally require a real token, so we'll test the method exists
-      const methodExists = typeof TokenManager.getTokenInfo === 'function' &&
-                          typeof TokenManager.validateTokenWithTiming === 'function' &&
-                          typeof TokenManager.extendToken === 'function';
-      
+      const methodExists = typeof TokenManager.getTokenInfo === "function" &&
+        typeof TokenManager.validateTokenWithTiming === "function" &&
+        typeof TokenManager.extendToken === "function";
+
       this.addResult("Token management methods exist", methodExists);
     } catch (error) {
       this.addResult("Token management methods exist", false, error.message);
@@ -148,9 +148,9 @@ class SecurityTester {
 
     // Test cleanup functionality
     try {
-      const methodExists = typeof TokenManager.cleanupExpiredTokens === 'function' &&
-                          typeof TokenManager.scheduleCleanup === 'function';
-      
+      const methodExists = typeof TokenManager.cleanupExpiredTokens === "function" &&
+        typeof TokenManager.scheduleCleanup === "function";
+
       this.addResult("Token cleanup methods exist", methodExists);
     } catch (error) {
       this.addResult("Token cleanup methods exist", false, error.message);
@@ -164,8 +164,8 @@ class SecurityTester {
     try {
       const config = SECURITY_CONFIG.session;
       const hasValidConfig = config.cleanupInterval >= 60000 && // At least 1 minute
-                           config.stateExpiry >= 60000; // At least 1 minute
-      
+        config.stateExpiry >= 60000; // At least 1 minute
+
       this.addResult("Session configuration valid", hasValidConfig);
     } catch (error) {
       this.addResult("Session configuration valid", false, error.message);
@@ -173,10 +173,10 @@ class SecurityTester {
 
     // Test OAuth service methods for session management
     try {
-      const methodExists = typeof OAuthService.createOAuthToken === 'function' &&
-                          typeof OAuthService.revokeToken === 'function' &&
-                          typeof OAuthService.validateToken === 'function';
-      
+      const methodExists = typeof OAuthService.createOAuthToken === "function" &&
+        typeof OAuthService.revokeToken === "function" &&
+        typeof OAuthService.validateToken === "function";
+
       this.addResult("Session management methods exist", methodExists);
     } catch (error) {
       this.addResult("Session management methods exist", false, error.message);
@@ -198,11 +198,11 @@ class SecurityTester {
     try {
       const state1 = OAuthService.generateState();
       const state2 = OAuthService.generateState();
-      
+
       const isUUID1 = OAuthService.isValidStateFormat(state1);
       const isUUID2 = OAuthService.isValidStateFormat(state2);
       const isDifferent = state1 !== state2;
-      
+
       this.addResult("CSRF state generation", isUUID1 && isUUID2 && isDifferent);
     } catch (error) {
       this.addResult("CSRF state generation", false, error.message);
@@ -212,10 +212,10 @@ class SecurityTester {
     try {
       const random1 = OAuthService.generateSecureRandomString(32);
       const random2 = OAuthService.generateSecureRandomString(32);
-      
+
       const hasCorrectLength = random1.length === 64 && random2.length === 64; // Hex encoding doubles length
       const isDifferent = random1 !== random2;
-      
+
       this.addResult("Secure random string generation", hasCorrectLength && isDifferent);
     } catch (error) {
       this.addResult("Secure random string generation", false, error.message);
@@ -229,9 +229,9 @@ class SecurityTester {
     try {
       const config = SECURITY_CONFIG.oauth;
       const hasValidConfig = config.maxAuthAttempts >= 1 &&
-                           config.authAttemptWindow >= 1000 &&
-                           config.blockDuration >= 60000;
-      
+        config.authAttemptWindow >= 1000 &&
+        config.blockDuration >= 60000;
+
       this.addResult("Brute force configuration valid", hasValidConfig);
     } catch (error) {
       this.addResult("Brute force configuration valid", false, error.message);
@@ -254,7 +254,7 @@ class SecurityTester {
   }
 
   private printResults(): void {
-    const passed = this.results.filter(r => r.passed).length;
+    const passed = this.results.filter((r) => r.passed).length;
     const total = this.results.length;
     const percentage = Math.round((passed / total) * 100);
 
@@ -266,7 +266,7 @@ class SecurityTester {
       console.log("🎉 All security tests passed!");
     } else {
       console.log("⚠️  Some security tests failed:");
-      this.results.filter(r => !r.passed).forEach(result => {
+      this.results.filter((r) => !r.passed).forEach((result) => {
         console.log(`  ❌ ${result.name}${result.error ? ` - ${result.error}` : ""}`);
       });
     }

@@ -5,6 +5,10 @@ import { registerUser } from "./register.ts";
 import { loginUser } from "./login.ts";
 import { logoutUser } from "./logout.ts";
 import { refreshToken } from "./refresh.ts";
+import { resetPassword } from "./reset-password.ts";
+import { updatePassword } from "./update-password.ts";
+import { getSession } from "./session.ts";
+import { initiateOAuth } from "./oauth.ts";
 
 export async function handleAuth(request: Request, context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }): Promise<Response> {
   const { supabase } = context;
@@ -23,6 +27,14 @@ export async function handleAuth(request: Request, context: { user: any, supabas
         return await logoutUser(request, supabase);
       case "refresh":
         return await refreshToken(request, supabase);
+      case "reset-password":
+        return await resetPassword(request, supabase);
+      case "update-password":
+        return await updatePassword(request, supabase);
+      case "session":
+        return await getSession(request, supabase);
+      case "oauth":
+        return await initiateOAuth(request, supabase);
       default:
         return new Response("Not found", {
           status: 404,

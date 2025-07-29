@@ -56,7 +56,7 @@ export class OAuthService {
    */
   static generateAuthUrl(params: OAuthParams): string {
     const { clientId, redirectUri, scope, state, responseType } = params;
-    
+
     const authParams = new URLSearchParams({
       client_id: clientId,
       redirect_uri: redirectUri,
@@ -86,7 +86,7 @@ export class OAuthService {
 
     // Validate scopes
     const requestedScopes = scope.split(" ");
-    const invalidScopes = requestedScopes.filter(s => !client.allowed_scopes.includes(s));
+    const invalidScopes = requestedScopes.filter((s) => !client.allowed_scopes.includes(s));
     if (invalidScopes.length > 0) {
       throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
     }
@@ -119,7 +119,7 @@ export class OAuthService {
     code: string,
     clientId: string,
     clientSecret: string,
-    redirectUri: string
+    redirectUri: string,
   ): Promise<TokenResponse> {
     // Validate client credentials
     const client = await this.validateClientCredentials(clientId, clientSecret);
@@ -161,7 +161,7 @@ export class OAuthService {
       clientId,
       accessToken,
       refreshToken,
-      expiresIn
+      expiresIn,
     );
 
     // Clean up used authorization code
@@ -194,7 +194,7 @@ export class OAuthService {
     }
 
     const user = session.user;
-    
+
     return {
       access_token: session.access_token,
       token_type: "Bearer",
@@ -264,7 +264,7 @@ export class OAuthService {
     // Check if refresh token is still valid (30 days from creation)
     const refreshExpiryDate = new Date(tokenData.created_at);
     refreshExpiryDate.setDate(refreshExpiryDate.getDate() + this.REFRESH_TOKEN_EXPIRY_DAYS);
-    
+
     if (refreshExpiryDate < new Date()) {
       // Clean up expired refresh token
       await supabase.from("oauth_tokens").delete().eq("refresh_token", refreshToken);
@@ -312,7 +312,8 @@ export class OAuthService {
       user: {
         id: userData.id,
         email: userData.email,
-        name: userData.display_name || `${userData.first_name || ""} ${userData.last_name || ""}`.trim(),
+        name: userData.display_name ||
+          `${userData.first_name || ""} ${userData.last_name || ""}`.trim(),
         avatar_url: userData.avatar_url,
       },
     };
@@ -321,7 +322,10 @@ export class OAuthService {
   /**
    * Validate client credentials
    */
-  static async validateClientCredentials(clientId: string, clientSecret: string): Promise<Tables<"oauth_clients"> | null> {
+  static async validateClientCredentials(
+    clientId: string,
+    clientSecret: string,
+  ): Promise<Tables<"oauth_clients"> | null> {
     const { data, error } = await supabase
       .from("oauth_clients")
       .select("*")
@@ -363,7 +367,7 @@ export class OAuthService {
     clientId: string,
     accessToken: string,
     refreshToken?: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Promise<Tables<"oauth_tokens">> {
     const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
 
@@ -411,7 +415,7 @@ export class OAuthService {
 
     // Validate scopes
     const validScopes = [...this.DEFAULT_SCOPES, "admin", "read", "write"];
-    const invalidScopes = data.allowedScopes.filter(scope => !validScopes.includes(scope));
+    const invalidScopes = data.allowedScopes.filter((scope) => !validScopes.includes(scope));
     if (invalidScopes.length > 0) {
       throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
     }
@@ -453,8 +457,10 @@ export class OAuthService {
    */
   static async updateClient(
     clientId: string,
-    updates: Partial<Pick<ClientRegistrationData, "name" | "description" | "redirectUris" | "allowedScopes">>,
-    updatedBy: string
+    updates: Partial<
+      Pick<ClientRegistrationData, "name" | "description" | "redirectUris" | "allowedScopes">
+    >,
+    updatedBy: string,
   ): Promise<Tables<"oauth_clients">> {
     // Get existing client
     const existingClient = await this.getOAuthClient(clientId);
@@ -465,7 +471,7 @@ export class OAuthService {
     // Validate scopes if provided
     if (updates.allowedScopes) {
       const validScopes = [...this.DEFAULT_SCOPES, "admin", "read", "write"];
-      const invalidScopes = updates.allowedScopes.filter(scope => !validScopes.includes(scope));
+      const invalidScopes = updates.allowedScopes.filter((scope) => !validScopes.includes(scope));
       if (invalidScopes.length > 0) {
         throw new Error(`Invalid scopes: ${invalidScopes.join(", ")}`);
       }
@@ -566,7 +572,7 @@ export class OAuthService {
     }
 
     const now = new Date();
-    const activeTokens = tokens?.filter(token => new Date(token.expires_at) > now).length || 0;
+    const activeTokens = tokens?.filter((token) => new Date(token.expires_at) > now).length || 0;
     const totalTokens = tokens?.length || 0;
     const expiredTokens = totalTokens - activeTokens;
 
@@ -628,17 +634,17 @@ export class OAuthService {
     if (!providedState || !expectedState) {
       return false;
     }
-    
+
     // Use constant-time comparison to prevent timing attacks
     if (providedState.length !== expectedState.length) {
       return false;
     }
-    
+
     let result = 0;
     for (let i = 0; i < providedState.length; i++) {
       result |= providedState.charCodeAt(i) ^ expectedState.charCodeAt(i);
     }
-    
+
     return result === 0;
   }
 
@@ -647,7 +653,7 @@ export class OAuthService {
    */
   static isValidStateFormat(state: string): boolean {
     if (!state) return false;
-    
+
     // State should be a UUID for security
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(state);
@@ -659,6 +665,6 @@ export class OAuthService {
   static generateSecureRandomString(length: number = 32): string {
     const array = new Uint8Array(length);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("");
   }
 }

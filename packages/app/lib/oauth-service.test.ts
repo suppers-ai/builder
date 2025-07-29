@@ -1,5 +1,9 @@
-import { assertEquals, assertExists, assertRejects } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { describe, it, beforeEach, afterEach } from "https://deno.land/std@0.224.0/testing/bdd.ts";
+import {
+  assertEquals,
+  assertExists,
+  assertRejects,
+} from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { afterEach, beforeEach, describe, it } from "https://deno.land/std@0.224.0/testing/bdd.ts";
 import { FakeTime } from "https://deno.land/std@0.224.0/testing/time.ts";
 
 // Mock database types
@@ -37,12 +41,14 @@ const oauthService = {
     return `auth_code_${clientId}_${userId}_${Date.now()}`;
   },
 
-  async validateAuthorizationCode(code: string): Promise<{
-    client_id: string;
-    user_id: string;
-    scope: string;
-    expires_at: Date;
-  } | null> {
+  async validateAuthorizationCode(code: string): Promise<
+    {
+      client_id: string;
+      user_id: string;
+      scope: string;
+      expires_at: Date;
+    } | null
+  > {
     if (code.startsWith("auth_code_")) {
       const parts = code.split("_");
       return {
@@ -63,7 +69,7 @@ const oauthService = {
   }> {
     const accessToken = `access_${clientId}_${userId}_${Date.now()}`;
     const refreshToken = `refresh_${clientId}_${userId}_${Date.now()}`;
-    
+
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -87,7 +93,7 @@ const oauthService = {
         valid: true,
       };
     }
-    
+
     return {
       user_id: "",
       client_id: "",
@@ -96,23 +102,25 @@ const oauthService = {
     };
   },
 
-  async refreshAccessToken(refreshToken: string): Promise<{
-    access_token: string;
-    refresh_token: string;
-    expires_in: number;
-  } | null> {
+  async refreshAccessToken(refreshToken: string): Promise<
+    {
+      access_token: string;
+      refresh_token: string;
+      expires_in: number;
+    } | null
+  > {
     if (refreshToken.startsWith("refresh_")) {
       const parts = refreshToken.split("_");
       const newAccessToken = `access_${parts[1]}_${parts[2]}_${Date.now()}`;
       const newRefreshToken = `refresh_${parts[1]}_${parts[2]}_${Date.now()}`;
-      
+
       return {
         access_token: newAccessToken,
         refresh_token: newRefreshToken,
         expires_in: 3600,
       };
     }
-    
+
     return null;
   },
 
@@ -129,7 +137,7 @@ const oauthService = {
     url.searchParams.set("scope", params.scope);
     url.searchParams.set("state", params.state);
     url.searchParams.set("response_type", params.response_type);
-    
+
     return url.toString();
   },
 
@@ -143,8 +151,8 @@ const oauthService = {
   validateScope(scope: string): boolean {
     const validScopes = ["openid", "profile", "email"];
     const requestedScopes = scope.split(" ");
-    
-    return requestedScopes.every(s => validScopes.includes(s));
+
+    return requestedScopes.every((s) => validScopes.includes(s));
   },
 };
 
@@ -162,7 +170,7 @@ describe("OAuth Service", () => {
   describe("validateClient", () => {
     it("should validate existing client", async () => {
       const client = await oauthService.validateClient("valid-client");
-      
+
       assertExists(client);
       assertEquals(client.client_id, "valid-client");
       assertEquals(client.name, "Test Client");
@@ -170,13 +178,13 @@ describe("OAuth Service", () => {
 
     it("should return null for invalid client", async () => {
       const client = await oauthService.validateClient("invalid-client");
-      
+
       assertEquals(client, null);
     });
 
     it("should validate client with secret", async () => {
       const client = await oauthService.validateClient("valid-client", "valid-secret");
-      
+
       assertExists(client);
       assertEquals(client.client_id, "valid-client");
     });
@@ -185,7 +193,7 @@ describe("OAuth Service", () => {
   describe("generateAuthorizationCode", () => {
     it("should generate authorization code", () => {
       const code = oauthService.generateAuthorizationCode("test-client", "test-user", "openid");
-      
+
       assertExists(code);
       assertEquals(code.startsWith("auth_code_test-client_test-user_"), true);
     });
@@ -195,7 +203,7 @@ describe("OAuth Service", () => {
     it("should validate correct authorization code", async () => {
       const code = "auth_code_test-client_test-user_1234567890";
       const result = await oauthService.validateAuthorizationCode(code);
-      
+
       assertExists(result);
       assertEquals(result.client_id, "test-client");
       assertEquals(result.user_id, "test-user");
@@ -204,7 +212,7 @@ describe("OAuth Service", () => {
 
     it("should return null for invalid code", async () => {
       const result = await oauthService.validateAuthorizationCode("invalid-code");
-      
+
       assertEquals(result, null);
     });
   });
@@ -212,7 +220,7 @@ describe("OAuth Service", () => {
   describe("generateTokens", () => {
     it("should generate access and refresh tokens", async () => {
       const tokens = await oauthService.generateTokens("test-client", "test-user", "openid");
-      
+
       assertExists(tokens.access_token);
       assertExists(tokens.refresh_token);
       assertEquals(tokens.token_type, "Bearer");
@@ -224,7 +232,7 @@ describe("OAuth Service", () => {
     it("should validate correct access token", async () => {
       const token = "access_test-client_test-user_1234567890";
       const result = await oauthService.validateAccessToken(token);
-      
+
       assertEquals(result.valid, true);
       assertEquals(result.client_id, "test-client");
       assertEquals(result.user_id, "test-user");
@@ -233,7 +241,7 @@ describe("OAuth Service", () => {
 
     it("should reject invalid access token", async () => {
       const result = await oauthService.validateAccessToken("invalid-token");
-      
+
       assertEquals(result.valid, false);
       assertEquals(result.user_id, "");
       assertEquals(result.client_id, "");
@@ -244,7 +252,7 @@ describe("OAuth Service", () => {
     it("should refresh access token with valid refresh token", async () => {
       const refreshToken = "refresh_test-client_test-user_1234567890";
       const result = await oauthService.refreshAccessToken(refreshToken);
-      
+
       assertExists(result);
       assertExists(result.access_token);
       assertExists(result.refresh_token);
@@ -253,7 +261,7 @@ describe("OAuth Service", () => {
 
     it("should return null for invalid refresh token", async () => {
       const result = await oauthService.refreshAccessToken("invalid-refresh-token");
-      
+
       assertEquals(result, null);
     });
   });
@@ -267,7 +275,7 @@ describe("OAuth Service", () => {
         state: "random-state",
         response_type: "code",
       });
-      
+
       const parsedUrl = new URL(url);
       assertEquals(parsedUrl.pathname, "/oauth/authorize");
       assertEquals(parsedUrl.searchParams.get("client_id"), "test-client");
@@ -280,20 +288,29 @@ describe("OAuth Service", () => {
 
   describe("validateRedirectUri", () => {
     it("should validate correct redirect URI for client", () => {
-      const isValid = oauthService.validateRedirectUri("valid-client", "http://localhost:3000/callback");
-      
+      const isValid = oauthService.validateRedirectUri(
+        "valid-client",
+        "http://localhost:3000/callback",
+      );
+
       assertEquals(isValid, true);
     });
 
     it("should reject invalid redirect URI", () => {
-      const isValid = oauthService.validateRedirectUri("valid-client", "http://malicious.com/callback");
-      
+      const isValid = oauthService.validateRedirectUri(
+        "valid-client",
+        "http://malicious.com/callback",
+      );
+
       assertEquals(isValid, false);
     });
 
     it("should reject redirect URI for invalid client", () => {
-      const isValid = oauthService.validateRedirectUri("invalid-client", "http://localhost:3000/callback");
-      
+      const isValid = oauthService.validateRedirectUri(
+        "invalid-client",
+        "http://localhost:3000/callback",
+      );
+
       assertEquals(isValid, false);
     });
   });
@@ -301,25 +318,25 @@ describe("OAuth Service", () => {
   describe("validateScope", () => {
     it("should validate correct scopes", () => {
       const isValid = oauthService.validateScope("openid profile email");
-      
+
       assertEquals(isValid, true);
     });
 
     it("should validate single scope", () => {
       const isValid = oauthService.validateScope("openid");
-      
+
       assertEquals(isValid, true);
     });
 
     it("should reject invalid scope", () => {
       const isValid = oauthService.validateScope("invalid-scope");
-      
+
       assertEquals(isValid, false);
     });
 
     it("should reject mixed valid and invalid scopes", () => {
       const isValid = oauthService.validateScope("openid invalid-scope");
-      
+
       assertEquals(isValid, false);
     });
   });

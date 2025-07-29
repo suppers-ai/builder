@@ -25,7 +25,10 @@ export const handler = {
         const formData = await req.formData();
         revokeRequest = {
           token: formData.get("token")?.toString() || "",
-          token_type_hint: formData.get("token_type_hint")?.toString() as "access_token" | "refresh_token" | undefined,
+          token_type_hint: formData.get("token_type_hint")?.toString() as
+            | "access_token"
+            | "refresh_token"
+            | undefined,
           client_id: formData.get("client_id")?.toString() || "",
           client_secret: formData.get("client_secret")?.toString() || "",
         };
@@ -58,7 +61,7 @@ export const handler = {
         // Validate client credentials
         const client = await OAuthService.validateClientCredentials(
           revokeRequest.client_id,
-          revokeRequest.client_secret
+          revokeRequest.client_secret,
         );
 
         if (!client) {

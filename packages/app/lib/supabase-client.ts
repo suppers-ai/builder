@@ -46,16 +46,36 @@ function getSupabaseClient() {
     let url = supabaseUrl;
     let key = supabaseAnonKey;
 
-    if (typeof globalThis.Deno !== "undefined") {
-      url = Deno.env.get("SUPABASE_URL") || url;
-      key = Deno.env.get("SUPABASE_ANON_KEY") || key;
-    } else {
+    try {
+      // Try to access Deno environment variables (server-side)
+      if (typeof globalThis.Deno !== "undefined") {
+        url = Deno.env.get("SUPABASE_URL") || url;
+        key = Deno.env.get("SUPABASE_ANON_KEY") || key;
+      }
+    } catch (e) {
+      // Fallback to browser globals
+      url = (globalThis as any).SUPABASE_URL || url;
+      key = (globalThis as any).SUPABASE_ANON_KEY || key;
+    }
+
+    // Final fallback to browser globals if not set above
+    if (!url || !key) {
       url = (globalThis as any).SUPABASE_URL || url;
       key = (globalThis as any).SUPABASE_ANON_KEY || key;
     }
 
     if (!url || !key) {
       console.error("❌ Supabase client cannot be initialized without URL and key");
+      console.error("  URL:", url ? "✓ Set" : "❌ Missing");
+      console.error("  Key:", key ? "✓ Set" : "❌ Missing");
+      console.error(
+        "  Browser globals - URL:",
+        (globalThis as any).SUPABASE_URL ? "✓ Set" : "❌ Missing",
+      );
+      console.error(
+        "  Browser globals - Key:",
+        (globalThis as any).SUPABASE_ANON_KEY ? "✓ Set" : "❌ Missing",
+      );
       // Return a mock client to prevent errors
       return null as any;
     }

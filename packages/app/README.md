@@ -1,6 +1,8 @@
 # @suppers/app - SSO Authentication Service
 
-A dedicated Single Sign-On (SSO) authentication service built with Fresh and Deno. This package provides OAuth 2.0 authentication endpoints and user management functionality for the Suppers ecosystem.
+A dedicated Single Sign-On (SSO) authentication service built with Fresh and Deno. This package
+provides OAuth 2.0 authentication endpoints and user management functionality for the Suppers
+ecosystem.
 
 ## Features
 
@@ -94,11 +96,13 @@ packages/app/
 The app package implements a complete OAuth 2.0 authorization server with the following endpoints:
 
 #### Authorization Endpoint
+
 ```
 GET /oauth/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=REDIRECT_URI&scope=SCOPE&state=STATE
 ```
 
 #### Token Endpoint
+
 ```
 POST /oauth/token
 Content-Type: application/x-www-form-urlencoded
@@ -107,18 +111,21 @@ grant_type=authorization_code&code=CODE&redirect_uri=REDIRECT_URI&client_id=CLIE
 ```
 
 #### User Info Endpoint
+
 ```
 GET /oauth/userinfo
 Authorization: Bearer ACCESS_TOKEN
 ```
 
 #### Token Validation
+
 ```
 POST /oauth/validate
 Authorization: Bearer ACCESS_TOKEN
 ```
 
 #### Token Revocation
+
 ```
 POST /oauth/revoke
 Authorization: Bearer ACCESS_TOKEN
@@ -135,17 +142,17 @@ The app uses the following Supabase tables:
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `SUPABASE_URL` | Your Supabase project URL | Yes |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key | Yes |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | Yes |
-| `JWT_SECRET` | Secret for signing JWT tokens | Yes |
-| `OAUTH_CLIENT_ID` | Default OAuth client ID | No |
-| `OAUTH_CLIENT_SECRET` | Default OAuth client secret | No |
-| `CORS_ORIGINS` | Allowed CORS origins (comma-separated) | No |
-| `RATE_LIMIT_REQUESTS` | Rate limit requests per minute | No |
-| `TOKEN_EXPIRY_MINUTES` | Access token expiry in minutes | No |
+| Variable                    | Description                            | Required |
+| --------------------------- | -------------------------------------- | -------- |
+| `SUPABASE_URL`              | Your Supabase project URL              | Yes      |
+| `SUPABASE_ANON_KEY`         | Supabase anonymous key                 | Yes      |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key              | Yes      |
+| `JWT_SECRET`                | Secret for signing JWT tokens          | Yes      |
+| `OAUTH_CLIENT_ID`           | Default OAuth client ID                | No       |
+| `OAUTH_CLIENT_SECRET`       | Default OAuth client secret            | No       |
+| `CORS_ORIGINS`              | Allowed CORS origins (comma-separated) | No       |
+| `RATE_LIMIT_REQUESTS`       | Rate limit requests per minute         | No       |
+| `TOKEN_EXPIRY_MINUTES`      | Access token expiry in minutes         | No       |
 
 ## OAuth Integration for External Applications
 
@@ -169,43 +176,43 @@ Here's how to integrate with the SSO service from your application:
 
 ```typescript
 // 1. Redirect user to authorization endpoint
-const authUrl = new URL('http://localhost:8001/oauth/authorize');
-authUrl.searchParams.set('response_type', 'code');
-authUrl.searchParams.set('client_id', 'your-client-id');
-authUrl.searchParams.set('redirect_uri', 'https://yourapp.com/auth/callback');
-authUrl.searchParams.set('scope', 'openid profile email');
-authUrl.searchParams.set('state', generateRandomState());
+const authUrl = new URL("http://localhost:8001/oauth/authorize");
+authUrl.searchParams.set("response_type", "code");
+authUrl.searchParams.set("client_id", "your-client-id");
+authUrl.searchParams.set("redirect_uri", "https://yourapp.com/auth/callback");
+authUrl.searchParams.set("scope", "openid profile email");
+authUrl.searchParams.set("state", generateRandomState());
 
 window.location.href = authUrl.toString();
 
 // 2. Handle the callback in your application
 async function handleCallback(code: string, state: string) {
-  const tokenResponse = await fetch('http://localhost:8001/oauth/token', {
-    method: 'POST',
+  const tokenResponse = await fetch("http://localhost:8001/oauth/token", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      grant_type: 'authorization_code',
+      grant_type: "authorization_code",
       code,
-      redirect_uri: 'https://yourapp.com/auth/callback',
-      client_id: 'your-client-id',
-      client_secret: 'your-client-secret',
+      redirect_uri: "https://yourapp.com/auth/callback",
+      client_id: "your-client-id",
+      client_secret: "your-client-secret",
     }),
   });
 
   const tokens = await tokenResponse.json();
-  
+
   // Store tokens securely
-  localStorage.setItem('access_token', tokens.access_token);
-  localStorage.setItem('refresh_token', tokens.refresh_token);
+  localStorage.setItem("access_token", tokens.access_token);
+  localStorage.setItem("refresh_token", tokens.refresh_token);
 }
 
 // 3. Use the access token to get user info
 async function getUserInfo(accessToken: string) {
-  const response = await fetch('http://localhost:8001/oauth/userinfo', {
+  const response = await fetch("http://localhost:8001/oauth/userinfo", {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
+      "Authorization": `Bearer ${accessToken}`,
     },
   });
 
@@ -265,6 +272,7 @@ MIT License - see the [LICENSE](../../LICENSE) file for details.
 ## Support
 
 For questions and support:
+
 - Create an issue in the repository
 - Check the [documentation](../../docs/)
 - Join our community discussions

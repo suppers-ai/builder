@@ -27,36 +27,56 @@ export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
           throw new Error(errorDescription || error);
         }
 
-        // Check for auth tokens in URL
+        // Get callback type
+        const type = searchParams.get("type") || hashParams.get("type");
+
+        // Check for auth tokens in URL (OAuth or email confirmation)
         const accessToken = hashParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token");
 
-        if (accessToken) {
-          // OAuth callback with tokens
-          setSuccess("Authentication successful! Redirecting...");
+        if (accessToken || type === "signup" || type === "recovery") {
+          // Handle different callback types
+          let successMessage = "Authentication successful! Redirecting...";
+
+          if (type === "signup") {
+            successMessage = "Email verified successfully! Welcome to Suppers!";
+          } else if (type === "recovery") {
+            successMessage = "Password reset verified! You can now set a new password.";
+          }
+
+          setSuccess(successMessage);
 
           // Get redirect URL
-          const redirectTo = searchParams.get("redirect_to") || "/profile";
+          let redirectTo = searchParams.get("redirect_to") || "/profile";
+
+          // For password recovery, redirect to a password update page
+          if (type === "recovery") {
+            redirectTo = "/profile?update_password=true";
+          }
 
           // Small delay to show success message
           setTimeout(() => {
             globalThis.location.href = redirectTo;
           }, 1500);
         } else {
-          // Check for session
-          const session = await AuthHelpers.getCurrentSession();
+          // Check for current session
+          try {
+            const session = await AuthHelpers.getCurrentSession();
 
-          if (session) {
-            setSuccess("Authentication successful! Redirecting...");
+            if (session?.user) {
+              setSuccess("Authentication successful! Redirecting...");
 
-            // Get redirect URL
-            const redirectTo = searchParams.get("redirect_to") || "/profile";
+              // Get redirect URL
+              const redirectTo = searchParams.get("redirect_to") || "/profile";
 
-            // Small delay to show success message
-            setTimeout(() => {
-              globalThis.location.href = redirectTo;
-            }, 1500);
-          } else {
+              // Small delay to show success message
+              setTimeout(() => {
+                globalThis.location.href = redirectTo;
+              }, 1500);
+            } else {
+              throw new Error("No authentication session found");
+            }
+          } catch (sessionErr) {
             throw new Error("No authentication session found");
           }
         }

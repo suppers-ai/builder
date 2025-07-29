@@ -28,7 +28,7 @@ export const handler = {
         };
         return new Response(JSON.stringify(errorResponse), {
           status: 401,
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "WWW-Authenticate": 'Bearer realm="oauth"',
           },
@@ -46,7 +46,8 @@ export const handler = {
           sub: user.id, // Subject identifier
           email: user.email,
           email_verified: true, // Assuming email is verified since it's from our system
-          name: user.display_name || `${user.first_name || ""} ${user.last_name || ""}`.trim() || undefined,
+          name: user.display_name || `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
+            undefined,
           given_name: user.first_name || undefined,
           family_name: user.last_name || undefined,
           picture: user.avatar_url || undefined,
@@ -55,12 +56,12 @@ export const handler = {
 
         // Remove undefined values
         const cleanedUserInfo = Object.fromEntries(
-          Object.entries(userInfo).filter(([_, value]) => value !== undefined)
+          Object.entries(userInfo).filter(([_, value]) => value !== undefined),
         );
 
         return new Response(JSON.stringify(cleanedUserInfo), {
           status: 200,
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Cache-Control": "no-store",
             "Pragma": "no-cache",
@@ -73,7 +74,7 @@ export const handler = {
         };
         return new Response(JSON.stringify(errorResponse), {
           status: 401,
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "WWW-Authenticate": 'Bearer realm="oauth"',
           },

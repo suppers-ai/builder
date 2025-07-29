@@ -73,12 +73,12 @@ export const handler = {
             tokenRequest.code,
             tokenRequest.client_id,
             tokenRequest.client_secret,
-            tokenRequest.redirect_uri
+            tokenRequest.redirect_uri,
           );
 
           return new Response(JSON.stringify(tokenResponse), {
             status: 200,
-            headers: { 
+            headers: {
               "Content-Type": "application/json",
               "Cache-Control": "no-store",
               "Pragma": "no-cache",
@@ -87,7 +87,9 @@ export const handler = {
         } catch (error) {
           const errorResponse: TokenErrorResponse = {
             error: "invalid_grant",
-            error_description: error instanceof Error ? error.message : "Invalid authorization code",
+            error_description: error instanceof Error
+              ? error.message
+              : "Invalid authorization code",
           };
           return new Response(JSON.stringify(errorResponse), {
             status: 400,
@@ -111,9 +113,9 @@ export const handler = {
           // Validate client credentials first
           const client = await OAuthService.validateClientCredentials(
             tokenRequest.client_id,
-            tokenRequest.client_secret
+            tokenRequest.client_secret,
           );
-          
+
           if (!client) {
             const errorResponse: TokenErrorResponse = {
               error: "invalid_client",
@@ -129,7 +131,7 @@ export const handler = {
 
           return new Response(JSON.stringify(tokenResponse), {
             status: 200,
-            headers: { 
+            headers: {
               "Content-Type": "application/json",
               "Cache-Control": "no-store",
               "Pragma": "no-cache",

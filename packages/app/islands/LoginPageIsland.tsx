@@ -24,13 +24,14 @@ interface LoginPageIslandProps {
 
 export default function LoginPageIsland({
   initialMode = "login",
-  redirectTo = "/",
+  redirectTo = "/profile",
 }: LoginPageIslandProps) {
   const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [theme, setTheme] = useState<string>("light");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -39,7 +40,7 @@ export default function LoginPageIsland({
     lastName: "",
   });
 
-  // Check auth state on mount
+  // Check auth state and theme on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -57,7 +58,28 @@ export default function LoginPageIsland({
       }
     };
 
+    // Get initial theme
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+    setTheme(currentTheme);
+
+    // Watch for theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
+          const newTheme = document.documentElement.getAttribute("data-theme") || "light";
+          setTheme(newTheme);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
     checkAuth();
+
+    return () => observer.disconnect();
 
     // Note: Auth state changes are not implemented yet
     // TODO: Implement proper auth state listening when API supports it
@@ -107,13 +129,18 @@ export default function LoginPageIsland({
           password: formData.password,
         });
         setSuccess("Login successful! Redirecting...");
+
+        // Redirect after successful login
+        setTimeout(() => {
+          globalThis.location.href = redirectTo;
+        }, 1000);
       } else {
         // Register
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Passwords do not match");
         }
 
-        await AuthHelpers.signUp({
+        const result = await AuthHelpers.signUp({
           email: formData.email,
           password: formData.password,
           firstName: formData.firstName,
@@ -121,7 +148,18 @@ export default function LoginPageIsland({
           displayName: `${formData.firstName} ${formData.lastName}`.trim(),
         });
 
-        setSuccess("Account created! Please check your email for verification.");
+        if (result.user && !result.user.email_confirmed_at) {
+          setSuccess(
+            "Account created! Please check your email and click the verification link to complete your registration.",
+          );
+        } else if (result.user && result.user.email_confirmed_at) {
+          setSuccess("Account created and verified! Redirecting...");
+          setTimeout(() => {
+            globalThis.location.href = redirectTo;
+          }, 1000);
+        } else {
+          setSuccess("Account created! Please check your email for verification.");
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -170,15 +208,26 @@ export default function LoginPageIsland({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-300 flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        backgroundImage: "url(/backgrounds/hero-gradient.webp)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
       <div className="max-w-md w-full">
         <Card bordered class="bg-base-100 shadow-xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="text-4xl mb-4">🔐</div>
-            <h1 className="text-2xl font-bold text-base-content mb-2">
-              Suppers Auth
-            </h1>
+            <div className="mb-4">
+              <img
+                src={theme === "dark" ? "/logos/long_dark.png" : "/logos/long_light.png"}
+                alt="Suppers"
+                className="h-12 mx-auto"
+              />
+            </div>
             <p className="text-base-content/70">
               {showForgotPassword
                 ? "Reset your password"
@@ -352,7 +401,7 @@ export default function LoginPageIsland({
                   disabled={isLoading}
                   loading={isLoading}
                   color="primary"
-                  wide
+                  class="w-full"
                 >
                   {isLoading ? "Loading..." : (isLogin ? "Sign In" : "Create Account")}
                 </Button>
@@ -416,16 +465,6 @@ export default function LoginPageIsland({
                     </Button>
                   </div>
                 )}
-              </div>
-
-              {/* Back to Home */}
-              <div className="mt-6 text-center">
-                <a
-                  href="/"
-                  className="text-base-content/60 hover:text-base-content/50 text-sm"
-                >
-                  ← Back to Home
-                </a>
               </div>
             </>
           )}

@@ -122,6 +122,8 @@ export { AdminPage } from "./page/admin-page/AdminPage.tsx";
 export type { AdminPageProps } from "./page/admin-page/AdminPage.tsx";
 export { UserPage } from "./page/user-page/UserPage.tsx";
 export type { UserPageProps } from "./page/user-page/UserPage.tsx";
+export { ProfileCard } from "./page/profile-card/ProfileCard.tsx";
+export type { ProfileCardProps } from "./page/profile-card/ProfileCard.tsx";
 export { EditUserModal, SimpleEditUserModal } from "./page/user-page/index.ts";
 export { ApplicationsPage } from "./page/applications-page/ApplicationsPage.tsx";
 export type { ApplicationsPageProps } from "./page/applications-page/ApplicationsPage.tsx";

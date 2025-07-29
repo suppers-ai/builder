@@ -41,7 +41,7 @@ export const handler = {
         "given_name",
         "family_name",
         "picture",
-        "updated_at"
+        "updated_at",
       ],
       code_challenge_methods_supported: ["S256", "plain"],
     };

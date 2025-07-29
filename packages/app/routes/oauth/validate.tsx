@@ -32,7 +32,7 @@ export const handler = {
         };
         return new Response(JSON.stringify(errorResponse), {
           status: 401,
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "WWW-Authenticate": 'Bearer realm="oauth"',
           },
@@ -44,7 +44,7 @@ export const handler = {
       try {
         // Use enhanced token validation with timing information
         const validation = await TokenManager.validateTokenWithTiming(token);
-        
+
         if (!validation.valid) {
           const errorResponse: ErrorResponse = {
             error: "invalid_token",
@@ -52,7 +52,7 @@ export const handler = {
           };
           return new Response(JSON.stringify(errorResponse), {
             status: 401,
-            headers: { 
+            headers: {
               "Content-Type": "application/json",
               "WWW-Authenticate": 'Bearer realm="oauth"',
             },
@@ -61,15 +61,15 @@ export const handler = {
 
         // Get token info for additional details
         const tokenInfo = await TokenManager.getTokenInfo(token);
-        
+
         const response: ValidateResponse = {
           valid: true,
           user: {
             id: validation.user!.id,
             email: validation.user!.email,
-            name: validation.user!.display_name || 
-                  `${validation.user!.first_name || ""} ${validation.user!.last_name || ""}`.trim() || 
-                  validation.user!.email,
+            name: validation.user!.display_name ||
+              `${validation.user!.first_name || ""} ${validation.user!.last_name || ""}`.trim() ||
+              validation.user!.email,
             avatar_url: validation.user!.avatar_url || undefined,
           },
           expires_in: validation.expiresIn,
@@ -80,7 +80,7 @@ export const handler = {
 
         return new Response(JSON.stringify(response), {
           status: 200,
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Cache-Control": "no-store",
             "Pragma": "no-cache",
@@ -93,7 +93,7 @@ export const handler = {
         };
         return new Response(JSON.stringify(errorResponse), {
           status: 401,
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "WWW-Authenticate": 'Bearer realm="oauth"',
           },

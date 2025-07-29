@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
 
     // Check if this is a public auth endpoint that doesn't require authentication
     const isPublicAuthEndpoint = resource === "auth" && 
-      (rest[0] === "register" || rest[0] === "login" || rest[0] === "refresh");
+      (rest[0] === "register" || rest[0] === "login" || rest[0] === "refresh" || rest[0] === "reset-password" || rest[0] === "oauth");
 
     // Get JWT token from Authorization header (not required for public endpoints)
     const authHeader = req.headers.get("Authorization");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
-import { UserPage } from "@suppers/ui-lib";
+import { ProfileCard } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import type { User } from "@supabase/supabase-js";
 
@@ -23,6 +23,22 @@ export default function ProfilePageIsland() {
         if (!user) {
           // Redirect to login if not authenticated
           globalThis.location.href = "/login?redirect_to=/profile";
+        } else {
+          // Apply user's theme preference if available
+          if (user.user_metadata?.theme) {
+            document.documentElement.setAttribute('data-theme', user.user_metadata.theme);
+            localStorage.setItem('theme', user.user_metadata.theme);
+          }
+
+          // Check if we need to prompt for password update (from recovery flow)
+          const urlParams = new URLSearchParams(globalThis.location?.search || "");
+          if (urlParams.get("update_password") === "true") {
+            setSuccess("Please set your new password below.");
+            // Remove the parameter from URL
+            const newUrl = new URL(globalThis.location?.href || "");
+            newUrl.searchParams.delete("update_password");
+            globalThis.history?.replaceState({}, "", newUrl.toString());
+          }
         }
       } catch (err) {
         console.log("No authenticated user");
@@ -34,25 +50,36 @@ export default function ProfilePageIsland() {
 
     checkAuth();
 
-    // Listen for auth state changes
-    const { data: { subscription } } = AuthHelpers.onAuthStateChange(
-      (event, session) => {
-        userSignal.value = session?.user ?? null;
-        if (!session?.user) {
-          globalThis.location.href = "/login?redirect_to=/profile";
-        }
-      },
-    );
+    // Listen for auth state changes using Supabase client
+    const setupAuthListener = async () => {
+      try {
+        const subscription = await AuthHelpers.onAuthStateChange(
+          (event, session) => {
+            userSignal.value = session?.user ?? null;
+            if (!session?.user && event === "SIGNED_OUT") {
+              globalThis.location.href = "/login?redirect_to=/profile";
+            }
+          },
+        );
 
-    return () => subscription.unsubscribe();
+        return () => subscription.data.subscription.unsubscribe();
+      } catch (error) {
+        console.error("Failed to setup auth listener:", error);
+        return () => {}; // Return empty cleanup function
+      }
+    };
+
+    setupAuthListener().then((cleanup) => {
+      // Store cleanup function for effect cleanup
+      return cleanup;
+    });
   }, []);
 
   const handleUpdateProfile = async (data: {
     firstName?: string;
-    middleNames?: string;
     lastName?: string;
     displayName?: string;
-    avatarUrl?: string;
+    theme?: string;
   }) => {
     setIsLoading(true);
     setError(null);
@@ -79,9 +106,7 @@ export default function ProfilePageIsland() {
     setError(null);
 
     try {
-      const avatarUrl = await AuthHelpers.uploadAvatar(file, userSignal.value.id);
-      await AuthHelpers.updateUser({ avatarUrl });
-
+      await AuthHelpers.uploadAvatar(file, userSignal.value.id);
       setSuccess("Avatar updated successfully!");
 
       // Refresh user data
@@ -93,6 +118,7 @@ export default function ProfilePageIsland() {
       setIsLoading(false);
     }
   };
+
 
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
     setIsLoading(true);
@@ -121,11 +147,14 @@ export default function ProfilePageIsland() {
   };
 
   const handleSignOut = async () => {
+    setIsLoading(true);
     try {
       await AuthHelpers.signOut();
       globalThis.location.href = "/";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign out");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -151,20 +180,17 @@ export default function ProfilePageIsland() {
   }
 
   return (
-    <UserPage
-      user={userSignal.value}
-      authLoading={authLoadingSignal.value}
-      isLoading={isLoading}
-      error={error}
-      success={success}
-      onUpdateProfile={handleUpdateProfile}
-      onUploadAvatar={handleUploadAvatar}
-      onChangePassword={handleChangePassword}
-      onSignOut={handleSignOut}
-      appName="Suppers Auth"
-      appIcon="🔐"
-      showBackToHome
-      homeUrl="/"
-    />
+    <div class="min-h-screen bg-base-200 py-8">
+      <ProfileCard
+        user={userSignal.value}
+        isLoading={authLoadingSignal.value || isLoading}
+        error={error}
+        success={success}
+        onUpdateProfile={handleUpdateProfile}
+        onUploadAvatar={handleUploadAvatar}
+        onSignOut={handleSignOut}
+        onChangePassword={handleChangePassword}
+      />
+    </div>
   );
 }

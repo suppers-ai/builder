@@ -1,3 +1,4 @@
+import { useState } from "preact/hooks";
 import { InputProps } from "./Input.schema.ts";
 
 export function Input({
@@ -101,9 +102,13 @@ export function Input({
     );
   }
 
-  // Password input with toggle (SSR-compatible, always shows as password)
+  // Password input with toggle
   if (type === "password") {
-    const isVisible = false; // Static for SSR
+    const [isVisible, setIsVisible] = useState(false);
+    
+    const toggleVisibility = () => {
+      setIsVisible(!isVisible);
+    };
     
     return (
       <div className="relative">
@@ -127,8 +132,10 @@ export function Input({
         {showPasswordToggle && (
           <button
             type="button"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/50 hover:text-base-content"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors"
             disabled={disabled}
+            onClick={toggleVisibility}
+            aria-label={isVisible ? "Hide password" : "Show password"}
           >
             {isVisible ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
