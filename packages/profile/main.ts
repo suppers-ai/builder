@@ -68,10 +68,10 @@ if (import.meta.main) {
   Deno.addSignalListener("SIGINT", shutdown);
   Deno.addSignalListener("SIGTERM", shutdown);
 
-  // Configure port from environment variable (default to 8001)
-  const port = parseInt(Deno.env.get("APP_PORT") || "8001");
-  const hostname = Deno.env.get("APP_HOST") || "localhost";
+  // Configure port from environment variable (default to 8002)
+  const port = parseInt(Deno.env.get("PROFILE_PORT") || "8002");
+  const hostname = Deno.env.get("PROFILE_HOST") || "localhost";
 
-  console.log(`🚀 App package starting on http://${hostname}:${port}`);
+  console.log(`🚀 Profile package starting on http://${hostname}:${port}`);
   await app.listen({ port, hostname });
 }

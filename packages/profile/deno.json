@@ -1,6 +1,7 @@
 {
-  "name": "@suppers/app",
+  "name": "@suppers/profile",
   "version": "1.0.0",
+  "description": "Profile & SSO Authentication Service - OAuth 2.0 endpoints, user authentication flows, and profile management",
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno run --allow-all --watch=static/,routes/,islands/,lib/ dev.ts",

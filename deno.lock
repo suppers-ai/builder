@@ -4194,16 +4194,6 @@
           "jsr:@supabase/supabase-js@2"
         ]
       },
-      "packages/app": {
-        "dependencies": [
-          "jsr:@fresh/core@^2.0.0-alpha.34",
-          "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
-          "npm:@preact/signals-core@1.8.0",
-          "npm:@preact/signals@2.2.1",
-          "npm:preact@10.26.9",
-          "npm:tailwindcss@3.4.0"
-        ]
-      },
       "packages/compiler": {
         "dependencies": [
           "jsr:@fresh/core@^2.0.0-alpha.34",
@@ -4218,6 +4208,16 @@
           "npm:preact@10.26.9",
           "npm:tailwindcss@^3.4.0",
           "npm:zod@^3.23.8"
+        ]
+      },
+      "packages/profile": {
+        "dependencies": [
+          "jsr:@fresh/core@^2.0.0-alpha.34",
+          "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
+          "npm:@preact/signals-core@1.8.0",
+          "npm:@preact/signals@2.2.1",
+          "npm:preact@10.26.9",
+          "npm:tailwindcss@3.4.0"
         ]
       },
       "packages/shared": {

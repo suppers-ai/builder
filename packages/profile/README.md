@@ -1,4 +1,4 @@
-# @suppers/app - SSO Authentication Service
+# @suppers/profile - Profile & SSO Authentication Service
 
 A dedicated Single Sign-On (SSO) authentication service built with Fresh and Deno. This package
 provides OAuth 2.0 authentication endpoints and user management functionality for the Suppers
@@ -22,9 +22,9 @@ ecosystem.
 
 ### Installation
 
-1. Clone the repository and navigate to the app package:
+1. Clone the repository and navigate to the profile package:
    ```bash
-   cd packages/app
+   cd packages/profile
    ```
 
 2. Copy the environment template:
@@ -47,7 +47,7 @@ ecosystem.
    deno task dev
    ```
 
-The app will be available at `http://localhost:8001`.
+The profile service will be available at `http://localhost:8002`.
 
 ## Development
 
@@ -65,7 +65,7 @@ The app will be available at `http://localhost:8001`.
 ### Project Structure
 
 ```
-packages/app/
+packages/profile/
 ├── islands/           # Interactive client-side components
 │   ├── AuthCallbackHandler.tsx
 │   ├── LoginPageIsland.tsx
@@ -93,7 +93,7 @@ packages/app/
 
 ### OAuth 2.0 Configuration
 
-The app package implements a complete OAuth 2.0 authorization server with the following endpoints:
+The profile package implements a complete OAuth 2.0 authorization server with the following endpoints:
 
 #### Authorization Endpoint
 
@@ -133,7 +133,7 @@ Authorization: Bearer ACCESS_TOKEN
 
 ### Database Schema
 
-The app uses the following Supabase tables:
+The profile service uses the following Supabase tables:
 
 - `users` - User profiles and authentication data
 - `oauth_clients` - Registered OAuth client applications
@@ -176,7 +176,7 @@ Here's how to integrate with the SSO service from your application:
 
 ```typescript
 // 1. Redirect user to authorization endpoint
-const authUrl = new URL("http://localhost:8001/oauth/authorize");
+const authUrl = new URL("http://localhost:8002/oauth/authorize");
 authUrl.searchParams.set("response_type", "code");
 authUrl.searchParams.set("client_id", "your-client-id");
 authUrl.searchParams.set("redirect_uri", "https://yourapp.com/auth/callback");
@@ -187,7 +187,7 @@ window.location.href = authUrl.toString();
 
 // 2. Handle the callback in your application
 async function handleCallback(code: string, state: string) {
-  const tokenResponse = await fetch("http://localhost:8001/oauth/token", {
+  const tokenResponse = await fetch("http://localhost:8002/oauth/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -210,7 +210,7 @@ async function handleCallback(code: string, state: string) {
 
 // 3. Use the access token to get user info
 async function getUserInfo(accessToken: string) {
-  const response = await fetch("http://localhost:8001/oauth/userinfo", {
+  const response = await fetch("http://localhost:8002/oauth/userinfo", {
     headers: {
       "Authorization": `Bearer ${accessToken}`,
     },
@@ -252,7 +252,7 @@ WORKDIR /app
 COPY . .
 RUN deno cache main.ts
 
-EXPOSE 8001
+EXPOSE 8002
 CMD ["deno", "run", "--allow-all", "main.ts"]
 ```
 

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This feature involves refactoring the existing store package and creating a new app package to better separate concerns. The store will become a marketplace/generator interface for creating and managing applications using the compiler, while the new app package will handle the SSO provider functionality that currently exists in the store.
+This feature involves refactoring the existing store package and creating a new profile package to better separate concerns. The store will become a marketplace/generator interface for creating and managing applications using the compiler, while the new profile package will handle the SSO provider functionality that currently exists in the store.
 
 ## Requirements
 
@@ -20,25 +20,25 @@ This feature involves refactoring the existing store package and creating a new 
 
 ### Requirement 2
 
-**User Story:** As a developer, I want a dedicated app package for SSO functionality, so that client applications have a clean authentication endpoint separate from the store interface.
+**User Story:** As a developer, I want a dedicated profile package for SSO functionality, so that client applications have a clean authentication endpoint separate from the store interface.
 
 #### Acceptance Criteria
 
-1. WHEN the app package is created THEN it SHALL contain only login and profile pages for SSO functionality
-2. WHEN a user accesses the app login page THEN the system SHALL provide authentication via email/password and OAuth providers
+1. WHEN the profile package is created THEN it SHALL contain only login and profile pages for SSO functionality
+2. WHEN a user accesses the profile login page THEN the system SHALL provide authentication via email/password and OAuth providers
 3. WHEN a user successfully authenticates THEN the system SHALL redirect them to their profile page or specified redirect URL
-4. WHEN a user accesses the app profile page THEN the system SHALL display user information and account management options
-5. WHEN external applications integrate with the app THEN the system SHALL provide OAuth authorization and token endpoints
+4. WHEN a user accesses the profile profile page THEN the system SHALL display user information and account management options
+5. WHEN external applications integrate with the profile THEN the system SHALL provide OAuth authorization and token endpoints
 
 ### Requirement 3
 
-**User Story:** As a developer, I want the SSO functionality moved from store to app, so that the store can focus on application generation while app handles authentication.
+**User Story:** As a developer, I want the SSO functionality moved from store to profile, so that the store can focus on application generation while profile handles authentication.
 
 #### Acceptance Criteria
 
 1. WHEN the refactoring is complete THEN the store package SHALL NOT contain any authentication pages or SSO provider logic
-2. WHEN the refactoring is complete THEN the app package SHALL contain all authentication islands, routes, and auth helpers from the store
-3. WHEN external applications need authentication THEN they SHALL integrate with the app package instead of the store
+2. WHEN the refactoring is complete THEN the profile package SHALL contain all authentication islands, routes, and auth helpers from the store
+3. WHEN external applications need authentication THEN they SHALL integrate with the profile package instead of the store
 4. WHEN the migration is complete THEN existing authentication flows SHALL continue to work without breaking changes
 5. WHEN both packages are running THEN they SHALL operate independently with separate concerns
 
@@ -56,24 +56,24 @@ This feature involves refactoring the existing store package and creating a new 
 
 ### Requirement 5
 
-**User Story:** As a developer, I want the app package to be lightweight and focused, so that it serves as a dedicated authentication service without unnecessary features.
+**User Story:** As a developer, I want the profile package to be lightweight and focused, so that it serves as a dedicated authentication service without unnecessary features.
 
 #### Acceptance Criteria
 
-1. WHEN the app package is created THEN it SHALL only include authentication-related functionality
-2. WHEN the app package runs THEN it SHALL have minimal dependencies and fast startup time
-3. WHEN the app package serves requests THEN it SHALL focus only on login, profile, and OAuth endpoints
-4. WHEN the app package is deployed THEN it SHALL be independently deployable from the store
-5. WHEN the app package handles authentication THEN it SHALL maintain the same security standards as the current store implementation
+1. WHEN the profile package is created THEN it SHALL only include authentication-related functionality
+2. WHEN the profile package runs THEN it SHALL have minimal dependencies and fast startup time
+3. WHEN the profile package serves requests THEN it SHALL focus only on login, profile, and OAuth endpoints
+4. WHEN the profile package is deployed THEN it SHALL be independently deployable from the store
+5. WHEN the profile package handles authentication THEN it SHALL maintain the same security standards as the current store implementation
 
 ### Requirement 6
 
-**User Story:** As a developer, I want proper configuration management between packages, so that both store and app can be configured independently while sharing common settings.
+**User Story:** As a developer, I want proper configuration management between packages, so that both store and profile can be configured independently while sharing common settings.
 
 #### Acceptance Criteria
 
 1. WHEN both packages are configured THEN they SHALL have separate environment configurations
 2. WHEN shared configuration is needed THEN the system SHALL use the shared package for common constants and types
-3. WHEN the app package needs database access THEN it SHALL use the same Supabase configuration pattern as other packages
+3. WHEN the profile package needs database access THEN it SHALL use the same Supabase configuration pattern as other packages
 4. WHEN the store package needs to call the compiler THEN it SHALL have proper configuration for compiler integration
 5. WHEN both packages are deployed THEN they SHALL be able to run on different ports and domains if needed

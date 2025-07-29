@@ -1,11 +1,11 @@
 #!/usr/bin/env -S deno run --allow-all
 
 /**
- * Concurrent development script for running both app and store packages
+ * Concurrent development script for running both profile and store packages
  * This script starts both packages in development mode simultaneously
  */
 
-import { colors } from "https://deno.land/std@0.224.0/fmt/colors.ts";
+import * as colors from "https://deno.land/std@0.224.0/fmt/colors.ts";
 
 interface ProcessInfo {
   name: string;
@@ -17,10 +17,10 @@ interface ProcessInfo {
 
 const processes: ProcessInfo[] = [
   {
-    name: "APP",
+    name: "PROFILE",
     command: ["deno", "task", "dev"],
-    cwd: "./packages/app",
-    port: 8001,
+    cwd: "./packages/profile",
+    port: 8002,
     color: colors.blue,
   },
   {
@@ -112,7 +112,7 @@ async function startProcess(processInfo: ProcessInfo): Promise<void> {
 
 function printHeader(): void {
   console.log(colors.bold(colors.cyan("\n🚀 Starting Development Environment\n")));
-  console.log(colors.gray("Running both app and store packages concurrently...\n"));
+  console.log(colors.gray("Running both profile and store packages concurrently...\n"));
   
   for (const process of processes) {
     console.log(

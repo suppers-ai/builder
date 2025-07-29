@@ -10,7 +10,7 @@ if (typeof globalThis.Deno !== "undefined") {
   supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
   supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
 
-  console.log("🔍 App package - Supabase client initialization (Server):");
+  console.log("🔍 Profile package - Supabase client initialization (Server):");
   console.log("  SUPABASE_URL:", supabaseUrl ? `${supabaseUrl.substring(0, 30)}...` : "❌ MISSING");
   console.log(
     "  SUPABASE_ANON_KEY:",
@@ -21,7 +21,7 @@ if (typeof globalThis.Deno !== "undefined") {
   supabaseUrl = (globalThis as any).SUPABASE_URL || "";
   supabaseAnonKey = (globalThis as any).SUPABASE_ANON_KEY || "";
 
-  console.log("🔍 App package - Supabase client initialization (Browser):");
+  console.log("🔍 Profile package - Supabase client initialization (Browser):");
   console.log("  SUPABASE_URL:", supabaseUrl ? "✓ Set" : "❌ Missing");
   console.log("  SUPABASE_ANON_KEY:", supabaseAnonKey ? "✓ Set" : "❌ Missing");
 }

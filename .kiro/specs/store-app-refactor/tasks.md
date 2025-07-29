@@ -1,29 +1,29 @@
 # Implementation Plan
 
-- [x] 1. Create app package structure and basic setup
-  - Create new `packages/app` directory with Fresh application structure
+- [x] 1. Create profile package structure and basic setup
+  - Create new `packages/profile` directory with Fresh application structure
   - Set up deno.json configuration with proper dependencies
   - Create basic routing structure with index, login, and profile routes
   - Configure Tailwind CSS and daisyUI for styling
   - _Requirements: 2.1, 2.2, 5.1, 5.4_
 
-- [x] 2. Move authentication functionality from store to app package
+- [x] 2. Move authentication functionality from store to profile package
 - [x] 2.1 Copy authentication islands and components
-  - Move LoginPageIsland.tsx from store to app package
-  - Move ProfilePageIsland.tsx from store to app package
+  - Move LoginPageIsland.tsx from store to profile package
+  - Move ProfilePageIsland.tsx from store to profile package
   - Move AuthCallbackHandler.tsx and OAuthHandler.tsx islands
   - Update imports to use @suppers/ui-lib components
   - _Requirements: 3.2, 3.4_
 
 - [x] 2.2 Copy authentication routes and handlers
-  - Move login.tsx, profile.tsx routes from store to app
-  - Move auth callback, logout, and oauth routes from store to app
+  - Move login.tsx, profile.tsx routes from store to profile
+  - Move auth callback, logout, and oauth routes from store to profile
   - Update route handlers to work with new package structure
   - _Requirements: 3.2, 3.4_
 
 - [x] 2.3 Copy authentication helpers and services
-  - Move auth-helpers.ts from store lib to app lib
-  - Move supabase-client.ts configuration to app package
+  - Move auth-helpers.ts from store lib to profile lib
+  - Move supabase-client.ts configuration to profile package
   - Update database types imports to use shared package
   - Create OAuth service using existing database types
   - _Requirements: 3.2, 3.4, 6.3_
@@ -91,7 +91,7 @@
   - Create application deletion and cleanup features
   - _Requirements: 4.3, 4.4_
 
-- [-] 6. Update app package for OAuth and SSO functionality
+- [-] 6. Update profile package for OAuth and SSO functionality
 - [x] 6.1 Enhance OAuth service implementation
   - Extend OAuth service to use Tables<"oauth_clients"> database types
   - Implement OAuth authorization code flow with proper state validation
@@ -114,10 +114,10 @@
   - _Requirements: 2.5, 5.5_
 
 - [x] 7. Configure package environments and dependencies
-- [x] 7.1 Set up app package configuration
-  - Configure app package deno.json with proper dependencies
+- [x] 7.1 Set up profile package configuration
+  - Configure profile package deno.json with proper dependencies
   - Set up environment variables for Supabase and OAuth configuration
-  - Create separate port configuration for app package (8001)
+  - Create separate port configuration for profile package (8002)
   - Configure CORS settings for cross-origin authentication requests
   - _Requirements: 6.1, 6.4, 6.5_
 
@@ -144,14 +144,14 @@
   - _Requirements: 6.5_
 
 - [x] 8.2 Create package documentation
-  - Update README.md for app package with authentication setup
+  - Update README.md for profile package with authentication setup
   - Update README.md for store package with marketplace functionality
   - Create migration guide for existing authentication users
   - Document OAuth integration steps for external applications
   - _Requirements: 6.5_
 
 - [x] 8.3 Implement testing for both packages
-  - Create unit tests for app package authentication flows
+  - Create unit tests for profile package authentication flows
   - Add integration tests for store package compiler integration
   - Test cross-package communication and OAuth flows
   - Create end-to-end tests for complete application generation workflow

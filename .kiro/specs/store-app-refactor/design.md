@@ -2,7 +2,7 @@
 
 ## Overview
 
-This design outlines the refactoring of the existing store package and creation of a new app package to better separate concerns. The store will become a web-based application marketplace and generator interface, while the app package will serve as a dedicated SSO authentication service.
+This design outlines the refactoring of the existing store package and creation of a new profile package to better separate concerns. The store will become a web-based application marketplace and generator interface, while the profile package will serve as a dedicated SSO authentication service.
 
 ## Architecture
 
@@ -18,7 +18,7 @@ graph TB
         S5[Compiler Integration]
     end
     
-    subgraph "App Package (SSO Service)"
+    subgraph "Profile Package (SSO Service)"
         A1[Login Page]
         A2[Profile Page]
         A3[OAuth Endpoints]
@@ -67,7 +67,7 @@ graph TB
   - Integration with compiler for app generation
   - Generated app management and download
 
-#### App Package (New)
+#### Profile Package (New)
 - **Purpose**: Dedicated SSO authentication service
 - **Core Features**:
   - Login/registration pages
@@ -140,7 +140,7 @@ interface CompilerService {
 }
 ```
 
-### App Package Components
+### Profile Package Components
 
 #### 1. Authentication Islands (using UI lib components)
 ```typescript
@@ -253,7 +253,7 @@ interface ApplicationTemplate {
 }
 ```
 
-### App Package Models (using database types)
+### Profile Package Models (using database types)
 
 #### 1. OAuth Client (uses database types)
 ```typescript
@@ -299,7 +299,7 @@ class GenerationErrorHandler {
 - Detailed error logs for debugging
 - Suggested fixes for common issues
 
-### App Package Error Handling
+### Profile Package Error Handling
 
 #### 1. Authentication Errors
 ```typescript
@@ -338,7 +338,7 @@ class AuthErrorHandler {
 - Template selection and preview
 - Responsive design testing
 
-### App Package Testing
+### Profile Package Testing
 
 #### 1. Unit Tests
 - Authentication helper functions
@@ -373,8 +373,8 @@ class AuthErrorHandler {
 
 ## Migration Strategy
 
-### Phase 1: Create App Package Structure
-1. Create new `packages/app` directory
+### Phase 1: Create Profile Package Structure
+1. Create new `packages/profile` directory
 2. Set up Fresh application structure
 3. Configure Deno configuration and dependencies
 4. Set up basic routing structure
@@ -398,7 +398,7 @@ class AuthErrorHandler {
 4. Configure cross-package communication
 
 ### Phase 5: Testing and Validation
-1. Test authentication flows in app package
+1. Test authentication flows in profile package
 2. Test app generation in store package
 3. Validate cross-package integration
 4. Performance and security testing
