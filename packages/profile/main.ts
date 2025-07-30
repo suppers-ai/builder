@@ -14,6 +14,8 @@ import {
 } from "./lib/middleware.ts";
 import { CleanupService } from "./lib/cleanup-service.ts";
 import { SECURITY_CONFIG } from "./lib/security-config.ts";
+import { dirname, fromFileUrl } from "@std/path/mod.ts";
+Deno.chdir(dirname(fromFileUrl(import.meta.url)));
 
 export const app = new App()
   // Add static file serving middleware
@@ -50,7 +52,7 @@ export const app = new App()
 await fsRoutes(app, {
   loadIsland: (path) => import(`./islands/${path}`),
   loadRoute: (path) => import(`./routes/${path}`),
-});
+});// Ensure the working directory is the same directory as this file
 
 // If this module is called directly, start the server
 if (import.meta.main) {
