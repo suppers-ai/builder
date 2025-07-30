@@ -1,0 +1,25 @@
+{
+  "name": "@suppers/cdn",
+  "version": "1.0.0",
+  "description": "CDN package for serving shared static assets across applications",
+  "exports": "./mod.ts",
+  "tasks": {
+    "dev": "deno run --allow-all --watch=static/,lib/ main.ts",
+    "start": "deno run --allow-all main.ts",
+    "test": "deno test --allow-all",
+    "test:watch": "deno test --allow-all --watch",
+    "check": "deno check **/*.ts",
+    "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "lint": "deno lint"
+  },
+  "imports": {
+    "@/": "./",
+    "@std/path": "https://deno.land/std@0.224.0/path/mod.ts"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}
