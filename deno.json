@@ -1,4 +1,5 @@
 {
+  "nodeModulesDir": "auto",
   "workspace": [
     "packages/compiler",
     "packages/ui-lib",
@@ -26,9 +27,6 @@
     "preact-render-to-string": "npm:preact-render-to-string@6.5.11",
     "@preact/signals": "npm:@preact/signals@2.2.1",
     "@preact/signals-core": "npm:@preact/signals-core@1.8.0",
-    "tailwindcss": "npm:tailwindcss@3.4.0",
-    "tailwindcss/": "npm:tailwindcss@3.4.0/",
-    "tailwindcss/plugin": "npm:tailwindcss@3.4.0/plugin.js",
     "zod": "https://esm.sh/zod@3.25.1",
     "lucide-preact": "https://esm.sh/lucide-preact@0.460.0",
     "$fresh/": "jsr:@fresh/core@2.0.0-alpha.49/",
