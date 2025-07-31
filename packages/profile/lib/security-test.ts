@@ -4,7 +4,7 @@
  * This script tests all the security features implemented in task 6.3
  */
 
-import { OAuthService } from "./oauth-service.ts";
+// OAuth service functionality moved to API package
 import { TokenManager } from "./token-manager.ts";
 import { OAUTH_ERRORS, SECURITY_CONFIG } from "./security-config.ts";
 

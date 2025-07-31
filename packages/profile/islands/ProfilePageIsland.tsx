@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { ProfileCard } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
-import type { User } from "@supabase/supabase-js";
+import type { User } from "../lib/api-client.ts";
 
 // Signals for reactive state
 const userSignal = signal<User | null>(null);

@@ -5,7 +5,7 @@ type FreshContext = {
 };
 
 type MiddlewareHandler = (req: Request, ctx: FreshContext) => Promise<Response>;
-import { OAuthService } from "./oauth-service.ts";
+// OAuth functionality moved to API package
 import { OAUTH_ERRORS, SECURITY_CONFIG, SECURITY_HEADERS } from "./security-config.ts";
 
 // Rate limiting store (in production, use Redis or similar)
@@ -255,26 +255,20 @@ export function requireValidToken(): MiddlewareHandler {
 
     const token = authHeader.substring(7);
 
-    try {
-      const user = await OAuthService.validateToken(token);
-      // Add user to context for use in handlers
-      ctx.state.user = user;
-      return await ctx.next();
-    } catch (error) {
-      return new Response(
-        JSON.stringify({
-          error: "invalid_token",
-          error_description: error instanceof Error ? error.message : "Invalid token",
-        }),
-        {
-          status: 401,
-          headers: {
-            "Content-Type": "application/json",
-            "WWW-Authenticate": 'Bearer realm="oauth"',
-          },
+    // Token validation now handled by API package
+    return new Response(
+      JSON.stringify({
+        error: "server_error",
+        error_description: "Token validation should use API package endpoints",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "WWW-Authenticate": 'Bearer realm="oauth"',
         },
-      );
-    }
+      },
+    );
   };
 }
 
@@ -338,22 +332,17 @@ export function validateOAuthClient(): MiddlewareHandler {
           );
         }
 
-        const client = await OAuthService.validateClientCredentials(clientId, clientSecret);
-        if (!client) {
-          return new Response(
-            JSON.stringify({
-              error: "invalid_client",
-              error_description: "Invalid client credentials",
-            }),
-            {
-              status: 401,
-              headers: { "Content-Type": "application/json" },
-            },
-          );
-        }
-
-        // Add client to context
-        ctx.state.client = client;
+        // Client validation now handled by API package
+        return new Response(
+          JSON.stringify({
+            error: "server_error",
+            error_description: "Client validation should use API package endpoints",
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          },
+        );
       } catch (error) {
         return new Response(
           JSON.stringify({

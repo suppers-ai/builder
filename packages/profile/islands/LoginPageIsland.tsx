@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
-import type { User } from "@supabase/supabase-js";
+import type { User } from "../lib/api-client.ts";
 import {
   Alert,
   Button,

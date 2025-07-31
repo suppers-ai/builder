@@ -78,21 +78,8 @@ export class AuthHelpers {
       console.log("✅ Logout successful - getCurrentUser throws error:", error.message);
     }
 
-    try {
-      // Also clear the Supabase session directly with global scope
-      const { supabase } = await import("./supabase-client.ts");
-      const { error: supabaseError } = await supabase.auth.signOut({ 
-        scope: 'global' // This clears all sessions everywhere
-      });
-      
-      if (supabaseError) {
-        console.warn("Supabase logout failed:", supabaseError.message);
-      } else {
-        console.log("✅ Supabase global logout successful");
-      }
-    } catch (error) {
-      console.warn("Supabase logout error:", error);
-    }
+    // Session clearing is now handled by API package
+    console.log("✅ Session clearing handled by API package");
 
     // Clear any localStorage and sessionStorage tokens
     if (typeof globalThis.localStorage !== "undefined") {
@@ -217,12 +204,7 @@ export class AuthHelpers {
    * Update user metadata
    */
   static async updateUser(data: UpdateUserData) {
-    // Use direct Supabase client for user metadata updates
-    const { supabase } = await import("./supabase-client.ts");
-    
-    const { error } = await supabase.auth.updateUser({
-      data: data
-    });
+    const { error } = await apiClient.auth.updateUser(data);
 
     if (error) {
       throw new Error(error.message);
@@ -235,54 +217,20 @@ export class AuthHelpers {
    * Upload user avatar
    */
   static async uploadAvatar(file: File, userId: string) {
-    // Use direct Supabase client for file uploads
-    const { supabase } = await import("./supabase-client.ts");
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}.${fileExt}`;
-    const filePath = `avatars/${fileName}`;
+    const { data, error } = await apiClient.storage.uploadAvatar(file, userId);
 
-    // Upload file to storage
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      throw new Error(uploadError.message);
+    if (error) {
+      throw new Error(error.message);
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
-
-    // Update user metadata with avatar URL
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { avatar_url: publicUrl }
-    });
-
-    if (updateError) {
-      throw new Error(updateError.message);
-    }
-
-    return publicUrl;
+    return data.publicUrl;
   }
 
   /**
    * Listen to auth state changes
    */
   static onAuthStateChange(callback: (event: string, session: Session | null) => void) {
-    // Use direct Supabase client for auth state changes
-    const initAuth = async () => {
-      const { supabase } = await import("./supabase-client.ts");
-
-      return supabase.auth.onAuthStateChange((event, session) => {
-        callback(event, session);
-      });
-    };
-
-    // Return a promise that resolves to the subscription
-    return initAuth();
+    return apiClient.auth.onAuthStateChange(callback);
   }
 
   /**
