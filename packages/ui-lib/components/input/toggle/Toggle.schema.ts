@@ -15,7 +15,7 @@ import {
 // Toggle-specific props
 const ToggleSpecificPropsSchema = z.object({
   checked: withMetadata(
-    z.boolean().default(false).describe("Whether the toggle is checked"),
+    z.boolean().optional().default(false).describe("Whether the toggle is checked"),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 

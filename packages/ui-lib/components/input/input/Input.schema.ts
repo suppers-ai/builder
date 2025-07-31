@@ -62,6 +62,7 @@ const InputSpecificPropsSchema = z.object({
 // Complete Input Props Schema
 export const InputPropsSchema = InputBaseSchema
   .merge(InputSpecificPropsSchema)
+  .partial() // Make all properties optional for better usability
   .describe("Text input fields for capturing user input with various styles and states");
 
 // Infer TypeScript type from schema

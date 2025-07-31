@@ -38,7 +38,7 @@ Deno.test("DateInput - disabled state", () => {
     disabled: true,
   }));
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("DateInput - enabled state", () => {
@@ -191,7 +191,7 @@ Deno.test("DateInput - disabled with value", () => {
   }));
   assertStringIncludes(html, 'value="2024-05-10"');
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("DateInput - ghost style with accent color", () => {

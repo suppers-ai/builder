@@ -15,13 +15,14 @@ export default function ProfilePageIsland() {
 
   // Check auth state on mount
   useEffect(() => {
+    // Check if this is an external SSO request in a popup
+    const isPopup = globalThis.window?.opener && globalThis.window?.opener !== globalThis.window;
+    const urlParams = new URLSearchParams(globalThis.location?.search || "");
+    const externalApp = urlParams.get("external_app");
+    const origin = urlParams.get("origin");
+
     const checkAuth = async () => {
       try {
-        // Check if this is an external SSO request in a popup
-        const isPopup = globalThis.window?.opener && globalThis.window?.opener !== globalThis.window;
-        const urlParams = new URLSearchParams(globalThis.location?.search || "");
-        const externalApp = urlParams.get("external_app");
-        const origin = urlParams.get("origin");
 
         console.log("🔵 Profile page: Auth check", { isPopup, externalApp, origin });
         console.log("🔵 Profile page: Current URL:", globalThis.location?.href);
@@ -290,7 +291,7 @@ export default function ProfilePageIsland() {
   }
 
   return (
-    <div class="min-h-screen bg-base-200 py-8">
+    <div class="min-h-screen bg-base-100 p-4">
       <ProfileCard
         user={userSignal.value}
         isLoading={authLoadingSignal.value || isLoading}

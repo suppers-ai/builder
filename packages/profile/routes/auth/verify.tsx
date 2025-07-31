@@ -1,4 +1,4 @@
-import { type PageProps } from "$fresh/runtime";
+import { type PageProps } from "fresh";
 
 export default function AuthVerify(props: PageProps) {
   // This component handles Supabase email verification redirects

@@ -1,4 +1,3 @@
-import { useState } from "preact/hooks";
 import { InputProps } from "./Input.schema.ts";
 
 export function Input({
@@ -102,18 +101,58 @@ export function Input({
     );
   }
 
-  // Password input with toggle
+  // Password input with optional toggle (for islands/client-side components)
   if (type === "password") {
-    const [isVisible, setIsVisible] = useState(false);
-    
-    const toggleVisibility = () => {
-      setIsVisible(!isVisible);
-    };
-    
-    return (
-      <div className="relative">
+    if (showPasswordToggle) {
+      // Return a wrapper div that can be enhanced with client-side functionality
+      return (
+        <div className="relative flex items-center">
+          <input
+            type="password"
+            class={`${inputClasses} flex-1`}
+            placeholder={getDefaultPlaceholder()}
+            value={value}
+            disabled={disabled}
+            id={id}
+            name={name}
+            defaultValue={defaultValue}
+            required={required}
+            autoComplete={getAutoComplete()}
+            onChange={onChange}
+            onFocus={onFocus}
+            onBlur={onBlur}
+            onInput={onInput}
+            {...props}
+          />
+          <button
+            type="button"
+            className="ml-2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            disabled={disabled}
+            aria-label="Toggle password visibility"
+            data-password-toggle="true"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
+            </svg>
+          </button>
+        </div>
+      );
+    } else {
+      // Simple password input without toggle
+      return (
         <input
-          type={isVisible ? "text" : "password"}
+          type="password"
           class={inputClasses}
           placeholder={getDefaultPlaceholder()}
           value={value}
@@ -129,51 +168,17 @@ export function Input({
           onInput={onInput}
           {...props}
         />
-        {showPasswordToggle && (
-          <button
-            type="button"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/50 hover:text-base-content transition-colors"
-            disabled={disabled}
-            onClick={toggleVisibility}
-            aria-label={isVisible ? "Hide password" : "Show password"}
-          >
-            {isVisible ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-                />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                />
-              </svg>
-            )}
-          </button>
-        )}
-      </div>
-    );
+      );
+    }
   }
 
   // Number input with increment/decrement controls
   if (type === "number") {
+    const stepValue = step || 1; // Default step for number inputs
+    
     const increment = () => {
       const currentValue = (value as number) || 0;
-      const stepValue = (step as number) || 1;
-      const newValue = currentValue + stepValue;
+      const newValue = currentValue + (stepValue as number);
       if (max === undefined || newValue <= (max as number)) {
         const event = new Event("change");
         Object.defineProperty(event, "target", {
@@ -186,8 +191,7 @@ export function Input({
 
     const decrement = () => {
       const currentValue = (value as number) || 0;
-      const stepValue = (step as number) || 1;
-      const newValue = currentValue - stepValue;
+      const newValue = currentValue - (stepValue as number);
       if (min === undefined || newValue >= (min as number)) {
         const event = new Event("change");
         Object.defineProperty(event, "target", {
@@ -212,14 +216,14 @@ export function Input({
           required={required}
           min={min}
           max={max}
-          step={step}
+          step={stepValue}
           onChange={onChange}
           onFocus={onFocus}
           onBlur={onBlur}
           onInput={onInput}
           {...props}
         />
-        <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex flex-col">
+        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col">
           <button
             type="button"
             className="text-xs text-base-content/50 hover:text-base-content disabled:cursor-not-allowed"
@@ -247,7 +251,7 @@ export function Input({
       <div className="relative">
         {showColorPreview && (
           <div
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded border border-base-300"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded border border-base-300"
             style={{ backgroundColor: (value as string) || "#000000" }}
           />
         )}

@@ -97,7 +97,7 @@ Deno.test("Select - not ghost (default)", () => {
 });
 
 Deno.test("Select - size variants", () => {
-  const sizes = ["xs", "sm", "md", "lg"];
+  const sizes = ["xs", "sm", "md", "lg", "xl"];
 
   sizes.forEach((size) => {
     const html = renderToString(Select({
@@ -109,7 +109,7 @@ Deno.test("Select - size variants", () => {
 });
 
 Deno.test("Select - color variants", () => {
-  const colors = ["primary", "secondary", "accent", "info", "success", "warning", "error"];
+  const colors = ["primary", "secondary", "accent", "neutral", "info", "success", "warning", "error"];
 
   colors.forEach((color) => {
     const html = renderToString(Select({
@@ -282,6 +282,23 @@ Deno.test("Select - complex option values", () => {
   assertStringIncludes(html, "Special Characters: @#$%");
   assertStringIncludes(html, 'value="123"');
   assertStringIncludes(html, "Numeric Label 123");
+});
+
+// DaisyUI 5 specific tests
+Deno.test("Select - DaisyUI 5 xl size", () => {
+  const html = renderToString(Select({
+    options: basicOptions,
+    size: "xl",
+  }));
+  assertStringIncludes(html, "select-xl");
+});
+
+Deno.test("Select - DaisyUI 5 neutral color", () => {
+  const html = renderToString(Select({
+    options: basicOptions,
+    color: "neutral",
+  }));
+  assertStringIncludes(html, "select-neutral");
 });
 
 // Snapshot tests

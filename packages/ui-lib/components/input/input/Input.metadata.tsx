@@ -88,10 +88,10 @@ const inputProps: ComponentProp[] = [
 
 export const inputMetadata: ComponentMetadata = {
   name: "Input",
-  description: "Text input fields for capturing user input with various styles and states",
+  description: "Text input fields for capturing user input with various styles and states, compatible with DaisyUI 5 and Tailwind 4",
   category: ComponentCategory.INPUT,
   path: "/components/input/input",
-  tags: ["input", "text", "form", "field"],
+  tags: ["input", "text", "form", "field", "daisyui-5", "tailwind-4"],
   relatedComponents: ["textarea", "button", "label"],
   interactive: true, // Inputs are inherently interactive
   preview: (
@@ -110,4 +110,8 @@ export const inputMetadata: ComponentMetadata = {
     "Combine with labels for better accessibility",
     "Use appropriate input types for better mobile keyboards",
     "Consider using validation states (success, error) for form feedback",
+    "Password inputs support optional toggle buttons for client-side enhancement",
+    "Number inputs include default step=1 and increment/decrement controls",
+    "Color inputs include preview swatches by default",
+    "Updated for DaisyUI 5 and Tailwind 4 compatibility with modern class patterns",
   ]};

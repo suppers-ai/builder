@@ -32,7 +32,9 @@ export function Card({
     side ? "card-side" : "",
     glass ? "glass" : "",
     bordered ? "card-bordered" : "",
-    "bg-base-100 shadow-xl",
+    "bg-base-100",
+    // Enhanced shadow for DaisyUI 5 - use shadow-xl as default, but allow override
+    className.includes("shadow-") ? "" : "shadow-xl",
     className,
   ].filter(Boolean).join(" ");
 

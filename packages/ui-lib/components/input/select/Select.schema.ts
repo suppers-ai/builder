@@ -54,7 +54,10 @@ export { SelectOptionSchema };
 
 // Infer TypeScript types from schemas
 export type SelectOption = z.infer<typeof SelectOptionSchema>;
-export type SelectProps = z.infer<typeof SelectPropsSchema>;
+export type SelectProps = Partial<z.infer<typeof SelectPropsSchema>> & {
+  children?: any; // ComponentChildren from preact
+  options: SelectOption[]; // Keep options as required
+};
 
 // Export validation functions
 export const validateSelectProps = (props: unknown): SelectProps => {

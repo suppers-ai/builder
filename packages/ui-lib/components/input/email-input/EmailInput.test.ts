@@ -38,7 +38,7 @@ Deno.test("EmailInput - disabled state", () => {
     disabled: true,
   }));
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("EmailInput - enabled state", () => {
@@ -187,7 +187,7 @@ Deno.test("EmailInput - disabled with value", () => {
   }));
   assertStringIncludes(html, 'value="readonly@example.com"');
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("EmailInput - ghost style with accent color", () => {

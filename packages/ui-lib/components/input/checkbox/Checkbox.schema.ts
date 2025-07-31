@@ -15,12 +15,12 @@ import {
 // Checkbox-specific props
 const CheckboxSpecificPropsSchema = z.object({
   checked: withMetadata(
-    z.boolean().default(false).describe("Whether the checkbox is checked"),
+    z.boolean().optional().default(false).describe("Whether the checkbox is checked"),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 
   indeterminate: withMetadata(
-    z.boolean().default(false).describe("Whether the checkbox is in indeterminate state"),
+    z.boolean().optional().default(false).describe("Whether the checkbox is in indeterminate state"),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 

@@ -1,12 +1,4 @@
-import { BaseComponentProps, ColorProps, DisabledProps, SizeProps } from "../../types.ts";
-
-export interface RadioProps extends BaseComponentProps, SizeProps, ColorProps, DisabledProps {
-  name?: string;
-  value?: string;
-  checked?: boolean;
-  label?: string;
-  onChange?: (event: Event) => void;
-}
+import { RadioProps } from "./Radio.schema.ts";
 
 export function Radio({
   class: className = "",

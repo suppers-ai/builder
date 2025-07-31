@@ -1,9 +1,4 @@
-import { BaseComponentProps, ColorProps, DisabledProps, SizeProps } from "../../types.ts";
-
-export interface ToggleProps extends BaseComponentProps, SizeProps, ColorProps, DisabledProps {
-  checked?: boolean;
-  onChange?: (event: Event) => void;
-}
+import { ToggleProps } from "./Toggle.schema.ts";
 
 export function Toggle({
   class: className = "",

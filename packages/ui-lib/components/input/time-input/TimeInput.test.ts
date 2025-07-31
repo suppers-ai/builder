@@ -45,7 +45,7 @@ Deno.test("TimeInput - disabled state", () => {
     disabled: true,
   }));
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("TimeInput - enabled state", () => {
@@ -200,7 +200,7 @@ Deno.test("TimeInput - disabled with value", () => {
   }));
   assertStringIncludes(html, 'value="15:00"');
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("TimeInput - ghost style with accent color", () => {

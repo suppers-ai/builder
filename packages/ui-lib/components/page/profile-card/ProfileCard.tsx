@@ -2,9 +2,12 @@ import { useState, useRef } from "preact/hooks";
 import { BaseComponentProps } from "../../types.ts";
 import { Button } from "../../action/button/Button.tsx";
 import { Input } from "../../input/input/Input.tsx";
+import { PasswordInput } from "../../input/password-input/PasswordInput.tsx";
 import { Alert } from "../../feedback/alert/Alert.tsx";
 import { Loading } from "../../feedback/loading/Loading.tsx";
 import { Select } from "../../input/select/Select.tsx";
+import { Avatar } from "../../display/avatar/Avatar.tsx";
+import { Card } from "../../display/card/Card.tsx";
 
 export interface User {
   id: string;
@@ -156,9 +159,27 @@ export function ProfileCard({
       .slice(0, 2);
   };
 
+  const getJoinedDate = () => {
+    if (!user?.created_at) return "Recently";
+    const date = new Date(user.created_at);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 30) {
+      return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months === 1 ? '' : 's'} ago`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years === 1 ? '' : 's'} ago`;
+    }
+  };
+
   if (!user) {
     return (
-      <div class={`max-w-2xl mx-auto p-6 ${className}`} id={id} {...props}>
+      <div class={`max-w-md mx-auto p-4 ${className}`} id={id} {...props}>
         <div class="bg-base-100 rounded-xl shadow-sm border border-base-200 p-8 text-center">
           <div class="text-base-content/50 mb-4">
             <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +194,7 @@ export function ProfileCard({
   }
 
   return (
-    <div class={`max-w-xl mx-auto p-4 space-y-4 ${className}`} id={id} {...props}>
+    <div class={`max-w-md mx-auto ${className}`} id={id} {...props}>
       {/* Messages */}
       {error && (
         <Alert color="error" class="mb-4">
@@ -186,89 +207,145 @@ export function ProfileCard({
         </Alert>
       )}
 
-      {/* Profile Card */}
-      <div class="bg-base-100 rounded-lg shadow-sm border border-base-200">
-        <div class="p-6">
-          {/* Header */}
-          <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center space-x-4">
-              {/* Avatar */}
-              <div class="relative group">
-                <button
-                  type="button"
-                  onClick={handleAvatarClick}
-                  class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center hover:bg-primary/20 transition-colors relative overflow-hidden"
-                  disabled={isLoading}
-                >
-                  {user.user_metadata?.avatar_url ? (
-                    <img 
-                      src={user.user_metadata.avatar_url} 
-                      alt="Profile" 
-                      class="w-14 h-14 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span class="text-xl font-semibold text-primary">
-                      {getInitials()}
-                    </span>
-                  )}
-                  {/* Hover overlay */}
-                  <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  class="hidden"
-                />
-              </div>
-              
-              {/* User Info */}
-              <div>
-                <h1 class="text-xl font-semibold text-base-content">
-                  {getDisplayName()}
-                </h1>
-                <p class="text-base-content/60 text-sm">
-                  {user.email}
-                </p>
-                {user.created_at && (
-                  <p class="text-base-content/40 text-xs mt-1">
-                    Member since {new Date(user.created_at).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
-            </div>
+      {/* Top Navigation Bar */}
+      <div class="flex items-center justify-between mb-6">
+        <button 
+          onClick={() => window.history.back()}
+          class="p-2 rounded-lg hover:bg-base-200 transition-colors"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button class="p-2 rounded-lg hover:bg-base-200 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </button>
+      </div>
 
-            {/* Actions */}
-            <div class="flex items-center space-x-3">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsEditing(!isEditing)}
-                disabled={isLoading}
-              >
-                {isEditing ? "Cancel" : "Edit"}
-              </Button>
-              <Button
-                size="sm"
-                color="error"
-                variant="outline"
-                onClick={onSignOut}
-                disabled={isLoading}
-              >
-                Sign Out
-              </Button>
-            </div>
-          </div>
+      {/* User Information Section */}
+      <div class="flex items-start gap-4 mb-8">
+        <div class="flex-shrink-0">
+          <button
+            type="button"
+            onClick={handleAvatarClick}
+            class="relative group"
+            disabled={isLoading}
+          >
+            <Avatar
+              src={user.user_metadata?.avatar_url}
+              alt="Profile"
+              initials={getInitials()}
+              size="xl"
+              class="w-20 h-20 ring-2 ring-base-300"
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              class="hidden"
+            />
+          </button>
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 class="text-xl font-bold text-base-content truncate">
+            {user.user_metadata?.firstName || getDisplayName()}
+          </h1>
+          <p class="text-sm text-base-content/60 truncate">
+            {user.user_metadata?.lastName || ""}
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-base-content/60">Joined</p>
+          <p class="text-sm font-semibold text-base-content">{getJoinedDate()}</p>
+        </div>
+      </div>
 
-          {/* Edit Form */}
-          {isEditing && (
-            <form onSubmit={handleEditSubmit} class="space-y-4 mb-6 pb-6 border-b border-base-200">
+      {/* Profile Section */}
+      <div class="mb-6">
+        <h2 class="text-lg font-semibold text-base-content mb-3">Profile</h2>
+        <div class="bg-base-100 rounded-lg border border-base-200">
+          <button 
+            onClick={() => setIsEditing(!isEditing)}
+            class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <div class="w-3 h-3 rounded-full bg-primary"></div>
+              </div>
+              <span class="text-base-content font-medium">Manage user</span>
+            </div>
+            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Settings Section */}
+      <div class="mb-8">
+        <h2 class="text-lg font-semibold text-base-content mb-3">Settings</h2>
+        <div class="bg-base-100 rounded-lg border border-base-200 space-y-px">
+          <button class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
+                <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.5 19.5a2 2 0 01-2-2v-11a2 2 0 012-2h11a2 2 0 012 2v11a2 2 0 01-2 2h-11z" />
+                </svg>
+              </div>
+              <span class="text-base-content font-medium">Notifications</span>
+            </div>
+            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <button class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
+                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              </div>
+              <span class="text-base-content font-medium">Dark Mode</span>
+            </div>
+            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Sign Out Button */}
+      <Button
+        onClick={onSignOut}
+        disabled={isLoading}
+        variant="outline"
+        color="error"
+        wide
+        className="w-full"
+      >
+        Sign Out
+      </Button>
+
+      {/* Edit Form Modal */}
+      {isEditing && (
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div class="bg-base-100 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-semibold text-base-content">Edit Profile</h3>
+              <button 
+                onClick={() => setIsEditing(false)}
+                class="p-2 hover:bg-base-200 rounded-lg transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-base-content mb-2">
@@ -281,8 +358,10 @@ export function ProfileCard({
                       ...prev, 
                       firstName: (e.target as HTMLInputElement).value 
                     }))}
-                    placeholder="First name"
-                    size="sm"
+                    placeholder="Enter first name"
+                    size="md"
+                    bordered={true}
+                    class="w-full"
                   />
                 </div>
                 <div>
@@ -296,11 +375,12 @@ export function ProfileCard({
                       ...prev, 
                       lastName: (e.target as HTMLInputElement).value 
                     }))}
-                    placeholder="Last name"
-                    size="sm"
+                    placeholder="Enter last name"
+                    class="w-full"
                   />
                 </div>
               </div>
+              
               <div>
                 <label class="block text-sm font-medium text-base-content mb-2">
                   Display Name
@@ -312,10 +392,11 @@ export function ProfileCard({
                     ...prev, 
                     displayName: (e.target as HTMLInputElement).value 
                   }))}
-                  placeholder="Display name"
-                  size="sm"
+                  placeholder="How you'd like to be displayed"
+                  class="w-full"
                 />
               </div>
+              
               <div>
                 <label class="block text-sm font-medium text-base-content mb-2">
                   Theme Preference
@@ -326,139 +407,130 @@ export function ProfileCard({
                     ...prev, 
                     theme: (e.target as HTMLSelectElement).value 
                   }))}
-                  size="sm"
+                  options={themes.map(theme => ({
+                    value: theme.value,
+                    label: theme.label
+                  }))}
                   class="w-full"
-                >
-                  {themes.map(theme => (
-                    <option key={theme.value} value={theme.value}>
-                      {theme.label}
-                    </option>
-                  ))}
-                </Select>
-                <p class="text-xs text-base-content/60 mt-1">
-                  Your theme preference will be saved and applied across all apps
-                </p>
+                />
               </div>
-              <div class="flex justify-end space-x-3">
+              
+              <div class="flex gap-3 pt-4">
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="sm"
+                  variant="outline"
                   onClick={() => setIsEditing(false)}
+                  class="flex-1"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   color="primary"
-                  size="sm"
                   disabled={isLoading}
                   loading={isLoading}
+                  class="flex-1"
                 >
-                  Save Changes
+                  Save
                 </Button>
               </div>
             </form>
-          )}
-
-          {/* Security Section */}
-          <div class="pt-6">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <h3 class="text-lg font-medium text-base-content">Security</h3>
-                <p class="text-sm text-base-content/60">Manage your password and security settings</p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowPasswordForm(!showPasswordForm)}
-                disabled={isLoading}
-              >
-                Change Password
-              </Button>
-            </div>
-
-            {/* Password Change Form */}
-            {showPasswordForm && (
-              <form onSubmit={handlePasswordSubmit} class="space-y-4 mt-4 p-4 bg-base-50 rounded-lg">
-                <div>
-                  <label class="block text-sm font-medium text-base-content mb-2">
-                    Current Password
-                  </label>
-                  <Input
-                    type="password"
-                    value={passwordData.currentPassword}
-                    onInput={(e) => setPasswordData(prev => ({ 
-                      ...prev, 
-                      currentPassword: (e.target as HTMLInputElement).value 
-                    }))}
-                    placeholder="Current password"
-                    size="sm"
-                    showPasswordToggle
-                    required
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-base-content mb-2">
-                    New Password
-                  </label>
-                  <Input
-                    type="password"
-                    value={passwordData.newPassword}
-                    onInput={(e) => setPasswordData(prev => ({ 
-                      ...prev, 
-                      newPassword: (e.target as HTMLInputElement).value 
-                    }))}
-                    placeholder="New password"
-                    size="sm"
-                    showPasswordToggle
-                    required
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-base-content mb-2">
-                    Confirm New Password
-                  </label>
-                  <Input
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onInput={(e) => setPasswordData(prev => ({ 
-                      ...prev, 
-                      confirmPassword: (e.target as HTMLInputElement).value 
-                    }))}
-                    placeholder="Confirm new password"
-                    size="sm"
-                    showPasswordToggle
-                    required
-                  />
-                </div>
-                <div class="flex justify-end space-x-3">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowPasswordForm(false);
-                      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    color="primary"
-                    size="sm"
-                    disabled={isLoading || passwordData.newPassword !== passwordData.confirmPassword}
-                    loading={isLoading}
-                  >
-                    Update Password
-                  </Button>
-                </div>
-              </form>
-            )}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Password Change Modal */}
+      {showPasswordForm && (
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div class="bg-base-100 rounded-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-semibold text-base-content">Change Password</h3>
+              <button 
+                onClick={() => setShowPasswordForm(false)}
+                class="p-2 hover:bg-base-200 rounded-lg transition-colors"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <form onSubmit={handlePasswordSubmit} class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  Current Password
+                </label>
+                <PasswordInput
+                  value={passwordData.currentPassword}
+                  onInput={(e) => setPasswordData(prev => ({ 
+                    ...prev, 
+                    currentPassword: (e.target as HTMLInputElement).value 
+                  }))}
+                  placeholder="Enter your current password"
+                  class="w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  New Password
+                </label>
+                <PasswordInput
+                  value={passwordData.newPassword}
+                  onInput={(e) => setPasswordData(prev => ({ 
+                    ...prev, 
+                    newPassword: (e.target as HTMLInputElement).value 
+                  }))}
+                  placeholder="Enter your new password"
+                  class="w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  Confirm New Password
+                </label>
+                <PasswordInput
+                  value={passwordData.confirmPassword}
+                  onInput={(e) => setPasswordData(prev => ({ 
+                    ...prev, 
+                    confirmPassword: (e.target as HTMLInputElement).value 
+                  }))}
+                  placeholder="Confirm your new password"
+                  class="w-full"
+                  required
+                />
+                {passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
+                  <p class="text-error text-xs mt-1">Passwords do not match</p>
+                )}
+              </div>
+              
+              <div class="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowPasswordForm(false);
+                    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                  }}
+                  class="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  color="primary"
+                  disabled={isLoading || passwordData.newPassword !== passwordData.confirmPassword || !passwordData.currentPassword || !passwordData.newPassword}
+                  loading={isLoading}
+                  class="flex-1"
+                >
+                  Update
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

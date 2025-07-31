@@ -28,6 +28,7 @@ export function Accordion({
   ...props
 }: AccordionProps) {
   const accordionClasses = [
+    "collapse-container",
     className,
   ].filter(Boolean).join(" ");
 
@@ -56,10 +57,11 @@ export function Accordion({
           return (
             <div
               key={item.id}
-              class="collapse collapse-arrow !mb-0"
+              class="collapse collapse-arrow bg-base-200 mb-2"
             >
               <input
                 type="checkbox"
+                class="sr-only"
                 checked={isOpen}
                 onChange={() => !item.disabled && handleToggle(item.id)}
                 disabled={item.disabled}
@@ -92,7 +94,7 @@ export function Accordion({
           return (
             <div
               key={item.id}
-              class="collapse collapse-arrow !mb-0"
+              class="collapse collapse-arrow bg-base-200 mb-2"
             >
               <input
                 type={multiple ? "checkbox" : "radio"}

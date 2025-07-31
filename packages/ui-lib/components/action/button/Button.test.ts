@@ -35,12 +35,12 @@ Deno.test("Button - size variants", () => {
 });
 
 Deno.test("Button - variant styles", () => {
-  const variants = ["outline", "ghost", "link"];
+  const variants = ["outline", "ghost", "link"] as const;
 
   variants.forEach((variant) => {
     const html = renderToString(Button({
       children: "Test",
-      variant: variant as string,
+      variant: variant,
     }));
     assertStringIncludes(html, `btn-${variant}`);
   });

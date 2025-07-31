@@ -385,46 +385,53 @@ export default function LoginPageIsland({
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        backgroundImage: "url(/backgrounds/hero-gradient.webp)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
+    <div className="min-h-screen flex items-center justify-center p-4 bg-base-300">
       <div className="max-w-md w-full">
-        <Card bordered class="bg-base-100 shadow-xl">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="mb-4">
-              <img
-                src={theme === "dark" ? "/logos/long_dark.png" : "/logos/long_light.png"}
-                alt="Suppers"
-                className="h-12 mx-auto"
-              />
+        <Card bordered class="bg-base-100 shadow-xl border-base-200 overflow-hidden">
+          <div className="px-6 pt-6 pb-4">
+            <div className="text-center">
+                              <div className="mb-4">
+                  <img
+                    src={theme === "dark" ? "/logos/long_dark.png" : "/logos/long_light.png"}
+                    alt="Suppers"
+                    className="h-8 mx-auto"
+                  />
+                </div>
+              <h1 className="text-xl font-semibold text-base-content">
+                {showForgotPassword
+                  ? "Reset Password"
+                  : isLogin
+                  ? "Welcome Back"
+                  : "Join Suppers"}
+              </h1>
+              <p className="text-sm text-base-content/60">
+                {showForgotPassword
+                  ? "Enter your email to reset your password"
+                  : isLogin
+                  ? "Sign in to your account to continue"
+                  : "Create your account to get started"}
+              </p>
             </div>
-            <p className="text-base-content/70">
-              {showForgotPassword
-                ? "Reset your password"
-                : isLogin
-                ? "Sign in to your account"
-                : "Create a new account"}
-            </p>
           </div>
 
-          {/* Error/Success Messages */}
+          <div className="px-6 pb-6">
+            {/* Error/Success Messages */}
           {error && (
-            <div className="mb-4">
-              <Alert color="error">
+            <div className="mb-6">
+              <Alert color="error" class="bg-error/5 border-error/20 text-error">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.186-.833-2.956 0L3.858 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
                 {error}
               </Alert>
             </div>
           )}
           {success && (
-            <div className="mb-4">
-              <Alert color="success">
+            <div className="mb-6">
+              <Alert color="success" class="bg-success/5 border-success/20 text-success">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 {success}
               </Alert>
             </div>
@@ -437,7 +444,7 @@ export default function LoginPageIsland({
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-base-content mb-1"
+                    className="block text-sm text-base-content mb-1"
                   >
                     Email address
                   </label>
@@ -448,6 +455,8 @@ export default function LoginPageIsland({
                       handleInputChange("email", (e.target as HTMLInputElement).value)}
                     required
                     placeholder="Enter your email"
+                    size="md"
+                    bordered={true}
                     class="w-full"
                   />
                 </div>
@@ -458,7 +467,11 @@ export default function LoginPageIsland({
                   loading={isLoading}
                   color="primary"
                   wide
+                  class="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 font-semibold"
                 >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
                   {isLoading ? "Sending..." : "Send Reset Email"}
                 </Button>
 
@@ -467,20 +480,24 @@ export default function LoginPageIsland({
                   onClick={handleHideForgotPassword}
                   variant="ghost"
                   wide
+                  class="text-base-content/60 hover:text-base-content font-medium"
                 >
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
                   Back to Sign In
                 </Button>
               </form>
             )
             : (
               /* Login/Register Form */
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
-                  <>
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label
                         htmlFor="firstName"
-                        className="block text-sm font-medium text-base-content mb-1"
+                        className="block text-sm text-base-content mb-1"
                       >
                         First Name
                       </label>
@@ -491,7 +508,9 @@ export default function LoginPageIsland({
                         onInput={(e) =>
                           handleInputChange("firstName", (e.target as HTMLInputElement).value)}
                         required
-                        placeholder="First Name"
+                        placeholder="Enter first name"
+                        size="md"
+                        bordered={true}
                         class="w-full"
                       />
                     </div>
@@ -499,7 +518,7 @@ export default function LoginPageIsland({
                     <div>
                       <label
                         htmlFor="lastName"
-                        className="block text-sm font-medium text-base-content mb-1"
+                        className="block text-sm text-base-content mb-1"
                       >
                         Last Name
                       </label>
@@ -510,17 +529,19 @@ export default function LoginPageIsland({
                         onInput={(e) =>
                           handleInputChange("lastName", (e.target as HTMLInputElement).value)}
                         required
-                        placeholder="Last Name"
+                        placeholder="Enter last name"
+                        size="md"
+                        bordered={true}
                         class="w-full"
                       />
                     </div>
-                  </>
+                  </div>
                 )}
 
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-base-content mb-1"
+                    className="block text-sm text-base-content mb-1"
                   >
                     Email address
                   </label>
@@ -530,7 +551,9 @@ export default function LoginPageIsland({
                     onInput={(e) =>
                       handleInputChange("email", (e.target as HTMLInputElement).value)}
                     required
-                    placeholder="Email address"
+                    placeholder="Enter your email address"
+                    size="md"
+                    bordered={true}
                     class="w-full"
                   />
                 </div>
@@ -538,7 +561,7 @@ export default function LoginPageIsland({
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-base-content mb-1"
+                    className="block text-sm text-base-content mb-1"
                   >
                     Password
                   </label>
@@ -548,7 +571,9 @@ export default function LoginPageIsland({
                     onInput={(e) =>
                       handleInputChange("password", (e.target as HTMLInputElement).value)}
                     required
-                    placeholder="Password"
+                    placeholder="Enter your password"
+                    size="md"
+                    bordered={true}
                     class="w-full"
                   />
                 </div>
@@ -557,7 +582,7 @@ export default function LoginPageIsland({
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-base-content mb-1"
+                      className="block text-sm text-base-content mb-1"
                     >
                       Confirm Password
                     </label>
@@ -567,9 +592,14 @@ export default function LoginPageIsland({
                       onInput={(e) =>
                         handleInputChange("confirmPassword", (e.target as HTMLInputElement).value)}
                       required
-                      placeholder="Confirm Password"
+                      placeholder="Confirm your password"
+                      size="md"
+                      bordered={true}
                       class="w-full"
                     />
+                    {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                      <p class="text-error text-xs mt-1">Passwords do not match</p>
+                    )}
                   </div>
                 )}
 
@@ -587,24 +617,29 @@ export default function LoginPageIsland({
 
           {!showForgotPassword && (
             <>
-              {/* OAuth Buttons */}
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-base-300" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-base-100 text-base-content/50">Or continue with</span>
+                    <span className="px-3 bg-base-100 text-base-content/60">Or continue with</span>
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid grid-cols-2 gap-3">
                   <Button
                     type="button"
                     onClick={() => handleOAuthLogin("google")}
                     variant="outline"
                     size="sm"
                   >
+                    <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
                     Google
                   </Button>
 
@@ -614,13 +649,15 @@ export default function LoginPageIsland({
                     variant="outline"
                     size="sm"
                   >
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                    </svg>
                     GitHub
                   </Button>
                 </div>
               </div>
 
-              {/* Toggle Mode & Forgot Password */}
-              <div className="mt-6 text-center space-y-2">
+              <div className="mt-6 text-center space-y-2 border-t border-base-300 pt-4 flex gap-4">
                 <Button
                   type="button"
                   onClick={handleToggleMode}
@@ -631,20 +668,19 @@ export default function LoginPageIsland({
                 </Button>
 
                 {isLogin && (
-                  <div>
-                    <Button
-                      type="button"
-                      onClick={handleShowForgotPassword}
-                      variant="link"
-                      size="sm"
-                    >
-                      Forgot your password?
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleShowForgotPassword}
+                    variant="link"
+                    size="sm"
+                  >
+                    Forgot your password?
+                  </Button>
                 )}
               </div>
             </>
           )}
+          </div>
         </Card>
       </div>
     </div>

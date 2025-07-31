@@ -68,7 +68,7 @@ Deno.test("Badge - variant styles", () => {
   variants.forEach((variant) => {
     const html = renderToString(h(Badge, {
       children: "Test",
-      variant: variant as string,
+      variant: variant as any,
     }));
     assertStringIncludes(html, `badge-${variant}`);
   });
@@ -109,7 +109,7 @@ Deno.test("Badge - positioned badge all positions", () => {
   positions.forEach((position) => {
     const html = renderToString(h(Badge, {
       content: "Badge",
-      position: position as string,
+      position: position as "top-right" | "top-left" | "bottom-right" | "bottom-left",
       children: h("div", {}, "Content"),
     }));
     assertStringIncludes(html, "indicator");

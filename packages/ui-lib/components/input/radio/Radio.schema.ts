@@ -23,7 +23,7 @@ const RadioSpecificPropsSchema = z.object({
     .describe("Value of the radio button"),
 
   checked: withMetadata(
-    z.boolean().default(false).describe("Whether the radio button is selected"),
+    z.boolean().optional().default(false).describe("Whether the radio button is selected"),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 

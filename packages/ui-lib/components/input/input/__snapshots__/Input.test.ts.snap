@@ -1,31 +1,31 @@
 export const snapshot = {};
 
-snapshot[`InputDisplay - HTML snapshot basic 1`] = `'<input type="text" class="input input-md input-bordered" placeholder value/>'`;
+snapshot[`Input - HTML snapshot basic 1`] = `'<input type="text" class="input input-md input-bordered" placeholder/>'`;
 
-snapshot[`InputDisplay - HTML snapshot with all props 1`] = `'<input type="email" class="input input-lg input-primary input-bordered" placeholder="Enter your email address" value="user@example.com" id="email-input"/>'`;
+snapshot[`Input - HTML snapshot with all props 1`] = `'<input type="email" class="input input-lg input-primary input-bordered" placeholder="Enter your email address" value="user@example.com" id="email-input" autocomplete="email"/>'`;
 
-snapshot[`InputDisplay - HTML snapshot variants 1`] = `
-'<input type="text" class="input input-sm input-bordered" placeholder="Text input" value/>
-<input type="email" class="input input-md input-primary input-bordered" placeholder="Email input" value/>
-<input type="password" class="input input-md input-secondary input-bordered" placeholder="Password input" value/>
-<input type="number" class="input input-lg input-bordered" placeholder="Number input" value/>
-<input type="text" class="input input-md input-bordered input-ghost" placeholder="Ghost input" value/>
+snapshot[`Input - HTML snapshot variants 1`] = `
+'<input type="text" class="input input-sm input-bordered" placeholder="Text input"/>
+<input type="email" class="input input-md input-primary input-bordered" placeholder="Email input" autocomplete="email"/>
+<input type="password" class="input input-md input-secondary input-bordered" placeholder="Password input" autocomplete="current-password"/>
+<div class="relative"><input type="number" class="input input-lg input-bordered pr-8" placeholder="Number input" step="1"/><div class="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col"><button type="button" class="text-xs text-base-content/50 hover:text-base-content disabled:cursor-not-allowed">▲</button><button type="button" class="text-xs text-base-content/50 hover:text-base-content disabled:cursor-not-allowed">▼</button></div></div>
+<input type="text" class="input input-md input-bordered input-ghost" placeholder="Ghost input"/>
 <input type="text" class="input input-md input-bordered" placeholder value="Disabled input" disabled/>'
 `;
 
-snapshot[`InputDisplay - HTML snapshot sizes 1`] = `
-'<input type="text" class="input input-xs input-primary input-bordered" placeholder="Size xs" value/>
-<input type="text" class="input input-sm input-primary input-bordered" placeholder="Size sm" value/>
-<input type="text" class="input input-md input-primary input-bordered" placeholder="Size md" value/>
-<input type="text" class="input input-lg input-primary input-bordered" placeholder="Size lg" value/>'
+snapshot[`Input - HTML snapshot sizes 1`] = `
+'<input type="text" class="input input-xs input-primary input-bordered" placeholder="Size xs"/>
+<input type="text" class="input input-sm input-primary input-bordered" placeholder="Size sm"/>
+<input type="text" class="input input-md input-primary input-bordered" placeholder="Size md"/>
+<input type="text" class="input input-lg input-primary input-bordered" placeholder="Size lg"/>'
 `;
 
-snapshot[`InputDisplay - HTML snapshot colors 1`] = `
-'<input type="text" class="input input-md input-primary input-bordered" placeholder="Color primary" value/>
-<input type="text" class="input input-md input-secondary input-bordered" placeholder="Color secondary" value/>
-<input type="text" class="input input-md input-accent input-bordered" placeholder="Color accent" value/>
-<input type="text" class="input input-md input-info input-bordered" placeholder="Color info" value/>
-<input type="text" class="input input-md input-success input-bordered" placeholder="Color success" value/>
-<input type="text" class="input input-md input-warning input-bordered" placeholder="Color warning" value/>
-<input type="text" class="input input-md input-error input-bordered" placeholder="Color error" value/>'
+snapshot[`Input - HTML snapshot colors 1`] = `
+'<input type="text" class="input input-md input-primary input-bordered" placeholder="Color primary"/>
+<input type="text" class="input input-md input-secondary input-bordered" placeholder="Color secondary"/>
+<input type="text" class="input input-md input-accent input-bordered" placeholder="Color accent"/>
+<input type="text" class="input input-md input-info input-bordered" placeholder="Color info"/>
+<input type="text" class="input input-md input-success input-bordered" placeholder="Color success"/>
+<input type="text" class="input input-md input-warning input-bordered" placeholder="Color warning"/>
+<input type="text" class="input input-md input-error input-bordered" placeholder="Color error"/>'
 `;

@@ -111,6 +111,50 @@ const selectExamples: ComponentExample[] = [
       disabled: true
     }
   },
+  {
+    title: "Extra Large Select",
+    description: "DaisyUI 5 extra large size variant",
+    props: {
+      options: [
+        {
+          value: "xl1",
+          label: "Extra Large Option 1"
+        },
+        {
+          value: "xl2",
+          label: "Extra Large Option 2"
+        },
+        {
+          value: "xl3",
+          label: "Extra Large Option 3"
+        }
+      ],
+      placeholder: "Choose XL option...",
+      size: "xl"
+    }
+  },
+  {
+    title: "Neutral Color Select",
+    description: "DaisyUI 5 neutral color theme",
+    props: {
+      options: [
+        {
+          value: "neutral1",
+          label: "Neutral Option 1"
+        },
+        {
+          value: "neutral2",
+          label: "Neutral Option 2"
+        },
+        {
+          value: "neutral3",
+          label: "Neutral Option 3"
+        }
+      ],
+      placeholder: "Choose neutral option...",
+      color: "neutral"
+    }
+  },
 ];
 
 const selectProps: ComponentProp[] = [
@@ -129,12 +173,12 @@ const selectProps: ComponentProp[] = [
     description: "Placeholder text when no option is selected"},
   {
     name: "size",
-    type: "'xs' | 'sm' | 'md' | 'lg'",
+    type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
     description: "Size variant of the select",
     default: "md"},
   {
     name: "color",
-    type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
+    type: "'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error'",
     description: "Color theme for the select"},
   {
     name: "bordered",
@@ -171,13 +215,13 @@ export const selectMetadata: ComponentMetadata = {
   interactive: true, // User can select options
   preview: (
     <div class="flex gap-4">
-      <select class="select select-bordered w-full max-w-xs">
+      <select class="select w-full max-w-xs">
         <option disabled selected>Choose...</option>
         <option>Option 1</option>
         <option>Option 2</option>
         <option>Option 3</option>
       </select>
-      <select class="select select-bordered select-primary w-full max-w-xs">
+      <select class="select select-primary w-full max-w-xs">
         <option disabled>Choose...</option>
         <option selected>Primary</option>
         <option>Secondary</option>

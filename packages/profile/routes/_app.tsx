@@ -1,4 +1,4 @@
-import { type PageProps } from "$fresh/runtime";
+import { type PageProps } from "fresh";
 
 export default function App({ Component }: PageProps) {
   // Inject environment variables for browser

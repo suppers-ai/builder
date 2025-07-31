@@ -89,5 +89,6 @@ export const buttonMetadata: ComponentMetadata = {
     "Outline buttons work well for secondary actions",
     "Ghost buttons are ideal for tertiary actions or navigation",
     "Loading state automatically disables the button to prevent multiple submissions",
+    "Updated for DaisyUI 5 compatibility with enhanced loading spinner patterns",
   ]
 };

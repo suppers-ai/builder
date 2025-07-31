@@ -30,6 +30,8 @@ export function Select({
     "select",
     size ? `select-${size}` : "",
     color ? `select-${color}` : "",
+    // Note: DaisyUI 5 select has borders by default, select-bordered class may not be needed
+    // but keeping for backward compatibility if it exists
     bordered ? "select-bordered" : "",
     ghost ? "select-ghost" : "",
     "w-full max-w-xs",

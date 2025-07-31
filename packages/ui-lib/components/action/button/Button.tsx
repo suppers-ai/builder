@@ -39,7 +39,7 @@ export function Button({
     glass ? "glass" : "",
     noAnimation ? "no-animation" : "",
     active ? "btn-active" : "",
-    loading ? "loading" : "",
+    loading ? "loading loading-spinner" : "",
     className,
   ].filter(Boolean).join(" ");
 

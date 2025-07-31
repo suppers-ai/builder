@@ -43,7 +43,7 @@ Deno.test("PasswordInput - disabled state", () => {
     disabled: true,
   }));
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("PasswordInput - enabled state", () => {
@@ -213,7 +213,7 @@ Deno.test("PasswordInput - disabled with value", () => {
   }));
   assertStringIncludes(html, 'value="readonly123"');
   assertStringIncludes(html, "disabled");
-  assertStringIncludes(html, "input-disabled");
+  // Note: DaisyUI uses HTML disabled attribute, not input-disabled class
 });
 
 Deno.test("PasswordInput - ghost style with accent color", () => {

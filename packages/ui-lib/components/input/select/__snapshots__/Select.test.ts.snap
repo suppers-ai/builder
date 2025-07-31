@@ -1,19 +1,19 @@
 export const snapshot = {};
 
-snapshot[`SelectDisplay - HTML snapshot basic 1`] = `'<select class="select select-md select-bordered w-full max-w-xs"><option disabled selected>Select option</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>'`;
+snapshot[`Select - HTML snapshot basic 1`] = `'<select class="select select-md select-bordered w-full max-w-xs"><option disabled selected>Select option</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>'`;
 
-snapshot[`SelectDisplay - HTML snapshot with selection 1`] = `'<select class="select select-md select-primary select-bordered w-full max-w-xs"><option value="option1">Option 1</option><option selected value="option2">Option 2</option><option value="option3">Option 3</option></select>'`;
+snapshot[`Select - HTML snapshot with selection 1`] = `'<select class="select select-md select-primary select-bordered w-full max-w-xs"><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>'`;
 
-snapshot[`SelectDisplay - HTML snapshot with disabled options 1`] = `'<select class="select select-lg select-warning select-bordered w-full max-w-xs"><option disabled selected>Choose wisely</option><option value="active1">Active Option 1</option><option value="inactive1" disabled>Inactive Option 1</option><option value="active2">Active Option 2</option><option value="inactive2" disabled>Inactive Option 2</option></select>'`;
+snapshot[`Select - HTML snapshot with disabled options 1`] = `'<select class="select select-lg select-warning select-bordered w-full max-w-xs"><option disabled selected>Choose wisely</option><option value="active1">Active Option 1</option><option value="inactive1" disabled>Inactive Option 1</option><option value="active2">Active Option 2</option><option value="inactive2" disabled>Inactive Option 2</option></select>'`;
 
-snapshot[`SelectDisplay - HTML snapshot all sizes 1`] = `
+snapshot[`Select - HTML snapshot all sizes 1`] = `
 '<select class="select select-xs select-primary select-bordered w-full max-w-xs"><option disabled selected>Size xs</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>
 <select class="select select-sm select-primary select-bordered w-full max-w-xs"><option disabled selected>Size sm</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>
 <select class="select select-md select-primary select-bordered w-full max-w-xs"><option disabled selected>Size md</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>
 <select class="select select-lg select-primary select-bordered w-full max-w-xs"><option disabled selected>Size lg</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>'
 `;
 
-snapshot[`SelectDisplay - HTML snapshot all colors 1`] = `
+snapshot[`Select - HTML snapshot all colors 1`] = `
 '<select class="select select-md select-primary select-bordered w-full max-w-xs"><option disabled selected>Color primary</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>
 <select class="select select-md select-secondary select-bordered w-full max-w-xs"><option disabled selected>Color secondary</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>
 <select class="select select-md select-accent select-bordered w-full max-w-xs"><option disabled selected>Color accent</option><option value="option1">Option 1</option><option value="option2">Option 2</option><option value="option3">Option 3</option></select>

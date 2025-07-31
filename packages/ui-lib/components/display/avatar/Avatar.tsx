@@ -35,23 +35,30 @@ export function Avatar({
 
   const avatarClasses = [
     "avatar",
-    "relative",
+    online ? "online" : "",
+    offline ? "offline" : "",
     className,
   ].filter(Boolean).join(" ");
 
-  const wrapperClasses = [
-    getSizeClasses(size),
+  const imageClasses = [
+    ring ? "ring ring-primary ring-offset-base-100 ring-offset-2" : "",
     "rounded-full",
-    ring ? "ring-primary ring-offset-base-100 ring-2 ring-offset-2" : "",
+    getSizeClasses(size),
   ].filter(Boolean).join(" ");
 
-  const imageClasses = "w-full h-full rounded-full";
+  const placeholderClasses = [
+    "placeholder",
+    ring ? "ring ring-primary ring-offset-base-100 ring-offset-2" : "",
+    "rounded-full",
+    getSizeClasses(size),
+    "bg-neutral text-neutral-content",
+  ].filter(Boolean).join(" ");
 
   const content = src
     ? <img src={src} alt={alt} class={imageClasses} />
     : (
-      <div class="bg-neutral text-neutral-content !flex items-center justify-center w-full h-full rounded-full">
-        <span class={size === "xs" ? "text-[8px]" : size === "sm" ? "text-xs" : size === "lg" ? "text-lg" : size === "xl" ? "text-2xl" : "text-xl"}>
+      <div class={placeholderClasses}>
+        <span class={size === "xs" ? "text-xs" : size === "sm" ? "text-sm" : "text-xl"}>
           {initials || placeholder || "?"}
         </span>
       </div>
@@ -59,14 +66,12 @@ export function Avatar({
 
   return (
     <div class={avatarClasses} id={id} {...props}>
-      <div class={wrapperClasses}>
-        {content}
-      </div>
+      {content}
       {online && (
         <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
       )}
       {offline && (
-        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-gray-400 ring-2 ring-white"></span>
+        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-slate-400 ring-2 ring-white"></span>
       )}
     </div>
   );
