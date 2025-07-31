@@ -1,7 +1,7 @@
 import { apiClient, type Session, type User } from "./api-client.ts";
-import type { OAuthProvider } from "@suppers/shared";
 import type {
   AuthState,
+  OAuthProvider,
   ResetPasswordData,
   SignInData,
   SignUpData,
@@ -49,10 +49,97 @@ export class AuthHelpers {
    * Sign out the current user
    */
   static async signOut() {
-    const { error } = await apiClient.auth.signOut();
+    console.log("🔴 Starting logout process...");
+    
+    try {
+      // First, call the API logout endpoint
+      console.log("🔴 Calling API logout endpoint...");
+      const { error } = await apiClient.auth.signOut();
 
-    if (error) {
-      throw new Error(error.message);
+      if (error) {
+        console.warn("❌ API logout failed:", error.message);
+      } else {
+        console.log("✅ API logout successful");
+      }
+    } catch (error) {
+      console.warn("❌ API logout error:", error);
+    }
+    
+    // Test if logout worked by calling getCurrentUser
+    try {
+      console.log("🔴 Testing if logout worked - calling getCurrentUser...");
+      const user = await AuthHelpers.getCurrentUser();
+      if (user) {
+        console.error("❌ LOGOUT FAILED - getCurrentUser still returns user:", user.email);
+      } else {
+        console.log("✅ Logout successful - getCurrentUser returns null");
+      }
+    } catch (error) {
+      console.log("✅ Logout successful - getCurrentUser throws error:", error.message);
+    }
+
+    try {
+      // Also clear the Supabase session directly with global scope
+      const { supabase } = await import("./supabase-client.ts");
+      const { error: supabaseError } = await supabase.auth.signOut({ 
+        scope: 'global' // This clears all sessions everywhere
+      });
+      
+      if (supabaseError) {
+        console.warn("Supabase logout failed:", supabaseError.message);
+      } else {
+        console.log("✅ Supabase global logout successful");
+      }
+    } catch (error) {
+      console.warn("Supabase logout error:", error);
+    }
+
+    // Clear any localStorage and sessionStorage tokens
+    if (typeof globalThis.localStorage !== "undefined") {
+      globalThis.localStorage.removeItem("access_token");
+      globalThis.localStorage.removeItem("refresh_token");
+      globalThis.localStorage.removeItem("expires_at");
+      globalThis.localStorage.removeItem("token_type");
+      globalThis.localStorage.removeItem("user_data");
+      
+      // Clear any Supabase-specific storage keys
+      globalThis.localStorage.removeItem("supabase.auth.token");
+      globalThis.localStorage.removeItem("sb-localhost-auth-token");
+      
+      // Clear any keys that might contain session data
+      const keysToRemove = [];
+      for (let i = 0; i < globalThis.localStorage.length; i++) {
+        const key = globalThis.localStorage.key(i);
+        if (key && (key.includes("supabase") || key.includes("auth") || key.includes("session"))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => globalThis.localStorage.removeItem(key));
+      
+      console.log("🧹 Cleared localStorage tokens and Supabase data");
+    }
+    
+    // Also clear sessionStorage
+    if (typeof globalThis.sessionStorage !== "undefined") {
+      const sessionKeysToRemove = [];
+      for (let i = 0; i < globalThis.sessionStorage.length; i++) {
+        const key = globalThis.sessionStorage.key(i);
+        if (key && (key.includes("supabase") || key.includes("auth") || key.includes("session"))) {
+          sessionKeysToRemove.push(key);
+        }
+      }
+      sessionKeysToRemove.forEach(key => globalThis.sessionStorage.removeItem(key));
+      
+      console.log("🧹 Cleared sessionStorage auth data");
+    }
+    
+    // Force clear the apiClient token as well
+    try {
+      const { apiClient } = await import("./api-client.ts");
+      apiClient.setToken(null);
+      console.log("🧹 Cleared apiClient token");
+    } catch (error) {
+      console.warn("Failed to clear apiClient token:", error);
     }
   }
 

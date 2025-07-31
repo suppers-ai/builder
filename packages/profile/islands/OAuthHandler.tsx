@@ -1,13 +1,13 @@
 import { useEffect, useState } from "preact/hooks";
 import { Alert, Button, Card, Loading } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
-import type { OAuthProvider } from "@suppers/shared/schemas/auth";
+import type { OAuthProvider } from "@suppers/shared";
 
 interface OAuthHandlerProps {
   url: string;
 }
 
-export function OAuthHandler({ url }: OAuthHandlerProps) {
+export default function OAuthHandler({ url }: OAuthHandlerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

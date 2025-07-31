@@ -16,8 +16,8 @@
     "@std/": "https://deno.land/std@0.224.0/",
     "zod": "https://esm.sh/zod@3.25.1",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.3",
-    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
-    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime"
+    "preact/jsx-runtime": "npm:preact@10.27.0/jsx-runtime",
+    "preact/jsx-dev-runtime": "npm:preact@10.27.0/jsx-dev-runtime"
   },
   "compilerOptions": {
     "lib": ["dom", "dom.asynciterable", "deno.ns"],

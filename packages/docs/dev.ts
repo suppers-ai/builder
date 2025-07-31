@@ -2,6 +2,7 @@
 import { loadSync } from "@std/dotenv";
 import { Builder } from "fresh/dev";
 import { tailwind } from "@fresh/plugin-tailwind";
+import { PORTS } from "@suppers/shared";
 
 // Load environment variables
 try {
@@ -10,8 +11,10 @@ try {
     defaultsPath: "../../.env",
     export: true,
   });
+  console.log('env variables loaded')
 } catch {
   // Ignore if no env files
+  console.log('No env variables found')
 }
 
 const builder = new Builder({ target: "safari12" });
@@ -26,6 +29,6 @@ if (Deno.args.includes("build")) {
 } else {
   // Start the development server
   await builder.listen(() => import("./main.ts").then(m => m.app), {
-    port: parseInt(Deno.env.get("DOCS_PORT") || "8002"),
+    port: parseInt(Deno.env.get("DOCS_PORT") || PORTS.DOCS.toString()),
   });
 }

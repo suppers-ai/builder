@@ -1,4 +1,5 @@
 import type { Database } from "@suppers/shared/generated/database-types";
+import { getPackageUrl } from "./cross-package-urls.ts";
 
 export type User = {
   id: string;
@@ -187,7 +188,7 @@ class ApiClient {
     },
 
     resetPassword: async (email: string): Promise<{ error: Error | null }> => {
-      const origin = globalThis.location?.origin || "http://localhost:8000";
+      const origin = globalThis.location?.origin || getPackageUrl("STORE");
       const result = await this.request(`/api/v1/auth/reset-password?origin=${encodeURIComponent(origin)}`, {
         method: "POST",
         body: JSON.stringify({ email }),
@@ -218,7 +219,7 @@ class ApiClient {
       provider: string,
       redirectTo?: string,
     ): Promise<{ data: any; error: Error | null }> => {
-      const origin = globalThis.location?.origin || "http://localhost:8000";
+      const origin = globalThis.location?.origin || getPackageUrl("STORE");
       const result = await this.request(`/api/v1/auth/oauth?origin=${encodeURIComponent(origin)}`, {
         method: "POST",
         body: JSON.stringify({ provider, redirectTo }),

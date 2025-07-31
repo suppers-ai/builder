@@ -1,5 +1,6 @@
 #!/usr/bin/env deno run -A
-import { App, fsRoutes, staticFiles } from "fresh";
+import { App, staticFiles } from "fresh";
+import { fsRoutes } from "fresh/dev";
 
 export const app = new App()
   // Add static file serving middleware

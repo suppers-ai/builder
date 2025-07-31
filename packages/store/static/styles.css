@@ -1,57 +1,143 @@
-/* Store Package Styles */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "daisyui";
+/* Custom styles for the development environment */
 
-/* Custom styles for the store package */
-.store-container {
-  @apply min-h-screen bg-base-200;
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  overflow-x: hidden;
 }
 
-.store-card {
-  @apply bg-base-100 shadow-lg rounded-lg p-6;
+html {
+  overflow-x: hidden;
 }
 
-.store-header {
-  @apply text-center mb-8;
+/* Code highlighting */
+
+pre {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
 }
 
-.store-title {
-  @apply text-3xl font-bold text-primary mb-2;
+/* Ensure spinners are visible */
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 
-.store-subtitle {
-  @apply text-lg text-base-content/70;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.store-form {
-  @apply space-y-6;
+/* Line clamp utility for text truncation */
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.store-button {
-  @apply w-full btn btn-primary;
+/* Component grid responsive layout */
+
+.card-grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  width: 100%;
+  overflow-x: hidden;
 }
 
-.store-link {
-  @apply link link-primary;
+@media (min-width: 480px) {
+  .card-grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-/* Theme transitions */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+@media (min-width: 768px) {
+  .card-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
 }
 
-/* Loading states */
-.store-loading {
-  @apply flex items-center justify-center p-8;
+@media (min-width: 1024px) {
+  .card-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
 }
 
-/* Error states */
-.store-error {
-  @apply alert alert-error mb-4;
+@media (min-width: 1280px) {
+  .card-grid-responsive {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+  }
 }
 
-/* Success states */
-.store-success {
-  @apply alert alert-success mb-4;
+/* Ensure grid items don't overflow */
+
+.card-grid-responsive > * {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Hero background using actual image */
+
+.hero-gradient-bg {
+  background-image: url("/backgrounds/hero-gradient.webp");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add subtle overlay for better text readability */
+
+.hero-gradient-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* Ensure text remains readable over the image */
+
+.hero-gradient-bg .hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Sidebar aware layout - CSS-only approach to prevent flickering */
+
+.sidebar-aware-layout {
+  /* Default: assume sidebar is open on desktop */
+  margin-left: 0;
+  /* Add smooth transition for sidebar open/close */
+  transition: margin-left 200ms ease-out;
+}
+
+@media (min-width: 1024px) {
+  .sidebar-aware-layout {
+    margin-left: 320px;
+    /* 80 * 4 = 320px (w-80) */
+  }
+
+  /* When sidebar is closed, remove the margin */
+
+  body.sidebar-closed .sidebar-aware-layout {
+    margin-left: 0;
+  }
 }

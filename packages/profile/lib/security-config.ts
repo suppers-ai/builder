@@ -1,6 +1,7 @@
 /**
  * Security configuration for OAuth and authentication endpoints
  */
+import { PORTS } from "../../shared/constants/ports.ts";
 
 export interface SecurityConfig {
   oauth: {
@@ -55,9 +56,10 @@ export const SECURITY_CONFIG: SecurityConfig = {
   security: {
     requireHttps: Deno.env.get("DENO_ENV") === "production",
     allowedOrigins: [
-      "http://localhost:3000",
-      "http://localhost:8000",
-      "http://localhost:8001",
+      "http://localhost:3000", // Legacy support
+      `http://localhost:${PORTS.STORE}`,
+      `http://localhost:${PORTS.PROFILE}`,
+      `http://localhost:${PORTS.DOCS}`,
       ...(Deno.env.get("ALLOWED_ORIGINS")?.split(",") || []),
     ],
     csrfProtection: true,

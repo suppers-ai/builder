@@ -4,7 +4,7 @@
  */
 
 import { useSignal, useSignalEffect } from "@preact/signals";
-import { Progress, Alert, Button, Card } from "@suppers/ui-lib";
+import { Alert, Button, Card, Progress } from "@suppers/ui-lib";
 import type { GenerationResult } from "@suppers/shared";
 
 export interface GenerationProgressProps {
@@ -73,7 +73,7 @@ export default function GenerationProgress({
   // Update steps based on current progress
   useSignalEffect(() => {
     const newSteps = [...steps.value];
-    
+
     if (progress >= 0 && progress < 25) {
       newSteps[0].status = "active";
       newSteps[0].progress = (progress / 25) * 100;
@@ -99,12 +99,12 @@ export default function GenerationProgress({
       newSteps[3].status = "active";
       newSteps[3].progress = ((progress - 75) / 25) * 100;
     } else if (progress >= 100) {
-      newSteps.forEach(step => {
+      newSteps.forEach((step) => {
         step.status = "completed";
         step.progress = 100;
       });
     }
-    
+
     steps.value = newSteps;
   });
 
@@ -112,7 +112,7 @@ export default function GenerationProgress({
   useSignalEffect(() => {
     if (result && !result.success && result.errors) {
       const newSteps = [...steps.value];
-      const activeStep = newSteps.find(step => step.status === "active");
+      const activeStep = newSteps.find((step) => step.status === "active");
       if (activeStep) {
         activeStep.status = "error";
         activeStep.error = result.errors[0];
@@ -153,16 +153,26 @@ export default function GenerationProgress({
       <Card>
         <div class="card-body">
           <h3 class="card-title">
-            {isGenerating ? "Generating Application..." : result?.success ? "Generation Complete!" : "Generation Failed"}
+            {isGenerating
+              ? "Generating Application..."
+              : result?.success
+              ? "Generation Complete!"
+              : "Generation Failed"}
           </h3>
-          
+
           <div class="space-y-4">
-            <Progress 
-              value={progress} 
+            <Progress
+              value={progress}
               max={100}
-              class={`progress ${result?.success ? 'progress-success' : result && !result.success ? 'progress-error' : 'progress-primary'}`}
+              class={`progress ${
+                result?.success
+                  ? "progress-success"
+                  : result && !result.success
+                  ? "progress-error"
+                  : "progress-primary"
+              }`}
             />
-            
+
             <div class="flex justify-between text-sm">
               <span class="text-base-content/70">{currentStep}</span>
               <span class="font-medium">{Math.round(progress)}%</span>
@@ -175,12 +185,12 @@ export default function GenerationProgress({
       <Card>
         <div class="card-body">
           <h4 class="font-semibold mb-4">Generation Steps</h4>
-          
+
           <div class="space-y-3">
             {steps.value.map((step) => (
               <div key={step.id} class={`flex items-center space-x-3 ${getStepClass(step)}`}>
                 <span class="text-lg">{getStepIcon(step)}</span>
-                
+
                 <div class="flex-1">
                   <div class="flex items-center justify-between">
                     <span class="font-medium">{step.name}</span>
@@ -188,17 +198,17 @@ export default function GenerationProgress({
                       <span class="text-xs">{Math.round(step.progress)}%</span>
                     )}
                   </div>
-                  
+
                   <p class="text-sm opacity-70">{step.description}</p>
-                  
+
                   {step.status === "active" && (
-                    <Progress 
-                      value={step.progress} 
+                    <Progress
+                      value={step.progress}
                       max={100}
                       class="progress progress-primary progress-xs mt-1"
                     />
                   )}
-                  
+
                   {step.error && (
                     <Alert variant="error" class="mt-2">
                       <span class="text-sm">{step.error}</span>
@@ -215,103 +225,111 @@ export default function GenerationProgress({
       {result && (
         <Card>
           <div class="card-body">
-            {result.success ? (
-              <div class="space-y-4">
-                <Alert variant="success">
-                  <div>
-                    <h4 class="font-semibold">Application Generated Successfully!</h4>
-                    <p class="text-sm mt-1">
-                      Your application "{result.applicationName}" has been generated and is ready to use.
-                    </p>
-                  </div>
-                </Alert>
+            {result.success
+              ? (
+                <div class="space-y-4">
+                  <Alert variant="success">
+                    <div>
+                      <h4 class="font-semibold">Application Generated Successfully!</h4>
+                      <p class="text-sm mt-1">
+                        Your application "{result.applicationName}" has been generated and is ready
+                        to use.
+                      </p>
+                    </div>
+                  </Alert>
 
-                <div class="bg-base-200 rounded-lg p-4">
-                  <h5 class="font-medium mb-2">Generated Application Details</h5>
-                  <div class="space-y-1 text-sm">
-                    <div><strong>Name:</strong> {result.applicationName}</div>
-                    <div><strong>Output Path:</strong> {result.outputPath}</div>
+                  <div class="bg-base-200 rounded-lg p-4">
+                    <h5 class="font-medium mb-2">Generated Application Details</h5>
+                    <div class="space-y-1 text-sm">
+                      <div>
+                        <strong>Name:</strong> {result.applicationName}
+                      </div>
+                      <div>
+                        <strong>Output Path:</strong> {result.outputPath}
+                      </div>
+                    </div>
+                  </div>
+
+                  {result.warnings && result.warnings.length > 0 && (
+                    <Alert variant="warning">
+                      <div>
+                        <h5 class="font-medium">Warnings</h5>
+                        <ul class="text-sm mt-1 list-disc list-inside">
+                          {result.warnings.map((warning, index) => <li key={index}>{warning}</li>)}
+                        </ul>
+                      </div>
+                    </Alert>
+                  )}
+
+                  <div class="flex gap-2">
+                    {onDownload && (
+                      <Button
+                        variant="primary"
+                        onClick={() => onDownload(result)}
+                      >
+                        Download Application
+                      </Button>
+                    )}
+
+                    {onStartOver && (
+                      <Button
+                        variant="ghost"
+                        onClick={onStartOver}
+                      >
+                        Generate Another
+                      </Button>
+                    )}
                   </div>
                 </div>
-
-                {result.warnings && result.warnings.length > 0 && (
-                  <Alert variant="warning">
+              )
+              : (
+                <div class="space-y-4">
+                  <Alert variant="error">
                     <div>
-                      <h5 class="font-medium">Warnings</h5>
-                      <ul class="text-sm mt-1 list-disc list-inside">
-                        {result.warnings.map((warning, index) => (
-                          <li key={index}>{warning}</li>
+                      <h4 class="font-semibold">Generation Failed</h4>
+                      <p class="text-sm mt-1">
+                        There was an error generating your application. Please review the errors
+                        below and try again.
+                      </p>
+                    </div>
+                  </Alert>
+
+                  {result.errors && result.errors.length > 0 && (
+                    <div class="bg-error/10 border border-error/20 rounded-lg p-4">
+                      <h5 class="font-medium text-error mb-2">Errors</h5>
+                      <ul class="space-y-1">
+                        {result.errors.map((error, index) => (
+                          <li key={index} class="text-sm text-error/80 flex items-start">
+                            <span class="mr-2">•</span>
+                            <span>{error}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
-                  </Alert>
-                )}
-
-                <div class="flex gap-2">
-                  {onDownload && (
-                    <Button 
-                      variant="primary" 
-                      onClick={() => onDownload(result)}
-                    >
-                      Download Application
-                    </Button>
                   )}
-                  
-                  {onStartOver && (
-                    <Button 
-                      variant="ghost" 
-                      onClick={onStartOver}
-                    >
-                      Generate Another
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div class="space-y-4">
-                <Alert variant="error">
-                  <div>
-                    <h4 class="font-semibold">Generation Failed</h4>
-                    <p class="text-sm mt-1">
-                      There was an error generating your application. Please review the errors below and try again.
-                    </p>
-                  </div>
-                </Alert>
 
-                {result.errors && result.errors.length > 0 && (
-                  <div class="bg-error/10 border border-error/20 rounded-lg p-4">
-                    <h5 class="font-medium text-error mb-2">Errors</h5>
-                    <ul class="space-y-1">
-                      {result.errors.map((error, index) => (
-                        <li key={index} class="text-sm text-error/80 flex items-start">
-                          <span class="mr-2">•</span>
-                          <span>{error}</span>
-                        </li>
-                      ))}
+                  <div class="space-y-2">
+                    <h5 class="font-medium">Common Solutions</h5>
+                    <ul class="text-sm space-y-1 text-base-content/70">
+                      <li>• Check that all required fields are filled out correctly</li>
+                      <li>
+                        • Ensure your application name contains only letters, numbers, and hyphens
+                      </li>
+                      <li>• Verify that all selected components are available</li>
+                      <li>• Try using a different application name if there's a conflict</li>
                     </ul>
                   </div>
-                )}
 
-                <div class="space-y-2">
-                  <h5 class="font-medium">Common Solutions</h5>
-                  <ul class="text-sm space-y-1 text-base-content/70">
-                    <li>• Check that all required fields are filled out correctly</li>
-                    <li>• Ensure your application name contains only letters, numbers, and hyphens</li>
-                    <li>• Verify that all selected components are available</li>
-                    <li>• Try using a different application name if there's a conflict</li>
-                  </ul>
+                  {onStartOver && (
+                    <Button
+                      variant="primary"
+                      onClick={onStartOver}
+                    >
+                      Try Again
+                    </Button>
+                  )}
                 </div>
-
-                {onStartOver && (
-                  <Button 
-                    variant="primary" 
-                    onClick={onStartOver}
-                  >
-                    Try Again
-                  </Button>
-                )}
-              </div>
-            )}
+              )}
           </div>
         </Card>
       )}

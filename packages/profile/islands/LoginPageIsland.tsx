@@ -26,6 +26,8 @@ export default function LoginPageIsland({
   initialMode = "login",
   redirectTo = "/profile",
 }: LoginPageIslandProps) {
+  console.log("🔵 LoginPageIsland: Component loaded", { initialMode, redirectTo, currentUrl: globalThis.location?.href });
+  
   const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -44,12 +46,64 @@ export default function LoginPageIsland({
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("🔴 LoginPage: Checking if user is logged in...");
         const user = await AuthHelpers.getCurrentUser();
+        console.log("🔴 LoginPage: getCurrentUser result:", user ? `User: ${user.email}` : "No user");
         userSignal.value = user;
 
         if (user) {
-          // Redirect if already logged in
-          globalThis.location.href = redirectTo;
+          // Check if this is an external SSO request first
+          const isPopup = globalThis.window?.opener && globalThis.window?.opener !== globalThis.window;
+          const urlParams = new URLSearchParams(globalThis.location.search);
+          const externalApp = urlParams.get("external_app");
+          const origin = urlParams.get("origin");
+
+          if (isPopup && externalApp && origin) {
+            console.log("🔵 LoginPage: User already logged in - handling external SSO directly");
+            
+            try {
+              const session = await AuthHelpers.getCurrentSession();
+              if (session) {
+                const message = {
+                  type: "SSO_SUCCESS",
+                  accessToken: session.access_token,
+                  refreshToken: session.refresh_token,
+                  user: session.user,
+                  expiresIn: session.expires_in
+                };
+                
+                console.log("🔵 LoginPage: Sending SSO success message to parent:", message);
+                globalThis.window?.opener?.postMessage(message, origin);
+                
+                // Close popup
+                setTimeout(() => {
+                  console.log("🔵 LoginPage: Closing SSO popup");
+                  globalThis.window?.close();
+                }, 500);
+                return; // Don't continue with normal redirect
+              }
+            } catch (error) {
+              console.error("❌ LoginPage: Error handling external SSO for already logged in user:", error);
+              const errorMessage = {
+                type: "SSO_ERROR",
+                error: error instanceof Error ? error.message : "Unknown error"
+              };
+              globalThis.window?.opener?.postMessage(errorMessage, origin);
+              globalThis.window?.close();
+              return;
+            }
+          }
+          
+          // Normal redirect if not external SSO - preserve external SSO params if they exist
+          if (externalApp && origin) {
+            // Preserve external SSO parameters in the redirect
+            const redirectUrl = new URL(redirectTo, globalThis.location.origin);
+            redirectUrl.searchParams.set("external_app", externalApp);
+            redirectUrl.searchParams.set("origin", origin);
+            globalThis.location.href = redirectUrl.toString();
+          } else {
+            globalThis.location.href = redirectTo;
+          }
         }
       } catch (err) {
         console.log("No authenticated user");
@@ -124,15 +178,77 @@ export default function LoginPageIsland({
     try {
       if (isLogin) {
         // Login
-        await AuthHelpers.signIn({
+        const loginResult = await AuthHelpers.signIn({
           email: formData.email,
           password: formData.password,
         });
         setSuccess("Login successful! Redirecting...");
 
         // Redirect after successful login
-        setTimeout(() => {
-          globalThis.location.href = redirectTo;
+        setTimeout(async () => {
+          // Check if we're in a popup window for external SSO
+          const isPopup = globalThis.window?.opener && globalThis.window?.opener !== globalThis.window;
+          const urlParams = new URLSearchParams(globalThis.location.search);
+          const externalApp = urlParams.get("external_app");
+          const origin = urlParams.get("origin");
+          
+          console.log("🔵 Profile: Post-login redirect check:", {
+            isPopup,
+            externalApp,
+            origin,
+            currentUrl: globalThis.location.href
+          });
+          
+          if (isPopup && externalApp && origin) {
+            console.log("🔵 Profile: Handling external SSO success for app:", externalApp);
+            console.log("🔵 Profile: Target origin:", origin);
+            
+            try {
+              // Use session from login result instead of making another API call
+              const session = loginResult.session;
+              console.log("🔵 Profile: Using session from login result:", { 
+                hasSession: !!session, 
+                hasUser: !!session?.user,  
+                userEmail: session?.user?.email
+              });
+              
+              if (session) {
+                const message = {
+                  type: "SSO_SUCCESS",
+                  accessToken: session.access_token,
+                  refreshToken: session.refresh_token,
+                  user: session.user,
+                  expiresIn: session.expires_in
+                };
+                
+                console.log("🔵 Profile: Sending SSO success message to parent:", message);
+                globalThis.window?.opener?.postMessage(message, origin);
+                
+                // Small delay then close
+                setTimeout(() => {
+                  console.log("🔵 Profile: Closing popup window");
+                  globalThis.window?.close();
+                }, 500);
+              } else {
+                throw new Error("No session found after login");
+              }
+            } catch (error) {
+              console.error("❌ Profile: Error sending SSO success:", error);
+              const errorMessage = {
+                type: "SSO_ERROR",
+                error: error instanceof Error ? error.message : "Unknown error"
+              };
+              globalThis.window?.opener?.postMessage(errorMessage, origin);
+              globalThis.window?.close();
+            }
+          } else if (isPopup) {
+            // Regular popup close
+            console.log("🔵 Profile: Regular popup close (no external SSO)");
+            globalThis.window?.close();
+          } else {
+            console.log("🔵 Profile: Regular redirect to:", redirectTo);
+            globalThis.location.href = redirectTo;
+          }
         }, 1000);
       } else {
         // Register
@@ -154,8 +270,43 @@ export default function LoginPageIsland({
           );
         } else if (result.user && result.user.email_confirmed_at) {
           setSuccess("Account created and verified! Redirecting...");
-          setTimeout(() => {
-            globalThis.location.href = redirectTo;
+          setTimeout(async () => {
+            // Check if we're in a popup window for external SSO
+            const isPopup = globalThis.window?.opener && globalThis.window?.opener !== globalThis.window;
+            const urlParams = new URLSearchParams(globalThis.location.search);
+            const externalApp = urlParams.get("external_app");
+            const origin = urlParams.get("origin");
+            
+            if (isPopup && externalApp && origin) {
+              try {
+                // Use session from registration result instead of making another API call
+                const session = result.session;
+                if (session) {
+                  const message = {
+                    type: "SSO_SUCCESS",
+                    accessToken: session.access_token,
+                    refreshToken: session.refresh_token,
+                    user: session.user,
+                    expiresIn: session.expires_in
+                  };
+                  globalThis.window?.opener?.postMessage(message, origin);
+                  setTimeout(() => globalThis.window?.close(), 500);
+                } else {
+                  throw new Error("No session found after registration");
+                }
+              } catch (error) {
+                const errorMessage = {
+                  type: "SSO_ERROR",
+                  error: error instanceof Error ? error.message : "Unknown error"
+                };
+                globalThis.window?.opener?.postMessage(errorMessage, origin);
+                globalThis.window?.close();
+              }
+            } else if (isPopup) {
+              globalThis.window?.close();
+            } else {
+              globalThis.location.href = redirectTo;
+            }
           }, 1000);
         } else {
           setSuccess("Account created! Please check your email for verification.");
@@ -171,12 +322,38 @@ export default function LoginPageIsland({
   const handleOAuthLogin = async (provider: "google" | "github") => {
     try {
       setError(null);
-      const currentUrl = new URL(globalThis.location.href);
-      const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
-      callbackUrl.searchParams.set("redirect_to", redirectTo);
-
-      await AuthHelpers.signInWithOAuth(provider, callbackUrl.toString());
+      
+      // Check if we're in a popup window opened for external SSO
+      const isPopup = globalThis.window?.opener && globalThis.window?.opener !== globalThis.window;
+      const urlParams = new URLSearchParams(globalThis.location.search);
+      const externalApp = urlParams.get("external_app");
+      const origin = urlParams.get("origin");
+      
+      console.log("🔵 Profile: OAuth login attempt:", {
+        provider,
+        isPopup,
+        externalApp,
+        origin,
+        redirectTo
+      });
+      
+      if (isPopup && externalApp && origin) {
+        // External SSO - build callback URL that preserves the external SSO parameters
+        const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
+        callbackUrl.searchParams.set("redirect_to", globalThis.location.href); // Keep current URL with params
+        
+        console.log("🔵 Profile: External SSO OAuth callback URL:", callbackUrl.toString());
+        await AuthHelpers.signInWithOAuth(provider, callbackUrl.toString());
+      } else {
+        // Normal flow - same origin callback
+        const callbackUrl = new URL("/auth/callback", globalThis.location.origin);
+        callbackUrl.searchParams.set("redirect_to", redirectTo);
+        
+        console.log("🔵 Profile: Normal OAuth callback URL:", callbackUrl.toString());
+        await AuthHelpers.signInWithOAuth(provider, callbackUrl.toString());
+      }
     } catch (err) {
+      console.error("❌ Profile: OAuth login failed:", err);
       setError(err instanceof Error ? err.message : "OAuth login failed");
     }
   };

@@ -6,7 +6,7 @@ interface AuthCallbackHandlerProps {
   url: string;
 }
 
-export function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
+export default function AuthCallbackHandler({ url }: AuthCallbackHandlerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

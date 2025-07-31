@@ -53,7 +53,6 @@ export function generateDenoConfig(name: string, template: string): string {
       "preact/": "https://esm.sh/preact@10.19.3/",
       "@preact/signals": "https://esm.sh/*@preact/signals@1.2.2",
       "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
-      "tailwindcss": "npm:tailwindcss@^4.1.11",
     },
     compilerOptions: {
       lib: ["dom", "dom.asynciterable", "deno.ns"],

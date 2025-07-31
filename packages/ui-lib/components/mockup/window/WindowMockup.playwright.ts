@@ -2,7 +2,7 @@ import { expect, test } from "npm:@playwright/test";
 
 test.describe("WindowMockup Visual Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("http://localhost:8000/components/mockup/window-mockup");
+    await page.goto("http://localhost:8002/components/mockup/window-mockup"); // UI lib tests run against docs package
   });
 
   test("window mockup variants", async ({ page }) => {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { Alert, Button, Card, Loading } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 
-export function LogoutHandler() {
+export default function LogoutHandler() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

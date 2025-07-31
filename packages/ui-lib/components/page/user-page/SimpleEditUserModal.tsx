@@ -1,7 +1,7 @@
 import { useState } from "preact/hooks";
 import { UserAvatar } from "../../display/avatar/UserAvatar.tsx";
 import { Loading } from "../../feedback/loading/Loading.tsx";
-import type { AuthUser } from "@suppers/shared/types/auth.ts";
+import type { AuthUser } from "@suppers/shared";
 
 interface SimpleEditUserModalProps {
   user: AuthUser;

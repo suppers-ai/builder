@@ -11,7 +11,7 @@ module.exports = {
   reporter: "list",
 
   use: {
-    baseURL: "http://localhost:8001",
+    baseURL: "http://localhost:8002", // UI lib tests run against docs package
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },

@@ -1,6 +1,8 @@
 # @suppers/store - Application Marketplace & Generator
 
-A web-based marketplace and generator interface for creating applications using the Suppers compiler. This package provides a visual interface for building, configuring, and managing applications without command-line tools.
+A web-based marketplace and generator interface for creating applications using the Suppers
+compiler. This package provides a visual interface for building, configuring, and managing
+applications without command-line tools.
 
 ## Features
 
@@ -119,7 +121,7 @@ interface ApplicationConfig {
     author?: string;
   };
   template: {
-    type: 'fresh-basic' | 'business' | 'portfolio' | 'blog' | 'ecommerce';
+    type: "fresh-basic" | "business" | "portfolio" | "blog" | "ecommerce";
     variant?: string;
   };
   features: {
@@ -136,7 +138,7 @@ interface ApplicationConfig {
     customCSS?: string;
   };
   deployment: {
-    platform: 'deno-deploy' | 'docker' | 'static';
+    platform: "deno-deploy" | "docker" | "static";
     domain?: string;
   };
 }
@@ -144,23 +146,24 @@ interface ApplicationConfig {
 
 ## Compiler Integration
 
-The store package integrates directly with the [@suppers/compiler](../compiler/) to generate applications:
+The store package integrates directly with the [@suppers/compiler](../compiler/) to generate
+applications:
 
 ### Compiler Service
 
 ```typescript
-import { CompilerService } from './lib/compiler-service.ts';
+import { CompilerService } from "./lib/compiler-service.ts";
 
 const compiler = new CompilerService();
 
 // Generate an application
 const result = await compiler.generateApplication({
-  name: 'my-awesome-app',
-  template: 'fresh-basic',
-  features: ['authentication', 'database'],
+  name: "my-awesome-app",
+  template: "fresh-basic",
+  features: ["authentication", "database"],
   routes: [
-    { path: '/', component: 'HomePage' },
-    { path: '/about', component: 'AboutPage' },
+    { path: "/", component: "HomePage" },
+    { path: "/about", component: "AboutPage" },
   ],
 });
 
@@ -196,13 +199,13 @@ const downloadUrl = await compiler.getDownloadUrl(result.id);
    ```typescript
    // template.config.ts
    export const templateConfig = {
-     name: 'My Custom Template',
-     description: 'A custom application template',
-     category: 'business',
-     features: ['authentication', 'database'],
-     preview: '/static/preview.png',
-     complexity: 'intermediate',
-     estimatedTime: '15 minutes',
+     name: "My Custom Template",
+     description: "A custom application template",
+     category: "business",
+     features: ["authentication", "database"],
+     preview: "/static/preview.png",
+     complexity: "intermediate",
+     estimatedTime: "15 minutes",
    };
    ```
 
@@ -212,10 +215,10 @@ const downloadUrl = await compiler.getDownloadUrl(result.id);
    const templates = [
      // ... existing templates
      {
-       id: 'my-template',
+       id: "my-template",
        ...templateConfig,
        spec: {
-         template: 'my-template',
+         template: "my-template",
          // ... default configuration
        },
      },
@@ -231,14 +234,15 @@ Templates support variable substitution:
 export default function HomePage() {
   return (
     <div>
-      <h1>Welcome to {{APP_NAME}}</h1>
-      <p>{{APP_DESCRIPTION}}</p>
+      <h1>Welcome to {{ APP_NAME }}</h1>
+      <p>{{ APP_DESCRIPTION }}</p>
     </div>
   );
 }
 ```
 
 Variables are replaced during generation:
+
 - `{{APP_NAME}}` - Application name
 - `{{APP_DESCRIPTION}}` - Application description
 - `{{AUTHOR}}` - Application author
@@ -249,18 +253,23 @@ Variables are replaced during generation:
 ### Compiler Service API
 
 #### `generateApplication(spec: ApplicationSpec): Promise<GenerationResult>`
+
 Generates a new application based on the provided specification.
 
 #### `validateSpec(spec: ApplicationSpec): Promise<ValidationResult>`
+
 Validates an application specification without generating.
 
 #### `getGenerationStatus(id: string): Promise<GenerationStatus>`
+
 Gets the current status of an application generation.
 
 #### `getAvailableTemplates(): Promise<ApplicationTemplate[]>`
+
 Returns all available application templates.
 
 #### `downloadApplication(id: string): Promise<Blob>`
+
 Downloads a generated application as a ZIP file.
 
 ### REST API Endpoints
@@ -273,14 +282,14 @@ Downloads a generated application as a ZIP file.
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SUPABASE_URL` | Supabase project URL | Required |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key | Required |
+| Variable              | Description                  | Default            |
+| --------------------- | ---------------------------- | ------------------ |
+| `SUPABASE_URL`        | Supabase project URL         | Required           |
+| `SUPABASE_ANON_KEY`   | Supabase anonymous key       | Required           |
 | `COMPILER_OUTPUT_DIR` | Directory for generated apps | `./apps/generated` |
-| `MAX_GENERATION_TIME` | Max generation time (ms) | `300000` |
-| `CLEANUP_INTERVAL` | Cleanup interval (ms) | `3600000` |
-| `MAX_STORAGE_SIZE` | Max storage size (bytes) | `1073741824` |
+| `MAX_GENERATION_TIME` | Max generation time (ms)     | `300000`           |
+| `CLEANUP_INTERVAL`    | Cleanup interval (ms)        | `3600000`          |
+| `MAX_STORAGE_SIZE`    | Max storage size (bytes)     | `1073741824`       |
 
 ## Deployment
 
@@ -321,16 +330,19 @@ For production deployment, ensure:
 ### Common Issues
 
 **Generation Fails**
+
 - Check compiler package is available
 - Verify output directory permissions
 - Check application specification validity
 
 **Templates Not Loading**
+
 - Ensure template files are accessible
 - Check template configuration syntax
 - Verify template registry registration
 
 **Performance Issues**
+
 - Monitor generation queue length
 - Check available disk space
 - Review cleanup configuration
@@ -338,6 +350,7 @@ For production deployment, ensure:
 ### Debug Mode
 
 Enable debug logging:
+
 ```bash
 DEBUG=true deno task dev
 ```
@@ -365,6 +378,7 @@ MIT License - see the [LICENSE](../../LICENSE) file for details.
 ## Support
 
 For questions and support:
+
 - Create an issue in the repository
 - Check the [documentation](../../docs/)
 - Join our community discussions

@@ -1,5 +1,6 @@
 import { type PageProps } from "fresh";
 import { AuthClientProvider } from "@suppers/ui-lib/shared/providers/AuthClientProvider.tsx";
+import { getPackageUrl } from "@suppers/shared/constants/ports.ts";
 
 export default function App({ Component }: PageProps) {
   const Comp = Component as any;
@@ -13,7 +14,7 @@ export default function App({ Component }: PageProps) {
       </head>
       <body>
         <AuthClientProvider
-          storeUrl="http://localhost:8001"
+          storeUrl={getPackageUrl("PROFILE")}
           clientId="fresh-basic-app"
           redirectUri={typeof window !== "undefined"
             ? globalThis.location.origin + "/auth/callback"

@@ -1,5 +1,5 @@
 import { assertEquals, assertExists } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { describe, it, beforeEach, afterEach } from "https://deno.land/std@0.224.0/testing/bdd.ts";
+import { afterEach, beforeEach, describe, it } from "https://deno.land/std@0.224.0/testing/bdd.ts";
 
 // Mock end-to-end application generation workflow
 interface E2ETestContext {
@@ -29,7 +29,7 @@ const e2eServices = {
         },
       };
     }
-    
+
     return {
       success: false,
       error: "Invalid credentials",
@@ -37,13 +37,15 @@ const e2eServices = {
   },
 
   // Template selection
-  async getTemplates(): Promise<Array<{
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    complexity: string;
-  }>> {
+  async getTemplates(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      complexity: string;
+    }>
+  > {
     return [
       {
         id: "fresh-basic",
@@ -113,7 +115,7 @@ const e2eServices = {
 
     // Simulate generation process
     const generationId = `e2e_gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     return {
       success: true,
       generationId,
@@ -130,15 +132,15 @@ const e2eServices = {
   }> {
     // Simulate generation progress
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, 100)); // Simulate delay
-      
+      await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate delay
+
       if (attempt < 3) {
         return {
           status: "generating",
           progress: (attempt / maxAttempts) * 100,
         };
       }
-      
+
       if (attempt === maxAttempts) {
         return {
           status: "completed",
@@ -173,7 +175,7 @@ const e2eServices = {
     // Simulate ZIP file creation
     const zipContent = new TextEncoder().encode(`Mock application ZIP for ${generationId}`);
     const blob = new Blob([zipContent], { type: "application/zip" });
-    
+
     return {
       success: true,
       blob,
@@ -257,20 +259,20 @@ describe("End-to-End Application Generation Workflow", () => {
     it("should complete full workflow from authentication to download", async () => {
       // Step 1: User Authentication
       const authResult = await e2eServices.authenticateUser("test@example.com", "password123");
-      
+
       assertEquals(authResult.success, true);
       assertExists(authResult.token);
       assertExists(authResult.user);
-      
+
       testContext.userToken = authResult.token!;
 
       // Step 2: Browse Available Templates
       const templates = await e2eServices.getTemplates();
-      
+
       assertExists(templates);
       assertEquals(templates.length > 0, true);
-      
-      const selectedTemplate = templates.find(t => t.id === "portfolio");
+
+      const selectedTemplate = templates.find((t) => t.id === "portfolio");
       assertExists(selectedTemplate);
 
       // Step 3: Create Application Specification
@@ -287,39 +289,39 @@ describe("End-to-End Application Generation Workflow", () => {
         theme: "modern",
         primaryColor: "#10b981",
       };
-      
+
       const spec = await e2eServices.createApplicationSpec(selectedTemplate.id, customizations);
-      
+
       assertEquals(spec.name, "My E2E Portfolio");
       assertEquals(spec.template, "portfolio");
       assertEquals(spec.features.includes("blog"), true);
       assertEquals(spec.routes.length, 4);
-      
+
       testContext.applicationSpec = spec;
 
       // Step 4: Generate Application
       const generationResult = await e2eServices.generateApplication(spec, testContext.userToken);
-      
+
       assertEquals(generationResult.success, true);
       assertExists(generationResult.generationId);
-      
+
       testContext.generationId = generationResult.generationId!;
 
       // Step 5: Monitor Generation Progress
       const finalStatus = await e2eServices.pollGenerationStatus(testContext.generationId);
-      
+
       assertEquals(finalStatus.status, "completed");
       assertEquals(finalStatus.progress, 100);
       assertExists(finalStatus.downloadUrl);
-      
+
       testContext.downloadUrl = finalStatus.downloadUrl!;
 
       // Step 6: Download Generated Application
       const downloadResult = await e2eServices.downloadApplication(
         testContext.generationId,
-        testContext.userToken
+        testContext.userToken,
       );
-      
+
       assertEquals(downloadResult.success, true);
       assertExists(downloadResult.blob);
       assertExists(downloadResult.filename);
@@ -327,7 +329,7 @@ describe("End-to-End Application Generation Workflow", () => {
 
       // Step 7: Verify Application in User's List
       const userApps = await e2eServices.getUserApplications(testContext.userToken);
-      
+
       assertEquals(userApps.success, true);
       assertExists(userApps.applications);
       assertEquals(userApps.applications!.length > 0, true);
@@ -336,7 +338,7 @@ describe("End-to-End Application Generation Workflow", () => {
     it("should handle authentication failure gracefully", async () => {
       // Attempt authentication with invalid credentials
       const authResult = await e2eServices.authenticateUser("invalid@example.com", "wrongpassword");
-      
+
       assertEquals(authResult.success, false);
       assertExists(authResult.error);
       assertEquals(authResult.error, "Invalid credentials");
@@ -352,9 +354,12 @@ describe("End-to-End Application Generation Workflow", () => {
         name: "", // Invalid: empty name
         template: "nonexistent-template", // Invalid: nonexistent template
       };
-      
-      const generationResult = await e2eServices.generateApplication(invalidSpec, testContext.userToken);
-      
+
+      const generationResult = await e2eServices.generateApplication(
+        invalidSpec,
+        testContext.userToken,
+      );
+
       assertEquals(generationResult.success, false);
       assertExists(generationResult.error);
     });
@@ -363,15 +368,15 @@ describe("End-to-End Application Generation Workflow", () => {
       // Attempt operations without authentication
       const generationResult = await e2eServices.generateApplication(
         { name: "Test", template: "fresh-basic" },
-        "invalid-token"
+        "invalid-token",
       );
-      
+
       assertEquals(generationResult.success, false);
       assertEquals(generationResult.error, "Invalid authentication token");
 
       // Attempt download without authentication
       const downloadResult = await e2eServices.downloadApplication("gen_123", "invalid-token");
-      
+
       assertEquals(downloadResult.success, false);
       assertEquals(downloadResult.error, "Invalid authentication token");
     });
@@ -386,35 +391,38 @@ describe("End-to-End Application Generation Workflow", () => {
 
     it("should list user applications", async () => {
       const userApps = await e2eServices.getUserApplications(testContext.userToken);
-      
+
       assertEquals(userApps.success, true);
       assertExists(userApps.applications);
       assertEquals(userApps.applications!.length, 2);
-      
-      const completedApp = userApps.applications!.find(app => app.status === "completed");
+
+      const completedApp = userApps.applications!.find((app) => app.status === "completed");
       assertExists(completedApp);
       assertEquals(completedApp.name, "My Portfolio");
       assertExists(completedApp.downloadUrl);
-      
-      const generatingApp = userApps.applications!.find(app => app.status === "generating");
+
+      const generatingApp = userApps.applications!.find((app) => app.status === "generating");
       assertExists(generatingApp);
       assertEquals(generatingApp.name, "Business App");
     });
 
     it("should delete user application", async () => {
-      const deleteResult = await e2eServices.deleteApplication("e2e_gen_123", testContext.userToken);
-      
+      const deleteResult = await e2eServices.deleteApplication(
+        "e2e_gen_123",
+        testContext.userToken,
+      );
+
       assertEquals(deleteResult.success, true);
     });
 
     it("should handle unauthorized application management", async () => {
       const userApps = await e2eServices.getUserApplications("invalid-token");
-      
+
       assertEquals(userApps.success, false);
       assertEquals(userApps.error, "Invalid authentication token");
 
       const deleteResult = await e2eServices.deleteApplication("e2e_gen_123", "invalid-token");
-      
+
       assertEquals(deleteResult.success, false);
       assertEquals(deleteResult.error, "Invalid authentication token");
     });
@@ -423,15 +431,15 @@ describe("End-to-End Application Generation Workflow", () => {
   describe("Template Selection and Customization", () => {
     it("should provide template selection options", async () => {
       const templates = await e2eServices.getTemplates();
-      
+
       assertExists(templates);
       assertEquals(templates.length, 2);
-      
-      const basicTemplate = templates.find(t => t.id === "fresh-basic");
+
+      const basicTemplate = templates.find((t) => t.id === "fresh-basic");
       assertExists(basicTemplate);
       assertEquals(basicTemplate.complexity, "beginner");
-      
-      const portfolioTemplate = templates.find(t => t.id === "portfolio");
+
+      const portfolioTemplate = templates.find((t) => t.id === "portfolio");
       assertExists(portfolioTemplate);
       assertEquals(portfolioTemplate.complexity, "intermediate");
     });
@@ -449,9 +457,9 @@ describe("End-to-End Application Generation Workflow", () => {
         theme: "corporate",
         primaryColor: "#1f2937",
       };
-      
+
       const spec = await e2eServices.createApplicationSpec("fresh-basic", customizations);
-      
+
       assertEquals(spec.name, "Custom Business App");
       assertEquals(spec.features.includes("authentication"), true);
       assertEquals(spec.features.includes("database"), true);

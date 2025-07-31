@@ -1,5 +1,5 @@
-import { useSignal, computed } from "@preact/signals";
-import { Button, Card, Badge, Modal, Input } from "@suppers/ui-lib";
+import { computed, useSignal } from "@preact/signals";
+import { Badge, Button, Card, Input, Modal } from "@suppers/ui-lib";
 import type { ApplicationTemplate } from "./MarketplaceHomepage.tsx";
 
 interface TemplateGalleryProps {
@@ -7,9 +7,9 @@ interface TemplateGalleryProps {
   onSelectTemplate: (template: ApplicationTemplate) => void;
 }
 
-export default function TemplateGallery({ 
-  templates, 
-  onSelectTemplate 
+export default function TemplateGallery({
+  templates,
+  onSelectTemplate,
 }: TemplateGalleryProps) {
   const selectedCategory = useSignal<string>("all");
   const selectedComplexity = useSignal<string>("all");
@@ -18,28 +18,28 @@ export default function TemplateGallery({
 
   // Get unique categories and complexities
   const categories = computed(() => {
-    const cats = Array.from(new Set(templates.map(t => t.category)));
+    const cats = Array.from(new Set(templates.map((t) => t.category)));
     return ["all", ...cats];
   });
 
   const complexities = computed(() => {
-    const comps = Array.from(new Set(templates.map(t => t.complexity)));
+    const comps = Array.from(new Set(templates.map((t) => t.complexity)));
     return ["all", ...comps];
   });
 
   // Filter templates based on selected filters and search
   const filteredTemplates = computed(() => {
-    return templates.filter(template => {
-      const matchesCategory = selectedCategory.value === "all" || 
+    return templates.filter((template) => {
+      const matchesCategory = selectedCategory.value === "all" ||
         template.category === selectedCategory.value;
-      
-      const matchesComplexity = selectedComplexity.value === "all" || 
+
+      const matchesComplexity = selectedComplexity.value === "all" ||
         template.complexity === selectedComplexity.value;
-      
+
       const matchesSearch = searchQuery.value === "" ||
         template.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
         template.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        template.features.some(feature => 
+        template.features.some((feature) =>
           feature.toLowerCase().includes(searchQuery.value.toLowerCase())
         );
 
@@ -50,10 +50,10 @@ export default function TemplateGallery({
   const getCategoryColor = (category: string) => {
     const colors = {
       business: "badge-primary",
-      portfolio: "badge-secondary", 
+      portfolio: "badge-secondary",
       blog: "badge-accent",
       ecommerce: "badge-success",
-      dashboard: "badge-warning"
+      dashboard: "badge-warning",
     };
     return colors[category as keyof typeof colors] || "badge-neutral";
   };
@@ -62,7 +62,7 @@ export default function TemplateGallery({
     const colors = {
       beginner: "text-success",
       intermediate: "text-warning",
-      advanced: "text-error"
+      advanced: "text-error",
     };
     return colors[complexity as keyof typeof colors] || "text-neutral";
   };
@@ -89,8 +89,8 @@ export default function TemplateGallery({
             Application Templates
           </h1>
           <p class="text-xl text-base-content/80 max-w-3xl mx-auto">
-            Browse our curated collection of application templates. Filter by category, 
-            complexity, or search for specific features.
+            Browse our curated collection of application templates. Filter by category, complexity,
+            or search for specific features.
           </p>
         </div>
 
@@ -117,15 +117,16 @@ export default function TemplateGallery({
                 <label class="label">
                   <span class="label-text">Category</span>
                 </label>
-                <select 
+                <select
                   class="select select-bordered w-full"
                   value={selectedCategory.value}
                   onChange={(e) => selectedCategory.value = (e.target as HTMLSelectElement).value}
                 >
-                  {categories.value.map(category => (
+                  {categories.value.map((category) => (
                     <option key={category} value={category}>
-                      {category === "all" ? "All Categories" : 
-                        category.charAt(0).toUpperCase() + category.slice(1)}
+                      {category === "all"
+                        ? "All Categories"
+                        : category.charAt(0).toUpperCase() + category.slice(1)}
                     </option>
                   ))}
                 </select>
@@ -136,15 +137,16 @@ export default function TemplateGallery({
                 <label class="label">
                   <span class="label-text">Complexity</span>
                 </label>
-                <select 
+                <select
                   class="select select-bordered w-full"
                   value={selectedComplexity.value}
                   onChange={(e) => selectedComplexity.value = (e.target as HTMLSelectElement).value}
                 >
-                  {complexities.value.map(complexity => (
+                  {complexities.value.map((complexity) => (
                     <option key={complexity} value={complexity}>
-                      {complexity === "all" ? "All Levels" : 
-                        complexity.charAt(0).toUpperCase() + complexity.slice(1)}
+                      {complexity === "all"
+                        ? "All Levels"
+                        : complexity.charAt(0).toUpperCase() + complexity.slice(1)}
                     </option>
                   ))}
                 </select>
@@ -154,8 +156,8 @@ export default function TemplateGallery({
             {/* Active Filters */}
             <div class="flex flex-wrap gap-2 mt-4">
               {selectedCategory.value !== "all" && (
-                <Badge 
-                  color="primary" 
+                <Badge
+                  color="primary"
                   class="cursor-pointer"
                   onClick={() => selectedCategory.value = "all"}
                 >
@@ -163,8 +165,8 @@ export default function TemplateGallery({
                 </Badge>
               )}
               {selectedComplexity.value !== "all" && (
-                <Badge 
-                  color="secondary" 
+                <Badge
+                  color="secondary"
                   class="cursor-pointer"
                   onClick={() => selectedComplexity.value = "all"}
                 >
@@ -172,8 +174,8 @@ export default function TemplateGallery({
                 </Badge>
               )}
               {searchQuery.value && (
-                <Badge 
-                  color="accent" 
+                <Badge
+                  color="accent"
                   class="cursor-pointer"
                   onClick={() => searchQuery.value = ""}
                 >
@@ -192,104 +194,106 @@ export default function TemplateGallery({
         </div>
 
         {/* Templates Grid */}
-        {filteredTemplates.value.length > 0 ? (
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredTemplates.value.map((template) => (
-              <Card 
-                key={template.id} 
-                class="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+        {filteredTemplates.value.length > 0
+          ? (
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredTemplates.value.map((template) => (
+                <Card
+                  key={template.id}
+                  class="hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+                >
+                  <div class="relative">
+                    {/* Template Preview Image */}
+                    <div class="h-48 bg-gradient-to-br from-base-300 to-base-100 rounded-t-lg flex items-center justify-center">
+                      <div class="text-6xl opacity-50">
+                        {template.category === "business" && "🏢"}
+                        {template.category === "portfolio" && "🎨"}
+                        {template.category === "blog" && "📝"}
+                        {template.category === "ecommerce" && "🛒"}
+                        {template.category === "dashboard" && "📊"}
+                      </div>
+                    </div>
+
+                    {/* Category Badge */}
+                    <Badge class={`${getCategoryColor(template.category)} absolute top-4 right-4`}>
+                      {template.category}
+                    </Badge>
+                  </div>
+
+                  <div class="p-6">
+                    <div class="flex justify-between items-start mb-3">
+                      <h3 class="text-xl font-semibold text-base-content">
+                        {template.name}
+                      </h3>
+                      <div class={`text-sm font-medium ${getComplexityColor(template.complexity)}`}>
+                        {template.complexity}
+                      </div>
+                    </div>
+
+                    <p class="text-base-content/70 text-sm mb-4 line-clamp-2">
+                      {template.description}
+                    </p>
+
+                    {/* Features */}
+                    <div class="flex flex-wrap gap-1 mb-4">
+                      {template.features.slice(0, 3).map((feature) => (
+                        <Badge key={feature} variant="outline" size="sm">
+                          {feature}
+                        </Badge>
+                      ))}
+                      {template.features.length > 3 && (
+                        <Badge variant="outline" size="sm">
+                          +{template.features.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                      <span class="text-xs text-base-content/60">
+                        ⏱️ {template.estimatedTime}
+                      </span>
+                      <div class="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handlePreviewTemplate(template)}
+                        >
+                          Preview
+                        </Button>
+                        <Button
+                          size="sm"
+                          color="primary"
+                          onClick={() => onSelectTemplate(template)}
+                        >
+                          Use Template
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )
+          : (
+            <div class="text-center py-16">
+              <div class="text-6xl mb-4 opacity-50">🔍</div>
+              <h3 class="text-2xl font-semibold text-base-content mb-2">
+                No templates found
+              </h3>
+              <p class="text-base-content/70 mb-6">
+                Try adjusting your filters or search terms to find more templates.
+              </p>
+              <Button
+                onClick={() => {
+                  selectedCategory.value = "all";
+                  selectedComplexity.value = "all";
+                  searchQuery.value = "";
+                }}
               >
-                <div class="relative">
-                  {/* Template Preview Image */}
-                  <div class="h-48 bg-gradient-to-br from-base-300 to-base-100 rounded-t-lg flex items-center justify-center">
-                    <div class="text-6xl opacity-50">
-                      {template.category === 'business' && '🏢'}
-                      {template.category === 'portfolio' && '🎨'}
-                      {template.category === 'blog' && '📝'}
-                      {template.category === 'ecommerce' && '🛒'}
-                      {template.category === 'dashboard' && '📊'}
-                    </div>
-                  </div>
-                  
-                  {/* Category Badge */}
-                  <Badge class={`${getCategoryColor(template.category)} absolute top-4 right-4`}>
-                    {template.category}
-                  </Badge>
-                </div>
-
-                <div class="p-6">
-                  <div class="flex justify-between items-start mb-3">
-                    <h3 class="text-xl font-semibold text-base-content">
-                      {template.name}
-                    </h3>
-                    <div class={`text-sm font-medium ${getComplexityColor(template.complexity)}`}>
-                      {template.complexity}
-                    </div>
-                  </div>
-
-                  <p class="text-base-content/70 text-sm mb-4 line-clamp-2">
-                    {template.description}
-                  </p>
-
-                  {/* Features */}
-                  <div class="flex flex-wrap gap-1 mb-4">
-                    {template.features.slice(0, 3).map((feature) => (
-                      <Badge key={feature} variant="outline" size="sm">
-                        {feature}
-                      </Badge>
-                    ))}
-                    {template.features.length > 3 && (
-                      <Badge variant="outline" size="sm">
-                        +{template.features.length - 3} more
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div class="flex justify-between items-center">
-                    <span class="text-xs text-base-content/60">
-                      ⏱️ {template.estimatedTime}
-                    </span>
-                    <div class="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handlePreviewTemplate(template)}
-                      >
-                        Preview
-                      </Button>
-                      <Button
-                        size="sm"
-                        color="primary"
-                        onClick={() => onSelectTemplate(template)}
-                      >
-                        Use Template
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div class="text-center py-16">
-            <div class="text-6xl mb-4 opacity-50">🔍</div>
-            <h3 class="text-2xl font-semibold text-base-content mb-2">
-              No templates found
-            </h3>
-            <p class="text-base-content/70 mb-6">
-              Try adjusting your filters or search terms to find more templates.
-            </p>
-            <Button
-              onClick={() => {
-                selectedCategory.value = "all";
-                selectedComplexity.value = "all";
-                searchQuery.value = "";
-              }}
-            >
-              Clear All Filters
-            </Button>
-          </div>
-        )}
+                Clear All Filters
+              </Button>
+            </div>
+          )}
 
         {/* Template Preview Modal */}
         {previewTemplate.value && (
@@ -303,11 +307,11 @@ export default function TemplateGallery({
               {/* Template Preview */}
               <div class="h-64 bg-gradient-to-br from-base-300 to-base-100 rounded-lg flex items-center justify-center">
                 <div class="text-8xl opacity-50">
-                  {previewTemplate.value.category === 'business' && '🏢'}
-                  {previewTemplate.value.category === 'portfolio' && '🎨'}
-                  {previewTemplate.value.category === 'blog' && '📝'}
-                  {previewTemplate.value.category === 'ecommerce' && '🛒'}
-                  {previewTemplate.value.category === 'dashboard' && '📊'}
+                  {previewTemplate.value.category === "business" && "🏢"}
+                  {previewTemplate.value.category === "portfolio" && "🎨"}
+                  {previewTemplate.value.category === "blog" && "📝"}
+                  {previewTemplate.value.category === "ecommerce" && "🛒"}
+                  {previewTemplate.value.category === "dashboard" && "📊"}
                 </div>
               </div>
 
@@ -322,7 +326,11 @@ export default function TemplateGallery({
                       <Badge class={getCategoryColor(previewTemplate.value.category)}>
                         {previewTemplate.value.category}
                       </Badge>
-                      <span class={`text-sm font-medium ${getComplexityColor(previewTemplate.value.complexity)}`}>
+                      <span
+                        class={`text-sm font-medium ${
+                          getComplexityColor(previewTemplate.value.complexity)
+                        }`}
+                      >
                         {previewTemplate.value.complexity}
                       </span>
                       <span class="text-sm text-base-content/60">

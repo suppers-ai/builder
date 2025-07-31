@@ -47,7 +47,7 @@ ecosystem.
    deno task dev
    ```
 
-The profile service will be available at `http://localhost:8002`.
+The profile service will be available at `http://localhost:8001`.
 
 ## Development
 
@@ -176,7 +176,7 @@ Here's how to integrate with the SSO service from your application:
 
 ```typescript
 // 1. Redirect user to authorization endpoint
-const authUrl = new URL("http://localhost:8002/oauth/authorize");
+const authUrl = new URL("http://localhost:8001/oauth/authorize");
 authUrl.searchParams.set("response_type", "code");
 authUrl.searchParams.set("client_id", "your-client-id");
 authUrl.searchParams.set("redirect_uri", "https://yourapp.com/auth/callback");
@@ -187,7 +187,7 @@ window.location.href = authUrl.toString();
 
 // 2. Handle the callback in your application
 async function handleCallback(code: string, state: string) {
-  const tokenResponse = await fetch("http://localhost:8002/oauth/token", {
+  const tokenResponse = await fetch("http://localhost:8001/oauth/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -210,7 +210,7 @@ async function handleCallback(code: string, state: string) {
 
 // 3. Use the access token to get user info
 async function getUserInfo(accessToken: string) {
-  const response = await fetch("http://localhost:8002/oauth/userinfo", {
+  const response = await fetch("http://localhost:8001/oauth/userinfo", {
     headers: {
       "Authorization": `Bearer ${accessToken}`,
     },

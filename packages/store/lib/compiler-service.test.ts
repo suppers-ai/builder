@@ -1,5 +1,9 @@
-import { assertEquals, assertExists, assertRejects } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { describe, it, beforeEach, afterEach } from "https://deno.land/std@0.224.0/testing/bdd.ts";
+import {
+  assertEquals,
+  assertExists,
+  assertRejects,
+} from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { afterEach, beforeEach, describe, it } from "https://deno.land/std@0.224.0/testing/bdd.ts";
 import { FakeTime } from "https://deno.land/std@0.224.0/testing/time.ts";
 
 // Mock application specification
@@ -36,19 +40,19 @@ const compilerService = {
     if (!spec.name || spec.name.trim() === "") {
       throw new Error("Application name is required");
     }
-    
+
     if (!spec.template) {
       throw new Error("Template is required");
     }
-    
+
     if (!spec.routes || spec.routes.length === 0) {
       throw new Error("At least one route is required");
     }
-    
+
     // Simulate generation process
     const generationId = `gen_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const outputPath = `./apps/generated/${spec.name.toLowerCase().replace(/\s+/g, '-')}`;
-    
+    const outputPath = `./apps/generated/${spec.name.toLowerCase().replace(/\s+/g, "-")}`;
+
     return {
       id: generationId,
       status: "completed",
@@ -66,47 +70,47 @@ const compilerService = {
   }> {
     const errors: string[] = [];
     const warnings: string[] = [];
-    
+
     // Required field validation
     if (!spec.name || spec.name.trim() === "") {
       errors.push("Application name is required");
     }
-    
+
     if (!spec.template) {
       errors.push("Template is required");
     }
-    
+
     if (!spec.routes || spec.routes.length === 0) {
       errors.push("At least one route is required");
     }
-    
+
     // Route validation
     if (spec.routes) {
       spec.routes.forEach((route, index) => {
         if (!route.path) {
           errors.push(`Route ${index + 1}: Path is required`);
         }
-        
+
         if (!route.component) {
           errors.push(`Route ${index + 1}: Component is required`);
         }
-        
+
         if (route.path && !route.path.startsWith("/")) {
           warnings.push(`Route ${index + 1}: Path should start with /`);
         }
       });
     }
-    
+
     // Feature validation
     if (spec.features && spec.features.includes("database") && !spec.features.includes("api")) {
       warnings.push("Database feature typically requires API feature");
     }
-    
+
     // Name validation
     if (spec.name && spec.name.length > 50) {
       warnings.push("Application name is quite long, consider shortening it");
     }
-    
+
     return {
       valid: errors.length === 0,
       errors,
@@ -118,7 +122,7 @@ const compilerService = {
     if (!id || !id.startsWith("gen_")) {
       return null;
     }
-    
+
     // Simulate different statuses based on ID
     if (id.includes("failed")) {
       return {
@@ -129,7 +133,7 @@ const compilerService = {
         updatedAt: new Date(),
       };
     }
-    
+
     if (id.includes("generating")) {
       return {
         id,
@@ -138,7 +142,7 @@ const compilerService = {
         updatedAt: new Date(),
       };
     }
-    
+
     return {
       id,
       status: "completed",
@@ -149,14 +153,16 @@ const compilerService = {
     };
   },
 
-  async getAvailableTemplates(): Promise<Array<{
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    features: string[];
-    complexity: string;
-  }>> {
+  async getAvailableTemplates(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      description: string;
+      category: string;
+      features: string[];
+      complexity: string;
+    }>
+  > {
     return [
       {
         id: "fresh-basic",
@@ -189,7 +195,7 @@ const compilerService = {
     if (!id || !id.startsWith("gen_")) {
       throw new Error("Invalid generation ID");
     }
-    
+
     // Simulate ZIP file creation
     const zipContent = new TextEncoder().encode(`Mock ZIP content for ${id}`);
     return new Blob([zipContent], { type: "application/zip" });
@@ -199,24 +205,26 @@ const compilerService = {
     if (!id || !id.startsWith("gen_")) {
       return false;
     }
-    
+
     // Simulate deletion
     return true;
   },
 
-  async getApplicationMetadata(id: string): Promise<{
-    id: string;
-    name: string;
-    description: string;
-    template: string;
-    features: string[];
-    size: number;
-    createdAt: Date;
-  } | null> {
+  async getApplicationMetadata(id: string): Promise<
+    {
+      id: string;
+      name: string;
+      description: string;
+      template: string;
+      features: string[];
+      size: number;
+      createdAt: Date;
+    } | null
+  > {
     if (!id || !id.startsWith("gen_")) {
       return null;
     }
-    
+
     return {
       id,
       name: "Test Application",
@@ -256,9 +264,9 @@ describe("Compiler Service", () => {
           primaryColor: "#3b82f6",
         },
       };
-      
+
       const result = await compilerService.generateApplication(spec);
-      
+
       assertExists(result);
       assertExists(result.id);
       assertEquals(result.status, "completed");
@@ -275,11 +283,11 @@ describe("Compiler Service", () => {
         routes: [{ path: "/", component: "HomePage" }],
         styling: { theme: "default", primaryColor: "#3b82f6" },
       };
-      
+
       await assertRejects(
         () => compilerService.generateApplication(spec),
         Error,
-        "Application name is required"
+        "Application name is required",
       );
     });
 
@@ -292,11 +300,11 @@ describe("Compiler Service", () => {
         routes: [{ path: "/", component: "HomePage" }],
         styling: { theme: "default", primaryColor: "#3b82f6" },
       };
-      
+
       await assertRejects(
         () => compilerService.generateApplication(spec),
         Error,
-        "Template is required"
+        "Template is required",
       );
     });
 
@@ -309,11 +317,11 @@ describe("Compiler Service", () => {
         routes: [],
         styling: { theme: "default", primaryColor: "#3b82f6" },
       };
-      
+
       await assertRejects(
         () => compilerService.generateApplication(spec),
         Error,
-        "At least one route is required"
+        "At least one route is required",
       );
     });
   });
@@ -328,9 +336,9 @@ describe("Compiler Service", () => {
         routes: [{ path: "/", component: "HomePage" }],
         styling: { theme: "default", primaryColor: "#3b82f6" },
       };
-      
+
       const result = await compilerService.validateSpec(spec);
-      
+
       assertEquals(result.valid, true);
       assertEquals(result.errors.length, 0);
     });
@@ -344,9 +352,9 @@ describe("Compiler Service", () => {
         routes: [],
         styling: { theme: "default", primaryColor: "#3b82f6" },
       };
-      
+
       const result = await compilerService.validateSpec(spec);
-      
+
       assertEquals(result.valid, false);
       assertEquals(result.errors.length, 3);
       assertEquals(result.errors.includes("Application name is required"), true);
@@ -363,12 +371,15 @@ describe("Compiler Service", () => {
         routes: [{ path: "home", component: "HomePage" }], // Path without leading slash
         styling: { theme: "default", primaryColor: "#3b82f6" },
       };
-      
+
       const result = await compilerService.validateSpec(spec);
-      
+
       assertEquals(result.valid, true);
       assertEquals(result.warnings.length, 2);
-      assertEquals(result.warnings.includes("Database feature typically requires API feature"), true);
+      assertEquals(
+        result.warnings.includes("Database feature typically requires API feature"),
+        true,
+      );
       assertEquals(result.warnings.includes("Route 1: Path should start with /"), true);
     });
   });
@@ -376,7 +387,7 @@ describe("Compiler Service", () => {
   describe("getGenerationStatus", () => {
     it("should return status for valid generation ID", async () => {
       const status = await compilerService.getGenerationStatus("gen_1234567890_abcdef123");
-      
+
       assertExists(status);
       assertEquals(status.id, "gen_1234567890_abcdef123");
       assertEquals(status.status, "completed");
@@ -384,13 +395,13 @@ describe("Compiler Service", () => {
 
     it("should return null for invalid generation ID", async () => {
       const status = await compilerService.getGenerationStatus("invalid-id");
-      
+
       assertEquals(status, null);
     });
 
     it("should return failed status for failed generation", async () => {
       const status = await compilerService.getGenerationStatus("gen_failed_12345");
-      
+
       assertExists(status);
       assertEquals(status.status, "failed");
       assertExists(status.errors);
@@ -399,7 +410,7 @@ describe("Compiler Service", () => {
 
     it("should return generating status for in-progress generation", async () => {
       const status = await compilerService.getGenerationStatus("gen_generating_12345");
-      
+
       assertExists(status);
       assertEquals(status.status, "generating");
     });
@@ -408,11 +419,11 @@ describe("Compiler Service", () => {
   describe("getAvailableTemplates", () => {
     it("should return list of available templates", async () => {
       const templates = await compilerService.getAvailableTemplates();
-      
+
       assertExists(templates);
       assertEquals(templates.length > 0, true);
-      
-      const basicTemplate = templates.find(t => t.id === "fresh-basic");
+
+      const basicTemplate = templates.find((t) => t.id === "fresh-basic");
       assertExists(basicTemplate);
       assertEquals(basicTemplate.name, "Fresh Basic");
       assertEquals(basicTemplate.complexity, "beginner");
@@ -422,7 +433,7 @@ describe("Compiler Service", () => {
   describe("downloadApplication", () => {
     it("should download application with valid ID", async () => {
       const blob = await compilerService.downloadApplication("gen_1234567890_abcdef123");
-      
+
       assertExists(blob);
       assertEquals(blob.type, "application/zip");
     });
@@ -431,7 +442,7 @@ describe("Compiler Service", () => {
       await assertRejects(
         () => compilerService.downloadApplication("invalid-id"),
         Error,
-        "Invalid generation ID"
+        "Invalid generation ID",
       );
     });
   });
@@ -439,13 +450,13 @@ describe("Compiler Service", () => {
   describe("deleteApplication", () => {
     it("should delete application with valid ID", async () => {
       const result = await compilerService.deleteApplication("gen_1234567890_abcdef123");
-      
+
       assertEquals(result, true);
     });
 
     it("should return false for invalid ID", async () => {
       const result = await compilerService.deleteApplication("invalid-id");
-      
+
       assertEquals(result, false);
     });
   });
@@ -453,7 +464,7 @@ describe("Compiler Service", () => {
   describe("getApplicationMetadata", () => {
     it("should return metadata for valid application ID", async () => {
       const metadata = await compilerService.getApplicationMetadata("gen_1234567890_abcdef123");
-      
+
       assertExists(metadata);
       assertEquals(metadata.id, "gen_1234567890_abcdef123");
       assertEquals(metadata.name, "Test Application");
@@ -462,7 +473,7 @@ describe("Compiler Service", () => {
 
     it("should return null for invalid application ID", async () => {
       const metadata = await compilerService.getApplicationMetadata("invalid-id");
-      
+
       assertEquals(metadata, null);
     });
   });

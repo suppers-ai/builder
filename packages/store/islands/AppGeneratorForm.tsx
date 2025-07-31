@@ -1,7 +1,7 @@
-import { useSignal, computed } from "@preact/signals";
-import { Button, Card, Input, Steps, Modal } from "@suppers/ui-lib";
+import { computed, useSignal } from "@preact/signals";
+import { Button, Card, Input, Modal, Steps } from "@suppers/ui-lib";
 import type { ApplicationTemplate } from "./MarketplaceHomepage.tsx";
-import type { ApplicationSpec, Route } from "@suppers/shared/types/application.ts";
+import type { ApplicationSpec, Route } from "@suppers/shared/types/application";
 
 interface AppGeneratorFormProps {
   selectedTemplate?: ApplicationTemplate;
@@ -34,21 +34,21 @@ interface GeneratorFormData {
   };
 }
 
-export default function AppGeneratorForm({ 
-  selectedTemplate, 
-  onGenerate, 
-  onCancel 
+export default function AppGeneratorForm({
+  selectedTemplate,
+  onGenerate,
+  onCancel,
 }: AppGeneratorFormProps) {
   const currentStep = useSignal(0);
   const isGenerating = useSignal(false);
   const showPreview = useSignal(false);
-  
+
   // Form data
   const formData = useSignal<GeneratorFormData>({
     application: {
       name: "",
       description: "",
-      version: "1.0.0"
+      version: "1.0.0",
     },
     template: selectedTemplate?.id || "fresh-basic",
     features: {
@@ -56,21 +56,21 @@ export default function AppGeneratorForm({
       database: false,
       api: false,
       analytics: false,
-      seo: true
+      seo: true,
     },
     routes: [
       {
         path: "/",
         type: "page",
-        components: []
-      }
+        components: [],
+      },
     ],
     styling: {
-      theme: "default"
+      theme: "default",
     },
     deployment: {
-      platform: "deno-deploy"
-    }
+      platform: "deno-deploy",
+    },
   });
 
   // Validation errors
@@ -81,37 +81,33 @@ export default function AppGeneratorForm({
     {
       title: "Application Info",
       description: "Basic information about your app",
-      status: currentStep.value > 0 ? "completed" : 
-              currentStep.value === 0 ? "current" : "pending"
+      status: currentStep.value > 0 ? "completed" : currentStep.value === 0 ? "current" : "pending",
     },
     {
       title: "Features",
       description: "Select features to include",
-      status: currentStep.value > 1 ? "completed" : 
-              currentStep.value === 1 ? "current" : "pending"
+      status: currentStep.value > 1 ? "completed" : currentStep.value === 1 ? "current" : "pending",
     },
     {
       title: "Routes",
       description: "Configure your app routes",
-      status: currentStep.value > 2 ? "completed" : 
-              currentStep.value === 2 ? "current" : "pending"
+      status: currentStep.value > 2 ? "completed" : currentStep.value === 2 ? "current" : "pending",
     },
     {
       title: "Styling",
       description: "Choose theme and styling",
-      status: currentStep.value > 3 ? "completed" : 
-              currentStep.value === 3 ? "current" : "pending"
+      status: currentStep.value > 3 ? "completed" : currentStep.value === 3 ? "current" : "pending",
     },
     {
       title: "Review",
       description: "Review and generate",
-      status: currentStep.value === 4 ? "current" : "pending"
-    }
+      status: currentStep.value === 4 ? "current" : "pending",
+    },
   ]);
 
   const validateCurrentStep = () => {
     const newErrors: Record<string, string> = {};
-    
+
     switch (currentStep.value) {
       case 0: // Application Info
         if (!formData.value.application.name.trim()) {
@@ -131,7 +127,7 @@ export default function AppGeneratorForm({
       case 3: // Styling - no validation needed
         break;
     }
-    
+
     errors.value = newErrors;
     return Object.keys(newErrors).length === 0;
   };
@@ -152,18 +148,18 @@ export default function AppGeneratorForm({
     const newRoute: Route = {
       path: "/new-page",
       type: "page",
-      components: []
+      components: [],
     };
     formData.value = {
       ...formData.value,
-      routes: [...formData.value.routes, newRoute]
+      routes: [...formData.value.routes, newRoute],
     };
   };
 
   const removeRoute = (index: number) => {
     formData.value = {
       ...formData.value,
-      routes: formData.value.routes.filter((_, i) => i !== index)
+      routes: formData.value.routes.filter((_, i) => i !== index),
     };
   };
 
@@ -172,33 +168,33 @@ export default function AppGeneratorForm({
     updatedRoutes[index] = { ...updatedRoutes[index], path };
     formData.value = {
       ...formData.value,
-      routes: updatedRoutes
+      routes: updatedRoutes,
     };
   };
 
   const handleGenerate = async () => {
     if (!validateCurrentStep()) return;
-    
+
     isGenerating.value = true;
-    
+
     try {
       // Convert form data to ApplicationSpec
       const spec: ApplicationSpec = {
         application: {
-          id: formData.value.application.name.toLowerCase().replace(/\s+/g, '-'),
+          id: formData.value.application.name.toLowerCase().replace(/\s+/g, "-"),
           name: formData.value.application.name,
           version: formData.value.application.version,
-          description: formData.value.application.description
+          description: formData.value.application.description,
         },
         compiler: {
           id: "suppers-compiler",
-          version: "1.0.0"
+          version: "1.0.0",
         },
         data: {
-          routes: formData.value.routes
-        }
+          routes: formData.value.routes,
+        },
       };
-      
+
       await onGenerate(spec);
     } catch (error) {
       console.error("Generation failed:", error);
@@ -225,11 +221,11 @@ export default function AppGeneratorForm({
                     ...formData.value,
                     application: {
                       ...formData.value.application,
-                      name: (e.target as HTMLInputElement).value
-                    }
+                      name: (e.target as HTMLInputElement).value,
+                    },
                   };
                 }}
-                class={`w-full ${errors.value.name ? 'input-error' : ''}`}
+                class={`w-full ${errors.value.name ? "input-error" : ""}`}
               />
               {errors.value.name && (
                 <div class="label">
@@ -243,7 +239,9 @@ export default function AppGeneratorForm({
                 <span class="label-text">Description *</span>
               </label>
               <textarea
-                class={`textarea textarea-bordered w-full ${errors.value.description ? 'textarea-error' : ''}`}
+                class={`textarea textarea-bordered w-full ${
+                  errors.value.description ? "textarea-error" : ""
+                }`}
                 placeholder="Describe what your application does..."
                 rows={3}
                 value={formData.value.application.description}
@@ -252,8 +250,8 @@ export default function AppGeneratorForm({
                     ...formData.value,
                     application: {
                       ...formData.value.application,
-                      description: (e.target as HTMLTextAreaElement).value
-                    }
+                      description: (e.target as HTMLTextAreaElement).value,
+                    },
                   };
                 }}
               />
@@ -277,8 +275,8 @@ export default function AppGeneratorForm({
                     ...formData.value,
                     application: {
                       ...formData.value.application,
-                      version: (e.target as HTMLInputElement).value
-                    }
+                      version: (e.target as HTMLInputElement).value,
+                    },
                   };
                 }}
                 class="w-full"
@@ -302,7 +300,7 @@ export default function AppGeneratorForm({
               {Object.entries(formData.value.features).map(([key, value]) => (
                 <div key={key} class="form-control">
                   <label class="label cursor-pointer">
-                    <span class="label-text capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                    <span class="label-text capitalize">{key.replace(/([A-Z])/g, " $1")}</span>
                     <input
                       type="checkbox"
                       class="checkbox checkbox-primary"
@@ -312,8 +310,8 @@ export default function AppGeneratorForm({
                           ...formData.value,
                           features: {
                             ...formData.value.features,
-                            [key]: (e.target as HTMLInputElement).checked
-                          }
+                            [key]: (e.target as HTMLInputElement).checked,
+                          },
                         };
                       }}
                     />
@@ -333,7 +331,7 @@ export default function AppGeneratorForm({
                 Add Route
               </Button>
             </div>
-            
+
             <div class="space-y-4">
               {formData.value.routes.map((route, index) => (
                 <Card key={index} class="p-4">
@@ -365,10 +363,8 @@ export default function AppGeneratorForm({
                 </Card>
               ))}
             </div>
-            
-            {errors.value.routes && (
-              <div class="text-error text-sm">{errors.value.routes}</div>
-            )}
+
+            {errors.value.routes && <div class="text-error text-sm">{errors.value.routes}</div>}
           </div>
         );
 
@@ -376,7 +372,7 @@ export default function AppGeneratorForm({
         return (
           <div class="space-y-6">
             <h3 class="text-lg font-semibold">Styling Options</h3>
-            
+
             <div>
               <label class="label">
                 <span class="label-text">Theme</span>
@@ -389,8 +385,8 @@ export default function AppGeneratorForm({
                     ...formData.value,
                     styling: {
                       ...formData.value.styling,
-                      theme: (e.target as HTMLSelectElement).value
-                    }
+                      theme: (e.target as HTMLSelectElement).value,
+                    },
                   };
                 }}
               >
@@ -416,8 +412,8 @@ export default function AppGeneratorForm({
                     ...formData.value,
                     styling: {
                       ...formData.value.styling,
-                      customCSS: (e.target as HTMLTextAreaElement).value
-                    }
+                      customCSS: (e.target as HTMLTextAreaElement).value,
+                    },
                   };
                 }}
               />
@@ -429,14 +425,20 @@ export default function AppGeneratorForm({
         return (
           <div class="space-y-6">
             <h3 class="text-lg font-semibold">Review Your Application</h3>
-            
+
             <div class="grid md:grid-cols-2 gap-6">
               <Card class="p-4">
                 <h4 class="font-semibold mb-2">Application Info</h4>
                 <div class="space-y-1 text-sm">
-                  <p><strong>Name:</strong> {formData.value.application.name}</p>
-                  <p><strong>Version:</strong> {formData.value.application.version}</p>
-                  <p><strong>Description:</strong> {formData.value.application.description}</p>
+                  <p>
+                    <strong>Name:</strong> {formData.value.application.name}
+                  </p>
+                  <p>
+                    <strong>Version:</strong> {formData.value.application.version}
+                  </p>
+                  <p>
+                    <strong>Description:</strong> {formData.value.application.description}
+                  </p>
                 </div>
               </Card>
 
@@ -446,7 +448,7 @@ export default function AppGeneratorForm({
                   {Object.entries(formData.value.features)
                     .filter(([_, enabled]) => enabled)
                     .map(([feature, _]) => (
-                      <p key={feature}>✓ {feature.replace(/([A-Z])/g, ' $1')}</p>
+                      <p key={feature}>✓ {feature.replace(/([A-Z])/g, " $1")}</p>
                     ))}
                 </div>
               </Card>
@@ -463,10 +465,10 @@ export default function AppGeneratorForm({
               <Card class="p-4">
                 <h4 class="font-semibold mb-2">Styling</h4>
                 <div class="space-y-1 text-sm">
-                  <p><strong>Theme:</strong> {formData.value.styling.theme}</p>
-                  {formData.value.styling.customCSS && (
-                    <p>✓ Custom CSS included</p>
-                  )}
+                  <p>
+                    <strong>Theme:</strong> {formData.value.styling.theme}
+                  </p>
+                  {formData.value.styling.customCSS && <p>✓ Custom CSS included</p>}
                 </div>
               </Card>
             </div>
@@ -535,7 +537,7 @@ export default function AppGeneratorForm({
               Cancel
             </Button>
           </div>
-          
+
           <div class="flex gap-4">
             {currentStep.value > 0 && (
               <Button
@@ -545,7 +547,7 @@ export default function AppGeneratorForm({
                 Previous
               </Button>
             )}
-            
+
             {currentStep.value < 4 && (
               <Button
                 color="primary"
