@@ -1,125 +1,64 @@
 import { type PageProps } from "fresh";
-import { type Handlers } from "fresh";
-import AppGeneratorForm from "../islands/AppGeneratorForm.tsx";
-import type { ApplicationTemplate } from "../islands/MarketplaceHomepage.tsx";
-import type { ApplicationSpec } from "@suppers/shared/types/application";
 
-interface CreatePageData {
-  selectedTemplate?: ApplicationTemplate;
-}
-
-export const handler: Handlers<CreatePageData> = {
-  GET(req, ctx) {
-    const url = new URL(req.url);
-    const templateId = url.searchParams.get("template");
-
-    // Mock templates - in a real implementation, these would be fetched from the database
-    const mockTemplates: ApplicationTemplate[] = [
-      {
-        id: "business-landing",
-        name: "Business Landing Page",
-        description:
-          "Professional landing page template with hero section, features, and contact form",
-        category: "business",
-        preview: {
-          image: "/templates/business-landing.png",
-          demoUrl: "https://demo.example.com/business",
-        },
-        features: ["Responsive Design", "Contact Form", "SEO Optimized", "Fast Loading"],
-        complexity: "beginner",
-        estimatedTime: "5 minutes",
-      },
-      {
-        id: "portfolio-creative",
-        name: "Creative Portfolio",
-        description: "Showcase your work with this modern portfolio template",
-        category: "portfolio",
-        preview: {
-          image: "/templates/portfolio-creative.png",
-          demoUrl: "https://demo.example.com/portfolio",
-        },
-        features: ["Gallery", "Project Showcase", "About Section", "Contact"],
-        complexity: "intermediate",
-        estimatedTime: "8 minutes",
-      },
-      {
-        id: "blog-minimal",
-        name: "Minimal Blog",
-        description: "Clean and simple blog template for content creators",
-        category: "blog",
-        preview: {
-          image: "/templates/blog-minimal.png",
-          demoUrl: "https://demo.example.com/blog",
-        },
-        features: ["Article Management", "Categories", "Search", "Comments"],
-        complexity: "intermediate",
-        estimatedTime: "10 minutes",
-      },
-      {
-        id: "ecommerce-store",
-        name: "E-commerce Store",
-        description: "Full-featured online store with product catalog and checkout",
-        category: "ecommerce",
-        preview: {
-          image: "/templates/ecommerce-store.png",
-          demoUrl: "https://demo.example.com/store",
-        },
-        features: ["Product Catalog", "Shopping Cart", "Payment Integration", "Admin Panel"],
-        complexity: "advanced",
-        estimatedTime: "15 minutes",
-      },
-      {
-        id: "dashboard-admin",
-        name: "Admin Dashboard",
-        description: "Comprehensive admin dashboard with charts and data management",
-        category: "dashboard",
-        preview: {
-          image: "/templates/dashboard-admin.png",
-          demoUrl: "https://demo.example.com/dashboard",
-        },
-        features: ["Data Visualization", "User Management", "Analytics", "Reports"],
-        complexity: "advanced",
-        estimatedTime: "12 minutes",
-      },
-    ];
-
-    const selectedTemplate = templateId
-      ? mockTemplates.find((t) => t.id === templateId)
-      : undefined;
-
-    return ctx.render({ selectedTemplate });
-  },
-};
-
-export default function CreatePage({ data }: PageProps<CreatePageData>) {
-  const handleGenerate = async (spec: ApplicationSpec) => {
-    try {
-      // In a real implementation, this would call the compiler service
-      console.log("Generating application with spec:", spec);
-
-      // Mock generation process
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Redirect to success page or show success message
-      alert("Application generated successfully!");
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Generation failed:", error);
-      alert("Generation failed. Please try again.");
-    }
-  };
-
-  const handleCancel = () => {
-    window.location.href = "/";
-  };
-
+export default function CreatePage(_props: PageProps) {
   return (
-    <div class="min-h-screen bg-base-100">
-      <AppGeneratorForm
-        selectedTemplate={data.selectedTemplate}
-        onGenerate={handleGenerate}
-        onCancel={handleCancel}
-      />
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+      {/* Header */}
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-semibold text-base-content mb-2">
+          What do you want to build?
+        </h1>
+        <div class="badge badge-warning badge-lg mt-4">
+          Coming Soon
+        </div>
+      </div>
+
+      {/* Chat Input */}
+      <div class="bg-base-100 rounded-2xl border border-base-300 p-4 mb-6">
+        <textarea 
+          class="w-full resize-none border-none outline-none bg-transparent text-base-content placeholder:text-base-content/50"
+          placeholder="Describe the app you want to build..."
+          rows={3}
+          disabled
+        ></textarea>
+        
+        <div class="flex justify-between items-center mt-3">
+          <div class="flex items-center gap-2 text-sm text-base-content/60">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </div>
+          <button class="btn btn-circle btn-sm bg-base-content text-base-100" disabled>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Examples Section */}
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
+        <h3 class="text-sm font-medium text-base-content/70 mb-3">Examples of apps you can build:</h3>
+        
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-sm text-base-content/60">
+            <span>→</span>
+            <span>A task management app with team collaboration features</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-base-content/60">
+            <span>→</span>
+            <span>An e-commerce store with payment integration</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-base-content/60">
+            <span>→</span>
+            <span>A personal blog with markdown support and comments</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-base-content/60">
+            <span>→</span>
+            <span>A dashboard to track business metrics and analytics</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

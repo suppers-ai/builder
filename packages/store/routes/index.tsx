@@ -1,34 +1,26 @@
 import { type PageProps } from "fresh";
-// @ts-ignore - Temporarily ignore import errors
-import MarketplaceHomepage from "../islands/MarketplaceHomepage.tsx";
 
 export default function Home(_props: PageProps) {
-  // In a real implementation, these would be fetched from the database
-  const recentApps = [];
-  const templates = [];
-
   return (
-    <>
-      <MarketplaceHomepage
-        templates={templates}
-        recentApps={recentApps}
-      />
-
-      {/* Footer */}
-      <footer class="bg-base-300 py-12">
-        <div class="container mx-auto px-4">
-          <div class="text-center">
-            <div class="mb-6">
-              <h4 class="text-2xl font-bold text-base-content mb-2">Suppers Store</h4>
-              <p class="text-base-content/70">Your application marketplace</p>
-            </div>
-            <div class="divider max-w-xs mx-auto"></div>
-            <p class="text-base-content/60 text-sm">
-              © 2024 Suppers Store. Built with ❤️ using Fresh, Deno, and Supabase.
-            </p>
+    <div class="px-4">
+      <div class="relative w-full h-[calc(100vh-80px)] overflow-hidden rounded-3xl" style="background-image: url('/hero-gradient.webp'); background-size: cover; background-position: center;">
+        {/* Main Content - Centered */}
+        <div class="flex flex-col items-center justify-center h-full text-center px-4">
+          {/* Logo/Brand */}
+          <div class="mb-8">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white max-w-4xl leading-tight">
+              Build, Monetize, Scale. Faster.
+            </h1>
           </div>
         </div>
-      </footer>
-    </>
+
+        {/* Browse Applications Button - Bottom Left */}
+        <div class="absolute bottom-6 left-6">
+          <a href="/applications" class="btn btn-primary rounded-full shadow-lg">
+            Browse Applications
+          </a>
+        </div>
+      </div>
+    </div>
   );
 }
