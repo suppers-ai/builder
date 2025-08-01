@@ -15,7 +15,6 @@
   "imports": {
     "@fresh/core": "jsr:@fresh/core@2.0.0-alpha.49",
     "fresh": "jsr:@fresh/core@2.0.0-alpha.49",
-    "fresh/": "jsr:@fresh/core@2.0.0-alpha.49/",
     "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
     "@std/": "https://deno.land/std@0.224.0/",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.3",
@@ -29,9 +28,7 @@
     "@preact/signals-core": "npm:@preact/signals-core@1.8.0",
     "zod": "https://esm.sh/zod@3.25.1",
     "lucide-preact": "https://esm.sh/lucide-preact@0.460.0",
-    "$fresh/": "jsr:@fresh/core@2.0.0-alpha.49/",
     "$fresh/runtime": "jsr:@fresh/core@2.0.0-alpha.49/runtime",
-    "fresh/dev": "jsr:@fresh/core@2.0.0-alpha.49/dev"
   },
   "tasks": {
     "dev": "deno task --config packages/compiler/deno.json dev",
