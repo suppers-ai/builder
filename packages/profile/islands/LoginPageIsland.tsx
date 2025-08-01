@@ -1,9 +1,8 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState, useRef } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import type { User } from "../lib/api-client.ts";
 import {
-  Alert,
   Button,
   Card,
   EmailInput,
@@ -34,6 +33,7 @@ export default function LoginPageIsland({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [theme, setTheme] = useState<string>("light");
+  const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: "success" | "error" }>>([]);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -41,6 +41,29 @@ export default function LoginPageIsland({
     firstName: "",
     lastName: "",
   });
+
+  // Add toast function
+  const addToast = (message: string, type: "success" | "error") => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 5000);
+  };
+
+  // Remove toast function
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  // Show toasts when error or success changes
+  if (error && !toasts.some(t => t.message === error)) {
+    addToast(error, "error");
+  }
+  if (success && !toasts.some(t => t.message === success)) {
+    addToast(success, "success");
+  }
 
   // Check auth state and theme on mount
   useEffect(() => {
@@ -182,7 +205,7 @@ export default function LoginPageIsland({
           email: formData.email,
           password: formData.password,
         });
-        setSuccess("Login successful! Redirecting...");
+        addToast("Login successful! Redirecting...", "success");
 
         // Redirect after successful login
         setTimeout(async () => {
@@ -265,11 +288,12 @@ export default function LoginPageIsland({
         });
 
         if (result.user && !result.user.email_confirmed_at) {
-          setSuccess(
+          addToast(
             "Account created! Please check your email and click the verification link to complete your registration.",
+            "success"
           );
         } else if (result.user && result.user.email_confirmed_at) {
-          setSuccess("Account created and verified! Redirecting...");
+          addToast("Account created and verified! Redirecting...", "success");
           setTimeout(async () => {
             // Check if we're in a popup window for external SSO
             const isPopup = globalThis.window?.opener && globalThis.window?.opener !== globalThis.window;
@@ -309,11 +333,11 @@ export default function LoginPageIsland({
             }
           }, 1000);
         } else {
-          setSuccess("Account created! Please check your email for verification.");
+          addToast("Account created! Please check your email for verification.", "success");
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      addToast(err instanceof Error ? err.message : "An error occurred", "error");
     } finally {
       setIsLoading(false);
     }
@@ -354,7 +378,7 @@ export default function LoginPageIsland({
       }
     } catch (err) {
       console.error("❌ Profile: OAuth login failed:", err);
-      setError(err instanceof Error ? err.message : "OAuth login failed");
+      addToast(err instanceof Error ? err.message : "OAuth login failed", "error");
     }
   };
 
@@ -368,9 +392,9 @@ export default function LoginPageIsland({
       await AuthHelpers.resetPassword({
         email: formData.email,
       });
-      setSuccess("Password reset email sent! Check your inbox.");
+      addToast("Password reset email sent! Check your inbox.", "success");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send reset email");
+      addToast(err instanceof Error ? err.message : "Failed to send reset email", "error");
     } finally {
       setIsLoading(false);
     }
@@ -386,6 +410,19 @@ export default function LoginPageIsland({
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-base-300">
+      {/* Toast Container */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            dismissible={true}
+            onDismiss={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
+      
       <div className="max-w-md w-full">
         <Card bordered class="bg-base-100 shadow-xl border-base-200 overflow-hidden">
           <div className="px-6 pt-6 pb-4">
@@ -415,27 +452,6 @@ export default function LoginPageIsland({
           </div>
 
           <div className="px-6 pb-6">
-            {/* Error/Success Messages */}
-          {error && (
-            <div className="mb-6">
-              <Alert color="error" class="bg-error/5 border-error/20 text-error">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.186-.833-2.956 0L3.858 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                {error}
-              </Alert>
-            </div>
-          )}
-          {success && (
-            <div className="mb-6">
-              <Alert color="success" class="bg-success/5 border-success/20 text-success">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {success}
-              </Alert>
-            </div>
-          )}
 
           {showForgotPassword
             ? (

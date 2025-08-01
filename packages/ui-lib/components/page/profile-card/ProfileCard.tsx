@@ -3,7 +3,7 @@ import { BaseComponentProps } from "../../types.ts";
 import { Button } from "../../action/button/Button.tsx";
 import { Input } from "../../input/input/Input.tsx";
 import { PasswordInput } from "../../input/password-input/PasswordInput.tsx";
-import { Alert } from "../../feedback/alert/Alert.tsx";
+import { Toast } from "../../feedback/toast/Toast.tsx";
 import { Loading } from "../../feedback/loading/Loading.tsx";
 import { Select } from "../../input/select/Select.tsx";
 import { Avatar } from "../../display/avatar/Avatar.tsx";
@@ -57,6 +57,7 @@ export function ProfileCard({
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(user?.user_metadata?.theme || "light");
+  const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: "success" | "error" }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editData, setEditData] = useState({
     firstName: user?.user_metadata?.firstName || "",
@@ -70,53 +71,45 @@ export function ProfileCard({
     confirmPassword: "",
   });
 
-  // Available themes
-  const themes = [
-    { value: "light", label: "Light" },
-    { value: "dark", label: "Dark" },
-    { value: "cupcake", label: "Cupcake" },
-    { value: "bumblebee", label: "Bumblebee" },
-    { value: "emerald", label: "Emerald" },
-    { value: "corporate", label: "Corporate" },
-    { value: "synthwave", label: "Synthwave" },
-    { value: "retro", label: "Retro" },
-    { value: "cyberpunk", label: "Cyberpunk" },
-    { value: "valentine", label: "Valentine" },
-    { value: "halloween", label: "Halloween" },
-    { value: "garden", label: "Garden" },
-    { value: "forest", label: "Forest" },
-    { value: "aqua", label: "Aqua" },
-    { value: "lofi", label: "Lo-Fi" },
-    { value: "pastel", label: "Pastel" },
-    { value: "fantasy", label: "Fantasy" },
-    { value: "wireframe", label: "Wireframe" },
-    { value: "black", label: "Black" },
-    { value: "luxury", label: "Luxury" },
-    { value: "dracula", label: "Dracula" },
-    { value: "cmyk", label: "CMYK" },
-    { value: "autumn", label: "Autumn" },
-    { value: "business", label: "Business" },
-    { value: "acid", label: "Acid" },
-    { value: "lemonade", label: "Lemonade" },
-    { value: "night", label: "Night" },
-    { value: "coffee", label: "Coffee" },
-    { value: "winter", label: "Winter" },
-    { value: "dim", label: "Dim" },
-    { value: "nord", label: "Nord" },
-    { value: "sunset", label: "Sunset" },
-  ];
+  // Add toast function
+  const addToast = (message: string, type: "success" | "error") => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 5000);
+  };
+
+  // Remove toast function
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  // Show toasts when error or success changes
+  if (error && !toasts.some(t => t.message === error)) {
+    addToast(error, "error");
+  }
+  if (success && !toasts.some(t => t.message === success)) {
+    addToast(success, "success");
+  }
 
   const handleEditSubmit = async (e: Event) => {
     e.preventDefault();
     if (onUpdateProfile) {
-      await onUpdateProfile(editData);
-      // Apply theme immediately
-      if (editData.theme !== currentTheme) {
-        document.documentElement.setAttribute('data-theme', editData.theme);
-        localStorage.setItem('theme', editData.theme);
-        setCurrentTheme(editData.theme);
+      try {
+        await onUpdateProfile(editData);
+        addToast("Profile updated successfully!", "success");
+        // Apply theme immediately
+        if (editData.theme !== currentTheme) {
+          document.documentElement.setAttribute('data-theme', editData.theme);
+          localStorage.setItem('theme', editData.theme);
+          setCurrentTheme(editData.theme);
+        }
+        setIsEditing(false);
+      } catch (error) {
+        addToast(error instanceof Error ? error.message : "Failed to update profile", "error");
       }
-      setIsEditing(false);
     }
   };
 
@@ -128,19 +121,30 @@ export function ProfileCard({
     const target = e.target as HTMLInputElement;
     const file = target.files?.[0];
     if (file && onUploadAvatar) {
-      await onUploadAvatar(file);
+      try {
+        await onUploadAvatar(file);
+        addToast("Avatar updated successfully!", "success");
+      } catch (error) {
+        addToast(error instanceof Error ? error.message : "Failed to upload avatar", "error");
+      }
     }
   };
 
   const handlePasswordSubmit = async (e: Event) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
+      addToast("Passwords do not match", "error");
       return;
     }
     if (onChangePassword) {
-      await onChangePassword(passwordData.currentPassword, passwordData.newPassword);
-      setShowPasswordForm(false);
-      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      try {
+        await onChangePassword(passwordData.currentPassword, passwordData.newPassword);
+        addToast("Password updated successfully!", "success");
+        setShowPasswordForm(false);
+        setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } catch (error) {
+        addToast(error instanceof Error ? error.message : "Failed to update password", "error");
+      }
     }
   };
 
@@ -198,17 +202,18 @@ export function ProfileCard({
 
   return (
     <div class={`bg-base-100 rounded-xl shadow-lg border border-base-200 overflow-hidden ${className}`} id={id} {...props}>
-      {/* Messages */}
-      {error && (
-        <Alert color="error" class="mb-4">
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert color="success" class="mb-4">
-          {success}
-        </Alert>
-      )}
+      {/* Toast Container */}
+      <div class="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            dismissible={true}
+            onDismiss={() => removeToast(toast.id)}
+          />
+        ))}
+      </div>
 
       {/* Logo Section */}
       <div class="text-center p-6 border-b border-base-200">
