@@ -4,8 +4,9 @@
   "description": "CDN package for serving shared static assets across applications",
   "exports": "./mod.ts",
   "tasks": {
-    "dev": "deno run --allow-all --watch=static/,lib/ main.ts",
-    "start": "deno run --allow-all main.ts",
+    "dev": "deno run -A --watch=static/,routes/,islands/,components/,lib/,hooks/,providers/,pages/ dev.ts",
+    "build": "deno run -A dev.ts build",
+    "start": "deno run -A main.ts",
     "test": "deno test --allow-all",
     "test:watch": "deno test --allow-all --watch",
     "check": "deno check **/*.ts",
@@ -15,7 +16,20 @@
   },
   "imports": {
     "@/": "./",
-    "@std/path": "https://deno.land/std@0.224.0/path/mod.ts"
+    "@std/path": "https://deno.land/std@0.224.0/path/mod.ts",
+    "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
+    "fresh": "jsr:@fresh/core@2.0.0-alpha.49",
+    "fresh/": "jsr:@fresh/core@2.0.0-alpha.49/",
+    "fresh/dev": "jsr:@fresh/core@2.0.0-alpha.49/dev",
+    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
+    "@suppers/shared": "../shared/mod.ts",
+    "preact": "https://esm.sh/preact@10.27.0",
+    "preact/": "https://esm.sh/preact@10.27.0/"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
   },
   "lint": {
     "rules": {

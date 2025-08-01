@@ -77,7 +77,7 @@
     "store:deploy": "deno deploy --app=builder-store --org=suppers packages/store/main.ts",
     "store:deploy:prod": "deno deploy --app=builder-store --org=suppers --prod packages/store/main.ts",
     "cdn:build:root": "deno task cdn:build && deno task cdn:copy",
-    "cdn:build": "cd packages/cdn && deno task check",
+    "cdn:build": "cd packages/cdn && deno task build",
     "cdn:copy": "cp -r packages/cdn/_fresh ./_fresh",
     "cdn:preview": "cd packages/cdn && deno task start",
     "ui:build:root": "deno task ui:build && deno task ui:copy",

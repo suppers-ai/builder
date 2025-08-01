@@ -2,6 +2,7 @@ export const PORTS = {
   STORE: 8000,
   PROFILE: 8001,
   DOCS: 8002,
+  CDN: 8003,
 } as const;
 
 export type PackagePort = typeof PORTS[keyof typeof PORTS];

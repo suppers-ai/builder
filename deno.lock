@@ -1231,8 +1231,14 @@
     "https://esm.sh/lucide-preact@0.460.0/denonext/lucide-preact.mjs": "fd24daf96c23ba2e8fd1cd89deb46af185b5964311957294cb54b0f38d443b98",
     "https://esm.sh/node-gyp-build@4.8.4/deno/node-gyp-build.mjs": "e9bc230917834055810674176447a8c639cba987adce9259b46a8d25a471a97d",
     "https://esm.sh/node-gyp-build@4.8.4?target=deno": "fea86ce1f0ba91dc63ed4f1071773ced7a2a2d2424f1f237e1ed6448e0068249",
+    "https://esm.sh/preact@10.19.6/denonext/jsx-runtime.mjs": "627b6575fca4db5a785f5ed3215124212d0e1aa22ada287962ad2befa8f4fce4",
+    "https://esm.sh/preact@10.19.6/denonext/preact.mjs": "c0291d833b48fbae0c94efedab74390fd782edf63882318f5e10007100f0df75",
+    "https://esm.sh/preact@10.19.6/jsx-runtime": "e818ce449d5b732d384ffec64c1de2b542a5e01eade3d01de5c522ba1e7e8ad1",
     "https://esm.sh/preact@10.26.9/denonext/preact.mjs": "4cd7a49dac13e586b0e110cfa468caa933fd3dc7c101de55642a3771a4f242cf",
     "https://esm.sh/preact@10.26.9?target=denonext": "e867e0b1e34e8ab6dbc8bbb7347c61e28a948cff8b278b55b3ef086bac37c8ee",
+    "https://esm.sh/preact@10.27.0/denonext/jsx-runtime.mjs": "eca8d082839db06e1964509be699072222b5822483819dc5ac96d7fee1201343",
+    "https://esm.sh/preact@10.27.0/denonext/preact.mjs": "7c0a67d0152259c63d2afea05ce8791f6f4e38ef355fdab8a2c71989cf590c3d",
+    "https://esm.sh/preact@10.27.0/jsx-runtime": "f33f69315b770515e473b14403cef9c49f3427ff61016041220e36505ab8cc68",
     "https://esm.sh/tr46@0.0.3/deno/tr46.mjs": "6be35687453e07a92137f2446040a7251b6bd3006720948d3df3fc8c4b83287d",
     "https://esm.sh/tr46@0.0.3?target=deno": "e2a57fa0797155f181306799813bff8ecb284f8563f71caa486b55068a0f630a",
     "https://esm.sh/utf-8-validate@6.0.5/deno/utf-8-validate.mjs": "676dca777dbeda2231db53235552f0a7f23a0ff83cb2679f1b47cc10884d4806",
@@ -1261,6 +1267,12 @@
         "dependencies": [
           "jsr:@supabase/functions-js@*",
           "jsr:@supabase/supabase-js@2"
+        ]
+      },
+      "packages/cdn": {
+        "dependencies": [
+          "jsr:@fresh/core@2.0.0-alpha.49",
+          "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9"
         ]
       },
       "packages/compiler": {

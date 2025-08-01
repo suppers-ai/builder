@@ -297,9 +297,9 @@ export function generateDenoConfig(name: string, template: string): string {
       fmt: "deno fmt",
     },
     imports: {
-      "preact": "https://esm.sh/preact@10.19.6",
-      "preact/": "https://esm.sh/preact@10.19.6/",
-      "preact/hooks": "https://esm.sh/preact@10.19.6/hooks",
+      "preact": "https://esm.sh/preact@10.27.0",
+      "preact/": "https://esm.sh/preact@10.27.0/",
+      "preact/hooks": "https://esm.sh/preact@10.27.0/hooks",
       "@std/": "jsr:@std/",
       "suppers/ui-lib": "../../packages/ui-lib/mod.ts",
     },
