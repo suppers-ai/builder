@@ -42,6 +42,9 @@ export class AuthHelpers {
       throw new Error(error.message);
     }
 
+    // Reload token to ensure it's available for subsequent requests
+    apiClient.reloadToken();
+
     return authData;
   }
 
@@ -75,7 +78,7 @@ export class AuthHelpers {
         console.log("✅ Logout successful - getCurrentUser returns null");
       }
     } catch (error) {
-      console.log("✅ Logout successful - getCurrentUser throws error:", error.message);
+      console.log("✅ Logout successful - getCurrentUser throws error:", error instanceof Error ? error.message : "Unknown error");
     }
 
     // Session clearing is now handled by API package
@@ -207,6 +210,7 @@ export class AuthHelpers {
     const { error } = await apiClient.auth.updateUser(data);
 
     if (error) {
+      console.error("Failed to update user:", error);
       throw new Error(error.message);
     }
 
@@ -223,6 +227,10 @@ export class AuthHelpers {
       throw new Error(error.message);
     }
 
+    if (!data) {
+      throw new Error("No data returned from avatar upload");
+    }
+
     return data.publicUrl;
   }
 
@@ -230,7 +238,19 @@ export class AuthHelpers {
    * Listen to auth state changes
    */
   static onAuthStateChange(callback: (event: string, session: Session | null) => void) {
-    return apiClient.auth.onAuthStateChange(callback);
+    // For now, return a mock subscription since the API doesn't support real-time auth state changes
+    console.warn("onAuthStateChange is not fully implemented - using mock subscription");
+    
+    // Return a mock subscription object
+    return {
+      data: {
+        subscription: {
+          unsubscribe: () => {
+            console.log("Mock auth subscription unsubscribed");
+          }
+        }
+      }
+    };
   }
 
   /**

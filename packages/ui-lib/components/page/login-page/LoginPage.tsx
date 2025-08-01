@@ -86,7 +86,7 @@ export function LoginPage<TUser = any>({
         <div class="text-center">
           <div class="text-green-500 text-6xl mb-4">✅</div>
           <h1 class="text-2xl font-bold mb-4">Already Logged In</h1>
-          <p class="text-gray-600 mb-4">Redirecting you...</p>
+          <p class="text-slate-600 mb-4">Redirecting you...</p>
         </div>
       </div>
     );
@@ -114,7 +114,7 @@ export function LoginPage<TUser = any>({
       </div>
 
       <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card class="shadow-lg">
+        <Card class="shadow-xl">
           {/* Error/Success Messages */}
           {error && (
             <Alert type="error" class="mb-4">

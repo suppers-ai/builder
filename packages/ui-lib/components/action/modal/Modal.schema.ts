@@ -27,6 +27,12 @@ const ModalSpecificPropsSchema = z.object({
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 
+  // DaisyUI 5 specific modal features
+  position: withMetadata(
+    z.enum(["top", "middle", "bottom"]).default("middle").describe("Modal position (DaisyUI 5)"),
+    { examples: ["top", "middle", "bottom"], since: "2.0.0" },
+  ),
+
   onClose: z.function()
     .args()
     .returns(z.void())

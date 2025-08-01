@@ -30,7 +30,7 @@ export function CodeMockup({
   const mockupClasses = [
     "mockup-code",
     variant === "dark" && "bg-neutral text-neutral-content",
-    variant === "terminal" && "bg-black text-green-400",
+    variant === "terminal" && "bg-neutral text-success",
     className,
   ].filter(Boolean).join(" ");
 

@@ -12,17 +12,24 @@ export async function loginUser(request: Request, supabase: SupabaseClient): Pro
     });
   }
 
+  console.log("🔐 Attempting login for:", email);
+  
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
+    console.log("❌ Login failed:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
+  console.log("✅ Login successful for:", data.user?.email);
+  console.log("🔑 Session access token:", data.session?.access_token ? "present" : "missing");
+  console.log("🔑 Session refresh token:", data.session?.refresh_token ? "present" : "missing");
 
   return new Response(
     JSON.stringify({

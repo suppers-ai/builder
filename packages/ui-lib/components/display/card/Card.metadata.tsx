@@ -125,11 +125,11 @@ const cardProps: ComponentProp[] = [
 
 export const cardMetadata: ComponentMetadata = {
   name: "Card",
-  description: "Content containers with flexible layouts for organizing information",
+  description: "Content containers with flexible layouts for organizing information, enhanced with DaisyUI 5 and Tailwind 4 features",
   category: ComponentCategory.DISPLAY,
   path: "/components/display/card",
-  tags: ["container", "content", "layout", "panel"],
-  relatedComponents: ["avatar", "badge", "button"],
+  tags: ["container", "content", "layout", "panel", "daisyui-5", "tailwind-4", "enhanced-shadows", "responsive"],
+  relatedComponents: ["avatar", "badge", "button", "image", "divider"],
   interactive: false, // Static component, no island mode needed
   preview: (
     <div class="w-72">
@@ -141,20 +141,30 @@ export const cardMetadata: ComponentMetadata = {
           </div>
         }
       >
-        This is a sample card with some content to demonstrate the component.
+        This is a sample card with enhanced DaisyUI 5 styling and improved shadows.
       </Card>
     </div>
   ),
   examples: cardExamples,
   props: cardProps,
-  variants: ["default", "compact", "side", "image-overlay"],
-  useCases: ["Product showcase", "User profiles", "Content preview", "Information display"],
+  variants: ["default", "compact", "side", "image-overlay", "bordered", "glass"],
+  useCases: ["Product showcase", "User profiles", "Content preview", "Information display", "Dashboard widgets", "Media cards"],
   usageNotes: [
-    "Cards are perfect for grouping related content together",
-    "Use card-body class for proper content padding",
-    "Images should include proper alt text for accessibility",
-    "Actions prop automatically creates card-actions container",
-    "Side layout works well for horizontal displays",
-    "Compact variant reduces padding for dense layouts",
-    "Glass effect requires backdrop blur support",
-  ]};
+    "Cards are perfect for grouping related content together with enhanced visual hierarchy",
+    "Use card-body class for proper content padding with DaisyUI 5 improvements",
+    "Images should include proper alt text for accessibility and better responsive handling",
+    "Actions prop automatically creates card-actions container with improved spacing",
+    "Side layout works well for horizontal displays with better responsive behavior",
+    "Compact variant reduces padding for dense layouts while maintaining readability",
+    "Glass effect enhanced with better backdrop blur and opacity handling",
+    "Enhanced shadow system with DaisyUI 5 for better depth perception",
+    "Improved border radius system for modern appearance",
+    "Better responsive image behavior within cards",
+    "Enhanced content spacing with improved padding and margin calculations",
+    "Supports Tailwind 4 container queries for responsive design based on card size",
+    "Better theme compatibility with enhanced color tokens",
+    "Improved accessibility with better focus management and ARIA support",
+    "Optimized performance with better CSS generation and reduced bundle impact",
+    "Fully backward compatible - all existing card patterns continue to work"
+  ]
+};;

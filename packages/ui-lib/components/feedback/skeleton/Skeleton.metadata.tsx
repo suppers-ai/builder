@@ -79,8 +79,8 @@ export const skeletonMetadata: ComponentMetadata = {
   description: "Loading placeholders that mimic content structure while data is being fetched",
   category: ComponentCategory.FEEDBACK,
   path: "/components/feedback/skeleton",
-  tags: ["skeleton", "placeholder", "loading", "shimmer", "ghost", "content"],
-  relatedComponents: ["loading", "avatar", "card"],
+  tags: ["skeleton", "placeholder", "loading loading loading-spinner", "shimmer", "ghost", "content"],
+  relatedComponents: ["loading loading loading-spinner", "avatar", "card"],
   interactive: false, // Loading placeholder, not interactive
   preview: (
     <div class="flex flex-col gap-3">
@@ -100,13 +100,13 @@ export const skeletonMetadata: ComponentMetadata = {
   useCases: [
     "Loading states",
     "Content placeholders",
-    "Image loading",
-    "Text loading",
+    "Image loading loading loading-spinner",
+    "Text loading loading loading-spinner",
     "Complex layouts",
   ],
   usageNotes: [
     "Use skeletons that match the actual content structure and dimensions",
-    "Vary skeleton widths to create more realistic loading states",
+    "Vary skeleton widths to create more realistic loading loading loading-spinner states",
     "Combine circular and rectangular skeletons for complex layouts",
     "Keep skeleton animations subtle to avoid distraction",
     "Replace skeletons with actual content as soon as data loads",

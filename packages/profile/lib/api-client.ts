@@ -48,21 +48,30 @@ class ApiClient {
     }
   }
 
+  // Method to reload token from storage (useful after login)
+  reloadToken() {
+    this.loadTokenFromStorage();
+  }
+
   private loadTokenFromStorage() {
     if (typeof globalThis.localStorage !== "undefined") {
       this.token = globalThis.localStorage.getItem("access_token");
+      console.log("🔑 Loaded token from storage:", this.token ? "present" : "missing");
     }
   }
 
   setToken(token: string | null) {
+    console.log("🔧 Setting token:", token ? "present" : "null");
     this.token = token;
 
     // Persist token to localStorage on browser
     if (typeof globalThis.localStorage !== "undefined") {
       if (token) {
         globalThis.localStorage.setItem("access_token", token);
+        console.log("💾 Token saved to localStorage");
       } else {
         globalThis.localStorage.removeItem("access_token");
+        console.log("🗑️ Token removed from localStorage");
       }
     }
   }
@@ -79,6 +88,11 @@ class ApiClient {
 
       if (this.token) {
         headers.Authorization = `Bearer ${this.token}`;
+        console.log("🔑 API request with token:", endpoint);
+        console.log("🔑 Token length:", this.token.length);
+      } else {
+        console.log("⚠️ API request without token:", endpoint);
+        console.log("⚠️ Token state:", this.token);
       }
 
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
@@ -116,13 +130,23 @@ class ApiClient {
       email: string;
       password: string;
     }): Promise<{ data: { user: User | null; session: Session | null }; error: Error | null }> => {
+      console.log("🔐 Client: Attempting signInWithPassword for:", credentials.email);
+      
       const result = await this.request<{ user: User; session: Session }>("/api/v1/auth/login", {
         method: "POST",
         body: JSON.stringify(credentials),
       });
 
+      console.log("🔐 Client: Login response received");
+      console.log("🔐 Client: Result data:", result.data ? "present" : "null");
+      console.log("🔐 Client: Result error:", result.error ? result.error.message : "null");
+      console.log("🔐 Client: Session access token:", result.data?.session?.access_token ? "present" : "missing");
+
       if (result.data?.session?.access_token) {
+        console.log("🔐 Client: Setting token from session");
         this.setToken(result.data.session.access_token);
+      } else {
+        console.log("🔐 Client: No access token in session");
       }
 
       return {
@@ -228,6 +252,52 @@ class ApiClient {
       return {
         data: result.data,
         error: result.error,
+      };
+    },
+
+    updateUser: async (data: any): Promise<{ error: Error | null }> => {
+      console.log("🔄 Updating user with data:", data);
+      
+      // Ensure token is loaded
+      if (!this.token) {
+        this.loadTokenFromStorage();
+      }
+      
+      if (!this.token) {
+        console.error("❌ No token available for update user");
+        return { error: new Error("No authentication token available") };
+      }
+      
+      const result = await this.request("/api/v1/auth/update-user-metadata", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (result.error) {
+        console.error("❌ Update user error:", result.error);
+      } else {
+        console.log("✅ Update user success");
+      }
+
+      return { error: result.error };
+    },
+
+    onAuthStateChange: (callback: (event: string, session: Session | null) => void) => {
+      // For now, return a cleanup function that does nothing
+      // In a real implementation, this would set up event listeners
+      console.warn("onAuthStateChange is not implemented in the API client");
+      return () => {}; // Return cleanup function
+    },
+  };
+
+  // Storage methods
+  storage = {
+    uploadAvatar: async (file: File, userId: string): Promise<{ data: { publicUrl: string } | null; error: Error | null }> => {
+      // Storage upload is not implemented yet
+      console.warn("Avatar upload is not implemented in the API yet");
+      return {
+        data: null,
+        error: new Error("Avatar upload is not implemented yet"),
       };
     },
   };

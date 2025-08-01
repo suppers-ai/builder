@@ -1,7 +1,9 @@
-// Base interfaces for DaisyUI components
+// Base interfaces for DaisyUI 5 components
 import { ComponentChildren, RefObject } from "preact";
 
 export type DaisyUISize = "xs" | "sm" | "md" | "lg" | "xl";
+
+// DaisyUI 5 Enhanced Color Types
 export type DaisyUIColor =
   | "primary"
   | "secondary"
@@ -10,10 +12,13 @@ export type DaisyUIColor =
   | "base-100"
   | "base-200"
   | "base-300"
+  | "base-content"  // Added for DaisyUI 5
   | "info"
   | "success"
   | "warning"
   | "error";
+
+// DaisyUI 5 Enhanced Variant Types
 export type DaisyUIVariant =
   | "primary"
   | "secondary"
@@ -24,7 +29,17 @@ export type DaisyUIVariant =
   | "error"
   | "outline"
   | "ghost"
-  | "link";
+  | "link"
+  | "neutral";  // Added for DaisyUI 5
+
+// DaisyUI 5 Loading Types
+export type DaisyUILoadingType =
+  | "spinner"
+  | "dots"
+  | "ring"
+  | "ball"
+  | "bars"
+  | "infinity";
 
 // Common component props
 export interface BaseComponentProps {
@@ -51,6 +66,7 @@ export interface DisabledProps {
 
 export interface LoadingProps {
   loading?: boolean;
+  loadingType?: DaisyUILoadingType;  // Added for DaisyUI 5
 }
 
 export interface EventProps {

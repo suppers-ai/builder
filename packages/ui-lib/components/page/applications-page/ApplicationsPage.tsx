@@ -69,10 +69,10 @@ export function ApplicationsPage({
       <div class="flex items-center justify-center min-h-screen">
         <div class="text-center">
           <h1 class="text-2xl font-bold mb-4">Authentication Required</h1>
-          <p class="text-gray-600 mb-4">Please log in to manage your applications.</p>
+          <p class="text-slate-600 mb-4">Please log in to manage your applications.</p>
           <a
             href="/login"
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+            class="btn btn-primary text-white px-4 py-2 rounded-md"
           >
             Log In
           </a>
@@ -110,21 +110,21 @@ export function ApplicationsPage({
       {/* Header */}
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">My Applications</h1>
-          <p class="text-gray-600 mt-2">
+          <h1 class="text-3xl font-bold text-slate-900">My Applications</h1>
+          <p class="text-slate-600 mt-2">
             Create, edit, and manage your web applications
           </p>
         </div>
         <div class="flex gap-3">
           <a
             href="/"
-            class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            class="bg-slate-500 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             🌟 Browse Published
           </a>
           <button
             onClick={onShowCreateForm}
-            class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            class="btn btn-primary text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             ➕ Create Application
           </button>
@@ -154,16 +154,16 @@ export function ApplicationsPage({
             {applications.length === 0
               ? (
                 <div>
-                  <div class="text-gray-400 text-6xl mb-4">📱</div>
-                  <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                  <div class="text-base-content/50 text-6xl mb-4">📱</div>
+                  <h3 class="text-xl font-semibold text-slate-900 mb-2">
                     No applications yet
                   </h3>
-                  <p class="text-gray-600 mb-6">
+                  <p class="text-slate-600 mb-6">
                     Create your first application to get started building something amazing!
                   </p>
                   <button
                     onClick={onShowCreateForm}
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                    class="btn btn-primary text-white px-6 py-3 rounded-lg font-medium transition-colors"
                   >
                     Create Your First App
                   </button>
@@ -171,11 +171,11 @@ export function ApplicationsPage({
               )
               : (
                 <div>
-                  <div class="text-gray-400 text-6xl mb-4">🔍</div>
-                  <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                  <div class="text-base-content/50 text-6xl mb-4">🔍</div>
+                  <h3 class="text-xl font-semibold text-slate-900 mb-2">
                     No matching applications
                   </h3>
-                  <p class="text-gray-600">
+                  <p class="text-slate-600">
                     Try adjusting your search or filters
                   </p>
                 </div>

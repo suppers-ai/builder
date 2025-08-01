@@ -1,3 +1,5 @@
+import { setGlobalTheme } from "@suppers/ui-lib";
+
 // Simple user interface for stored token data
 export interface StoredUser {
   id: string;
@@ -10,6 +12,12 @@ export interface StoredUser {
   email_confirmed_at?: string;
   last_sign_in_at?: string;
   role?: string;
+  // Database user fields
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  avatar_url?: string;
+  theme_id?: string;
 }
 
 interface StoredSession {
@@ -82,6 +90,8 @@ export class StoreAuthHelpers {
         this.clearStoredTokens();
         return null;
       }
+
+      setGlobalTheme(userData.theme_id || "light");
 
       const session: StoredSession = {
         access_token: accessToken,
@@ -214,5 +224,121 @@ export class StoreAuthHelpers {
   static async isAuthenticated(): Promise<boolean> {
     const session = await this.getCurrentSession();
     return !!session?.user;
+  }
+
+  /**
+   * Fetch fresh user data from API (including theme_id from database)
+   */
+  static async fetchCurrentUser(): Promise<StoredUser | null> {
+    try {
+      const session = await this.getCurrentSession();
+      if (!session?.access_token) {
+        console.log("❌ No access token available for API call");
+        return null;
+      }
+
+      console.log("🔍 StoreAuthHelpers: Fetching fresh user data from API...");
+      
+      // Call the API to get current user with database fields
+      const response = await fetch("http://localhost:8081/api/auth/current-user", {
+        headers: {
+          "Authorization": `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("❌ Failed to fetch user data:", response.status, response.statusText);
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.user) {
+        console.log("✅ Fetched fresh user data:", {
+          id: data.user.id,
+          email: data.user.email,
+          theme_id: data.user.theme_id,
+          display_name: data.user.display_name
+        });
+        
+        // Update stored user data with fresh data
+        this.updateStoredUserData(data.user);
+        return data.user;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("❌ Error fetching current user:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Update user's theme ID
+   */
+  static async updateUserTheme(themeId: string): Promise<boolean> {
+    try {
+      const session = await this.getCurrentSession();
+      if (!session?.access_token) {
+        console.log("❌ No access token available for theme update");
+        return false;
+      }
+
+      console.log("🔍 StoreAuthHelpers: Updating user theme to:", themeId);
+      
+      const response = await fetch("http://localhost:8081/api/auth/update-user-metadata", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          theme_id: themeId
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("❌ Failed to update user theme:", response.status, response.statusText);
+        return false;
+      }
+
+      console.log("✅ Successfully updated user theme to:", themeId);
+      
+      // Update local stored user data
+      const currentUser = session.user;
+      if (currentUser) {
+        currentUser.theme_id = themeId;
+        this.updateStoredUserData(currentUser);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("❌ Error updating user theme:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Update stored user data in localStorage
+   */
+  static updateStoredUserData(userData: StoredUser): void {
+    if (typeof globalThis.localStorage !== "undefined") {
+      globalThis.localStorage.setItem("user_data", JSON.stringify(userData));
+      console.log("✅ Updated stored user data");
+    }
+  }
+
+  /**
+   * Get user's theme ID from stored data, or fetch fresh if needed
+   */
+  static async getUserThemeId(): Promise<string | null> {
+    const user = await this.getCurrentUser();
+    if (user?.theme_id) {
+      return user.theme_id;
+    }
+    
+    // If no theme_id in stored data, fetch fresh data
+    const freshUser = await this.fetchCurrentUser();
+    return freshUser?.theme_id || null;
   }
 }

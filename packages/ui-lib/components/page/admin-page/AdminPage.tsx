@@ -203,7 +203,7 @@ export function AdminPage({
               class={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "pending"
                   ? "border-orange-500 text-orange-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               }`}
             >
               🔍 Pending Review ({pendingApplications.length})
@@ -218,7 +218,7 @@ export function AdminPage({
               class={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "all-apps"
                   ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               }`}
             >
               📊 All Applications ({allApplications.length})
@@ -228,7 +228,7 @@ export function AdminPage({
               class={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === "users"
                   ? "border-green-500 text-green-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
               }`}
             >
               👥 Users (Coming Soon)
@@ -250,13 +250,13 @@ export function AdminPage({
                     <button
                       onClick={onBulkApprove}
                       disabled={isSubmittingReview}
-                      class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                      class="btn btn-success text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
                     >
                       ✅ Bulk Approve
                     </button>
                     <button
                       onClick={onClearSelection}
-                      class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                      class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                       Clear Selection
                     </button>
@@ -269,11 +269,11 @@ export function AdminPage({
             {pendingApplications.length === 0
               ? (
                 <div class="text-center py-12">
-                  <div class="text-gray-400 text-6xl mb-4">✅</div>
-                  <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                  <div class="text-base-content/50 text-6xl mb-4">✅</div>
+                  <h3 class="text-xl font-semibold text-slate-900 mb-2">
                     No pending applications
                   </h3>
-                  <p class="text-gray-600">
+                  <p class="text-slate-600">
                     All applications have been reviewed! Check back later for new submissions.
                   </p>
                 </div>
@@ -283,7 +283,7 @@ export function AdminPage({
                   {pendingApplications.map((application) => (
                     <div
                       key={application.id}
-                      class="bg-white rounded-lg shadow-md border border-gray-200 p-6"
+                      class="bg-base-100 rounded-lg shadow-xl border border-base-300 p-6"
                     >
                       <div class="flex items-start justify-between">
                         <div class="flex items-start space-x-4">
@@ -295,16 +295,16 @@ export function AdminPage({
                                 application.id,
                                 (e.target as HTMLInputElement).checked,
                               )}
-                            class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
                           />
                           <div class="flex-1">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                            <h3 class="text-lg font-semibold text-slate-900 mb-2">
                               {application.name}
                             </h3>
                             {application.description && (
-                              <p class="text-gray-600 mb-3">{application.description}</p>
+                              <p class="text-slate-600 mb-3">{application.description}</p>
                             )}
-                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <div class="flex items-center space-x-4 text-sm text-slate-500">
                               <span>
                                 📅 Submitted:{" "}
                                 {new Date(application.updated_at).toLocaleDateString()}
@@ -322,19 +322,19 @@ export function AdminPage({
                         <div class="flex space-x-2">
                           <button
                             onClick={() => onReviewApplication(application, "approved")}
-                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            class="btn btn-success text-white px-4 py-2 rounded-lg font-medium transition-colors"
                           >
                             ✅ Approve
                           </button>
                           <button
                             onClick={() => onReviewApplication(application, "rejected")}
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            class="btn btn-error text-white px-4 py-2 rounded-lg font-medium transition-colors"
                           >
                             ❌ Reject
                           </button>
                           <button
                             onClick={() => onReviewApplication(application, null)}
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            class="btn btn-primary text-white px-4 py-2 rounded-lg font-medium transition-colors"
                           >
                             👁️ Details
                           </button>
@@ -363,11 +363,11 @@ export function AdminPage({
             {filteredApplications.length === 0
               ? (
                 <div class="text-center py-12">
-                  <div class="text-gray-400 text-6xl mb-4">📱</div>
-                  <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                  <div class="text-base-content/50 text-6xl mb-4">📱</div>
+                  <h3 class="text-xl font-semibold text-slate-900 mb-2">
                     No applications found
                   </h3>
-                  <p class="text-gray-600">
+                  <p class="text-slate-600">
                     Try adjusting your search or filters
                   </p>
                 </div>
@@ -389,11 +389,11 @@ export function AdminPage({
 
         {activeTab === "users" && (
           <div class="text-center py-12">
-            <div class="text-gray-400 text-6xl mb-4">👥</div>
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">
+            <div class="text-base-content/50 text-6xl mb-4">👥</div>
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">
               User Management
             </h3>
-            <p class="text-gray-600">
+            <p class="text-slate-600">
               User management features are coming soon! This will include user roles, activity
               monitoring, and account management tools.
             </p>
@@ -402,12 +402,12 @@ export function AdminPage({
 
         {/* Application Review Modal */}
         {selectedApp && (
-          <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+          <div class="fixed inset-0 bg-slate-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-xl rounded-md bg-base-100">
               <div class="mt-3">
                 {/* Modal Header */}
                 <div class="flex items-center justify-between mb-6">
-                  <h3 class="text-2xl font-bold text-gray-900">
+                  <h3 class="text-2xl font-bold text-slate-900">
                     {reviewAction === "approved"
                       ? "✅ Approve Application"
                       : reviewAction === "rejected"
@@ -416,21 +416,21 @@ export function AdminPage({
                   </h3>
                   <button
                     onClick={onCloseModal}
-                    class="text-gray-400 hover:text-gray-600"
+                    class="text-base-content/50 hover:text-slate-600"
                   >
                     ✕
                   </button>
                 </div>
 
                 {/* Application Details */}
-                <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                <div class="bg-slate-50 rounded-lg p-6 mb-6">
                   <h4 class="text-lg font-semibold mb-3">{selectedApp.name}</h4>
                   {selectedApp.description && (
-                    <p class="text-gray-600 mb-4">{selectedApp.description}</p>
+                    <p class="text-slate-600 mb-4">{selectedApp.description}</p>
                   )}
                   <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span class="font-medium text-gray-700">Status:</span>
+                      <span class="font-medium text-slate-700">Status:</span>
                       <span
                         class={`ml-2 px-2 py-1 rounded-full text-xs ${
                           selectedApp.status === "pending"
@@ -438,7 +438,7 @@ export function AdminPage({
                             : selectedApp.status === "published"
                             ? "bg-green-100 text-green-800"
                             : selectedApp.status === "draft"
-                            ? "bg-gray-100 text-gray-800"
+                            ? "bg-slate-100 text-slate-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
@@ -446,17 +446,17 @@ export function AdminPage({
                       </span>
                     </div>
                     <div>
-                      <span class="font-medium text-gray-700">Template:</span>
+                      <span class="font-medium text-slate-700">Template:</span>
                       <span class="ml-2">{selectedApp.template_id}</span>
                     </div>
                     <div>
-                      <span class="font-medium text-gray-700">Created:</span>
+                      <span class="font-medium text-slate-700">Created:</span>
                       <span class="ml-2">
                         {new Date(selectedApp.created_at).toLocaleDateString()}
                       </span>
                     </div>
                     <div>
-                      <span class="font-medium text-gray-700">Updated:</span>
+                      <span class="font-medium text-slate-700">Updated:</span>
                       <span class="ml-2">
                         {new Date(selectedApp.updated_at).toLocaleDateString()}
                       </span>
@@ -486,12 +486,12 @@ export function AdminPage({
                             >
                               {review.action === "approved" ? "✅ Approved" : "❌ Rejected"}
                             </span>
-                            <span class="text-sm text-gray-500">
+                            <span class="text-sm text-slate-500">
                               {new Date(review.reviewed_at).toLocaleDateString()}
                             </span>
                           </div>
                           {review.feedback && (
-                            <p class="text-gray-700 text-sm">{review.feedback}</p>
+                            <p class="text-slate-700 text-sm">{review.feedback}</p>
                           )}
                         </div>
                       ))}
@@ -502,7 +502,7 @@ export function AdminPage({
                 {/* Review Actions */}
                 {reviewAction && (
                   <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
                       {reviewAction === "approved"
                         ? "Approval Message (Optional)"
                         : "Rejection Reason (Required)"}
@@ -511,7 +511,7 @@ export function AdminPage({
                       value={reviewFeedback}
                       onChange={(e) => onSetReviewFeedback((e.target as HTMLTextAreaElement).value)}
                       rows={4}
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder={reviewAction === "approved"
                         ? "Optional feedback for the applicant..."
                         : "Please explain why this application is being rejected..."}
@@ -523,7 +523,7 @@ export function AdminPage({
                 <div class="flex justify-end space-x-3">
                   <button
                     onClick={onCloseModal}
-                    class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    class="bg-slate-500 hover:bg-slate-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
                   >
                     Cancel
                   </button>
@@ -534,8 +534,8 @@ export function AdminPage({
                         (reviewAction === "rejected" && !reviewFeedback.trim())}
                       class={`px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                         reviewAction === "approved"
-                          ? "bg-green-500 hover:bg-green-600 text-white"
-                          : "bg-red-500 hover:bg-red-600 text-white"
+                          ? "btn btn-success text-white"
+                          : "btn btn-error text-white"
                       }`}
                     >
                       {isSubmittingReview

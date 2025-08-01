@@ -1,5 +1,3 @@
-import { Navbar } from "@suppers/ui-lib";
-import { Button } from "@suppers/ui-lib";
 import SimpleAuthButton from "./SimpleAuthButton.tsx";
 
 interface SimpleNavbarProps {
@@ -70,6 +68,7 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
 
       {/* Auth and Mobile Menu - Right */}
       <div class="navbar-end">
+        
         {/* Auth Button - Always visible */}
         <div class="mr-4">
           <SimpleAuthButton />

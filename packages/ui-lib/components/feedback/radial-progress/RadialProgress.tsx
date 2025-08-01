@@ -51,6 +51,7 @@ export function RadialProgress({
     "base-100": "text-base-100",
     "base-200": "text-base-200",
     "base-300": "text-base-300",
+    "base-content": "text-base-content",  // Added for DaisyUI 5
   };
 
   const progressClasses = [

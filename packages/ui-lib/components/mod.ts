@@ -141,6 +141,8 @@ export { UserInfo } from "./display/user-info/UserInfo.tsx";
 export type { UserInfoProps, DropdownItem } from "./display/user-info/UserInfo.tsx";
 export { AuthGuard } from "./auth/auth-guard/AuthGuard.tsx";
 export type { AuthGuardProps } from "./auth/auth-guard/AuthGuard.tsx";
+export { AuthClientProvider, useAuthClient } from "../providers/AuthClientProvider.tsx";
+export type { AuthClientProviderProps } from "../providers/AuthClientProvider.tsx";
 export { Menu } from "./navigation/menu/Menu.tsx";
 export type { MenuProps } from "./navigation/menu/Menu.tsx";
 export { Kbd } from "./display/kbd/Kbd.tsx";

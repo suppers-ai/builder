@@ -28,7 +28,7 @@ export function PhoneMockup({
     "mockup-phone",
     orientation === "landscape" && "mockup-phone-landscape",
     color === "white" && "border-white",
-    color === "silver" && "border-gray-300",
+    color === "silver" && "border-slate-300",
     color === "gold" && "border-yellow-400",
     className,
   ].filter(Boolean).join(" ");

@@ -57,7 +57,7 @@ Deno.serve(async (req: Request) => {
     if (!isPublicAuthEndpoint) {
       // Require authentication for protected endpoints
       if (!token) {
-        console.log("token", token);
+        console.log("❌ No token provided for protected endpoint:", resource, rest);
         return new Response(
           JSON.stringify({ error: "Authorization token required" }),
           {
@@ -67,10 +67,13 @@ Deno.serve(async (req: Request) => {
         );
       }
 
+      console.log("🔑 Verifying token for endpoint:", resource, rest);
+
       // Verify JWT and get user
       const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
       if (authError || !authUser) {
+        console.log("❌ Token verification failed:", authError);
         return new Response(
           JSON.stringify({ error: "Invalid or expired token" }),
           {
@@ -80,21 +83,21 @@ Deno.serve(async (req: Request) => {
         );
       }
 
+      console.log("✅ Token verified for user:", authUser.email);
       user = authUser;
 
-      // Create user-scoped Supabase client for authenticated requests
-      supabase = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
-        global: {
-          headers: { Authorization: authHeader! },
-        },
-      });
+      // Use admin client for all operations, but pass user context
+      supabase = supabaseAdmin;
     }
 
     // Route to appropriate handler based on resource
     let response: Response;
 
+    console.log("🎯 Routing request to resource:", resource, "with rest:", rest);
+    
     switch (resource) {
       case "auth":
+        console.log("🔐 Routing to auth handler with path:", rest);
         response = await handleAuth(req, { user, supabase, supabaseAdmin, pathSegments: rest });
         break;
 

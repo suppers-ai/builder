@@ -18,11 +18,11 @@ function LazyApplicationForm(props: {
   // For demo purposes, form is disabled during SSR
   // In a real app with islands, you'd dynamically import the actual form here
   return (
-    <div class="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+    <div class="bg-base-100 rounded-lg shadow-xl border border-base-300 p-6">
       <h2 class="text-xl font-semibold mb-4">
         {props.application ? "Edit Application" : "Create New Application"}
       </h2>
-      <p class="text-gray-600 mb-4">
+      <p class="text-slate-600 mb-4">
         Form would load here in client context (island component)
       </p>
       <Button
@@ -86,7 +86,7 @@ export function HomePage({
           bordered
           class="w-full"
         />
-        <div class="absolute right-3 top-2.5 text-gray-400">
+        <div class="absolute right-3 top-2.5 text-base-content/50">
           🔍
         </div>
       </div>
@@ -138,7 +138,7 @@ export function HomePage({
       <div class="flex items-center justify-center min-h-screen">
         <div class="text-center">
           <h1 class="text-2xl font-bold mb-4">Welcome to the App Builder</h1>
-          <p class="text-gray-600 mb-4">Please log in to manage your applications.</p>
+          <p class="text-slate-600 mb-4">Please log in to manage your applications.</p>
           <Button
             as="a"
             href="/auth/login"
@@ -169,8 +169,8 @@ export function HomePage({
       {/* Header */}
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">My Applications</h1>
-          <p class="text-gray-600 mt-2">
+          <h1 class="text-3xl font-bold text-slate-900">My Applications</h1>
+          <p class="text-slate-600 mt-2">
             Build and manage your web applications
           </p>
         </div>
@@ -201,11 +201,11 @@ export function HomePage({
             {applications.length === 0
               ? (
                 <div>
-                  <div class="text-gray-400 text-6xl mb-4">📱</div>
-                  <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                  <div class="text-base-content/50 text-6xl mb-4">📱</div>
+                  <h3 class="text-xl font-semibold text-slate-900 mb-2">
                     No applications yet
                   </h3>
-                  <p class="text-gray-600 mb-6">
+                  <p class="text-slate-600 mb-6">
                     Create your first application to get started
                   </p>
                   <Button
@@ -219,11 +219,11 @@ export function HomePage({
               )
               : (
                 <div>
-                  <div class="text-gray-400 text-6xl mb-4">🔍</div>
-                  <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                  <div class="text-base-content/50 text-6xl mb-4">🔍</div>
+                  <h3 class="text-xl font-semibold text-slate-900 mb-2">
                     No matching applications
                   </h3>
-                  <p class="text-gray-600">
+                  <p class="text-slate-600">
                     Try adjusting your search or filters
                   </p>
                 </div>

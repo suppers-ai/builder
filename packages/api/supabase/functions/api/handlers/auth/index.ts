@@ -9,15 +9,19 @@ import { resetPassword } from "./reset-password.ts";
 import { updatePassword } from "./update-password.ts";
 import { getSession } from "./session.ts";
 import { initiateOAuth } from "./oauth.ts";
+import { updateUserMetadata } from "./update-user-metadata.ts";
 
 export async function handleAuth(request: Request, context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }): Promise<Response> {
   const { supabase } = context;
   const url = new URL(request.url);
   const path = url.pathname.split("/").pop();
 
+  console.log("🔐 Auth handler called with path:", path);
+  
   try {
     switch (path) {
       case "me":
+        console.log("🔐 Handling /me request");
         return await getCurrentUser(request, supabase);
       case "register":
         return await registerUser(request, supabase);
@@ -35,7 +39,11 @@ export async function handleAuth(request: Request, context: { user: any, supabas
         return await getSession(request, supabase);
       case "oauth":
         return await initiateOAuth(request, supabase);
+      case "update-user-metadata":
+        console.log("🔐 Handling update-user-metadata request");
+        return await updateUserMetadata(request, supabase);
       default:
+        console.log("🔐 Unknown auth path:", path);
         return new Response("Not found", {
           status: 404,
           headers: corsHeaders,

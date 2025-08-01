@@ -33,8 +33,14 @@ const SelectSpecificPropsSchema = z.object({
     .describe("Show select border"),
 
   ghost: withMetadata(
-    z.boolean().default(false).describe("Ghost style select"),
+    z.boolean().default(false).describe("Ghost style select (DaisyUI 5 compatible)"),
     { examples: ["true", "false"], since: "1.0.0" },
+  ),
+
+  // DaisyUI 5 specific select features
+  filled: withMetadata(
+    z.boolean().default(false).describe("Filled style select (DaisyUI 5)"),
+    { examples: ["true", "false"], since: "2.0.0" },
   ),
 
   onChange: z.function()

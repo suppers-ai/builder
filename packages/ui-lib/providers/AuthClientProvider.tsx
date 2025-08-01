@@ -2,12 +2,12 @@ import { ComponentChildren, createContext } from "preact";
 import { useContext, useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { AuthClient } from "@suppers/auth-client";
-import type { AuthSession, AuthUser } from "@suppers/auth-client";
+import type { AuthClientSession, AuthUser } from "@suppers/auth-client";
 
 export interface AuthClientContextType {
   authClient: AuthClient;
   user: AuthUser | null;
-  session: AuthSession | null;
+  session: AuthClientSession | null;
   loading: boolean;
   error: string | null;
   login: (redirectUri?: string) => void;
@@ -20,7 +20,7 @@ const AuthClientContext = createContext<AuthClientContextType | null>(null);
 
 // Global signals for auth state
 const userSignal = signal<AuthUser | null>(null);
-const sessionSignal = signal<AuthSession | null>(null);
+const sessionSignal = signal<AuthClientSession | null>(null);
 const loadingSignal = signal<boolean>(true);
 const errorSignal = signal<string | null>(null);
 
@@ -71,7 +71,7 @@ export function AuthClientProvider({
     initializeAuth();
 
     // Set up event listeners
-    const handleLogin = (event: any, session: AuthSession) => {
+    const handleLogin = (event: any, session: AuthClientSession) => {
       userSignal.value = session.user;
       sessionSignal.value = session;
       errorSignal.value = null;
@@ -83,7 +83,7 @@ export function AuthClientProvider({
       errorSignal.value = null;
     };
 
-    const handleTokenRefresh = (event: any, session: AuthSession) => {
+    const handleTokenRefresh = (event: any, session: AuthClientSession) => {
       userSignal.value = session.user;
       sessionSignal.value = session;
     };

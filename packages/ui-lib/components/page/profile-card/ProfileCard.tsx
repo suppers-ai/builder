@@ -1,13 +1,10 @@
-import { useState, useRef } from "preact/hooks";
+import { useState, useRef, useEffect } from "preact/hooks";
 import { BaseComponentProps } from "../../types.ts";
 import { Button } from "../../action/button/Button.tsx";
 import { Input } from "../../input/input/Input.tsx";
 import { PasswordInput } from "../../input/password-input/PasswordInput.tsx";
 import { Toast } from "../../feedback/toast/Toast.tsx";
-import { Loading } from "../../feedback/loading/Loading.tsx";
-import { Select } from "../../input/select/Select.tsx";
 import { Avatar } from "../../display/avatar/Avatar.tsx";
-import { Card } from "../../display/card/Card.tsx";
 import { GlobalThemeController } from "../../action/theme-controller/ThemeController.tsx";
 import { ChevronDown, Palette } from "lucide-preact";
 
@@ -21,7 +18,15 @@ export interface User {
     avatar_url?: string;
     theme?: string;
   };
+  // Database fields (from users table)
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  avatar_url?: string;
+  theme_id?: string;
+  role?: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface ProfileCardProps extends BaseComponentProps {
@@ -34,7 +39,7 @@ export interface ProfileCardProps extends BaseComponentProps {
     lastName?: string;
     displayName?: string;
     theme?: string;
-  }) => Promise<void>;
+  }) => Promise<{ success?: boolean, error?: string }>;
   onUploadAvatar?: (file: File) => Promise<void>;
   onSignOut?: () => void;
   onChangePassword?: (currentPassword: string, newPassword: string) => Promise<void>;
@@ -63,8 +68,18 @@ export function ProfileCard({
     firstName: user?.user_metadata?.firstName || "",
     lastName: user?.user_metadata?.lastName || "",
     displayName: user?.user_metadata?.displayName || "",
-    theme: user?.user_metadata?.theme || "light",
+    theme: user?.user_metadata?.theme || user?.theme_id || "light",
   });
+
+  // Update editData when user data changes
+  useEffect(() => {
+    setEditData({
+      firstName: user?.user_metadata?.firstName || user?.first_name || "",
+      lastName: user?.user_metadata?.lastName || user?.last_name || "",
+      displayName: user?.user_metadata?.displayName || user?.display_name || "",
+      theme: user?.user_metadata?.theme || user?.theme_id || "light",
+    });
+  }, [user]);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -86,7 +101,7 @@ export function ProfileCard({
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
-  // Show toasts when error or success changes
+  // Show toasts when error or success changes (only if they're provided as props)
   if (error && !toasts.some(t => t.message === error)) {
     addToast(error, "error");
   }
@@ -98,19 +113,35 @@ export function ProfileCard({
     e.preventDefault();
     if (onUpdateProfile) {
       try {
-        await onUpdateProfile(editData);
-        addToast("Profile updated successfully!", "success");
+        await onUpdateProfile(editData).then((res) => {
+          if (res.success) {
+            addToast("Profile updated successfully!", "success");
+          } else {
+            addToast(res.error || "Failed to update profile", "error");
+          }
+        });
         // Apply theme immediately
-        if (editData.theme !== currentTheme) {
-          document.documentElement.setAttribute('data-theme', editData.theme);
-          localStorage.setItem('theme', editData.theme);
-          setCurrentTheme(editData.theme);
-        }
+        // if (editData.theme !== currentTheme) {
+        //   document.documentElement.setAttribute('data-theme', editData.theme);
+        //   localStorage.setItem('theme', editData.theme);
+        //   setCurrentTheme(editData.theme);
+        // }
         setIsEditing(false);
       } catch (error) {
         addToast(error instanceof Error ? error.message : "Failed to update profile", "error");
       }
     }
+  };
+
+  const handleEditClick = () => {
+    // Update form data with current user data when opening edit mode
+    setEditData({
+      firstName: user?.user_metadata?.firstName || user?.first_name || "",
+      lastName: user?.user_metadata?.lastName || user?.last_name || "",
+      displayName: user?.user_metadata?.displayName || user?.display_name || "",
+      theme: user?.user_metadata?.theme || user?.theme_id || "light",
+    });
+    setIsEditing(true);
   };
 
   const handleAvatarClick = () => {
@@ -149,10 +180,20 @@ export function ProfileCard({
   };
 
   const getDisplayName = () => {
+    // Check metadata first, then database fields
     if (user?.user_metadata?.displayName) return user.user_metadata.displayName;
+    if (user?.display_name) return user.display_name;
+    
+    // Check for firstName/lastName in metadata
     if (user?.user_metadata?.firstName || user?.user_metadata?.lastName) {
       return `${user?.user_metadata?.firstName || ""} ${user?.user_metadata?.lastName || ""}`.trim();
     }
+    
+    // Check for first_name/last_name in database
+    if (user?.first_name || user?.last_name) {
+      return `${user?.first_name || ""} ${user?.last_name || ""}`.trim();
+    }
+    
     return user?.email?.split("@")[0] || "User";
   };
 
@@ -201,7 +242,7 @@ export function ProfileCard({
   }
 
   return (
-    <div class={`bg-base-100 rounded-xl shadow-lg border border-base-200 overflow-hidden ${className}`} id={id} {...props}>
+    <div class={`bg-base-100 rounded-xl shadow-xl border border-base-200 overflow-hidden ${className}`} id={id} {...props}>
       {/* Toast Container */}
       <div class="fixed top-4 right-4 z-50 space-y-2">
         {toasts.map(toast => (
@@ -259,7 +300,7 @@ export function ProfileCard({
       <div class="space-y-px">
         {/* User Profile */}
         <button 
-          onClick={() => setIsEditing(!isEditing)}
+                          onClick={handleEditClick}
           class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200"
         >
           <div class="flex items-center gap-3">
@@ -322,11 +363,20 @@ export function ProfileCard({
         >
           <GlobalThemeController
             showButton={false}
-            onThemeChange={(newTheme) => {
+            onThemeChange={async (newTheme) => {
               setCurrentTheme(newTheme);
+              // setEditData(prev => ({ ...prev, theme: newTheme }));
+              
+              // Save theme immediately
               if (onUpdateProfile) {
-                onUpdateProfile({ theme: newTheme });
+                try {
+                  await onUpdateProfile({ theme: newTheme });
+                  addToast("Theme updated successfully!", "success");
+                } catch (error) {
+                  addToast(error instanceof Error ? error.message : "Failed to update theme", "error");
+                }
               }
+              
               setShowThemeModal(false);
             }}
             onClose={() => setShowThemeModal(false)}

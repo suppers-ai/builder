@@ -32,13 +32,19 @@ const CardSpecificPropsSchema = z.object({
   ),
 
   glass: withMetadata(
-    z.boolean().default(false).describe("Apply glass morphism effect"),
+    z.boolean().default(false).describe("Apply glass morphism effect (DaisyUI 5 compatible)"),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 
   bordered: z.boolean()
     .default(false)
-    .describe("Show card border"),
+    .describe("Show card border (DaisyUI 5 compatible)"),
+
+  // DaisyUI 5 specific card features
+  normal: withMetadata(
+    z.boolean().default(false).describe("Use normal card styling (DaisyUI 5)"),
+    { examples: ["true", "false"], since: "2.0.0" },
+  ),
 
   actions: z.any()
     .optional()

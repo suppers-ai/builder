@@ -45,6 +45,14 @@ const fallbackClients = new Map([
     ],
     allowedScopes: ["openid", "email", "profile", "applications:read", "applications:write"],
   }],
+  ["suppers-docs-app", {
+    name: "Suppers Docs App",
+    redirectUris: [
+      "http://localhost:8002/auth/callback",
+      "https://docs.yourdomain.com/auth/callback",
+    ],
+    allowedScopes: ["openid", "email", "profile"],
+  }],
 ]);
 
 export async function handleAuthorizeRequest(url: URL) {

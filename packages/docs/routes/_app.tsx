@@ -1,11 +1,6 @@
 import { type PageProps } from "fresh";
 import { asset } from "$fresh/runtime";
 
-// Mock AuthProvider for development environment
-function MockAuthProvider({ children }: { children: any }) {
-  return children;
-}
-
 export default function App({ Component, state }: PageProps) {
   const Comp = Component as any;
   const title = (state as any)?.title || "Suppers Component Library - Fresh 2.0";
@@ -122,9 +117,7 @@ export default function App({ Component, state }: PageProps) {
         />
       </head>
       <body class="theme-transition">
-        <MockAuthProvider>
-          <Comp />
-        </MockAuthProvider>
+        <Comp />
       </body>
     </html>
   );

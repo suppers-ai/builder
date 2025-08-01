@@ -6,8 +6,10 @@
 import { z } from "zod";
 import type { ComponentChildren } from "preact";
 
-// DaisyUI Core Types
+// DaisyUI 5 Core Types
 export const DaisyUISizeSchema = z.enum(["xs", "sm", "md", "lg", "xl"]).describe("Component size");
+
+// DaisyUI 5 Enhanced Color Schema with semantic colors
 export const DaisyUIColorSchema = z.enum([
   "primary",
   "secondary",
@@ -16,12 +18,14 @@ export const DaisyUIColorSchema = z.enum([
   "base-100",
   "base-200",
   "base-300",
+  "base-content",
   "info",
   "success",
   "warning",
   "error",
-]).describe("Component color theme");
+]).describe("Component color theme (DaisyUI 5 compatible)");
 
+// DaisyUI 5 Enhanced Variant Schema
 export const DaisyUIVariantSchema = z.enum([
   "primary",
   "secondary",
@@ -33,7 +37,18 @@ export const DaisyUIVariantSchema = z.enum([
   "outline",
   "ghost",
   "link",
-]).describe("Component visual variant");
+  "neutral",
+]).describe("Component visual variant (DaisyUI 5 compatible)");
+
+// DaisyUI 5 Loading Types Schema
+export const DaisyUILoadingTypeSchema = z.enum([
+  "spinner",
+  "dots",
+  "ring",
+  "ball",
+  "bars",
+  "infinity",
+]).describe("Loading animation type (DaisyUI 5 requires explicit type)");
 
 // Base Props Schemas
 export const BaseComponentPropsSchema = z.object({
@@ -60,7 +75,8 @@ export const DisabledPropsSchema = z.object({
 
 export const LoadingPropsSchema = z.object({
   loading: z.boolean().optional().default(false).describe("Show loading state"),
-}).describe("Loading state properties");
+  loadingType: DaisyUILoadingTypeSchema.optional().default("spinner").describe("Loading animation type (DaisyUI 5)"),
+}).describe("Loading state properties (DaisyUI 5 compatible)");
 
 export const ActivePropsSchema = z.object({
   active: z.boolean().optional().default(false).describe("Apply active state styling"),

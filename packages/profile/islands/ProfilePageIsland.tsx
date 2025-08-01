@@ -198,13 +198,15 @@ export default function ProfilePageIsland() {
 
     try {
       await AuthHelpers.updateUser(data);
-      setSuccess("Profile updated successfully!");
+      // setSuccess("Profile updated successfully!");
 
       // Refresh user data
       const updatedUser = await AuthHelpers.getCurrentUser();
       userSignal.value = updatedUser;
+      return { success: true };
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile");
+      return { success: false, error: err instanceof Error ? err.message : "Failed to update profile" };
     } finally {
       setIsLoading(false);
     }
@@ -294,8 +296,6 @@ export default function ProfilePageIsland() {
     <ProfileCard
       user={userSignal.value}
       isLoading={authLoadingSignal.value || isLoading}
-      error={error}
-      success={success}
       onUpdateProfile={handleUpdateProfile}
       onUploadAvatar={handleUploadAvatar}
       onSignOut={handleSignOut}

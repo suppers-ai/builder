@@ -23,11 +23,17 @@ const InputSpecificPropsSchema = z.object({
 
   bordered: z.boolean()
     .default(true)
-    .describe("Show input border"),
+    .describe("Show input border (DaisyUI 5 compatible)"),
 
   ghost: withMetadata(
-    z.boolean().default(false).describe("Ghost style input"),
+    z.boolean().default(false).describe("Ghost style input (DaisyUI 5 compatible)"),
     { examples: ["true", "false"], since: "1.0.0" },
+  ),
+
+  // DaisyUI 5 specific input features
+  filled: withMetadata(
+    z.boolean().default(false).describe("Filled style input (DaisyUI 5)"),
+    { examples: ["true", "false"], since: "2.0.0" },
   ),
 
   // Number input specific props

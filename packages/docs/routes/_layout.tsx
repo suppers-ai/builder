@@ -15,9 +15,6 @@ export default function Layout({ Component, url }: PageProps) {
       {/* Custom sidebar with login and theme controls */}
       <CustomSidebarIsland
         currentPath={currentPath}
-        showLogin
-        showProfile={false}
-        user={undefined}
       />
 
       {/* Main content with sidebar awareness */}

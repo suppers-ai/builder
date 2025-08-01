@@ -11,7 +11,7 @@ const loadingExamples: ComponentExample[] = [
     description: "Simple loading spinners with different variants",
     props: {
       size: "md",
-      loading: true
+      variant: "spinner"
     }
   },  {
     title: "Loading Sizes",
@@ -31,14 +31,14 @@ const loadingExamples: ComponentExample[] = [
     description: "Different animation styles",
     props: {
       size: "md",
-      variant: "outlined"
+      variant: "dots"
     }
   },  {
     title: "Loading with Text",
     description: "Loading indicators with accompanying text",
     props: {
       size: "md",
-      loading: true
+      variant: "spinner"
     }
   },
 ];
@@ -96,4 +96,5 @@ export const loadingMetadata: ComponentMetadata = {
     "Combine with text labels to provide context about what's loading",
     "Use colors sparingly - neutral colors work best for most cases",
     "Position loading indicators where users expect to see content appear",
-  ]};
+  ]
+};

@@ -163,18 +163,18 @@ const modalSchema: ComponentSchema = {
 
 export const modalMetadata: ComponentMetadata = {
   name: "Modal",
-  description: "Dialog boxes and overlays for displaying content and capturing user input",
+  description: "Dialog boxes and overlays for displaying content and capturing user input, enhanced with DaisyUI 5 and Tailwind 4 features",
   category: ComponentCategory.ACTION,
   path: "/components/action/modal",
-  tags: ["dialog", "overlay", "popup"],
-  relatedComponents: ["button", "alert"],
+  tags: ["dialog", "overlay", "popup", "daisyui-5", "tailwind-4", "enhanced-animations", "accessibility", "focus-management"],
+  relatedComponents: ["button", "alert", "backdrop", "drawer"],
   interactive: true, // Can have interactive elements and close handlers
   preview: (
     <div class="mockup-window border bg-base-300 scale-75">
       <div class="flex justify-center px-4 py-16 bg-base-200">
         <div class="text-center">
-          <h3 class="font-bold text-lg">Modal Dialog</h3>
-          <p class="py-4">Dialog box for displaying content and capturing user input</p>
+          <h3 class="font-bold text-lg">Enhanced Modal Dialog</h3>
+          <p class="py-4">Dialog box with improved animations and accessibility</p>
           <div class="flex gap-2 justify-center">
             <button class="btn btn-sm">Close</button>
             <button class="btn btn-primary btn-sm">Save</button>
@@ -186,14 +186,26 @@ export const modalMetadata: ComponentMetadata = {
   examples: modalExamples,
   schema: modalSchema,
   props: modalProps,
-  variants: ["default", "bottom sheet", "full screen", "confirmation"],
-  useCases: ["User forms", "Confirmations", "Image gallery", "Settings"],
+  variants: ["default", "bottom sheet", "full screen", "confirmation", "drawer-style"],
+  useCases: ["User forms", "Confirmations", "Image gallery", "Settings", "Data entry", "Content preview"],
   usageNotes: [
     "Use Modal for server-side rendered modals that show static content",
     "For interactive modals with close handlers, create an island component",
     "Always provide a way to close the modal (close button, backdrop click, or escape key)",
-    "Use modal-action class for button containers at the bottom",
-    "Consider using alert styles for confirmation modals",
+    "Use modal-action class for button containers at the bottom with improved spacing",
+    "Consider using alert styles for confirmation modals with enhanced color contrast",
     "Set responsive={true} for modals with wide content like tables",
-    "Modal backdrop provides visual separation from background content",
-  ]};
+    "Enhanced backdrop with better blur and opacity handling in DaisyUI 5",
+    "Smoother open/close animations with improved transition timing",
+    "Better focus management with enhanced focus trapping and restoration",
+    "Improved mobile optimization with better touch handling and responsive behavior",
+    "Enhanced accessibility with better ARIA attributes and screen reader support",
+    "Better keyboard navigation with improved escape key and tab handling",
+    "Supports Tailwind 4 container queries for responsive modal content",
+    "Enhanced backdrop-blur effects with better browser compatibility",
+    "Improved z-index management for better stacking context",
+    "Better performance with optimized CSS animations and reduced reflows",
+    "Respects user's prefers-reduced-motion settings for animations",
+    "Fully backward compatible - all existing modal patterns continue to work"
+  ]
+};;

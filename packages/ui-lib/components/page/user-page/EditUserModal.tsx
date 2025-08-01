@@ -110,7 +110,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div className="bg-base-100 rounded-lg shadow-xl w-full max-w-md">
         <div className="p-6">
           <h2 className="text-xl font-semibold mb-6">Edit User</h2>
 
@@ -125,7 +125,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
 
             {/* First Name */}
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 mb-2">
                 First Name *
               </label>
               <input
@@ -135,7 +135,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 onChange={(e) =>
                   handleInputChange("firstName", (e.target as HTMLInputElement).value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.firstName ? "border-red-500" : "border-gray-300"
+                  errors.firstName ? "border-red-500" : "border-slate-300"
                 }`}
                 placeholder="Enter your first name"
                 disabled={isLoading}
@@ -145,7 +145,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
 
             {/* Middle Names */}
             <div>
-              <label htmlFor="middleNames" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="middleNames" className="block text-sm font-medium text-slate-700 mb-2">
                 Middle Names
               </label>
               <input
@@ -155,7 +155,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 onChange={(e) =>
                   handleInputChange("middleNames", (e.target as HTMLInputElement).value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.middleNames ? "border-red-500" : "border-gray-300"
+                  errors.middleNames ? "border-red-500" : "border-slate-300"
                 }`}
                 placeholder="Enter your middle names"
                 disabled={isLoading}
@@ -167,7 +167,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
 
             {/* Last Name */}
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="lastName" className="block text-sm font-medium text-slate-700 mb-2">
                 Last Name *
               </label>
               <input
@@ -177,7 +177,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 onChange={(e) =>
                   handleInputChange("lastName", (e.target as HTMLInputElement).value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.lastName ? "border-red-500" : "border-gray-300"
+                  errors.lastName ? "border-red-500" : "border-slate-300"
                 }`}
                 placeholder="Enter your last name"
                 disabled={isLoading}
@@ -187,7 +187,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
 
             {/* Display Name */}
             <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="displayName" className="block text-sm font-medium text-slate-700 mb-2">
                 Display Name *
               </label>
               <input
@@ -197,7 +197,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 onChange={(e) =>
                   handleInputChange("displayName", (e.target as HTMLInputElement).value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.displayName ? "border-red-500" : "border-gray-300"
+                  errors.displayName ? "border-red-500" : "border-slate-300"
                 }`}
                 placeholder="Enter your display name"
                 disabled={isLoading}
@@ -209,7 +209,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
 
             {/* Avatar URL */}
             <div>
-              <label htmlFor="avatarUrl" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="avatarUrl" className="block text-sm font-medium text-slate-700 mb-2">
                 Avatar URL (Optional)
               </label>
               <input
@@ -218,7 +218,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 value={formData.avatarUrl}
                 onChange={(e) => handleAvatarUrlChange((e.target as HTMLInputElement).value)}
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.avatarUrl ? "border-red-500" : "border-gray-300"
+                  errors.avatarUrl ? "border-red-500" : "border-slate-300"
                 }`}
                 placeholder="Enter your avatar URL"
                 disabled={isLoading}
@@ -234,11 +234,11 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
+            <div className="flex items-center gap-4 pt-4 border-t border-base-300">
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                className="flex-1 btn btn-primary text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
               >
                 {isLoading
                   ? (
@@ -255,7 +255,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>

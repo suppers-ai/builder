@@ -49,13 +49,13 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div className="bg-base-100 rounded-lg shadow-xl w-full max-w-md">
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold mb-4">Edit User</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-slate-500 hover:text-slate-700"
             >
               ✕
             </button>
@@ -63,7 +63,7 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 First Name
               </label>
               <input
@@ -71,14 +71,14 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
                 value={formData.firstName}
                 onChange={(e) =>
                   handleInputChange("firstName", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter first name"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Last Name
               </label>
               <input
@@ -86,14 +86,14 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
                 value={formData.lastName}
                 onChange={(e) =>
                   handleInputChange("lastName", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter last name"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Display Name
               </label>
               <input
@@ -101,14 +101,14 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
                 value={formData.displayName}
                 onChange={(e) =>
                   handleInputChange("displayName", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter display name"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
                 Avatar URL
               </label>
               <input
@@ -116,7 +116,7 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
                 value={formData.avatarUrl}
                 onChange={(e) =>
                   handleInputChange("avatarUrl", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter avatar URL"
                 disabled={loading}
               />
@@ -126,7 +126,7 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                className="flex-1 btn btn-primary text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
               >
                 {loading
                   ? (
@@ -143,7 +143,7 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Cancel
               </button>

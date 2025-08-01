@@ -37,7 +37,7 @@ const SkeletonSpecificPropsSchema = z.object({
 // Complete Skeleton Props Schema
 export const SkeletonPropsSchema = BaseComponentPropsSchema
   .merge(SkeletonSpecificPropsSchema)
-  .describe("Skeleton loading placeholder component");
+  .describe("Skeleton loading placeholder component (DaisyUI 5 compatible)");
 
 // Infer TypeScript type from schema
 export type SkeletonProps = z.infer<typeof SkeletonPropsSchema>;

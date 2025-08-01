@@ -28,7 +28,7 @@ export function Accordion({
   ...props
 }: AccordionProps) {
   const accordionClasses = [
-    "collapse-container",
+    "space-y-2",
     className,
   ].filter(Boolean).join(" ");
 
@@ -48,7 +48,7 @@ export function Accordion({
 
   return (
     <div class={accordionClasses} id={id} {...props}>
-      {safeItems.map((item, index) => {
+      {safeItems.map((item) => {
         const isOpen = currentOpenItems.includes(item.id);
         const collapseId = `collapse-${item.id}`;
 

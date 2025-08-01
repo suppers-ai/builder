@@ -66,22 +66,23 @@ const buttonExamples: ComponentExample[] = [
 
 export const buttonMetadata: ComponentMetadata = {
   name: "Button",
-  description: "Interactive buttons with multiple variants, sizes, and states for user actions",
+  description: "Interactive buttons with multiple variants, sizes, and states for user actions, fully compatible with DaisyUI 5 and Tailwind 4",
   category: ComponentCategory.ACTION,
   path: "/components/action/button",
-  tags: ["interactive", "action", "click"],
+  tags: ["interactive", "action", "click", "daisyui-5", "tailwind-4", "enhanced-loading", "accessibility"],
   relatedComponents: ["dropdown", "modal"],
   interactive: true, // Supports island mode with onClick handlers
   preview: (
     <div class="flex gap-2">
       <Button color="primary">Primary</Button>
       <Button variant="outline">Outline</Button>
+      <Button loading={true}>Loading</Button>
     </div>
   ),
   examples: buttonExamples,
   schema: buttonSchema,
-  variants: ["primary", "secondary", "accent", "ghost", "link", "outline"],
-  useCases: ["Form submission", "Navigation", "Actions", "Loading states"],
+  variants: ["primary", "secondary", "accent", "ghost", "link", "outline", "neutral"],
+  useCases: ["Form submission", "Navigation", "Actions", "Loading states", "Interactive elements"],
   usageNotes: [
     "Use Button component for server-side rendered buttons without interactivity",
     "Use Button island for client-side interactive buttons with event handlers",
@@ -89,6 +90,13 @@ export const buttonMetadata: ComponentMetadata = {
     "Outline buttons work well for secondary actions",
     "Ghost buttons are ideal for tertiary actions or navigation",
     "Loading state automatically disables the button to prevent multiple submissions",
-    "Updated for DaisyUI 5 compatibility with enhanced loading spinner patterns",
+    "Enhanced loading spinner patterns with DaisyUI 5: supports spinner, dots, ring, and ball types",
+    "Improved hover states and animations with smoother transitions",
+    "Better accessibility with enhanced focus rings and ARIA support",
+    "Enhanced color system with better semantic tokens and contrast ratios",
+    "Supports Tailwind 4 arbitrary values for custom styling: bg-[#custom], text-[14px]",
+    "Optimized performance with better CSS generation and tree-shaking",
+    "Fully backward compatible - all existing usage patterns continue to work",
+    "Respects user's prefers-reduced-motion settings for animations"
   ]
 };

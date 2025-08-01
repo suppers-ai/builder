@@ -49,7 +49,7 @@ export function AuthGuard({
     
     return (
       <div className={`flex items-center justify-center ${className}`}>
-        <div className="loading loading-spinner loading-md"></div>
+        <div className="loading loading loading-spinner loading-md"></div>
       </div>
     );
   }

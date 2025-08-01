@@ -1,61 +1,32 @@
 import { useEffect, useState } from "preact/hooks";
-import { ChevronDown, ChevronRight, LogIn, LogOut, Palette, User } from "lucide-preact";
+import { ChevronDown, ChevronRight, LogIn, LogOut, User } from "lucide-preact";
 import {
   closeGlobalSidebar,
   globalSidebarOpen,
   globalTheme,
   loadSavedTheme,
-  LoginButton,
-  UserProfileDropdown,
   Accordion,
 } from "@suppers/ui-lib";
-import type { UserProfileDropdownUser, AccordionItemProps } from "@suppers/ui-lib";
+import type { AccordionItemProps } from "@suppers/ui-lib";
 import { defaultUISidebarConfig } from "../utils/sidebar-config.tsx";
-import ThemeModal from "./ThemeModal.tsx";
+import SimpleAuthButton from "./SimpleAuthButton.tsx";
 
 export interface CustomSidebarIslandProps {
   currentPath?: string;
-  showLogin?: boolean;
-  showProfile?: boolean;
-  user?: UserProfileDropdownUser;
-  onLogin?: () => void;
-  onLogout?: () => void;
 }
 
 export default function CustomSidebarIsland({
   currentPath = "",
-  showLogin = true,
-  showProfile = false,
-  user,
-  onLogin,
-  onLogout,
 }: CustomSidebarIslandProps) {
   const [openSections, setOpenSections] = useState<string[]>(() => 
     defaultUISidebarConfig.sections.map((s) => s.id)
   );
-  const [showThemeModal, setShowThemeModal] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    // Initialize with actual theme from DOM/localStorage on first render
-    if (typeof window !== "undefined") {
-      const domTheme = document.documentElement.getAttribute("data-theme");
-      if (domTheme) return domTheme;
-
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme) return savedTheme;
-    }
-    return globalTheme.value;
-  });
 
   const sidebarOpen = globalSidebarOpen.value;
 
   useEffect(() => {
     // Load the saved theme to sync the signal with DOM
     loadSavedTheme();
-
-    // Subscribe to theme changes to keep component reactive
-    const unsubscribe = globalTheme.subscribe((newTheme) => {
-      setCurrentTheme(newTheme);
-    });
 
     // Subscribe to sidebar state changes and update body class
     const sidebarUnsubscribe = globalSidebarOpen.subscribe((isOpen) => {
@@ -78,26 +49,10 @@ export default function CustomSidebarIsland({
     }
 
     return () => {
-      unsubscribe();
       sidebarUnsubscribe();
     };
   }, []);
 
-  const handleLogin = () => {
-    if (onLogin) {
-      onLogin();
-    } else {
-      globalThis.location.href = "/login";
-    }
-  };
-
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    } else {
-      globalThis.location.href = "/auth/logout";
-    }
-  };
 
   const handleOverlayClick = (e: MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -116,7 +71,8 @@ export default function CustomSidebarIsland({
     setOpenSections(newOpenSections);
   };
 
-  // Determine logo based on theme
+  // Determine logo based on current theme
+  const currentTheme = globalTheme.value;
   const darkThemes = new Set([
     "dark",
     "night",
@@ -144,11 +100,6 @@ export default function CustomSidebarIsland({
         />
       )}
 
-      {/* Theme Modal */}
-      <ThemeModal
-        isOpen={showThemeModal}
-        onClose={() => setShowThemeModal(false)}
-      />
 
       {/* Sidebar */}
       <aside
@@ -231,50 +182,9 @@ export default function CustomSidebarIsland({
 
         {/* Sticky Bottom Section */}
         <div class="border-t border-base-300 bg-base-100">
-          {/* Theme Selector */}
-          <div class="p-4 border-b border-base-300">
-            <button
-              onClick={() => setShowThemeModal(true)}
-              class="w-full flex items-center justify-between p-3 bg-base-200 hover:bg-base-300 rounded-lg transition-colors"
-            >
-              <div class="flex items-center gap-2">
-                <Palette size={16} class="text-base-content/70" />
-                <span class="text-sm text-base-content/70">Theme</span>
-              </div>
-              <ChevronDown size={16} class="text-base-content/50" />
-            </button>
-          </div>
-
           {/* Authentication Section */}
           <div class="p-4">
-            {showLogin && !user && (
-              <button
-                onClick={handleLogin}
-                class="w-full flex items-center justify-center gap-2 p-3 bg-primary text-primary-content rounded-lg hover:bg-primary/90 transition-colors font-medium"
-              >
-                <LogIn size={18} />
-                Sign In
-              </button>
-            )}
-
-            {showProfile && user && (
-              <div class="space-y-3">
-                <div class="p-3 bg-base-200 rounded-lg">
-                  <UserProfileDropdown
-                    user={user}
-                    onLogout={handleLogout}
-                    className="w-full"
-                  />
-                </div>
-                <button
-                  onClick={handleLogout}
-                  class="w-full flex items-center justify-center gap-2 p-3 text-error hover:bg-error/10 rounded-lg transition-colors border border-error/20"
-                >
-                  <LogOut size={18} />
-                  Sign Out
-                </button>
-              </div>
-            )}
+            <SimpleAuthButton />
           </div>
         </div>
       </aside>
