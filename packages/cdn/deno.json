@@ -18,22 +18,31 @@
     "@/": "./",
     "@std/path": "https://deno.land/std@0.224.0/path/mod.ts",
     "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
+    "@suppers/shared": "../shared/mod.ts",
     "fresh": "jsr:@fresh/core@2.0.0-alpha.49",
     "fresh/": "jsr:@fresh/core@2.0.0-alpha.49/",
+    "$fresh/": "jsr:@fresh/core@2.0.0-alpha.49/",
+    "$fresh/runtime": "jsr:@fresh/core@2.0.0-alpha.49/runtime",
     "fresh/dev": "jsr:@fresh/core@2.0.0-alpha.49/dev",
     "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
-    "@suppers/shared": "../shared/mod.ts",
-    "preact": "https://esm.sh/preact@10.27.0",
-    "preact/": "https://esm.sh/preact@10.27.0/"
+    "preact": "npm:preact@10.27.0",
+    "preact/": "npm:preact@10.27.0/",
+    "preact/jsx-runtime": "npm:preact@10.27.0/jsx-runtime",
+    "preact/jsx-dev-runtime": "npm:preact@10.27.0/jsx-dev-runtime",
+    "@preact/signals": "npm:@preact/signals@2.2.1",
+    "@preact/signals-core": "npm:@preact/signals-core@1.8.0",
+    "preact-render-to-string": "npm:preact-render-to-string@6.5.11"
   },
   "compilerOptions": {
-    "allowJs": true,
+    "lib": ["dom", "dom.asynciterable", "deno.ns"],
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
+    "strict": true
   },
+  "exclude": ["**/_fresh/*"],
   "lint": {
     "rules": {
-      "tags": ["recommended"]
+      "tags": ["fresh", "recommended"]
     }
   }
 }
