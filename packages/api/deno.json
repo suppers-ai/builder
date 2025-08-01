@@ -14,7 +14,7 @@
     "dev": "npx supabase start",
     "stop": "npx supabase stop",
     "reset": "npx supabase db reset",
-    "deploy": "npx supabase functions deploy --no-verify-jwt --project-ref=mgqdxvpmaoppkotbgwvs",
+    "deploy": "npx supabase functions deploy --no-verify-jwt",
     "deploy:api": "npx supabase functions deploy api",
     "deploy:oauth": "npx supabase functions deploy authorize && npx supabase functions deploy callback",
     "logs": "npx supabase functions logs api",
