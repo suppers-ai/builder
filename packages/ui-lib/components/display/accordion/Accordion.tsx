@@ -61,29 +61,20 @@ export function Accordion({
             >
               <input
                 type="checkbox"
-                class="sr-only"
+                id={collapseId}
                 checked={isOpen}
                 onChange={() => !item.disabled && handleToggle(item.id)}
                 disabled={item.disabled}
+                class="sr-only"
               />
-              <div
+              <label
+                for={collapseId}
                 class={`collapse-title text-xl font-medium ${
-                  item.disabled ? "opacity-50 cursor-not-allowed" : ""
+                  item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                 }`}
-                onClick={() => !item.disabled && handleToggle(item.id)}
-                onKeyDown={(e) => {
-                  if ((e.key === "Enter" || e.key === " ") && !item.disabled) {
-                    e.preventDefault();
-                    handleToggle(item.id);
-                  }
-                }}
-                tabIndex={item.disabled ? -1 : 0}
-                role="button"
-                aria-expanded={isOpen}
-                aria-disabled={item.disabled}
               >
                 {item.title}
-              </div>
+              </label>
               <div class="collapse-content">
                 <div>{item.content}</div>
               </div>
@@ -102,19 +93,16 @@ export function Accordion({
                 id={collapseId}
                 defaultChecked={isOpen}
                 disabled={item.disabled}
+                class="sr-only"
               />
-              <div
+              <label
+                for={collapseId}
                 class={`collapse-title text-xl font-medium ${
-                  item.disabled ? "opacity-50 cursor-not-allowed" : ""
+                  item.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                 }`}
               >
-                <label
-                  for={collapseId}
-                  class="cursor-pointer"
-                >
-                  {item.title}
-                </label>
-              </div>
+                {item.title}
+              </label>
               <div class="collapse-content">
                 <div>{item.content}</div>
               </div>

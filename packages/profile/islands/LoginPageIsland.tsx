@@ -657,24 +657,36 @@ export default function LoginPageIsland({
                 </div>
               </div>
 
-              <div className="mt-6 text-center space-y-2 border-t border-base-300 pt-4 flex gap-4">
-                <Button
-                  type="button"
-                  onClick={handleToggleMode}
-                  variant="link"
-                  size="sm"
-                >
-                  {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
-                </Button>
+              <div className="mt-6 text-center space-y-2 border-t border-base-300 pt-4">
+                {isLogin ? (
+                  <div className="flex gap-4 justify-center">
+                    <Button
+                      type="button"
+                      onClick={handleToggleMode}
+                      variant="link"
+                      size="sm"
+                    >
+                      Need an account? Sign up
+                    </Button>
 
-                {isLogin && (
+                    <Button
+                      type="button"
+                      onClick={handleShowForgotPassword}
+                      variant="link"
+                      size="sm"
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
+                ) : (
                   <Button
                     type="button"
-                    onClick={handleShowForgotPassword}
+                    onClick={handleToggleMode}
                     variant="link"
                     size="sm"
+                    class="w-full"
                   >
-                    Forgot your password?
+                    Already have an account? Sign in
                   </Button>
                 )}
               </div>

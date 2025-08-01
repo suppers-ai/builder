@@ -2,6 +2,11 @@
 @plugin "daisyui" {
     themes: all;
 }
+@source "./islands/**/*.tsx";
+/*
+  Since we lazy load components, we need to tell Tailwind to scan for classes in them.
+*/
+@source "./../../ui-lib/components/**/*.tsx";
 /* Custom styles for the development environment */
 
 body {

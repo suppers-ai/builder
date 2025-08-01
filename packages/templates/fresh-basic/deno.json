@@ -9,7 +9,7 @@
     "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
     "$fresh/": "jsr:@fresh/core@2.0.0-alpha.49/",
     "$fresh/runtime": "jsr:@fresh/core@2.0.0-alpha.49/runtime",
-    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.7",
+    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
     "preact": "npm:preact@10.27.0",
     "preact/": "npm:preact@10.27.0/",
     "preact/hooks": "npm:preact@10.27.0/hooks",

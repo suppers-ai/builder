@@ -291,17 +291,15 @@ export default function ProfilePageIsland() {
   }
 
   return (
-    <div class="min-h-screen bg-base-100 p-4">
-      <ProfileCard
-        user={userSignal.value}
-        isLoading={authLoadingSignal.value || isLoading}
-        error={error}
-        success={success}
-        onUpdateProfile={handleUpdateProfile}
-        onUploadAvatar={handleUploadAvatar}
-        onSignOut={handleSignOut}
-        onChangePassword={handleChangePassword}
-      />
-    </div>
+    <ProfileCard
+      user={userSignal.value}
+      isLoading={authLoadingSignal.value || isLoading}
+      error={error}
+      success={success}
+      onUpdateProfile={handleUpdateProfile}
+      onUploadAvatar={handleUploadAvatar}
+      onSignOut={handleSignOut}
+      onChangePassword={handleChangePassword}
+    />
   );
 }

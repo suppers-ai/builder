@@ -25,11 +25,11 @@ export function Avatar({
 }: AvatarProps) {
   const getSizeClasses = (size: string) => {
     switch (size) {
-      case "xs": return "w-6 h-6";
-      case "sm": return "w-8 h-8";
-      case "lg": return "w-16 h-16";
-      case "xl": return "w-24 h-24";
-      default: return "w-12 h-12"; // md
+      case "xs": return "w-6";
+      case "sm": return "w-8";
+      case "lg": return "w-16";
+      case "xl": return "w-24";
+      default: return "w-12"; // md
     }
   };
 
@@ -47,7 +47,7 @@ export function Avatar({
   ].filter(Boolean).join(" ");
 
   const placeholderClasses = [
-    "placeholder",
+    "placeholder !flex items-center justify-center",
     ring ? "ring ring-primary ring-offset-base-100 ring-offset-2" : "",
     "rounded-full",
     getSizeClasses(size),

@@ -2,7 +2,11 @@
 @plugin "daisyui" {
   themes: all;
 }
-/* Custom styles for the development environment */
+
+/*
+  Since we lazy load components, we need to tell Tailwind to scan for classes in them.
+*/
+@source "./../../ui-lib/components/**/*.tsx";
 
 body {
   font-family:

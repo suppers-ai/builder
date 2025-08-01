@@ -8,6 +8,8 @@ import { Loading } from "../../feedback/loading/Loading.tsx";
 import { Select } from "../../input/select/Select.tsx";
 import { Avatar } from "../../display/avatar/Avatar.tsx";
 import { Card } from "../../display/card/Card.tsx";
+import { GlobalThemeController } from "../../action/theme-controller/ThemeController.tsx";
+import { ChevronDown, Palette } from "lucide-preact";
 
 export interface User {
   id: string;
@@ -53,6 +55,7 @@ export function ProfileCard({
 }: ProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(user?.user_metadata?.theme || "light");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editData, setEditData] = useState({
@@ -179,8 +182,8 @@ export function ProfileCard({
 
   if (!user) {
     return (
-      <div class={`max-w-md mx-auto p-4 ${className}`} id={id} {...props}>
-        <div class="bg-base-100 rounded-xl shadow-sm border border-base-200 p-8 text-center">
+      <div class={`${className}`} id={id} {...props}>
+        <div class="text-center">
           <div class="text-base-content/50 mb-4">
             <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -194,7 +197,7 @@ export function ProfileCard({
   }
 
   return (
-    <div class={`max-w-md mx-auto ${className}`} id={id} {...props}>
+    <div class={`bg-base-100 rounded-xl shadow-lg border border-base-200 overflow-hidden ${className}`} id={id} {...props}>
       {/* Messages */}
       {error && (
         <Alert color="error" class="mb-4">
@@ -207,26 +210,18 @@ export function ProfileCard({
         </Alert>
       )}
 
-      {/* Top Navigation Bar */}
-      <div class="flex items-center justify-between mb-6">
-        <button 
-          onClick={() => window.history.back()}
-          class="p-2 rounded-lg hover:bg-base-200 transition-colors"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button class="p-2 rounded-lg hover:bg-base-200 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-          </svg>
-        </button>
+      {/* Logo Section */}
+      <div class="text-center p-6 border-b border-base-200">
+        <img
+          src={currentTheme === "dark" ? "/logos/long_dark.png" : "/logos/long_light.png"}
+          alt="Suppers"
+          class="h-8 mx-auto"
+        />
       </div>
 
-      {/* User Information Section */}
-      <div class="flex items-start gap-4 mb-8">
-        <div class="flex-shrink-0">
+      {/* User Header Section */}
+      <div class="flex items-center justify-between p-6 mb-6">
+        <div class="flex items-center gap-4">
           <button
             type="button"
             onClick={handleAvatarClick}
@@ -237,8 +232,8 @@ export function ProfileCard({
               src={user.user_metadata?.avatar_url}
               alt="Profile"
               initials={getInitials()}
-              size="xl"
-              class="w-20 h-20 ring-2 ring-base-300"
+              size="lg"
+              class="w-12 h-12"
             />
             <input
               ref={fileInputRef}
@@ -248,86 +243,103 @@ export function ProfileCard({
               class="hidden"
             />
           </button>
-        </div>
-        <div class="flex-1 min-w-0">
-          <h1 class="text-xl font-bold text-base-content truncate">
-            {user.user_metadata?.firstName || getDisplayName()}
-          </h1>
-          <p class="text-sm text-base-content/60 truncate">
-            {user.user_metadata?.lastName || ""}
-          </p>
-        </div>
-        <div class="text-right">
-          <p class="text-xs text-base-content/60">Joined</p>
-          <p class="text-sm font-semibold text-base-content">{getJoinedDate()}</p>
+          <div>
+            <p class="text-sm text-base-content/60">Welcome</p>
+            <h1 class="text-lg font-bold text-base-content">{getDisplayName()}</h1>
+          </div>
         </div>
       </div>
 
-      {/* Profile Section */}
-      <div class="mb-6">
-        <h2 class="text-lg font-semibold text-base-content mb-3">Profile</h2>
-        <div class="bg-base-100 rounded-lg border border-base-200">
-          <button 
-            onClick={() => setIsEditing(!isEditing)}
-            class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors"
-          >
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                <div class="w-3 h-3 rounded-full bg-primary"></div>
-              </div>
-              <span class="text-base-content font-medium">Manage user</span>
+      {/* Menu Items */}
+      <div class="space-y-px">
+        {/* User Profile */}
+        <button 
+          onClick={() => setIsEditing(!isEditing)}
+          class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
+              <svg class="w-4 h-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </div>
-            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+            <span class="text-base-content font-medium">User Profile</span>
+          </div>
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Change Password */}
+        <button 
+          onClick={() => setShowPasswordForm(true)}
+          class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
+              <svg class="w-4 h-4 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <span class="text-base-content font-medium">Change Password</span>
+          </div>
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Theme Controller */}
+        <button
+          onClick={() => setShowThemeModal(true)}
+          class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
+              <Palette size={16} class="text-base-content/70" />
+            </div>
+            <span class="text-base-content font-medium">Theme</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-base-content/70 capitalize">{currentTheme}</span>
+            <ChevronDown size={16} class="text-base-content/50" />
+          </div>
+        </button>
+        
+      {/* Theme Modal */}
+      {showThemeModal && (
+        <div
+          class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowThemeModal(false);
+            }
+          }}
+        >
+          <GlobalThemeController
+            showButton={false}
+            onThemeChange={(newTheme) => {
+              setCurrentTheme(newTheme);
+              if (onUpdateProfile) {
+                onUpdateProfile({ theme: newTheme });
+              }
+              setShowThemeModal(false);
+            }}
+            onClose={() => setShowThemeModal(false)}
+          />
         </div>
+      )}
       </div>
 
-      {/* Settings Section */}
-      <div class="mb-8">
-        <h2 class="text-lg font-semibold text-base-content mb-3">Settings</h2>
-        <div class="bg-base-100 rounded-lg border border-base-200 space-y-px">
-          <button class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
-                <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.5 19.5a2 2 0 01-2-2v-11a2 2 0 012-2h11a2 2 0 012 2v11a2 2 0 01-2 2h-11z" />
-                </svg>
-              </div>
-              <span class="text-base-content font-medium">Notifications</span>
-            </div>
-            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-          <button class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              </div>
-              <span class="text-base-content font-medium">Dark Mode</span>
-            </div>
-            <svg class="w-4 h-4 text-base-content/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
+      {/* Logout Button */}
+      <div class="p-6 pt-4">
+        <button
+          onClick={onSignOut}
+          disabled={isLoading}
+          class="w-full py-3 px-4 border border-error text-error hover:bg-error hover:text-error-content rounded-lg transition-colors font-medium"
+        >
+          Sign Out
+        </button>
       </div>
-
-      {/* Sign Out Button */}
-      <Button
-        onClick={onSignOut}
-        disabled={isLoading}
-        variant="outline"
-        color="error"
-        wide
-        className="w-full"
-      >
-        Sign Out
-      </Button>
 
       {/* Edit Form Modal */}
       {isEditing && (
@@ -393,24 +405,6 @@ export function ProfileCard({
                     displayName: (e.target as HTMLInputElement).value 
                   }))}
                   placeholder="How you'd like to be displayed"
-                  class="w-full"
-                />
-              </div>
-              
-              <div>
-                <label class="block text-sm font-medium text-base-content mb-2">
-                  Theme Preference
-                </label>
-                <Select
-                  value={editData.theme}
-                  onChange={(e) => setEditData(prev => ({ 
-                    ...prev, 
-                    theme: (e.target as HTMLSelectElement).value 
-                  }))}
-                  options={themes.map(theme => ({
-                    value: theme.value,
-                    label: theme.label
-                  }))}
                   class="w-full"
                 />
               </div>

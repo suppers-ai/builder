@@ -30,7 +30,9 @@ export default function CustomSidebarIsland({
   onLogin,
   onLogout,
 }: CustomSidebarIslandProps) {
-  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [openSections, setOpenSections] = useState<string[]>(() => 
+    defaultUISidebarConfig.sections.map((s) => s.id)
+  );
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(() => {
     // Initialize with actual theme from DOM/localStorage on first render
@@ -47,9 +49,6 @@ export default function CustomSidebarIsland({
   const sidebarOpen = globalSidebarOpen.value;
 
   useEffect(() => {
-    // Initialize all sections as open by default
-    setOpenSections(defaultUISidebarConfig.sections.map((s) => s.id));
-
     // Load the saved theme to sync the signal with DOM
     loadSavedTheme();
 

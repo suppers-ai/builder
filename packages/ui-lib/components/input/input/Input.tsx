@@ -1,4 +1,5 @@
 import { InputProps } from "./Input.schema.ts";
+import { useState } from "preact/hooks";
 
 export function Input({
   class: className = "",
@@ -35,6 +36,8 @@ export function Input({
   "aria-hidden": ariaHidden,
   ...props
 }: InputProps) {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   // Set default placeholders based on input type
   const getDefaultPlaceholder = () => {
     if (placeholder) return placeholder;
@@ -108,7 +111,7 @@ export function Input({
       return (
         <div className="relative flex items-center">
           <input
-            type="password"
+            type={isPasswordVisible ? "text" : "password"}
             class={`${inputClasses} flex-1`}
             placeholder={getDefaultPlaceholder()}
             value={value}
@@ -126,10 +129,11 @@ export function Input({
           />
           <button
             type="button"
-            className="ml-2 p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="ml-2 p-2 text-base-content/50 hover:text-base-content transition-colors"
             disabled={disabled}
             aria-label="Toggle password visibility"
             data-password-toggle="true"
+            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
