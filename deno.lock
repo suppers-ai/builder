@@ -1,9 +1,9 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@deno/esbuild-plugin@^1.1.1": "1.1.1",
-    "jsr:@deno/loader@~0.2.1": "0.2.1",
-    "jsr:@fresh/core@2.0.0-alpha.49": "2.0.0-alpha.49",
+    "jsr:@deno/esbuild-plugin@^1.1.4": "1.1.4",
+    "jsr:@deno/loader@~0.3.2": "0.3.2",
+    "jsr:@fresh/core@2.0.0-alpha.52": "2.0.0-alpha.52",
     "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9": "0.0.1-alpha.9",
     "jsr:@std/bytes@^1.0.6": "1.0.6",
     "jsr:@std/collections@^1.1.1": "1.1.2",
@@ -43,18 +43,18 @@
     "npm:zod@^3.23.8": "3.25.76"
   },
   "jsr": {
-    "@deno/esbuild-plugin@1.1.1": {
-      "integrity": "590fb5382b09a78c203aa845afc36ee4dcd7737cd8ffcc604ef5710587801b8b",
+    "@deno/esbuild-plugin@1.1.4": {
+      "integrity": "a9574e2c394cbfec57ce573482bef265e0c32180a498929c4594aa1bb010ee6e",
       "dependencies": [
         "jsr:@deno/loader",
         "jsr:@std/path@^1.1.1"
       ]
     },
-    "@deno/loader@0.2.1": {
-      "integrity": "c9fcc7309ce6a77306d37a7dc4b886e547aafc5204a4a28b0eafa523ffa5c9fc"
+    "@deno/loader@0.3.2": {
+      "integrity": "2734cfcd7d91cb2be49279c0d68ae1d1922138525c0f9d409260c085efb1983d"
     },
-    "@fresh/core@2.0.0-alpha.49": {
-      "integrity": "a53b8b2907c5fb5ef8a7df2ec9fd69c0a74a09c0f1920b54cf3a058ad4f44c6b",
+    "@fresh/core@2.0.0-alpha.52": {
+      "integrity": "64200a9c98452d99ad148efa174b0c7edaedc25a187eafeb96371376546af8ea",
       "dependencies": [
         "jsr:@deno/esbuild-plugin",
         "jsr:@std/encoding@1",
@@ -1250,7 +1250,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@fresh/core@2.0.0-alpha.49",
+      "jsr:@fresh/core@2.0.0-alpha.52",
       "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
       "npm:@preact/signals-core@1.8.0",
       "npm:@preact/signals@2.2.1",
@@ -1266,7 +1266,7 @@
       },
       "packages/cdn": {
         "dependencies": [
-          "jsr:@fresh/core@2.0.0-alpha.49",
+          "jsr:@fresh/core@2.0.0-alpha.52",
           "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
           "npm:@preact/signals-core@1.8.0",
           "npm:@preact/signals@2.2.1",
@@ -1282,7 +1282,7 @@
       },
       "packages/docs": {
         "dependencies": [
-          "jsr:@fresh/core@2.0.0-alpha.49",
+          "jsr:@fresh/core@2.0.0-alpha.52",
           "jsr:@pakornv/fresh-plugin-tailwindcss@^1.0.3",
           "npm:@preact/signals-core@1.8.0",
           "npm:@preact/signals@2.2.1",
@@ -1314,7 +1314,7 @@
       },
       "packages/templates/fresh-basic": {
         "dependencies": [
-          "jsr:@fresh/core@2.0.0-alpha.49",
+          "jsr:@fresh/core@2.0.0-alpha.52",
           "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
           "npm:@preact/signals-core@1.11.0",
           "npm:@preact/signals@2.2.1",

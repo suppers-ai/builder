@@ -5,7 +5,7 @@
   "exports": "./mod.ts",
   "tasks": {
     "dev": "deno run --allow-all --watch=static/,routes/,islands/,lib/ dev.ts",
-    "build": "deno run --allow-all dev.ts build",
+    "build": "deno run --allow-all dev.ts build --prod",
     "start": "deno run --allow-all main.ts",
     "preview": "deno run --allow-all main.ts",
     "update": "deno run --allow-all -r https://fresh.deno.dev/update .",
