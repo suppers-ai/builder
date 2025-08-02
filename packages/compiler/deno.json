@@ -6,8 +6,8 @@
     "@cliffy/command": "https://deno.land/x/cliffy@v1.0.0-rc.4/command/mod.ts",
     "@cliffy/prompt": "https://deno.land/x/cliffy@v1.0.0-rc.4/prompt/mod.ts",
     "$fresh/runtime": "jsr:@fresh/core@^2.0.0-alpha.34/runtime",
-    "preact/jsx-runtime": "npm:preact@10.27.0/jsx-runtime",
-    "preact/jsx-dev-runtime": "npm:preact@10.27.0/jsx-dev-runtime",
+    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
+    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
     "@suppers/shared": "../shared/mod.ts"
   },
   "tasks": {

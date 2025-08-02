@@ -49,8 +49,8 @@ export function generateDenoConfig(name: string, template: string): string {
     imports: {
       "@std/": "https://deno.land/std@0.217.0/",
       "$fresh/": "https://deno.land/x/fresh@1.6.1/",
-      "preact": "https://esm.sh/preact@10.27.0",
-      "preact/": "https://esm.sh/preact@10.27.0/",
+      "preact": "https://esm.sh/preact@10.26.9",
+      "preact/": "https://esm.sh/preact@10.26.9/",
       "@preact/signals": "https://esm.sh/*@preact/signals@1.2.2",
       "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
     },

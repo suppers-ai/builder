@@ -18,13 +18,13 @@ export async function handler(ctx: FreshContext): Promise<Response> {
   switch (req.method) {
     case "GET":
       return await handleAssetRequest(assetPath, req);
-    
+
     case "HEAD":
       return await handleHeadRequest(assetPath, req);
-    
+
     case "OPTIONS":
       return handleOptionsRequest();
-    
+
     default:
       return new Response("Method Not Allowed", {
         status: 405,
@@ -39,7 +39,7 @@ export async function handler(ctx: FreshContext): Promise<Response> {
 async function handleHomePage(): Promise<Response> {
   // Get list of available assets
   const assets: string[] = [];
-  
+
   try {
     for await (const entry of Deno.readDir("./static")) {
       if (entry.isDirectory) {
@@ -112,7 +112,7 @@ async function handleAssetRequest(assetPath: string, request: Request): Promise<
     console.error("Error serving asset:", error);
     return new Response("Internal Server Error", {
       status: 500,
-      headers: { 
+      headers: {
         "Cache-Control": "no-cache",
         "Access-Control-Allow-Origin": "*"
       }
@@ -124,7 +124,7 @@ async function handleHeadRequest(assetPath: string, request: Request): Promise<R
   try {
     const ifNoneMatch = request.headers.get("If-None-Match") || undefined;
     const response = await serveAsset(assetPath, "./static", ifNoneMatch);
-    
+
     if (response.body) {
       const reader = response.body.getReader();
       try {
@@ -133,7 +133,7 @@ async function handleHeadRequest(assetPath: string, request: Request): Promise<R
         reader.releaseLock();
       }
     }
-    
+
     return new Response(null, {
       status: response.status,
       headers: response.headers
@@ -142,7 +142,7 @@ async function handleHeadRequest(assetPath: string, request: Request): Promise<R
     console.error("Error serving asset (HEAD):", error);
     return new Response(null, {
       status: 500,
-      headers: { 
+      headers: {
         "Cache-Control": "no-cache",
         "Access-Control-Allow-Origin": "*"
       }
