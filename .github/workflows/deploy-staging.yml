@@ -33,24 +33,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
     - name: Setup Google Cloud CLI
       uses: google-github-actions/setup-gcloud@v2
       with:
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        project_id: ${{ env.PROJECT_ID }}
+        install_components: 'gke-gcloud-auth-plugin'
 
-    - name: Configure Docker for GCR
-      run: gcloud auth configure-docker
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
     - name: Build and Deploy ${{ matrix.app }}
       run: |
         SERVICE_NAME="suppers-${{ matrix.app }}-staging"
-        IMAGE_NAME="gcr.io/${{ env.PROJECT_ID }}/${SERVICE_NAME}"
+        IMAGE_NAME="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/suppers/${SERVICE_NAME}"
         
         # Build Docker image with app name
         docker build --build-arg APP_NAME=${{ matrix.app }} -t ${IMAGE_NAME} .
         
-        # Push to GCR
+        # Push to Artifact Registry
         docker push ${IMAGE_NAME}
         
         # Deploy to Cloud Run
