@@ -29,6 +29,8 @@ if (Deno.args.includes("build")) {
     console.log("Building with Fresh...");
     await builder.build();
     console.log("Build completed successfully!");
+    console.log("Exiting build process...");
+    Deno.exit(0);
   } catch (error) {
     console.error("Build failed:", error);
     Deno.exit(1);
