@@ -1,0 +1,72 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'App to deploy (store, profile, cdn, docs, or all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - store
+        - profile
+        - cdn
+        - docs
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ github.event.inputs.app_name == 'all' && fromJson('["store", "profile", "cdn", "docs"]') || fromJson(format('["{0}"]', github.event.inputs.app_name || 'store')) }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Configure Docker for GCR
+      run: gcloud auth configure-docker
+
+    - name: Build and Deploy ${{ matrix.app }}
+      run: |
+        SERVICE_NAME="suppers-${{ matrix.app }}-production"
+        IMAGE_NAME="gcr.io/${{ env.PROJECT_ID }}/${SERVICE_NAME}"
+        
+        # Build Docker image with app name
+        docker build --build-arg APP_NAME=${{ matrix.app }} -t ${IMAGE_NAME} .
+        
+        # Push to GCR
+        docker push ${IMAGE_NAME}
+        
+        # Deploy to Cloud Run
+        gcloud run deploy ${SERVICE_NAME} \
+          --image ${IMAGE_NAME} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --port 8080 \
+          --memory 2Gi \
+          --cpu 2 \
+          --min-instances 1 \
+          --max-instances 20 \
+          --set-env-vars="ENVIRONMENT=production"
+
+    - name: Get service URL
+      run: |
+        SERVICE_NAME="suppers-${{ matrix.app }}-production"
+        URL=$(gcloud run services describe ${SERVICE_NAME} --region=${{ env.REGION }} --format='value(status.url)')
+        echo "🚀 ${{ matrix.app }} deployed to: ${URL}"
