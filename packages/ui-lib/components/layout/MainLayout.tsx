@@ -1,5 +1,6 @@
 import { PageLayout } from "./page-layout/PageLayout.tsx";
 import { FooterSection, SocialLink } from "./footer/Footer.tsx";
+import { Breadcrumbs } from "../navigation/breadcrumbs/Breadcrumbs.tsx";
 
 export interface MainLayoutProps {
   children: any;
@@ -62,25 +63,14 @@ export function MainLayout({
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav class="bg-base-200/50 border-b border-base-300">
           <div class="px-4 lg:px-6 py-3">
-            <div class="breadcrumbs text-sm">
-              <ul>
-                {breadcrumbs.map((breadcrumb, index) => (
-                  <li key={index}>
-                    {breadcrumb.path && !breadcrumb.active
-                      ? (
-                        <a href={breadcrumb.path} class="link link-hover">
-                          {breadcrumb.name}
-                        </a>
-                      )
-                      : (
-                        <span class={breadcrumb.active ? "text-base-content/60" : ""}>
-                          {breadcrumb.name}
-                        </span>
-                      )}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Breadcrumbs 
+              size="sm"
+              items={breadcrumbs.map(breadcrumb => ({
+                label: breadcrumb.name,
+                href: breadcrumb.path,
+                active: breadcrumb.active
+              }))}
+            />
           </div>
         </nav>
       )}

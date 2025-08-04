@@ -27,6 +27,25 @@ export default function TemplateGallery({
     return ["all", ...comps];
   });
 
+  // Convert to Select options
+  const categoryOptions = computed(() => 
+    categories.value.map(category => ({
+      value: category,
+      label: category === "all" 
+        ? "All Categories" 
+        : category.charAt(0).toUpperCase() + category.slice(1)
+    }))
+  );
+
+  const complexityOptions = computed(() => 
+    complexities.value.map(complexity => ({
+      value: complexity,
+      label: complexity === "all" 
+        ? "All Levels" 
+        : complexity.charAt(0).toUpperCase() + complexity.slice(1)
+    }))
+  );
+
   // Filter templates based on selected filters and search
   const filteredTemplates = computed(() => {
     return templates.filter((template) => {
@@ -117,19 +136,13 @@ export default function TemplateGallery({
                 <label class="label">
                   <span class="label-text">Category</span>
                 </label>
-                <select
-                  class="select select-bordered w-full"
+                <Select
                   value={selectedCategory.value}
+                  options={categoryOptions.value}
                   onChange={(e) => selectedCategory.value = (e.target as HTMLSelectElement).value}
-                >
-                  {categories.value.map((category) => (
-                    <option key={category} value={category}>
-                      {category === "all"
-                        ? "All Categories"
-                        : category.charAt(0).toUpperCase() + category.slice(1)}
-                    </option>
-                  ))}
-                </select>
+                  bordered
+                  class="w-full"
+                />
               </div>
 
               {/* Complexity Filter */}
@@ -137,19 +150,13 @@ export default function TemplateGallery({
                 <label class="label">
                   <span class="label-text">Complexity</span>
                 </label>
-                <select
-                  class="select select-bordered w-full"
+                <Select
                   value={selectedComplexity.value}
+                  options={complexityOptions.value}
                   onChange={(e) => selectedComplexity.value = (e.target as HTMLSelectElement).value}
-                >
-                  {complexities.value.map((complexity) => (
-                    <option key={complexity} value={complexity}>
-                      {complexity === "all"
-                        ? "All Levels"
-                        : complexity.charAt(0).toUpperCase() + complexity.slice(1)}
-                    </option>
-                  ))}
-                </select>
+                  bordered
+                  class="w-full"
+                />
               </div>
             </div>
 

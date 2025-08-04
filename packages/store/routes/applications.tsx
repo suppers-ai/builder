@@ -1,5 +1,5 @@
 import { type PageProps } from "fresh";
-import { Button } from "@suppers/ui-lib";
+import { Button, Card } from "@suppers/ui-lib";
 import { Package } from "lucide-preact";
 
 // Mock application data - in a real implementation, this would come from a database
@@ -53,9 +53,12 @@ export default function ApplicationsPage(_props: PageProps) {
             href={app.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="card bg-base-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-base-200 rounded-2xl cursor-pointer hover:border-primary/20"
           >
-            <div class="card-body p-6">
+            <Card
+              bordered
+              hoverable
+              class="cursor-pointer hover:border-primary/20 rounded-2xl"
+            >
               <div class="flex items-start gap-4">
                 {/* App Icon */}
                 <div class="flex-shrink-0">
@@ -102,7 +105,7 @@ export default function ApplicationsPage(_props: PageProps) {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </a>
         ))}
       </div>

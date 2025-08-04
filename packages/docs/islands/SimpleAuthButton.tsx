@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { DocsAuthHelpers } from "../lib/auth-helpers.ts";
 import type { StoredUser } from "../lib/auth-helpers.ts";
 import { User, LogIn, LogOut } from "lucide-preact";
-import { Button } from "@suppers/ui-lib";
+import { Button, Loading } from "@suppers/ui-lib";
 import { profileSyncManager, crossAppAuthHelpers } from "@suppers/shared/utils/mod.ts";
 
 export default function SimpleAuthButton() {
@@ -178,7 +178,7 @@ export default function SimpleAuthButton() {
   if (loading) {
     return (
       <div class="flex items-center justify-center">
-        <div class="loading loading-spinner loading-sm"></div>
+        <Loading size="sm" />
       </div>
     );
   }

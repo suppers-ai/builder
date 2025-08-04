@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { StoreAuthHelpers } from "../lib/auth-helpers.ts";
 import type { StoredUser } from "../lib/auth-helpers.ts";
 import { FileText, Home, LogOut, Package, Plus, Settings, Store, User } from "lucide-preact";
-import { Button } from "@suppers/ui-lib";
+import { Button, Loading } from "@suppers/ui-lib";
 
 interface SidebarProps {
   currentPath?: string;
@@ -256,7 +256,7 @@ export default function Sidebar({ currentPath = "/" }: SidebarProps) {
           {loading
             ? (
               <div className="flex items-center justify-center p-4">
-                <div className="loading loading-spinner loading-sm"></div>
+                <Loading size="sm" />
               </div>
             )
             : user
