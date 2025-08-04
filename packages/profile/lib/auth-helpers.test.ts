@@ -2,9 +2,9 @@ import {
   assertEquals,
   assertExists,
   assertRejects,
-} from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { afterEach, beforeEach, describe, it } from "https://deno.land/std@0.224.0/testing/bdd.ts";
-import { FakeTime } from "https://deno.land/std@0.224.0/testing/time.ts";
+} from "@std/assert";
+import { afterEach, beforeEach, describe, it } from "@std/testing/bdd";
+import { FakeTime } from "@std/testing/time";
 
 // Mock Supabase client
 const mockSupabaseClient = {

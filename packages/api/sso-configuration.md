@@ -140,7 +140,7 @@ Create custom OAuth endpoints for external apps:
 
 ```typescript
 // supabase/functions/oauth/authorize.ts
-import { serve } from "https://deno.land/std/http/server.ts";
+import { serve } from "@std/http";
 
 serve(async (req) => {
   const url = new URL(req.url);

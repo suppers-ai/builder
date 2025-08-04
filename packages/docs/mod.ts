@@ -3,6 +3,3 @@
 
 // Re-export everything from ui-lib for convenience
 export * from "@suppers/ui-lib";
-
-// Export shared components that are website-specific
-export * from "./shared/mod.ts";

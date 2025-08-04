@@ -1,5 +1,5 @@
-import { assertStringIncludes } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { assertSnapshot } from "https://deno.land/std@0.224.0/testing/snapshot.ts";
+import { assertStringIncludes } from "@std/assert";
+import { assertSnapshot } from "@std/testing/snapshot";
 import { renderToString } from "preact-render-to-string";
 import { Collapse } from "./Collapse.tsx";
 

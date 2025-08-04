@@ -6,7 +6,7 @@
  * Command-line interface for generating sites with the Suppers AI Builder.
  */
 
-import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/mod.ts";
+import { Command } from "jsr:@cliffy/command@^1.0.0-rc.8";
 import { handleGenerate, handleHelp, handleValidate, handleVersion } from "./src/commands/mod.ts";
 
 export const CLI_METADATA = {

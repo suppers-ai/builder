@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std/http/server.ts";
+import { serve } from "@std/http";
 import { handleRefreshRequest } from "./handlers/index.ts";
 
 serve(async (req) => {

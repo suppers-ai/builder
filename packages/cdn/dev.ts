@@ -7,8 +7,7 @@ import { PORTS } from "@suppers/shared";
 // Load environment variables
 try {
     loadSync({
-        envPath: "../../.env.local",
-        defaultsPath: "../../.env",
+        envPath: "../../.env",
         export: true,
     });
     console.log('env variables loaded')

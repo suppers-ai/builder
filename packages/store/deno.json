@@ -30,12 +30,6 @@
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.8?target=deno",
     "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
     "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
-    "@preact/signals": "npm:@preact/signals@2.2.1",
-    "@preact/signals-core": "npm:@preact/signals-core@1.8.0",
-    "daisyui": "npm:daisyui@^5.0.50",
-    "preact-render-to-string": "https://esm.sh/preact-render-to-string@6.2.2",
-    "zod": "https://esm.sh/zod@3.25.1",
-    "lucide-preact": "https://esm.sh/lucide-preact@0.460.0",
     "jose": "https://esm.sh/jose@5.2.0"
   },
   "lint": {
