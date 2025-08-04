@@ -27,7 +27,7 @@ jobs:
     environment: staging
     strategy:
       matrix:
-        app: ${{ github.event.inputs.app_name == 'all' && fromJson('["store", "profile", "cdn", "docs"]') || fromJson(format('["{0}"]', github.event.inputs.app_name || 'store')) }}
+        app: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.app_name == 'all' && fromJson('["store", "profile", "cdn", "docs"]') || fromJson(format('["{0}"]', github.event.inputs.app_name))) || fromJson('["store", "profile", "cdn", "docs"]') }}
     
     steps:
     - name: Checkout code
@@ -65,7 +65,7 @@ jobs:
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
           --port 8080 \
-          --memory 1Gi \
+          --memory 256Mi \
           --cpu 1 \
           --min-instances 0 \
           --max-instances 10 \
