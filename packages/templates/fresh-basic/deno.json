@@ -5,8 +5,11 @@
   "imports": {
     "@fresh/core": "jsr:@fresh/core@2.0.0-alpha.52",
     "fresh": "jsr:@fresh/core@2.0.0-alpha.52",
-    "@std/": "https://deno.land/std@0.224.0/",
-    "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
+    "@std/path": "jsr:@std/path@^1.1.1",
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.5",
+    "@std/crypto": "jsr:@std/crypto@^1.0.5",
+    "@std/encoding": "jsr:@std/encoding@^1.0.10",
+    "@std/uuid": "jsr:@std/uuid@^1.0.9",
     "$fresh/": "jsr:@fresh/core@2.0.0-alpha.52/",
     "$fresh/runtime": "jsr:@fresh/core@2.0.0-alpha.52/runtime",
     "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",

@@ -16,8 +16,6 @@
   },
   "imports": {
     "@/": "./",
-    "@std/path": "https://deno.land/std@0.224.0/path/mod.ts",
-    "@std/dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
     "@suppers/shared": "../shared/mod.ts",
     "fresh": "jsr:@fresh/core@2.0.0-alpha.52",
     "$fresh/runtime": "jsr:@fresh/core@2.0.0-alpha.52/runtime",

@@ -9,7 +9,7 @@ COPY . .
 
 # Cache dependencies for the specific app we're building
 ARG APP_NAME=store
-RUN deno cache packages/${APP_NAME}/main.ts packages/${APP_NAME}/dev.ts
+RUN deno task cache
 
 # Build the specific app
 WORKDIR /app/packages/${APP_NAME}

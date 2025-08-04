@@ -1,5 +1,5 @@
-import { basename, dirname, join } from "@std/path/mod.ts";
-import { copy, ensureDir } from "@std/fs/mod.ts";
+import { basename, dirname, join } from "@std/path";
+import { copy, ensureDir } from "@std/fs";
 import type { DirectoryCopyOptions } from "../types/mod.ts";
 
 /**

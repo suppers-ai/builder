@@ -1,5 +1,5 @@
 #!/usr/bin/env deno run -A
-import { dirname, fromFileUrl, join } from "@std/path/mod.ts";
+import { dirname, fromFileUrl, join } from "@std/path";
 
 const rootDir = dirname(fromFileUrl(import.meta.url));
 
