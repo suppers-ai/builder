@@ -24,6 +24,7 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: main
     strategy:
       matrix:
         app: ${{ github.event.inputs.app_name == 'all' && fromJson('["store", "profile", "cdn", "docs"]') || fromJson(format('["{0}"]', github.event.inputs.app_name || 'store')) }}
