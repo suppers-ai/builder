@@ -13,9 +13,9 @@ export function Loading({
   ...props
 }: LoadingProps) {
   const loadingClasses = [
-    "loading loading loading-spinner",
-    `loading loading loading-spinner-${variant}`,
-    size ? `loading loading loading-spinner-${size}` : "",
+    "loading",
+    `loading-${variant}`,
+    size ? `loading-${size}` : "",
     color ? `text-${color}` : "",
     className,
   ].filter(Boolean).join(" ");

@@ -320,7 +320,9 @@ export function Table({
                         key={column.key}
                         class={column.align ? `text-${column.align}` : ""}
                       >
-                        {column.render ? column.render(row[column.key], row) : String(row[column.key] ?? "")}
+                        {column.render
+                          ? column.render(row[column.key], row)
+                          : String(row[column.key] ?? "")}
                       </td>
                     ))}
                   </tr>
@@ -358,7 +360,7 @@ export function PaginatedTable({
   // Ensure columns and data are arrays
   const safeColumns = Array.isArray(columns) ? columns : [];
   const safeData = Array.isArray(data) ? data : [];
-  
+
   const [sortColumn, setSortColumn] = useState(safeColumns[0]?.key || "");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
@@ -367,11 +369,11 @@ export function PaginatedTable({
     ? [...safeData].sort((a, b) => {
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
-      
+
       // Convert to strings for comparison
       const aStr = String(aValue ?? "");
       const bStr = String(bValue ?? "");
-      
+
       const comparison = aStr < bStr ? -1 : aStr > bStr ? 1 : 0;
       return sortDirection === "asc" ? comparison : -comparison;
     })

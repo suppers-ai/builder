@@ -29,7 +29,7 @@ export async function initiateOAuth(request: Request, supabase: SupabaseClient):
     // Get the origin from the request or use a default
     const requestUrl = new URL(request.url);
     const appOrigin = requestUrl.searchParams.get("origin") || "http://localhost:8000";
-    
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -44,13 +44,16 @@ export async function initiateOAuth(request: Request, supabase: SupabaseClient):
       });
     }
 
-    return new Response(JSON.stringify({ 
-      data,
-      success: true 
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        data,
+        success: true,
+      }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     console.error("OAuth initiation error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {

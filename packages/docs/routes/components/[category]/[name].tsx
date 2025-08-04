@@ -1,19 +1,19 @@
 /**
  * Dynamic component route handler for the simplified metadata system
- * 
+ *
  * This route handler processes component documentation using a simplified, props-based approach.
  * All component examples are now defined purely through props objects, with automatic JSX code
  * generation and consistent presentation.
- * 
+ *
  * Key features of the simplified system:
  * - Props-based examples: All examples use `props` objects instead of raw JSX strings
  * - Automatic code generation: JSX code is generated from props using `generateJSXFromProps`
  * - Consistent presentation: All examples show rendered component + generated code
  * - Single rendering path: No more complex parsing or multiple rendering approaches
- * 
+ *
  * Handles URLs like /components/action/button, /components/display/card, etc.
  * Uses metadata-driven approach for automatic component discovery.
- * 
+ *
  * @example
  * // Example metadata structure (simplified)
  * {
@@ -21,12 +21,12 @@
  *   description: "A button with primary styling",
  *   props: { color: "primary", children: "Click me" }
  * }
- * 
+ *
  * @example
  * // Multiple component example
  * {
  *   title: "Button Colors",
- *   description: "Various button color options", 
+ *   description: "Various button color options",
  *   props: [
  *     { color: "primary", children: "Primary" },
  *     { color: "secondary", children: "Secondary" }
@@ -37,7 +37,7 @@
 import type { PageProps } from "fresh";
 import { createComponentRoute } from "../../../utils/component-route-generator.tsx";
 import { ComponentMetadata, flatComponentsMetadata } from "@suppers/ui-lib";
-import { Breadcrumbs } from "@suppers/ui-lib";
+import { Breadcrumbs, Button } from "@suppers/ui-lib";
 import CodeExample from "../../../islands/CodeExample.tsx";
 import { generateJSXFromProps } from "../../../utils/props-to-jsx.ts";
 import { h } from "preact";
@@ -60,7 +60,6 @@ function findComponentMetadata(category: string, name: string): ComponentMetadat
   const expectedPath = `/components/${category}/${name}`;
   return flatComponentsMetadata.find((meta) => meta.path === expectedPath) || null;
 }
-
 
 /**
  * Dynamically import component from UI library based on component name and metadata
@@ -112,9 +111,9 @@ export default async function DynamicComponentPage(props: PageProps) {
           </header>
           <div class="px-4 lg:px-6 py-8">
             <div class="max-w-7xl mx-auto">
-              <a href="/components" class="btn btn-primary">
+              <Button as="a" href="/components" color="primary">
                 Back to Components
-              </a>
+              </Button>
             </div>
           </div>
         </>
@@ -142,7 +141,8 @@ export default async function DynamicComponentPage(props: PageProps) {
                 {pageData.title}
               </h1>
               <p class="text-lg text-base-content/70 max-w-2xl">
-                {pageData.description}            </p>
+                {pageData.description}
+              </p>
             </div>
           </div>
         </header>
@@ -243,21 +243,23 @@ export default async function DynamicComponentPage(props: PageProps) {
                             {prop.required && <span class="text-error ml-1">*</span>}
                           </td>
                           <td class="font-mono">
-                            <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">{prop.type}</code>
+                            <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">
+                              {prop.type}
+                            </code>
                           </td>
                           <td class="text-base-content">
-                            {prop.required ? (
-                              <span class="text-error font-medium">Yes</span>
-                            ) : (
-                              <span class="text-base-content/60">No</span>
-                            )}
+                            {prop.required
+                              ? <span class="text-error font-medium">Yes</span>
+                              : <span class="text-base-content/60">No</span>}
                           </td>
                           <td class="font-mono">
-                            {prop.default ? (
-                              <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">{prop.default}</code>
-                            ) : (
-                              <span class="text-base-content/40">-</span>
-                            )}
+                            {prop.default
+                              ? (
+                                <code class="bg-base-200 text-base-content px-2 py-1 rounded text-xs">
+                                  {prop.default}
+                                </code>
+                              )
+                              : <span class="text-base-content/40">-</span>}
                           </td>
                           <td class="text-base-content">
                             {prop.description}
@@ -306,9 +308,9 @@ export default async function DynamicComponentPage(props: PageProps) {
             <p class="text-sm text-gray-500 mb-8">
               Error: {error instanceof Error ? error.message : "Unknown error"}
             </p>
-            <a href="/components" class="btn btn-primary">
+            <Button as="a" href="/components" color="primary">
               Back to Components
-            </a>
+            </Button>
           </div>
         </div>
       </>

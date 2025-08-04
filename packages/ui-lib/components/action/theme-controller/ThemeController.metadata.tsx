@@ -1,13 +1,13 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { ThemeController } from "./ThemeController.tsx";
 
 const themeControllerExamples: ComponentExample[] = [
   {
     title: "Theme Modal Interface",
     description: "Interactive theme selection modal with organized theme categories",
-    props: { showButton: false }
-        }
-      ];;
+    props: { showButton: false },
+  },
+];
 
 export const themeControllerMetadata: ComponentMetadata = {
   name: "ThemeController",
@@ -25,4 +25,5 @@ export const themeControllerMetadata: ComponentMetadata = {
         showLabel={true}
       />
     </div>
-  )};
+  ),
+};

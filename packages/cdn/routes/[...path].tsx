@@ -31,7 +31,7 @@ export async function handler(ctx: FreshContext): Promise<Response> {
         headers: {
           "Allow": "GET, HEAD, OPTIONS",
           "Access-Control-Allow-Origin": "*",
-        }
+        },
       });
   }
 }
@@ -79,11 +79,13 @@ async function handleHomePage(): Promise<Response> {
     
     <h2>📁 Available Assets</h2>
     <ul class="asset-list">
-        ${assets.map(asset => `
+        ${
+    assets.map((asset) => `
             <li class="asset-item">
                 <a href="/${asset}" class="asset-link" target="_blank">/${asset}</a>
             </li>
-        `).join('')}
+        `).join("")
+  }
     </ul>
     
     <h2>📋 API Usage</h2>
@@ -99,7 +101,7 @@ OPTIONS /{asset-path}  - CORS preflight</code></pre>
       "Content-Type": "text/html; charset=utf-8",
       "Access-Control-Allow-Origin": "*",
       "Cache-Control": "public, max-age=300", // 5 minutes
-    }
+    },
   });
 }
 
@@ -114,8 +116,8 @@ async function handleAssetRequest(assetPath: string, request: Request): Promise<
       status: 500,
       headers: {
         "Cache-Control": "no-cache",
-        "Access-Control-Allow-Origin": "*"
-      }
+        "Access-Control-Allow-Origin": "*",
+      },
     });
   }
 }
@@ -136,7 +138,7 @@ async function handleHeadRequest(assetPath: string, request: Request): Promise<R
 
     return new Response(null, {
       status: response.status,
-      headers: response.headers
+      headers: response.headers,
     });
   } catch (error) {
     console.error("Error serving asset (HEAD):", error);
@@ -144,8 +146,8 @@ async function handleHeadRequest(assetPath: string, request: Request): Promise<R
       status: 500,
       headers: {
         "Cache-Control": "no-cache",
-        "Access-Control-Allow-Origin": "*"
-      }
+        "Access-Control-Allow-Origin": "*",
+      },
     });
   }
 }
@@ -158,6 +160,6 @@ function handleOptionsRequest(): Response {
       "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, If-None-Match",
       "Access-Control-Max-Age": "86400",
-    }
+    },
   });
 }

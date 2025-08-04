@@ -1,9 +1,14 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory, ComponentSchema } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentSchema,
+} from "../../types.ts";
 import { Navbar } from "./Navbar.tsx";
 import {
   NavbarPropsSchema,
   safeValidateNavbarProps,
-  validateNavbarProps
+  validateNavbarProps,
 } from "./Navbar.schema.ts";
 
 const navbarExamples: ComponentExample[] = [
@@ -18,8 +23,8 @@ const navbarExamples: ComponentExample[] = [
           <a class="btn btn-ghost">About</a>
           <a class="btn btn-ghost">Contact</a>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Navbar with Dropdown",
@@ -34,14 +39,20 @@ const navbarExamples: ComponentExample[] = [
               Services
             </div>
             <ul class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-              <li><a>Web Design</a></li>
-              <li><a>Development</a></li>
-              <li><a>Consulting</a></li>
+              <li>
+                <a>Web Design</a>
+              </li>
+              <li>
+                <a>Development</a>
+              </li>
+              <li>
+                <a>Consulting</a>
+              </li>
             </ul>
           </div>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Navbar with Search",
@@ -50,10 +61,10 @@ const navbarExamples: ComponentExample[] = [
       start: <a class="btn btn-ghost text-xl">Platform</a>,
       center: (
         <div class="form-control">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            class="input input-bordered w-24 md:w-auto" 
+          <input
+            type="text"
+            placeholder="Search..."
+            class="input input-bordered w-24 md:w-auto"
           />
         </div>
       ),
@@ -61,13 +72,18 @@ const navbarExamples: ComponentExample[] = [
         <div class="flex gap-2">
           <button class="btn btn-ghost btn-circle">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0z"
+              />
             </svg>
           </button>
           <button class="btn btn-primary">Sign In</button>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Responsive Navbar",
@@ -78,14 +94,27 @@ const navbarExamples: ComponentExample[] = [
           <div class="dropdown">
             <div tabIndex={0} role="button" class="btn btn-ghost lg:hidden">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h8m-8 6h16"
+                />
               </svg>
             </div>
             <ul class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-              <li><a>Home</a></li>
-              <li><a>Products</a></li>
-              <li><a>About</a></li>
-              <li><a>Contact</a></li>
+              <li>
+                <a>Home</a>
+              </li>
+              <li>
+                <a>Products</a>
+              </li>
+              <li>
+                <a>About</a>
+              </li>
+              <li>
+                <a>Contact</a>
+              </li>
             </ul>
           </div>
           <a class="btn btn-ghost text-xl">Company</a>
@@ -94,22 +123,30 @@ const navbarExamples: ComponentExample[] = [
       center: (
         <div class="navbar-center hidden lg:flex">
           <ul class="menu menu-horizontal px-1">
-            <li><a>Home</a></li>
-            <li><a>Products</a></li>
-            <li><a>About</a></li>
-            <li><a>Contact</a></li>
+            <li>
+              <a>Home</a>
+            </li>
+            <li>
+              <a>Products</a>
+            </li>
+            <li>
+              <a>About</a>
+            </li>
+            <li>
+              <a>Contact</a>
+            </li>
           </ul>
         </div>
       ),
-      end: <a class="btn">Get Started</a>
-    }
+      end: <a class="btn">Get Started</a>,
+    },
   },
 ];
 
 const navbarSchema: ComponentSchema = {
   schema: NavbarPropsSchema,
   validateFn: validateNavbarProps,
-  safeValidateFn: safeValidateNavbarProps
+  safeValidateFn: safeValidateNavbarProps,
 };
 
 export const navbarMetadata: ComponentMetadata = {
@@ -133,5 +170,5 @@ export const navbarMetadata: ComponentMetadata = {
         }
       />
     </div>
-  )
+  ),
 };

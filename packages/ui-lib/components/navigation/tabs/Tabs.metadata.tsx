@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 
 const tabsExamples: ComponentExample[] = [
   {
@@ -12,11 +13,10 @@ const tabsExamples: ComponentExample[] = [
       tabs: [
         { id: "tab1", label: "Home", content: "Welcome to the home page!" },
         { id: "tab2", label: "About", content: "Learn more about us here." },
-        { id: "tab3", label: "Contact", content: "Get in touch with our team."
-        }
+        { id: "tab3", label: "Contact", content: "Get in touch with our team." },
       ],
-      activeTab: "tab1"
-    }
+      activeTab: "tab1",
+    },
   },
   {
     title: "Tabs Variants",
@@ -26,30 +26,29 @@ const tabsExamples: ComponentExample[] = [
         bordered: true,
         tabs: [
           { id: "tab1", label: "Bordered", content: "This tab has borders" },
-          { id: "tab2", label: "Style", content: "Different tab styling"
-        }
-      ]
+          { id: "tab2", label: "Style", content: "Different tab styling" },
+        ],
       },
       {
         lifted: true,
         tabs: [
           { id: "tab1", label: "Lifted", content: "This tab appears lifted" },
-          { id: "tab2", label: "Design", content: "Elevated tab design"
-        }
-      ]
+          { id: "tab2", label: "Design", content: "Elevated tab design" },
+        ],
       },
       {
         boxed: true,
         tabs: [
           { id: "tab1", label: "Boxed", content: "This tab has a boxed style" },
-          { id: "tab2", label: "Layout", content: "Boxed tab layout"
-        }
-      ]
-        }
-      ]},
+          { id: "tab2", label: "Layout", content: "Boxed tab layout" },
+        ],
+      },
+    ],
+  },
   {
     title: "Tabs Sizes",
-    description: "Different tab sizes for various contexts"},
+    description: "Different tab sizes for various contexts",
+  },
   {
     title: "Tabs with Rich Content",
     description: "Tabs containing complex content and components",
@@ -69,7 +68,7 @@ const tabsExamples: ComponentExample[] = [
               </div>
               <p>Welcome to your dashboard overview.</p>
             </div>
-          )
+          ),
         },
         {
           id: "settings",
@@ -84,10 +83,10 @@ const tabsExamples: ComponentExample[] = [
                 <option>Dark</option>
               </select>
             </div>
-          )
-        }
-      ]
-    }
+          ),
+        },
+      ],
+    },
   },
   {
     title: "Tabs with Disabled State",
@@ -96,52 +95,59 @@ const tabsExamples: ComponentExample[] = [
       tabs: [
         { id: "available", label: "Available", content: "This tab is available and active." },
         { id: "disabled", label: "Disabled", content: "This content won't show.", disabled: true },
-        { id: "enabled", label: "Enabled", content: "This tab is also available."
-        }
+        { id: "enabled", label: "Enabled", content: "This tab is also available." },
       ],
-      activeTab: "available"
-    }
-        }
-      ];;
+      activeTab: "available",
+    },
+  },
+];
 
 const tabsProps: ComponentProp[] = [
   {
     name: "tabs",
     type: "TabItemProps[]",
     description: "Array of tab items with id, label, content, and optional disabled state",
-    required: true},
+    required: true,
+  },
   {
     name: "activeTab",
     type: "string",
-    description: "ID of the currently active tab"},
+    description: "ID of the currently active tab",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the tabs",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Show border around tabs",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "lifted",
     type: "boolean",
     description: "Lifted appearance with shadow effect",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "boxed",
     type: "boolean",
     description: "Boxed style with background",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onTabChange",
     type: "(tabId: string) => void",
-    description: "Callback function called when tab is changed"},
+    description: "Callback function called when tab is changed",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const tabsMetadata: ComponentMetadata = {
@@ -176,4 +182,5 @@ export const tabsMetadata: ComponentMetadata = {
     "Lifted variant adds depth and visual hierarchy",
     "Boxed variant provides clear separation between tabs",
     "Disabled tabs prevent user interaction but remain visible",
-  ]};
+  ],
+};

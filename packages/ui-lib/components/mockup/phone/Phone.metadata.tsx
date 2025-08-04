@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { PhoneMockup } from "./PhoneMockup.tsx";
 
 const phoneExamples: ComponentExample[] = [
@@ -6,34 +6,38 @@ const phoneExamples: ComponentExample[] = [
     title: "Basic Phone Mockup",
     description: "Simple mobile device frame mockup",
     props: {
-      children: "Mobile app content"
-    }
-  }, {
+      children: "Mobile app content",
+    },
+  },
+  {
     title: "iPhone with Camera",
     description: "iPhone mockup with camera cutout detail",
     props: {
-      children: "Mobile app content"
-    }
-  }, {
+      children: "Mobile app content",
+    },
+  },
+  {
     title: "Different Colors",
     description: "Phone mockups with different frame colors",
     props: {
       children: "Mobile app content",
-      color: "primary"
-    }
-  }, {
+      color: "primary",
+    },
+  },
+  {
     title: "Different Sizes",
     description: "Phone mockups in various sizes",
     props: {
       children: "Mobile app content",
-      size: "lg"
-    }
-  }, {
+      size: "lg",
+    },
+  },
+  {
     title: "Responsive E-commerce App",
     description: "Phone mockup showcasing a mobile app interface",
     props: {
-      children: "Mobile app content"
-    }
+      children: "Mobile app content",
+    },
   },
 ];
 
@@ -58,5 +62,5 @@ export const phoneMetadata: ComponentMetadata = {
         </div>
       </PhoneMockup>
     </div>
-  )
+  ),
 };

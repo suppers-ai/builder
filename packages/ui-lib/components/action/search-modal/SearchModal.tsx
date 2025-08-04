@@ -112,21 +112,24 @@ export function SearchModal({
   const displayedResults = searchResults.slice(0, maxResults);
 
   // For documentation purposes, show modal content as a static card
-  const isDocumentationMode = typeof window === 'undefined' || window.location?.pathname?.includes('/components/');
-  
+  const isDocumentationMode = typeof window === "undefined" ||
+    window.location?.pathname?.includes("/components/");
+
   if (isDocumentationMode && !isOpen) {
     return (
-      <div class={`w-full max-w-2xl mx-auto bg-base-100 rounded-lg shadow-lg border border-base-300 ${className}`}>
+      <div
+        class={`w-full max-w-2xl mx-auto bg-base-100 rounded-lg shadow-lg border border-base-300 ${className}`}
+      >
         <div class="p-6 border-b border-base-300">
           <div class="flex items-center gap-4">
             <div class="flex-1 relative">
               <div class="flex items-center">
                 <Search size={20} class="absolute left-3 text-base-content/60" />
-                <input
+                <Input
                   type="text"
                   placeholder={placeholder}
                   value=""
-                  class="input pl-10 pr-4 w-full border-0 focus:ring-0 bg-transparent text-lg"
+                  class="pl-10 pr-4 w-full border-0 focus:ring-0 bg-transparent text-lg"
                   disabled
                 />
               </div>
@@ -159,9 +162,7 @@ export function SearchModal({
                 <div
                   key={result.id}
                   class={`flex items-center gap-4 p-4 hover:bg-base-200 cursor-pointer border-l-4 transition-colors ${
-                    index === 0
-                      ? "bg-base-200 border-l-primary"
-                      : "border-l-transparent"
+                    index === 0 ? "bg-base-200 border-l-primary" : "border-l-transparent"
                   }`}
                 >
                   {result.icon && (
@@ -236,13 +237,13 @@ export function SearchModal({
             <div class="flex-1 relative">
               <div class="flex items-center">
                 <Search size={20} class="absolute left-3 text-base-content/60" />
-                <input
+                <Input
                   ref={inputRef}
                   type="text"
                   placeholder={placeholder}
                   value={searchQuery}
                   onInput={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-                  class="input pl-10 pr-4 w-full border-0 focus:ring-0 bg-transparent text-lg"
+                  class="pl-10 pr-4 w-full border-0 focus:ring-0 bg-transparent text-lg"
                 />
               </div>
             </div>

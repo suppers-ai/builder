@@ -229,7 +229,7 @@ export class TypeMappers {
     if (user.email) {
       return user.email.split("@")[0];
     }
-    
+
     // Final fallback
     return "Anonymous User";
   }

@@ -4,7 +4,10 @@ import { getUser } from "./get-user.ts";
 import { createUser } from "./post-user.ts";
 import { updateUser } from "./put-user.ts";
 
-export async function handleUserRequest(request: Request, supabase: SupabaseClient): Promise<Response> {
+export async function handleUserRequest(
+  request: Request,
+  supabase: SupabaseClient,
+): Promise<Response> {
   const url = new URL(request.url);
   const method = request.method;
 
@@ -24,9 +27,12 @@ export async function handleUserRequest(request: Request, supabase: SupabaseClie
     }
   } catch (error) {
     console.error("User handler error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 }

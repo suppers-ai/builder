@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Toast } from "./Toast.tsx";
 
 const toastExamples: ComponentExample[] = [
@@ -7,37 +7,41 @@ const toastExamples: ComponentExample[] = [
     description: "Simple toast notification message",
     props: {
       message: "Operation completed successfully!",
-      type: "success"
-    }
-  },  {
+      type: "success",
+    },
+  },
+  {
     title: "Different Positions",
     description: "Toast notifications in various screen positions",
     props: {
       message: "Operation completed successfully!",
-      type: "success"
-    }
-  },  {
+      type: "success",
+    },
+  },
+  {
     title: "Color Variants",
     description: "Toast notifications with different types",
     props: {
       message: "Operation completed successfully!",
       type: "success",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Toast with Actions",
     description: "Toast notifications with action buttons",
     props: {
       message: "Operation completed successfully!",
-      type: "success"
-    }
-  },  {
+      type: "success",
+    },
+  },
+  {
     title: "Stacked Toasts",
     description: "Multiple toast notifications displayed together",
     props: {
       message: "Operation completed successfully!",
-      type: "success"
-    }
+      type: "success",
+    },
   },
 ];
 
@@ -55,4 +59,5 @@ export const toastMetadata: ComponentMetadata = {
       <Toast message="Warning: Please check your input" type="warning" />
       <Toast message="Information: Update available" type="info" />
     </div>
-  )};
+  ),
+};

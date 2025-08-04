@@ -142,12 +142,14 @@ export function Carousel({
           </div>
         )}
         {allowAutoSlideToggle && (
-          <button
-            class={`btn btn-sm ${autoSlideEnabled ? "btn-secondary" : "btn-outline"}`}
+          <Button
+            size="sm"
+            variant={autoSlideEnabled ? "solid" : "outline"}
+            color={autoSlideEnabled ? "secondary" : "primary"}
             onClick={() => setAutoSlideEnabled(!autoSlideEnabled)}
           >
             {autoSlideEnabled ? "Stop Auto-slide" : "Start Auto-slide"}
-          </button>
+          </Button>
         )}
       </div>
     );

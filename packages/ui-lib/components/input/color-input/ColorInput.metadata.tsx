@@ -2,7 +2,7 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp
+  ComponentProp,
 } from "../../types.ts";
 
 const colorInputExamples: ComponentExample[] = [
@@ -11,8 +11,8 @@ const colorInputExamples: ComponentExample[] = [
     description: "Simple color picker input with preview",
     props: {
       value: "#3b82f6",
-      placeholder: "Select a color"
-    }
+      placeholder: "Select a color",
+    },
   },
   {
     title: "Color Input Sizes",
@@ -22,9 +22,8 @@ const colorInputExamples: ComponentExample[] = [
       { size: "sm", value: "#f97316" },
       { size: "md", value: "#eab308" },
       { size: "lg", value: "#22c55e" },
-      { size: "xl", value: "#3b82f6"
-        }
-      ]
+      { size: "xl", value: "#3b82f6" },
+    ],
   },
   {
     title: "Color Input Variants",
@@ -32,9 +31,8 @@ const colorInputExamples: ComponentExample[] = [
     props: [
       { bordered: true, value: "#8b5cf6" },
       { ghost: true, value: "#ec4899" },
-      { bordered: false, value: "#06b6d4"
-        }
-      ]
+      { bordered: false, value: "#06b6d4" },
+    ],
   },
   {
     title: "Color Input States",
@@ -42,76 +40,75 @@ const colorInputExamples: ComponentExample[] = [
     props: [
       { value: "#10b981", disabled: false },
       { value: "#6b7280", disabled: true },
-      { value: "#dc2626", required: true
-        }
-      ]
-        }
-      ];
+      { value: "#dc2626", required: true },
+    ],
+  },
+];
 
 const colorInputProps: ComponentProp[] = [
   {
     name: "value",
     type: "string",
     description: "The color value in hex format",
-    default: "#000000"
+    default: "#000000",
   },
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text for the input"
+    description: "Placeholder text for the input",
   },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
     description: "Size of the color input",
-    default: "md"
+    default: "md",
   },
   {
     name: "color",
     type: "DaisyUIColor",
-    description: "Color theme for the input"
+    description: "Color theme for the input",
   },
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true"
+    default: "true",
   },
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false"
+    default: "false",
   },
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false"
+    default: "false",
   },
   {
     name: "required",
     type: "boolean",
     description: "Mark input as required",
-    default: "false"
+    default: "false",
   },
   {
     name: "showPreview",
     type: "boolean",
     description: "Show color preview swatch",
-    default: "true"
+    default: "true",
   },
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Callback when color value changes"
+    description: "Callback when color value changes",
   },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"
-        }
-      ];
+    description: "Additional CSS classes",
+  },
+];
 
 export const colorInputMetadata: ComponentMetadata = {
   name: "ColorInput",
@@ -142,5 +139,5 @@ export const colorInputMetadata: ComponentMetadata = {
     "Combine with labels for better accessibility",
     "Consider using validation for proper hex color format",
     "Preview swatch adds visual feedback for better UX",
-  ]
+  ],
 };

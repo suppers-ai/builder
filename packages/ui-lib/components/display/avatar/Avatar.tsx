@@ -25,11 +25,16 @@ export function Avatar({
 }: AvatarProps) {
   const getSizeClasses = (size: string) => {
     switch (size) {
-      case "xs": return "w-6";
-      case "sm": return "w-8";
-      case "lg": return "w-16";
-      case "xl": return "w-24";
-      default: return "w-12"; // md
+      case "xs":
+        return "w-6";
+      case "sm":
+        return "w-8";
+      case "lg":
+        return "w-16";
+      case "xl":
+        return "w-24";
+      default:
+        return "w-12"; // md
     }
   };
 
@@ -68,10 +73,12 @@ export function Avatar({
     <div class={avatarClasses} id={id} {...props}>
       {content}
       {online && (
-        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white"></span>
+        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-white">
+        </span>
       )}
       {offline && (
-        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-slate-400 ring-2 ring-white"></span>
+        <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-slate-400 ring-2 ring-white">
+        </span>
       )}
     </div>
   );

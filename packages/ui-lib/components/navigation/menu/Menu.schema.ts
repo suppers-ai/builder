@@ -4,24 +4,20 @@
  */
 
 import { z } from "zod";
-import {
-  BaseComponentPropsSchema,
-  SizePropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, SizePropsSchema, withMetadata } from "../../schemas/base.ts";
 
 // Recursive MenuItemProps schema
 const MenuItemBaseSchema = z.object({
   label: z.string().describe("Menu item display label"),
-  
+
   href: z.string()
     .optional()
     .describe("Optional link URL for navigation"),
-    
+
   active: z.boolean()
     .default(false)
     .describe("Whether menu item is currently active"),
-    
+
   disabled: z.boolean()
     .default(false)
     .describe("Whether menu item is disabled"),
@@ -43,21 +39,21 @@ const MenuSpecificPropsSchema = z.object({
   horizontal: z.boolean()
     .default(false)
     .describe("Display menu horizontally instead of vertically"),
-    
+
   compact: z.boolean()
     .default(false)
     .describe("Use compact spacing for menu items"),
-    
+
   items: withMetadata(
     z.array(MenuItemSchema)
       .min(1)
       .describe("Array of menu items with optional nested structure"),
-    { 
+    {
       examples: [
         '[{ label: "Home", href: "/", active: true }, { label: "About", href: "/about" }]',
-        '[{ label: "Products", children: [{ label: "Web Apps", href: "/web" }] }]'
-      ], 
-      since: "1.0.0" 
+        '[{ label: "Products", children: [{ label: "Web Apps", href: "/web" }] }]',
+      ],
+      since: "1.0.0",
     },
   ),
 });
@@ -66,7 +62,9 @@ const MenuSpecificPropsSchema = z.object({
 export const MenuPropsSchema = BaseComponentPropsSchema
   .merge(SizePropsSchema)
   .merge(MenuSpecificPropsSchema)
-  .describe("Hierarchical navigation menu with support for nested items and horizontal/vertical layouts");
+  .describe(
+    "Hierarchical navigation menu with support for nested items and horizontal/vertical layouts",
+  );
 
 // Export MenuItem schema for reuse
 export { MenuItemSchema };

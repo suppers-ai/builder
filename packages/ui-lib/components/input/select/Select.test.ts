@@ -102,19 +102,36 @@ Deno.test("Select - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(Select({
       options: basicOptions,
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, `select-${size}`);
   });
 });
 
 Deno.test("Select - color variants", () => {
-  const colors = ["primary", "secondary", "accent", "neutral", "info", "success", "warning", "error"];
+  const colors = [
+    "primary",
+    "secondary",
+    "accent",
+    "neutral",
+    "info",
+    "success",
+    "warning",
+    "error",
+  ];
 
   colors.forEach((color) => {
     const html = renderToString(Select({
       options: basicOptions,
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
     }));
     assertStringIncludes(html, `select-${color}`);
   });
@@ -342,7 +359,7 @@ Deno.test("Select - HTML snapshot all sizes", async (t) => {
   const htmls = sizes.map((size) =>
     renderToString(Select({
       options: basicOptions,
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       placeholder: `Size ${size}`,
       color: "primary",
     }))
@@ -355,7 +372,15 @@ Deno.test("Select - HTML snapshot all colors", async (t) => {
   const htmls = colors.map((color) =>
     renderToString(Select({
       options: basicOptions,
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
       placeholder: `Color ${color}`,
       size: "md",
     }))

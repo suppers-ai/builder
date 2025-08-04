@@ -26,7 +26,7 @@ Deno.test("Rating - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Rating({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
 
     if (size === "md") {

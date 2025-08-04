@@ -4,7 +4,15 @@ import { getAccess } from "./get-access.ts";
 import { grantAccess } from "./post-access.ts";
 import { revokeAccess } from "./delete-access.ts";
 
-export async function handleAccess(request: Request, context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }): Promise<Response> {
+export async function handleAccess(
+  request: Request,
+  context: {
+    user: any;
+    supabase: SupabaseClient;
+    supabaseAdmin: SupabaseClient;
+    pathSegments: string[];
+  },
+): Promise<Response> {
   const { supabase } = context;
   const url = new URL(request.url);
   const method = request.method;
@@ -25,9 +33,12 @@ export async function handleAccess(request: Request, context: { user: any, supab
     }
   } catch (error) {
     console.error("Access handler error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 }

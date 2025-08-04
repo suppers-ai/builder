@@ -1,9 +1,11 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory, ComponentSchema } from "../../types.ts";
-import { Menu } from "./Menu.tsx";
 import {
-  MenuPropsSchema,
-  safeValidateMenuProps,
-  validateMenuProps} from "./Menu.schema.ts";
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentSchema,
+} from "../../types.ts";
+import { Menu } from "./Menu.tsx";
+import { MenuPropsSchema, safeValidateMenuProps, validateMenuProps } from "./Menu.schema.ts";
 
 const menuExamples: ComponentExample[] = [
   {
@@ -14,35 +16,34 @@ const menuExamples: ComponentExample[] = [
         { label: "Dashboard", href: "/dashboard", active: true },
         { label: "Projects", href: "/projects" },
         { label: "Team", href: "/team" },
-        { label: "Settings", href: "/settings"
-        }
-      ]
-    }
+        { label: "Settings", href: "/settings" },
+      ],
+    },
   },
   {
     title: "Menu with Icons",
     description: "Menu items with icon elements",
     props: {
       items: [
-        { 
-          label: "🏠 Dashboard", 
-          href: "/dashboard", 
-          active: true 
+        {
+          label: "🏠 Dashboard",
+          href: "/dashboard",
+          active: true,
         },
-        { 
-          label: "📊 Projects", 
-          href: "/projects" 
+        {
+          label: "📊 Projects",
+          href: "/projects",
         },
-        { 
-          label: "👥 Team", 
-          href: "/team" 
+        {
+          label: "👥 Team",
+          href: "/team",
         },
-        { 
-          label: "⚙️ Settings", 
-          href: "/settings"
-        }
-      ]
-    }
+        {
+          label: "⚙️ Settings",
+          href: "/settings",
+        },
+      ],
+    },
   },
   {
     title: "Collapsible Menu",
@@ -54,21 +55,19 @@ const menuExamples: ComponentExample[] = [
           children: [
             { label: "Website Redesign", href: "/projects/website" },
             { label: "Mobile App", href: "/projects/mobile" },
-            { label: "API Integration", href: "/projects/api"
-        }
-      ]
+            { label: "API Integration", href: "/projects/api" },
+          ],
         },
         {
           label: "👥 Team",
           children: [
             { label: "Developers", href: "/team/developers" },
             { label: "Designers", href: "/team/designers" },
-            { label: "Managers", href: "/team/managers"
-        }
-      ]
-        }
-      ]
-    }
+            { label: "Managers", href: "/team/managers" },
+          ],
+        },
+      ],
+    },
   },
   {
     title: "Bordered Menu",
@@ -78,11 +77,10 @@ const menuExamples: ComponentExample[] = [
         { label: "Home", href: "/", active: true },
         { label: "About", href: "/about" },
         { label: "Services", href: "/services" },
-        { label: "Contact", href: "/contact"
-        }
+        { label: "Contact", href: "/contact" },
       ],
-      class: "border border-base-300"
-    }
+      class: "border border-base-300",
+    },
   },
   {
     title: "Responsive Horizontal Menu",
@@ -92,18 +90,18 @@ const menuExamples: ComponentExample[] = [
         { label: "Dashboard", href: "/dashboard", active: true },
         { label: "Analytics", href: "/analytics" },
         { label: "Reports", href: "/reports" },
-        { label: "Settings", href: "/settings"
-        }
+        { label: "Settings", href: "/settings" },
       ],
-      horizontal: true
-    }
-        }
-      ];;
+      horizontal: true,
+    },
+  },
+];
 
 const menuSchema: ComponentSchema = {
   schema: MenuPropsSchema,
   validateFn: validateMenuProps,
-  safeValidateFn: safeValidateMenuProps};
+  safeValidateFn: safeValidateMenuProps,
+};
 
 export const menuMetadata: ComponentMetadata = {
   name: "Menu",
@@ -125,4 +123,5 @@ export const menuMetadata: ComponentMetadata = {
         ]}
       />
     </div>
-  )};
+  ),
+};

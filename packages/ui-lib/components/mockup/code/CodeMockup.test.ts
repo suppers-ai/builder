@@ -40,7 +40,15 @@ Deno.test("CodeMockup - language variants", () => {
 
   languages.forEach((language) => {
     const html = renderToString(CodeMockup({
-      language: language as 'javascript' | 'typescript' | 'python' | 'html' | 'css' | 'json' | 'bash' | 'sql',
+      language: language as
+        | "javascript"
+        | "typescript"
+        | "python"
+        | "html"
+        | "css"
+        | "json"
+        | "bash"
+        | "sql",
       code: "// Test code",
     }));
 

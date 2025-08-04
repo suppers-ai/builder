@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Breadcrumbs } from "./Breadcrumbs.tsx";
 
 const breadcrumbsExamples: ComponentExample[] = [
@@ -9,87 +9,90 @@ const breadcrumbsExamples: ComponentExample[] = [
       items: [
         {
           label: "Home",
-      href: "/"
+          href: "/",
         },
         {
           label: "Products",
-      href: "/products"
+          href: "/products",
         },
         {
           label: "Category",
-      href: "/products/category"
+          href: "/products/category",
         },
         {
-          label: "Item"
-        }
-      ]
-    }
-  },  {
+          label: "Item",
+        },
+      ],
+    },
+  },
+  {
     title: "Breadcrumbs with Icons",
     description: "Navigation breadcrumbs with icon elements",
     props: {
       items: [
         {
           label: "Home",
-      href: "/"
+          href: "/",
         },
         {
           label: "Products",
-      href: "/products"
+          href: "/products",
         },
         {
           label: "Category",
-      href: "/products/category"
+          href: "/products/category",
         },
         {
-          label: "Item"
-        }
-      ]
-    }
-  },  {
+          label: "Item",
+        },
+      ],
+    },
+  },
+  {
     title: "Max Width Breadcrumbs",
     description: "Breadcrumbs with truncated long paths",
     props: {
       items: [
         {
           label: "Home",
-      href: "/"
+          href: "/",
         },
         {
           label: "Products",
-      href: "/products"
+          href: "/products",
         },
         {
           label: "Category",
-      href: "/products/category"
+          href: "/products/category",
         },
         {
-          label: "Item"
-        }
-      ]
-    }
-  },  {
+          label: "Item",
+        },
+      ],
+    },
+  },
+  {
     title: "Responsive Breadcrumbs",
     description: "Breadcrumbs that adapt to screen size",
     props: {
       items: [
         {
           label: "Home",
-      href: "/"
+          href: "/",
         },
         {
           label: "Products",
-      href: "/products"
+          href: "/products",
         },
         {
           label: "Category",
-      href: "/products/category"
+          href: "/products/category",
         },
         {
-          label: "Item"
-        }
-      ]
-    }
+          label: "Item",
+        },
+      ],
+    },
   },
 ];
 
@@ -110,4 +113,5 @@ export const breadcrumbsMetadata: ComponentMetadata = {
         { label: "MacBook Pro", active: true },
       ]}
     />
-  )};
+  ),
+};

@@ -65,8 +65,8 @@ export default function App({ Component, state }: PageProps) {
           dangerouslySetInnerHTML={{
             __html: `
               (function () {
-                const lightFavicon = "${asset('/favicon_light.ico')}";
-                const darkFavicon = "${asset('/favicon_dark.ico')}";
+                const lightFavicon = "${asset("/favicon_light.ico")}";
+                const darkFavicon = "${asset("/favicon_dark.ico")}";
 
                 function setFavicon(theme) {
                   var link = document.getElementById('site-favicon');

@@ -14,16 +14,26 @@ const AuthGuardSpecificPropsSchema = z.object({
     .describe("Text to display on the login button"),
 
   loginButtonVariant: withMetadata(
-    z.enum(["primary", "secondary", "accent", "ghost", "link", "info", "success", "warning", "error"])
+    z.enum([
+      "primary",
+      "secondary",
+      "accent",
+      "ghost",
+      "link",
+      "info",
+      "success",
+      "warning",
+      "error",
+    ])
       .default("primary")
       .describe("Variant style for the login button"),
-    { examples: ["primary", "secondary", "accent"], since: "1.0.0" }
+    { examples: ["primary", "secondary", "accent"], since: "1.0.0" },
   ),
 
   loginButtonSize: withMetadata(
     z.enum(["xs", "sm", "md", "lg"]).default("md")
       .describe("Size of the login button"),
-    { examples: ["xs", "sm", "md", "lg"], since: "1.0.0" }
+    { examples: ["xs", "sm", "md", "lg"], since: "1.0.0" },
   ),
 
   loginHref: z.string()
@@ -38,7 +48,7 @@ const AuthGuardSpecificPropsSchema = z.object({
   dropdownItems: z.array(z.object({
     label: z.string().describe("Display text for the dropdown item"),
     onClick: z.function().describe("Callback function when the item is clicked"),
-    icon: z.any().optional().describe("Optional icon component for the item")
+    icon: z.any().optional().describe("Optional icon component for the item"),
   }))
     .optional()
     .describe("Custom dropdown menu items for the user info settings menu"),
@@ -55,15 +65,19 @@ const AuthGuardSpecificPropsSchema = z.object({
 
   renderUserInfo: z.function()
     .optional()
-    .describe("Custom render function for authenticated state. Receives user and logout function as parameters."),
+    .describe(
+      "Custom render function for authenticated state. Receives user and logout function as parameters.",
+    ),
 });
 
 // Complete AuthGuard Props Schema
 export const AuthGuardPropsSchema = BaseComponentPropsSchema
   .merge(AuthGuardSpecificPropsSchema)
-  .describe("AuthGuard component that conditionally renders login or user info based on authentication state");
+  .describe(
+    "AuthGuard component that conditionally renders login or user info based on authentication state",
+  );
 
-// Infer TypeScript type from schema  
+// Infer TypeScript type from schema
 export type AuthGuardProps = z.infer<typeof AuthGuardPropsSchema>;
 
 // Export validation function

@@ -57,7 +57,7 @@ Deno.test("Loading - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Loading({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, `loading-${size}`);
   });
@@ -77,7 +77,15 @@ Deno.test("Loading - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Loading({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
     }));
     assertStringIncludes(html, `text-${color}`);
   });
@@ -232,7 +240,7 @@ Deno.test("Loading - HTML snapshot all sizes", async (t) => {
   const htmls = sizes.map((size) =>
     renderToString(Loading({
       variant: "spinner",
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       color: "primary",
     }))
   );

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "preact/hooks";
 import { ChevronDown, ChevronRight, LogIn, LogOut, User } from "lucide-preact";
 import {
+  Accordion,
   closeGlobalSidebar,
   globalSidebarOpen,
   globalTheme,
   loadSavedTheme,
-  Accordion,
 } from "@suppers/ui-lib";
 import type { AccordionItemProps } from "@suppers/ui-lib";
 import { defaultUISidebarConfig } from "../utils/sidebar-config.tsx";
@@ -18,7 +18,7 @@ export interface CustomSidebarIslandProps {
 export default function CustomSidebarIsland({
   currentPath = "",
 }: CustomSidebarIslandProps) {
-  const [openSections, setOpenSections] = useState<string[]>(() => 
+  const [openSections, setOpenSections] = useState<string[]>(() =>
     defaultUISidebarConfig.sections.map((s) => s.id)
   );
 
@@ -52,7 +52,6 @@ export default function CustomSidebarIsland({
       sidebarUnsubscribe();
     };
   }, []);
-
 
   const handleOverlayClick = (e: MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -99,7 +98,6 @@ export default function CustomSidebarIsland({
           onClick={handleOverlayClick}
         />
       )}
-
 
       {/* Sidebar */}
       <aside

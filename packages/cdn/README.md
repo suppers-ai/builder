@@ -46,19 +46,24 @@ packages/cdn/
 ## API
 
 ### GET /
+
 Returns an HTML page listing all available assets.
 
 ### GET /{asset-path}
+
 Serves the requested asset with proper headers:
+
 - `Content-Type`: Appropriate MIME type
 - `Cache-Control`: Long-term caching (1 year)
 - `ETag`: File-based ETag for conditional requests
 - `Access-Control-Allow-Origin`: `*`
 
 ### HEAD /{asset-path}
+
 Returns asset metadata without the body.
 
 ### OPTIONS /{asset-path}
+
 CORS preflight request handler.
 
 ## Examples
@@ -116,7 +121,7 @@ The CDN can be deployed to any platform that supports Deno:
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `8080` | Server port |
-| `CDN_PORT` | `8080` | Alternative port variable |
+| Variable   | Default | Description               |
+| ---------- | ------- | ------------------------- |
+| `PORT`     | `8080`  | Server port               |
+| `CDN_PORT` | `8080`  | Alternative port variable |

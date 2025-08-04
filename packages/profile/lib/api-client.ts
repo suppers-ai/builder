@@ -131,7 +131,7 @@ class ApiClient {
       password: string;
     }): Promise<{ data: { user: User | null; session: Session | null }; error: Error | null }> => {
       console.log("🔐 Client: Attempting signInWithPassword for:", credentials.email);
-      
+
       const result = await this.request<{ user: User; session: Session }>("/api/v1/auth/login", {
         method: "POST",
         body: JSON.stringify(credentials),
@@ -140,7 +140,10 @@ class ApiClient {
       console.log("🔐 Client: Login response received");
       console.log("🔐 Client: Result data:", result.data ? "present" : "null");
       console.log("🔐 Client: Result error:", result.error ? result.error.message : "null");
-      console.log("🔐 Client: Session access token:", result.data?.session?.access_token ? "present" : "missing");
+      console.log(
+        "🔐 Client: Session access token:",
+        result.data?.session?.access_token ? "present" : "missing",
+      );
 
       if (result.data?.session?.access_token) {
         console.log("🔐 Client: Setting token from session");
@@ -213,10 +216,13 @@ class ApiClient {
 
     resetPassword: async (email: string): Promise<{ error: Error | null }> => {
       const origin = globalThis.location?.origin || getPackageUrl("STORE");
-      const result = await this.request(`/api/v1/auth/reset-password?origin=${encodeURIComponent(origin)}`, {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
+      const result = await this.request(
+        `/api/v1/auth/reset-password?origin=${encodeURIComponent(origin)}`,
+        {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        },
+      );
 
       return { error: result.error };
     },
@@ -257,17 +263,17 @@ class ApiClient {
 
     updateUser: async (data: any): Promise<{ error: Error | null }> => {
       console.log("🔄 Updating user with data:", data);
-      
+
       // Ensure token is loaded
       if (!this.token) {
         this.loadTokenFromStorage();
       }
-      
+
       if (!this.token) {
         console.error("❌ No token available for update user");
         return { error: new Error("No authentication token available") };
       }
-      
+
       const result = await this.request("/api/v1/auth/update-user-metadata", {
         method: "POST",
         body: JSON.stringify(data),
@@ -292,7 +298,10 @@ class ApiClient {
 
   // Storage methods
   storage = {
-    uploadAvatar: async (file: File, userId: string): Promise<{ data: { publicUrl: string } | null; error: Error | null }> => {
+    uploadAvatar: async (
+      file: File,
+      userId: string,
+    ): Promise<{ data: { publicUrl: string } | null; error: Error | null }> => {
       // Storage upload is not implemented yet
       console.warn("Avatar upload is not implemented in the API yet");
       return {

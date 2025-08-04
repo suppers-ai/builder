@@ -116,7 +116,7 @@ Deno.test("NumberInput - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(NumberInput({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, `input-${size}`);
   });
@@ -127,7 +127,15 @@ Deno.test("NumberInput - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(NumberInput({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
     }));
     assertStringIncludes(html, `input-${color}`);
   });

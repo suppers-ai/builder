@@ -2,7 +2,7 @@ import { AuthUser } from "@suppers/auth-client";
 import { Avatar, AvatarProps } from "./Avatar.tsx";
 import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
 
-export interface UserAvatarProps extends Omit<AvatarProps, 'src' | 'alt' | 'initials'> {
+export interface UserAvatarProps extends Omit<AvatarProps, "src" | "alt" | "initials"> {
   user: AuthUser;
 }
 

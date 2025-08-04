@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Steps } from "./Steps.tsx";
 
 const stepsExamples: ComponentExample[] = [
@@ -9,105 +9,109 @@ const stepsExamples: ComponentExample[] = [
       steps: [
         {
           id: "1",
-      label: "Step 1",
-      completed: true
+          label: "Step 1",
+          completed: true,
         },
         {
           id: "2",
-      label: "Step 2",
-      active: true
+          label: "Step 2",
+          active: true,
         },
         {
           id: "3",
-      label: "Step 3"
-        }
-      ]
-    }
-  },  {
+          label: "Step 3",
+        },
+      ],
+    },
+  },
+  {
     title: "Vertical Steps",
     description: "Steps displayed in vertical layout",
     props: {
       steps: [
         {
           id: "1",
-      label: "Step 1",
-      completed: true
+          label: "Step 1",
+          completed: true,
         },
         {
           id: "2",
-      label: "Step 2",
-      active: true
+          label: "Step 2",
+          active: true,
         },
         {
           id: "3",
-      label: "Step 3"
-        }
-      ]
-    }
-  },  {
+          label: "Step 3",
+        },
+      ],
+    },
+  },
+  {
     title: "Responsive Steps",
     description: "Steps that adapt to different screen sizes",
     props: {
       steps: [
         {
           id: "1",
-      label: "Step 1",
-      completed: true
+          label: "Step 1",
+          completed: true,
         },
         {
           id: "2",
-      label: "Step 2",
-      active: true
+          label: "Step 2",
+          active: true,
         },
         {
           id: "3",
-      label: "Step 3"
-        }
-      ]
-    }
-  },  {
+          label: "Step 3",
+        },
+      ],
+    },
+  },
+  {
     title: "Steps with Data",
     description: "Steps with additional information and descriptions",
     props: {
       steps: [
         {
           id: "1",
-      label: "Step 1",
-      completed: true
+          label: "Step 1",
+          completed: true,
         },
         {
           id: "2",
-      label: "Step 2",
-      active: true
+          label: "Step 2",
+          active: true,
         },
         {
           id: "3",
-      label: "Step 3"
-        }
-      ]
-    }
-  },  {
+          label: "Step 3",
+        },
+      ],
+    },
+  },
+  {
     title: "Colored Steps",
     description: "Steps with different color themes",
     props: {
       steps: [
         {
           id: "1",
-      label: "Step 1",
-      completed: true
+          label: "Step 1",
+          completed: true,
         },
         {
           id: "2",
-      label: "Step 2",
-      active: true
+          label: "Step 2",
+          active: true,
         },
         {
           id: "3",
-      label: "Step 3"
-        }
+          label: "Step 3",
+        },
       ],
-      color: "primary"
-    }
+      color: "primary",
+    },
   },
 ];
 
@@ -128,4 +132,5 @@ export const stepsMetadata: ComponentMetadata = {
         { id: "4", label: "Receive product" },
       ]}
     />
-  )};
+  ),
+};

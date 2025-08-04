@@ -89,7 +89,7 @@ pre {
 
 /* Ensure grid items don't overflow */
 
-.card-grid-responsive>* {
+.card-grid-responsive > * {
   min-width: 0;
   overflow: hidden;
 }

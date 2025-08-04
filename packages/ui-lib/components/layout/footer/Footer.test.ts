@@ -72,7 +72,7 @@ Deno.test("Footer - size variants", () => {
 
   sizes.forEach((size, index) => {
     const html = renderToString(Footer({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, sizeClasses[index]);
   });

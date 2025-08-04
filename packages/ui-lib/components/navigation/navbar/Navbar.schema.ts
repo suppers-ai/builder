@@ -5,10 +5,7 @@
 
 import { z } from "zod";
 import { ComponentChildren } from "preact";
-import {
-  BaseComponentPropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, withMetadata } from "../../schemas/base.ts";
 
 // Navbar-specific props
 const NavbarSpecificPropsSchema = z.object({
@@ -18,11 +15,11 @@ const NavbarSpecificPropsSchema = z.object({
       .describe("Content for the start/left section of navbar"),
     { examples: ["<Logo />", "<MenuButton />"], since: "1.0.0" },
   ),
-  
+
   center: z.custom<ComponentChildren>()
     .optional()
     .describe("Content for the center section of navbar"),
-    
+
   end: z.custom<ComponentChildren>()
     .optional()
     .describe("Content for the end/right section of navbar"),
@@ -46,11 +43,11 @@ export const safeValidateNavbarProps = (props: unknown) => {
 };
 
 // Utility validation function to ensure at least one section has content
-export const validateNavbarContent = (props: { 
-  start?: ComponentChildren; 
-  center?: ComponentChildren; 
-  end?: ComponentChildren; 
-  children?: ComponentChildren; 
+export const validateNavbarContent = (props: {
+  start?: ComponentChildren;
+  center?: ComponentChildren;
+  end?: ComponentChildren;
+  children?: ComponentChildren;
 }): boolean => {
   return Boolean(props.start || props.center || props.end || props.children);
 };

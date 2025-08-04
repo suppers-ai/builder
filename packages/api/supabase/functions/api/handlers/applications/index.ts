@@ -7,7 +7,12 @@ import { deleteApplication } from "./delete-applications.ts";
 
 export async function handleApplications(
   request: Request,
-  context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }
+  context: {
+    user: any;
+    supabase: SupabaseClient;
+    supabaseAdmin: SupabaseClient;
+    pathSegments: string[];
+  },
 ): Promise<Response> {
   const { supabase } = context;
   const url = new URL(request.url);
@@ -31,9 +36,12 @@ export async function handleApplications(
     }
   } catch (error) {
     console.error("Applications handler error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 }

@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Alert } from "./Alert.tsx";
 
 const alertExamples: ComponentExample[] = [
@@ -11,36 +12,40 @@ const alertExamples: ComponentExample[] = [
     description: "Simple alert with icon and message",
     props: {
       type: "info",
-      children: "This is an informational alert message."
-    }
-  },  {
+      children: "This is an informational alert message.",
+    },
+  },
+  {
     title: "Alert Types",
     description: "Different alert types for various messages",
     props: {
       type: "info",
-      children: "This is an informational alert message."
-    }
-  },  {
+      children: "This is an informational alert message.",
+    },
+  },
+  {
     title: "Alert with Actions",
     description: "Alerts containing action buttons",
     props: {
       type: "info",
-      children: "This is an informational alert message."
-    }
-  },  {
+      children: "This is an informational alert message.",
+    },
+  },
+  {
     title: "Rich Content Alert",
     description: "Alert with title and detailed content",
     props: {
       type: "info",
-      children: "This is an informational alert message."
-    }
-  },  {
+      children: "This is an informational alert message.",
+    },
+  },
+  {
     title: "Compact Alert",
     description: "Smaller alert for inline messages",
     props: {
       type: "info",
-      children: "This is an informational alert message."
-    }
+      children: "This is an informational alert message.",
+    },
   },
 ];
 
@@ -49,29 +54,35 @@ const alertProps: ComponentProp[] = [
     name: "children",
     type: "ComponentChildren",
     description: "Alert content including icon, text, and actions",
-    required: true},
+    required: true,
+  },
   {
     name: "color",
     type: "'info' | 'success' | 'warning' | 'error'",
-    description: "Alert color theme indicating message type"},
+    description: "Alert color theme indicating message type",
+  },
   {
     name: "variant",
     type: "'filled' | 'outline'",
     description: "Visual style variant",
-    default: "filled"},
+    default: "filled",
+  },
   {
     name: "dismissible",
     type: "boolean",
     description: "Whether alert can be dismissed by user",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onDismiss",
     type: "() => void",
-    description: "Function called when alert is dismissed"},
+    description: "Function called when alert is dismissed",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const alertMetadata: ComponentMetadata = {
@@ -129,4 +140,5 @@ export const alertMetadata: ComponentMetadata = {
     "Consider dismissible alerts for non-critical messages",
     "Use proper heading hierarchy for rich content alerts",
     "Ensure sufficient color contrast for accessibility",
-  ]};
+  ],
+};

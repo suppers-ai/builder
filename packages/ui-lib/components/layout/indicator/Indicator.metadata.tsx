@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Indicator } from "./Indicator.tsx";
 
 const indicatorExamples: ComponentExample[] = [
@@ -7,24 +7,29 @@ const indicatorExamples: ComponentExample[] = [
     description: "Simple indicator with numeric value",
     props: {
       item: "5",
-      children: <button class="btn">Messages</button>
-    }
+      children: <button class="btn">Messages</button>,
+    },
   },
   {
     title: "Position Variants",
-    description: "Indicators in different positions"},
+    description: "Indicators in different positions",
+  },
   {
     title: "Color Variants",
-    description: "Indicators with different color themes"},
+    description: "Indicators with different color themes",
+  },
   {
     title: "Indicator on Button",
-    description: "Common pattern for notification buttons"},
+    description: "Common pattern for notification buttons",
+  },
   {
     title: "Indicator on Avatar",
-    description: "Status indicators on user avatars"},
+    description: "Status indicators on user avatars",
+  },
   {
     title: "Text Indicators",
-    description: "Indicators with custom text labels"},
+    description: "Indicators with custom text labels",
+  },
 ];
 
 export const indicatorMetadata: ComponentMetadata = {
@@ -46,4 +51,5 @@ export const indicatorMetadata: ComponentMetadata = {
         </div>
       </Indicator>
     </div>
-  )};
+  ),
+};

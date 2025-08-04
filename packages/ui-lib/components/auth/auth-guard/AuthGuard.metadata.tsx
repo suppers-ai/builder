@@ -1,37 +1,37 @@
 import { AuthGuard } from "./AuthGuard.tsx";
 import { AuthGuardPropsSchema } from "./AuthGuard.schema.ts";
-import { User, LogOut, Settings as SettingsIcon } from "lucide-preact";
+import { LogOut, Settings as SettingsIcon, User } from "lucide-preact";
 
 // Sample dropdown items for examples
 const basicDropdownItems = [
   {
     label: "View Profile",
     onClick: () => console.log("Navigate to profile"),
-    icon: User
+    icon: User,
   },
   {
     label: "Logout",
     onClick: () => console.log("Logout clicked"),
-    icon: LogOut
-  }
+    icon: LogOut,
+  },
 ];
 
 const adminDropdownItems = [
   {
-    label: "View Profile", 
+    label: "View Profile",
     onClick: () => console.log("Navigate to profile"),
-    icon: User
+    icon: User,
   },
   {
     label: "Settings",
     onClick: () => console.log("Navigate to settings"),
-    icon: SettingsIcon
+    icon: SettingsIcon,
   },
   {
     label: "Logout",
     onClick: () => console.log("Logout clicked"),
-    icon: LogOut
-  }
+    icon: LogOut,
+  },
 ];
 
 export const componentMetadata = {
@@ -39,62 +39,64 @@ export const componentMetadata = {
   category: "Auth",
   name: "AuthGuard",
   path: "/components/auth/auth-guard",
-  description: "Authentication-aware component that renders login button when not authenticated or user info when authenticated. Requires AuthClientProvider for full functionality, but gracefully falls back to login-only mode without it.",
+  description:
+    "Authentication-aware component that renders login button when not authenticated or user info when authenticated. Requires AuthClientProvider for full functionality, but gracefully falls back to login-only mode without it.",
   schema: { schema: AuthGuardPropsSchema },
   props: {
     loginButtonText: {
       type: "string",
       default: '"Login"',
       required: false,
-      description: "Text to display on the login button"
+      description: "Text to display on the login button",
     },
     loginButtonVariant: {
-      type: '"primary" | "secondary" | "accent" | "ghost" | "link" | "info" | "success" | "warning" | "error"',
+      type:
+        '"primary" | "secondary" | "accent" | "ghost" | "link" | "info" | "success" | "warning" | "error"',
       default: '"primary"',
       required: false,
-      description: "Variant style for the login button"
+      description: "Variant style for the login button",
     },
     loginButtonSize: {
       type: '"xs" | "sm" | "md" | "lg"',
       default: '"md"',
       required: false,
-      description: "Size of the login button"
+      description: "Size of the login button",
     },
     loginHref: {
       type: "string",
       required: false,
-      description: "URL to navigate to for login (if not using OAuth)"
+      description: "URL to navigate to for login (if not using OAuth)",
     },
     onLogin: {
       type: "() => void",
       required: false,
-      description: "Custom login handler function"
+      description: "Custom login handler function",
     },
     dropdownItems: {
       type: "DropdownItem[]",
       required: false,
-      description: "Custom dropdown menu items for the user info settings menu"
+      description: "Custom dropdown menu items for the user info settings menu",
     },
     loadingComponent: {
       type: "ComponentChildren",
       required: false,
-      description: "Custom loading component to show while auth state is initializing"
+      description: "Custom loading component to show while auth state is initializing",
     },
     renderLogin: {
       type: "(loginFn: () => void) => ComponentChildren",
       required: false,
-      description: "Custom render function for login state"
+      description: "Custom render function for login state",
     },
     renderUserInfo: {
       type: "(user: AuthUser, logoutFn: () => void) => ComponentChildren",
       required: false,
-      description: "Custom render function for authenticated state"
+      description: "Custom render function for authenticated state",
     },
     class: {
       type: "string",
       required: false,
-      description: "Additional CSS classes to apply"
-    }
+      description: "Additional CSS classes to apply",
+    },
   },
   examples: [
     {
@@ -103,7 +105,7 @@ export const componentMetadata = {
 <AuthClientProvider storeUrl="..." clientId="...">
   <AuthGuard />
 </AuthClientProvider>`,
-      props: {}
+      props: {},
     },
     {
       name: "Custom Login Button",
@@ -115,8 +117,8 @@ export const componentMetadata = {
       props: {
         loginButtonText: "Sign In",
         loginButtonVariant: "secondary",
-        loginButtonSize: "lg"
-      }
+        loginButtonSize: "lg",
+      },
     },
     {
       name: "With Custom Dropdown Items",
@@ -140,8 +142,8 @@ export const componentMetadata = {
   ]}
 />`,
       props: {
-        dropdownItems: adminDropdownItems
-      }
+        dropdownItems: adminDropdownItems,
+      },
     },
     {
       name: "Custom Login Handler",
@@ -153,8 +155,8 @@ export const componentMetadata = {
   }}
 />`,
       props: {
-        onLogin: () => console.log("Custom login handler")
-      }
+        onLogin: () => console.log("Custom login handler"),
+      },
     },
     {
       name: "With Custom Loading",
@@ -167,8 +169,8 @@ export const componentMetadata = {
   }
 />`,
       props: {
-        loadingComponent: "Custom loading component"
-      }
+        loadingComponent: "Custom loading component",
+      },
     },
     {
       name: "Custom Render Functions",
@@ -192,8 +194,8 @@ export const componentMetadata = {
 />`,
       props: {
         renderLogin: () => "Custom login render",
-        renderUserInfo: () => "Custom user info render"
-      }
-    }
-  ]
+        renderUserInfo: () => "Custom user info render",
+      },
+    },
+  ],
 };

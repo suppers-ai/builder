@@ -17,7 +17,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 });
 
 Deno.serve(async (req: Request) => {
-  console.log('---------------------------', req);
+  console.log("---------------------------", req);
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -25,7 +25,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url);
-    console.log('url', url);
+    console.log("url", url);
     const pathSegments = url.pathname.split("/").filter((segment) => segment);
 
     // Extract API version and resource from path
@@ -43,8 +43,9 @@ Deno.serve(async (req: Request) => {
     }
 
     // Check if this is a public auth endpoint that doesn't require authentication
-    const isPublicAuthEndpoint = resource === "auth" && 
-      (rest[0] === "register" || rest[0] === "login" || rest[0] === "refresh" || rest[0] === "reset-password" || rest[0] === "oauth");
+    const isPublicAuthEndpoint = resource === "auth" &&
+      (rest[0] === "register" || rest[0] === "login" || rest[0] === "refresh" ||
+        rest[0] === "reset-password" || rest[0] === "oauth");
 
     // Get JWT token from Authorization header (not required for public endpoints)
     const authHeader = req.headers.get("Authorization");
@@ -70,7 +71,9 @@ Deno.serve(async (req: Request) => {
       console.log("🔑 Verifying token for endpoint:", resource, rest);
 
       // Verify JWT and get user
-      const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(
+        token,
+      );
 
       if (authError || !authUser) {
         console.log("❌ Token verification failed:", authError);
@@ -94,7 +97,7 @@ Deno.serve(async (req: Request) => {
     let response: Response;
 
     console.log("🎯 Routing request to resource:", resource, "with rest:", rest);
-    
+
     switch (resource) {
       case "auth":
         console.log("🔐 Routing to auth handler with path:", rest);

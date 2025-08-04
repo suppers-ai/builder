@@ -16,7 +16,7 @@ const UserInfoSpecificPropsSchema = z.object({
   dropdownItems: z.array(z.object({
     label: z.string().describe("Display text for the dropdown item"),
     onClick: z.function().describe("Callback function when the item is clicked"),
-    icon: z.any().optional().describe("Optional icon component for the item")
+    icon: z.any().optional().describe("Optional icon component for the item"),
   }))
     .default([])
     .describe("Array of dropdown menu items for the settings menu"),
@@ -25,7 +25,9 @@ const UserInfoSpecificPropsSchema = z.object({
 // Complete UserInfo Props Schema
 export const UserInfoPropsSchema = BaseComponentPropsSchema
   .merge(UserInfoSpecificPropsSchema)
-  .describe("UserInfo component for displaying comprehensive user information with multiple layout variants");
+  .describe(
+    "UserInfo component for displaying comprehensive user information with multiple layout variants",
+  );
 
 // Infer TypeScript type from schema
 export type UserInfoProps = z.infer<typeof UserInfoPropsSchema>;

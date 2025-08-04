@@ -36,26 +36,26 @@ export function ApplicationCard({
       value: "published",
       icon: "🚀",
       message: "Live and available to users",
-      badgeClass: "badge-success"
+      badgeClass: "badge-success",
     },
     pending: {
-      value: "pending", 
+      value: "pending",
       icon: "⏳",
       message: "Waiting for admin review",
-      badgeClass: "badge-warning"
+      badgeClass: "badge-warning",
     },
     draft: {
       value: "draft",
-      icon: "📝", 
+      icon: "📝",
       message: "Work in progress",
-      badgeClass: "badge-neutral"
+      badgeClass: "badge-neutral",
     },
     archived: {
       value: "archived",
       icon: "📦",
-      message: "No longer active", 
-      badgeClass: "badge-error"
-    }
+      message: "No longer active",
+      badgeClass: "badge-error",
+    },
   };
 
   const canEdit = (status: string): boolean => status === "draft";
@@ -68,37 +68,37 @@ export function ApplicationCard({
       icon: "✏️",
       onClick: () => onEdit?.(application),
       variant: "success" as const,
-      condition: onEdit && canEdit(application.status)
+      condition: onEdit && canEdit(application.status),
     },
     {
-      label: "Submit", 
+      label: "Submit",
       icon: "📋",
       onClick: () => onSubmitForReview?.(application),
       variant: "warning" as const,
-      condition: onSubmitForReview && canSubmitForReview(application.status)
-    }
+      condition: onSubmitForReview && canSubmitForReview(application.status),
+    },
   ];
 
   const menuActions = [
     {
       label: "Edit",
-      icon: "✏️", 
+      icon: "✏️",
       onClick: () => onEdit?.(application),
-      condition: onEdit && canEdit(application.status)
+      condition: onEdit && canEdit(application.status),
     },
     {
       label: "Submit for Review",
       icon: "📋",
-      onClick: () => onSubmitForReview?.(application), 
-      condition: onSubmitForReview && canSubmitForReview(application.status)
+      onClick: () => onSubmitForReview?.(application),
+      condition: onSubmitForReview && canSubmitForReview(application.status),
     },
     {
       label: "Delete",
       icon: "🗑️",
       onClick: () => onDelete?.(application),
       className: "text-error",
-      condition: onDelete && canDelete(application.status)
-    }
+      condition: onDelete && canDelete(application.status),
+    },
   ];
 
   return (
@@ -109,7 +109,7 @@ export function ApplicationCard({
       updatedAt={application.updated_at}
       status={{
         value: application.status,
-        statuses: applicationStatuses
+        statuses: applicationStatuses,
       }}
       metadata={application.configuration}
       className={className}

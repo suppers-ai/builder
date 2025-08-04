@@ -30,7 +30,7 @@ Deno.test("Toast - type variants", () => {
   types.forEach((type) => {
     const html = renderToString(Toast({
       message: "Test message",
-      type: type as 'info' | 'success' | 'warning' | 'error',
+      type: type as "info" | "success" | "warning" | "error",
     }));
     assertStringIncludes(html, `alert-${type}`);
   });

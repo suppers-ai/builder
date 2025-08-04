@@ -6,14 +6,14 @@ import { PORTS } from "@suppers/shared";
 
 // Load environment variables
 try {
-    loadSync({
-        envPath: "../../.env",
-        export: true,
-    });
-    console.log('env variables loaded')
+  loadSync({
+    envPath: "../../.env",
+    export: true,
+  });
+  console.log("env variables loaded");
 } catch {
-    // Ignore if no env files
-    console.log('No env variables found')
+  // Ignore if no env files
+  console.log("No env variables found");
 }
 
 const builder = new Builder({ target: "safari12" });
@@ -24,10 +24,10 @@ tailwind(builder);
 // Create optimized assets for the browser when
 // running `deno run -A dev.ts build`
 if (Deno.args.includes("build")) {
-    await builder.build();
+  await builder.build();
 } else {
-    // Start the development server
-    await builder.listen(() => import("./main.ts").then(m => m.app), {
-        port: parseInt(Deno.env.get("CDN_PORT") || PORTS.CDN.toString()),
-    });
+  // Start the development server
+  await builder.listen(() => import("./main.ts").then((m) => m.app), {
+    port: parseInt(Deno.env.get("CDN_PORT") || PORTS.CDN.toString()),
+  });
 }

@@ -66,7 +66,15 @@ Deno.test("Indicator - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Indicator({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
       content: "Test",
       children: `Color ${color}`,
     }));
@@ -81,7 +89,7 @@ Deno.test("Indicator - size variants", () => {
 
   sizes.forEach((size, index) => {
     const html = renderToString(Indicator({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       content: "Test",
       children: `Size ${size}`,
     }));

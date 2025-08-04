@@ -2,9 +2,10 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Sidebar } from "./Sidebar.tsx";
-import { Home, Settings, User, FileText, BarChart3 } from "lucide-preact";
+import { BarChart3, FileText, Home, Settings, User } from "lucide-preact";
 
 const sidebarExamples: ComponentExample[] = [
   {
@@ -21,14 +22,13 @@ const sidebarExamples: ComponentExample[] = [
             icon: <Home size={16} />,
             links: [
               { name: "Dashboard", path: "/dashboard" },
-              { name: "Settings", path: "/settings"
-        }
-      ]
-        }
-      ]
+              { name: "Settings", path: "/settings" },
+            ],
+          },
+        ],
       },
-      currentPath: "/dashboard"
-    }
+      currentPath: "/dashboard",
+    },
   },
   {
     title: "Sidebar with Quick Links",
@@ -39,9 +39,8 @@ const sidebarExamples: ComponentExample[] = [
         showQuickLinks: true,
         quickLinks: [
           { name: "Home", path: "/", icon: <Home size={16} /> },
-          { name: "Profile", path: "/profile", icon: <User size={16} />
-        }
-      ],
+          { name: "Profile", path: "/profile", icon: <User size={16} /> },
+        ],
         sections: [
           {
             id: "tools",
@@ -50,13 +49,12 @@ const sidebarExamples: ComponentExample[] = [
             icon: <BarChart3 size={16} />,
             links: [
               { name: "Analytics", path: "/analytics" },
-              { name: "Reports", path: "/reports"
-        }
-      ]
-        }
-      ]
-      }
-    }
+              { name: "Reports", path: "/reports" },
+            ],
+          },
+        ],
+      },
+    },
   },
   {
     title: "Sidebar with Search",
@@ -74,13 +72,12 @@ const sidebarExamples: ComponentExample[] = [
             links: [
               { name: "Getting Started", path: "/docs/start" },
               { name: "API Reference", path: "/docs/api" },
-              { name: "Examples", path: "/docs/examples"
-        }
-      ]
-        }
-      ]
-      }
-    }
+              { name: "Examples", path: "/docs/examples" },
+            ],
+          },
+        ],
+      },
+    },
   },
   {
     title: "Interactive Sidebar",
@@ -95,49 +92,53 @@ const sidebarExamples: ComponentExample[] = [
             defaultOpen: true,
             icon: <Settings size={16} />,
             links: [
-              { 
-                name: "Messages", 
+              {
+                name: "Messages",
                 path: "/messages",
-                badge: "5"
+                badge: "5",
               },
-              { 
-                name: "Notifications", 
+              {
+                name: "Notifications",
                 path: "/notifications",
-                badge: "2"
+                badge: "2",
               },
-              { 
-                name: "External Link", 
+              {
+                name: "External Link",
                 path: "https://example.com",
-                external: true
-        }
-      ]
-        }
-      ]
+                external: true,
+              },
+            ],
+          },
+        ],
       },
-      onLinkClick: (link) => console.log('Clicked:', link)
-    }
-        }
-      ];;
+      onLinkClick: (link) => console.log("Clicked:", link),
+    },
+  },
+];
 
 const sidebarProps: ComponentProp[] = [
   {
     name: "config",
     type: "SidebarConfig",
     description: "Configuration object defining sidebar structure and behavior",
-    required: true},
+    required: true,
+  },
   {
     name: "currentPath",
     type: "string",
     description: "Current active path for highlighting active links",
-    default: "''"},
+    default: "''",
+  },
   {
     name: "onLinkClick",
     type: "(link: SidebarLink) => void",
-    description: "Callback when a sidebar link is clicked"},
+    description: "Callback when a sidebar link is clicked",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes for the sidebar container"},
+    description: "Additional CSS classes for the sidebar container",
+  },
 ];
 
 export const sidebarMetadata: ComponentMetadata = {
@@ -175,4 +176,5 @@ export const sidebarMetadata: ComponentMetadata = {
     "Quick links provide rapid access to important pages",
     "Badges can show counts or status indicators",
     "External links automatically show external indicators",
-  ]};
+  ],
+};

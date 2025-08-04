@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Countdown } from "./Countdown.tsx";
 
 const countdownExamples: ComponentExample[] = [
@@ -11,9 +11,9 @@ const countdownExamples: ComponentExample[] = [
         hours: 10,
         minutes: 24,
         seconds: 58,
-        totalSeconds: 1333498
-      }
-    }
+        totalSeconds: 1333498,
+      },
+    },
   },
   {
     title: "Large Countdown",
@@ -24,10 +24,10 @@ const countdownExamples: ComponentExample[] = [
         hours: 3,
         minutes: 45,
         seconds: 22,
-        totalSeconds: 2173522
+        totalSeconds: 2173522,
       },
-      size: "lg"
-    }
+      size: "lg",
+    },
   },
   {
     title: "Different Sizes",
@@ -38,10 +38,10 @@ const countdownExamples: ComponentExample[] = [
         hours: 14,
         minutes: 30,
         seconds: 15,
-        totalSeconds: 484215
+        totalSeconds: 484215,
       },
-      size: "sm"
-    }
+      size: "sm",
+    },
   },
   {
     title: "With Labels",
@@ -52,10 +52,10 @@ const countdownExamples: ComponentExample[] = [
         hours: 8,
         minutes: 15,
         seconds: 42,
-        totalSeconds: 2621742
+        totalSeconds: 2621742,
       },
-      showLabels: true
-    }
+      showLabels: true,
+    },
   },
   {
     title: "Without Labels",
@@ -66,12 +66,12 @@ const countdownExamples: ComponentExample[] = [
         hours: 12,
         minutes: 30,
         seconds: 45,
-        totalSeconds: 649845
+        totalSeconds: 649845,
       },
-      showLabels: false
-    }
-        }
-      ];;
+      showLabels: false,
+    },
+  },
+];
 
 export const countdownMetadata: ComponentMetadata = {
   name: "Countdown",
@@ -89,7 +89,8 @@ export const countdownMetadata: ComponentMetadata = {
           hours: 10,
           minutes: 24,
           seconds: 58,
-          totalSeconds: 1000}}
+          totalSeconds: 1000,
+        }}
         showLabels
       />
       <Countdown
@@ -98,8 +99,10 @@ export const countdownMetadata: ComponentMetadata = {
           hours: 2,
           minutes: 30,
           seconds: 15,
-          totalSeconds: 500}}
+          totalSeconds: 500,
+        }}
         size="sm"
       />
     </div>
-  )};
+  ),
+};

@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Textarea } from "./Textarea.tsx";
 
 const textareaExamples: ComponentExample[] = [
@@ -10,35 +11,39 @@ const textareaExamples: ComponentExample[] = [
     title: "Basic Textarea",
     description: "Simple multi-line text inputs with different configurations",
     props: {
-      placeholder: "Enter your message..."
-    }
-  },  {
+      placeholder: "Enter your message...",
+    },
+  },
+  {
     title: "Textarea Sizes",
     description: "Different sizes for various contexts",
     props: {
       placeholder: "Enter your message...",
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Textarea Colors",
     description: "Various color themes for different states",
     props: {
       placeholder: "Enter your message...",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Textarea Variants",
     description: "Different visual styles",
     props: {
       placeholder: "Enter your message...",
-      variant: "outlined"
-    }
-  },  {
+      variant: "outlined",
+    },
+  },
+  {
     title: "Textarea States",
     description: "Different states and configurations",
     props: {
-      placeholder: "Enter your message..."
-    }
+      placeholder: "Enter your message...",
+    },
   },
 ];
 
@@ -46,52 +51,63 @@ const textareaProps: ComponentProp[] = [
   {
     name: "value",
     type: "string",
-    description: "Text content of the textarea"},
+    description: "Text content of the textarea",
+  },
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text shown when empty"},
+    description: "Placeholder text shown when empty",
+  },
   {
     name: "rows",
     type: "number",
     description: "Number of visible text lines",
-    default: "3"},
+    default: "3",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size variant of the textarea",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
-    description: "Color theme for the textarea"},
+    description: "Color theme for the textarea",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Whether to show border",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style variant with subtle appearance",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Disabled state",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Change event handler"},
+    description: "Change event handler",
+  },
   {
     name: "onInput",
     type: "(event: Event) => void",
-    description: "Input event handler for real-time updates"},
+    description: "Input event handler for real-time updates",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const textareaMetadata: ComponentMetadata = {
@@ -127,4 +143,5 @@ export const textareaMetadata: ComponentMetadata = {
     "Ghost variant works well in minimal design contexts",
     "Use color variants to indicate validation states (success, error)",
     "Ensure proper labeling for accessibility",
-  ]};
+  ],
+};

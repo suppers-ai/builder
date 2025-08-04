@@ -1,5 +1,5 @@
 import { computed, useSignal } from "@preact/signals";
-import { Badge, Button, Card, Input, Modal } from "@suppers/ui-lib";
+import { Badge, Button, Card, Input, Modal, Select } from "@suppers/ui-lib";
 import type { ApplicationTemplate } from "./MarketplaceHomepage.tsx";
 
 interface TemplateGalleryProps {

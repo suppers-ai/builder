@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { EmailInput } from "./EmailInput.tsx";
 
 const emailInputExamples: ComponentExample[] = [
@@ -10,28 +11,31 @@ const emailInputExamples: ComponentExample[] = [
     title: "Basic Email Input",
     description: "Simple email input with validation",
     props: {
-      placeholder: "Enter email address..."
-    }
-  },  {
+      placeholder: "Enter email address...",
+    },
+  },
+  {
     title: "Email Input Sizes",
     description: "Different email input sizes",
     props: {
       placeholder: "Enter email address...",
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Email Input Variants",
     description: "Different visual styles",
     props: {
       placeholder: "Enter email address...",
-      variant: "outlined"
-    }
-  },  {
+      variant: "outlined",
+    },
+  },
+  {
     title: "Email Input States",
     description: "Different input states and validation",
     props: {
-      placeholder: "Enter email address..."
-    }
+      placeholder: "Enter email address...",
+    },
   },
 ];
 
@@ -39,58 +43,70 @@ const emailInputProps: ComponentProp[] = [
   {
     name: "value",
     type: "string",
-    description: "The email input value"},
+    description: "The email input value",
+  },
   {
     name: "placeholder",
     type: "string",
     description: "Placeholder text for the input",
-    default: "your@email.com"},
+    default: "your@email.com",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the email input",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "DaisyUIColor",
-    description: "Color theme for the input"},
+    description: "Color theme for the input",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "required",
     type: "boolean",
     description: "Mark input as required",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "autoComplete",
     type: "string",
     description: "Autocomplete attribute value",
-    default: "email"},
+    default: "email",
+  },
   {
     name: "onChange",
     type: "(value: string) => void",
-    description: "Callback when email value changes"},
+    description: "Callback when email value changes",
+  },
   {
     name: "onValidationChange",
     type: "(isValid: boolean) => void",
-    description: "Callback when email validation state changes"},
+    description: "Callback when email validation state changes",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const emailInputMetadata: ComponentMetadata = {
@@ -117,4 +133,5 @@ export const emailInputMetadata: ComponentMetadata = {
     "Use autoComplete='email' for better user experience",
     "Combine with validation states for form feedback",
     "Consider using onValidationChange for real-time validation feedback",
-  ]};
+  ],
+};

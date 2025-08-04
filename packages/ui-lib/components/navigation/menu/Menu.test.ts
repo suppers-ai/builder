@@ -35,7 +35,7 @@ Deno.test("Menu - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Menu({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       items: [{ label: "Test Item", href: "/test" }],
     }));
     assertStringIncludes(html, `menu-${size}`);

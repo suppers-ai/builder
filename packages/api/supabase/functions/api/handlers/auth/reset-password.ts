@@ -23,17 +23,17 @@ export async function resetPassword(request: Request, supabase: SupabaseClient):
     const requestUrl = new URL(request.url);
     const appOrigin = requestUrl.searchParams.get("origin") || "http://localhost:8000";
     const redirectUrl = `${appOrigin}/auth/callback?type=recovery`;
-    
+
     console.log("🔄 Password reset request:");
     console.log("  Email:", email);
     console.log("  App Origin:", appOrigin);
     console.log("  Redirect URL:", redirectUrl);
     console.log("  Request URL:", request.url);
-    
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     });
-    
+
     console.log("🔄 Password reset result:");
     console.log("  Error:", error?.message || "No error");
 

@@ -4,10 +4,7 @@
  */
 
 import { z } from "zod";
-import {
-  BaseComponentPropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, withMetadata } from "../../schemas/base.ts";
 import type { ComponentChildren } from "preact";
 
 // StepProps schema
@@ -32,7 +29,9 @@ const StepsSpecificPropsSchema = z.object({
   ),
 
   responsive: withMetadata(
-    z.boolean().default(false).describe("Use responsive layout (vertical on mobile, horizontal on desktop)"),
+    z.boolean().default(false).describe(
+      "Use responsive layout (vertical on mobile, horizontal on desktop)",
+    ),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 

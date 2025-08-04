@@ -2,12 +2,14 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentSchema} from "../../types.ts";
+  ComponentSchema,
+} from "../../types.ts";
 import { Dropdown } from "./Dropdown.tsx";
 import {
   DropdownPropsSchema,
   safeValidateDropdownProps,
-  validateDropdownProps} from "./Dropdown.schema.ts";
+  validateDropdownProps,
+} from "./Dropdown.schema.ts";
 
 const dropdownExamples: ComponentExample[] = [
   {
@@ -17,12 +19,18 @@ const dropdownExamples: ComponentExample[] = [
       trigger: <button class="btn btn-primary">Click me</button>,
       content: (
         <>
-          <li><a>Item 1</a></li>
-          <li><a>Item 2</a></li>
-          <li><a>Item 3</a></li>
+          <li>
+            <a>Item 1</a>
+          </li>
+          <li>
+            <a>Item 2</a>
+          </li>
+          <li>
+            <a>Item 3</a>
+          </li>
         </>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Dropdown Positions",
@@ -32,21 +40,32 @@ const dropdownExamples: ComponentExample[] = [
         trigger: <button class="btn btn-secondary">Top</button>,
         content: (
           <>
-            <li><a>Item 1</a></li>
-            <li><a>Item 2</a></li>
+            <li>
+              <a>Item 1</a>
+            </li>
+            <li>
+              <a>Item 2</a>
+            </li>
           </>
         ),
-        position: "top" as const},
+        position: "top" as const,
+      },
       {
         trigger: <button class="btn btn-accent">Bottom End</button>,
         content: (
           <>
-            <li><a>Item 1</a></li>
-            <li><a>Item 2</a></li>
+            <li>
+              <a>Item 1</a>
+            </li>
+            <li>
+              <a>Item 2</a>
+            </li>
           </>
         ),
-        position: "bottom-end" as const},
-    ]},
+        position: "bottom-end" as const,
+      },
+    ],
+  },
   {
     title: "Hover Dropdown",
     description: "Dropdown that opens on hover",
@@ -54,13 +73,19 @@ const dropdownExamples: ComponentExample[] = [
       trigger: <button class="btn btn-outline">Hover Me</button>,
       content: (
         <>
-          <li><a>Quick Action 1</a></li>
-          <li><a>Quick Action 2</a></li>
-          <li><a>Quick Action 3</a></li>
+          <li>
+            <a>Quick Action 1</a>
+          </li>
+          <li>
+            <a>Quick Action 2</a>
+          </li>
+          <li>
+            <a>Quick Action 3</a>
+          </li>
         </>
       ),
-      hover: true
-    }
+      hover: true,
+    },
   },
   {
     title: "User Profile Dropdown",
@@ -69,27 +94,42 @@ const dropdownExamples: ComponentExample[] = [
       trigger: (
         <div class="btn btn-ghost btn-circle avatar">
           <div class="w-10 rounded-full">
-            <img alt="User" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+            <img
+              alt="User"
+              src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+            />
           </div>
         </div>
       ),
       content: (
         <>
-          <li class="menu-title"><span>John Doe</span></li>
-          <li><a>Profile</a></li>
-          <li><a>Settings</a></li>
-          <li><hr class="my-2" /></li>
-          <li><a class="text-error">Sign out</a></li>
+          <li class="menu-title">
+            <span>John Doe</span>
+          </li>
+          <li>
+            <a>Profile</a>
+          </li>
+          <li>
+            <a>Settings</a>
+          </li>
+          <li>
+            <hr class="my-2" />
+          </li>
+          <li>
+            <a class="text-error">Sign out</a>
+          </li>
         </>
       ),
-      position: "bottom-end" as const}
-        }
-      ];;
+      position: "bottom-end" as const,
+    },
+  },
+];
 
 const dropdownSchema: ComponentSchema = {
   schema: DropdownPropsSchema,
   validateFn: validateDropdownProps,
-  safeValidateFn: safeValidateDropdownProps};
+  safeValidateFn: safeValidateDropdownProps,
+};
 
 export const dropdownMetadata: ComponentMetadata = {
   name: "Dropdown",
@@ -127,4 +167,5 @@ export const dropdownMetadata: ComponentMetadata = {
     "Position prop controls where the dropdown appears relative to trigger",
     "Hover prop enables hover-to-open behavior",
     "Great for navigation menus, context menus, and action lists",
-  ]};
+  ],
+};

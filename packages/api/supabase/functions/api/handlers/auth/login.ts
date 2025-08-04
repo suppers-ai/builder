@@ -13,7 +13,7 @@ export async function loginUser(request: Request, supabase: SupabaseClient): Pro
   }
 
   console.log("🔐 Attempting login for:", email);
-  
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,

@@ -57,7 +57,7 @@ export class StoreAuthHelpers {
         hasAccessToken: !!accessToken,
         hasRefreshToken: !!refreshToken,
         hasUserData: !!userDataStr,
-        expiresAt: expiresAt ? new Date(parseInt(expiresAt)).toISOString() : "none"
+        expiresAt: expiresAt ? new Date(parseInt(expiresAt)).toISOString() : "none",
       });
 
       if (!accessToken || !userDataStr) {
@@ -99,7 +99,7 @@ export class StoreAuthHelpers {
         expires_in: expiresAt ? Math.floor((parseInt(expiresAt) - Date.now()) / 1000) : 3600,
         expires_at: expiresAt ? parseInt(expiresAt) : undefined,
         token_type: tokenType,
-        user: userData
+        user: userData,
       };
 
       console.log("✅ Found valid stored session for user:", userData.email);
@@ -122,7 +122,7 @@ export class StoreAuthHelpers {
       const accessToken = globalThis.localStorage?.getItem("access_token");
 
       if (accessToken) {
-        // Call the profile package's logout endpoint  
+        // Call the profile package's logout endpoint
         const profileLogoutUrl = "http://localhost:8001/auth/logout";
         console.log("🔍 StoreAuthHelpers: Calling profile package logout endpoint...");
 
@@ -133,9 +133,9 @@ export class StoreAuthHelpers {
               "Authorization": `Bearer ${accessToken}`,
               "Content-Type": "application/json",
             },
-            credentials: 'include' // Include cookies for proper logout
+            credentials: "include", // Include cookies for proper logout
           });
-          
+
           if (response.ok) {
             console.log("✅ StoreAuthHelpers: Successfully signed out from profile package");
           } else {
@@ -171,7 +171,12 @@ export class StoreAuthHelpers {
   /**
    * Store authentication session (called by callback handler)
    */
-  static storeSession(accessToken: string, refreshToken: string, user: StoredUser, expiresIn?: number): void {
+  static storeSession(
+    accessToken: string,
+    refreshToken: string,
+    user: StoredUser,
+    expiresIn?: number,
+  ): void {
     console.log("🔍 StoreAuthHelpers: Storing session for user:", user.email);
     console.log("🔍 StoreAuthHelpers: User data being stored:", user);
 
@@ -192,7 +197,7 @@ export class StoreAuthHelpers {
       console.log("✅ StoreAuthHelpers: Session stored successfully, verification:", {
         hasAccessToken: !!globalThis.localStorage.getItem("access_token"),
         hasUserData: !!storedUserData,
-        userDataLength: storedUserData?.length || 0
+        userDataLength: storedUserData?.length || 0,
       });
     } else {
       console.error("❌ StoreAuthHelpers: localStorage not available!");
@@ -212,9 +217,9 @@ export class StoreAuthHelpers {
         subscription: {
           unsubscribe: () => {
             console.log("🔍 StoreAuthHelpers: Auth state listener unsubscribed");
-          }
-        }
-      }
+          },
+        },
+      },
     };
   }
 
@@ -238,7 +243,7 @@ export class StoreAuthHelpers {
       }
 
       console.log("🔍 StoreAuthHelpers: Fetching fresh user data from API...");
-      
+
       // Call the API to get current user with database fields
       const response = await fetch("http://localhost:8081/api/auth/current-user", {
         headers: {
@@ -258,9 +263,9 @@ export class StoreAuthHelpers {
           id: data.user.id,
           email: data.user.email,
           theme_id: data.user.theme_id,
-          display_name: data.user.display_name
+          display_name: data.user.display_name,
         });
-        
+
         // Update stored user data with fresh data
         this.updateStoredUserData(data.user);
         return data.user;
@@ -285,7 +290,7 @@ export class StoreAuthHelpers {
       }
 
       console.log("🔍 StoreAuthHelpers: Updating user theme to:", themeId);
-      
+
       const response = await fetch("http://localhost:8081/api/auth/update-user-metadata", {
         method: "POST",
         headers: {
@@ -293,7 +298,7 @@ export class StoreAuthHelpers {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          theme_id: themeId
+          theme_id: themeId,
         }),
       });
 
@@ -303,14 +308,14 @@ export class StoreAuthHelpers {
       }
 
       console.log("✅ Successfully updated user theme to:", themeId);
-      
+
       // Update local stored user data
       const currentUser = session.user;
       if (currentUser) {
         currentUser.theme_id = themeId;
         this.updateStoredUserData(currentUser);
       }
-      
+
       return true;
     } catch (error) {
       console.error("❌ Error updating user theme:", error);
@@ -336,7 +341,7 @@ export class StoreAuthHelpers {
     if (user?.theme_id) {
       return user.theme_id;
     }
-    
+
     // If no theme_id in stored data, fetch fresh data
     const freshUser = await this.fetchCurrentUser();
     return freshUser?.theme_id || null;

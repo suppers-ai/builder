@@ -149,14 +149,14 @@ export function Hero({
 
   const renderTextContent = () => (
     <div className={variant === "split" ? "flex-1" : "max-w-4xl"}>
-      <h1 
+      <h1
         className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6"
         style={titleColor ? { color: titleColor } : {}}
       >
         {title}
       </h1>
       {subtitle && (
-        <p 
+        <p
           className="text-lg sm:text-xl lg:text-2xl opacity-80 mb-8 leading-relaxed"
           style={subtitleColor ? { color: subtitleColor } : {}}
         >

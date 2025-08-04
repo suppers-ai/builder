@@ -2,7 +2,7 @@ import { BaseComponentProps, SizeProps } from "../../types.ts";
 import { useEffect, useState } from "preact/hooks";
 import { globalTheme, loadSavedTheme, setGlobalTheme } from "../../../utils/signals.ts";
 import { Check, Palette, X } from "lucide-preact";
-import { THEMES } from "@suppers/shared/constants"
+import { THEMES } from "@suppers/shared/constants";
 
 // Theme controller interfaces
 export interface ThemeControllerProps extends BaseComponentProps {
@@ -16,7 +16,6 @@ export interface ThemeControllerProps extends BaseComponentProps {
   autoLoadSavedTheme?: boolean;
   autoSaveTheme?: boolean;
 }
-
 
 // Shared theme modal content component
 interface ThemeModalContentProps {
@@ -34,7 +33,7 @@ function ThemeModalContent({
   darkThemes,
   onThemeChange,
   onClose,
-  isStatic = false
+  isStatic = false,
 }: ThemeModalContentProps) {
   return (
     <div class="bg-base-100 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border border-base-300">
@@ -72,19 +71,21 @@ function ThemeModalContent({
                   <button
                     key={theme.name}
                     onClick={isStatic ? undefined : () => onThemeChange(theme.name)}
-                    class={`relative p-3 rounded-xl border-2 transition-all duration-200 ${isStatic ? '' : 'hover:scale-105'
-                      } ${activeTheme === theme.name
+                    class={`relative p-3 rounded-xl border-2 transition-all duration-200 ${
+                      isStatic ? "" : "hover:scale-105"
+                    } ${
+                      activeTheme === theme.name
                         ? "border-primary bg-primary/5 shadow-md"
-                        : `border-base-300 ${isStatic ? '' : 'hover:border-base-400'}`
-                      }`}
+                        : `border-base-300 ${isStatic ? "" : "hover:border-base-400"}`
+                    }`}
                   >
                     <div class="text-center space-y-2">
                       <div
                         class="w-12 h-8 mx-auto overflow-hidden border border-base-300/50 shadow-sm"
                         data-theme={theme.name}
                         style={{
-                          borderRadius: 'var(--rounded-btn, 0.5rem)',
-                          backgroundColor: 'var(--b1, #ffffff)'
+                          borderRadius: "var(--rounded-btn, 0.5rem)",
+                          backgroundColor: "var(--b1, #ffffff)",
                         }}
                       >
                         <div class="flex h-full">
@@ -121,19 +122,21 @@ function ThemeModalContent({
                   <button
                     key={theme.name}
                     onClick={isStatic ? undefined : () => onThemeChange(theme.name)}
-                    class={`relative p-3 rounded-xl border-2 transition-all duration-200 ${isStatic ? '' : 'hover:scale-105'
-                      } ${activeTheme === theme.name
+                    class={`relative p-3 rounded-xl border-2 transition-all duration-200 ${
+                      isStatic ? "" : "hover:scale-105"
+                    } ${
+                      activeTheme === theme.name
                         ? "border-primary bg-primary/5 shadow-md"
-                        : `border-base-300 ${isStatic ? '' : 'hover:border-base-400'}`
-                      }`}
+                        : `border-base-300 ${isStatic ? "" : "hover:border-base-400"}`
+                    }`}
                   >
                     <div class="text-center space-y-2">
                       <div
                         class="w-12 h-8 mx-auto overflow-hidden border border-base-300/50 shadow-sm"
                         data-theme={theme.name}
                         style={{
-                          borderRadius: 'var(--rounded-btn, 0.5rem)',
-                          backgroundColor: 'var(--b1, #ffffff)'
+                          borderRadius: "var(--rounded-btn, 0.5rem)",
+                          backgroundColor: "var(--b1, #ffffff)",
                         }}
                       >
                         <div class="flex h-full">
@@ -192,9 +195,9 @@ export function ThemeController({
   const activeTheme = useGlobalState ? globalTheme.value : internalTheme;
 
   // Filter themes based on provided themes prop, or use all themes
-  const availableThemes = themes ? THEMES.filter(theme => themes.includes(theme.name)) : THEMES;
-  const lightThemes = availableThemes.filter(theme => theme.category === "Light");
-  const darkThemes = availableThemes.filter(theme => theme.category === "Dark");
+  const availableThemes = themes ? THEMES.filter((theme) => themes.includes(theme.name)) : THEMES;
+  const lightThemes = availableThemes.filter((theme) => theme.category === "Light");
+  const darkThemes = availableThemes.filter((theme) => theme.category === "Dark");
 
   // Handle theme changes
   const handleThemeChange = (newTheme: string) => {

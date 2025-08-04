@@ -3,6 +3,7 @@ import { signal } from "@preact/signals";
 import { ProfileCard } from "@suppers/ui-lib";
 import { AuthHelpers } from "../lib/auth-helpers.ts";
 import type { User } from "../lib/api-client.ts";
+import { profileSyncManager, crossAppAuthHelpers } from "@suppers/shared/utils";
 
 // Signals for reactive state
 const userSignal = signal<User | null>(null);
@@ -12,6 +13,24 @@ export default function ProfilePageIsland() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isPopupMode, setIsPopupMode] = useState(false);
+  const [parentOrigin, setParentOrigin] = useState<string | null>(null);
+
+  // Function to handle popup closing after successful updates
+  const handlePopupClose = () => {
+    if (isPopupMode && parentOrigin && globalThis.window?.opener) {
+      // Send close message to parent
+      globalThis.window.opener.postMessage({
+        type: "POPUP_CLOSE",
+        data: { reason: "profile_updated" }
+      }, parentOrigin);
+      
+      // Close popup after a short delay
+      setTimeout(() => {
+        globalThis.window?.close();
+      }, 1000);
+    }
+  };
 
   // Check auth state on mount
   useEffect(() => {
@@ -20,10 +39,17 @@ export default function ProfilePageIsland() {
     const urlParams = new URLSearchParams(globalThis.location?.search || "");
     const externalApp = urlParams.get("external_app");
     const origin = urlParams.get("origin");
+    const popupParam = urlParams.get("popup");
+    
+    // Detect popup mode for new profile sync system
+    const isNewPopupMode = popupParam === "true" || (isPopup && urlParams.get("source"));
+    setIsPopupMode(isNewPopupMode);
+    if (origin) {
+      setParentOrigin(origin);
+    }
 
     const checkAuth = async () => {
       try {
-
         console.log("🔵 Profile page: Auth check", { isPopup, externalApp, origin });
         console.log("🔵 Profile page: Current URL:", globalThis.location?.href);
         console.log("🔵 Profile page: URL params:", globalThis.location?.search);
@@ -37,67 +63,76 @@ export default function ProfilePageIsland() {
           isPopup: !!isPopup,
           externalApp: !!externalApp,
           origin: !!origin,
-          user: !!user
+          user: !!user,
         });
-        
+
         if (isPopup && externalApp && origin && user) {
           console.log("🔵 Profile page: Handling external SSO for logged-in user");
-          
+
           try {
             let session;
             console.log("🔵 Profile page: About to call getCurrentSession...");
             try {
               session = await AuthHelpers.getCurrentSession();
               console.log("🔵 Profile page: getCurrentSession success:", !!session);
-              
+
               // If API call succeeded but returned null session, use localStorage fallback
               if (!session) {
-                console.log("🔵 Profile page: getCurrentSession returned null, trying localStorage fallback...");
+                console.log(
+                  "🔵 Profile page: getCurrentSession returned null, trying localStorage fallback...",
+                );
                 throw new Error("Session is null, using localStorage fallback");
               }
             } catch (sessionError) {
-              console.warn("🔵 Profile page: getCurrentSession failed, trying localStorage fallback:", sessionError);
+              console.warn(
+                "🔵 Profile page: getCurrentSession failed, trying localStorage fallback:",
+                sessionError,
+              );
               // Fallback: construct session from localStorage if API fails
               const accessToken = globalThis.localStorage?.getItem("access_token");
               const refreshToken = globalThis.localStorage?.getItem("refresh_token");
               const expiresAt = globalThis.localStorage?.getItem("expires_at");
-              
+
               console.log("🔵 Profile page: localStorage tokens:", {
                 hasAccessToken: !!accessToken,
                 hasRefreshToken: !!refreshToken,
                 hasExpiresAt: !!expiresAt,
-                hasUser: !!user
+                hasUser: !!user,
               });
-              
+
               if (accessToken && user) {
                 session = {
                   access_token: accessToken,
                   refresh_token: refreshToken || "",
-                  expires_in: expiresAt ? Math.floor((parseInt(expiresAt) - Date.now()) / 1000) : 3600,
+                  expires_in: expiresAt
+                    ? Math.floor((parseInt(expiresAt) - Date.now()) / 1000)
+                    : 3600,
                   expires_at: expiresAt ? parseInt(expiresAt) : undefined,
                   token_type: "bearer",
-                  user: user
+                  user: user,
                 };
                 console.log("🔵 Profile page: Using localStorage session fallback");
               } else {
-                console.warn("🔵 Profile page: Cannot create fallback session - missing accessToken or user");
+                console.warn(
+                  "🔵 Profile page: Cannot create fallback session - missing accessToken or user",
+                );
               }
             }
-            
+
             if (session) {
               const message = {
                 type: "SSO_SUCCESS",
                 accessToken: session.access_token,
                 refreshToken: session.refresh_token,
                 user: session.user,
-                expiresIn: session.expires_in
+                expiresIn: session.expires_in,
               };
-              
+
               console.log("🔵 Profile page: Sending SSO success message to parent:", message);
               console.log("🔵 Profile page: Target origin for message:", origin);
               console.log("🔵 Profile page: Window opener exists:", !!globalThis.window?.opener);
               globalThis.window?.opener?.postMessage(message, origin);
-              
+
               // Close popup
               setTimeout(() => {
                 console.log("🔵 Profile page: Closing SSO popup");
@@ -109,7 +144,7 @@ export default function ProfilePageIsland() {
             console.error("❌ Profile page: Error handling external SSO:", error);
             const errorMessage = {
               type: "SSO_ERROR",
-              error: error instanceof Error ? error.message : "Unknown error"
+              error: error instanceof Error ? error.message : "Unknown error",
             };
             globalThis.window?.opener?.postMessage(errorMessage, origin);
             globalThis.window?.close();
@@ -119,15 +154,15 @@ export default function ProfilePageIsland() {
 
         if (!user) {
           // Redirect to login if not authenticated, preserving external SSO params
-          const loginUrl = externalApp && origin ? 
-            `/login?external_app=${externalApp}&origin=${encodeURIComponent(origin)}` :
-            "/login?redirect_to=/profile";
+          const loginUrl = externalApp && origin
+            ? `/login?external_app=${externalApp}&origin=${encodeURIComponent(origin)}`
+            : "/login?redirect_to=/profile";
           globalThis.location.href = loginUrl;
         } else {
           // Apply user's theme preference if available
           if (user.user_metadata?.theme) {
-            document.documentElement.setAttribute('data-theme', user.user_metadata.theme);
-            localStorage.setItem('theme', user.user_metadata.theme);
+            document.documentElement.setAttribute("data-theme", user.user_metadata.theme);
+            localStorage.setItem("theme", user.user_metadata.theme);
           }
 
           // Check if we need to prompt for password update (from recovery flow)
@@ -145,9 +180,9 @@ export default function ProfilePageIsland() {
         const urlParams = new URLSearchParams(globalThis.location?.search || "");
         const externalApp = urlParams.get("external_app");
         const origin = urlParams.get("origin");
-        const loginUrl = externalApp && origin ? 
-          `/login?external_app=${externalApp}&origin=${encodeURIComponent(origin)}` :
-          "/login?redirect_to=/profile";
+        const loginUrl = externalApp && origin
+          ? `/login?external_app=${externalApp}&origin=${encodeURIComponent(origin)}`
+          : "/login?redirect_to=/profile";
         globalThis.location.href = loginUrl;
       } finally {
         authLoadingSignal.value = false;
@@ -203,10 +238,52 @@ export default function ProfilePageIsland() {
       // Refresh user data
       const updatedUser = await AuthHelpers.getCurrentUser();
       userSignal.value = updatedUser;
+
+      // Broadcast profile changes when in popup mode
+      if (isPopupMode && updatedUser) {
+        // Set user in cross-app auth helpers for sync
+        crossAppAuthHelpers.setCurrentUser({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          displayName: updatedUser.display_name || updatedUser.user_metadata?.full_name,
+          firstName: updatedUser.first_name || updatedUser.user_metadata?.first_name,
+          lastName: updatedUser.last_name || updatedUser.user_metadata?.last_name,
+          avatarUrl: updatedUser.avatar_url || updatedUser.user_metadata?.avatar_url,
+          theme: updatedUser.theme_id,
+        });
+
+        // Broadcast specific changes
+        if (data.theme) {
+          crossAppAuthHelpers.syncThemeAcrossApps(data.theme);
+        }
+
+        if (data.displayName || data.firstName || data.lastName) {
+          crossAppAuthHelpers.syncUserDataAcrossApps({
+            displayName: data.displayName,
+            firstName: data.firstName,
+            lastName: data.lastName,
+          });
+        }
+
+        // Send message to parent window if available
+        if (parentOrigin && globalThis.window?.opener) {
+          globalThis.window.opener.postMessage({
+            type: "PROFILE_UPDATED",
+            data: {
+              user: updatedUser,
+              changes: data,
+            }
+          }, parentOrigin);
+        }
+      }
+
       return { success: true };
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile");
-      return { success: false, error: err instanceof Error ? err.message : "Failed to update profile" };
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Failed to update profile",
+      };
     } finally {
       setIsLoading(false);
     }
@@ -225,13 +302,45 @@ export default function ProfilePageIsland() {
       // Refresh user data
       const updatedUser = await AuthHelpers.getCurrentUser();
       userSignal.value = updatedUser;
+
+      // Broadcast avatar changes when in popup mode
+      if (isPopupMode && updatedUser) {
+        // Set user in cross-app auth helpers for sync
+        crossAppAuthHelpers.setCurrentUser({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          displayName: updatedUser.display_name || updatedUser.user_metadata?.full_name,
+          firstName: updatedUser.first_name || updatedUser.user_metadata?.first_name,
+          lastName: updatedUser.last_name || updatedUser.user_metadata?.last_name,
+          avatarUrl: updatedUser.avatar_url || updatedUser.user_metadata?.avatar_url,
+          theme: updatedUser.theme_id,
+        });
+
+        // Broadcast avatar change
+        const avatarUrl = updatedUser.avatar_url || updatedUser.user_metadata?.avatar_url;
+        if (avatarUrl) {
+          crossAppAuthHelpers.syncUserDataAcrossApps({
+            avatarUrl: avatarUrl,
+          });
+        }
+
+        // Send message to parent window if available
+        if (parentOrigin && globalThis.window?.opener) {
+          globalThis.window.opener.postMessage({
+            type: "PROFILE_UPDATED",
+            data: {
+              user: updatedUser,
+              changes: { avatarUrl },
+            }
+          }, parentOrigin);
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to upload avatar");
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
     setIsLoading(true);
@@ -300,6 +409,15 @@ export default function ProfilePageIsland() {
       onUploadAvatar={handleUploadAvatar}
       onSignOut={handleSignOut}
       onChangePassword={handleChangePassword}
+      enableRealTimeSync={true}
+      syncSource="profile"
+      isPopupMode={isPopupMode}
+      parentOrigin={parentOrigin}
+      onPopupClose={handlePopupClose}
+      onProfileChange={(change) => {
+        // Broadcast profile changes through the sync manager
+        profileSyncManager.broadcastProfileChange(change);
+      }}
     />
   );
 }

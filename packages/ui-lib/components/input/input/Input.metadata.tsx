@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Input } from "./Input.tsx";
 
 const inputExamples: ComponentExample[] = [
@@ -10,35 +11,39 @@ const inputExamples: ComponentExample[] = [
     title: "Basic Input",
     description: "Simple text input with different types",
     props: {
-      placeholder: "Enter text..."
-    }
-  },  {
+      placeholder: "Enter text...",
+    },
+  },
+  {
     title: "Input Sizes",
     description: "Different input sizes",
     props: {
       placeholder: "Enter text...",
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Input Colors",
     description: "Input with different colors",
     props: {
       placeholder: "Enter text...",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Input States",
     description: "Different input states",
     props: {
-      placeholder: "Enter text..."
-    }
-  },  {
+      placeholder: "Enter text...",
+    },
+  },
+  {
     title: "Input Variants",
     description: "Different visual styles",
     props: {
       placeholder: "Enter text...",
-      variant: "outlined"
-    }
+      variant: "outlined",
+    },
   },
 ];
 
@@ -47,51 +52,71 @@ const inputProps: ComponentProp[] = [
     name: "type",
     type: "string",
     description: "Input type (text, email, password, etc.)",
-    default: "text"},
+    default: "text",
+  },
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text"},
+    description: "Placeholder text",
+  },
   {
     name: "value",
     type: "string",
-    description: "Input value"},
+    description: "Input value",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Input size",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Input color theme"},
+    description: "Input color theme",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const inputMetadata: ComponentMetadata = {
   name: "Input",
-  description: "Text input fields for capturing user input with various styles and states, fully compatible with DaisyUI 5 and Tailwind 4 with enhanced features",
+  description:
+    "Text input fields for capturing user input with various styles and states, fully compatible with DaisyUI 5 and Tailwind 4 with enhanced features",
   category: ComponentCategory.INPUT,
   path: "/components/input/input",
-  tags: ["input", "text", "form", "field", "daisyui-5", "tailwind-4", "enhanced-validation", "accessibility", "ssr-compatible"],
+  tags: [
+    "input",
+    "text",
+    "form",
+    "field",
+    "daisyui-5",
+    "tailwind-4",
+    "enhanced-validation",
+    "accessibility",
+    "ssr-compatible",
+  ],
   relatedComponents: ["textarea", "button", "label", "checkbox", "radio", "select"],
   interactive: true, // Inputs are inherently interactive
   preview: (
@@ -103,8 +128,25 @@ export const inputMetadata: ComponentMetadata = {
   ),
   examples: inputExamples,
   props: inputProps,
-  variants: ["bordered", "ghost", "no-border", "primary", "secondary", "accent", "success", "warning", "error"],
-  useCases: ["Forms", "Search fields", "User authentication", "Data entry", "Validation feedback", "Real-time input"],
+  variants: [
+    "bordered",
+    "ghost",
+    "no-border",
+    "primary",
+    "secondary",
+    "accent",
+    "success",
+    "warning",
+    "error",
+  ],
+  useCases: [
+    "Forms",
+    "Search fields",
+    "User authentication",
+    "Data entry",
+    "Validation feedback",
+    "Real-time input",
+  ],
   usageNotes: [
     "Use bordered style for most form inputs with enhanced DaisyUI 5 styling",
     "Ghost style works well for search inputs in navigation with improved focus states",
@@ -123,6 +165,6 @@ export const inputMetadata: ComponentMetadata = {
     "Better responsive behavior with container queries support",
     "Optimized performance with improved CSS generation",
     "Fully backward compatible - all existing usage patterns continue to work",
-    "Enhanced TypeScript support with optional properties and better defaults"
-  ]
-};;
+    "Enhanced TypeScript support with optional properties and better defaults",
+  ],
+};

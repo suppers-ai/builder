@@ -17,3 +17,6 @@ export * from "./database.ts";
 
 // UI schemas
 export * from "./ui.ts";
+
+// Profile sync schemas
+export * from "./profile-sync.ts";

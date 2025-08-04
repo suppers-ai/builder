@@ -12,7 +12,7 @@ export type DaisyUIColor =
   | "base-100"
   | "base-200"
   | "base-300"
-  | "base-content"  // Added for DaisyUI 5
+  | "base-content" // Added for DaisyUI 5
   | "info"
   | "success"
   | "warning"
@@ -30,7 +30,7 @@ export type DaisyUIVariant =
   | "outline"
   | "ghost"
   | "link"
-  | "neutral";  // Added for DaisyUI 5
+  | "neutral"; // Added for DaisyUI 5
 
 // DaisyUI 5 Loading Types
 export type DaisyUILoadingType =
@@ -66,7 +66,7 @@ export interface DisabledProps {
 
 export interface LoadingProps {
   loading?: boolean;
-  loadingType?: DaisyUILoadingType;  // Added for DaisyUI 5
+  loadingType?: DaisyUILoadingType; // Added for DaisyUI 5
 }
 
 export interface EventProps {
@@ -104,11 +104,11 @@ export enum ComponentCategory {
 
 /**
  * Component example interface for simplified props-based examples.
- * 
+ *
  * This interface defines the structure for component examples in the documentation.
  * Examples are now purely props-based, with automatic code generation and consistent
  * presentation. The JSX code is automatically generated from the provided props.
- * 
+ *
  * @example
  * // Single component example
  * {
@@ -116,7 +116,7 @@ export enum ComponentCategory {
  *   description: "A button with primary styling",
  *   props: { color: "primary", children: "Click me" }
  * }
- * 
+ *
  * @example
  * // Multiple component example
  * {
@@ -133,7 +133,7 @@ export interface ComponentExample {
   title: string;
   /** Description explaining what the example demonstrates */
   description: string;
-  /** 
+  /**
    * Props to pass to the component(s). Can be a single props object for one component,
    * or an array of props objects for multiple component instances.
    */

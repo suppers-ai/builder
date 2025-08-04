@@ -98,7 +98,7 @@ Deno.test("Form Components Integration - all components support checked state co
 
 Deno.test("Form Components Integration - all components support custom classes consistently", () => {
   const customClass = "custom-form-input";
-  
+
   const checkboxHtml = renderToString(Checkbox({ class: customClass }));
   const radioHtml = renderToString(Radio({ class: customClass }));
   const toggleHtml = renderToString(Toggle({ class: customClass }));

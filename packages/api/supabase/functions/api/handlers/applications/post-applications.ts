@@ -1,7 +1,10 @@
 import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function createApplication(request: Request, supabase: SupabaseClient): Promise<Response> {
+export async function createApplication(
+  request: Request,
+  supabase: SupabaseClient,
+): Promise<Response> {
   const body = await request.json();
   const {
     ownerId,

@@ -21,7 +21,7 @@ export type { RatingProps } from "./input/rating/Rating.tsx";
 export { FileInput } from "./input/file-input/FileInput.tsx";
 export type { FileInputProps } from "./input/file-input/FileInput.tsx";
 export { Carousel, CarouselItem } from "./display/carousel/Carousel.tsx";
-export type { CarouselProps, CarouselItemProps } from "./display/carousel/Carousel.tsx";
+export type { CarouselItemProps, CarouselProps } from "./display/carousel/Carousel.tsx";
 export { Steps } from "./navigation/steps/Steps.tsx";
 export type { StepsProps } from "./navigation/steps/Steps.tsx";
 export { Drawer } from "./layout/drawer/Drawer.tsx";
@@ -138,7 +138,7 @@ export { ComponentPreviewCard } from "./display/ComponentPreviewCard.tsx";
 export { Avatar } from "./display/avatar/Avatar.tsx";
 export type { AvatarProps } from "./display/avatar/Avatar.tsx";
 export { UserInfo } from "./display/user-info/UserInfo.tsx";
-export type { UserInfoProps, DropdownItem } from "./display/user-info/UserInfo.tsx";
+export type { DropdownItem, UserInfoProps } from "./display/user-info/UserInfo.tsx";
 export { AuthGuard } from "./auth/auth-guard/AuthGuard.tsx";
 export type { AuthGuardProps } from "./auth/auth-guard/AuthGuard.tsx";
 export { AuthClientProvider, useAuthClient } from "../providers/AuthClientProvider.tsx";
@@ -148,7 +148,7 @@ export type { MenuProps } from "./navigation/menu/Menu.tsx";
 export { Kbd } from "./display/kbd/Kbd.tsx";
 export type { KbdProps } from "./display/kbd/Kbd.tsx";
 export { Diff, DiffItem, DiffResizer } from "./display/diff/Diff.tsx";
-export type { DiffProps, DiffItemProps, DiffResizerProps } from "./display/diff/Diff.tsx";
+export type { DiffItemProps, DiffProps, DiffResizerProps } from "./display/diff/Diff.tsx";
 export { RadialProgress } from "./feedback/radial-progress/RadialProgress.tsx";
 export type { RadialProgressProps } from "./feedback/radial-progress/RadialProgress.tsx";
 export { Timeline } from "./display/timeline/Timeline.tsx";
@@ -260,7 +260,4 @@ export { phoneMetadata } from "./mockup/phone/Phone.metadata.tsx";
 export { windowMetadata } from "./mockup/window/Window.metadata.tsx";
 
 // Export organized metadata collections
-export {
-  componentsMetadata,
-  flatComponentsMetadata,
-} from "./metadata.tsx";
+export { componentsMetadata, flatComponentsMetadata } from "./metadata.tsx";

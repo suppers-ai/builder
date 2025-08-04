@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Link } from "./Link.tsx";
 
 const linkExamples: ComponentExample[] = [
@@ -11,31 +12,34 @@ const linkExamples: ComponentExample[] = [
     description: "Simple links with different styles",
     props: {
       href: "#",
-      children: "Click here"
-    }
-  },  {
+      children: "Click here",
+    },
+  },
+  {
     title: "Link Colors",
     description: "Links with different color themes",
     props: {
       href: "#",
       children: "Click here",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Link Variants",
     description: "Different link behaviors and styles",
     props: {
       href: "#",
       children: "Click here",
-      variant: "outlined"
-    }
-  },  {
+      variant: "outlined",
+    },
+  },
+  {
     title: "Interactive Links",
     description: "Links with custom click handlers",
     props: {
       href: "#",
-      children: "Click here"
-    }
+      children: "Click here",
+    },
   },
 ];
 
@@ -44,47 +48,57 @@ const linkProps: ComponentProp[] = [
     name: "children",
     type: "ComponentChildren",
     description: "Link text content",
-    required: true},
+    required: true,
+  },
   {
     name: "href",
     type: "string",
-    description: "URL or path to navigate to"},
+    description: "URL or path to navigate to",
+  },
   {
     name: "variant",
     type: "'default' | 'hover' | 'focus' | 'neutral'",
     description: "Link variant style",
-    default: "default"},
+    default: "default",
+  },
   {
     name: "color",
     type: "DaisyUIColor",
-    description: "Color theme for the link"},
+    description: "Color theme for the link",
+  },
   {
     name: "underline",
     type: "boolean",
     description: "Whether link is underlined",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "external",
     type: "boolean",
     description: "Whether link is external (opens in new tab)",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Whether link is disabled",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onClick",
     type: "(e: Event) => void",
-    description: "Custom click handler"},
+    description: "Custom click handler",
+  },
   {
     name: "onNavigate",
     type: "(href: string) => void",
-    description: "Callback when navigation occurs"},
+    description: "Callback when navigation occurs",
+  },
   {
     name: "className",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const linkMetadata: ComponentMetadata = {
@@ -113,4 +127,5 @@ export const linkMetadata: ComponentMetadata = {
     "Disabled links prevent navigation and show visual feedback",
     "Use onNavigate for custom routing logic",
     "Color variants integrate with DaisyUI theme system",
-  ]};
+  ],
+};

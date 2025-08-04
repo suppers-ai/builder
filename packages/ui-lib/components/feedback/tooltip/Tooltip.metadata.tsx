@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Tooltip } from "./Tooltip.tsx";
 
 const tooltipExamples: ComponentExample[] = [
@@ -11,37 +12,41 @@ const tooltipExamples: ComponentExample[] = [
     description: "Simple tooltips on different elements",
     props: {
       content: "This is a helpful tooltip",
-      children: "Hover me"
-    }
-  },  {
+      children: "Hover me",
+    },
+  },
+  {
     title: "Tooltip Positions",
     description: "Tooltips positioned around the target element",
     props: {
       content: "This is a helpful tooltip",
-      children: "Hover me"
-    }
-  },  {
+      children: "Hover me",
+    },
+  },
+  {
     title: "Tooltip Colors",
     description: "Different colored tooltips for various contexts",
     props: {
       content: "This is a helpful tooltip",
       children: "Hover me",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Always Visible Tooltips",
     description: "Tooltips that are always shown (useful for demonstrations)",
     props: {
       content: "This is a helpful tooltip",
-      children: "Hover me"
-    }
-  },  {
+      children: "Hover me",
+    },
+  },
+  {
     title: "Tooltips in Real Contexts",
     description: "Practical examples of tooltips in UI elements",
     props: {
       content: "This is a helpful tooltip",
-      children: "Hover me"
-    }
+      children: "Hover me",
+    },
   },
 ];
 
@@ -50,38 +55,46 @@ const tooltipProps: ComponentProp[] = [
     name: "tip",
     type: "string",
     description: "Text content to display in the tooltip",
-    required: true},
+    required: true,
+  },
   {
     name: "position",
     type: "'top' | 'bottom' | 'left' | 'right'",
     description: "Position of tooltip relative to the target element",
-    default: "top"},
+    default: "top",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Color theme for the tooltip"},
+    description: "Color theme for the tooltip",
+  },
   {
     name: "open",
     type: "boolean",
     description: "Force tooltip to always be visible",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "children",
     type: "ComponentChildren",
     description: "Element that triggers the tooltip on hover",
-    required: true},
+    required: true,
+  },
   {
     name: "onShow",
     type: "() => void",
-    description: "Callback when tooltip becomes visible"},
+    description: "Callback when tooltip becomes visible",
+  },
   {
     name: "onHide",
     type: "() => void",
-    description: "Callback when tooltip becomes hidden"},
+    description: "Callback when tooltip becomes hidden",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const tooltipMetadata: ComponentMetadata = {
@@ -123,4 +136,5 @@ export const tooltipMetadata: ComponentMetadata = {
     "Consider accessibility - tooltips should also be accessible via keyboard",
     "Don't use tooltips for critical information that users must see",
     "Test tooltip positioning on mobile devices where hover doesn't work",
-  ]};
+  ],
+};

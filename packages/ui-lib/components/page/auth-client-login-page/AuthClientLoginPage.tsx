@@ -1,4 +1,4 @@
-import { LoginPage, LoginPageProps, AuthUser } from "../login-page/LoginPage.tsx";
+import { AuthUser, LoginPage, LoginPageProps } from "../login-page/LoginPage.tsx";
 
 export interface AuthClientLoginPageProps extends LoginPageProps<AuthUser> {}
 

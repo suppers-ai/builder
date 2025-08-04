@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Accordion } from "./Accordion.tsx";
 
 const accordionExamples: ComponentExample[] = [
@@ -10,20 +10,21 @@ const accordionExamples: ComponentExample[] = [
         {
           id: "1",
           title: "What is your return policy?",
-          content: "We offer a 30-day return policy for all unused items in original packaging."
+          content: "We offer a 30-day return policy for all unused items in original packaging.",
         },
         {
-          id: "2", 
+          id: "2",
           title: "How long does shipping take?",
-          content: "Standard shipping takes 3-5 business days. Express options are available."
+          content: "Standard shipping takes 3-5 business days. Express options are available.",
         },
         {
           id: "3",
           title: "Do you offer international shipping?",
-          content: "Yes, we ship to most countries worldwide with varying costs and delivery times."
-        }
-      ]
-    }
+          content:
+            "Yes, we ship to most countries worldwide with varying costs and delivery times.",
+        },
+      ],
+    },
   },
   {
     title: "Multiple Open Sections",
@@ -33,24 +34,26 @@ const accordionExamples: ComponentExample[] = [
         {
           id: "getting-started",
           title: "Getting Started",
-          content: "Welcome to our platform! Create your account, complete your profile, and explore the dashboard."
+          content:
+            "Welcome to our platform! Create your account, complete your profile, and explore the dashboard.",
         },
         {
           id: "account-settings",
-          title: "Account Settings", 
-          content: "Manage your account preferences, update personal information, and change notification settings."
+          title: "Account Settings",
+          content:
+            "Manage your account preferences, update personal information, and change notification settings.",
         },
         {
           id: "billing",
           title: "Billing Information",
-          content: "View and update your billing details, payment methods, and subscription plans."
-        }
+          content: "View and update your billing details, payment methods, and subscription plans.",
+        },
       ],
       multiple: true,
-      defaultOpen: ["getting-started", "account-settings"]
-    }
-        }
-      ];;
+      defaultOpen: ["getting-started", "account-settings"],
+    },
+  },
+];
 
 export const accordionMetadata: ComponentMetadata = {
   name: "Accordion",
@@ -66,12 +69,15 @@ export const accordionMetadata: ComponentMetadata = {
         {
           id: "1",
           title: "Getting Started",
-          content: "Learn the basics of our platform"},
+          content: "Learn the basics of our platform",
+        },
         {
           id: "2",
           title: "Advanced Features",
-          content: "Explore advanced functionality"},
+          content: "Explore advanced functionality",
+        },
       ]}
       defaultOpen={["1"]}
     />
-  )};
+  ),
+};

@@ -1,7 +1,10 @@
 import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function getCurrentUser(request: Request, supabase: SupabaseClient): Promise<Response> {
+export async function getCurrentUser(
+  request: Request,
+  supabase: SupabaseClient,
+): Promise<Response> {
   // Get token from request headers
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "");

@@ -12,11 +12,12 @@ export interface DiffProps extends BaseComponentProps {
 export function Diff({
   class: className = "",
   item1Content = "BEFORE",
-  item2Content = "AFTER", 
+  item2Content = "AFTER",
   item1Label,
   item2Label,
   item1Class = "bg-primary text-primary-content font-bold text-xl flex items-center justify-center",
-  item2Class = "bg-secondary text-secondary-content font-bold text-xl flex items-center justify-center",
+  item2Class =
+    "bg-secondary text-secondary-content font-bold text-xl flex items-center justify-center",
   id,
   ...props
 }: DiffProps) {

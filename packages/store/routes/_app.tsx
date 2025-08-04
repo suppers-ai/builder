@@ -10,8 +10,9 @@ export default function App({ Component, route }: PageProps) {
         <title>Suppers Store - Application Marketplace</title>
         <link rel="stylesheet" href="/styles.css" />
         {/* Theme initialization script - runs before body renders to prevent flash */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
             (function() {
               try {
                 // First check localStorage for immediate theme application
@@ -30,14 +31,15 @@ export default function App({ Component, route }: PageProps) {
                 console.log('🎨 Fallback theme set: light');
               }
             })();
-          `
-        }} />
+          `,
+          }}
+        />
       </head>
       <body>
         <div class="min-h-screen bg-base-100">
           {/* Top Navigation */}
           <SimpleNavbar currentPath={route} />
-          
+
           {/* Main Content */}
           <main class="w-full">
             <Component />

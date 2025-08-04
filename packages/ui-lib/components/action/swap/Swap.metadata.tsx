@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Swap } from "./Swap.tsx";
 
 const swapExamples: ComponentExample[] = [
@@ -8,25 +8,25 @@ const swapExamples: ComponentExample[] = [
     props: {
       rotate: true,
       on: <span>📄</span>,
-      off: <span>📁</span>
-    }
+      off: <span>📁</span>,
+    },
   },
   {
-    title: "Flip Animation", 
+    title: "Flip Animation",
     description: "Swap with flip animation between states",
     props: {
       flip: true,
       on: <span>😄</span>,
-      off: <span>😐</span>
-    }
+      off: <span>😐</span>,
+    },
   },
   {
     title: "On/Off Toggle",
     description: "Simple on/off state toggle",
     props: {
       on: <span>🌞</span>,
-      off: <span>🌙</span>
-    }
+      off: <span>🌙</span>,
+    },
   },
   {
     title: "Animated Text",
@@ -34,9 +34,10 @@ const swapExamples: ComponentExample[] = [
     props: {
       rotate: true,
       on: <span class="text-lg font-bold">ON</span>,
-      off: <span class="text-lg font-bold">OFF</span>}
-        }
-      ];;
+      off: <span class="text-lg font-bold">OFF</span>,
+    },
+  },
+];
 
 export const swapMetadata: ComponentMetadata = {
   name: "Swap",
@@ -59,4 +60,5 @@ export const swapMetadata: ComponentMetadata = {
         off={<span>😐</span>}
       />
     </div>
-  )};
+  ),
+};

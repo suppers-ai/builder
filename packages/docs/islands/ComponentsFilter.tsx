@@ -105,14 +105,22 @@ export default function ComponentsFilterInteractive(
   // Map category display names to enum values
   const categoryNameToEnum = (categoryName: string): ComponentCategory | null => {
     switch (categoryName) {
-      case "Actions": return ComponentCategory.ACTION;
-      case "Display": return ComponentCategory.DISPLAY;
-      case "Input": return ComponentCategory.INPUT;
-      case "Layout": return ComponentCategory.LAYOUT;
-      case "Navigation": return ComponentCategory.NAVIGATION;
-      case "Feedback": return ComponentCategory.FEEDBACK;
-      case "Mockup": return ComponentCategory.MOCKUP;
-      default: return null;
+      case "Actions":
+        return ComponentCategory.ACTION;
+      case "Display":
+        return ComponentCategory.DISPLAY;
+      case "Input":
+        return ComponentCategory.INPUT;
+      case "Layout":
+        return ComponentCategory.LAYOUT;
+      case "Navigation":
+        return ComponentCategory.NAVIGATION;
+      case "Feedback":
+        return ComponentCategory.FEEDBACK;
+      case "Mockup":
+        return ComponentCategory.MOCKUP;
+      default:
+        return null;
     }
   };
 
@@ -120,9 +128,9 @@ export default function ComponentsFilterInteractive(
   const filteredComponents = selectedCategory === "All"
     ? components
     : components.filter((component) => {
-        const enumValue = categoryNameToEnum(selectedCategory);
-        return enumValue && component.category === enumValue;
-      });
+      const enumValue = categoryNameToEnum(selectedCategory);
+      return enumValue && component.category === enumValue;
+    });
 
   const handleCategoryChange = (categoryName: string) => {
     setSelectedCategory(categoryName);

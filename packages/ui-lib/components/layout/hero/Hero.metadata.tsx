@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Hero } from "./Hero.tsx";
 
 const heroExamples: ComponentExample[] = [
@@ -10,9 +10,9 @@ const heroExamples: ComponentExample[] = [
       subtitle: "Build amazing applications with our modern tools and components",
       primaryCTA: {
         text: "Get Started",
-        href: "/signup"
-      }
-    }
+        href: "/signup",
+      },
+    },
   },
   {
     title: "Hero with Figure",
@@ -24,13 +24,13 @@ const heroExamples: ComponentExample[] = [
       secondaryCTA: { text: "View Demo" },
       variant: "split",
       content: (
-        <img 
-          src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.jpg" 
-          class="max-w-sm rounded-lg shadow-2xl" 
+        <img
+          src="https://img.daisyui.com/images/stock/photo-1635805737707-575885ab0820.jpg"
+          class="max-w-sm rounded-lg shadow-2xl"
           alt="Hero"
         />
-      )
-    }
+      ),
+    },
   },
   {
     title: "Overlay Hero",
@@ -43,8 +43,8 @@ const heroExamples: ComponentExample[] = [
       backgroundImage: "https://img.daisyui.com/images/stock/photo-1507003211169-0a1dd7228f2d.jpg",
       primaryCTA: { text: "Learn More" },
       align: "center",
-      size: "lg"
-    }
+      size: "lg",
+    },
   },
   {
     title: "Centered Content",
@@ -56,12 +56,13 @@ const heroExamples: ComponentExample[] = [
       background: "gradient",
       primaryCTA: { text: "Explore Now" },
       secondaryCTA: { text: "Watch Video" },
-      align: "center"
-    }
+      align: "center",
+    },
   },
   {
     title: "Full-Screen Hero",
-    description: "Full viewport height hero for landing pages"},
+    description: "Full viewport height hero for landing pages",
+  },
 ];
 
 export const heroMetadata: ComponentMetadata = {
@@ -79,8 +80,10 @@ export const heroMetadata: ComponentMetadata = {
         subtitle="Build amazing things with our platform"
         primaryCTA={{
           text: "Get Started",
-          onClick: () => {}}}
+          onClick: () => {},
+        }}
         className="h-48"
       />
     </div>
-  )};
+  ),
+};

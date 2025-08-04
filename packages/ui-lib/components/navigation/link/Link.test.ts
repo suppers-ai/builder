@@ -39,7 +39,15 @@ Deno.test("Link - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Link({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
       children: `${color} link`,
       href: "/test",
     }));

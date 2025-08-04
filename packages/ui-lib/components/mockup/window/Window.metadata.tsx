@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { WindowMockup } from "./WindowMockup.tsx";
 
 const windowExamples: ComponentExample[] = [
@@ -7,37 +7,41 @@ const windowExamples: ComponentExample[] = [
     description: "Simple OS window mockup",
     props: {
       title: "Application Window",
-      children: "Window content"
-    }
-  },  {
+      children: "Window content",
+    },
+  },
+  {
     title: "Window with Toolbar",
     description: "Window with toolbar and menu items",
     props: {
       title: "Application Window",
-      children: "Window content"
-    }
-  },  {
+      children: "Window content",
+    },
+  },
+  {
     title: "Colored Window",
     description: "Window with custom title bar color",
     props: {
       title: "Application Window",
       children: "Window content",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Responsive Window",
     description: "Window that adapts to different screen sizes",
     props: {
       title: "Application Window",
-      children: "Window content"
-    }
-  },  {
+      children: "Window content",
+    },
+  },
+  {
     title: "Minimized Window",
     description: "Window in minimized state with reduced content",
     props: {
       title: "Application Window",
-      children: "Window content"
-    }
+      children: "Window content",
+    },
   },
 ];
 
@@ -57,4 +61,5 @@ export const windowMetadata: ComponentMetadata = {
         </div>
       </WindowMockup>
     </div>
-  )};
+  ),
+};

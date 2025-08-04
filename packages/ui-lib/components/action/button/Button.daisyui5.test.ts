@@ -11,10 +11,10 @@ Deno.test("Button - DaisyUI 5 loading spinner", () => {
 
   // Should have both loading classes in the button element
   assertStringIncludes(html, 'class="btn loading loading-spinner"');
-  
+
   // Should have loading spinner span element
   assertStringIncludes(html, '<span class="loading loading-spinner"></span>');
-  
+
   // Should be disabled when loading
   assertStringIncludes(html, "disabled");
 });
@@ -60,9 +60,17 @@ Deno.test("Button - DaisyUI 5 shape variants", () => {
 
 Deno.test("Button - DaisyUI 5 all color variants", () => {
   const colors = [
-    "primary", "secondary", "accent", "neutral", 
-    "base-100", "base-200", "base-300",
-    "info", "success", "warning", "error"
+    "primary",
+    "secondary",
+    "accent",
+    "neutral",
+    "base-100",
+    "base-200",
+    "base-300",
+    "info",
+    "success",
+    "warning",
+    "error",
   ] as const;
 
   colors.forEach((color) => {

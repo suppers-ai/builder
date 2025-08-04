@@ -1,18 +1,23 @@
 import { type PageProps } from "fresh";
+import { Button } from "@suppers/ui-lib";
 
 export default function Home(_props: PageProps) {
   return (
     <div class="px-4">
-      <div class="relative w-full h-[calc(100vh-80px)] overflow-hidden rounded-3xl" id="hero-container">
+      <div
+        class="relative w-full h-[calc(100vh-80px)] overflow-hidden rounded-3xl"
+        id="hero-container"
+      >
         {/* Background Image - Initial */}
-        <div 
-          class="absolute inset-0 bg-cover bg-center transition-opacity duration-500 ease-in-out" 
+        <div
+          class="absolute inset-0 bg-cover bg-center transition-opacity duration-500 ease-in-out"
           style="background-image: url('/hero-gradient.webp');"
           id="hero-image"
-        ></div>
-        
+        >
+        </div>
+
         {/* Background Video - Loads after image */}
-        <video 
+        <video
           class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 ease-in-out"
           id="hero-video"
           autoplay
@@ -20,7 +25,7 @@ export default function Home(_props: PageProps) {
           playsInline
           onLoadedData="document.getElementById('hero-video').style.opacity = '1'; document.getElementById('hero-image').style.opacity = '0';"
         >
-          <source src="/hero-gradient.mp4" type="video/mp4"/>
+          <source src="/hero-gradient.mp4" type="video/mp4" />
         </video>
 
         {/* Main Content - Centered */}
@@ -35,9 +40,9 @@ export default function Home(_props: PageProps) {
 
         {/* Browse Applications Button - Bottom Left */}
         <div class="absolute bottom-6 left-6 z-10">
-          <a href="/applications" class="btn btn-primary rounded-full shadow-lg">
+          <Button as="a" href="/applications" color="primary" class="rounded-full shadow-lg">
             Browse Applications
-          </a>
+          </Button>
         </div>
       </div>
     </div>

@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 
 const searchModalExamples: ComponentExample[] = [
   {
@@ -10,10 +11,12 @@ const searchModalExamples: ComponentExample[] = [
     description: "Simple search modal with placeholder text",
     props: {
       isOpen: false,
-      onClose: () => console.log('Closed'),
-      onSearch: (query: string) => console.log('Search:', query),
-      placeholder: "Search components..."},
-    interactive: true},
+      onClose: () => console.log("Closed"),
+      onSearch: (query: string) => console.log("Search:", query),
+      placeholder: "Search components...",
+    },
+    interactive: true,
+  },
   {
     title: "Search Modal with Results",
     description: "Search modal displaying search results",
@@ -24,21 +27,22 @@ const searchModalExamples: ComponentExample[] = [
       searchResults: [
         {
           id: "1",
-          title: "Button Component", 
+          title: "Button Component",
           description: "Interactive buttons with multiple variants",
           url: "/components/action/button",
-          category: "Action"
+          category: "Action",
         },
         {
-          id: "2", 
+          id: "2",
           title: "Input Component",
           description: "Text input fields for user data",
           url: "/components/input/input",
-          category: "Input"
-        }
-      ]
+          category: "Input",
+        },
+      ],
     },
-    interactive: true},
+    interactive: true,
+  },
   {
     title: "Loading Search Modal",
     description: "Search modal with loading state",
@@ -47,8 +51,10 @@ const searchModalExamples: ComponentExample[] = [
       onClose: () => {},
       onSearch: () => {},
       loading: true,
-      placeholder: "Searching..."},
-    interactive: true},
+      placeholder: "Searching...",
+    },
+    interactive: true,
+  },
   {
     title: "Customized Search Modal",
     description: "Search modal with custom settings",
@@ -59,8 +65,10 @@ const searchModalExamples: ComponentExample[] = [
       placeholder: "Find documentation...",
       showKeyboardShortcut: false,
       maxResults: 5,
-      autoFocus: false},
-    interactive: true},
+      autoFocus: false,
+    },
+    interactive: true,
+  },
 ];
 
 const searchModalProps: ComponentProp[] = [
@@ -68,55 +76,66 @@ const searchModalProps: ComponentProp[] = [
     name: "isOpen",
     type: "boolean",
     description: "Controls modal visibility",
-    required: true},
+    required: true,
+  },
   {
     name: "onClose",
     type: "() => void",
     description: "Function called when modal is closed",
-    required: true},
+    required: true,
+  },
   {
     name: "onSearch",
     type: "(query: string) => void",
     description: "Function called when search is performed",
-    required: true},
+    required: true,
+  },
   {
     name: "placeholder",
     type: "string",
     description: "Search input placeholder text",
-    default: "Search components..."},
+    default: "Search components...",
+  },
   {
     name: "searchResults",
     type: "SearchResult[]",
     description: "Array of search results to display",
-    default: "[]"},
+    default: "[]",
+  },
   {
     name: "loading",
     type: "boolean",
     description: "Show loading state",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "autoFocus",
     type: "boolean",
     description: "Auto-focus search input when opened",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "showKeyboardShortcut",
     type: "boolean",
     description: "Show keyboard shortcut hints",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "maxResults",
     type: "number",
     description: "Maximum number of results to display",
-    default: "10"},
+    default: "10",
+  },
   {
     name: "className",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Additional content in results area"},
+    description: "Additional content in results area",
+  },
 ];
 
 export const searchModalMetadata: ComponentMetadata = {
@@ -163,4 +182,5 @@ export const searchModalMetadata: ComponentMetadata = {
     "Keyboard shortcuts are hidden on mobile for better responsive design",
     "Built on top of Modal component for consistent behavior",
     "Automatically clears search query when closed",
-  ]};
+  ],
+};

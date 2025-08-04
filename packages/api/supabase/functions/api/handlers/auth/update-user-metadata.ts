@@ -2,7 +2,10 @@ import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-export async function updateUserMetadata(request: Request, supabase: SupabaseClient): Promise<Response> {
+export async function updateUserMetadata(
+  request: Request,
+  supabase: SupabaseClient,
+): Promise<Response> {
   const body = await request.json();
   const {
     firstName,
@@ -16,7 +19,7 @@ export async function updateUserMetadata(request: Request, supabase: SupabaseCli
   // Get the Authorization header to extract the token
   const authHeader = request.headers.get("Authorization")?.trim();
   const token = authHeader?.replace("Bearer ", "");
-  
+
   console.log("🔍 Auth header:", authHeader);
   console.log("token", token);
   console.log("🔍 Token:", token ? "present" : "missing");
@@ -55,7 +58,7 @@ export async function updateUserMetadata(request: Request, supabase: SupabaseCli
 
   // Prepare metadata update
   const metadata: Record<string, any> = {};
-  
+
   if (firstName !== undefined) metadata.firstName = firstName;
   if (lastName !== undefined) metadata.lastName = lastName;
   if (displayName !== undefined) metadata.displayName = displayName;
@@ -66,7 +69,7 @@ export async function updateUserMetadata(request: Request, supabase: SupabaseCli
   // Update user metadata using admin client with user ID
   const { data: user, error } = await supabaseAdmin.auth.admin.updateUserById(
     authUser.id,
-    { user_metadata: metadata }
+    { user_metadata: metadata },
   );
 
   console.log("🔍 User:", user);
@@ -81,9 +84,12 @@ export async function updateUserMetadata(request: Request, supabase: SupabaseCli
   }
 
   // Also update the database table if we have theme or other database fields
-  if (theme !== undefined || firstName !== undefined || lastName !== undefined || displayName !== undefined) {
+  if (
+    theme !== undefined || firstName !== undefined || lastName !== undefined ||
+    displayName !== undefined
+  ) {
     const dbUpdateData: Record<string, any> = {};
-    
+
     if (firstName !== undefined) dbUpdateData.first_name = firstName;
     if (lastName !== undefined) dbUpdateData.last_name = lastName;
     if (displayName !== undefined) dbUpdateData.display_name = displayName;
@@ -106,4 +112,4 @@ export async function updateUserMetadata(request: Request, supabase: SupabaseCli
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-} 
+}

@@ -66,7 +66,7 @@ export default function ComponentsPage({ url }: PageProps) {
           </div>
         </div>
       </nav>
-  
+
       <div class="px-4 lg:px-6 py-8">
         <div class="max-w-7xl mx-auto">
           {/* Interactive Components Filter using serializable metadata */}

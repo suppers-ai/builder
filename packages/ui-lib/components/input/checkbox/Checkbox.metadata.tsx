@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Checkbox } from "./Checkbox.tsx";
 
 const checkboxExamples: ComponentExample[] = [
@@ -11,38 +12,42 @@ const checkboxExamples: ComponentExample[] = [
     description: "Simple checkbox with labels",
     props: {
       label: "Check me",
-      checked: false
-    }
-  },  {
+      checked: false,
+    },
+  },
+  {
     title: "Checkbox Sizes",
     description: "Different sizes for various contexts",
     props: {
       label: "Check me",
       checked: false,
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Checkbox Colors",
     description: "Various color themes",
     props: {
       label: "Check me",
       checked: false,
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Checkbox States",
     description: "Different states and variants",
     props: {
       label: "Check me",
-      checked: false
-    }
-  },  {
+      checked: false,
+    },
+  },
+  {
     title: "Checkbox Group",
     description: "Group of related checkboxes",
     props: {
       label: "Check me",
-      checked: false
-    }
+      checked: false,
+    },
   },
 ];
 
@@ -50,47 +55,57 @@ const checkboxProps: ComponentProp[] = [
   {
     name: "label",
     type: "string",
-    description: "Checkbox label text"},
+    description: "Checkbox label text",
+  },
   {
     name: "checked",
     type: "boolean",
     description: "Whether checkbox is checked",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Checkbox size",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
-    description: "Checkbox color theme"},
+    description: "Checkbox color theme",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Whether checkbox is disabled",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "indeterminate",
     type: "boolean",
     description: "Show indeterminate state",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onChange",
     type: "(checked: boolean) => void",
-    description: "Function called when checkbox state changes"},
+    description: "Function called when checkbox state changes",
+  },
   {
     name: "name",
     type: "string",
-    description: "Form input name attribute"},
+    description: "Form input name attribute",
+  },
   {
     name: "value",
     type: "string",
-    description: "Form input value attribute"},
+    description: "Form input value attribute",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const checkboxMetadata: ComponentMetadata = {
@@ -128,4 +143,5 @@ export const checkboxMetadata: ComponentMetadata = {
     "Consider using fieldsets for checkbox groups",
     "Ensure sufficient contrast for all color variants",
     "Support keyboard navigation with proper tabindex",
-  ]};
+  ],
+};

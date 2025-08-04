@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Stack } from "./Stack.tsx";
 
 const stackExamples: ComponentExample[] = [
@@ -9,22 +9,26 @@ const stackExamples: ComponentExample[] = [
       children: [
         <div class="bg-primary text-primary-content p-6 rounded-lg">Layer 1</div>,
         <div class="bg-secondary text-secondary-content p-6 rounded-lg">Layer 2</div>,
-        <div class="bg-accent text-accent-content p-6 rounded-lg">Layer 3</div>
-      ]
-    }
+        <div class="bg-accent text-accent-content p-6 rounded-lg">Layer 3</div>,
+      ],
+    },
   },
   {
     title: "Stacked Cards",
-    description: "Card components arranged in a stack"},
+    description: "Card components arranged in a stack",
+  },
   {
     title: "Stack with Text",
-    description: "Text elements layered with different backgrounds"},
+    description: "Text elements layered with different backgrounds",
+  },
   {
     title: "Image Stack",
-    description: "Stacked images with different effects"},
+    description: "Stacked images with different effects",
+  },
   {
     title: "Shadowed Stack",
-    description: "Stack with shadow effects and depth"},
+    description: "Stack with shadow effects and depth",
+  },
 ];
 
 export const stackMetadata: ComponentMetadata = {
@@ -43,4 +47,5 @@ export const stackMetadata: ComponentMetadata = {
         <div class="bg-accent text-accent-content p-4 rounded-lg">Layer 3</div>
       </Stack>
     </div>
-  )};
+  ),
+};

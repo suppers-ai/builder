@@ -60,7 +60,7 @@ Deno.test("Checkbox - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Checkbox({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, `checkbox-${size}`);
   });
@@ -71,7 +71,15 @@ Deno.test("Checkbox - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Checkbox({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
     }));
     assertStringIncludes(html, `checkbox-${color}`);
   });
@@ -241,7 +249,7 @@ Deno.test("Checkbox - HTML snapshot all sizes", async (t) => {
   const sizes = ["xs", "sm", "md", "lg"];
   const htmls = sizes.map((size) =>
     renderToString(Checkbox({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       label: `Size ${size}`,
       color: "primary",
     }))

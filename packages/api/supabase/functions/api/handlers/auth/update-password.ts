@@ -1,7 +1,10 @@
 import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function updatePassword(request: Request, supabase: SupabaseClient): Promise<Response> {
+export async function updatePassword(
+  request: Request,
+  supabase: SupabaseClient,
+): Promise<Response> {
   if (request.method !== "POST") {
     return new Response("Method not allowed", {
       status: 405,
@@ -39,7 +42,7 @@ export async function updatePassword(request: Request, supabase: SupabaseClient)
     }
 
     const { error } = await supabase.auth.updateUser({
-      password: password
+      password: password,
     });
 
     if (error) {
@@ -49,10 +52,13 @@ export async function updatePassword(request: Request, supabase: SupabaseClient)
       });
     }
 
-    return new Response(JSON.stringify({ success: true, message: "Password updated successfully" }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: true, message: "Password updated successfully" }),
+      {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     console.error("Update password error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {

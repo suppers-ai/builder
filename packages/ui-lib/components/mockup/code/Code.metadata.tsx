@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { CodeMockup } from "./CodeMockup.tsx";
 
 const codeExamples: ComponentExample[] = [
@@ -11,8 +11,8 @@ const codeExamples: ComponentExample[] = [
   return true;
 }`,
       _language: "javascript",
-      showLineNumbers: true
-    }
+      showLineNumbers: true,
+    },
   },
   {
     title: "Code with Prefix",
@@ -22,8 +22,8 @@ const codeExamples: ComponentExample[] = [
 npm start
 echo "Server running on port 3000"`,
       variant: "terminal",
-      showLineNumbers: false
-    }
+      showLineNumbers: false,
+    },
   },
   {
     title: "Multi-line Code",
@@ -48,8 +48,8 @@ async function fetchUser(id: number): Promise<User> {
 export { User, fetchUser };`,
       _language: "typescript",
       filename: "user.ts",
-      showLineNumbers: true
-    }
+      showLineNumbers: true,
+    },
   },
   {
     title: "Python Code Theme",
@@ -75,8 +75,8 @@ results = analyze_data(data)
 print(f"Analysis complete: {results['count']} records processed")`,
       _language: "python",
       filename: "analysis.py",
-      showLineNumbers: true
-    }
+      showLineNumbers: true,
+    },
   },
   {
     title: "CSS Code Block",
@@ -106,9 +106,9 @@ print(f"Analysis complete: {results['count']} records processed")`,
 }`,
       _language: "css",
       filename: "styles.css",
-      showLineNumbers: true
-    }
-  }
+      showLineNumbers: true,
+    },
+  },
 ];
 
 export const codeMetadata: ComponentMetadata = {
@@ -128,5 +128,5 @@ export const codeMetadata: ComponentMetadata = {
         showLineNumbers
       />
     </div>
-  )
+  ),
 };

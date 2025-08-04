@@ -1,16 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import { StoreAuthHelpers } from "../lib/auth-helpers.ts";
 import type { StoredUser } from "../lib/auth-helpers.ts";
-import { 
-  Home, 
-  Package, 
-  Plus, 
-  Settings, 
-  User, 
-  LogOut,
-  Store,
-  FileText
-} from "lucide-preact";
+import { FileText, Home, LogOut, Package, Plus, Settings, Store, User } from "lucide-preact";
+import { Button } from "@suppers/ui-lib";
 
 interface SidebarProps {
   currentPath?: string;
@@ -24,15 +16,18 @@ export default function Sidebar({ currentPath = "/" }: SidebarProps) {
     const checkAuth = async () => {
       try {
         console.log("🔍 Sidebar: Checking authentication...");
-        
+
         // Add timeout to prevent hanging
         const authPromise = StoreAuthHelpers.getCurrentUser();
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Auth check timeout")), 5000)
         );
-        
+
         const currentUser = await Promise.race([authPromise, timeoutPromise]);
-        console.log("🔍 Sidebar: Auth check result:", { user: !!currentUser, email: currentUser?.email });
+        console.log("🔍 Sidebar: Auth check result:", {
+          user: !!currentUser,
+          email: currentUser?.email,
+        });
         setUser(currentUser);
       } catch (err) {
         console.error("❌ Sidebar: Auth check failed:", err);
@@ -65,16 +60,18 @@ export default function Sidebar({ currentPath = "/" }: SidebarProps) {
   const handleLogin = () => {
     console.log("🔵 SSO Login clicked!");
     const profilePackageUrl = "http://localhost:8001";
-    
+
     // For cross-origin SSO, we'll use a special parameter to indicate this is for external app
-    const loginUrl = `${profilePackageUrl}/login?external_app=store&origin=${encodeURIComponent(globalThis.location?.origin || "")}`;
-    
+    const loginUrl = `${profilePackageUrl}/login?external_app=store&origin=${
+      encodeURIComponent(globalThis.location?.origin || "")
+    }`;
+
     console.log("🔵 Opening popup to:", loginUrl);
-    
+
     const popup = globalThis.window?.open(
       loginUrl,
       "sso-login",
-      "width=500,height=700,scrollbars=yes,resizable=yes"
+      "width=500,height=700,scrollbars=yes,resizable=yes",
     );
 
     if (!popup) {
@@ -91,35 +88,40 @@ export default function Sidebar({ currentPath = "/" }: SidebarProps) {
       console.log("🔍 Message origin:", event.origin);
       console.log("🔍 Expected origin:", profilePackageUrl);
       console.log("🔍 Message data:", event.data);
-      
+
       // Only accept messages from profile package
       if (event.origin !== profilePackageUrl) {
-        console.warn("⚠️ Ignoring message from unknown origin:", event.origin, "expected:", profilePackageUrl);
+        console.warn(
+          "⚠️ Ignoring message from unknown origin:",
+          event.origin,
+          "expected:",
+          profilePackageUrl,
+        );
         return;
       }
 
       if (event.data?.type === "SSO_SUCCESS") {
         console.log("✅ SSO Success message received:", event.data);
-        
+
         // Extract tokens and user data from message
         const { accessToken, refreshToken, user, expiresIn } = event.data;
-        
+
         console.log("🔍 Message contents:", {
           hasAccessToken: !!accessToken,
           hasRefreshToken: !!refreshToken,
           hasUser: !!user,
           userEmail: user?.email,
-          expiresIn: expiresIn
+          expiresIn: expiresIn,
         });
-        
+
         if (accessToken && user) {
           // Store the session
           StoreAuthHelpers.storeSession(accessToken, refreshToken || "", user, expiresIn);
-          
+
           // Update UI
           setUser(user);
           console.log("✅ User logged in via message:", user.email);
-          
+
           // Close popup
           popup?.close();
         } else {
@@ -149,7 +151,7 @@ export default function Sidebar({ currentPath = "/" }: SidebarProps) {
 
   const handleLogout = async () => {
     try {
-      console.log('logout');
+      console.log("logout");
       await StoreAuthHelpers.signOut();
       setUser(null);
       // globalThis.location.href = "/";
@@ -200,13 +202,13 @@ export default function Sidebar({ currentPath = "/" }: SidebarProps) {
       onClick: () => {
         globalThis.window?.open("http://localhost:8001/profile", "_blank");
       },
-      icon: User
+      icon: User,
     },
     {
       label: "Logout",
       onClick: () => handleLogout(),
-      icon: LogOut
-    }
+      icon: LogOut,
+    },
   ];
 
   return (
@@ -251,66 +253,79 @@ export default function Sidebar({ currentPath = "/" }: SidebarProps) {
 
         {/* Auth Section at Bottom */}
         <div className="p-4 border-t border-base-300">
-          {loading ? (
-            <div className="flex items-center justify-center p-4">
-              <div className="loading loading-spinner loading-sm"></div>
-            </div>
-          ) : user ? (
-            // Authenticated - Show User Profile
-            <div className="dropdown dropdown-top dropdown-end w-full">
-              <div tabIndex={0} role="button" className="btn btn-ghost w-full justify-start gap-3 p-2">
-                <div className="avatar">
-                  <div className="w-8 rounded-full">
-                    {user.user_metadata?.avatar_url ? (
-                      <img
-                        alt="User avatar"
-                        src={user.user_metadata.avatar_url}
-                      />
-                    ) : (
-                      <div className="bg-neutral text-neutral-content rounded-full w-8 h-8 flex items-center justify-center text-sm">
-                        {user.email?.charAt(0).toUpperCase() || "U"}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="text-left flex-1">
-                  <div className="text-sm font-medium truncate">
-                    {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
-                  </div>
-                  <div className="text-xs text-base-content/70 truncate">
-                    {user.email}
-                  </div>
-                </div>
+          {loading
+            ? (
+              <div className="flex items-center justify-center p-4">
+                <div className="loading loading-spinner loading-sm"></div>
               </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg mb-2"
-              >
-                {dropdownItems.map((item, index) => (
-                  <li key={index}>
-                    <button
-                      onClick={item.onClick}
-                      className="flex items-center gap-2"
-                    >
-                      <item.icon className="w-4 h-4" />
-                      {item.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            // Not Authenticated - Show Login Button
-            <div className="space-y-2">
-              <button
-                onClick={handleLogin}
-                className="btn btn-outline btn-sm w-full gap-2"
-              >
-                <User className="w-4 h-4" />
-                Sign In
-              </button>
-            </div>
-          )}
+            )
+            : user
+            ? (
+              // Authenticated - Show User Profile
+              <div className="dropdown dropdown-top dropdown-end w-full">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-ghost w-full justify-start gap-3 p-2"
+                >
+                  <div className="avatar">
+                    <div className="w-8 rounded-full">
+                      {user.user_metadata?.avatar_url
+                        ? (
+                          <img
+                            alt="User avatar"
+                            src={user.user_metadata.avatar_url}
+                          />
+                        )
+                        : (
+                          <div className="bg-neutral text-neutral-content rounded-full w-8 h-8 flex items-center justify-center text-sm">
+                            {user.email?.charAt(0).toUpperCase() || "U"}
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                  <div className="text-left flex-1">
+                    <div className="text-sm font-medium truncate">
+                      {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
+                    </div>
+                    <div className="text-xs text-base-content/70 truncate">
+                      {user.email}
+                    </div>
+                  </div>
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg mb-2"
+                >
+                  {dropdownItems.map((item, index) => (
+                    <li key={index}>
+                      <Button
+                        onClick={item.onClick}
+                        className="flex items-center gap-2 bg-transparent border-none"
+                        variant="ghost"
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+            : (
+              // Not Authenticated - Show Login Button
+              <div className="space-y-2">
+                <Button
+                  onClick={handleLogin}
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  Sign In
+                </Button>
+              </div>
+            )}
         </div>
       </aside>
     </div>

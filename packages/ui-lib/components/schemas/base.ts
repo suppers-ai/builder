@@ -75,7 +75,9 @@ export const DisabledPropsSchema = z.object({
 
 export const LoadingPropsSchema = z.object({
   loading: z.boolean().optional().default(false).describe("Show loading state"),
-  loadingType: DaisyUILoadingTypeSchema.optional().default("spinner").describe("Loading animation type (DaisyUI 5)"),
+  loadingType: DaisyUILoadingTypeSchema.optional().default("spinner").describe(
+    "Loading animation type (DaisyUI 5)",
+  ),
 }).describe("Loading state properties (DaisyUI 5 compatible)");
 
 export const ActivePropsSchema = z.object({

@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { PasswordInput } from "./PasswordInput.tsx";
 
 const passwordInputExamples: ComponentExample[] = [
@@ -10,35 +11,39 @@ const passwordInputExamples: ComponentExample[] = [
     title: "Basic Password Input",
     description: "Simple password input with toggle visibility",
     props: {
-      placeholder: "Enter password..."
-    }
-  },  {
+      placeholder: "Enter password...",
+    },
+  },
+  {
     title: "Password Input Sizes",
     description: "Different sizes for various contexts",
     props: {
       placeholder: "Enter password...",
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Password Input Colors",
     description: "Different color variants for validation states",
     props: {
       placeholder: "Enter password...",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Password Input Variants",
     description: "Different visual styles and states",
     props: {
       placeholder: "Enter password...",
-      variant: "outlined"
-    }
-  },  {
+      variant: "outlined",
+    },
+  },
+  {
     title: "Password Input with Auto-complete",
     description: "Password inputs for different form contexts",
     props: {
-      placeholder: "Enter password..."
-    }
+      placeholder: "Enter password...",
+    },
   },
 ];
 
@@ -46,63 +51,76 @@ const passwordInputProps: ComponentProp[] = [
   {
     name: "value",
     type: "string",
-    description: "Password input value"},
+    description: "Password input value",
+  },
   {
     name: "placeholder",
     type: "string",
     description: "Placeholder text",
-    default: "••••••••"},
+    default: "••••••••",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Input size",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Input color theme for validation states"},
+    description: "Input color theme for validation states",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "required",
     type: "boolean",
     description: "Mark as required field",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "autoComplete",
     type: "string",
     description: "Auto-complete behavior",
-    default: "current-password"},
+    default: "current-password",
+  },
   {
     name: "showToggle",
     type: "boolean",
     description: "Show password visibility toggle button",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "onChange",
     type: "(value: string) => void",
-    description: "Called when input value changes"},
+    description: "Called when input value changes",
+  },
   {
     name: "onVisibilityToggle",
     type: "(visible: boolean) => void",
-    description: "Called when visibility is toggled"},
+    description: "Called when visibility is toggled",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const passwordInputMetadata: ComponentMetadata = {
@@ -149,4 +167,5 @@ export const passwordInputMetadata: ComponentMetadata = {
     "showToggle=false removes the visibility button for high-security contexts",
     "Eye icon changes based on visibility state",
     "Proper ARIA labels and keyboard accessibility built-in",
-  ]};
+  ],
+};

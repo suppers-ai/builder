@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { ChatBubble } from "./ChatBubble.tsx";
 
 const chatBubbleExamples: ComponentExample[] = [
@@ -8,41 +8,45 @@ const chatBubbleExamples: ComponentExample[] = [
     props: {
       message: "Hello! How can I help you today?",
       sender: "Assistant",
-      timestamp: "2:30 PM"
-    }
-  },  {
+      timestamp: "2:30 PM",
+    },
+  },
+  {
     title: "With User Avatar",
     description: "Chat bubble with user profile image",
     props: {
       message: "Hello! How can I help you today?",
       sender: "Assistant",
-      timestamp: "2:30 PM"
-    }
-  },  {
+      timestamp: "2:30 PM",
+    },
+  },
+  {
     title: "With Header Info",
     description: "Chat bubble with timestamp and user details",
     props: {
       message: "Hello! How can I help you today?",
       sender: "Assistant",
-      timestamp: "2:30 PM"
-    }
-  },  {
+      timestamp: "2:30 PM",
+    },
+  },
+  {
     title: "Different Colors",
     description: "Chat bubbles with various color themes for different message types",
     props: {
       message: "Hello! How can I help you today?",
       sender: "Assistant",
       timestamp: "2:30 PM",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Start and End Positions",
     description: "Conversation flow with alternating message positions",
     props: {
       message: "Hello! How can I help you today?",
       sender: "Assistant",
-      timestamp: "2:30 PM"
-    }
+      timestamp: "2:30 PM",
+    },
   },
 ];
 
@@ -70,4 +74,5 @@ export const chatBubbleMetadata: ComponentMetadata = {
         color="primary"
       />
     </div>
-  )};
+  ),
+};

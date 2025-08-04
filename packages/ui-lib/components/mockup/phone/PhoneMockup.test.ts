@@ -48,7 +48,15 @@ Deno.test("PhoneMockup - color variants", () => {
   colors.forEach((color) => {
     const html = renderToString(PhoneMockup({
       children: "Test content",
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
     }));
 
     if (color === "black") {

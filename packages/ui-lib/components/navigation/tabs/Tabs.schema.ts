@@ -5,25 +5,21 @@
 
 import { z } from "zod";
 import { ComponentChildren } from "preact";
-import {
-  BaseComponentPropsSchema,
-  SizePropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, SizePropsSchema, withMetadata } from "../../schemas/base.ts";
 
 // Tab Item schema
 const TabItemSchema = z.object({
   id: z.string()
     .min(1)
     .describe("Unique tab identifier"),
-    
+
   label: z.string()
     .min(1)
     .describe("Tab display label"),
-    
+
   content: z.custom<ComponentChildren>()
     .describe("Tab content to display when active"),
-    
+
   disabled: z.boolean()
     .default(false)
     .describe("Whether tab is disabled"),
@@ -35,61 +31,61 @@ const TabsSpecificPropsSchema = z.object({
     z.array(TabItemSchema)
       .min(1)
       .describe("Array of tab items"),
-    { 
+    {
       examples: [
         '[{ id: "tab1", label: "Overview", content: <div>Content</div> }]',
-        '[{ id: "settings", label: "Settings", content: settingsPanel, disabled: false }]'
-      ], 
-      since: "1.0.0" 
+        '[{ id: "settings", label: "Settings", content: settingsPanel, disabled: false }]',
+      ],
+      since: "1.0.0",
     },
   ),
-  
+
   activeTab: z.string()
     .optional()
     .describe("ID of currently active tab (defaults to first tab)"),
-    
+
   bordered: z.boolean()
     .default(false)
     .describe("Add borders to tabs"),
-    
+
   lifted: z.boolean()
     .default(false)
     .describe("Apply lifted tab style"),
-    
+
   boxed: z.boolean()
     .default(false)
     .describe("Apply boxed tab style"),
-    
+
   onTabChange: z.function()
     .args(z.string())
     .returns(z.void())
     .optional()
     .describe("Callback when tab is changed"),
 })
-.refine(
-  (data) => {
-    // If activeTab is specified, it must exist in tabs array
-    if (data.activeTab) {
-      return data.tabs.some(tab => tab.id === data.activeTab);
-    }
-    return true;
-  },
-  {
-    message: "activeTab must match an existing tab ID",
-    path: ["activeTab"],
-  }
-)
-.refine(
-  (data) => {
-    // All tab IDs must be unique
-    const ids = data.tabs.map(tab => tab.id);
-    return new Set(ids).size === ids.length;
-  },
-  {
-    message: "All tab IDs must be unique",
-    path: ["tabs"],
-  }
-);
+  .refine(
+    (data) => {
+      // If activeTab is specified, it must exist in tabs array
+      if (data.activeTab) {
+        return data.tabs.some((tab) => tab.id === data.activeTab);
+      }
+      return true;
+    },
+    {
+      message: "activeTab must match an existing tab ID",
+      path: ["activeTab"],
+    },
+  )
+  .refine(
+    (data) => {
+      // All tab IDs must be unique
+      const ids = data.tabs.map((tab) => tab.id);
+      return new Set(ids).size === ids.length;
+    },
+    {
+      message: "All tab IDs must be unique",
+      path: ["tabs"],
+    },
+  );
 
 // Complete Tabs Props Schema
 export const TabsPropsSchema = BaseComponentPropsSchema
@@ -127,5 +123,5 @@ export const validateTabsArray = (tabs: unknown): TabItemProps[] => {
 };
 
 export const validateActiveTab = (activeTab: string, tabs: TabItemProps[]): boolean => {
-  return tabs.some(tab => tab.id === activeTab);
+  return tabs.some((tab) => tab.id === activeTab);
 };

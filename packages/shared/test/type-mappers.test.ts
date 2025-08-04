@@ -3,11 +3,7 @@
  * Comprehensive tests for all type mapping functions
  */
 
-import {
-  assertEquals,
-  assertExists,
-  assertThrows,
-} from "@std/assert";
+import { assertEquals, assertExists, assertThrows } from "@std/assert";
 import {
   type AuthUser,
   TypeMappers,

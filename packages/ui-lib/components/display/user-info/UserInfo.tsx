@@ -1,6 +1,7 @@
 import { AuthUser } from "@suppers/auth-client";
 import { UserAvatar } from "../avatar/UserAvatar.tsx";
 import { Dropdown } from "../../action/dropdown/Dropdown.tsx";
+import { Button } from "../../action/button/Button.tsx";
 import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
 import { UserInfoProps } from "./UserInfo.schema.ts";
 import { Settings } from "lucide-preact";
@@ -14,7 +15,7 @@ export interface DropdownItem {
 export function UserInfo({
   user,
   dropdownItems = [],
-  class: className = ""
+  class: className = "",
 }: UserInfoProps) {
   // Handle undefined user case
   if (!user) {
@@ -46,21 +47,22 @@ export function UserInfo({
       {dropdownItems.length > 0 && (
         <Dropdown
           trigger={
-            <button className="btn btn-ghost btn-circle">
+            <Button variant="ghost" shape="circle">
               <Settings size={20} />
-            </button>
+            </Button>
           }
           content={
             <>
               {dropdownItems.map((item, index) => (
                 <li key={index}>
-                  <button 
+                  <Button
                     onClick={item.onClick}
-                    className="flex items-center gap-2 w-full"
+                    class="flex items-center gap-2 w-full bg-transparent border-none justify-start"
+                    type="button"
                   >
                     {item.icon && <item.icon size={16} />}
                     {item.label}
-                  </button>
+                  </Button>
                 </li>
               ))}
             </>

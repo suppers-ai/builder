@@ -1,9 +1,15 @@
-import { ComponentCategory, ComponentExample, ComponentMetadata, ComponentSchema } from "../../types.ts";
+import {
+  ComponentCategory,
+  ComponentExample,
+  ComponentMetadata,
+  ComponentSchema,
+} from "../../types.ts";
 import { Drawer } from "./Drawer.tsx";
 import {
   DrawerPropsSchema,
   safeValidateDrawerProps,
-  validateDrawerProps} from "./Drawer.schema.ts";
+  validateDrawerProps,
+} from "./Drawer.schema.ts";
 
 const drawerExamples: ComponentExample[] = [
   {
@@ -12,9 +18,15 @@ const drawerExamples: ComponentExample[] = [
     props: {
       sidebarContent: (
         <ul class="menu p-4 w-80 bg-base-200">
-          <li><a>Home</a></li>
-          <li><a>Projects</a></li>
-          <li><a>Settings</a></li>
+          <li>
+            <a>Home</a>
+          </li>
+          <li>
+            <a>Projects</a>
+          </li>
+          <li>
+            <a>Settings</a>
+          </li>
         </ul>
       ),
       open: true,
@@ -23,8 +35,8 @@ const drawerExamples: ComponentExample[] = [
           <h2 class="text-2xl font-bold">Main Content</h2>
           <p>This is the main content area.</p>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Drawer with Overlay",
@@ -46,8 +58,8 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Main content with overlay drawer.</p>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Responsive Drawer",
@@ -72,8 +84,8 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Content that works on mobile and desktop.</p>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Drawer with Navbar",
@@ -81,10 +93,18 @@ const drawerExamples: ComponentExample[] = [
     props: {
       sidebarContent: (
         <ul class="menu p-4 w-80 bg-base-200">
-          <li><a>Dashboard</a></li>
-          <li><a>Users</a></li>
-          <li><a>Settings</a></li>
-          <li><a>Logout</a></li>
+          <li>
+            <a>Dashboard</a>
+          </li>
+          <li>
+            <a>Users</a>
+          </li>
+          <li>
+            <a>Settings</a>
+          </li>
+          <li>
+            <a>Logout</a>
+          </li>
         </ul>
       ),
       navbar: (
@@ -103,8 +123,8 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Main content with integrated navbar.</p>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "End Drawer",
@@ -136,14 +156,16 @@ const drawerExamples: ComponentExample[] = [
         <div class="p-4">
           <p>Main content with right-side drawer.</p>
         </div>
-      )}
-        }
-      ];;
+      ),
+    },
+  },
+];
 
 const drawerSchema: ComponentSchema = {
   schema: DrawerPropsSchema,
   validateFn: validateDrawerProps,
-  safeValidateFn: safeValidateDrawerProps};
+  safeValidateFn: safeValidateDrawerProps,
+};
 
 export const drawerMetadata: ComponentMetadata = {
   name: "Drawer",
@@ -175,4 +197,5 @@ export const drawerMetadata: ComponentMetadata = {
         <div class="p-4">Main content area</div>
       </Drawer>
     </div>
-  )};
+  ),
+};

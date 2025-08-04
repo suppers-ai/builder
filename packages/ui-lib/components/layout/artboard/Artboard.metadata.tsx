@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Artboard } from "./Artboard.tsx";
 
 const artboardExamples: ComponentExample[] = [
@@ -14,8 +14,8 @@ const artboardExamples: ComponentExample[] = [
             <p>Your content goes here</p>
           </div>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Phone Artboard",
@@ -38,8 +38,8 @@ const artboardExamples: ComponentExample[] = [
             </button>
           </div>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Horizontal Artboard",
@@ -64,8 +64,8 @@ const artboardExamples: ComponentExample[] = [
             </div>
           </div>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Demo Artboard",
@@ -93,8 +93,8 @@ const artboardExamples: ComponentExample[] = [
             </div>
           </div>
         </div>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Responsive Artboard",
@@ -125,10 +125,10 @@ const artboardExamples: ComponentExample[] = [
             </div>
           </div>
         </div>
-      )
-    }
-        }
-      ];;
+      ),
+    },
+  },
+];
 
 export const artboardMetadata: ComponentMetadata = {
   name: "Artboard",
@@ -151,4 +151,5 @@ export const artboardMetadata: ComponentMetadata = {
         </div>
       </Artboard>
     </div>
-  )};
+  ),
+};

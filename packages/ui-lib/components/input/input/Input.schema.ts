@@ -9,7 +9,19 @@ import { InputBaseSchema, withMetadata } from "../../schemas/base.ts";
 // Input-specific props
 const InputSpecificPropsSchema = z.object({
   type: withMetadata(
-    z.enum(["text", "email", "password", "number", "date", "time", "datetime-local", "color", "tel", "url", "search"]).default("text").describe("HTML input type attribute"),
+    z.enum([
+      "text",
+      "email",
+      "password",
+      "number",
+      "date",
+      "time",
+      "datetime-local",
+      "color",
+      "tel",
+      "url",
+      "search",
+    ]).default("text").describe("HTML input type attribute"),
     { examples: ["text", "email", "password", "number", "date", "time", "color"], since: "1.0.0" },
   ),
 

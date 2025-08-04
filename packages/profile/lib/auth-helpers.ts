@@ -53,7 +53,7 @@ export class AuthHelpers {
    */
   static async signOut() {
     console.log("🔴 Starting logout process...");
-    
+
     try {
       // First, call the API logout endpoint
       console.log("🔴 Calling API logout endpoint...");
@@ -67,7 +67,7 @@ export class AuthHelpers {
     } catch (error) {
       console.warn("❌ API logout error:", error);
     }
-    
+
     // Test if logout worked by calling getCurrentUser
     try {
       console.log("🔴 Testing if logout worked - calling getCurrentUser...");
@@ -78,7 +78,10 @@ export class AuthHelpers {
         console.log("✅ Logout successful - getCurrentUser returns null");
       }
     } catch (error) {
-      console.log("✅ Logout successful - getCurrentUser throws error:", error instanceof Error ? error.message : "Unknown error");
+      console.log(
+        "✅ Logout successful - getCurrentUser throws error:",
+        error instanceof Error ? error.message : "Unknown error",
+      );
     }
 
     // Session clearing is now handled by API package
@@ -91,11 +94,11 @@ export class AuthHelpers {
       globalThis.localStorage.removeItem("expires_at");
       globalThis.localStorage.removeItem("token_type");
       globalThis.localStorage.removeItem("user_data");
-      
+
       // Clear any Supabase-specific storage keys
       globalThis.localStorage.removeItem("supabase.auth.token");
       globalThis.localStorage.removeItem("sb-localhost-auth-token");
-      
+
       // Clear any keys that might contain session data
       const keysToRemove = [];
       for (let i = 0; i < globalThis.localStorage.length; i++) {
@@ -104,11 +107,11 @@ export class AuthHelpers {
           keysToRemove.push(key);
         }
       }
-      keysToRemove.forEach(key => globalThis.localStorage.removeItem(key));
-      
+      keysToRemove.forEach((key) => globalThis.localStorage.removeItem(key));
+
       console.log("🧹 Cleared localStorage tokens and Supabase data");
     }
-    
+
     // Also clear sessionStorage
     if (typeof globalThis.sessionStorage !== "undefined") {
       const sessionKeysToRemove = [];
@@ -118,11 +121,11 @@ export class AuthHelpers {
           sessionKeysToRemove.push(key);
         }
       }
-      sessionKeysToRemove.forEach(key => globalThis.sessionStorage.removeItem(key));
-      
+      sessionKeysToRemove.forEach((key) => globalThis.sessionStorage.removeItem(key));
+
       console.log("🧹 Cleared sessionStorage auth data");
     }
-    
+
     // Force clear the apiClient token as well
     try {
       const { apiClient } = await import("./api-client.ts");
@@ -240,16 +243,16 @@ export class AuthHelpers {
   static onAuthStateChange(callback: (event: string, session: Session | null) => void) {
     // For now, return a mock subscription since the API doesn't support real-time auth state changes
     console.warn("onAuthStateChange is not fully implemented - using mock subscription");
-    
+
     // Return a mock subscription object
     return {
       data: {
         subscription: {
           unsubscribe: () => {
             console.log("Mock auth subscription unsubscribed");
-          }
-        }
-      }
+          },
+        },
+      },
     };
   }
 

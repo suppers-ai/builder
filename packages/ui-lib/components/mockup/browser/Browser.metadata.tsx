@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { BrowserMockup } from "./BrowserMockup.tsx";
 
 const browserExamples: ComponentExample[] = [
@@ -7,36 +7,40 @@ const browserExamples: ComponentExample[] = [
     description: "Simple browser window mockup",
     props: {
       url: "https://example.com",
-      children: "Website content goes here"
-    }
-  },  {
+      children: "Website content goes here",
+    },
+  },
+  {
     title: "Browser with Toolbar",
     description: "Browser mockup with address bar and controls",
     props: {
       url: "https://example.com",
-      children: "Website content goes here"
-    }
-  },  {
+      children: "Website content goes here",
+    },
+  },
+  {
     title: "Browser with Custom URL",
     description: "Browser showing dashboard with specific URL",
     props: {
       url: "https://example.com",
-      children: "Website content goes here"
-    }
-  },  {
+      children: "Website content goes here",
+    },
+  },
+  {
     title: "Dark Theme Browser",
     description: "Browser mockup with dark theme",
     props: {
       url: "https://example.com",
-      children: "Website content goes here"
-    }
-  },  {
+      children: "Website content goes here",
+    },
+  },
+  {
     title: "Responsive Browser",
     description: "Browser that adapts to different screen sizes",
     props: {
       url: "https://example.com",
-      children: "Website content goes here"
-    }
+      children: "Website content goes here",
+    },
   },
 ];
 
@@ -56,4 +60,5 @@ export const browserMetadata: ComponentMetadata = {
         </div>
       </BrowserMockup>
     </div>
-  )};
+  ),
+};

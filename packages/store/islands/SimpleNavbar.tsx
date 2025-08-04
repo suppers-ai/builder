@@ -1,4 +1,5 @@
 import SimpleAuthButton from "./SimpleAuthButton.tsx";
+import { Button } from "@suppers/ui-lib";
 
 interface SimpleNavbarProps {
   currentPath?: string;
@@ -15,13 +16,13 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
       {/* Logo - Left */}
       <div class="navbar-start">
         <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img 
-            src="/logos/long_light.png" 
+          <img
+            src="/logos/long_light.png"
             alt="Suppers Store Logo"
             class="h-8 w-auto object-contain dark:hidden"
           />
-          <img 
-            src="/logos/long_dark.png" 
+          <img
+            src="/logos/long_dark.png"
             alt="Suppers Store Logo"
             class="h-8 w-auto object-contain hidden dark:block"
           />
@@ -47,28 +48,26 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
             <a
               href="/create"
               class={`font-medium ${
-                currentPath === "/create"
-                  ? "text-primary"
-                  : "text-base-content hover:text-primary"
+                currentPath === "/create" ? "text-primary" : "text-base-content hover:text-primary"
               }`}
             >
               Create
             </a>
           </li>
           <li>
-            <button
+            <Button
               onClick={handleDocsClick}
-              class="font-medium text-base-content hover:text-primary"
+              class="font-medium text-base-content hover:text-primary bg-transparent border-none"
+              variant="ghost"
             >
               Docs
-            </button>
+            </Button>
           </li>
         </ul>
       </div>
 
       {/* Auth and Mobile Menu - Right */}
       <div class="navbar-end">
-        
         {/* Auth Button - Always visible */}
         <div class="mr-4">
           <SimpleAuthButton />
@@ -79,14 +78,24 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
           <div class="dropdown dropdown-end">
             <div tabIndex={0} role="button" class="btn btn-ghost">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </div>
-            <ul tabIndex={0} class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+            <ul
+              tabIndex={0}
+              class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+            >
               <li>
                 <a
                   href="/applications"
-                  class={currentPath === "/applications" || currentPath.startsWith("/applications") ? "active" : ""}
+                  class={currentPath === "/applications" || currentPath.startsWith("/applications")
+                    ? "active"
+                    : ""}
                 >
                   Applications
                 </a>
@@ -100,9 +109,13 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
                 </a>
               </li>
               <li>
-                <button onClick={handleDocsClick}>
+                <Button 
+                  onClick={handleDocsClick}
+                  class="bg-transparent border-none"
+                  variant="ghost"
+                >
                   Docs
-                </button>
+                </Button>
               </li>
             </ul>
           </div>

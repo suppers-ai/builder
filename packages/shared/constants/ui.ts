@@ -107,7 +107,7 @@ const THEMES = [
     category: "Light",
     colors: ["#519903", "#e9e92f", "#af4ab1", "#ffffff"],
   },
-   {
+  {
     name: "winter",
     label: "Winter",
     category: "Light",
@@ -217,7 +217,7 @@ const THEMES = [
     category: "Light",
     colors: ["#ff6b9d", "#4ecdc4", "#45b7d1", "#f8f9fa"],
   },
-]
+];
 
 export type THEME_KEYS = keyof typeof THEMES;
 

@@ -11,13 +11,21 @@ import { getSession } from "./session.ts";
 import { initiateOAuth } from "./oauth.ts";
 import { updateUserMetadata } from "./update-user-metadata.ts";
 
-export async function handleAuth(request: Request, context: { user: any, supabase: SupabaseClient, supabaseAdmin: SupabaseClient, pathSegments: string[] }): Promise<Response> {
+export async function handleAuth(
+  request: Request,
+  context: {
+    user: any;
+    supabase: SupabaseClient;
+    supabaseAdmin: SupabaseClient;
+    pathSegments: string[];
+  },
+): Promise<Response> {
   const { supabase } = context;
   const url = new URL(request.url);
   const path = url.pathname.split("/").pop();
 
   console.log("🔐 Auth handler called with path:", path);
-  
+
   try {
     switch (path) {
       case "me":
@@ -51,9 +59,12 @@ export async function handleAuth(request: Request, context: { user: any, supabas
     }
   } catch (error) {
     console.error("Auth handler error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   }
 }

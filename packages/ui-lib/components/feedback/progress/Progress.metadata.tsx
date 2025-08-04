@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Progress } from "./Progress.tsx";
 
 const progressExamples: ComponentExample[] = [
@@ -11,38 +12,42 @@ const progressExamples: ComponentExample[] = [
     description: "Simple progress bars with different values",
     props: {
       value: 70,
-      max: 100
-    }
-  },  {
+      max: 100,
+    },
+  },
+  {
     title: "Progress Colors",
     description: "Different color themes for various contexts",
     props: {
       value: 70,
       max: 100,
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Progress Sizes",
     description: "Different sizes for various use cases",
     props: {
       value: 70,
       max: 100,
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Indeterminate Progress",
     description: "Progress bars without specific progress value",
     props: {
       value: 70,
-      max: 100
-    }
-  },  {
+      max: 100,
+    },
+  },
+  {
     title: "Progress with Labels",
     description: "Progress bars with value labels and descriptions",
     props: {
       value: 70,
-      max: 100
-    }
+      max: 100,
+    },
   },
 ];
 
@@ -50,40 +55,48 @@ const progressProps: ComponentProp[] = [
   {
     name: "value",
     type: "number",
-    description: "Progress value (0-100)"},
+    description: "Progress value (0-100)",
+  },
   {
     name: "max",
     type: "number",
     description: "Maximum value",
-    default: "100"},
+    default: "100",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Progress bar color theme"},
+    description: "Progress bar color theme",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Progress bar size",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "indeterminate",
     type: "boolean",
     description: "Show indeterminate (loading) animation",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "striped",
     type: "boolean",
     description: "Show striped pattern",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "animated",
     type: "boolean",
     description: "Animate the striped pattern",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const progressMetadata: ComponentMetadata = {
@@ -112,4 +125,5 @@ export const progressMetadata: ComponentMetadata = {
     "Consider accessibility by providing aria-label or aria-describedby",
     "Combine with text labels for better user experience",
     "Use consistent sizing within the same interface",
-  ]};
+  ],
+};

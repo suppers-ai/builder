@@ -22,17 +22,17 @@ const applicationFields: FormField[] = [
     placeholder: "Enter application name",
     validation: {
       minLength: 3,
-      maxLength: 100
-    }
+      maxLength: 100,
+    },
   },
   {
-    key: "description", 
+    key: "description",
     label: "Description",
     type: "textarea",
     placeholder: "Enter application description",
     validation: {
-      maxLength: 500
-    }
+      maxLength: 500,
+    },
   },
   {
     key: "templateId",
@@ -43,27 +43,27 @@ const applicationFields: FormField[] = [
       {
         value: "fresh-basic",
         label: "Fresh Basic",
-        description: "Basic Fresh framework with Tailwind CSS"
-      }
-    ]
+        description: "Basic Fresh framework with Tailwind CSS",
+      },
+    ],
   },
   {
     key: "status",
-    label: "Status", 
+    label: "Status",
     type: "select",
     required: true,
     options: [
       { value: "draft", label: "Draft" },
       { value: "published", label: "Published" },
-      { value: "archived", label: "Archived" }
-    ]
+      { value: "archived", label: "Archived" },
+    ],
   },
   {
     key: "configuration",
     label: "Configuration (JSON)",
     type: "json",
-    placeholder: '{"key": "value"}'
-  }
+    placeholder: '{"key": "value"}',
+  },
 ];
 
 export function ApplicationForm({
@@ -73,19 +73,21 @@ export function ApplicationForm({
   isLoading = false,
   className = "",
 }: ApplicationFormProps) {
-  const initialData = application ? {
-    name: application.name,
-    description: application.description || "",
-    templateId: application.template_id,
-    status: application.status,
-    configuration: application.configuration || {}
-  } : {
-    name: "",
-    description: "",
-    templateId: "fresh-basic", 
-    status: "draft",
-    configuration: {}
-  };
+  const initialData = application
+    ? {
+      name: application.name,
+      description: application.description || "",
+      templateId: application.template_id,
+      status: application.status,
+      configuration: application.configuration || {},
+    }
+    : {
+      name: "",
+      description: "",
+      templateId: "fresh-basic",
+      status: "draft",
+      configuration: {},
+    };
 
   const handleSubmit = async (data: Record<string, any>) => {
     const submitData = {

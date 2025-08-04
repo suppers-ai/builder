@@ -4,12 +4,7 @@
  */
 
 import { FileSystem } from "../utils/mod.ts";
-import type {
-  ApplicationSpec,
-  ComponentDefinition,
-  GlobalConfig,
-  Head,
-} from "../types/mod.ts";
+import type { ApplicationSpec, ComponentDefinition, GlobalConfig, Head } from "../types/mod.ts";
 
 /**
  * Generate global layout component

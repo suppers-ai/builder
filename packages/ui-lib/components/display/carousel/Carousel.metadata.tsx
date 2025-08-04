@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Carousel, CarouselItem } from "./Carousel.tsx";
 
 const carouselExamples: ComponentExample[] = [
@@ -9,94 +9,98 @@ const carouselExamples: ComponentExample[] = [
       items: [
         {
           id: "1",
-      content: "Slide 1 content"
+          content: "Slide 1 content",
         },
         {
           id: "2",
-      content: "Slide 2 content"
+          content: "Slide 2 content",
         },
         {
           id: "3",
-      content: "Slide 3 content"
-        }
-      ]
-    }
-  },  {
+          content: "Slide 3 content",
+        },
+      ],
+    },
+  },
+  {
     title: "With Indicators",
     description: "Carousel with dot indicators at the bottom",
     props: {
       items: [
         {
           id: "1",
-      content: "Slide 1 content"
+          content: "Slide 1 content",
         },
         {
           id: "2",
-      content: "Slide 2 content"
+          content: "Slide 2 content",
         },
         {
           id: "3",
-      content: "Slide 3 content"
-        }
-      ]
-    }
-  },  {
+          content: "Slide 3 content",
+        },
+      ],
+    },
+  },
+  {
     title: "With Navigation Buttons",
     description: "Carousel with previous/next navigation buttons",
     props: {
       items: [
         {
           id: "1",
-      content: "Slide 1 content"
+          content: "Slide 1 content",
         },
         {
           id: "2",
-      content: "Slide 2 content"
+          content: "Slide 2 content",
         },
         {
           id: "3",
-      content: "Slide 3 content"
-        }
-      ]
-    }
-  },  {
+          content: "Slide 3 content",
+        },
+      ],
+    },
+  },
+  {
     title: "Vertical Carousel",
     description: "Carousel with vertical sliding orientation",
     props: {
       items: [
         {
           id: "1",
-      content: "Slide 1 content"
+          content: "Slide 1 content",
         },
         {
           id: "2",
-      content: "Slide 2 content"
+          content: "Slide 2 content",
         },
         {
           id: "3",
-      content: "Slide 3 content"
-        }
-      ]
-    }
-  },  {
+          content: "Slide 3 content",
+        },
+      ],
+    },
+  },
+  {
     title: "Center Mode Carousel",
     description: "Carousel with center snap and multiple visible items",
     props: {
       items: [
         {
           id: "1",
-      content: "Slide 1 content"
+          content: "Slide 1 content",
         },
         {
           id: "2",
-      content: "Slide 2 content"
+          content: "Slide 2 content",
         },
         {
           id: "3",
-      content: "Slide 3 content"
-        }
-      ]
-    }
+          content: "Slide 3 content",
+        },
+      ],
+    },
   },
 ];
 
@@ -128,4 +132,5 @@ export const carouselMetadata: ComponentMetadata = {
         </CarouselItem>
       </Carousel>
     </div>
-  )};
+  ),
+};

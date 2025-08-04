@@ -1,8 +1,8 @@
 export { AuthGuard } from "./AuthGuard.tsx";
 export { componentMetadata } from "./AuthGuard.metadata.tsx";
-export { 
-  AuthGuardPropsSchema, 
-  validateAuthGuardProps, 
+export {
+  type AuthGuardProps,
+  AuthGuardPropsSchema,
   safeValidateAuthGuardProps,
-  type AuthGuardProps
+  validateAuthGuardProps,
 } from "./AuthGuard.schema.ts";

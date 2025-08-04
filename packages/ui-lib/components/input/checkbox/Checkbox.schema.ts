@@ -20,7 +20,9 @@ const CheckboxSpecificPropsSchema = z.object({
   ),
 
   indeterminate: withMetadata(
-    z.boolean().optional().default(false).describe("Whether the checkbox is in indeterminate state"),
+    z.boolean().optional().default(false).describe(
+      "Whether the checkbox is in indeterminate state",
+    ),
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 

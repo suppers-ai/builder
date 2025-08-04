@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Kbd } from "./Kbd.tsx";
 
 const kbdExamples: ComponentExample[] = [
@@ -10,33 +11,37 @@ const kbdExamples: ComponentExample[] = [
     title: "Basic Keyboard Keys",
     description: "Simple keyboard key representations",
     props: {
-      children: "Ctrl+C"
-    }
-  },  {
+      children: "Ctrl+C",
+    },
+  },
+  {
     title: "Keyboard Sizes",
     description: "Different sizes for various contexts",
     props: {
       children: "Ctrl+C",
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Key Combinations",
     description: "Showing keyboard shortcuts and combinations",
     props: {
-      children: "Ctrl+C"
-    }
-  },  {
+      children: "Ctrl+C",
+    },
+  },
+  {
     title: "Function Keys",
     description: "Special function keys and longer key names",
     props: {
-      children: "Ctrl+C"
-    }
-  },  {
+      children: "Ctrl+C",
+    },
+  },
+  {
     title: "Documentation Usage",
     description: "Keyboard shortcuts in help documentation and tooltips",
     props: {
-      children: "Ctrl+C"
-    }
+      children: "Ctrl+C",
+    },
   },
 ];
 
@@ -45,25 +50,30 @@ const kbdProps: ComponentProp[] = [
     name: "children",
     type: "ComponentChildren",
     description: "The key content to display (text, symbols, or icons)",
-    required: true},
+    required: true,
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
     description: "Size of the keyboard key",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "variant",
     type: "'default' | 'primary' | 'secondary' | 'accent' | 'ghost'",
     description: "Visual style variant",
-    default: "default"},
+    default: "default",
+  },
   {
     name: "onClick",
     type: "() => void",
-    description: "Click handler for interactive keys"},
+    description: "Click handler for interactive keys",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const kbdMetadata: ComponentMetadata = {
@@ -103,4 +113,5 @@ export const kbdMetadata: ComponentMetadata = {
     "Use smaller sizes for inline documentation and larger sizes for emphasis",
     "Consider platform differences when showing shortcuts (Mac vs PC keys)",
     "Combine with tooltips or help text to explain what shortcuts do",
-  ]};
+  ],
+};

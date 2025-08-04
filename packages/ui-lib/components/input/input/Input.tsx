@@ -42,13 +42,20 @@ export function Input({
   const getDefaultPlaceholder = () => {
     if (placeholder) return placeholder;
     switch (type) {
-      case "email": return "your@email.com";
-      case "password": return "••••••••";
-      case "number": return "0";
-      case "date": return "";
-      case "time": return "";
-      case "color": return "";
-      default: return "";
+      case "email":
+        return "your@email.com";
+      case "password":
+        return "••••••••";
+      case "number":
+        return "0";
+      case "date":
+        return "";
+      case "time":
+        return "";
+      case "color":
+        return "";
+      default:
+        return "";
     }
   };
 
@@ -56,9 +63,12 @@ export function Input({
   const getAutoComplete = () => {
     if (autoComplete) return autoComplete;
     switch (type) {
-      case "email": return "email";
-      case "password": return "current-password";
-      default: return undefined;
+      case "email":
+        return "email";
+      case "password":
+        return "current-password";
+      default:
+        return undefined;
     }
   };
 
@@ -77,8 +87,9 @@ export function Input({
   ].filter(Boolean).join(" ");
 
   // For simple input types that don't need special UI
-  const isSimpleInput = ["text", "email", "date", "time", "datetime-local", "tel", "url", "search"].includes(type);
-  
+  const isSimpleInput = ["text", "email", "date", "time", "datetime-local", "tel", "url", "search"]
+    .includes(type);
+
   if (isSimpleInput) {
     return (
       <input
@@ -179,7 +190,7 @@ export function Input({
   // Number input with increment/decrement controls
   if (type === "number") {
     const stepValue = step || 1; // Default step for number inputs
-    
+
     const increment = () => {
       const currentValue = (value as number) || 0;
       const newValue = currentValue + (stepValue as number);
@@ -232,7 +243,8 @@ export function Input({
             type="button"
             className="text-xs text-base-content/50 hover:text-base-content disabled:cursor-not-allowed"
             onClick={increment}
-            disabled={disabled || (max !== undefined && ((value as number) || 0) >= (max as number))}
+            disabled={disabled ||
+              (max !== undefined && ((value as number) || 0) >= (max as number))}
           >
             ▲
           </button>
@@ -240,7 +252,8 @@ export function Input({
             type="button"
             className="text-xs text-base-content/50 hover:text-base-content disabled:cursor-not-allowed"
             onClick={decrement}
-            disabled={disabled || (min !== undefined && ((value as number) || 0) <= (min as number))}
+            disabled={disabled ||
+              (min !== undefined && ((value as number) || 0) <= (min as number))}
           >
             ▼
           </button>

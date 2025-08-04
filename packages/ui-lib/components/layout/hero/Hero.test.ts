@@ -44,7 +44,7 @@ Deno.test("Hero - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(Hero({
       title: "Test Title",
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
 
     const expectedClasses = {

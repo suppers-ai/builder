@@ -55,7 +55,7 @@ export class DocsAuthHelpers {
         hasAccessToken: !!accessToken,
         hasRefreshToken: !!refreshToken,
         hasUserData: !!userDataStr,
-        expiresAt: expiresAt ? new Date(parseInt(expiresAt)).toISOString() : "none"
+        expiresAt: expiresAt ? new Date(parseInt(expiresAt)).toISOString() : "none",
       });
 
       if (!accessToken || !userDataStr) {
@@ -95,7 +95,7 @@ export class DocsAuthHelpers {
         expires_in: expiresAt ? Math.floor((parseInt(expiresAt) - Date.now()) / 1000) : 3600,
         expires_at: expiresAt ? parseInt(expiresAt) : undefined,
         token_type: tokenType,
-        user: userData
+        user: userData,
       };
 
       console.log("✅ Found valid stored session for user:", userData.email);
@@ -109,19 +109,24 @@ export class DocsAuthHelpers {
   /**
    * Store session data from SSO popup
    */
-  static storeSession(accessToken: string, refreshToken: string, user: StoredUser, expiresIn: number): void {
+  static storeSession(
+    accessToken: string,
+    refreshToken: string,
+    user: StoredUser,
+    expiresIn: number,
+  ): void {
     console.log("💾 DocsAuthHelpers: Storing session data...");
-    
+
     const expiresAt = Date.now() + (expiresIn * 1000);
-    
+
     globalThis.localStorage?.setItem("docs_access_token", accessToken);
     globalThis.localStorage?.setItem("docs_refresh_token", refreshToken);
     globalThis.localStorage?.setItem("docs_expires_at", expiresAt.toString());
     globalThis.localStorage?.setItem("docs_token_type", "bearer");
     globalThis.localStorage?.setItem("docs_user_data", JSON.stringify(user));
-    
+
     console.log("✅ Session stored successfully for user:", user.email);
-    
+
     // Set user's theme if available
     this.setUserTheme(user);
   }
@@ -152,13 +157,13 @@ export class DocsAuthHelpers {
   static setUserTheme(user: StoredUser): void {
     if (user.theme_id && typeof document !== "undefined") {
       console.log("🎨 DocsAuthHelpers: Setting user theme to:", user.theme_id);
-      
+
       // Set the theme in localStorage
       globalThis.localStorage?.setItem("theme", user.theme_id);
-      
+
       // Apply the theme to the document
       document.documentElement.setAttribute("data-theme", user.theme_id);
-      
+
       console.log("✅ User theme applied:", user.theme_id);
     } else {
       console.log("ℹ️ DocsAuthHelpers: No theme preference found for user");
@@ -171,5 +176,19 @@ export class DocsAuthHelpers {
   static async getUserThemeId(): Promise<string | null> {
     const user = await this.getCurrentUser();
     return user?.theme_id || null;
+  }
+
+  /**
+   * Update stored user data with new information
+   */
+  static updateStoredUserData(updatedUser: StoredUser): void {
+    console.log("💾 DocsAuthHelpers: Updating stored user data...");
+    
+    try {
+      globalThis.localStorage?.setItem("docs_user_data", JSON.stringify(updatedUser));
+      console.log("✅ User data updated successfully for user:", updatedUser.email);
+    } catch (error) {
+      console.error("❌ Failed to update stored user data:", error);
+    }
   }
 }

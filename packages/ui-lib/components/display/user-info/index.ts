@@ -1,8 +1,8 @@
-export { UserInfo, type DropdownItem } from "./UserInfo.tsx";
+export { type DropdownItem, UserInfo } from "./UserInfo.tsx";
 export { userInfoMetadata as componentMetadata } from "./UserInfo.metadata.tsx";
-export { 
-  UserInfoPropsSchema, 
-  validateUserInfoProps, 
+export {
   safeValidateUserInfoProps,
-  type UserInfoProps
+  type UserInfoProps,
+  UserInfoPropsSchema,
+  validateUserInfoProps,
 } from "./UserInfo.schema.ts";

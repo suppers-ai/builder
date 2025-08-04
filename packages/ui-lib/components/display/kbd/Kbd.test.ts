@@ -28,7 +28,7 @@ Deno.test("Kbd - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(Kbd({
       children: "Key",
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, `kbd-${size}`);
   });

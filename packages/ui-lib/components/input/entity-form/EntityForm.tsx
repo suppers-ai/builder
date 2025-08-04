@@ -40,7 +40,7 @@ export function EntityForm({
   isLoading = false,
   className = "",
   submitLabel = "Save",
-  cancelLabel = "Cancel"
+  cancelLabel = "Cancel",
 }: EntityFormProps) {
   const [formData, setFormData] = useState<Record<string, any>>(initialData);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -50,8 +50,8 @@ export function EntityForm({
   useEffect(() => {
     const newFormData = { ...initialData };
     const newJsonFields: Record<string, string> = {};
-    
-    fields.forEach(field => {
+
+    fields.forEach((field) => {
       if (field.type === "json") {
         const value = initialData[field.key];
         newJsonFields[field.key] = value ? JSON.stringify(value, null, 2) : "{}";
@@ -60,7 +60,7 @@ export function EntityForm({
         newFormData[field.key] = field.type === "json" ? {} : "";
       }
     });
-    
+
     setFormData(newFormData);
     setJsonFields(newJsonFields);
   }, [initialData, fields]);
@@ -72,7 +72,7 @@ export function EntityForm({
 
     if (field.validation) {
       const { minLength, maxLength, pattern, custom } = field.validation;
-      
+
       if (typeof value === "string") {
         if (minLength && value.length < minLength) {
           return `${field.label} must be at least ${minLength} characters`;
@@ -84,7 +84,7 @@ export function EntityForm({
           return `${field.label} format is invalid`;
         }
       }
-      
+
       if (custom) {
         const customError = custom(value);
         if (customError) return customError;
@@ -109,11 +109,9 @@ export function EntityForm({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
-    fields.forEach(field => {
-      const value = field.type === "json" 
-        ? jsonFields[field.key] 
-        : formData[field.key];
+
+    fields.forEach((field) => {
+      const value = field.type === "json" ? jsonFields[field.key] : formData[field.key];
       const error = validateField(field, value);
       if (error) {
         newErrors[field.key] = error;
@@ -126,14 +124,14 @@ export function EntityForm({
 
   const handleInputChange = (field: FormField, value: string) => {
     if (field.type === "json") {
-      setJsonFields(prev => ({ ...prev, [field.key]: value }));
+      setJsonFields((prev) => ({ ...prev, [field.key]: value }));
     } else {
-      setFormData(prev => ({ ...prev, [field.key]: value }));
+      setFormData((prev) => ({ ...prev, [field.key]: value }));
     }
 
     // Clear error when user starts typing
     if (errors[field.key]) {
-      setErrors(prev => ({ ...prev, [field.key]: "" }));
+      setErrors((prev) => ({ ...prev, [field.key]: "" }));
     }
   };
 
@@ -146,9 +144,9 @@ export function EntityForm({
 
     try {
       const submitData = { ...formData };
-      
+
       // Parse JSON fields
-      fields.forEach(field => {
+      fields.forEach((field) => {
         if (field.type === "json") {
           try {
             submitData[field.key] = JSON.parse(jsonFields[field.key] || "{}");
@@ -166,14 +164,13 @@ export function EntityForm({
   };
 
   const renderField = (field: FormField) => {
-    const value = field.type === "json" 
-      ? jsonFields[field.key] || "{}" 
-      : formData[field.key] || "";
+    const value = field.type === "json" ? jsonFields[field.key] || "{}" : formData[field.key] || "";
     const hasError = !!errors[field.key];
 
-    const baseInputClasses = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-      hasError ? "border-red-500" : "border-gray-300"
-    }`;
+    const baseInputClasses =
+      `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+        hasError ? "border-red-500" : "border-gray-300"
+      }`;
 
     switch (field.type) {
       case "textarea":
@@ -198,9 +195,9 @@ export function EntityForm({
               bordered
               disabled={isLoading}
             />
-            {field.options?.find(opt => opt.value === value)?.description && (
+            {field.options?.find((opt) => opt.value === value)?.description && (
               <p class="mt-1 text-sm text-gray-500">
-                {field.options.find(opt => opt.value === value)?.description}
+                {field.options.find((opt) => opt.value === value)?.description}
               </p>
             )}
           </div>
@@ -250,9 +247,7 @@ export function EntityForm({
                 {field.label} {field.required && "*"}
               </label>
               {renderField(field)}
-              {errors[field.key] && (
-                <p class="mt-1 text-sm text-red-600">{errors[field.key]}</p>
-              )}
+              {errors[field.key] && <p class="mt-1 text-sm text-red-600">{errors[field.key]}</p>}
             </div>
           ))}
 

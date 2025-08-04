@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Badge } from "./Badge.tsx";
 
 const badgeExamples: ComponentExample[] = [
@@ -10,35 +11,39 @@ const badgeExamples: ComponentExample[] = [
     title: "Basic Badges",
     description: "Simple badges with text content",
     props: {
-      children: "New"
-    }
-  },  {
+      children: "New",
+    },
+  },
+  {
     title: "Badge Colors",
     description: "Different color variants for various use cases",
     props: {
       children: "New",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Badge Sizes",
     description: "Different sizes from xs to lg",
     props: {
       children: "New",
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Badge Variants",
     description: "Filled and dashed styles",
     props: {
       children: "New",
-      variant: "dash"
-    }
-  },  {
+      variant: "dash",
+    },
+  },
+  {
     title: "Status Badges",
     description: "Badges for showing various status states",
     props: {
-      children: "New"
-    }
+      children: "New",
+    },
   },
 ];
 
@@ -46,33 +51,40 @@ const badgeProps: ComponentProp[] = [
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Badge content (text, icons, etc.)"},
+    description: "Badge content (text, icons, etc.)",
+  },
   {
     name: "content",
     type: "string | number",
-    description: "Alternative way to set badge content"},
+    description: "Alternative way to set badge content",
+  },
   {
     name: "color",
     type:
       "'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Badge color variant"},
+    description: "Badge color variant",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Badge size",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "variant",
     type: "'outline'",
-    description: "Badge style variant"},
+    description: "Badge style variant",
+  },
   {
     name: "position",
     type: "'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'",
-    description: "Position when used as indicator"},
+    description: "Position when used as indicator",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const badgeMetadata: ComponentMetadata = {
@@ -102,4 +114,5 @@ export const badgeMetadata: ComponentMetadata = {
     "Outline variant provides a subtle alternative to filled badges",
     "Position prop creates indicator-style badges",
     "Keep badge text concise for better readability",
-  ]};
+  ],
+};

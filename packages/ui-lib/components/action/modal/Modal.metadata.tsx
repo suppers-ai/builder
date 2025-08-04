@@ -3,12 +3,10 @@ import {
   ComponentExample,
   ComponentMetadata,
   ComponentProp,
-  ComponentSchema} from "../../types.ts";
+  ComponentSchema,
+} from "../../types.ts";
 import { Modal } from "./Modal.tsx";
-import {
-  ModalPropsSchema,
-  safeValidateModalProps,
-  validateModalProps} from "./Modal.schema.ts";
+import { ModalPropsSchema, safeValidateModalProps, validateModalProps } from "./Modal.schema.ts";
 
 const modalExamples: ComponentExample[] = [
   {
@@ -27,8 +25,8 @@ const modalExamples: ComponentExample[] = [
             <button class="btn btn-primary">Save</button>
           </div>
         </>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Form Modal",
@@ -57,8 +55,8 @@ const modalExamples: ComponentExample[] = [
             <button class="btn btn-primary">Create Account</button>
           </div>
         </>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Confirmation Modal",
@@ -69,8 +67,18 @@ const modalExamples: ComponentExample[] = [
       children: (
         <>
           <div class="alert alert-warning">
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="stroke-current shrink-0 h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v3m0 3h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
+              />
             </svg>
             <span>This action cannot be undone. Are you sure you want to delete this item?</span>
           </div>
@@ -79,8 +87,8 @@ const modalExamples: ComponentExample[] = [
             <button class="btn btn-error">Delete</button>
           </div>
         </>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Modal without Backdrop",
@@ -98,8 +106,8 @@ const modalExamples: ComponentExample[] = [
             <button class="btn btn-primary">Got it</button>
           </div>
         </>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Non-Responsive Modal",
@@ -117,56 +125,75 @@ const modalExamples: ComponentExample[] = [
             <button class="btn btn-primary">Close</button>
           </div>
         </>
-      )}
-        }
-      ];;
+      ),
+    },
+  },
+];
 
 const modalProps: ComponentProp[] = [
   {
     name: "children",
     type: "ComponentChildren",
     description: "Modal content",
-    required: true},
+    required: true,
+  },
   {
     name: "open",
     type: "boolean",
     description: "Controls modal visibility",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "title",
     type: "string",
-    description: "Modal title displayed at the top"},
+    description: "Modal title displayed at the top",
+  },
   {
     name: "backdrop",
     type: "boolean",
     description: "Show backdrop behind modal",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "responsive",
     type: "boolean",
     description: "Make modal responsive with max width",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
   {
     name: "id",
     type: "string",
-    description: "HTML id attribute"},
+    description: "HTML id attribute",
+  },
 ];
 
 const modalSchema: ComponentSchema = {
   schema: ModalPropsSchema,
   validateFn: validateModalProps,
-  safeValidateFn: safeValidateModalProps};
+  safeValidateFn: safeValidateModalProps,
+};
 
 export const modalMetadata: ComponentMetadata = {
   name: "Modal",
-  description: "Dialog boxes and overlays for displaying content and capturing user input, enhanced with DaisyUI 5 and Tailwind 4 features",
+  description:
+    "Dialog boxes and overlays for displaying content and capturing user input, enhanced with DaisyUI 5 and Tailwind 4 features",
   category: ComponentCategory.ACTION,
   path: "/components/action/modal",
-  tags: ["dialog", "overlay", "popup", "daisyui-5", "tailwind-4", "enhanced-animations", "accessibility", "focus-management"],
+  tags: [
+    "dialog",
+    "overlay",
+    "popup",
+    "daisyui-5",
+    "tailwind-4",
+    "enhanced-animations",
+    "accessibility",
+    "focus-management",
+  ],
   relatedComponents: ["button", "alert", "backdrop", "drawer"],
   interactive: true, // Can have interactive elements and close handlers
   preview: (
@@ -187,7 +214,14 @@ export const modalMetadata: ComponentMetadata = {
   schema: modalSchema,
   props: modalProps,
   variants: ["default", "bottom sheet", "full screen", "confirmation", "drawer-style"],
-  useCases: ["User forms", "Confirmations", "Image gallery", "Settings", "Data entry", "Content preview"],
+  useCases: [
+    "User forms",
+    "Confirmations",
+    "Image gallery",
+    "Settings",
+    "Data entry",
+    "Content preview",
+  ],
   usageNotes: [
     "Use Modal for server-side rendered modals that show static content",
     "For interactive modals with close handlers, create an island component",
@@ -206,6 +240,6 @@ export const modalMetadata: ComponentMetadata = {
     "Improved z-index management for better stacking context",
     "Better performance with optimized CSS animations and reduced reflows",
     "Respects user's prefers-reduced-motion settings for animations",
-    "Fully backward compatible - all existing modal patterns continue to work"
-  ]
-};;
+    "Fully backward compatible - all existing modal patterns continue to work",
+  ],
+};

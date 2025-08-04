@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Loading } from "./Loading.tsx";
 
 const loadingExamples: ComponentExample[] = [
@@ -11,35 +12,39 @@ const loadingExamples: ComponentExample[] = [
     description: "Simple loading spinners with different variants",
     props: {
       size: "md",
-      variant: "spinner"
-    }
-  },  {
+      variant: "spinner",
+    },
+  },
+  {
     title: "Loading Sizes",
     description: "Different sizes for various contexts",
     props: {
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Loading Colors",
     description: "Various color themes",
     props: {
       size: "md",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Loading Variants",
     description: "Different animation styles",
     props: {
       size: "md",
-      variant: "dots"
-    }
-  },  {
+      variant: "dots",
+    },
+  },
+  {
     title: "Loading with Text",
     description: "Loading indicators with accompanying text",
     props: {
       size: "md",
-      variant: "spinner"
-    }
+      variant: "spinner",
+    },
   },
 ];
 
@@ -48,20 +53,24 @@ const loadingProps: ComponentProp[] = [
     name: "variant",
     type: "'spinner' | 'dots' | 'ring' | 'ball' | 'bars' | 'infinity'",
     description: "Loading animation style",
-    default: "spinner"},
+    default: "spinner",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the loading indicator",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
-    description: "Color theme for the loading indicator"},
+    description: "Color theme for the loading indicator",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const loadingMetadata: ComponentMetadata = {
@@ -96,5 +105,5 @@ export const loadingMetadata: ComponentMetadata = {
     "Combine with text labels to provide context about what's loading",
     "Use colors sparingly - neutral colors work best for most cases",
     "Position loading indicators where users expect to see content appear",
-  ]
+  ],
 };

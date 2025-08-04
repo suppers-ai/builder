@@ -4,10 +4,7 @@
  */
 
 import { z } from "zod";
-import {
-  BaseComponentPropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, withMetadata } from "../../schemas/base.ts";
 
 // Form Field Option schema
 const FormFieldOptionSchema = z.object({
@@ -25,17 +22,17 @@ const FormFieldValidationSchema = z.object({
     .positive()
     .optional()
     .describe("Minimum length validation"),
-    
+
   maxLength: z.number()
     .int()
     .positive()
     .optional()
     .describe("Maximum length validation"),
-    
+
   pattern: z.custom<RegExp>()
     .optional()
     .describe("Regular expression pattern validation"),
-    
+
   custom: z.function()
     .args(z.any())
     .returns(z.union([z.string(), z.null()]))
@@ -46,26 +43,26 @@ const FormFieldValidationSchema = z.object({
 // Form Field schema
 const FormFieldSchema = z.object({
   key: z.string().describe("Unique field identifier"),
-  
+
   label: z.string().describe("Field display label"),
-  
+
   type: withMetadata(
     z.enum(["text", "textarea", "select", "json"]).describe("Field input type"),
     { examples: ["text", "textarea", "select", "json"], since: "1.0.0" },
   ),
-  
+
   required: z.boolean()
     .default(false)
     .describe("Whether field is required"),
-    
+
   placeholder: z.string()
     .optional()
     .describe("Field placeholder text"),
-    
+
   options: z.array(FormFieldOptionSchema)
     .optional()
     .describe("Options for select field type"),
-    
+
   validation: FormFieldValidationSchema
     .optional()
     .describe("Field validation rules"),
@@ -74,33 +71,33 @@ const FormFieldSchema = z.object({
 // EntityForm-specific props
 const EntityFormSpecificPropsSchema = z.object({
   title: z.string().describe("Form title"),
-  
+
   fields: z.array(FormFieldSchema)
     .min(1)
     .describe("Array of form field configurations"),
-    
+
   initialData: z.record(z.string(), z.any())
     .default({})
     .describe("Initial form data values"),
-    
+
   onSubmit: z.function()
     .args(z.record(z.string(), z.any()))
     .returns(z.promise(z.void()))
     .describe("Form submission handler (async)"),
-    
+
   onCancel: z.function()
     .args()
     .returns(z.void())
     .describe("Form cancellation handler"),
-    
+
   isLoading: z.boolean()
     .default(false)
     .describe("Loading state during form submission"),
-    
+
   submitLabel: z.string()
     .default("Save")
     .describe("Submit button label"),
-    
+
   cancelLabel: z.string()
     .default("Cancel")
     .describe("Cancel button label"),
@@ -112,11 +109,7 @@ export const EntityFormPropsSchema = BaseComponentPropsSchema
   .describe("Dynamic form builder with field validation, JSON support, and async submission");
 
 // Export related schemas for reuse
-export { 
-  FormFieldSchema, 
-  FormFieldOptionSchema, 
-  FormFieldValidationSchema 
-};
+export { FormFieldOptionSchema, FormFieldSchema, FormFieldValidationSchema };
 
 // Infer TypeScript types from schemas
 export type FormField = z.infer<typeof FormFieldSchema>;

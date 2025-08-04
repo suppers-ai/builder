@@ -1,18 +1,18 @@
 /**
  * Generic component route generator for the simplified metadata system
- * 
+ *
  * This utility provides functions for generating component documentation routes using
  * a simplified, props-based metadata system. The system has been streamlined to remove
  * complex parsing logic and multiple rendering approaches in favor of a single,
  * consistent props-based approach.
- * 
+ *
  * Key improvements in the simplified system:
  * - Removed complex JSX parsing functions (parseJSXExample, parseProps)
  * - Eliminated old properties: code, staticRender, showCode
  * - Unified rendering approach using only props objects
  * - Automatic JSX code generation from props
  * - Consistent presentation across all components
- * 
+ *
  * @deprecated The createComponentRoute function is deprecated in favor of the
  * direct route handler approach in [category]/[name].tsx for better performance
  * and simpler maintenance.
@@ -27,8 +27,6 @@ import {
 } from "../../ui-lib/components/schemas/extractor.ts";
 import CodeExample from "../islands/CodeExample.tsx";
 import { generateJSXFromProps } from "./props-to-jsx.ts";
-
-
 
 export interface ComponentPageData {
   title: string;
@@ -119,11 +117,9 @@ export async function loadComponentPageData(
   }
 }
 
-
-
 /**
  * Create a component route with proper documentation
- * 
+ *
  * @deprecated This function is deprecated in favor of the direct route handler
  * approach in [category]/[name].tsx for better performance and simpler maintenance.
  */
@@ -201,7 +197,7 @@ export function createComponentRoute(config: {
                             <Component key={propIndex} {...propSet} />
                           ));
                         }
-                        
+
                         // Handle single props object
                         return <Component {...example.props} />;
                       })()}
@@ -236,11 +232,21 @@ export function createComponentRoute(config: {
                   <table class="min-w-full border border-gray-300 rounded-lg">
                     <thead class="bg-gray-50">
                       <tr>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Prop</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Type</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Required</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Default</th>
-                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">Description</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">
+                          Prop
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">
+                          Type
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">
+                          Required
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">
+                          Default
+                        </th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700 border-b">
+                          Description
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -254,18 +260,14 @@ export function createComponentRoute(config: {
                             <code class="bg-gray-100 px-2 py-1 rounded">{prop.type}</code>
                           </td>
                           <td class="px-4 py-3 text-sm text-gray-700 border-b">
-                            {prop.required ? (
-                              <span class="text-red-500 font-medium">Yes</span>
-                            ) : (
-                              <span class="text-gray-500">No</span>
-                            )}
+                            {prop.required
+                              ? <span class="text-red-500 font-medium">Yes</span>
+                              : <span class="text-gray-500">No</span>}
                           </td>
                           <td class="px-4 py-3 text-sm font-mono text-gray-700 border-b">
-                            {prop.default ? (
-                              <code class="bg-gray-100 px-2 py-1 rounded">{prop.default}</code>
-                            ) : (
-                              <span class="text-gray-400">-</span>
-                            )}
+                            {prop.default
+                              ? <code class="bg-gray-100 px-2 py-1 rounded">{prop.default}</code>
+                              : <span class="text-gray-400">-</span>}
                           </td>
                           <td class="px-4 py-3 text-sm text-gray-700 border-b">
                             {prop.description}

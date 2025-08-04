@@ -1,4 +1,4 @@
-import { ComponentMetadata, ComponentExample, ComponentCategory } from "../../types.ts";
+import { ComponentCategory, ComponentExample, ComponentMetadata } from "../../types.ts";
 import { Footer } from "./Footer.tsx";
 
 const footerExamples: ComponentExample[] = [
@@ -8,24 +8,29 @@ const footerExamples: ComponentExample[] = [
     props: {
       title: "My Company",
       description: "Building amazing products since 2024",
-      copyright: "© 2024 My Company. All rights reserved."
-    }
+      copyright: "© 2024 My Company. All rights reserved.",
+    },
   },
   {
     title: "Footer with Logo",
-    description: "Footer including company logo and branding"},
+    description: "Footer including company logo and branding",
+  },
   {
     title: "Newsletter Footer",
-    description: "Footer with newsletter signup functionality"},
+    description: "Footer with newsletter signup functionality",
+  },
   {
     title: "Social Media Footer",
-    description: "Footer with social media links and icons"},
+    description: "Footer with social media links and icons",
+  },
   {
     title: "Centered Footer",
-    description: "Simple centered footer layout"},
+    description: "Simple centered footer layout",
+  },
   {
     title: "Grid Layout Footer",
-    description: "Comprehensive footer with multiple sections"},
+    description: "Comprehensive footer with multiple sections",
+  },
 ];
 
 export const footerMetadata: ComponentMetadata = {
@@ -47,8 +52,10 @@ export const footerMetadata: ComponentMetadata = {
             links: [
               { text: "Features", href: "/features" },
               { text: "Pricing", href: "/pricing" },
-            ]},
+            ],
+          },
         ]}
       />
     </div>
-  )};
+  ),
+};

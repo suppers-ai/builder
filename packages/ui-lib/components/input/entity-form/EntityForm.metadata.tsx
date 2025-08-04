@@ -9,43 +9,43 @@ export const componentMetadata = {
     title: {
       type: "string",
       required: true,
-      description: "Form title displayed at the top"
+      description: "Form title displayed at the top",
     },
     fields: {
       type: "FormField[]",
       required: true,
-      description: "Array of field configurations defining the form structure"
+      description: "Array of field configurations defining the form structure",
     },
     initialData: {
       type: "Record<string, any>",
       default: "{}",
-      description: "Initial form data for editing existing entities"
+      description: "Initial form data for editing existing entities",
     },
     onSubmit: {
       type: "(data: Record<string, any>) => Promise<void>",
       required: true,
-      description: "Callback function called when form is submitted"
+      description: "Callback function called when form is submitted",
     },
     onCancel: {
-      type: "() => void", 
+      type: "() => void",
       required: true,
-      description: "Callback function called when form is cancelled"
+      description: "Callback function called when form is cancelled",
     },
     isLoading: {
       type: "boolean",
       default: "false",
-      description: "Whether form is in loading state"
+      description: "Whether form is in loading state",
     },
     submitLabel: {
       type: "string",
       default: '"Save"',
-      description: "Label for the submit button"
+      description: "Label for the submit button",
     },
     cancelLabel: {
-      type: "string", 
+      type: "string",
       default: '"Cancel"',
-      description: "Label for the cancel button"
-    }
+      description: "Label for the cancel button",
+    },
   },
   examples: [
     {
@@ -60,7 +60,7 @@ export const componentMetadata = {
   onSubmit={async (data) => console.log(data)}
   onCancel={() => console.log("cancelled")}
 />`,
-      props: {}
-        }
-      ]
+      props: {},
+    },
+  ],
 };

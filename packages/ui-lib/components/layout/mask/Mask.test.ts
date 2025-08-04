@@ -49,7 +49,7 @@ Deno.test("Mask - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Mask({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       children: `Size ${size}`,
     }));
     assertStringIncludes(html, `mask-${size}`);

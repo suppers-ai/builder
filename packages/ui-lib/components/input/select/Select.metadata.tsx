@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Select } from "./Select.tsx";
 
 const selectExamples: ComponentExample[] = [
@@ -13,103 +14,107 @@ const selectExamples: ComponentExample[] = [
       options: [
         {
           value: "option1",
-      label: "Option 1"
+          label: "Option 1",
         },
         {
           value: "option2",
-      label: "Option 2"
+          label: "Option 2",
         },
         {
           value: "option3",
-      label: "Option 3"
-        }
+          label: "Option 3",
+        },
       ],
-      placeholder: "Choose an option..."
-    }
-  },  {
+      placeholder: "Choose an option...",
+    },
+  },
+  {
     title: "Select Sizes",
     description: "Different size variants for various contexts",
     props: {
       options: [
         {
           value: "option1",
-      label: "Option 1"
+          label: "Option 1",
         },
         {
           value: "option2",
-      label: "Option 2"
+          label: "Option 2",
         },
         {
           value: "option3",
-      label: "Option 3"
-        }
+          label: "Option 3",
+        },
       ],
       placeholder: "Choose an option...",
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Select Colors",
     description: "Various color themes for different states",
     props: {
       options: [
         {
           value: "option1",
-      label: "Option 1"
+          label: "Option 1",
         },
         {
           value: "option2",
-      label: "Option 2"
+          label: "Option 2",
         },
         {
           value: "option3",
-      label: "Option 3"
-        }
+          label: "Option 3",
+        },
       ],
       placeholder: "Choose an option...",
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Select Variants",
     description: "Different visual styles",
     props: {
       options: [
         {
           value: "option1",
-      label: "Option 1"
+          label: "Option 1",
         },
         {
           value: "option2",
-      label: "Option 2"
+          label: "Option 2",
         },
         {
           value: "option3",
-      label: "Option 3"
-        }
+          label: "Option 3",
+        },
       ],
       placeholder: "Choose an option...",
-      variant: "outlined"
-    }
-  },  {
+      variant: "outlined",
+    },
+  },
+  {
     title: "Select with Disabled Options",
     description: "Select with some disabled options",
     props: {
       options: [
         {
           value: "option1",
-      label: "Option 1"
+          label: "Option 1",
         },
         {
           value: "option2",
-      label: "Option 2"
+          label: "Option 2",
         },
         {
           value: "option3",
-      label: "Option 3"
-        }
+          label: "Option 3",
+        },
       ],
       placeholder: "Choose an option...",
-      disabled: true
-    }
+      disabled: true,
+    },
   },
   {
     title: "Extra Large Select",
@@ -118,20 +123,20 @@ const selectExamples: ComponentExample[] = [
       options: [
         {
           value: "xl1",
-          label: "Extra Large Option 1"
+          label: "Extra Large Option 1",
         },
         {
           value: "xl2",
-          label: "Extra Large Option 2"
+          label: "Extra Large Option 2",
         },
         {
           value: "xl3",
-          label: "Extra Large Option 3"
-        }
+          label: "Extra Large Option 3",
+        },
       ],
       placeholder: "Choose XL option...",
-      size: "xl"
-    }
+      size: "xl",
+    },
   },
   {
     title: "Neutral Color Select",
@@ -140,20 +145,20 @@ const selectExamples: ComponentExample[] = [
       options: [
         {
           value: "neutral1",
-          label: "Neutral Option 1"
+          label: "Neutral Option 1",
         },
         {
           value: "neutral2",
-          label: "Neutral Option 2"
+          label: "Neutral Option 2",
         },
         {
           value: "neutral3",
-          label: "Neutral Option 3"
-        }
+          label: "Neutral Option 3",
+        },
       ],
       placeholder: "Choose neutral option...",
-      color: "neutral"
-    }
+      color: "neutral",
+    },
   },
 ];
 
@@ -162,47 +167,58 @@ const selectProps: ComponentProp[] = [
     name: "options",
     type: "Array<{value: string, label: string, disabled?: boolean}>",
     description: "Array of select options",
-    required: true},
+    required: true,
+  },
   {
     name: "value",
     type: "string",
-    description: "Selected value"},
+    description: "Selected value",
+  },
   {
     name: "placeholder",
     type: "string",
-    description: "Placeholder text when no option is selected"},
+    description: "Placeholder text when no option is selected",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
     description: "Size variant of the select",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
-    type: "'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error'",
-    description: "Color theme for the select"},
+    type:
+      "'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error'",
+    description: "Color theme for the select",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Whether to show border",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style variant",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Disabled state",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Change event handler"},
+    description: "Change event handler",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const selectMetadata: ComponentMetadata = {
@@ -239,4 +255,5 @@ export const selectMetadata: ComponentMetadata = {
     "Use onChange handler for form integration and state management",
     "Ghost variant provides subtle styling for minimal designs",
     "Placeholder option is automatically disabled and not selectable",
-  ]};
+  ],
+};

@@ -2,19 +2,19 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentSchema
+  ComponentSchema,
 } from "../../types.ts";
 import { Button } from "./Button.tsx";
 import {
   ButtonPropsSchema,
   safeValidateButtonProps,
-  validateButtonProps
+  validateButtonProps,
 } from "./Button.schema.ts";
 
 const buttonSchema: ComponentSchema = {
   schema: ButtonPropsSchema,
   validateFn: validateButtonProps,
-  safeValidateFn: safeValidateButtonProps
+  safeValidateFn: safeValidateButtonProps,
 };
 
 const buttonExamples: ComponentExample[] = [
@@ -25,9 +25,8 @@ const buttonExamples: ComponentExample[] = [
       { children: "Default" },
       { color: "primary", children: "Primary" },
       { color: "secondary", children: "Secondary" },
-      { color: "accent", children: "Accent"
-        }
-      ]
+      { color: "accent", children: "Accent" },
+    ],
   },
   {
     title: "Button Variants",
@@ -35,9 +34,8 @@ const buttonExamples: ComponentExample[] = [
     props: [
       { variant: "outline", color: "primary", children: "Outline" },
       { variant: "ghost", color: "primary", children: "Ghost" },
-      { variant: "link", color: "primary", children: "Link"
-        }
-      ]
+      { variant: "link", color: "primary", children: "Link" },
+    ],
   },
   {
     title: "Button Sizes",
@@ -46,9 +44,8 @@ const buttonExamples: ComponentExample[] = [
       { size: "xs", color: "primary", children: "XS" },
       { size: "sm", color: "primary", children: "SM" },
       { color: "primary", children: "MD" },
-      { size: "lg", color: "primary", children: "LG"
-        }
-      ]
+      { size: "lg", color: "primary", children: "LG" },
+    ],
   },
   {
     title: "Button States",
@@ -57,19 +54,26 @@ const buttonExamples: ComponentExample[] = [
       { color: "primary", children: "Normal" },
       { color: "primary", active: true, children: "Active" },
       { color: "primary", disabled: true, children: "Disabled" },
-      { color: "primary", loading: true, children: "Loading"
-        }
-      ]
+      { color: "primary", loading: true, children: "Loading" },
+    ],
   },
-
 ];
 
 export const buttonMetadata: ComponentMetadata = {
   name: "Button",
-  description: "Interactive buttons with multiple variants, sizes, and states for user actions, fully compatible with DaisyUI 5 and Tailwind 4",
+  description:
+    "Interactive buttons with multiple variants, sizes, and states for user actions, fully compatible with DaisyUI 5 and Tailwind 4",
   category: ComponentCategory.ACTION,
   path: "/components/action/button",
-  tags: ["interactive", "action", "click", "daisyui-5", "tailwind-4", "enhanced-loading", "accessibility"],
+  tags: [
+    "interactive",
+    "action",
+    "click",
+    "daisyui-5",
+    "tailwind-4",
+    "enhanced-loading",
+    "accessibility",
+  ],
   relatedComponents: ["dropdown", "modal"],
   interactive: true, // Supports island mode with onClick handlers
   preview: (
@@ -97,6 +101,6 @@ export const buttonMetadata: ComponentMetadata = {
     "Supports Tailwind 4 arbitrary values for custom styling: bg-[#custom], text-[14px]",
     "Optimized performance with better CSS generation and tree-shaking",
     "Fully backward compatible - all existing usage patterns continue to work",
-    "Respects user's prefers-reduced-motion settings for animations"
-  ]
+    "Respects user's prefers-reduced-motion settings for animations",
+  ],
 };

@@ -322,7 +322,10 @@ describe("Cross-Package Integration", () => {
 
       assertEquals(result.authenticated, false);
       assertExists(result.redirectUrl);
-      assertEquals(result.redirectUrl!.includes(getPackageUrl("PROFILE").replace("http://", "")), true);
+      assertEquals(
+        result.redirectUrl!.includes(getPackageUrl("PROFILE").replace("http://", "")),
+        true,
+      );
       assertEquals(result.redirectUrl!.includes("/oauth/authorize"), true);
     });
 

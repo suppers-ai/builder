@@ -93,7 +93,8 @@ packages/profile/
 
 ### OAuth 2.0 Configuration
 
-The profile package implements a complete OAuth 2.0 authorization server with the following endpoints:
+The profile package implements a complete OAuth 2.0 authorization server with the following
+endpoints:
 
 #### Authorization Endpoint
 

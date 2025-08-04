@@ -4,11 +4,7 @@
  */
 
 import { z } from "zod";
-import {
-  BaseComponentPropsSchema,
-  SizePropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, SizePropsSchema, withMetadata } from "../../schemas/base.ts";
 
 // BreadcrumbItem schema
 const BreadcrumbItemPropsSchema = z.object({
@@ -22,7 +18,10 @@ const BreadcrumbItemPropsSchema = z.object({
 const BreadcrumbsSpecificPropsSchema = z.object({
   items: withMetadata(
     z.array(BreadcrumbItemPropsSchema).describe("Array of breadcrumb items"),
-    { examples: ['[{ label: "Home", href: "/" }, { label: "Current", active: true }]'], since: "1.0.0" },
+    {
+      examples: ['[{ label: "Home", href: "/" }, { label: "Current", active: true }]'],
+      since: "1.0.0",
+    },
   ),
 });
 

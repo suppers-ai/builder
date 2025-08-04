@@ -1,6 +1,7 @@
 import { useState } from "preact/hooks";
-import { UserAvatar } from "../../display/avatar/UserAvatar.tsx";
-import { Loading } from "../../feedback/loading/Loading.tsx";
+import { Button } from "../../action/button/Button.tsx";
+import { Input } from "../../input/input/Input.tsx";
+import { Modal } from "../../action/modal/Modal.tsx";
 import type { AuthUser } from "@suppers/shared";
 
 interface SimpleEditUserModalProps {
@@ -48,109 +49,89 @@ export function SimpleEditUserModal({ user, isOpen, onClose, onSave }: SimpleEdi
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-base-100 rounded-lg shadow-xl w-full max-w-md">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold mb-4">Edit User</h2>
-            <button
-              onClick={onClose}
-              className="text-slate-500 hover:text-slate-700"
-            >
-              ✕
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                First Name
-              </label>
-              <input
-                type="text"
-                value={formData.firstName}
-                onChange={(e) =>
-                  handleInputChange("firstName", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter first name"
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Last Name
-              </label>
-              <input
-                type="text"
-                value={formData.lastName}
-                onChange={(e) =>
-                  handleInputChange("lastName", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter last name"
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Display Name
-              </label>
-              <input
-                type="text"
-                value={formData.displayName}
-                onChange={(e) =>
-                  handleInputChange("displayName", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter display name"
-                disabled={loading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Avatar URL
-              </label>
-              <input
-                type="url"
-                value={formData.avatarUrl}
-                onChange={(e) =>
-                  handleInputChange("avatarUrl", (e.target as HTMLInputElement).value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter avatar URL"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="flex items-center gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 btn btn-primary text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-              >
-                {loading
-                  ? (
-                    <>
-                      <Loading size="sm" variant="spinner" class="mr-2" />
-                      Saving...
-                    </>
-                  )
-                  : (
-                    "Save Changes"
-                  )}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={loading}
-                className="flex-1 bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+    <Modal open={isOpen} onClose={onClose} title="Edit User" class="max-w-md">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            First Name
+          </label>
+          <Input
+            type="text"
+            value={formData.firstName}
+            onInput={(e) => handleInputChange("firstName", (e.target as HTMLInputElement).value)}
+            class="w-full"
+            placeholder="Enter first name"
+            disabled={loading}
+            bordered
+          />
         </div>
-      </div>
-    </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Last Name
+          </label>
+          <Input
+            type="text"
+            value={formData.lastName}
+            onInput={(e) => handleInputChange("lastName", (e.target as HTMLInputElement).value)}
+            class="w-full"
+            placeholder="Enter last name"
+            disabled={loading}
+            bordered
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Display Name
+          </label>
+          <Input
+            type="text"
+            value={formData.displayName}
+            onInput={(e) => handleInputChange("displayName", (e.target as HTMLInputElement).value)}
+            class="w-full"
+            placeholder="Enter display name"
+            disabled={loading}
+            bordered
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Avatar URL
+          </label>
+          <Input
+            type="url"
+            value={formData.avatarUrl}
+            onInput={(e) => handleInputChange("avatarUrl", (e.target as HTMLInputElement).value)}
+            class="w-full"
+            placeholder="Enter avatar URL"
+            disabled={loading}
+            bordered
+          />
+        </div>
+
+        <div className="flex items-center gap-3 pt-4">
+          <Button
+            type="submit"
+            disabled={loading}
+            color="primary"
+            class="flex-1"
+            loading={loading}
+          >
+            {loading ? "Saving..." : "Save Changes"}
+          </Button>
+          <Button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            variant="outline"
+            class="flex-1"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }

@@ -1,5 +1,6 @@
 import { useAuthClient } from "@suppers/ui-lib/shared/providers/AuthClientProvider.tsx";
 import { UserClientAvatar } from "@suppers/ui-lib/shared/components/UserClientAvatar.tsx";
+import { Button } from "@suppers/ui-lib";
 
 export default function Home() {
   const { user, loading, login, logout, isAuthenticated } = useAuthClient();
@@ -44,12 +45,13 @@ export default function Home() {
                   </p>
 
                   <div className="flex justify-center space-x-4">
-                    <button
+                    <Button
                       onClick={() => logout()}
-                      className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold"
+                      color="error"
+                      class="px-6 py-2 font-semibold"
                     >
                       Logout
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -64,12 +66,13 @@ export default function Home() {
                 </p>
 
                 <div className="space-y-4">
-                  <button
+                  <Button
                     onClick={() => login()}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold"
+                    color="primary"
+                    class="px-6 py-2 font-semibold"
                   >
                     Sign In
-                  </button>
+                  </Button>
 
                   <p className="text-sm text-gray-500">
                     Or visit the{" "}

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { VariablesSchema, CompilerInfoSchema } from "./generator.ts";
+import { CompilerInfoSchema, VariablesSchema } from "./generator.ts";
 import { DataSchema } from "./route.ts";
 
 // Application Info Schema

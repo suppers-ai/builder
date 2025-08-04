@@ -27,18 +27,22 @@ const syntaxPatterns: Record<string, SyntaxPattern[]> = {
   tsx: [
     // Comments
     { pattern: /(\/\*[\s\S]*?\*\/|\/\/.*$)/gm, className: "text-base-content/50 italic" },
-    
+
     // String literals first to avoid conflicts
     { pattern: /&quot;[^&]*&quot;/g, className: "text-accent" },
-    
+
     // Complete JSX opening/closing tags for React components (capitalized)
     { pattern: /&lt;\/?[A-Z][a-zA-Z0-9]*[^&]*?&gt;/g, className: "text-info font-semibold" },
-    
-    // Complete JSX opening/closing tags for HTML elements (lowercase)  
+
+    // Complete JSX opening/closing tags for HTML elements (lowercase)
     { pattern: /&lt;\/?[a-z][a-zA-Z0-9-]*[^&]*?&gt;/g, className: "text-secondary" },
-    
+
     // JavaScript keywords (excluding "class" to avoid HTML class attribute conflicts)
-    { pattern: /\b(import|export|from|as|default|const|let|var|function|interface|type|enum|namespace|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|async|await)\b/g, className: "text-primary font-semibold" },
+    {
+      pattern:
+        /\b(import|export|from|as|default|const|let|var|function|interface|type|enum|namespace|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|async|await)\b/g,
+      className: "text-primary font-semibold",
+    },
   ],
   ts: [
     { pattern: /(\/\*[\s\S]*?\*\/|\/\/.*$)/gm, className: "text-base-content/60" }, // Comments
@@ -74,23 +78,23 @@ const syntaxPatterns: Record<string, SyntaxPattern[]> = {
 };
 
 function highlightCode(code: string, language: string): string {
-  if (language !== 'tsx' && language !== 'jsx') {
+  if (language !== "tsx" && language !== "jsx") {
     // For non-JSX languages, use simple escaping
     return code
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   // First escape HTML entities
   let escaped = code
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
   // Simple JSX-specific highlighting - process tags before strings to avoid conflicts
   let highlighted = escaped;
@@ -106,7 +110,10 @@ function highlightCode(code: string, language: string): string {
   });
 
   // 3. Highlight strings last (after tags to avoid interfering with tag matching)
-  highlighted = highlighted.replace(/&quot;([^&]*)&quot;/g, '<span class="text-accent">&quot;$1&quot;</span>');
+  highlighted = highlighted.replace(
+    /&quot;([^&]*)&quot;/g,
+    '<span class="text-accent">&quot;$1&quot;</span>',
+  );
 
   return highlighted;
 }
@@ -325,17 +332,18 @@ export default function SyntaxHighlighter({
         {files.length > 1 && (
           <div class="flex bg-base-100 border-b border-base-300 overflow-x-auto">
             {files.map((file, index) => (
-              <button
+              <Button
                 key={index}
-                class={`px-4 py-2 text-sm font-medium border-r border-base-300 hover:bg-base-200 transition-colors whitespace-nowrap ${
+                class={`px-4 py-2 text-sm font-medium border-r border-base-300 hover:bg-base-200 transition-colors whitespace-nowrap bg-transparent border-none rounded-none ${
                   index === activeFileIndex
                     ? "bg-base-200 text-primary border-b-2 border-primary"
                     : "text-base-content/70"
                 }`}
+                variant="ghost"
                 onClick={() => setActiveFileIndex(index)}
               >
                 {file.filename}
-              </button>
+              </Button>
             ))}
           </div>
         )}

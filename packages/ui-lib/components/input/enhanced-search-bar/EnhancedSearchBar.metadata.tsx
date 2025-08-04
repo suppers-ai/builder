@@ -9,33 +9,33 @@ export const componentMetadata = {
     placeholder: {
       type: "string",
       default: '"Search..."',
-      description: "Placeholder text for the search input"
+      description: "Placeholder text for the search input",
     },
     onSearch: {
       type: "(query: string, filters: Record<string, string>) => void",
       required: true,
-      description: "Callback function called when search query or filters change"
+      description: "Callback function called when search query or filters change",
     },
     filters: {
       type: "SearchFilter[]",
       default: "[]",
-      description: "Array of filter objects with key, label, and options"
+      description: "Array of filter objects with key, label, and options",
     },
     debounceMs: {
       type: "number",
       default: "300",
-      description: "Milliseconds to debounce search input"
+      description: "Milliseconds to debounce search input",
     },
     className: {
       type: "string",
       default: '""',
-      description: "Additional CSS classes"
+      description: "Additional CSS classes",
     },
     showClearButton: {
-      type: "boolean", 
+      type: "boolean",
       default: "true",
-      description: "Whether to show the clear button when there's content"
-    }
+      description: "Whether to show the clear button when there's content",
+    },
   },
   examples: [
     {
@@ -43,9 +43,8 @@ export const componentMetadata = {
       code: `<EnhancedSearchBar 
   onSearch={(query, filters) => console.log(query, filters)} 
 />`,
-      props: {
-    }
-  },
+      props: {},
+    },
     {
       name: "Search Bar with Filters",
       code: `<EnhancedSearchBar
@@ -62,7 +61,7 @@ export const componentMetadata = {
         }
       ]}
 />`,
-      props: {}
-        }
-      ]
+      props: {},
+    },
+  ],
 };

@@ -77,7 +77,7 @@ Deno.test("Progress - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Progress({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       value: 50,
     }));
     assertStringIncludes(html, `progress-${size}`);
@@ -89,7 +89,15 @@ Deno.test("Progress - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(Progress({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
       value: 60,
     }));
     assertStringIncludes(html, `progress-${color}`);
@@ -285,7 +293,7 @@ Deno.test("Progress - HTML snapshot all sizes", async (t) => {
   const sizes = ["xs", "sm", "md", "lg"];
   const htmls = sizes.map((size) =>
     renderToString(Progress({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       value: 60,
       color: "primary",
     }))
@@ -297,7 +305,15 @@ Deno.test("Progress - HTML snapshot all colors", async (t) => {
   const colors = ["primary", "secondary", "accent", "info", "success", "warning", "error"];
   const htmls = colors.map((color) =>
     renderToString(Progress({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
       value: 45,
       size: "md",
     }))

@@ -2,6 +2,8 @@ import { useEffect, useState } from "preact/hooks";
 import { DocsAuthHelpers } from "../lib/auth-helpers.ts";
 import type { StoredUser } from "../lib/auth-helpers.ts";
 import { User, LogIn, LogOut } from "lucide-preact";
+import { Button } from "@suppers/ui-lib";
+import { profileSyncManager, crossAppAuthHelpers } from "@suppers/shared/utils/mod.ts";
 
 export default function SimpleAuthButton() {
   const [user, setUser] = useState<StoredUser | null>(null);
@@ -13,12 +15,23 @@ export default function SimpleAuthButton() {
         console.log("🔍 SimpleAuthButton: Checking authentication...");
         const currentUser = await DocsAuthHelpers.getCurrentUser();
         console.log("🔍 SimpleAuthButton: Auth check result:", { user: !!currentUser, email: currentUser?.email });
-        
+
         if (currentUser) {
           // Apply user's theme if they're already logged in
           DocsAuthHelpers.setUserTheme(currentUser);
+
+          // Set user in cross-app auth helpers for sync
+          crossAppAuthHelpers.setCurrentUser({
+            id: currentUser.id,
+            email: currentUser.email,
+            displayName: currentUser.display_name || currentUser.user_metadata?.full_name,
+            firstName: currentUser.first_name || currentUser.user_metadata?.first_name,
+            lastName: currentUser.last_name || currentUser.user_metadata?.last_name,
+            avatarUrl: currentUser.avatar_url || currentUser.user_metadata?.avatar_url,
+            theme: currentUser.theme_id,
+          });
         }
-        
+
         setUser(currentUser);
       } catch (err) {
         console.error("❌ SimpleAuthButton: Auth check failed:", err);
@@ -29,13 +42,90 @@ export default function SimpleAuthButton() {
     };
 
     checkAuth();
+
+    // Subscribe to profile changes from other applications
+    const unsubscribe = profileSyncManager.subscribeToProfileChanges((event) => {
+      console.log("🔄 SimpleAuthButton: Received profile change event:", event);
+
+      switch (event.type) {
+        case "theme":
+          if (event.data.theme) {
+            DocsAuthHelpers.setUserTheme({ ...user, theme_id: event.data.theme } as StoredUser);
+            // Update user state to trigger re-render
+            setUser(prev => prev ? { ...prev, theme_id: event.data.theme } : null);
+          }
+          break;
+
+        case "avatar":
+          if (event.data.avatarUrl && user) {
+            const updatedUser = {
+              ...user,
+              avatar_url: event.data.avatarUrl,
+              user_metadata: {
+                ...user.user_metadata,
+                avatar_url: event.data.avatarUrl,
+              }
+            };
+            setUser(updatedUser);
+            // Update stored user data
+            DocsAuthHelpers.updateStoredUserData(updatedUser);
+          }
+          break;
+
+        case "displayName":
+          if (user) {
+            const updatedUser = {
+              ...user,
+              display_name: event.data.displayName,
+              first_name: event.data.firstName,
+              last_name: event.data.lastName,
+              user_metadata: {
+                ...user.user_metadata,
+                full_name: event.data.displayName,
+                first_name: event.data.firstName,
+                last_name: event.data.lastName,
+              }
+            };
+            setUser(updatedUser);
+            // Update stored user data
+            DocsAuthHelpers.updateStoredUserData(updatedUser);
+          }
+          break;
+
+        case "profile":
+          if (event.data.user && user) {
+            const updatedUser = {
+              ...user,
+              ...event.data.user,
+              user_metadata: {
+                ...user.user_metadata,
+                ...event.data.user,
+              }
+            };
+            setUser(updatedUser);
+            // Update stored user data
+            DocsAuthHelpers.updateStoredUserData(updatedUser);
+          }
+          break;
+
+        case "signOut":
+          setUser(null);
+          DocsAuthHelpers.clearStoredTokens();
+          break;
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleLogin = () => {
     console.log("🔵 SSO Login clicked!");
     const profilePackageUrl = "http://localhost:8001";
     const loginUrl = `${profilePackageUrl}/login?external_app=docs&origin=${encodeURIComponent(globalThis.location?.origin || "")}`;
-    
+
     const popup = globalThis.window?.open(
       loginUrl,
       "sso-login",
@@ -49,7 +139,7 @@ export default function SimpleAuthButton() {
 
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== profilePackageUrl) return;
-      
+
       if (event.data?.type === "SSO_SUCCESS") {
         const { accessToken, refreshToken, user, expiresIn } = event.data;
         if (accessToken && user) {
@@ -65,7 +155,7 @@ export default function SimpleAuthButton() {
     };
 
     globalThis.window?.addEventListener("message", handleMessage);
-    
+
     const checkClosed = setInterval(() => {
       if (popup?.closed) {
         clearInterval(checkClosed);
@@ -76,6 +166,8 @@ export default function SimpleAuthButton() {
 
   const handleLogout = async () => {
     try {
+      // Use cross-app auth helpers to sign out across all applications
+      crossAppAuthHelpers.clearSessionAcrossApps();
       await DocsAuthHelpers.signOut();
       setUser(null);
     } catch (err) {
@@ -119,24 +211,53 @@ export default function SimpleAuthButton() {
           class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg mb-2"
         >
           <li>
-            <button
+            <Button
               onClick={() => {
-                globalThis.window?.open("http://localhost:8001/profile", "_blank");
+                // Use ProfileSyncManager to open popup-based profile interface
+                const handle = profileSyncManager.openProfilePopup({
+                  origin: "http://localhost:8001",
+                  appName: "docs",
+                  dimensions: { width: 600, height: 700 },
+                  position: "center"
+                }, {
+                  onFallback: (reason) => {
+                    console.log("Profile popup fallback:", reason);
+                    if (reason === "blocked") {
+                      alert("Popup was blocked. Opening profile in new tab instead.");
+                      globalThis.window?.open("http://localhost:8001/profile", "_blank");
+                    }
+                  },
+                  showNotification: true,
+                  openInNewTab: true
+                });
+
+                // Handle profile updates from popup
+                const cleanup = handle.onMessage((event) => {
+                  if (event.data?.type === "PROFILE_UPDATED") {
+                    console.log("Profile updated in popup:", event.data);
+                    // The profile sync system will handle the updates automatically
+                  } else if (event.data?.type === "POPUP_CLOSE") {
+                    handle.close();
+                    cleanup();
+                  }
+                });
               }}
-              class="flex items-center gap-2"
+              class="flex items-center gap-2 bg-transparent border-none"
+              variant="ghost"
             >
               <User class="w-4 h-4" />
               View Profile
-            </button>
+            </Button>
           </li>
           <li>
-            <button
+            <Button
               onClick={handleLogout}
-              class="flex items-center gap-2"
+              class="flex items-center gap-2 bg-transparent border-none"
+              variant="ghost"
             >
               <LogOut class="w-4 h-4" />
               Logout
-            </button>
+            </Button>
           </li>
         </ul>
       </div>
@@ -145,12 +266,15 @@ export default function SimpleAuthButton() {
 
   // User is not authenticated - show login button
   return (
-    <button
+    <Button
       onClick={handleLogin}
-      class="w-full flex items-center justify-center gap-2 p-3 bg-primary text-primary-content rounded-lg hover:bg-primary/90 transition-colors font-medium"
+      color="primary"
+      size="lg"
+      wide
+      class="flex items-center justify-center gap-2"
     >
       <LogIn size={18} />
       Sign In
-    </button>
+    </Button>
   );
 }

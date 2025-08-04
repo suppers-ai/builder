@@ -4,10 +4,7 @@
  */
 
 import { z } from "zod";
-import {
-  BaseComponentPropsSchema,
-  withMetadata,
-} from "../../schemas/base.ts";
+import { BaseComponentPropsSchema, withMetadata } from "../../schemas/base.ts";
 
 // Entity Status schema
 const EntityStatusSchema = z.object({
@@ -59,39 +56,39 @@ const EntityStatusConfigSchema = z.object({
 // EntityCard-specific props
 const EntityCardSpecificPropsSchema = z.object({
   title: z.string().describe("Entity title/name"),
-  
+
   subtitle: z.string()
     .optional()
     .describe("Optional entity subtitle"),
-    
+
   description: z.string()
     .optional()
     .describe("Entity description"),
-    
+
   updatedAt: withMetadata(
     z.string().describe("Last update timestamp (ISO string)"),
     { examples: ["2024-01-15T10:30:00Z"], since: "1.0.0" },
   ),
-  
+
   status: EntityStatusConfigSchema
     .describe("Entity status configuration"),
-    
+
   metadata: z.record(z.string(), z.any())
     .optional()
     .describe("Additional entity metadata for display"),
-    
+
   actions: z.array(EntityActionSchema)
     .default([])
     .describe("Primary actions displayed as buttons"),
-    
+
   menuActions: z.array(EntityMenuActionSchema)
     .default([])
     .describe("Secondary actions displayed in dropdown menu"),
-    
+
   showOwnerActions: z.boolean()
     .default(false)
     .describe("Whether to show owner/admin actions"),
-    
+
   onView: z.function()
     .args()
     .returns(z.void())
@@ -105,12 +102,7 @@ export const EntityCardPropsSchema = BaseComponentPropsSchema
   .describe("Comprehensive entity display card with status, actions, and metadata");
 
 // Export related schemas for reuse
-export { 
-  EntityStatusSchema, 
-  EntityActionSchema, 
-  EntityMenuActionSchema,
-  EntityStatusConfigSchema 
-};
+export { EntityActionSchema, EntityMenuActionSchema, EntityStatusConfigSchema, EntityStatusSchema };
 
 // Infer TypeScript types from schemas
 export type EntityStatus = z.infer<typeof EntityStatusSchema>;

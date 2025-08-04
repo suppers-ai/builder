@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Toggle } from "./Toggle.tsx";
 
 const toggleExamples: ComponentExample[] = [
@@ -11,38 +12,42 @@ const toggleExamples: ComponentExample[] = [
     description: "Simple on/off toggle switches",
     props: {
       label: "Toggle me",
-      checked: false
-    }
-  },  {
+      checked: false,
+    },
+  },
+  {
     title: "Toggle Sizes",
     description: "Different sizes for various contexts",
     props: {
       label: "Toggle me",
       checked: false,
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Toggle Colors",
     description: "Various color themes",
     props: {
       label: "Toggle me",
       checked: false,
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Toggle States",
     description: "Different states and configurations",
     props: {
       label: "Toggle me",
-      checked: false
-    }
-  },  {
+      checked: false,
+    },
+  },
+  {
     title: "Toggle Groups",
     description: "Multiple toggles for settings panels",
     props: {
       label: "Toggle me",
-      checked: false
-    }
+      checked: false,
+    },
   },
 ];
 
@@ -51,34 +56,41 @@ const toggleProps: ComponentProp[] = [
     name: "checked",
     type: "boolean",
     description: "Whether the toggle is checked (on)",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the toggle",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
     description: "Color theme for the toggle",
-    default: "primary"},
+    default: "primary",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Whether the toggle is disabled",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Change event handler"},
+    description: "Change event handler",
+  },
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Label text for the toggle"},
+    description: "Label text for the toggle",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const toggleMetadata: ComponentMetadata = {
@@ -128,4 +140,5 @@ export const toggleMetadata: ComponentMetadata = {
     "Consider grouping related toggles in settings panels",
     "Disabled state should be used when toggle cannot be changed",
     "Toggle automatically includes proper form control structure",
-  ]};
+  ],
+};

@@ -3,6 +3,18 @@
 // If metadata is needed for pages, it would be structured differently
 
 export const pageComponentsMetadata = [
-  // Page components would have different metadata structure
-  // focused on page-level concerns rather than component props
+  {
+    name: "ProfileModal",
+    description:
+      "Mobile-responsive profile modal component for popup-blocked scenarios and mobile devices",
+    category: "page",
+    features: [
+      "Mobile-responsive design",
+      "Touch-friendly interactions",
+      "Real-time profile synchronization",
+      "Popup mode support",
+      "Cross-application communication",
+      "Orientation change handling",
+    ],
+  },
 ];

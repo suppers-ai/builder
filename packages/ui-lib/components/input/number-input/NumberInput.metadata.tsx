@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 
 const numberInputExamples: ComponentExample[] = [
   {
@@ -10,30 +11,33 @@ const numberInputExamples: ComponentExample[] = [
     description: "Simple number input with increment/decrement buttons",
     props: {
       placeholder: "Enter number...",
-      value: 42
-    }
-  },  {
+      value: 42,
+    },
+  },
+  {
     title: "Number Input with Range",
     description: "Number input with min/max constraints",
     props: {
       placeholder: "Enter number...",
-      value: 42
-    }
-  },  {
+      value: 42,
+    },
+  },
+  {
     title: "Number Input Sizes",
     description: "Different number input sizes",
     props: {
       placeholder: "Enter number...",
       value: 42,
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Number Input States",
     description: "Different input states and colors",
     props: {
       placeholder: "Enter number...",
-      value: 42
-    }
+      value: 42,
+    },
   },
 ];
 
@@ -41,70 +45,85 @@ const numberInputProps: ComponentProp[] = [
   {
     name: "value",
     type: "number",
-    description: "The number input value"},
+    description: "The number input value",
+  },
   {
     name: "placeholder",
     type: "string",
     description: "Placeholder text for the input",
-    default: "0"},
+    default: "0",
+  },
   {
     name: "min",
     type: "number",
-    description: "Minimum allowed value"},
+    description: "Minimum allowed value",
+  },
   {
     name: "max",
     type: "number",
-    description: "Maximum allowed value"},
+    description: "Maximum allowed value",
+  },
   {
     name: "step",
     type: "number",
     description: "Step value for increment/decrement",
-    default: "1"},
+    default: "1",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the number input",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "DaisyUIColor",
-    description: "Color theme for the input"},
+    description: "Color theme for the input",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Show input border",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "ghost",
     type: "boolean",
     description: "Ghost style input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Disable the input",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "required",
     type: "boolean",
     description: "Mark input as required",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onChange",
     type: "(value: number) => void",
-    description: "Callback when number value changes"},
+    description: "Callback when number value changes",
+  },
   {
     name: "onIncrement",
     type: "() => void",
-    description: "Callback when increment button is clicked"},
+    description: "Callback when increment button is clicked",
+  },
   {
     name: "onDecrement",
     type: "() => void",
-    description: "Callback when decrement button is clicked"},
+    description: "Callback when decrement button is clicked",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const numberInputMetadata: ComponentMetadata = {
@@ -136,4 +155,5 @@ export const numberInputMetadata: ComponentMetadata = {
     "Increment/decrement buttons respect min/max limits",
     "Shows numeric keyboard on mobile devices",
     "Consider using for any numeric data entry",
-  ]};
+  ],
+};

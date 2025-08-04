@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Card } from "./Card.tsx";
 
 const cardExamples: ComponentExample[] = [
@@ -12,13 +13,14 @@ const cardExamples: ComponentExample[] = [
     props: [
       {
         title: "Card Title",
-        children: "This is a basic card with some content."
+        children: "This is a basic card with some content.",
       },
       {
-        title: "Product Card", 
-        children: "A great product with amazing features."
-        }
-      ]},
+        title: "Product Card",
+        children: "A great product with amazing features.",
+      },
+    ],
+  },
   {
     title: "Cards with Images",
     description: "Cards featuring images",
@@ -26,8 +28,8 @@ const cardExamples: ComponentExample[] = [
       image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
       imageAlt: "Shoes",
       title: "Shoes!",
-      children: "If a dog chews shoes whose shoes does he choose?"
-    }
+      children: "If a dog chews shoes whose shoes does he choose?",
+    },
   },
   {
     title: "Card with Actions",
@@ -40,8 +42,8 @@ const cardExamples: ComponentExample[] = [
           <button class="btn btn-primary">Buy Now</button>
           <button class="btn btn-outline">Add to Cart</button>
         </>
-      )
-    }
+      ),
+    },
   },
   {
     title: "Card Variants",
@@ -50,19 +52,20 @@ const cardExamples: ComponentExample[] = [
       {
         compact: true,
         title: "Compact Card",
-        children: "This is a compact card with less padding."
+        children: "This is a compact card with less padding.",
       },
       {
         bordered: true,
         title: "Bordered Card",
-        children: "This card has a border."
+        children: "This card has a border.",
       },
       {
         glass: true,
         title: "Glass Card",
-        children: "This card has a glass morphism effect."
-        }
-      ]},
+        children: "This card has a glass morphism effect.",
+      },
+    ],
+  },
   {
     title: "Side Layout Card",
     description: "Horizontal card layout with side image",
@@ -70,65 +73,85 @@ const cardExamples: ComponentExample[] = [
       side: true,
       image: "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
       title: "Side Card",
-      children: "This card uses a horizontal layout with the image on the side."
-    }
-        }
-      ];;
+      children: "This card uses a horizontal layout with the image on the side.",
+    },
+  },
+];
 
 const cardProps: ComponentProp[] = [
   {
     name: "children",
     type: "ComponentChildren",
     description: "Card content",
-    required: true},
+    required: true,
+  },
   {
     name: "title",
     type: "string",
-    description: "Card title displayed prominently"},
+    description: "Card title displayed prominently",
+  },
   {
     name: "image",
     type: "string",
-    description: "Image URL to display in card header"},
+    description: "Image URL to display in card header",
+  },
   {
     name: "imageAlt",
     type: "string",
-    description: "Alt text for the image"},
+    description: "Alt text for the image",
+  },
   {
     name: "actions",
     type: "ComponentChildren",
-    description: "Action buttons displayed at bottom"},
+    description: "Action buttons displayed at bottom",
+  },
   {
     name: "compact",
     type: "boolean",
     description: "Use compact padding",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "side",
     type: "boolean",
     description: "Horizontal layout with side image",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "glass",
     type: "boolean",
     description: "Glass morphism effect",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "bordered",
     type: "boolean",
     description: "Show card border",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const cardMetadata: ComponentMetadata = {
   name: "Card",
-  description: "Content containers with flexible layouts for organizing information, enhanced with DaisyUI 5 and Tailwind 4 features",
+  description:
+    "Content containers with flexible layouts for organizing information, enhanced with DaisyUI 5 and Tailwind 4 features",
   category: ComponentCategory.DISPLAY,
   path: "/components/display/card",
-  tags: ["container", "content", "layout", "panel", "daisyui-5", "tailwind-4", "enhanced-shadows", "responsive"],
+  tags: [
+    "container",
+    "content",
+    "layout",
+    "panel",
+    "daisyui-5",
+    "tailwind-4",
+    "enhanced-shadows",
+    "responsive",
+  ],
   relatedComponents: ["avatar", "badge", "button", "image", "divider"],
   interactive: false, // Static component, no island mode needed
   preview: (
@@ -148,7 +171,14 @@ export const cardMetadata: ComponentMetadata = {
   examples: cardExamples,
   props: cardProps,
   variants: ["default", "compact", "side", "image-overlay", "bordered", "glass"],
-  useCases: ["Product showcase", "User profiles", "Content preview", "Information display", "Dashboard widgets", "Media cards"],
+  useCases: [
+    "Product showcase",
+    "User profiles",
+    "Content preview",
+    "Information display",
+    "Dashboard widgets",
+    "Media cards",
+  ],
   usageNotes: [
     "Cards are perfect for grouping related content together with enhanced visual hierarchy",
     "Use card-body class for proper content padding with DaisyUI 5 improvements",
@@ -165,6 +195,6 @@ export const cardMetadata: ComponentMetadata = {
     "Better theme compatibility with enhanced color tokens",
     "Improved accessibility with better focus management and ARIA support",
     "Optimized performance with better CSS generation and reduced bundle impact",
-    "Fully backward compatible - all existing card patterns continue to work"
-  ]
-};;
+    "Fully backward compatible - all existing card patterns continue to work",
+  ],
+};

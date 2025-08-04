@@ -3,4 +3,4 @@ import { handleRefreshRequest } from "./refresh.ts";
 import { handleUserRequest } from "./user.ts";
 import { handleValidateRequest } from "./validate.ts";
 
-export { handleTokenRequest, handleRefreshRequest, handleUserRequest, handleValidateRequest };
+export { handleRefreshRequest, handleTokenRequest, handleUserRequest, handleValidateRequest };

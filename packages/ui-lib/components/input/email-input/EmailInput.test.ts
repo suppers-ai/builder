@@ -96,7 +96,7 @@ Deno.test("EmailInput - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(EmailInput({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, `input-${size}`);
   });
@@ -107,7 +107,15 @@ Deno.test("EmailInput - color variants", () => {
 
   colors.forEach((color) => {
     const html = renderToString(EmailInput({
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
     }));
     assertStringIncludes(html, `input-${color}`);
   });

@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 
 const userProfileDropdownExamples: ComponentExample[] = [
   {
@@ -10,97 +11,100 @@ const userProfileDropdownExamples: ComponentExample[] = [
     description: "Simple user profile dropdown with standard menu items",
     props: {
       user: {
-                "name": "John Doe",
-      email: "john@example.com",
-      avatar: "https://via.placeholder.com/32"
-          },
+        "name": "John Doe",
+        email: "john@example.com",
+        avatar: "https://via.placeholder.com/32",
+      },
       items: [
         {
           label: "Profile",
-      href: "/profile"
+          href: "/profile",
         },
         {
           label: "Settings",
-      href: "/settings"
+          href: "/settings",
         },
         {
           label: "Logout",
-      href: "/logout"
-        }
-      ]
-    }
-  },  {
+          href: "/logout",
+        },
+      ],
+    },
+  },
+  {
     title: "Admin User Dropdown",
     description: "User dropdown with admin access",
     props: {
       user: {
-                "name": "John Doe",
-      email: "john@example.com",
-      avatar: "https://via.placeholder.com/32"
-          },
+        "name": "John Doe",
+        email: "john@example.com",
+        avatar: "https://via.placeholder.com/32",
+      },
       items: [
         {
           label: "Profile",
-      href: "/profile"
+          href: "/profile",
         },
         {
           label: "Settings",
-      href: "/settings"
+          href: "/settings",
         },
         {
           label: "Logout",
-      href: "/logout"
-        }
-      ]
-    }
-  },  {
+          href: "/logout",
+        },
+      ],
+    },
+  },
+  {
     title: "Custom Handlers Dropdown",
     description: "User dropdown with custom navigation handlers",
     props: {
       user: {
-                "name": "John Doe",
-      email: "john@example.com",
-      avatar: "https://via.placeholder.com/32"
-          },
+        "name": "John Doe",
+        email: "john@example.com",
+        avatar: "https://via.placeholder.com/32",
+      },
       items: [
         {
           label: "Profile",
-      href: "/profile"
+          href: "/profile",
         },
         {
           label: "Settings",
-      href: "/settings"
+          href: "/settings",
         },
         {
           label: "Logout",
-      href: "/logout"
-        }
-      ]
-    }
-  },  {
+          href: "/logout",
+        },
+      ],
+    },
+  },
+  {
     title: "Custom Menu Items",
     description: "User dropdown with additional custom menu items",
     props: {
       user: {
-                "name": "John Doe",
-      email: "john@example.com",
-      avatar: "https://via.placeholder.com/32"
-          },
+        "name": "John Doe",
+        email: "john@example.com",
+        avatar: "https://via.placeholder.com/32",
+      },
       items: [
         {
           label: "Profile",
-      href: "/profile"
+          href: "/profile",
         },
         {
           label: "Settings",
-      href: "/settings"
+          href: "/settings",
         },
         {
           label: "Logout",
-      href: "/logout"
-        }
-      ]
-    }
+          href: "/logout",
+        },
+      ],
+    },
   },
 ];
 
@@ -109,51 +113,62 @@ const userProfileDropdownProps: ComponentProp[] = [
     name: "user",
     type: "AuthUser",
     description: "User object containing profile information",
-    required: true},
+    required: true,
+  },
   {
     name: "onLogout",
     type: "() => void",
-    description: "Callback when logout is clicked"},
+    description: "Callback when logout is clicked",
+  },
   {
     name: "onProfile",
     type: "() => void",
-    description: "Callback when profile menu item is clicked"},
+    description: "Callback when profile menu item is clicked",
+  },
   {
     name: "onSettings",
     type: "() => void",
-    description: "Callback when settings menu item is clicked"},
+    description: "Callback when settings menu item is clicked",
+  },
   {
     name: "onAdmin",
     type: "() => void",
-    description: "Callback when admin menu item is clicked"},
+    description: "Callback when admin menu item is clicked",
+  },
   {
     name: "showAdmin",
     type: "boolean",
     description: "Whether to show admin menu item",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "profileHref",
     type: "string",
     description: "URL for profile page navigation",
-    default: "/profile"},
+    default: "/profile",
+  },
   {
     name: "settingsHref",
     type: "string",
     description: "URL for settings page navigation",
-    default: "/settings"},
+    default: "/settings",
+  },
   {
     name: "adminHref",
     type: "string",
     description: "URL for admin page navigation",
-    default: "/admin"},
+    default: "/admin",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
   {
     name: "children",
     type: "ComponentChildren",
-    description: "Additional menu items to insert before logout"},
+    description: "Additional menu items to insert before logout",
+  },
 ];
 
 export const userProfileDropdownMetadata: ComponentMetadata = {
@@ -190,4 +205,5 @@ export const userProfileDropdownMetadata: ComponentMetadata = {
     "Custom menu items can be added through children prop",
     "Use callback handlers for custom navigation logic",
     "Automatically handles responsive display of user name",
-  ]};
+  ],
+};

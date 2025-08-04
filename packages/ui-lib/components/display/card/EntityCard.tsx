@@ -65,11 +65,11 @@ export function EntityCard({
     value: status.value,
     icon: "📄",
     message: "",
-    badgeClass: "badge-neutral"
+    badgeClass: "badge-neutral",
   };
 
-  const visibleActions = actions.filter(action => action.condition !== false);
-  const visibleMenuActions = menuActions.filter(action => action.condition !== false);
+  const visibleActions = actions.filter((action) => action.condition !== false);
+  const visibleMenuActions = menuActions.filter((action) => action.condition !== false);
 
   return (
     <div class={`card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow ${className}`}>
@@ -164,7 +164,7 @@ export function EntityCard({
             {showOwnerActions && visibleActions.map((action, index) => (
               <Button
                 key={index}
-                color={action.variant as any || 'neutral'}
+                color={action.variant as any || "neutral"}
                 size="sm"
                 onClick={action.onClick}
               >

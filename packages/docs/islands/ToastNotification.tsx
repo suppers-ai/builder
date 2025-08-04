@@ -1,4 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
+import { Button } from "@suppers/ui-lib";
+import { X } from "lucide-preact";
 
 export interface ToastProps {
   message: string;
@@ -103,28 +105,17 @@ export default function ToastNotification({
       <div class={`alert ${getAlertClasses()}`}>
         {getIcon()}
         <span>{message}</span>
-        <button
-          class="btn btn-sm btn-circle btn-ghost"
+        <Button
+          size="sm"
+          variant="ghost"
+          circle
           onClick={() => {
             setVisible(false);
             setTimeout(() => onClose?.(), 300);
           }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+          <X size={16} />
+        </Button>
       </div>
     </div>
   );

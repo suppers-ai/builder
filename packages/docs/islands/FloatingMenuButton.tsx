@@ -1,6 +1,6 @@
 import { useEffect } from "preact/hooks";
 import { Menu, X } from "lucide-preact";
-import { globalSidebarOpen, toggleGlobalSidebar } from "@suppers/ui-lib";
+import { Button, globalSidebarOpen, toggleGlobalSidebar } from "@suppers/ui-lib";
 
 export interface FloatingMenuButtonProps {
   className?: string;
@@ -27,10 +27,12 @@ export default function FloatingMenuButton({ className = "" }: FloatingMenuButto
   }, []);
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleToggle}
-      class={`fixed top-4 z-[60] btn btn-primary btn-circle shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out ${
+      color="primary"
+      circle
+      class={`fixed top-4 z-[60] shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out ${
         sidebarOpen ? "left-[264px] lg:left-[264px]" : "left-4"
       } ${className}`}
       aria-label={sidebarOpen ? "Close menu (Ctrl+B)" : "Open menu (Ctrl+B)"}
@@ -50,6 +52,6 @@ export default function FloatingMenuButton({ className = "" }: FloatingMenuButto
           }`}
         />
       </div>
-    </button>
+    </Button>
   );
 }

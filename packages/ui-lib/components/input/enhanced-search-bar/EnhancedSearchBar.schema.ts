@@ -5,8 +5,8 @@ export const SearchFilterSchema = z.object({
   label: z.string(),
   options: z.array(z.object({
     value: z.string(),
-    label: z.string()
-  }))
+    label: z.string(),
+  })),
 });
 
 export const EnhancedSearchBarSchema = z.object({
@@ -14,5 +14,5 @@ export const EnhancedSearchBarSchema = z.object({
   filters: z.array(SearchFilterSchema).optional().default([]),
   debounceMs: z.number().optional().default(300),
   className: z.string().optional().default(""),
-  showClearButton: z.boolean().optional().default(true)
+  showClearButton: z.boolean().optional().default(true),
 });

@@ -2,75 +2,80 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Divider } from "./Divider.tsx";
 
 const dividerExamples: ComponentExample[] = [
   {
     title: "Basic Divider",
     description: "Simple horizontal dividers for separating content",
-    props: {
-    }
+    props: {},
   },
   {
     title: "Divider with Text",
     description: "Dividers with text labels for clearer section separation",
     props: [
       { text: "OR" },
-      { text: "CONTINUE WITH"
-        }
-      ]},
+      { text: "CONTINUE WITH" },
+    ],
+  },
   {
     title: "Text Position",
     description: "Different text positioning within the divider",
     props: [
       { text: "Start aligned", position: "start" },
       { text: "Center aligned", position: "center" },
-      { text: "End aligned", position: "end"
-        }
-      ]},
+      { text: "End aligned", position: "end" },
+    ],
+  },
   {
     title: "Vertical Dividers",
     description: "Vertical dividers for side-by-side content separation",
     props: [
       { vertical: true },
-      { vertical: true, text: "OR"
-        }
-      ]},
+      { vertical: true, text: "OR" },
+    ],
+  },
   {
     title: "Dividers in Forms",
     description: "Real-world usage in forms and cards",
     props: [
       { text: "OR CONTINUE WITH" },
-      {
-        }
-      ]},
+      {},
+    ],
+  },
 ];
 
 const dividerProps: ComponentProp[] = [
   {
     name: "text",
     type: "string",
-    description: "Text to display in the middle of the divider"},
+    description: "Text to display in the middle of the divider",
+  },
   {
     name: "position",
     type: "'start' | 'center' | 'end'",
     description: "Horizontal alignment of the text within the divider",
-    default: "center"},
+    default: "center",
+  },
   {
     name: "vertical",
     type: "boolean",
     description: "Whether to render as a vertical divider",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "responsive",
     type: "boolean",
     description: "Enable responsive behavior for the divider",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const dividerMetadata: ComponentMetadata = {
@@ -108,4 +113,5 @@ export const dividerMetadata: ComponentMetadata = {
     "Text positioning helps create visual hierarchy in complex layouts",
     "Dividers improve readability by creating clear content boundaries",
     "Consider using semantic HTML elements like <hr> for screen readers when appropriate",
-  ]};
+  ],
+};

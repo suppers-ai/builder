@@ -96,7 +96,7 @@ Deno.test("Dock - size variants", () => {
 
   sizes.forEach((size, index) => {
     const html = renderToString(Dock({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       items: [{ id: "test", label: "Test", icon: "✓" }],
     }));
     assertStringIncludes(html, sizeClasses[index]);

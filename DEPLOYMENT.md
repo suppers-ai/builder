@@ -6,15 +6,28 @@ This guide covers deploying your Deno Fresh applications to Google Cloud Run.
 
 1. **Google Cloud Project**: Create a project and enable the following APIs:
    - Cloud Run API
-   - Container Registry API
+   - Artifact Registry API
    - Cloud Build API
 
-2. **Authentication**: Set up a service account with the following roles:
-   - Cloud Run Admin
-   - Storage Admin
+2. **Artifact Registry Repository**: Create a Docker repository:
+   ```bash
+   gcloud artifacts repositories create suppers \
+       --repository-format=docker \
+       --location=us-central1 \
+       --description="Docker repository for Suppers applications"
+   ```
+   
+   Or create via Google Cloud Console:
+   - Navigate to Artifact Registry
+   - Click "CREATE REPOSITORY"
+   - Name: `suppers`, Format: Docker, Region: `us-central1`
+
+3. **Authentication**: Set up a service account with the following roles:
+   - Cloud Run Developer
+   - Artifact Registry Writer
    - Service Account User
 
-3. **GitHub Secrets**: Add these secrets to your repository:
+4. **GitHub Secrets**: Add these secrets to your repository:
    - `GCP_PROJECT_ID`: Your Google Cloud project ID
    - `GCP_SA_KEY`: Base64 encoded service account key JSON
 
@@ -41,15 +54,18 @@ This guide covers deploying your Deno Fresh applications to Google Cloud Run.
 
 Build and deploy a specific app using the root Dockerfile:
 ```bash
-# Build Docker image with app name
-docker build --build-arg APP_NAME=store -t gcr.io/your-project-id/suppers-store-staging .
+# Configure Docker for Artifact Registry
+gcloud auth configure-docker us-central1-docker.pkg.dev
 
-# Push to registry
-docker push gcr.io/your-project-id/suppers-store-staging
+# Build Docker image with app name
+docker build --build-arg APP_NAME=store -t us-central1-docker.pkg.dev/your-project-id/suppers/suppers-store-staging .
+
+# Push to Artifact Registry
+docker push us-central1-docker.pkg.dev/your-project-id/suppers/suppers-store-staging
 
 # Deploy to Cloud Run
 gcloud run deploy suppers-store-staging \
-  --image gcr.io/your-project-id/suppers-store-staging \
+  --image us-central1-docker.pkg.dev/your-project-id/suppers/suppers-store-staging \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \

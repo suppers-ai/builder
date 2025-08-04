@@ -247,19 +247,19 @@ export function AdminPage({
                     {selectedApplications.size} application(s) selected
                   </span>
                   <div class="space-x-3">
-                    <button
+                    <Button
                       onClick={onBulkApprove}
                       disabled={isSubmittingReview}
-                      class="btn btn-success text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                      color="success"
                     >
                       ✅ Bulk Approve
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={onClearSelection}
-                      class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                      variant="outline"
                     >
                       Clear Selection
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -287,15 +287,15 @@ export function AdminPage({
                     >
                       <div class="flex items-start justify-between">
                         <div class="flex items-start space-x-4">
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={selectedApplications.has(application.id)}
                             onChange={(e) =>
                               onApplicationSelect(
                                 application.id,
                                 (e.target as HTMLInputElement).checked,
                               )}
-                            class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                            class="mt-1"
+                            size="sm"
                           />
                           <div class="flex-1">
                             <h3 class="text-lg font-semibold text-slate-900 mb-2">
@@ -320,24 +320,27 @@ export function AdminPage({
                           </div>
                         </div>
                         <div class="flex space-x-2">
-                          <button
+                          <Button
                             onClick={() => onReviewApplication(application, "approved")}
-                            class="btn btn-success text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            color="success"
+                            size="sm"
                           >
                             ✅ Approve
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => onReviewApplication(application, "rejected")}
-                            class="btn btn-error text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            color="error"
+                            size="sm"
                           >
                             ❌ Reject
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => onReviewApplication(application, null)}
-                            class="btn btn-primary text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                            color="primary"
+                            size="sm"
                           >
                             👁️ Details
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -402,157 +405,137 @@ export function AdminPage({
 
         {/* Application Review Modal */}
         {selectedApp && (
-          <div class="fixed inset-0 bg-slate-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-xl rounded-md bg-base-100">
-              <div class="mt-3">
-                {/* Modal Header */}
-                <div class="flex items-center justify-between mb-6">
-                  <h3 class="text-2xl font-bold text-slate-900">
-                    {reviewAction === "approved"
-                      ? "✅ Approve Application"
-                      : reviewAction === "rejected"
-                      ? "❌ Reject Application"
-                      : "👁️ Application Details"}
-                  </h3>
-                  <button
-                    onClick={onCloseModal}
-                    class="text-base-content/50 hover:text-slate-600"
+          <Modal
+            open={true}
+            onClose={onCloseModal}
+            title={reviewAction === "approved"
+              ? "✅ Approve Application"
+              : reviewAction === "rejected"
+              ? "❌ Reject Application"
+              : "👁️ Application Details"}
+            class="max-w-4xl"
+          >
+            {/* Application Details */}
+            <div class="bg-slate-50 rounded-lg p-6 mb-6">
+              <h4 class="text-lg font-semibold mb-3">{selectedApp.name}</h4>
+              {selectedApp.description && (
+                <p class="text-slate-600 mb-4">{selectedApp.description}</p>
+              )}
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="font-medium text-slate-700">Status:</span>
+                  <span
+                    class={`ml-2 px-2 py-1 rounded-full text-xs ${
+                      selectedApp.status === "pending"
+                        ? "bg-orange-100 text-orange-800"
+                        : selectedApp.status === "published"
+                        ? "bg-green-100 text-green-800"
+                        : selectedApp.status === "draft"
+                        ? "bg-slate-100 text-slate-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
                   >
-                    ✕
-                  </button>
+                    {selectedApp.status}
+                  </span>
                 </div>
-
-                {/* Application Details */}
-                <div class="bg-slate-50 rounded-lg p-6 mb-6">
-                  <h4 class="text-lg font-semibold mb-3">{selectedApp.name}</h4>
-                  {selectedApp.description && (
-                    <p class="text-slate-600 mb-4">{selectedApp.description}</p>
-                  )}
-                  <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span class="font-medium text-slate-700">Status:</span>
-                      <span
-                        class={`ml-2 px-2 py-1 rounded-full text-xs ${
-                          selectedApp.status === "pending"
-                            ? "bg-orange-100 text-orange-800"
-                            : selectedApp.status === "published"
-                            ? "bg-green-100 text-green-800"
-                            : selectedApp.status === "draft"
-                            ? "bg-slate-100 text-slate-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {selectedApp.status}
-                      </span>
-                    </div>
-                    <div>
-                      <span class="font-medium text-slate-700">Template:</span>
-                      <span class="ml-2">{selectedApp.template_id}</span>
-                    </div>
-                    <div>
-                      <span class="font-medium text-slate-700">Created:</span>
-                      <span class="ml-2">
-                        {new Date(selectedApp.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div>
-                      <span class="font-medium text-slate-700">Updated:</span>
-                      <span class="ml-2">
-                        {new Date(selectedApp.updated_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
+                <div>
+                  <span class="font-medium text-slate-700">Template:</span>
+                  <span class="ml-2">{selectedApp.template_id}</span>
                 </div>
-
-                {/* Previous Reviews */}
-                {reviews.length > 0 && (
-                  <div class="mb-6">
-                    <h4 class="text-lg font-semibold mb-3">Review History</h4>
-                    <div class="space-y-3">
-                      {reviews.map((review) => (
-                        <div
-                          key={review.id}
-                          class={`p-4 rounded-lg border ${
-                            review.action === "approved"
-                              ? "bg-green-50 border-green-200"
-                              : "bg-red-50 border-red-200"
-                          }`}
-                        >
-                          <div class="flex items-center justify-between mb-2">
-                            <span
-                              class={`font-medium ${
-                                review.action === "approved" ? "text-green-800" : "text-red-800"
-                              }`}
-                            >
-                              {review.action === "approved" ? "✅ Approved" : "❌ Rejected"}
-                            </span>
-                            <span class="text-sm text-slate-500">
-                              {new Date(review.reviewed_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          {review.feedback && (
-                            <p class="text-slate-700 text-sm">{review.feedback}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Review Actions */}
-                {reviewAction && (
-                  <div class="mb-6">
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                      {reviewAction === "approved"
-                        ? "Approval Message (Optional)"
-                        : "Rejection Reason (Required)"}
-                    </label>
-                    <textarea
-                      value={reviewFeedback}
-                      onChange={(e) => onSetReviewFeedback((e.target as HTMLTextAreaElement).value)}
-                      rows={4}
-                      class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder={reviewAction === "approved"
-                        ? "Optional feedback for the applicant..."
-                        : "Please explain why this application is being rejected..."}
-                    />
-                  </div>
-                )}
-
-                {/* Modal Actions */}
-                <div class="flex justify-end space-x-3">
-                  <button
-                    onClick={onCloseModal}
-                    class="bg-slate-500 hover:bg-slate-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  {reviewAction && (
-                    <button
-                      onClick={onSubmitReview}
-                      disabled={isSubmittingReview ||
-                        (reviewAction === "rejected" && !reviewFeedback.trim())}
-                      class={`px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                        reviewAction === "approved"
-                          ? "btn btn-success text-white"
-                          : "btn btn-error text-white"
-                      }`}
-                    >
-                      {isSubmittingReview
-                        ? <Loading size="sm" variant="spinner" />
-                        : reviewAction === "approved"
-                        ? (
-                          "✅ Approve Application"
-                        )
-                        : (
-                          "❌ Reject Application"
-                        )}
-                    </button>
-                  )}
+                <div>
+                  <span class="font-medium text-slate-700">Created:</span>
+                  <span class="ml-2">
+                    {new Date(selectedApp.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+                <div>
+                  <span class="font-medium text-slate-700">Updated:</span>
+                  <span class="ml-2">
+                    {new Date(selectedApp.updated_at).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
-          </div>
+
+            {/* Previous Reviews */}
+            {reviews.length > 0 && (
+              <div class="mb-6">
+                <h4 class="text-lg font-semibold mb-3">Review History</h4>
+                <div class="space-y-3">
+                  {reviews.map((review) => (
+                    <div
+                      key={review.id}
+                      class={`p-4 rounded-lg border ${
+                        review.action === "approved"
+                          ? "bg-green-50 border-green-200"
+                          : "bg-red-50 border-red-200"
+                      }`}
+                    >
+                      <div class="flex items-center justify-between mb-2">
+                        <span
+                          class={`font-medium ${
+                            review.action === "approved" ? "text-green-800" : "text-red-800"
+                          }`}
+                        >
+                          {review.action === "approved" ? "✅ Approved" : "❌ Rejected"}
+                        </span>
+                        <span class="text-sm text-slate-500">
+                          {new Date(review.reviewed_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {review.feedback && <p class="text-slate-700 text-sm">{review.feedback}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Review Actions */}
+            {reviewAction && (
+              <div class="mb-6">
+                <label class="block text-sm font-medium text-base-content mb-2">
+                  {reviewAction === "approved"
+                    ? "Approval Message (Optional)"
+                    : "Rejection Reason (Required)"}
+                </label>
+                <Textarea
+                  value={reviewFeedback}
+                  onInput={(e) => onSetReviewFeedback((e.target as HTMLTextAreaElement).value)}
+                  rows={4}
+                  bordered
+                  placeholder={reviewAction === "approved"
+                    ? "Optional feedback for the applicant..."
+                    : "Please explain why this application is being rejected..."}
+                  class="w-full"
+                />
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div class="flex justify-end space-x-3">
+              <Button
+                onClick={onCloseModal}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              {reviewAction && (
+                <Button
+                  onClick={onSubmitReview}
+                  disabled={isSubmittingReview ||
+                    (reviewAction === "rejected" && !reviewFeedback.trim())}
+                  color={reviewAction === "approved" ? "success" : "error"}
+                  loading={isSubmittingReview}
+                >
+                  {isSubmittingReview
+                    ? "Processing..."
+                    : reviewAction === "approved"
+                    ? "✅ Approve Application"
+                    : "❌ Reject Application"}
+                </Button>
+              )}
+            </div>
+          </Modal>
         )}
       </div>
     </div>

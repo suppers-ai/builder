@@ -16,7 +16,7 @@ Deno.test("Artboard - size variants", () => {
 
   sizes.forEach((size) => {
     const html = renderToString(Artboard({
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       children: `Size ${size}`,
     }));
     assertStringIncludes(html, `artboard-${size}`);
@@ -41,7 +41,7 @@ Deno.test("Artboard - phone mode with different sizes", () => {
   sizes.forEach((size) => {
     const html = renderToString(Artboard({
       phone: true,
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
       children: `Phone ${size}`,
     }));
     assertStringIncludes(html, `phone-${size}`);

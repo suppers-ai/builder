@@ -51,7 +51,7 @@ Deno.test("Pagination - size variants", () => {
     const html = renderToString(Pagination({
       currentPage: 1,
       totalPages: 3,
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }) as ComponentProps);
     if (size === "md") {
       // Default size doesn't add a class

@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 
 const dockExamples: ComponentExample[] = [
   {
@@ -12,111 +13,115 @@ const dockExamples: ComponentExample[] = [
       items: [
         {
           label: "Home",
-      icon: "🏠",
-      href: "/"
+          icon: "🏠",
+          href: "/",
         },
         {
           label: "Search",
-      icon: "🔍",
-      href: "/search"
+          icon: "🔍",
+          href: "/search",
         },
         {
           label: "Profile",
-      icon: "👤",
-      href: "/profile"
-        }
-      ]
-    }
-  },  {
+          icon: "👤",
+          href: "/profile",
+        },
+      ],
+    },
+  },
+  {
     title: "Dock Positions",
     description: "Different dock positions",
     props: {
       items: [
         {
           label: "Home",
-      icon: "🏠",
-      href: "/"
+          icon: "🏠",
+          href: "/",
         },
         {
           label: "Search",
-      icon: "🔍",
-      href: "/search"
+          icon: "🔍",
+          href: "/search",
         },
         {
           label: "Profile",
-      icon: "👤",
-      href: "/profile"
-        }
-      ]
-    }
-  },  {
+          icon: "👤",
+          href: "/profile",
+        },
+      ],
+    },
+  },
+  {
     title: "Dock Sizes",
     description: "Different sizes for various contexts",
     props: {
       items: [
         {
           label: "Home",
-      icon: "🏠",
-      href: "/"
+          icon: "🏠",
+          href: "/",
         },
         {
           label: "Search",
-      icon: "🔍",
-      href: "/search"
+          icon: "🔍",
+          href: "/search",
         },
         {
           label: "Profile",
-      icon: "👤",
-      href: "/profile"
-        }
+          icon: "👤",
+          href: "/profile",
+        },
       ],
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Dock with Badges",
     description: "Dock items with notification badges",
     props: {
       items: [
         {
           label: "Home",
-      icon: "🏠",
-      href: "/"
+          icon: "🏠",
+          href: "/",
         },
         {
           label: "Search",
-      icon: "🔍",
-      href: "/search"
+          icon: "🔍",
+          href: "/search",
         },
         {
           label: "Profile",
-      icon: "👤",
-      href: "/profile"
-        }
-      ]
-    }
-  },  {
+          icon: "👤",
+          href: "/profile",
+        },
+      ],
+    },
+  },
+  {
     title: "Dock Variants",
     description: "Different visual styles",
     props: {
       items: [
         {
           label: "Home",
-      icon: "🏠",
-      href: "/"
+          icon: "🏠",
+          href: "/",
         },
         {
           label: "Search",
-      icon: "🔍",
-      href: "/search"
+          icon: "🔍",
+          href: "/search",
         },
         {
           label: "Profile",
-      icon: "👤",
-      href: "/profile"
-        }
+          icon: "👤",
+          href: "/profile",
+        },
       ],
-      variant: "outlined"
-    }
+      variant: "outlined",
+    },
   },
 ];
 
@@ -125,40 +130,48 @@ const dockProps: ComponentProp[] = [
     name: "items",
     type: "DockItem[]",
     description: "Array of dock items to display",
-    required: true},
+    required: true,
+  },
   {
     name: "position",
     type: "'bottom' | 'top' | 'left' | 'right'",
     description: "Position of the dock",
-    default: "bottom"},
+    default: "bottom",
+  },
   {
     name: "size",
     type: "'sm' | 'md' | 'lg'",
     description: "Size variant of the dock",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "variant",
     type: "'default' | 'primary' | 'secondary' | 'accent' | 'neutral' | 'ghost'",
     description: "Visual style variant",
-    default: "default"},
+    default: "default",
+  },
   {
     name: "showLabels",
     type: "boolean",
     description: "Whether to show item labels",
-    default: "true"},
+    default: "true",
+  },
   {
     name: "fixed",
     type: "boolean",
     description: "Whether dock has fixed positioning",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onItemClick",
     type: "(item: DockItem, index: number) => void",
-    description: "Callback when any item is clicked"},
+    description: "Callback when any item is clicked",
+  },
   {
     name: "className",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const dockMetadata: ComponentMetadata = {
@@ -203,4 +216,5 @@ export const dockMetadata: ComponentMetadata = {
     "Hover animations include scale effects for better feedback",
     "Labels can be hidden with showLabels=false for icon-only docks",
     "Responsive design adapts layout based on position",
-  ]};
+  ],
+};

@@ -1,4 +1,4 @@
-import { SelectProps, SelectOption } from "./Select.schema.ts";
+import { SelectOption, SelectProps } from "./Select.schema.ts";
 
 export function Select({
   class: className = "",

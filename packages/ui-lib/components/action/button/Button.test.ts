@@ -16,7 +16,15 @@ Deno.test("Button - color variants", () => {
   colors.forEach((color) => {
     const html = renderToString(Button({
       children: "Test",
-      color: color as 'primary' | 'secondary' | 'accent' | 'neutral' | 'info' | 'success' | 'warning' | 'error',
+      color: color as
+        | "primary"
+        | "secondary"
+        | "accent"
+        | "neutral"
+        | "info"
+        | "success"
+        | "warning"
+        | "error",
     }));
     assertStringIncludes(html, `btn-${color}`);
   });
@@ -28,7 +36,7 @@ Deno.test("Button - size variants", () => {
   sizes.forEach((size) => {
     const html = renderToString(Button({
       children: "Test",
-      size: size as 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+      size: size as "xs" | "sm" | "md" | "lg" | "xl",
     }));
     assertStringIncludes(html, `btn-${size}`);
   });

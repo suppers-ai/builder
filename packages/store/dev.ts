@@ -10,10 +10,10 @@ try {
     envPath: "../../.env",
     export: true,
   });
-  console.log('env variables loaded');
+  console.log("env variables loaded");
 } catch {
   // Ignore if no env files
-  console.log('No env variables found')
+  console.log("No env variables found");
 }
 
 const builder = new Builder({ target: "safari12" });
@@ -27,7 +27,7 @@ if (Deno.args.includes("build")) {
   await builder.build();
 } else {
   // Start the development server
-  await builder.listen(() => import("./main.ts").then(m => m.app), {
+  await builder.listen(() => import("./main.ts").then((m) => m.app), {
     port: parseInt(Deno.env.get("STORE_PORT") || PORTS.STORE.toString()),
   });
 }

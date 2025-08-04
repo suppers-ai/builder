@@ -2,7 +2,8 @@ import {
   ComponentCategory,
   ComponentExample,
   ComponentMetadata,
-  ComponentProp} from "../../types.ts";
+  ComponentProp,
+} from "../../types.ts";
 import { Range } from "./Range.tsx";
 
 const rangeExamples: ComponentExample[] = [
@@ -12,42 +13,46 @@ const rangeExamples: ComponentExample[] = [
     props: {
       min: 0,
       max: 100,
-      value: 50
-    }
-  },  {
+      value: 50,
+    },
+  },
+  {
     title: "Range Sizes",
     description: "Different sizes for various contexts",
     props: {
       min: 0,
       max: 100,
       value: 50,
-      size: "lg"
-    }
-  },  {
+      size: "lg",
+    },
+  },
+  {
     title: "Range Colors",
     description: "Various color themes",
     props: {
       min: 0,
       max: 100,
       value: 50,
-      color: "primary"
-    }
-  },  {
+      color: "primary",
+    },
+  },
+  {
     title: "Range with Custom Steps",
     description: "Different step increments and ranges",
     props: {
       min: 0,
       max: 100,
-      value: 50
-    }
-  },  {
+      value: 50,
+    },
+  },
+  {
     title: "Range with Value Display",
     description: "Showing current values with the range slider",
     props: {
       min: 0,
       max: 100,
-      value: 50
-    }
+      value: 50,
+    },
   },
 ];
 
@@ -56,45 +61,54 @@ const rangeProps: ComponentProp[] = [
     name: "value",
     type: "number",
     description: "Current value of the range slider",
-    default: "50"},
+    default: "50",
+  },
   {
     name: "min",
     type: "number",
     description: "Minimum value",
-    default: "0"},
+    default: "0",
+  },
   {
     name: "max",
     type: "number",
     description: "Maximum value",
-    default: "100"},
+    default: "100",
+  },
   {
     name: "step",
     type: "number",
     description: "Step increment for the slider",
-    default: "1"},
+    default: "1",
+  },
   {
     name: "size",
     type: "'xs' | 'sm' | 'md' | 'lg'",
     description: "Size of the range slider",
-    default: "md"},
+    default: "md",
+  },
   {
     name: "color",
     type: "'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error'",
     description: "Color theme for the range slider",
-    default: "primary"},
+    default: "primary",
+  },
   {
     name: "disabled",
     type: "boolean",
     description: "Whether the range slider is disabled",
-    default: "false"},
+    default: "false",
+  },
   {
     name: "onChange",
     type: "(event: Event) => void",
-    description: "Change event handler"},
+    description: "Change event handler",
+  },
   {
     name: "class",
     type: "string",
-    description: "Additional CSS classes"},
+    description: "Additional CSS classes",
+  },
 ];
 
 export const rangeMetadata: ComponentMetadata = {
@@ -129,4 +143,5 @@ export const rangeMetadata: ComponentMetadata = {
     "Use colors to convey meaning (success for good values, warning for limits)",
     "Label ranges clearly to indicate what values represent",
     "Consider accessibility by providing keyboard navigation support",
-  ]};
+  ],
+};
