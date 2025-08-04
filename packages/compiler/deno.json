@@ -5,9 +5,6 @@
   "imports": {
     "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.8",
     "@cliffy/prompt": "jsr:@cliffy/prompt@^1.0.0-rc.8",
-    "$fresh/runtime": "jsr:@fresh/core@^2.0.0-alpha.34/runtime",
-    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
-    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
     "@suppers/shared": "../shared/mod.ts"
   },
   "tasks": {

@@ -13,9 +13,7 @@
     "./generated/database-types": "./generated/database-types.ts"
   },
   "imports": {
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.3",
-    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
-    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime"
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.3"
   },
   "compilerOptions": {
     "lib": ["dom", "dom.asynciterable", "deno.ns"],
