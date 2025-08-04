@@ -24,7 +24,15 @@ tailwind(builder);
 // Create optimized assets for the browser when
 // running `deno run -A dev.ts build`
 if (Deno.args.includes("build")) {
-  await builder.build();
+  console.log("Starting build process...");
+  try {
+    console.log("Building with Fresh...");
+    await builder.build();
+    console.log("Build completed successfully!");
+  } catch (error) {
+    console.error("Build failed:", error);
+    Deno.exit(1);
+  }
 } else {
   // Start the development server
   await builder.listen(() => import("./main.ts").then((m) => m.app), {
