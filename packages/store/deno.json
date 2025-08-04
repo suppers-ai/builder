@@ -28,8 +28,6 @@
     "@suppers/profile": "../profile/mod.ts",
     "@suppers/auth-client": "../auth-client/mod.ts",
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.8?target=deno",
-    "preact/jsx-runtime": "npm:preact@10.26.9/jsx-runtime",
-    "preact/jsx-dev-runtime": "npm:preact@10.26.9/jsx-dev-runtime",
     "jose": "https://esm.sh/jose@5.2.0"
   },
   "lint": {

@@ -1221,17 +1221,7 @@
           "npm:preact@10.26.9"
         ]
       },
-      "packages/profile": {
-        "dependencies": [
-          "npm:preact@10.26.9"
-        ]
-      },
       "packages/shared": {
-        "dependencies": [
-          "npm:preact@10.26.9"
-        ]
-      },
-      "packages/store": {
         "dependencies": [
           "npm:preact@10.26.9"
         ]
