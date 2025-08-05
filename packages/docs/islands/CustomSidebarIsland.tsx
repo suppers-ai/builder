@@ -1,11 +1,11 @@
 import { useEffect, useState } from "preact/hooks";
-import { ChevronDown, ChevronRight, LogIn, LogOut, User } from "lucide-preact";
 import {
   Accordion,
   closeGlobalSidebar,
   globalSidebarOpen,
   globalTheme,
   loadSavedTheme,
+  Logo,
 } from "@suppers/ui-lib";
 import type { AccordionItemProps } from "@suppers/ui-lib";
 import { defaultUISidebarConfig } from "../utils/sidebar-config.tsx";
@@ -87,7 +87,6 @@ export default function CustomSidebarIsland({
     "business",
   ]);
   const isDarkTheme = darkThemes.has(currentTheme) || currentTheme?.includes("dark");
-  const logoSrc = isDarkTheme ? "/logos/long_dark.png" : "/logos/long_light.png";
 
   return (
     <>
@@ -107,10 +106,10 @@ export default function CustomSidebarIsland({
       >
         {/* Sidebar Header */}
         <div class="p-4 pr-16 border-b border-base-300 bg-base-100">
-          <img
-            src={logoSrc}
-            alt="Suppers Software Logo"
-            class="h-11 w-auto"
+          <Logo 
+            alt="Suppers Software Logo" 
+            variant="long" 
+            size="lg"
           />
         </div>
 

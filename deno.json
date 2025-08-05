@@ -28,7 +28,7 @@
     "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
     "$fresh/runtime": "jsr:@fresh/core@2.0.0-alpha.52/runtime",
     "tailwindcss": "npm:tailwindcss@4.1.11",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.50.3",
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@2",
     "preact": "npm:preact@10.27.0",
     "preact/": "npm:preact@10.27.0/",
     "preact/hooks": "npm:preact@10.27.0/hooks",

@@ -4,9 +4,7 @@
  */
 
 import { z } from "zod";
-
-// User Role Schema
-export const UserRoleSchema = z.enum(["user", "admin", "moderator"]);
+import { UserRoleSchema } from "./database.ts";
 
 // User Schema
 export const UserSchema = z.object({
@@ -173,7 +171,6 @@ export const ApiKeySchema = z.object({
 });
 
 // Export inferred types
-export type UserRole = z.infer<typeof UserRoleSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type UserInsert = z.infer<typeof UserInsertSchema>;
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;

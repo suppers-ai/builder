@@ -27,7 +27,6 @@
     "@suppers/compiler": "../compiler/mod.ts",
     "@suppers/profile": "../profile/mod.ts",
     "@suppers/auth-client": "../auth-client/mod.ts",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.8?target=deno",
     "jose": "https://esm.sh/jose@5.2.0"
   },
   "lint": {

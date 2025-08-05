@@ -5,4 +5,3 @@
  */
 
 export * from "./api-client.ts";
-export * from "./auth-helpers.ts";

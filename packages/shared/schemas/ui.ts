@@ -5,30 +5,6 @@
 
 import { z } from "zod";
 
-// Custom Theme Variables Schema
-export const CustomThemeVariablesSchema = z.object({
-  primary: z.string().optional(),
-  secondary: z.string().optional(),
-  accent: z.string().optional(),
-  neutral: z.string().optional(),
-  "base-100": z.string().optional(),
-  "base-200": z.string().optional(),
-  "base-300": z.string().optional(),
-  info: z.string().optional(),
-  success: z.string().optional(),
-  warning: z.string().optional(),
-  error: z.string().optional(),
-}).catchall(z.union([z.string(), z.number()]));
-
-// Custom Theme Definition Schema
-export const CustomThemeSchema = z.object({
-  name: z.string().min(1, "Theme name is required"),
-  label: z.string().min(1, "Theme label is required"),
-  description: z.string().optional(),
-  variables: CustomThemeVariablesSchema,
-  isPublic: z.boolean().default(false),
-});
-
 // Component Size Schema
 export const ComponentSizeSchema = z.enum(["xs", "sm", "md", "lg", "xl"]);
 
@@ -280,8 +256,6 @@ export const ChangeHandlerSchema = z.function().args(z.any()).returns(z.void());
 export const SubmitHandlerSchema = z.function().args(z.record(z.any())).returns(z.void());
 
 // Export inferred types
-export type CustomThemeVariables = z.infer<typeof CustomThemeVariablesSchema>;
-export type CustomTheme = z.infer<typeof CustomThemeSchema>;
 export type ComponentSize = z.infer<typeof ComponentSizeSchema>;
 export type ComponentColor = z.infer<typeof ComponentColorSchema>;
 export type ComponentVariant = z.infer<typeof ComponentVariantSchema>;

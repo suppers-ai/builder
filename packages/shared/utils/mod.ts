@@ -38,9 +38,3 @@ export * from "./type-mappers.ts";
 
 // Deprecation warning utilities
 export * from "./deprecation-warnings.ts";
-
-// Profile synchronization utilities
-export * from "./profile-sync.ts";
-
-// Cross-application authentication utilities
-export * from "./cross-app-auth.ts";

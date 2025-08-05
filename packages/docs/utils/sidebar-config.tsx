@@ -67,16 +67,6 @@ export const defaultUISidebarConfig: SidebarConfig = {
       })),
     },
     {
-      id: "auth",
-      title: "Authentication",
-      icon: categoryIcons["Auth"],
-      defaultOpen: true,
-      links: componentsMetadata.auth.map((value) => ({
-        name: value.name,
-        path: value.path,
-      })),
-    },
-    {
       id: "display",
       title: "Display",
       icon: categoryIcons["Data Display"],

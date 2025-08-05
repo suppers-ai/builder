@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { AccessLevelSchema, ApplicationStatusSchema, ReviewActionSchema } from "./database.ts";
 
 // HTTP Method Schema
 export const HttpMethodSchema = z.enum(["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]);
@@ -91,9 +92,6 @@ export const RequestConfigSchema = z.object({
   timeout: z.number().positive().optional(),
 });
 
-// Application Data Schemas
-export const ApplicationStatusSchema = z.enum(["draft", "pending", "published", "archived"]);
-
 export const ApplicationSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, "Application name is required"),
@@ -122,8 +120,6 @@ export const UpdateApplicationDataSchema = z.object({
   status: ApplicationStatusSchema.optional(),
 });
 
-// User Access Schemas
-export const AccessLevelSchema = z.enum(["read", "write", "admin"]);
 
 export const UserAccessSchema = z.object({
   id: z.string().uuid(),
@@ -139,9 +135,6 @@ export const GrantAccessDataSchema = z.object({
   userId: z.string().uuid("Invalid user ID"),
   accessLevel: AccessLevelSchema,
 });
-
-// Application Review Schemas
-export const ReviewActionSchema = z.enum(["approved", "rejected"]);
 
 export const ApplicationReviewSchema = z.object({
   id: z.string().uuid(),
@@ -239,14 +232,11 @@ export type SortParams = z.infer<typeof SortParamsSchema>;
 export type SearchParams = z.infer<typeof SearchParamsSchema>;
 export type QueryParams = z.infer<typeof QueryParamsSchema>;
 export type RequestConfig = z.infer<typeof RequestConfigSchema>;
-export type ApplicationStatus = z.infer<typeof ApplicationStatusSchema>;
 export type Application = z.infer<typeof ApplicationSchema>;
 export type CreateApplicationData = z.infer<typeof CreateApplicationDataSchema>;
 export type UpdateApplicationData = z.infer<typeof UpdateApplicationDataSchema>;
-export type AccessLevel = z.infer<typeof AccessLevelSchema>;
 export type UserAccess = z.infer<typeof UserAccessSchema>;
 export type GrantAccessData = z.infer<typeof GrantAccessDataSchema>;
-export type ReviewAction = z.infer<typeof ReviewActionSchema>;
 export type ApplicationReview = z.infer<typeof ApplicationReviewSchema>;
 export type CreateReviewData = z.infer<typeof CreateReviewDataSchema>;
 export type CustomTheme = z.infer<typeof CustomThemeSchema>;

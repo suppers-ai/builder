@@ -1,6 +1,14 @@
 // Import canonical types from shared package
-import type { AuthUser } from "../../shared/types/auth.ts";
-export type { AuthUser } from "../../shared/types/auth.ts";
+import type { AuthUser as SharedAuthUser } from "../../shared/types/auth.ts";
+
+// Extended AuthUser with compatibility properties for easier component usage
+export interface AuthUser extends SharedAuthUser {
+  // Camel case aliases for easier component usage
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;
+  avatarUrl?: string;
+}
 
 export interface AuthClientConfig {
   storeUrl: string;

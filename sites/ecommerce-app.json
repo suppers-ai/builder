@@ -29,7 +29,7 @@
             {
               "id": "Logo",
               "props": {
-                "src": "/logo.png",
+                "src": "https://cdn.suppers.ai/logos/long_light.png",
                 "alt": "MyStore"
               }
             },
@@ -96,7 +96,7 @@
             "props": {
               "title": "Welcome to MyStore",
               "subtitle": "Find amazing products at great prices",
-              "backgroundImage": "/hero-bg.jpg",
+              "backgroundImage": "https://cdn.suppers.ai/backgrounds/hero-gradient.webp",
               "ctaText": "Shop Now",
               "ctaHref": "/products"
             }
