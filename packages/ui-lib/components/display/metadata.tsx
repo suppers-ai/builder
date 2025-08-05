@@ -8,6 +8,7 @@ import { collapseMetadata } from "./collapse/Collapse.metadata.tsx";
 import { countdownMetadata } from "./countdown/Countdown.metadata.tsx";
 import { diffMetadata } from "./diff/Diff.metadata.tsx";
 import { kbdMetadata } from "./kbd/Kbd.metadata.tsx";
+import logoMetadata from "./logo/Logo.metadata.tsx";
 import { statMetadata } from "./stat/Stat.metadata.tsx";
 import { tableMetadata } from "./table/Table.metadata.tsx";
 import { timelineMetadata } from "./timeline/Timeline.metadata.tsx";
@@ -24,6 +25,7 @@ export const displayComponentsMetadata = [
   countdownMetadata,
   diffMetadata,
   kbdMetadata,
+  logoMetadata,
   statMetadata,
   tableMetadata,
   timelineMetadata,

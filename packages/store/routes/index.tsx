@@ -11,7 +11,7 @@ export default function Home(_props: PageProps) {
         {/* Background Image - Initial */}
         <div
           class="absolute inset-0 bg-cover bg-center transition-opacity duration-500 ease-in-out"
-          style="background-image: url('/hero-gradient.webp');"
+          style="background-image: url('https://cdn.suppers.ai/backgrounds/hero-gradient.webp');"
           id="hero-image"
         >
         </div>
@@ -25,7 +25,7 @@ export default function Home(_props: PageProps) {
           playsInline
           onLoadedData="document.getElementById('hero-video').style.opacity = '1'; document.getElementById('hero-image').style.opacity = '0';"
         >
-          <source src="/hero-gradient.mp4" type="video/mp4" />
+          <source src="https://cdn.suppers.ai/videos/hero-gradient.mp4" type="video/mp4" />
         </video>
 
         {/* Main Content - Centered */}

@@ -108,7 +108,7 @@
                 "PostgreSQL",
                 "AWS/Docker"
               ],
-              "image": "/profile.jpg"
+              "image": "https://cdn.suppers.ai/images/profile.jpg"
             }
           },
           {
