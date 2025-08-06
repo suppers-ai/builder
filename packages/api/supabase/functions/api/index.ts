@@ -1,7 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "./lib/cors.ts";
-import { handleAuth } from "./handlers/auth/index.ts";
 import { handleApplications } from "./handlers/applications/index.ts";
 import { handleUserRequest } from "./handlers/user/index.ts";
 import { handleAccess } from "./handlers/access/index.ts";
@@ -42,10 +41,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Check if this is a public auth endpoint that doesn't require authentication
-    const isPublicAuthEndpoint = resource === "auth" &&
-      (rest[0] === "register" || rest[0] === "login" || rest[0] === "refresh" ||
-        rest[0] === "reset-password" || rest[0] === "oauth");
 
     // Get JWT token from Authorization header (not required for public endpoints)
     const authHeader = req.headers.get("Authorization");
@@ -55,43 +50,40 @@ Deno.serve(async (req: Request) => {
     let supabase = supabaseAdmin; // Default to admin client
     console.log("isPublicAuthEndpoint", isPublicAuthEndpoint);
 
-    if (!isPublicAuthEndpoint) {
-      // Require authentication for protected endpoints
-      if (!token) {
-        console.log("❌ No token provided for protected endpoint:", resource, rest);
-        return new Response(
-          JSON.stringify({ error: "Authorization token required" }),
-          {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
-      }
-
-      console.log("🔑 Verifying token for endpoint:", resource, rest);
-
-      // Verify JWT and get user
-      const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(
-        token,
+    if (!token) {
+      console.log("❌ No token provided for protected endpoint:", resource, rest);
+      return new Response(
+        JSON.stringify({ error: "Authorization token required" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
-
-      if (authError || !authUser) {
-        console.log("❌ Token verification failed:", authError);
-        return new Response(
-          JSON.stringify({ error: "Invalid or expired token" }),
-          {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
-      }
-
-      console.log("✅ Token verified for user:", authUser.email);
-      user = authUser;
-
-      // Use admin client for all operations, but pass user context
-      supabase = supabaseAdmin;
     }
+
+    console.log("🔑 Verifying token for endpoint:", resource, rest);
+
+    // Verify JWT and get user
+    const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(
+      token,
+    );
+
+    if (authError || !authUser) {
+      console.log("❌ Token verification failed:", authError);
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired token" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    console.log("✅ Token verified for user:", authUser.email);
+    user = authUser;
+
+    // Use admin client for all operations, but pass user context
+    supabase = supabaseAdmin;
 
     // Route to appropriate handler based on resource
     let response: Response;
@@ -99,11 +91,6 @@ Deno.serve(async (req: Request) => {
     console.log("🎯 Routing request to resource:", resource, "with rest:", rest);
 
     switch (resource) {
-      case "auth":
-        console.log("🔐 Routing to auth handler with path:", rest);
-        response = await handleAuth(req, { user, supabase, supabaseAdmin, pathSegments: rest });
-        break;
-
       case "applications":
         response = await handleApplications(req, {
           user,
@@ -123,7 +110,9 @@ Deno.serve(async (req: Request) => {
 
       default:
         response = new Response(
-          JSON.stringify({ error: `Unknown resource: ${resource}` }),
+          JSON.stringify({ 
+            error: `Unknown resource: ${resource}. Available resources: applications, user, access. Auth is handled directly by Supabase.` 
+          }),
           {
             status: 404,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
