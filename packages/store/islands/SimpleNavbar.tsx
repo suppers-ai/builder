@@ -1,5 +1,5 @@
 import SimpleAuthButton from "./SimpleAuthButton.tsx";
-import { Button } from "@suppers/ui-lib";
+import { Button, Logo } from "@suppers/ui-lib";
 
 interface SimpleNavbarProps {
   currentPath?: string;
@@ -15,44 +15,40 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
     <div class="navbar bg-base-100">
       {/* Logo - Left */}
       <div class="navbar-start">
-        <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img
-            src="/logos/long_light.png"
-            alt="Suppers Store Logo"
-            class="h-8 w-auto object-contain dark:hidden"
-          />
-          <img
-            src="/logos/long_dark.png"
-            alt="Suppers Store Logo"
-            class="h-8 w-auto object-contain hidden dark:block"
-          />
-        </a>
+        <Logo
+          href="/"
+          alt="Suppers Store Logo"
+          variant="long"
+          size="lg"
+        />
       </div>
 
       {/* Navigation - Center */}
       <div class="navbar-center">
         <ul class="menu menu-horizontal px-1 gap-4 hidden md:flex">
           <li>
-            <a
-              href="/applications"
+            <Button
+              onClick={() => window.location.href = "/applications"}
               class={`font-medium ${
                 currentPath === "/applications" || currentPath.startsWith("/applications")
                   ? "text-primary"
                   : "text-base-content hover:text-primary"
-              }`}
+              } bg-transparent border-none`}
+              variant="ghost"
             >
               Applications
-            </a>
+            </Button>
           </li>
           <li>
-            <a
-              href="/create"
+            <Button
+              onClick={() => window.location.href = "/create"}
               class={`font-medium ${
                 currentPath === "/create" ? "text-primary" : "text-base-content hover:text-primary"
-              }`}
+              } bg-transparent border-none`}
+              variant="ghost"
             >
               Create
-            </a>
+            </Button>
           </li>
           <li>
             <Button
@@ -69,7 +65,7 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
       {/* Auth and Mobile Menu - Right */}
       <div class="navbar-end">
         {/* Auth Button - Always visible */}
-        <div class="mr-4">
+        <div class="">
           <SimpleAuthButton />
         </div>
 
@@ -109,7 +105,7 @@ export default function SimpleNavbar({ currentPath = "/" }: SimpleNavbarProps) {
                 </a>
               </li>
               <li>
-                <Button 
+                <Button
                   onClick={handleDocsClick}
                   class="bg-transparent border-none"
                   variant="ghost"

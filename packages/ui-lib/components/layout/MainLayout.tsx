@@ -63,12 +63,12 @@ export function MainLayout({
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav class="bg-base-200/50 border-b border-base-300">
           <div class="px-4 lg:px-6 py-3">
-            <Breadcrumbs 
+            <Breadcrumbs
               size="sm"
-              items={breadcrumbs.map(breadcrumb => ({
+              items={breadcrumbs.map((breadcrumb) => ({
                 label: breadcrumb.name,
                 href: breadcrumb.path,
-                active: breadcrumb.active
+                active: breadcrumb.active,
               }))}
             />
           </div>

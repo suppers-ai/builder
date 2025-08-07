@@ -47,7 +47,12 @@ export default function App({ Component, state }: PageProps) {
 
         {/* Favicon and Icons */}
         {/* Theme-aware favicon: defaults to light icon, updated via script */}
-        <link id="site-favicon" rel="icon" type="image/x-icon" href="https://cdn.suppers.ai/favicons/favicon_light.ico" />
+        <link
+          id="site-favicon"
+          rel="icon"
+          type="image/x-icon"
+          href="https://cdn.suppers.ai/favicons/favicon_light.ico"
+        />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />

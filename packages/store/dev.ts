@@ -2,7 +2,7 @@
 import { loadSync } from "@std/dotenv";
 import { Builder } from "fresh/dev";
 import { tailwind } from "@fresh/plugin-tailwind";
-import { PORTS } from "@suppers/shared";
+import config from "../../config.ts";
 
 // Load environment variables
 try {
@@ -38,6 +38,6 @@ if (Deno.args.includes("build")) {
 } else {
   // Start the development server
   await builder.listen(() => import("./main.ts").then((m) => m.app), {
-    port: parseInt(Deno.env.get("STORE_PORT") || PORTS.STORE.toString()),
+    port: parseInt(Deno.env.get("STORE_PORT") || config.storePort.toString()),
   });
 }

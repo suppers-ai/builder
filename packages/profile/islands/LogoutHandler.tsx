@@ -1,22 +1,42 @@
 import { useEffect, useState } from "preact/hooks";
 import { Alert, Button, Card, Loading } from "@suppers/ui-lib";
-import { AuthHelpers } from "../lib/auth-helpers.ts";
+import { getAuthClient } from "../lib/auth.ts";
+
+// Get the singleton auth client
+const authClient = getAuthClient();
 
 export default function LogoutHandler() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Check if this is a popup logout
+  const isPopup = typeof globalThis.window !== "undefined" && 
+                  new URLSearchParams(globalThis.window.location.search).get("popup") === "true";
+
   useEffect(() => {
     const handleLogout = async () => {
       try {
-        await AuthHelpers.signOut();
-        setSuccess("Successfully logged out! Redirecting...");
+        await authClient.signOut();
+        setSuccess("Successfully logged out!");
 
-        // Redirect to home after a short delay
-        setTimeout(() => {
-          globalThis.location.href = "/";
-        }, 1500);
+        if (isPopup) {
+          // Send success message to parent window and close popup
+          if (globalThis.window.opener) {
+            globalThis.window.opener.postMessage({
+              type: 'OAUTH_LOGOUT_SUCCESS'
+            }, '*');
+          }
+          
+          setTimeout(() => {
+            globalThis.window.close();
+          }, 1000);
+        } else {
+          // Redirect to home after a short delay for normal logout
+          setTimeout(() => {
+            globalThis.location.href = "/";
+          }, 1500);
+        }
       } catch (err) {
         console.error("Logout error:", err);
         setError(err instanceof Error ? err.message : "Logout failed");
@@ -26,7 +46,7 @@ export default function LogoutHandler() {
     };
 
     handleLogout();
-  }, []);
+  }, [isPopup]);
 
   if (loading) {
     return (
@@ -52,7 +72,7 @@ export default function LogoutHandler() {
             <div class="text-red-500 text-6xl mb-4">❌</div>
             <h2 class="text-xl font-semibold mb-4">Logout Failed</h2>
 
-            <Alert type="error" class="mb-6">
+            <Alert color="error" class="mb-6">
               {error}
             </Alert>
 
@@ -88,17 +108,26 @@ export default function LogoutHandler() {
             <div class="text-green-500 text-6xl mb-4">👋</div>
             <h2 class="text-xl font-semibold mb-4">Goodbye!</h2>
 
-            <Alert type="success" class="mb-6">
+            <Alert color="success" class="mb-6">
               {success}
             </Alert>
 
-            <div class="mb-4">
-              <Loading size="sm" />
-            </div>
+            {!isPopup && (
+              <>
+                <div class="mb-4">
+                  <Loading size="sm" />
+                </div>
+                <p class="text-base-content/70">
+                  You will be redirected to the home page...
+                </p>
+              </>
+            )}
 
-            <p class="text-base-content/70">
-              You will be redirected to the home page...
-            </p>
+            {isPopup && (
+              <p class="text-base-content/70">
+                This window will close automatically...
+              </p>
+            )}
           </div>
         </Card>
       </div>

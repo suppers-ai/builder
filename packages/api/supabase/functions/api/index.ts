@@ -41,7 +41,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-
     // Get JWT token from Authorization header (not required for public endpoints)
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
@@ -110,8 +109,9 @@ Deno.serve(async (req: Request) => {
 
       default:
         response = new Response(
-          JSON.stringify({ 
-            error: `Unknown resource: ${resource}. Available resources: applications, user, access. Auth is handled directly by Supabase.` 
+          JSON.stringify({
+            error:
+              `Unknown resource: ${resource}. Available resources: applications, user, access. Auth is handled directly by Supabase.`,
           }),
           {
             status: 404,

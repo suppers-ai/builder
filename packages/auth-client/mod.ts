@@ -9,15 +9,15 @@ export * from "./src/mod.ts";
 export * from "./src/storage.ts";
 
 // Re-export shared types for convenience
-export type { 
-  AuthUser,
+export type {
+  AuthEventCallback,
+  AuthEventData,
+  AuthEventType,
   AuthSession,
   AuthState,
-  SignUpData,
-  SignInData,
+  AuthUser,
   ResetPasswordData,
+  SignInData,
+  SignUpData,
   UpdateUserData,
-  AuthEventType,
-  AuthEventCallback,
-  AuthEventData
 } from "../shared/types/auth.ts";

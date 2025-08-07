@@ -4,6 +4,3 @@
  */
 // UI constants
 export * from "./ui.ts";
-
-// Port constants
-export * from "./ports.ts";

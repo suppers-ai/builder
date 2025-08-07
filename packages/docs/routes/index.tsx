@@ -66,7 +66,11 @@ export default function Home() {
 
             <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
               <div class="flex justify-center mb-4">
-                <img src="https://cdn.suppers.ai/logos/daisyui.svg" alt="daisyUI" class="w-12 h-12" />
+                <img
+                  src="https://cdn.suppers.ai/logos/daisyui.svg"
+                  alt="daisyUI"
+                  class="w-12 h-12"
+                />
               </div>
               <h3 class="text-xl mb-2 font-semibold">DaisyUI</h3>
               <p class="text-base-content/70">

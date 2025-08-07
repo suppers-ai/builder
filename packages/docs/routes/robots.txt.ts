@@ -1,6 +1,7 @@
+import { Context } from "fresh";
 import { generateRobotsTxt } from "../utils/sitemap.ts";
 
-export const handler = (_req: Request): Response => {
+export const handler = (ctx: Context<any>): Response => {
   const robots = generateRobotsTxt();
 
   return new Response(robots, {

@@ -5,6 +5,7 @@ import { Input } from "../../input/input/Input.tsx";
 import { PasswordInput } from "../../input/password-input/PasswordInput.tsx";
 import { Toast } from "../../feedback/toast/Toast.tsx";
 import { Avatar } from "../../display/avatar/Avatar.tsx";
+import { Logo } from "../../display/logo/Logo.tsx";
 import { GlobalThemeController } from "../../action/theme-controller/ThemeController.tsx";
 import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
 import { ChevronDown, Palette } from "lucide-preact";
@@ -349,10 +350,11 @@ export function ProfileCard({
 
       {/* Logo Section */}
       <div class="text-center p-6 border-b border-base-200">
-        <img
-          src={currentTheme === "dark" ? "/logos/long_dark.png" : "/logos/long_light.png"}
+        <Logo
           alt="Suppers"
-          class="h-8 mx-auto"
+          variant="long"
+          size="md"
+          class="mx-auto"
         />
       </div>
 

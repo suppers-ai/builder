@@ -1,6 +1,6 @@
 -- =============================================
--- Supabase Database Schema (Idempotent Version)
--- Simplified to use Supabase's built-in auth only
+-- Supabase Database Schema (Idempotent Version) 
+-- Uses Supabase's built-in auth.users with user_metadata only
 -- =============================================
 
 -- Enable Row Level Security
@@ -28,7 +28,7 @@ begin
     end if;
 end $$;
 
--- User role enum for admin permissions
+-- User role enum for admin permissions (stored in auth.users.user_metadata)
 do $$ 
 begin
     if not exists (select 1 from pg_type where typname = 'user_role') then
@@ -56,35 +56,19 @@ end $$;
 -- TABLES
 -- =============================================
 
--- User table (renamed from profiles for better clarity)
-create table if not exists public.users (
-  id uuid references auth.users on delete cascade primary key,
-  email text unique not null,
-  first_name text,
-  middle_names text,
-  last_name text,
-  display_name text,
-  avatar_url text,
-  theme_id text, -- This could be a default theme id or a custom theme id
-  role user_role default 'user'::user_role not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- Add missing columns to existing tables (idempotent)
-do $$ 
-begin
-    -- Add role column to users table if it doesn't exist
-    if not exists (select 1 from information_schema.columns 
-                   where table_name = 'users' and column_name = 'role' and table_schema = 'public') then
-        alter table public.users add column role user_role default 'user'::user_role not null;
-    end if;
-end $$;
+-- No custom users table - using Supabase auth.users with user_metadata
+-- User data is stored in auth.users.user_metadata with these fields:
+-- - first_name
+-- - last_name  
+-- - display_name
+-- - avatar_url
+-- - role ('user' | 'admin')
+-- - theme_id
 
 -- Applications table
 create table if not exists public.applications (
   id uuid default uuid_generate_v4() primary key,
-  owner_id uuid references public.users(id) on delete cascade not null,
+  owner_id uuid references auth.users(id) on delete cascade not null,
   name text not null,
   description text,
   template_id text not null,
@@ -97,11 +81,11 @@ create table if not exists public.applications (
 -- User access table for application sharing
 create table if not exists public.user_access (
   id uuid default uuid_generate_v4() primary key,
-  user_id uuid references public.users(id) on delete cascade not null,
+  user_id uuid references auth.users(id) on delete cascade not null,
   application_id uuid references public.applications(id) on delete cascade not null,
   access_level access_level not null,
   granted_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  granted_by uuid references public.users(id) on delete cascade not null,
+  granted_by uuid references auth.users(id) on delete cascade not null,
   unique(user_id, application_id)
 );
 
@@ -109,7 +93,7 @@ create table if not exists public.user_access (
 create table if not exists public.application_reviews (
   id uuid default uuid_generate_v4() primary key,
   application_id uuid references public.applications(id) on delete cascade not null,
-  reviewer_id uuid references public.users(id) on delete cascade not null,
+  reviewer_id uuid references auth.users(id) on delete cascade not null,
   status review_status not null,
   feedback text,
   reviewed_at timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -123,7 +107,7 @@ create table if not exists public.custom_themes (
   description text,
   theme_data jsonb not null,
   is_public boolean default false not null,
-  created_by uuid references public.users(id) on delete cascade not null,
+  created_by uuid references auth.users(id) on delete cascade not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -133,17 +117,13 @@ create table if not exists public.custom_themes (
 -- =============================================
 
 -- Enable RLS on all tables
-alter table public.users enable row level security;
 alter table public.applications enable row level security;
 alter table public.user_access enable row level security;
 alter table public.application_reviews enable row level security;
 alter table public.custom_themes enable row level security;
 
 -- Drop all existing policies to ensure clean state
-drop policy if exists "Users can view own profile" on public.users;
-drop policy if exists "Users can update own profile" on public.users;
-drop policy if exists "Admins can view all users" on public.users;
-drop policy if exists "Admins can update any user" on public.users;
+-- Note: No user policies needed - using Supabase auth.users directly
 
 drop policy if exists "Users can view their applications" on public.applications;
 drop policy if exists "Users can insert their applications" on public.applications;
@@ -173,32 +153,17 @@ drop policy if exists "Admins can manage all themes" on public.custom_themes;
 -- POLICIES
 -- =============================================
 
--- Users policies
-create policy "Users can view own profile"
-  on public.users for select
-  using (auth.uid() = id);
-
-create policy "Users can update own profile"
-  on public.users for update
-  using (auth.uid() = id);
-
-create policy "Admins can view all users"
-  on public.users for select
-  using (
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
+-- Helper function to check if user is admin
+create or replace function public.is_admin(user_id uuid)
+returns boolean as $$
+begin
+  return (
+    select (raw_user_meta_data->>'role')::text = 'admin'
+    from auth.users
+    where id = user_id
   );
-
-create policy "Admins can update any user"
-  on public.users for update
-  using (
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+end;
+$$ language plpgsql security definer;
 
 -- Applications policies
 create policy "Users can view their applications"
@@ -209,10 +174,7 @@ create policy "Users can view their applications"
       select 1 from public.user_access
       where user_id = auth.uid() and application_id = id
     ) OR
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
+    public.is_admin(auth.uid())
   );
 
 create policy "Users can insert their applications"
@@ -235,12 +197,7 @@ create policy "Users can delete their applications"
 
 create policy "Admins can view all applications"
   on public.applications for all
-  using (
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_admin(auth.uid()));
 
 -- User access policies
 create policy "Users can view access to applications they own"
@@ -277,12 +234,7 @@ create policy "Application owners can revoke access"
 -- Application reviews policies
 create policy "Admins can view all reviews"
   on public.application_reviews for select
-  using (
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_admin(auth.uid()));
 
 create policy "Application owners can view reviews of their apps"
   on public.application_reviews for select
@@ -296,30 +248,18 @@ create policy "Application owners can view reviews of their apps"
 create policy "Admins can create reviews"
   on public.application_reviews for insert
   with check (
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    ) AND reviewer_id = auth.uid()
+    public.is_admin(auth.uid()) AND reviewer_id = auth.uid()
   );
 
 create policy "Admins can update their reviews"
   on public.application_reviews for update
   using (
-    reviewer_id = auth.uid() AND
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
+    reviewer_id = auth.uid() AND public.is_admin(auth.uid())
   );
 
 create policy "Admins can delete reviews"
   on public.application_reviews for delete
-  using (
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_admin(auth.uid()));
 
 -- Custom themes policies
 create policy "Users can view public themes"
@@ -344,33 +284,13 @@ create policy "Users can delete their own themes"
 
 create policy "Admins can manage all themes"
   on public.custom_themes for all
-  using (
-    exists (
-      select 1 from public.users
-      where id = auth.uid() and role = 'admin'
-    )
-  );
+  using (public.is_admin(auth.uid()));
 
 -- =============================================
 -- FUNCTIONS
 -- =============================================
 
--- Function to handle new user creation
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.users (id, email, first_name, last_name, display_name, avatar_url)
-  values (
-    new.id,
-    new.email,
-    new.raw_user_meta_data->>'first_name',
-    new.raw_user_meta_data->>'last_name',
-    new.raw_user_meta_data->>'display_name',
-    new.raw_user_meta_data->>'avatar_url'
-  );
-  return new;
-end;
-$$ language plpgsql security definer;
+-- No user creation trigger needed - using Supabase auth.users directly
 
 -- Function to handle updated_at timestamp
 create or replace function public.handle_updated_at()
@@ -391,15 +311,9 @@ drop trigger if exists handle_updated_at_users on public.users;
 drop trigger if exists handle_updated_at_applications on public.applications;
 drop trigger if exists handle_updated_at_custom_themes on public.custom_themes;
 
--- Trigger for new user registration
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- No user creation trigger needed - using Supabase auth.users directly
 
 -- Triggers for updated_at timestamp
-create trigger handle_updated_at_users
-  before update on public.users
-  for each row execute procedure public.handle_updated_at();
 
 create trigger handle_updated_at_applications
   before update on public.applications
@@ -413,9 +327,7 @@ create trigger handle_updated_at_custom_themes
 -- INDEXES
 -- =============================================
 
--- Users indexes
-create index if not exists idx_users_email on public.users(email);
-create index if not exists idx_users_role on public.users(role);
+-- No user indexes needed - using Supabase auth.users directly
 
 -- Applications indexes
 create index if not exists idx_applications_owner_id on public.applications(owner_id);

@@ -1,54 +1,54 @@
-import { type Handlers, type PageProps } from "fresh";
+import { Context, type PageProps } from "fresh";
 import LogoutHandler from "../../islands/LogoutHandler.tsx";
-import { AuthHelpers } from "../../lib/auth-helpers.ts";
+import { getAuthClient } from "../../lib/auth.ts";
+import { createCORSHeaders, createPreflightCORSHeaders } from "../../lib/cors.ts";
 
-export const handler: Handlers = {
-  async POST(req) {
+// Get the singleton auth client
+const authClient = getAuthClient();
+
+export const handler = {
+  async POST(ctx: Context<any>) {
+    const requestOrigin = ctx.req.headers.get("origin");
+
     try {
-      // Get the authorization header
-      const authHeader = req.headers.get("Authorization");
+      // Initialize auth client if needed
+      await authClient.initialize();
 
-      if (authHeader?.startsWith("Bearer ")) {
-        // Perform logout with the provided token
-        await AuthHelpers.signOut();
-      }
+      // Sign out using the profile auth client
+      await authClient.signOut();
 
-      // Return success response with CORS headers
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "http://localhost:8000",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Authorization, Content-Type",
-          "Access-Control-Allow-Credentials": "true",
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Logged out successfully",
+        }),
+        {
+          status: 200,
+          headers: createCORSHeaders(requestOrigin),
         },
-      });
+      );
     } catch (error) {
-      console.error("Logout error:", error);
-      return new Response(JSON.stringify({ error: "Logout failed" }), {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "http://localhost:8000",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Authorization, Content-Type",
-          "Access-Control-Allow-Credentials": "true",
+      console.error("Logout API error:", error);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Failed to logout",
+        }),
+        {
+          status: 500,
+          headers: createCORSHeaders(requestOrigin),
         },
-      });
+      );
     }
   },
 
-  async OPTIONS(req) {
-    // Handle preflight requests
+  // Handle CORS preflight requests
+  OPTIONS(ctx: Context<any>) {
+    const requestOrigin = ctx.req.headers.get("origin");
+
     return new Response(null, {
       status: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "http://localhost:8000",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Authorization, Content-Type",
-        "Access-Control-Allow-Credentials": "true",
-      },
+      headers: createPreflightCORSHeaders(requestOrigin),
     });
   },
 };

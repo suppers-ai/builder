@@ -57,3 +57,22 @@ export interface UpdateUserData {
   displayName?: string;
   avatarUrl?: string;
 }
+
+export type AuthEventType =
+  | "login"
+  | "logout"
+  | "token_refresh"
+  | "error"
+  | "profile_change";
+
+export interface AuthEventData {
+  login?: AuthSession;
+  logout?: void;
+  token_refresh?: AuthSession;
+  error?: { error: string; error_description?: string };
+  profile_change?: AuthUser;
+}
+
+export interface AuthEventCallback {
+  (event: AuthEventType, data?: AuthEventData[AuthEventType]): void;
+}

@@ -35,17 +35,17 @@ export function Logo({
 
   const getLogoSrc = () => {
     const currentTheme = globalTheme.value;
-    const isDark = currentTheme === "dark" || 
-                   currentTheme === "synthwave" || 
-                   currentTheme === "halloween" || 
-                   currentTheme === "forest" || 
-                   currentTheme === "black" || 
-                   currentTheme === "luxury" || 
-                   currentTheme === "dracula" || 
-                   currentTheme === "business" ||
-                   currentTheme === "night" ||
-                   currentTheme === "coffee";
-    
+    const isDark = currentTheme === "dark" ||
+      currentTheme === "synthwave" ||
+      currentTheme === "halloween" ||
+      currentTheme === "forest" ||
+      currentTheme === "black" ||
+      currentTheme === "luxury" ||
+      currentTheme === "dracula" ||
+      currentTheme === "business" ||
+      currentTheme === "night" ||
+      currentTheme === "coffee";
+
     const themeType = isDark ? "dark" : "light";
     return `https://cdn.suppers.ai/logos/${variant}_${themeType}.png`;
   };
@@ -65,8 +65,8 @@ export function Logo({
 
   if (href) {
     return (
-      <a 
-        href={href} 
+      <a
+        href={href}
         class="inline-block hover:opacity-80 transition-opacity"
       >
         {logoElement}

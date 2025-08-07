@@ -1,16 +1,18 @@
-import { SSOAuthClient } from "@suppers/auth-client";
+import { OAuthAuthClient } from "@suppers/auth-client";
 import config from "../../../config.ts";
 
-// Create singleton SSOAuthClient for the docs package
-let ssoAuthClient: SSOAuthClient | null = null;
+// Create singleton OAuth client for the docs package
+let oauthClient: OAuthAuthClient | null = null;
 
 /**
- * Get the singleton SSOAuthClient instance for the docs package
+ * Get the singleton OAuth auth client for the docs package
  */
-export function getAuthClient(): SSOAuthClient {
-  if (!ssoAuthClient) {
-    // Docs package connects to profile service for SSO
-    ssoAuthClient = new SSOAuthClient(config.profileUrl, config.docsUrl);
+export function getAuthClient(): OAuthAuthClient {
+  if (!oauthClient) {
+    oauthClient = new OAuthAuthClient(
+      config.profileUrl, // http://localhost:8001
+      "docs" // client ID for the docs package
+    );
   }
-  return ssoAuthClient;
+  return oauthClient;
 }

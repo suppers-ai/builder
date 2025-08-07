@@ -120,7 +120,6 @@ export const UpdateApplicationDataSchema = z.object({
   status: ApplicationStatusSchema.optional(),
 });
 
-
 export const UserAccessSchema = z.object({
   id: z.string().uuid(),
   application_id: z.string().uuid(),

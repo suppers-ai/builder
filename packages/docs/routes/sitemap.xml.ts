@@ -1,6 +1,7 @@
+import { Context } from "fresh";
 import { generateSitemap } from "../utils/sitemap.ts";
 
-export const handler = (_req: Request): Response => {
+export const handler = (ctx: Context<any>): Response => {
   const sitemap = generateSitemap();
 
   return new Response(sitemap, {

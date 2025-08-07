@@ -3,7 +3,8 @@ import { ComponentMetadata } from "../../types.ts";
 
 const metadata: ComponentMetadata = {
   name: "Logo",
-  description: "A responsive logo component that automatically adapts to the current theme (light/dark variants)",
+  description:
+    "A responsive logo component that automatically adapts to the current theme (light/dark variants)",
   category: "Display",
   examples: [
     {
@@ -43,8 +44,8 @@ const metadata: ComponentMetadata = {
       name: "Custom Styling",
       description: "Logo with custom classes and alt text",
       component: (
-        <Logo 
-          alt="Custom Suppers Logo" 
+        <Logo
+          alt="Custom Suppers Logo"
           class="border-2 border-primary rounded-lg p-2"
           size="lg"
         />
@@ -91,10 +92,12 @@ const metadata: ComponentMetadata = {
   ],
   accessibility: {
     keyboardNavigation: "When used with href, the logo link is keyboard accessible via Tab key",
-    screenReader: "Alt text is provided for screen readers. Logo automatically adapts to theme for better contrast",
+    screenReader:
+      "Alt text is provided for screen readers. Logo automatically adapts to theme for better contrast",
     highContrast: "Logo automatically switches between light and dark variants based on theme",
   },
-  examples_description: "The Logo component automatically detects the current theme and displays the appropriate logo variant (light or dark). It supports both long and short logo variants and can be used as a standalone image or wrapped in a link.",
+  examples_description:
+    "The Logo component automatically detects the current theme and displays the appropriate logo variant (light or dark). It supports both long and short logo variants and can be used as a standalone image or wrapped in a link.",
 };
 
 export default metadata;

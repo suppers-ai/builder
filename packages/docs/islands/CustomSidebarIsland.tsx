@@ -3,7 +3,6 @@ import {
   Accordion,
   closeGlobalSidebar,
   globalSidebarOpen,
-  globalTheme,
   loadSavedTheme,
   Logo,
 } from "@suppers/ui-lib";
@@ -70,24 +69,6 @@ export default function CustomSidebarIsland({
     setOpenSections(newOpenSections);
   };
 
-  // Determine logo based on current theme
-  const currentTheme = globalTheme.value;
-  const darkThemes = new Set([
-    "dark",
-    "night",
-    "halloween",
-    "forest",
-    "black",
-    "luxury",
-    "dracula",
-    "synthwave",
-    "cyberpunk",
-    "dim",
-    "coffee",
-    "business",
-  ]);
-  const isDarkTheme = darkThemes.has(currentTheme) || currentTheme?.includes("dark");
-
   return (
     <>
       {/* Mobile overlay */}
@@ -106,9 +87,9 @@ export default function CustomSidebarIsland({
       >
         {/* Sidebar Header */}
         <div class="p-4 pr-16 border-b border-base-300 bg-base-100">
-          <Logo 
-            alt="Suppers Software Logo" 
-            variant="long" 
+          <Logo
+            alt="Suppers Software Logo"
+            variant="long"
             size="lg"
           />
         </div>

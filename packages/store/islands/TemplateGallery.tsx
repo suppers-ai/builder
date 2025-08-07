@@ -28,21 +28,21 @@ export default function TemplateGallery({
   });
 
   // Convert to Select options
-  const categoryOptions = computed(() => 
-    categories.value.map(category => ({
+  const categoryOptions = computed(() =>
+    categories.value.map((category) => ({
       value: category,
-      label: category === "all" 
-        ? "All Categories" 
-        : category.charAt(0).toUpperCase() + category.slice(1)
+      label: category === "all"
+        ? "All Categories"
+        : category.charAt(0).toUpperCase() + category.slice(1),
     }))
   );
 
-  const complexityOptions = computed(() => 
-    complexities.value.map(complexity => ({
+  const complexityOptions = computed(() =>
+    complexities.value.map((complexity) => ({
       value: complexity,
-      label: complexity === "all" 
-        ? "All Levels" 
-        : complexity.charAt(0).toUpperCase() + complexity.slice(1)
+      label: complexity === "all"
+        ? "All Levels"
+        : complexity.charAt(0).toUpperCase() + complexity.slice(1),
     }))
   );
 

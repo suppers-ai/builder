@@ -1,21 +1,21 @@
 // Export auth clients - each package chooses which to use
 export { DirectAuthClient } from "./direct-auth-client.ts";
-export { SSOAuthClient } from "./sso-auth-client.ts";
+export { OAuthAuthClient } from "./oauth-auth-client.ts";
 export { BaseAuthClient } from "./base-auth-client.ts";
 
 // Export storage utilities
 export * from "./storage.ts";
 
 // Export types from shared package
-export type { 
-  AuthUser,
-  AuthSession,
-  AuthState,
-  SignUpData,
-  SignInData,
-  ResetPasswordData,
-  UpdateUserData,
-  AuthEventType,
+export type {
   AuthEventCallback,
   AuthEventData,
+  AuthEventType,
+  AuthSession,
+  AuthState,
+  AuthUser,
+  ResetPasswordData,
+  SignInData,
+  SignUpData,
+  UpdateUserData,
 } from "../../shared/types/auth.ts";
