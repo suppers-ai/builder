@@ -3,6 +3,7 @@ import { useState } from "preact/hooks";
 import { globalTheme } from "../../../utils/signals.ts";
 import { Check, Palette, X } from "lucide-preact";
 import { THEMES } from "@suppers/shared/constants";
+import { getCurrentTheme, User } from "@suppers/shared";
 
 // Theme controller interfaces
 export interface ThemeControllerProps extends BaseComponentProps {
@@ -12,6 +13,7 @@ export interface ThemeControllerProps extends BaseComponentProps {
   showButton?: boolean;
   onThemeChange?: (theme: string) => void;
   onClose?: () => void;
+  user?: User;
 }
 
 // Shared theme modal content component
@@ -172,12 +174,13 @@ export function ThemeController({
   onThemeChange,
   onClose,
   id,
+  user,
   ...props
 }: ThemeControllerProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Use global state if enabled, otherwise use internal/props
-  const activeTheme = globalTheme.value;
+  const activeTheme = getCurrentTheme(user);
 
   // Filter themes based on provided themes prop, or use all themes
   const availableThemes = themes ? THEMES.filter((theme) => themes.includes(theme.name)) : THEMES;

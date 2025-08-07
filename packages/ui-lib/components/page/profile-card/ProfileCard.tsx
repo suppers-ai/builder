@@ -451,6 +451,7 @@ export function ProfileCard({
           >
             <GlobalThemeController
               showButton={false}
+              user={user}
               onThemeChange={async (newTheme) => {
                 setCurrentTheme(newTheme);
 

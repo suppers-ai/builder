@@ -2,7 +2,7 @@
  * Shared theme utilities for consistent theme management across all packages
  */
 
-import { THEMES, DEFAULT_THEME } from "@suppers/shared";
+import { THEMES, DEFAULT_THEME, User } from "@suppers/shared";
 
 export type ThemeId = string;
 export const AVAILABLE_THEMES: ThemeId[] = THEMES.map((theme) => theme.name);
@@ -54,7 +54,7 @@ function getUserTheme(user: { user_metadata?: { theme_id?: string } } | null): T
  * 3. System preference
  * 4. Default theme
  */
-export function getCurrentTheme(user?: { user_metadata?: { theme_id?: string } } | null): ThemeId {
+export function getCurrentTheme(user?: User | null): ThemeId {
   // Priority 1: User metadata
   const userTheme = getUserTheme(user || null);
   if (userTheme) return userTheme;
