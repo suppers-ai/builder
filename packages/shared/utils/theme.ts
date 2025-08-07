@@ -129,7 +129,7 @@ export function generateEarlyThemeScript(): string {
         }
         
         // Fallback to saved theme or system theme
-        let theme = getCurrentTheme();
+        let theme = userTheme;
         if (!theme) {
           const saved = localStorage.getItem("theme");
           theme = saved && AVAILABLE_THEMES.includes(saved) ? saved : null;
