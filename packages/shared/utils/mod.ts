@@ -6,8 +6,8 @@
 // API utilities
 export * from "./api.ts";
 
-// Authentication utilities
-export * from "./auth.ts";
+// Theme utilities
+export * from "./theme.ts";
 
 // CORS utilities
 export * from "./cors.ts";
@@ -36,5 +36,5 @@ export * from "./preview-generator.ts";
 // Type mapping utilities
 export * from "./type-mappers.ts";
 
-// Deprecation warning utilities
-export * from "./deprecation-warnings.ts";
+// Clipboard utilities
+export * from "./clipboard.ts";

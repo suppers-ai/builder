@@ -4,7 +4,7 @@ import { asset } from "$fresh/runtime";
 export default function App({ Component, state }: PageProps) {
   const Comp = Component as any;
   const title = (state as any)?.title || "Suppers Component Library - Fresh 2.0";
-
+  
   return (
     <html>
       <head>
@@ -64,62 +64,6 @@ export default function App({ Component, state }: PageProps) {
 
         {/* Custom CSS files */}
         <link rel="stylesheet" href={asset("/styles.css")} />
-
-        {/* Theme initialization script – sets theme and swaps favicons accordingly */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function () {
-                const lightFavicon = "https://cdn.suppers.ai/favicons/favicon_light.ico";
-                const darkFavicon = "https://cdn.suppers.ai/favicons/favicon_dark.ico";
-
-                function setFavicon(theme) {
-                  var link = document.getElementById('site-favicon');
-                  if (!link) return;
-                  link.setAttribute('href', theme === 'dark' ? darkFavicon : lightFavicon);
-                }
-
-                function getSystemTheme() {
-                  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                }
-
-                try {
-                  const savedTheme = localStorage.getItem('theme');
-                  const currentTheme = savedTheme || getSystemTheme();
-                  document.documentElement.setAttribute('data-theme', currentTheme);
-                  setFavicon(currentTheme);
-                  
-                  console.log('System theme:', getSystemTheme());
-                  console.log('Saved theme:', savedTheme);
-                  console.log('Using theme:', currentTheme);
-
-                  // Listen for system theme changes
-                  if (window.matchMedia) {
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-                      if (!localStorage.getItem('theme')) {
-                        const systemTheme = e.matches ? 'dark' : 'light';
-                        document.documentElement.setAttribute('data-theme', systemTheme);
-                        setFavicon(systemTheme);
-                      }
-                    });
-                  }
-
-                  // Observe future theme changes
-                  new MutationObserver(function (m) {
-                    m.forEach(function (record) {
-                      if (record.attributeName === 'data-theme') {
-                        setFavicon(document.documentElement.getAttribute('data-theme'));
-                      }
-                    });
-                  }).observe(document.documentElement, { attributes: true });
-                } catch (e) {
-                  document.documentElement.setAttribute('data-theme', 'light');
-                  setFavicon('light');
-                }
-              })();
-            `,
-          }}
-        />
       </head>
       <body class="theme-transition">
         <Comp />

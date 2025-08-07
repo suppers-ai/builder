@@ -167,10 +167,14 @@ export class OAuthAuthClient {
       // For now, just update the local user object
       this.currentUser = {
         ...this.currentUser,
-        first_name: data.firstName || this.currentUser.first_name,
-        last_name: data.lastName || this.currentUser.last_name,
-        display_name: data.displayName || this.currentUser.display_name,
-        avatar_url: data.avatarUrl || this.currentUser.avatar_url,
+        user_metadata: {
+          ...this.currentUser.user_metadata,
+          first_name: data.first_name || this.currentUser.user_metadata.first_name,
+          last_name: data.last_name || this.currentUser.user_metadata.last_name,
+          display_name: data.display_name || this.currentUser.user_metadata.display_name,
+          avatar_url: data.avatar_url || this.currentUser.user_metadata.avatar_url,
+          theme_id: data.theme_id || this.currentUser.user_metadata.theme_id,
+        },
       };
       
       this.emitEvent("profile_change", this.currentUser);

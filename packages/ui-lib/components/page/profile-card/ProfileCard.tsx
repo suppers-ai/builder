@@ -8,27 +8,24 @@ import { Avatar } from "../../display/avatar/Avatar.tsx";
 import { Logo } from "../../display/logo/Logo.tsx";
 import { GlobalThemeController } from "../../action/theme-controller/ThemeController.tsx";
 import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
+import { applyTheme, type ThemeId } from "@suppers/shared/utils";
 import { ChevronDown, Palette } from "lucide-preact";
+import { UpdateUserData } from "@suppers/auth-client";
 
 export interface User {
   id: string;
   email?: string;
-  user_metadata?: {
-    firstName?: string;
-    lastName?: string;
-    displayName?: string;
-    avatar_url?: string;
-    theme?: string;
-  };
-  // Database fields (from users table)
-  first_name?: string;
-  last_name?: string;
-  display_name?: string;
-  avatar_url?: string;
-  theme_id?: string;
-  role?: string;
+  phone?: string;
   created_at?: string;
   updated_at?: string;
+  user_metadata?: {
+    first_name?: string;
+    last_name?: string;
+    display_name?: string;
+    avatar_url?: string;
+    theme_id?: string;
+    role?: string;
+  };
 }
 
 export interface ProfileCardProps extends BaseComponentProps {
@@ -36,24 +33,14 @@ export interface ProfileCardProps extends BaseComponentProps {
   isLoading?: boolean;
   error?: string | null;
   success?: string | null;
-  onUpdateProfile?: (data: {
-    firstName?: string;
-    lastName?: string;
-    displayName?: string;
-    theme?: string;
-  }) => Promise<{ success?: boolean; error?: string }>;
+  onUpdateProfile?: (data: UpdateUserData) => Promise<{ success?: boolean; error?: string }>;
   onUploadAvatar?: (file: File) => Promise<void>;
   onSignOut?: () => void;
   onChangePassword?: (currentPassword: string, newPassword: string) => Promise<void>;
-  // Real-time sync options
-  enableRealTimeSync?: boolean;
-  syncSource?: string; // identifier for the source application
   // Popup-specific options
   isPopupMode?: boolean;
   parentOrigin?: string;
   onPopupClose?: () => void;
-  // Event callbacks
-  onProfileChange?: (change: any) => void;
 }
 
 export function ProfileCard({
@@ -66,37 +53,34 @@ export function ProfileCard({
   onUploadAvatar,
   onSignOut,
   onChangePassword,
-  enableRealTimeSync = false,
-  syncSource,
   isPopupMode = false,
   parentOrigin,
   onPopupClose,
-  onProfileChange,
   id,
   ...props
 }: ProfileCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState(user?.user_metadata?.theme || "light");
+  const [currentTheme, setCurrentTheme] = useState(user?.user_metadata?.theme_id || "light");
   const [toasts, setToasts] = useState<
     Array<{ id: string; message: string; type: "success" | "error" }>
   >([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editData, setEditData] = useState({
-    firstName: user?.user_metadata?.firstName || "",
-    lastName: user?.user_metadata?.lastName || "",
-    displayName: user?.user_metadata?.displayName || "",
-    theme: user?.user_metadata?.theme || user?.theme_id || "light",
+    first_name: user?.user_metadata?.first_name || "",
+    last_name: user?.user_metadata?.last_name || "",
+    display_name: user?.user_metadata?.display_name || "",
+    theme_id: user?.user_metadata?.theme_id || "light",
   });
 
   // Update editData when user data changes
   useEffect(() => {
     setEditData({
-      firstName: user?.user_metadata?.firstName || user?.first_name || "",
-      lastName: user?.user_metadata?.lastName || user?.last_name || "",
-      displayName: user?.user_metadata?.displayName || user?.display_name || "",
-      theme: user?.user_metadata?.theme || user?.theme_id || "light",
+      first_name: user?.user_metadata?.first_name || "",
+      last_name: user?.user_metadata?.last_name || "",
+      display_name: user?.user_metadata?.display_name || "",
+      theme_id: user?.user_metadata?.theme_id || "light",
     });
   }, [user]);
 
@@ -193,17 +177,6 @@ export function ProfileCard({
         if (result.success) {
           addToast("Profile updated successfully!", "success");
 
-          // Broadcast profile change if real-time sync is enabled
-          if (enableRealTimeSync && onProfileChange) {
-            onProfileChange({
-              type: "profile",
-              data: { user: editData },
-              timestamp: Date.now(),
-              source: syncSource || "profile-card",
-              userId: user?.id || "",
-            });
-          }
-
           // Communicate with parent window if in popup mode
           if (isPopupMode && parentOrigin && window.parent) {
             window.parent.postMessage({
@@ -224,10 +197,10 @@ export function ProfileCard({
   const handleEditClick = () => {
     // Update form data with current user data when opening edit mode
     setEditData({
-      firstName: user?.user_metadata?.firstName || user?.first_name || "",
-      lastName: user?.user_metadata?.lastName || user?.last_name || "",
-      displayName: user?.user_metadata?.displayName || user?.display_name || "",
-      theme: user?.user_metadata?.theme || user?.theme_id || "light",
+      first_name: user?.user_metadata?.first_name || "",
+      last_name: user?.user_metadata?.last_name || "",
+      display_name: user?.user_metadata?.display_name || "",
+      theme_id: user?.user_metadata?.theme_id || "light",
     });
     setIsEditing(true);
   };
@@ -243,17 +216,6 @@ export function ProfileCard({
       try {
         await onUploadAvatar(file);
         addToast("Avatar updated successfully!", "success");
-
-        // Broadcast avatar change if real-time sync is enabled
-        if (enableRealTimeSync && onProfileChange) {
-          onProfileChange({
-            type: "avatar",
-            data: { avatarUrl: URL.createObjectURL(file) },
-            timestamp: Date.now(),
-            source: syncSource || "profile-card",
-            userId: user?.id || "",
-          });
-        }
 
         // Communicate with parent window if in popup mode
         if (isPopupMode && parentOrigin && window.parent) {
@@ -492,35 +454,20 @@ export function ProfileCard({
               onThemeChange={async (newTheme) => {
                 setCurrentTheme(newTheme);
 
-                // Save theme immediately
+                // Apply theme immediately for instant feedback
+                applyTheme(newTheme as ThemeId);
+
+                // Save theme to user profile
                 if (onUpdateProfile) {
                   try {
-                    await onUpdateProfile({ theme: newTheme });
-                    addToast("Theme updated successfully!", "success");
-
-                    // Broadcast theme change if real-time sync is enabled
-                    if (enableRealTimeSync && onProfileChange) {
-                      onProfileChange({
-                        type: "theme",
-                        data: { theme: newTheme },
-                        timestamp: Date.now(),
-                        source: syncSource || "profile-card",
-                        userId: user?.id || "",
-                      });
-                    }
-
-                    // Communicate with parent window if in popup mode
-                    if (isPopupMode && parentOrigin && window.parent) {
-                      window.parent.postMessage({
-                        type: "theme-updated",
-                        data: { theme: newTheme },
-                      }, parentOrigin);
-                    }
+                    await onUpdateProfile({ theme_id: newTheme });
                   } catch (error) {
                     addToast(
                       error instanceof Error ? error.message : "Failed to update theme",
                       "error",
                     );
+                    // Revert theme on error
+                    applyTheme(currentTheme as ThemeId);
                   }
                 }
 
@@ -538,17 +485,6 @@ export function ProfileCard({
           onClick={() => {
             if (onSignOut) {
               onSignOut();
-
-              // Broadcast sign out if real-time sync is enabled
-              if (enableRealTimeSync && onProfileChange) {
-                onProfileChange({
-                  type: "signOut",
-                  data: { reason: "user-initiated" },
-                  timestamp: Date.now(),
-                  source: syncSource || "profile-card",
-                  userId: user?.id || "",
-                });
-              }
 
               // Communicate with parent window if in popup mode
               if (isPopupMode && parentOrigin && window.parent) {
@@ -597,11 +533,11 @@ export function ProfileCard({
                   </label>
                   <Input
                     type="text"
-                    value={editData.firstName}
+                    value={editData.first_name}
                     onInput={(e) =>
                       setEditData((prev) => ({
                         ...prev,
-                        firstName: (e.target as HTMLInputElement).value,
+                        first_name: (e.target as HTMLInputElement).value,
                       }))}
                     placeholder="Enter first name"
                     size="md"
@@ -615,11 +551,11 @@ export function ProfileCard({
                   </label>
                   <Input
                     type="text"
-                    value={editData.lastName}
+                    value={editData.last_name}
                     onInput={(e) =>
                       setEditData((prev) => ({
                         ...prev,
-                        lastName: (e.target as HTMLInputElement).value,
+                        last_name: (e.target as HTMLInputElement).value,
                       }))}
                     placeholder="Enter last name"
                     class="w-full"
@@ -633,11 +569,11 @@ export function ProfileCard({
                 </label>
                 <Input
                   type="text"
-                  value={editData.displayName}
+                  value={editData.display_name}
                   onInput={(e) =>
                     setEditData((prev) => ({
                       ...prev,
-                      displayName: (e.target as HTMLInputElement).value,
+                      display_name: (e.target as HTMLInputElement).value,
                     }))}
                   placeholder="How you'd like to be displayed"
                   class="w-full"

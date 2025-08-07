@@ -4,6 +4,7 @@ import { DirectAuthClient, OAuthAuthClient } from "@suppers/auth-client";
 import type { AuthUser } from "@suppers/shared";
 import { LogIn, LogOut, User } from "lucide-preact";
 import { Button } from "@suppers/ui-lib";
+import { getCurrentTheme, applyTheme, TypeMappers } from "@suppers/shared/utils";
 import config from "../../../../config.ts";
 
 type AnyAuthClient = DirectAuthClient | OAuthAuthClient;
@@ -28,6 +29,13 @@ export default function SimpleAuthButton(
         const initialUser = await authClient.getUser();
         console.log("🔍 Initial user from auth client:", initialUser);
         setUser(initialUser);
+        
+        // Apply user's theme if available
+        if (initialUser) {
+          const userTheme = getCurrentTheme(initialUser);
+          applyTheme(userTheme);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error("Auth initialization failed:", error);
@@ -46,13 +54,29 @@ export default function SimpleAuthButton(
         const newUser = data?.user || await authClient.getUser();
         console.log("🔍 Setting user from login event:", newUser);
         setUser(newUser);
+        
+        // Apply user's theme
+        if (newUser) {
+          const userTheme = getCurrentTheme(newUser);
+          applyTheme(userTheme);
+        }
       } else if (event === "logout") {
         console.log("🔍 Logout event received");
         setUser(null);
+        
+        // Reset to system/default theme when logged out
+        const defaultTheme = getCurrentTheme(null);
+        applyTheme(defaultTheme);
       } else if (event === "profile_change") {
         const newUser = data || await authClient.getUser();
         console.log("🔍 Setting user from profile_change event:", newUser);
         setUser(newUser);
+        
+        // Apply updated user theme
+        if (newUser) {
+          const userTheme = getCurrentTheme(newUser);
+          applyTheme(userTheme);
+        }
       }
     };
 
@@ -104,29 +128,6 @@ export default function SimpleAuthButton(
     }
   };
 
-  const getDisplayName = (): string => {
-    if (!user) return "User";
-
-    if (user.display_name) return user.display_name;
-    if (user.first_name && user.last_name) {
-      return `${user.first_name} ${user.last_name}`;
-    }
-    if (user.first_name) return user.first_name;
-    if (user.email) return user.email.split("@")[0];
-    return "User";
-  };
-
-  const getInitials = (): string => {
-    if (!user) return "U";
-
-    if (user.first_name && user.last_name) {
-      return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
-    }
-    if (user.first_name) return user.first_name[0].toUpperCase();
-    if (user.email) return user.email[0].toUpperCase();
-    return "U";
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -146,23 +147,23 @@ export default function SimpleAuthButton(
           <div tabIndex={0} role="button" class="btn btn-ghost btn-sm gap-2">
             <div class="avatar">
               <div class="w-6 rounded-full">
-                {user.avatar_url
+                {user.user_metadata.avatar_url
                   ? (
                     <img
                       alt="User avatar"
-                      src={user.avatar_url}
+                      src={user.user_metadata.avatar_url}
                       loading="lazy"
                     />
                   )
                   : (
                     <div class="bg-neutral text-neutral-content rounded-full w-6 h-6 flex items-center justify-center text-xs">
-                      {getInitials()}
+                      {TypeMappers.getInitials(user)}
                     </div>
                   )}
               </div>
             </div>
             <span class="text-sm font-medium">
-              {getDisplayName()}
+              {TypeMappers.getDisplayName(user)}
             </span>
           </div>
           <ul

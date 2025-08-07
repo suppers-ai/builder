@@ -12,7 +12,7 @@ export function UserAvatar({ user, ...avatarProps }: UserAvatarProps) {
 
   return (
     <Avatar
-      src={user.avatar_url}
+      src={user.user_metadata.avatar_url}
       alt={displayName}
       initials={initials}
       {...avatarProps}

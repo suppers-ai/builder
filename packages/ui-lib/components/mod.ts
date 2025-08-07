@@ -110,10 +110,6 @@ export type { BreadcrumbsProps } from "./navigation/breadcrumbs/Breadcrumbs.tsx"
 // Layout components
 export { CleanSidebarLayout } from "./layout/clean-sidebar-layout/CleanSidebarLayout.tsx";
 export type { CleanSidebarLayoutProps } from "./layout/clean-sidebar-layout/CleanSidebarLayout.tsx";
-export { HeaderLayout } from "./layout/header-layout/HeaderLayout.tsx";
-export type { HeaderLayoutProps } from "./layout/header-layout/HeaderLayout.tsx";
-export { PageLayout } from "./layout/page-layout/PageLayout.tsx";
-export type { PageLayoutProps } from "./layout/page-layout/PageLayout.tsx";
 
 // Page components
 export { LoginPage } from "./page/login-page/LoginPage.tsx";
@@ -121,8 +117,6 @@ export type { LoginPageProps } from "./page/login-page/LoginPage.tsx";
 export { ProfileCard } from "./page/profile-card/ProfileCard.tsx";
 export type { ProfileCardProps } from "./page/profile-card/ProfileCard.tsx";
 
-// Export missing components
-export { MainLayout } from "./layout/MainLayout.tsx";
 export { BenefitsSection } from "./sections/benefits-section/BenefitsSection.tsx";
 export { StatsSection } from "./sections/stats-section/StatsSection.tsx";
 export { ComponentPreviewCard } from "./display/ComponentPreviewCard.tsx";

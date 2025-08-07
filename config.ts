@@ -29,6 +29,8 @@ const config: Config = {
 
 export default config;
 
+// Maybe in _app.tsx like set dangerouslySetInnerHTML
+
 // This should be called on the server side to inject environment variables
 // export function injectEnvironmentVariables(): string {
 //     const envVars = {

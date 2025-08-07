@@ -4,9 +4,10 @@
  */
 
 import type { Database } from "../generated/database-types.ts";
+import { User } from "@suppers/shared";
+import type { AuthUser } from "../types/auth.ts";
 
 // Database table types
-type UsersTable = Database["public"]["Tables"]["users"]["Row"];
 type ApplicationsTable = Database["public"]["Tables"]["applications"]["Row"];
 type UserAccessTable = Database["public"]["Tables"]["user_access"]["Row"];
 type ApplicationReviewsTable = Database["public"]["Tables"]["application_reviews"]["Row"];
@@ -14,7 +15,6 @@ type CustomThemesTable = Database["public"]["Tables"]["custom_themes"]["Row"];
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Re-export database types as canonical types
-export type User = UsersTable;
 export type Application = ApplicationsTable;
 export type UserAccess = UserAccessTable;
 export type ApplicationReview = ApplicationReviewsTable;
@@ -42,10 +42,6 @@ export interface ApplicationResponseExtended extends ApplicationResponse {
 }
 
 // Auth Types (derived from database types)
-export type AuthUser = Pick<
-  User,
-  "id" | "email" | "first_name" | "last_name" | "display_name" | "avatar_url" | "role"
->;
 
 export interface AuthSession {
   user: AuthUser;
@@ -102,11 +98,16 @@ export class TypeMappers {
     return {
       id: user.id,
       email: user.email,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      display_name: user.display_name,
-      avatar_url: user.avatar_url,
-      role: user.role,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+      user_metadata: {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        display_name: user.display_name,
+        avatar_url: user.avatar_url,
+        theme_id: user.theme_id,
+        role: user.role,
+      },
     };
   }
 
@@ -117,13 +118,18 @@ export class TypeMappers {
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || "",
-      first_name: dbUser?.first_name || supabaseUser.user_metadata?.first_name || undefined,
-      last_name: dbUser?.last_name || supabaseUser.user_metadata?.last_name || undefined,
-      display_name: dbUser?.display_name ||
-        supabaseUser.user_metadata?.display_name ||
-        supabaseUser.user_metadata?.full_name || undefined,
-      avatar_url: dbUser?.avatar_url || supabaseUser.user_metadata?.avatar_url || undefined,
-      role: dbUser?.role || "user",
+      created_at: supabaseUser.created_at,
+      updated_at: supabaseUser.updated_at,
+      user_metadata: {
+        first_name: dbUser?.first_name || supabaseUser.user_metadata?.first_name || undefined,
+        last_name: dbUser?.last_name || supabaseUser.user_metadata?.last_name || undefined,
+        display_name: dbUser?.display_name ||
+          supabaseUser.user_metadata?.display_name ||
+          supabaseUser.user_metadata?.full_name || undefined,
+        avatar_url: dbUser?.avatar_url || supabaseUser.user_metadata?.avatar_url || undefined,
+        theme_id: dbUser?.theme_id || supabaseUser.user_metadata?.theme_id || undefined,
+        role: dbUser?.role || "user",
+      },
     };
   }
 
@@ -239,32 +245,51 @@ export class TypeMappers {
    */
   static getInitials(user: User): string {
     const name = this.getFullName(user);
-    return name
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join("");
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length > 1) {
+      return parts[0].charAt(0).toUpperCase() + parts[1].charAt(0).toUpperCase();
+    }
+    return name.charAt(0).toUpperCase();
   }
 
   /**
    * Helper: Check if user has admin role
    */
   static isAdmin(user: User | AuthUser): boolean {
-    return user.role === "admin";
+    if ('role' in user) {
+      // Database User type
+      return user.role === "admin";
+    } else {
+      // AuthUser type
+      return user.user_metadata.role === "admin";
+    }
   }
 
   /**
    * Helper: Check if user has admin role (moderator role removed from schema)
    */
   static isModerator(user: User | AuthUser): boolean {
-    return user.role === "admin";
+    if ('role' in user) {
+      // Database User type
+      return user.role === "admin" || user.role === "moderator";
+    } else {
+      // AuthUser type
+      return user.user_metadata.role === "admin" || user.user_metadata.role === "moderator";
+    }
   }
 
   /**
    * Helper: Get user display name with fallback
    */
   static getDisplayName(user: User | AuthUser): string {
-    return user.display_name || this.getFullName(user as User) || user.email || "Anonymous User";
+    if ('display_name' in user) {
+      // Database User type
+      return user.display_name || this.getFullName(user as User) || user.email || "Unknown User";
+    } else {
+      // AuthUser type
+      return user.user_metadata.display_name || user.email || "Unknown User";
+    }
   }
 
   /**

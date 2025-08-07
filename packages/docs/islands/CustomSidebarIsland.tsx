@@ -3,7 +3,6 @@ import {
   Accordion,
   closeGlobalSidebar,
   globalSidebarOpen,
-  loadSavedTheme,
   Logo,
 } from "@suppers/ui-lib";
 import type { AccordionItemProps } from "@suppers/ui-lib";
@@ -25,7 +24,6 @@ export default function CustomSidebarIsland({
 
   useEffect(() => {
     // Load the saved theme to sync the signal with DOM
-    loadSavedTheme();
 
     // Subscribe to sidebar state changes and update body class
     const sidebarUnsubscribe = globalSidebarOpen.subscribe((isOpen) => {

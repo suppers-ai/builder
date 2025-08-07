@@ -1,6 +1,6 @@
-import { BaseComponentProps, SizeProps } from "../../types.ts";
-import { useEffect, useState } from "preact/hooks";
-import { globalTheme, loadSavedTheme, setGlobalTheme } from "../../../utils/signals.ts";
+import { BaseComponentProps } from "../../types.ts";
+import { useState } from "preact/hooks";
+import { globalTheme } from "../../../utils/signals.ts";
 import { Check, Palette, X } from "lucide-preact";
 import { THEMES } from "@suppers/shared/constants";
 
@@ -12,9 +12,6 @@ export interface ThemeControllerProps extends BaseComponentProps {
   showButton?: boolean;
   onThemeChange?: (theme: string) => void;
   onClose?: () => void;
-  useGlobalState?: boolean;
-  autoLoadSavedTheme?: boolean;
-  autoSaveTheme?: boolean;
 }
 
 // Shared theme modal content component
@@ -169,30 +166,18 @@ function ThemeModalContent({
 
 export function ThemeController({
   class: className = "",
-  currentTheme = "light",
   themes,
   showLabel = true,
   showButton = true,
   onThemeChange,
   onClose,
-  useGlobalState = false,
-  autoLoadSavedTheme = false,
-  autoSaveTheme = false,
   id,
   ...props
 }: ThemeControllerProps) {
-  const [internalTheme, setInternalTheme] = useState(currentTheme);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Load saved theme on mount
-  useEffect(() => {
-    if (autoLoadSavedTheme && useGlobalState) {
-      loadSavedTheme();
-    }
-  }, [autoLoadSavedTheme, useGlobalState]);
-
   // Use global state if enabled, otherwise use internal/props
-  const activeTheme = useGlobalState ? globalTheme.value : internalTheme;
+  const activeTheme = globalTheme.value;
 
   // Filter themes based on provided themes prop, or use all themes
   const availableThemes = themes ? THEMES.filter((theme) => themes.includes(theme.name)) : THEMES;
@@ -201,11 +186,6 @@ export function ThemeController({
 
   // Handle theme changes
   const handleThemeChange = (newTheme: string) => {
-    if (useGlobalState) {
-      setGlobalTheme(newTheme);
-    } else {
-      setInternalTheme(newTheme);
-    }
     onThemeChange?.(newTheme);
     setIsModalOpen(false);
   };
@@ -274,9 +254,6 @@ export function GlobalThemeController(
     <ThemeController
       {...props}
       currentTheme={globalTheme.value}
-      useGlobalState
-      autoLoadSavedTheme
-      autoSaveTheme
     />
   );
 }

@@ -1,0 +1,95 @@
+/**
+ * Shared theme utilities for consistent theme management across all packages
+ */
+
+import { THEMES, DEFAULT_THEME } from "@suppers/shared";
+
+export type ThemeId = string;
+export const AVAILABLE_THEMES: ThemeId[] = THEMES.map((theme) => theme.name);
+
+
+/**
+ * Get system theme preference
+ */
+function getSystemTheme(): ThemeId {
+  if (typeof window === "undefined") return DEFAULT_THEME;
+  
+  try {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches 
+      ? "dark" 
+      : "light";
+  } catch {
+    return DEFAULT_THEME;
+  }
+}
+
+/**
+ * Get theme from localStorage
+ */
+function getSavedTheme(): ThemeId | null {
+  if (typeof window === "undefined") return null;
+  
+  try {
+    const saved = localStorage.getItem("theme");
+    return saved && AVAILABLE_THEMES.includes(saved as ThemeId) ? saved as ThemeId : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get theme from user metadata
+ */
+function getUserTheme(user: { user_metadata?: { theme_id?: string } } | null): ThemeId | null {
+  if (!user?.user_metadata?.theme_id) return null;
+  
+  const themeId = user.user_metadata.theme_id;
+  return AVAILABLE_THEMES.includes(themeId as ThemeId) ? themeId as ThemeId : null;
+}
+
+/**
+ * Determine the current theme based on priority:
+ * 1. User metadata theme_id (if authenticated)
+ * 2. Saved theme in localStorage
+ * 3. System preference
+ * 4. Default theme
+ */
+export function getCurrentTheme(user?: { user_metadata?: { theme_id?: string } } | null): ThemeId {
+  // Priority 1: User metadata
+  const userTheme = getUserTheme(user || null);
+  if (userTheme) return userTheme;
+  
+  // Priority 2: Saved theme
+  const savedTheme = getSavedTheme();
+  if (savedTheme) return savedTheme;
+  
+  // Priority 3: System preference
+  const systemTheme = getSystemTheme();
+  if (systemTheme) return systemTheme;
+  
+  // Priority 4: Default
+  return DEFAULT_THEME;
+}
+
+/**
+ * Apply theme to DOM and save to localStorage
+ */
+export function applyTheme(theme: ThemeId): void {
+  if (typeof document === "undefined") return;
+  
+  try {
+    // Apply to DOM
+    document.documentElement.setAttribute("data-theme", theme);
+    
+    // Save to localStorage
+    localStorage.setItem("theme", theme);
+    
+    // Dispatch custom event for other components to listen
+    window.dispatchEvent(new CustomEvent("theme-changed", { 
+      detail: { theme } 
+    }));
+  } catch (error) {
+    console.warn("Failed to apply theme:", error);
+  }
+}
+

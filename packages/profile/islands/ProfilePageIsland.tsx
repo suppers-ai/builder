@@ -1,5 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
-import { type AuthUser } from "@suppers/auth-client";
+import { UpdateUserData, type AuthUser } from "@suppers/auth-client";
+import { ProfileCard } from "@suppers/ui-lib";
+import { getCurrentTheme, applyTheme } from "@suppers/shared/utils";
 import { getAuthClient } from "../lib/auth.ts";
 
 // Get the profile auth client (direct Supabase connection)
@@ -8,6 +10,8 @@ const authClient = getAuthClient();
 export default function ProfilePageIsland() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     // Initialize auth client
@@ -18,9 +22,17 @@ export default function ProfilePageIsland() {
         const currentUser = authClient.getUser();
         console.log("🔍 ProfilePageIsland: Auth client initialized, user:", currentUser);
         setUser(currentUser);
+        
+        // Apply user's theme if available
+        if (currentUser) {
+          const userTheme = getCurrentTheme(currentUser);
+          applyTheme(userTheme);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error("Auth initialization failed:", error);
+        setError("Failed to initialize authentication");
         setLoading(false);
       }
     };
@@ -34,12 +46,29 @@ export default function ProfilePageIsland() {
         const user = data?.user || authClient.getUser();
         console.log("🔍 ProfilePageIsland: Setting user after login:", user);
         setUser(user);
+        
+        // Apply user's theme
+        if (user) {
+          const userTheme = getCurrentTheme(user);
+          applyTheme(userTheme);
+        }
       } else if (event === "logout") {
         console.log("🔍 ProfilePageIsland: Clearing user after logout");
         setUser(null);
+        
+        // Reset to system/default theme when logged out
+        const defaultTheme = getCurrentTheme(null);
+        applyTheme(defaultTheme);
       } else if (event === "profile_change") {
         console.log("🔍 ProfilePageIsland: Profile changed, updating user:", data);
-        setUser(data || authClient.getUser());
+        const updatedUser = data || authClient.getUser();
+        setUser(updatedUser);
+        
+        // Apply updated user theme
+        if (updatedUser) {
+          const userTheme = getCurrentTheme(updatedUser);
+          applyTheme(userTheme);
+        }
       }
     };
 
@@ -53,6 +82,85 @@ export default function ProfilePageIsland() {
       authClient.removeEventListener("profile_change", handleAuthEvent);
     };
   }, []);
+
+  // Handle profile update
+  const handleUpdateProfile = async (data: UpdateUserData) => {
+    try {
+      setError(null);
+      setSuccess(null);
+      
+      const result = await authClient.updateUser(data);
+      
+      if (result.error) {
+        setError(result.error);
+        return { success: false, error: result.error };
+      } else {
+        setSuccess("Profile updated successfully!");
+        // The profile_change event will automatically update the UI
+        return { success: true };
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to update profile";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  // Handle avatar upload
+  const handleUploadAvatar = async (file: File) => {
+    try {
+      setError(null);
+      setSuccess(null);
+      
+      // Create a form data object for file upload
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // For now, just show that upload is triggered
+      // In a real implementation, you'd upload to your storage provider
+      console.log("Avatar upload triggered for file:", file.name);
+      throw new Error("Avatar upload not yet implemented");
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to upload avatar";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Handle password change
+  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      setError(null);
+      setSuccess(null);
+      
+      // Password change would typically use Supabase auth
+      // For now, show not implemented
+      console.log("Password change triggered");
+      throw new Error("Password change not yet implemented");
+      
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to change password";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      await authClient.signOut();
+      // Redirect after logout
+      if (window.opener) {
+        window.close();
+      } else {
+        window.location.href = "/";
+      }
+    } catch (err) {
+      console.error("Sign out error:", err);
+      setError("Failed to sign out");
+    }
+  };
 
   if (loading) {
     return (
@@ -80,73 +188,31 @@ export default function ProfilePageIsland() {
 
   return (
     <div class="container mx-auto p-4">
-      <div class="max-w-md mx-auto bg-base-100 rounded-xl shadow-xl border border-base-200">
-        <div class="p-6">
-          <div class="text-center">
-            <div class="avatar mb-4">
-              <div class="w-16 rounded-full">
-                {user.avatar_url
-                  ? <img src={user.avatar_url} alt="Avatar" />
-                  : (
-                    <div class="bg-neutral text-neutral-content rounded-full w-16 h-16 flex items-center justify-center text-2xl">
-                      {user.first_name?.[0] || user.email?.[0] || "U"}
-                    </div>
-                  )}
-              </div>
-            </div>
-            <h1 class="text-2xl font-bold mb-2">
-              {user.display_name || `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
-                "User"}
-            </h1>
-            <p class="text-base-content/60 mb-6">{user.email}</p>
-
-            <div class="space-y-4">
-              <button
-                class="btn btn-primary w-full"
-                onClick={async () => {
-                  // Simple profile update demo - in real app this would be a form
-                  const newDisplayName = prompt("Enter new display name:", user.display_name || "");
-                  if (newDisplayName && newDisplayName !== user.display_name) {
-                    try {
-                      const result = await authClient.updateUser({
-                        displayName: newDisplayName,
-                      });
-
-                      if (result.error) {
-                        alert("Error updating profile: " + result.error);
-                      } else {
-                        alert("Profile updated successfully!");
-                        // The profile_change event will automatically update the UI
-                      }
-                    } catch (error) {
-                      alert(
-                        "Error updating profile: " +
-                          (error instanceof Error ? error.message : "Unknown error"),
-                      );
-                    }
-                  }
-                }}
-              >
-                Edit Profile
-              </button>
-
-              <button
-                class="btn btn-outline w-full"
-                onClick={async () => {
-                  await authClient.signOut();
-                  // Redirect after logout
-                  if (window.opener) {
-                    window.close();
-                  } else {
-                    window.location.href = "/";
-                  }
-                }}
-              >
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
+      <div class="max-w-md mx-auto">
+        <ProfileCard
+          user={user as any} // Type conversion for compatibility
+          isLoading={loading}
+          error={error}
+          success={success}
+          onUpdateProfile={handleUpdateProfile}
+          onUploadAvatar={handleUploadAvatar}
+          onSignOut={handleSignOut}
+          onChangePassword={handleChangePassword}
+          // Detect if we're in popup mode
+          isPopupMode={!!window.opener}
+          parentOrigin={(() => {
+            if (!window.opener) return undefined;
+            const referrer = document.referrer;
+            const origin = referrer ? new URL(referrer).origin : "*";
+            console.log('🎨 ProfilePageIsland: Popup mode detected, referrer:', referrer, 'origin:', origin);
+            return origin;
+          })()}
+          onPopupClose={() => {
+            if (window.opener) {
+              window.close();
+            }
+          }}
+        />
       </div>
     </div>
   );

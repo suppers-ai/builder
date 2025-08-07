@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, UserMetadata, type SupabaseClient } from "@supabase/supabase-js";
 import type {
   AuthEventCallback,
   AuthEventType,
@@ -48,11 +48,16 @@ export class DirectAuthClient {
           const currentUser = {
             id: session.user.id,
             email: session.user.email || "",
-            first_name: session.user.user_metadata?.first_name || "",
-            last_name: session.user.user_metadata?.last_name || "",
-            display_name: session.user.user_metadata?.display_name || "",
-            avatar_url: session.user.user_metadata?.avatar_url || "",
-            role: session.user.user_metadata?.role || "user",
+            created_at: session.user.created_at,
+            updated_at: session.user.updated_at,
+            user_metadata: {
+              first_name: session.user.user_metadata?.first_name || "",
+              last_name: session.user.user_metadata?.last_name || "",
+              display_name: session.user.user_metadata?.display_name || "",
+              avatar_url: session.user.user_metadata?.avatar_url || "",
+              theme_id: session.user.user_metadata?.theme_id || "light",
+              role: session.user.user_metadata?.role || "user",
+            },
           };
           this.saveUserToStorage(currentUser);
           this.emitEvent("login", { user: currentUser });
@@ -133,11 +138,16 @@ export class DirectAuthClient {
         const currentUser = {
           id: session.user.id,
           email: session.user.email || "",
-          first_name: session.user.user_metadata?.first_name || "",
-          last_name: session.user.user_metadata?.last_name || "",
-          display_name: session.user.user_metadata?.display_name || "",
-          avatar_url: session.user.user_metadata?.avatar_url || "",
-          role: session.user.user_metadata?.role || "user",
+          created_at: session.user.created_at,
+          updated_at: session.user.updated_at,
+          user_metadata: {
+            first_name: session.user.user_metadata?.first_name || "",
+            last_name: session.user.user_metadata?.last_name || "",
+            display_name: session.user.user_metadata?.display_name || "",
+            avatar_url: session.user.user_metadata?.avatar_url || "",
+            theme_id: session.user.user_metadata?.theme_id || "light",
+            role: session.user.user_metadata?.role || "user",
+          },
         };
         this.saveUserToStorage(currentUser);
         this.emitEvent("login", { user: currentUser });
@@ -238,9 +248,9 @@ export class DirectAuthClient {
         password: data.password,
         options: {
           data: {
-            first_name: data.firstName || "",
-            last_name: data.lastName || "",
-            display_name: data.displayName || "",
+            first_name: data.first_name || "",
+            last_name: data.last_name || "",
+            display_name: data.display_name || "",
           },
         },
       });
@@ -290,33 +300,37 @@ export class DirectAuthClient {
         return { error: "Not authenticated" };
       }
 
+      const currentUser = this.getUserFromStorage();
+      if (!currentUser) {
+        return { error: "Not authenticated" };
+      }
+      const user_metadata: UserMetadata = {
+        ...currentUser.user_metadata,
+        first_name: data.first_name || currentUser.user_metadata.first_name,
+        last_name: data.last_name || currentUser.user_metadata.last_name,
+        display_name: data.display_name || currentUser.user_metadata.display_name,
+        avatar_url: data.avatar_url || currentUser.user_metadata.avatar_url,
+        theme_id: data.theme_id || currentUser.user_metadata.theme_id,
+      };
+
       // Update user metadata in Supabase Auth
       const { error } = await this.supabase.auth.updateUser({
-        data: {
-          first_name: data.firstName,
-          last_name: data.lastName,
-          display_name: data.displayName,
-          avatar_url: data.avatarUrl,
-        },
+        data: user_metadata,
       });
 
       if (error) {
         return { error: error.message };
       }
 
-      // Update the stored user data
-      const currentUser = this.getUserFromStorage();
-      if (currentUser) {
-        const updatedUser = {
-          ...currentUser,
-          first_name: data.firstName || currentUser.first_name,
-          last_name: data.lastName || currentUser.last_name,
-          display_name: data.displayName || currentUser.display_name,
-          avatar_url: data.avatarUrl || currentUser.avatar_url,
-        };
-        this.saveUserToStorage(updatedUser);
-        this.emitEvent("profile_change", updatedUser);
-      }
+      const updatedUser = {
+        ...currentUser,
+        user_metadata,
+      };
+      this.saveUserToStorage(updatedUser);
+      this.emitEvent("profile_change", updatedUser);
+
+      // Broadcast the profile change to all connected clients
+      // this.broadcastUserChange(updatedUser);
 
       return {};
     } catch (error) {

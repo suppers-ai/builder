@@ -4,16 +4,26 @@
  */
 
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
-import type { Database } from "../generated/database-types.ts";
 
-// Database table types
-type UsersTable = Database["public"]["Tables"]["users"]["Row"];
+// User metadata stored in auth.users.user_metadata
+export interface UserMetadata {
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  avatar_url?: string;
+  theme_id?: string;
+  role?: string;
+}
 
-// Derived Auth Types (based on database schema)
-export type AuthUser = Pick<
-  UsersTable,
-  "id" | "email" | "first_name" | "last_name" | "display_name" | "avatar_url" | "role"
->;
+// Derived Auth Types (based on Supabase auth.users with user_metadata)
+export interface AuthUser {
+  id: string;
+  email?: string;
+  phone?: string;
+  created_at?: string;
+  updated_at?: string;
+  user_metadata: UserMetadata;
+}
 
 // Auth Session with our user type
 export interface AuthSession {
@@ -33,10 +43,9 @@ export interface AuthState {
 export interface SignUpData {
   email: string;
   password: string;
-  firstName?: string;
-  middleNames?: string;
-  lastName?: string;
-  displayName?: string;
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
 }
 
 // Sign In Data
@@ -51,11 +60,11 @@ export interface ResetPasswordData {
 }
 
 export interface UpdateUserData {
-  firstName?: string;
-  middleNames?: string;
-  lastName?: string;
-  displayName?: string;
-  avatarUrl?: string;
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  avatar_url?: string;
+  theme_id?: string;
 }
 
 export type AuthEventType =

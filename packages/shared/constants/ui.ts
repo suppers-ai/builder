@@ -219,7 +219,7 @@ const THEMES = [
   },
 ];
 
-export type THEME_KEYS = keyof typeof THEMES;
+export const DEFAULT_THEME: string = "light";
 
 // Export the themes object
 export { THEMES };

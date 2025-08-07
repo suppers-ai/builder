@@ -48,14 +48,6 @@ const ThemeControllerSpecificPropsSchema = z.object({
     { examples: ["true", "false"], since: "1.0.0" },
   ),
 
-  autoLoadSavedTheme: z.boolean()
-    .default(false)
-    .describe("Automatically load saved theme on mount"),
-
-  autoSaveTheme: z.boolean()
-    .default(false)
-    .describe("Automatically save theme changes"),
-
   showControls: z.boolean()
     .default(false)
     .describe("Show additional theme controls"),
