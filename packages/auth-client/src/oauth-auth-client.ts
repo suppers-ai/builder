@@ -176,7 +176,8 @@ export class OAuthAuthClient {
           theme_id: data.theme_id || this.currentUser.user_metadata.theme_id,
         },
       };
-      
+
+      this.saveUserToStorage(this.currentUser);
       this.emitEvent("profile_change", this.currentUser);
       return {};
     } catch (error) {

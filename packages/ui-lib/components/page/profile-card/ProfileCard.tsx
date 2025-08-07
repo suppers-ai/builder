@@ -9,6 +9,7 @@ import { Logo } from "../../display/logo/Logo.tsx";
 import { GlobalThemeController } from "../../action/theme-controller/ThemeController.tsx";
 import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
 import { applyTheme, type ThemeId } from "@suppers/shared/utils";
+import config from "../../../../../config.ts";
 import { ChevronDown, Palette } from "lucide-preact";
 import { UpdateUserData } from "@suppers/auth-client";
 
@@ -169,6 +170,16 @@ export function ProfileCard({
     addToast(success, "success");
   }
 
+  const sendProfileUpdate = (user: User | null) => {
+    if (isPopupMode && window.opener && !window.opener.closed) {
+      window.opener.postMessage({
+        type: "SUPPERS_PROFILE_UPDATED",
+        data: { user },
+      }, config.docsUrl);
+      console.log('🎯 ProfileCard: Sending profile update to opener:', user);
+    }
+  };
+
   const handleEditSubmit = async (e: Event) => {
     e.preventDefault();
     if (onUpdateProfile) {
@@ -177,13 +188,11 @@ export function ProfileCard({
         if (result.success) {
           addToast("Profile updated successfully!", "success");
 
-          // Communicate with parent window if in popup mode
-          if (isPopupMode && parentOrigin && window.parent) {
-            window.parent.postMessage({
-              type: "profile-updated",
-              data: editData,
-            }, parentOrigin);
-          }
+          console.log('🎯 ProfileCard: editData:', editData);
+          console.log('🎯 ProfileCard: Sending profile update to opener:', user ? { ...user, user_metadata: { ...user.user_metadata, ...editData } } : null);
+
+          // Send update to opener window if in popup mode
+          sendProfileUpdate(user ? { ...user, user_metadata: { ...user.user_metadata, ...editData } } : null);
         } else {
           addToast(result.error || "Failed to update profile", "error");
         }
@@ -462,6 +471,7 @@ export function ProfileCard({
                 if (onUpdateProfile) {
                   try {
                     await onUpdateProfile({ theme_id: newTheme });
+                    sendProfileUpdate(user ? { ...user, user_metadata: { ...user.user_metadata, theme_id: newTheme } } : null);
                   } catch (error) {
                     addToast(
                       error instanceof Error ? error.message : "Failed to update theme",

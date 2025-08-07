@@ -80,14 +80,45 @@ export default function SimpleAuthButton(
       }
     };
 
+    // Listen for postMessage events from profile popup
+    const handlePopupMessage = (event: MessageEvent) => {
+      console.log('🎯 SimpleAuthButton: Received postMessage:', event.data, 'from origin:', event.origin);
+      
+      // Accept messages from the profile URL origin (cross-origin communication)
+      // Profile is on http://localhost:8001, docs is on http://localhost:8002
+      if (event.origin !== config.profileUrl) {
+        console.log('🎯 SimpleAuthButton: Ignoring message from unknown origin:', event.origin, 'expected:', config.profileUrl);
+        return;
+      }
+
+      switch (event.data.type) {
+        case 'SUPPERS_PROFILE_UPDATED':
+          const updatedUser = event.data.data.user;
+          if (updatedUser.user_metadata) {
+            authClient.updateUser(updatedUser.user_metadata);
+          }
+          break;
+        case 'popup-closing':
+          console.log('🎯 SimpleAuthButton: Profile popup is closing');
+          break;
+          
+        default:
+          console.log('🎯 SimpleAuthButton: Unknown message type from popup:', event.data.type);
+      }
+    };
+
     authClient.addEventListener("login", handleAuthEvent);
     authClient.addEventListener("logout", handleAuthEvent);
     authClient.addEventListener("profile_change", handleAuthEvent);
+    
+    // Add postMessage listener for popup communication
+    window.addEventListener('message', handlePopupMessage);
 
     return () => {
       authClient.removeEventListener("login", handleAuthEvent);
       authClient.removeEventListener("logout", handleAuthEvent);
       authClient.removeEventListener("profile_change", handleAuthEvent);
+      window.removeEventListener('message', handlePopupMessage);
     };
   }, []);
 
