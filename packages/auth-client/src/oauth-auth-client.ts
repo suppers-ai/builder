@@ -7,6 +7,7 @@ import type {
   ResetPasswordData,
   UpdateUserData
 } from "../../shared/types/auth.ts";
+import { clearTheme } from "../../shared/utils/theme.ts";
 
 /**
  * OAuth authentication client for centralized auth hub
@@ -330,6 +331,7 @@ export class OAuthAuthClient {
   private clearUserFromStorage(): void {
     if (typeof window !== "undefined") {
       try {
+        clearTheme();
         localStorage.removeItem(this.storageKey);
       } catch (error) {
         console.error("Failed to clear user from storage:", error);

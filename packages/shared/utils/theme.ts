@@ -2,10 +2,10 @@
  * Shared theme utilities for consistent theme management across all packages
  */
 
-import { THEMES, DEFAULT_THEME, User } from "@suppers/shared";
+import { THEME_NAMES, DEFAULT_THEME, User } from "@suppers/shared";
 
 export type ThemeId = string;
-export const AVAILABLE_THEMES: ThemeId[] = THEMES.map((theme) => theme.name);
+export const AVAILABLE_THEMES: ThemeId[] = THEME_NAMES;
 
 
 /**
@@ -71,6 +71,12 @@ export function getCurrentTheme(user?: User | null): ThemeId {
   return DEFAULT_THEME;
 }
 
+export function clearTheme() {
+  if (typeof document === "undefined") return;
+  document.documentElement.removeAttribute("data-theme");
+  localStorage.removeItem("theme");
+}
+
 /**
  * Apply theme to DOM and save to localStorage
  */
@@ -91,5 +97,56 @@ export function applyTheme(theme: ThemeId): void {
   } catch (error) {
     console.warn("Failed to apply theme:", error);
   }
+}
+
+/**
+ * Generate an inline script that applies theme early during page load to prevent flicker
+ * This should be included in the HTML <head> section
+ */
+export function generateEarlyThemeScript(): string {
+  return `
+    (function() {
+      try {
+        // Available themes list (sync with THEME_NAMES)
+        const AVAILABLE_THEMES = ${JSON.stringify(AVAILABLE_THEMES)};
+        const DEFAULT_THEME = "${DEFAULT_THEME}";
+        
+        // Check auth storage for user theme
+        let userTheme = null;
+        const authKeys = ["suppers_oauth_user", "suppers_auth_user"];
+        
+        for (const key of authKeys) {
+          try {
+            const stored = localStorage.getItem(key);
+            if (stored) {
+              const user = JSON.parse(stored);
+              if (user?.user_metadata?.theme_id && AVAILABLE_THEMES.includes(user.user_metadata.theme_id)) {
+                userTheme = user.user_metadata.theme_id;
+                break;
+              }
+            }
+          } catch (e) {}
+        }
+        
+        // Fallback to saved theme or system theme
+        let theme = getCurrentTheme();
+        if (!theme) {
+          const saved = localStorage.getItem("theme");
+          theme = saved && AVAILABLE_THEMES.includes(saved) ? saved : null;
+        }
+        if (!theme) {
+          theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        theme = theme || DEFAULT_THEME;
+        
+        // Apply theme immediately
+        document.documentElement.setAttribute("data-theme", theme);
+        console.log('🎯 Early theme applied:', theme, userTheme ? '(from user)' : '(fallback)');
+      } catch (error) {
+        console.warn("Early theme application failed:", error);
+        document.documentElement.setAttribute("data-theme", "${DEFAULT_THEME}");
+      }
+    })();
+  `.trim();
 }
 

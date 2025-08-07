@@ -1,13 +1,21 @@
 import { type PageProps } from "fresh";
+import { generateEarlyThemeScript } from "@suppers/shared/utils";
 
 export default function App({ Component, state }: PageProps) {
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Suppers App - SSO Authentication Service</title>
         <link rel="stylesheet" href="/styles.css" />
+        
+        {/* Early theme application to prevent flicker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: generateEarlyThemeScript(),
+          }}
+        />
       </head>
       <body class="theme-transition">
         <Component />

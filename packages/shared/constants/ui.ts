@@ -221,5 +221,7 @@ const THEMES = [
 
 export const DEFAULT_THEME: string = "light";
 
+export const THEME_NAMES: string[] = THEMES.map((theme) => theme.name);
+
 // Export the themes object
 export { THEMES };

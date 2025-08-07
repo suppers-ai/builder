@@ -1,5 +1,6 @@
 import { type PageProps } from "fresh";
 import { asset } from "$fresh/runtime";
+import { generateEarlyThemeScript } from "@suppers/shared/utils/theme.ts";
 
 export default function App({ Component, state }: PageProps) {
   const Comp = Component as any;
@@ -64,6 +65,13 @@ export default function App({ Component, state }: PageProps) {
 
         {/* Custom CSS files */}
         <link rel="stylesheet" href={asset("/styles.css")} />
+        
+        {/* Early theme application to prevent flicker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: generateEarlyThemeScript(),
+          }}
+        />
       </head>
       <body class="theme-transition">
         <Comp />

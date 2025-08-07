@@ -1,5 +1,6 @@
 import { type PageProps } from "fresh";
 import SimpleNavbar from "../islands/SimpleNavbar.tsx";
+import { generateEarlyThemeScript } from "@suppers/shared/utils";
 
 export default function App({ Component, url }: PageProps) {
   return (
@@ -9,6 +10,13 @@ export default function App({ Component, url }: PageProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Suppers Store - Application Marketplace</title>
         <link rel="stylesheet" href="/styles.css" />
+        
+        {/* Early theme application to prevent flicker */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: generateEarlyThemeScript(),
+          }}
+        />
       </head>
       <body>
         <div class="min-h-screen bg-base-100">
