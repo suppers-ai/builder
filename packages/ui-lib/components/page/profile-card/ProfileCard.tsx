@@ -13,21 +13,7 @@ import config from "../../../../../config.ts";
 import { ChevronDown, Palette } from "lucide-preact";
 import { UpdateUserData } from "@suppers/auth-client";
 
-export interface User {
-  id: string;
-  email?: string;
-  phone?: string;
-  created_at?: string;
-  updated_at?: string;
-  user_metadata?: {
-    first_name?: string;
-    last_name?: string;
-    display_name?: string;
-    avatar_url?: string;
-    theme_id?: string;
-    role?: string;
-  };
-}
+import type { User } from "@suppers/shared/utils/type-mappers.ts";
 
 export interface ProfileCardProps extends BaseComponentProps {
   user: User | null;
@@ -63,26 +49,27 @@ export function ProfileCard({
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState(user?.user_metadata?.theme_id || "light");
+  const [currentTheme, setCurrentTheme] = useState(user?.theme_id || "light");
   const [toasts, setToasts] = useState<
     Array<{ id: string; message: string; type: "success" | "error" }>
   >([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editData, setEditData] = useState({
-    first_name: user?.user_metadata?.first_name || "",
-    last_name: user?.user_metadata?.last_name || "",
-    display_name: user?.user_metadata?.display_name || "",
-    theme_id: user?.user_metadata?.theme_id || "light",
+    first_name: user?.first_name || "",
+    last_name: user?.last_name || "",
+    display_name: user?.display_name || "",
+    theme_id: user?.theme_id || "light",
   });
 
   // Update editData when user data changes
   useEffect(() => {
     setEditData({
-      first_name: user?.user_metadata?.first_name || "",
-      last_name: user?.user_metadata?.last_name || "",
-      display_name: user?.user_metadata?.display_name || "",
-      theme_id: user?.user_metadata?.theme_id || "light",
+      first_name: user?.first_name || "",
+      last_name: user?.last_name || "",
+      display_name: user?.display_name || "",
+      theme_id: user?.theme_id || "light",
     });
+    setCurrentTheme(user?.theme_id || "light");
   }, [user]);
 
   // Detect popup mode and setup parent window communication
@@ -189,10 +176,10 @@ export function ProfileCard({
           addToast("Profile updated successfully!", "success");
 
           console.log('🎯 ProfileCard: editData:', editData);
-          console.log('🎯 ProfileCard: Sending profile update to opener:', user ? { ...user, user_metadata: { ...user.user_metadata, ...editData } } : null);
+          console.log('🎯 ProfileCard: Sending profile update to opener:', user ? { ...user, ...editData } : null);
 
           // Send update to opener window if in popup mode
-          sendProfileUpdate(user ? { ...user, user_metadata: { ...user.user_metadata, ...editData } } : null);
+          sendProfileUpdate(user ? { ...user, ...editData } : null);
         } else {
           addToast(result.error || "Failed to update profile", "error");
         }
@@ -206,10 +193,10 @@ export function ProfileCard({
   const handleEditClick = () => {
     // Update form data with current user data when opening edit mode
     setEditData({
-      first_name: user?.user_metadata?.first_name || "",
-      last_name: user?.user_metadata?.last_name || "",
-      display_name: user?.user_metadata?.display_name || "",
-      theme_id: user?.user_metadata?.theme_id || "light",
+      first_name: user?.first_name || "",
+      last_name: user?.last_name || "",
+      display_name: user?.display_name || "",
+      theme_id: user?.theme_id || "light",
     });
     setIsEditing(true);
   };
@@ -339,7 +326,7 @@ export function ProfileCard({
             disabled={isLoading}
           >
             <Avatar
-              src={user.user_metadata?.avatar_url}
+              src={user?.avatar_url}
               alt="Profile"
               initials={initials}
               size="lg"
@@ -471,7 +458,7 @@ export function ProfileCard({
                 if (onUpdateProfile) {
                   try {
                     await onUpdateProfile({ theme_id: newTheme });
-                    sendProfileUpdate(user ? { ...user, user_metadata: { ...user.user_metadata, theme_id: newTheme } } : null);
+                    sendProfileUpdate(user ? { ...user, theme_id: newTheme } : null);
                   } catch (error) {
                     addToast(
                       error instanceof Error ? error.message : "Failed to update theme",

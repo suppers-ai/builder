@@ -4,10 +4,9 @@
  */
 
 import type { Database } from "../generated/database-types.ts";
-import { User } from "@suppers/shared";
-import type { AuthUser } from "../types/auth.ts";
 
 // Database table types
+type UsersTable = Database["public"]["Tables"]["users"]["Row"];
 type ApplicationsTable = Database["public"]["Tables"]["applications"]["Row"];
 type UserAccessTable = Database["public"]["Tables"]["user_access"]["Row"];
 type ApplicationReviewsTable = Database["public"]["Tables"]["application_reviews"]["Row"];
@@ -15,6 +14,7 @@ type CustomThemesTable = Database["public"]["Tables"]["custom_themes"]["Row"];
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 // Re-export database types as canonical types
+export type User = UsersTable;
 export type Application = ApplicationsTable;
 export type UserAccess = UserAccessTable;
 export type ApplicationReview = ApplicationReviewsTable;
@@ -41,21 +41,13 @@ export interface ApplicationResponseExtended extends ApplicationResponse {
   review_count?: number;
 }
 
-// Auth Types (derived from database types)
-
-export interface AuthSession {
-  user: AuthUser;
-  session: any; // Will be typed with actual session type
-  supabaseUser: SupabaseUser;
-}
-
-// AuthState is defined in packages/shared/types/auth.ts
-export type { AuthState } from "../types/auth.ts";
+// Re-export auth types
+export type { AuthState, AuthSession } from "../types/auth.ts";
 
 // Update operation types (derived from database types)
 export type UserUpdateData = Pick<
   User,
-  "first_name" | "middle_names" | "last_name" | "display_name" | "avatar_url"
+  "first_name" | "last_name" | "display_name" | "avatar_url" | "theme_id" | "stripe_customer_id" | "role"
 >;
 export type ApplicationUpdateData = Pick<
   Application,
@@ -92,66 +84,25 @@ export class TypeMappers {
   }
 
   /**
-   * Convert database user to auth user format
-   */
-  static userToAuthUser(user: User): AuthUser {
-    return {
-      id: user.id,
-      email: user.email,
-      created_at: user.created_at,
-      updated_at: user.updated_at,
-      user_metadata: {
-        first_name: user.first_name,
-        last_name: user.last_name,
-        display_name: user.display_name,
-        avatar_url: user.avatar_url,
-        theme_id: user.theme_id,
-        role: user.role,
-      },
-    };
-  }
-
-  /**
-   * Convert Supabase user directly to AuthUser format
-   */
-  static supabaseUserToAuthUser(supabaseUser: SupabaseUser, dbUser?: any): AuthUser {
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email || "",
-      created_at: supabaseUser.created_at,
-      updated_at: supabaseUser.updated_at,
-      user_metadata: {
-        first_name: dbUser?.first_name || supabaseUser.user_metadata?.first_name || undefined,
-        last_name: dbUser?.last_name || supabaseUser.user_metadata?.last_name || undefined,
-        display_name: dbUser?.display_name ||
-          supabaseUser.user_metadata?.display_name ||
-          supabaseUser.user_metadata?.full_name || undefined,
-        avatar_url: dbUser?.avatar_url || supabaseUser.user_metadata?.avatar_url || undefined,
-        theme_id: dbUser?.theme_id || supabaseUser.user_metadata?.theme_id || undefined,
-        role: dbUser?.role || "user",
-      },
-    };
-  }
-
-  /**
    * Convert Supabase user to our database user format
    */
-  static supabaseUserToUser(supabaseUser: SupabaseUser, dbUser?: Partial<User>): User {
+  static supabaseUserToUser(supabaseUser: SupabaseUser, existingUser?: Partial<User>): User {
     const now = new Date().toISOString();
 
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || "",
-      first_name: dbUser?.first_name || supabaseUser.user_metadata?.first_name,
-      middle_names: dbUser?.middle_names ?? null,
-      last_name: dbUser?.last_name || supabaseUser.user_metadata?.last_name,
-      display_name: dbUser?.display_name ||
+      first_name: existingUser?.first_name || supabaseUser.user_metadata?.first_name || null,
+      last_name: existingUser?.last_name || supabaseUser.user_metadata?.last_name || null,
+      display_name: existingUser?.display_name ||
         supabaseUser.user_metadata?.display_name ||
-        supabaseUser.user_metadata?.full_name,
-      avatar_url: dbUser?.avatar_url || supabaseUser.user_metadata?.avatar_url,
-      role: dbUser?.role || "user",
-      created_at: dbUser?.created_at || supabaseUser.created_at || now,
-      updated_at: dbUser?.updated_at || supabaseUser.updated_at || supabaseUser.created_at || now,
+        supabaseUser.user_metadata?.full_name || null,
+      avatar_url: existingUser?.avatar_url || supabaseUser.user_metadata?.avatar_url || null,
+      theme_id: existingUser?.theme_id || supabaseUser.user_metadata?.theme_id || null,
+      stripe_customer_id: existingUser?.stripe_customer_id || null,
+      role: (existingUser?.role as 'user' | 'admin') || "user",
+      created_at: existingUser?.created_at || supabaseUser.created_at || now,
+      updated_at: existingUser?.updated_at || supabaseUser.updated_at || supabaseUser.created_at || now,
     };
   }
 
@@ -203,29 +154,12 @@ export class TypeMappers {
   }
 
   /**
-   * Safe conversion with error handling
-   */
-  static safeUserToAuthUser(user: unknown): AuthUser | null {
-    try {
-      if (!user || typeof user !== "object") return null;
-
-      const u = user as User;
-      if (!u.id || !u.email) return null;
-
-      return this.userToAuthUser(u);
-    } catch (error) {
-      console.error("Failed to convert user to auth user:", error);
-      return null;
-    }
-  }
-
-  /**
    * Helper: Get full name from user
    */
   static getFullName(user: User): string {
     if (user.display_name?.trim()) return user.display_name.trim();
 
-    const parts = [user.first_name, user.middle_names, user.last_name]
+    const parts = [user.first_name, user.last_name]
       .filter((part) => part && part.trim().length > 0)
       .map((part) => part!.trim());
 
@@ -256,40 +190,15 @@ export class TypeMappers {
   /**
    * Helper: Check if user has admin role
    */
-  static isAdmin(user: User | AuthUser): boolean {
-    if ('role' in user) {
-      // Database User type
-      return user.role === "admin";
-    } else {
-      // AuthUser type
-      return user.user_metadata.role === "admin";
-    }
-  }
-
-  /**
-   * Helper: Check if user has admin role (moderator role removed from schema)
-   */
-  static isModerator(user: User | AuthUser): boolean {
-    if ('role' in user) {
-      // Database User type
-      return user.role === "admin" || user.role === "moderator";
-    } else {
-      // AuthUser type
-      return user.user_metadata.role === "admin" || user.user_metadata.role === "moderator";
-    }
+  static isAdmin(user: User): boolean {
+    return user.role === "admin";
   }
 
   /**
    * Helper: Get user display name with fallback
    */
-  static getDisplayName(user: User | AuthUser): string {
-    if ('display_name' in user) {
-      // Database User type
-      return user.display_name || this.getFullName(user as User) || user.email || "Unknown User";
-    } else {
-      // AuthUser type
-      return user.user_metadata.display_name || user.email || "Unknown User";
-    }
+  static getDisplayName(user: User): string {
+    return user.display_name || this.getFullName(user) || user.email || "Unknown User";
   }
 
   /**

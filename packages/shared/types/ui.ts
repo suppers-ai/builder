@@ -19,14 +19,6 @@ export interface CustomThemeVariables {
   [key: string]: string | number | undefined;
 }
 
-// Custom Theme Definition
-export interface CustomTheme {
-  name: string;
-  label: string;
-  description?: string;
-  variables: CustomThemeVariables;
-  isPublic?: boolean;
-}
 
 // Component Size Variants
 export type ComponentSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -146,7 +138,7 @@ export interface MenuItem {
 export interface TabItem {
   label: string;
   value: string;
-  content?: React.ReactNode;
+  content?: any;
   disabled?: boolean;
 }
 
@@ -252,7 +244,7 @@ export interface IconProps {
 }
 
 // Event Handler Types
-export type ClickHandler = (event: React.MouseEvent) => void;
+export type ClickHandler = (event: any) => void;
 export type ChangeHandler = (value: any) => void;
 export type SubmitHandler = (data: Record<string, any>) => void;
 

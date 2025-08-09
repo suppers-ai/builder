@@ -7,10 +7,12 @@ export async function updateUser(request: Request, supabase: SupabaseClient): Pr
     id,
     email,
     firstName,
-    middleNames,
     lastName,
     displayName,
     avatarUrl,
+    themeId,
+    stripeCustomerId,
+    role,
   } = body;
 
   console.log(body);
@@ -28,10 +30,12 @@ export async function updateUser(request: Request, supabase: SupabaseClient): Pr
 
   if (email !== undefined) updateData.email = email;
   if (firstName !== undefined) updateData.first_name = firstName;
-  if (middleNames !== undefined) updateData.middle_names = middleNames;
   if (lastName !== undefined) updateData.last_name = lastName;
   if (displayName !== undefined) updateData.display_name = displayName;
   if (avatarUrl !== undefined) updateData.avatar_url = avatarUrl;
+  if (themeId !== undefined) updateData.theme_id = themeId;
+  if (stripeCustomerId !== undefined) updateData.stripe_customer_id = stripeCustomerId;
+  if (role !== undefined) updateData.role = role;
 
   const { data: user, error } = await supabase
     .from("users")

@@ -1,106 +1,243 @@
-import type { 
-  AuthEventType, 
+import type {
   AuthEventCallback,
-  AuthUser,
+  AuthEventData,
+  AuthEventType,
+  AuthSession,
+  ResetPasswordData,
   SignInData,
   SignUpData,
-  ResetPasswordData,
-  UpdateUserData
+  UpdateUserData,
 } from "../../shared/types/auth.ts";
-import { clearTheme } from "../../shared/utils/theme.ts";
+import type { User } from "../../shared/utils/type-mappers.ts";
 
 /**
  * OAuth authentication client for centralized auth hub
- * This client communicates with the profile service for authentication
+ * Simplified to only store user ID and fetch user data from database when needed
  */
 export class OAuthAuthClient {
   private eventCallbacks: Map<AuthEventType, AuthEventCallback[]> = new Map();
-  private currentUser: AuthUser | null = null;
   private profileServiceUrl: string;
   private clientId: string;
+  private storageKey = "suppers_user_id";
+  private userStorageKey = "suppers_user_data";
 
   constructor(
     profileServiceUrl: string = "http://localhost:8001",
-    clientId: string
+    clientId: string,
   ) {
     this.profileServiceUrl = profileServiceUrl;
     this.clientId = clientId;
   }
 
   /**
-   * Initialize the OAuth auth client
+   * Save user ID to localStorage
    */
-  async initialize(): Promise<void> {
-    try {
-      // First check localStorage for existing user
-      const storedUser = this.getUserFromStorage();
-      if (storedUser) {
-        console.log("🔍 Found stored user, setting current user");
-        this.currentUser = storedUser;
-        this.emitEvent("login", { user: this.currentUser });
-
-        // TODO: we could save a expire at, then notify session as expired
-        return;
+  private saveUserIdToStorage(userId: string): void {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(this.storageKey, userId);
+      } catch (error) {
+        console.error("Failed to save user ID to storage:", error);
       }
-      console.log("🔍 No stored user found, initializing auth client");
-    } catch (error) {
-      console.error("OAuth auth initialization failed:", error);
     }
   }
 
   /**
-   * Get current user
+   * Get user ID from localStorage
    */
-  getUser(): AuthUser | null {
-    return this.currentUser;
+  private getUserIdFromStorage(): string | null {
+    if (typeof window !== "undefined") {
+      try {
+        return localStorage.getItem(this.storageKey);
+      } catch (error) {
+        console.error("Failed to get user ID from storage:", error);
+        return null;
+      }
+    }
+    return null;
   }
 
   /**
-   * Get current session (returns null for OAuth clients as they don't have Supabase sessions)
+   * Clear user ID from localStorage
    */
-  getSession(): any {
-    return null; // OAuth clients don't have Supabase sessions
+  private clearUserIdFromStorage(): void {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(this.storageKey);
+      } catch (error) {
+        console.error("Failed to clear user ID from storage:", error);
+      }
+    }
+  }
+
+  /**
+   * Save user data to localStorage
+   */
+  saveUserDataToStorage(userData: User): void {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(this.userStorageKey, JSON.stringify(userData));
+      } catch (error) {
+        console.error("Failed to save user data to storage:", error);
+      }
+    }
+  }
+
+  /**
+   * Get user data from localStorage
+   */
+  private getUserDataFromStorage(): User | null {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(this.userStorageKey);
+        return stored ? JSON.parse(stored) : null;
+      } catch (error) {
+        console.error("Failed to get user data from storage:", error);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Clear user data from localStorage
+   */
+  private clearUserDataFromStorage(): void {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(this.userStorageKey);
+      } catch (error) {
+        console.error("Failed to clear user data from storage:", error);
+      }
+    }
+  }
+
+  /**
+   * Ensure user profile exists in public.users table via profile service
+   */
+  private async ensureUserProfile(
+    oauthUser: { id: string; email?: string; user_metadata?: Record<string, unknown> },
+  ): Promise<void> {
+    try {
+      // Check if user profile exists
+      const response = await this.apiRequest(`/api/users/${oauthUser.id}`);
+
+      if (response.ok) {
+        // User profile already exists
+        return;
+      }
+
+      // Create new user profile
+      const newUserData = {
+        id: oauthUser.id,
+        email: oauthUser.email || "",
+        first_name: oauthUser.user_metadata?.first_name || null,
+        last_name: oauthUser.user_metadata?.last_name || null,
+        display_name: oauthUser.user_metadata?.display_name || oauthUser.user_metadata?.full_name ||
+          null,
+        avatar_url: oauthUser.user_metadata?.avatar_url || null,
+        theme_id: oauthUser.user_metadata?.theme_id || null,
+        stripe_customer_id: null,
+        role: "user" as const,
+      };
+
+      const createResponse = await this.apiRequest("/api/users", {
+        method: "POST",
+        body: JSON.stringify(newUserData),
+      });
+
+      if (!createResponse.ok) {
+        console.error("Failed to create user profile via profile service");
+      }
+    } catch (error) {
+      console.error("Error ensuring user profile via profile service:", error);
+    }
+  }
+
+  /**
+   * Initialize the OAuth auth client
+   */
+  initialize(): Promise<void> {
+    try {
+      // Check if user ID exists in storage
+      const userId = this.getUserIdFromStorage();
+      if (userId) {
+        console.log("Found stored user ID, emitting login event");
+        this.emitEvent("login", { userId });
+        return Promise.resolve();
+      }
+      console.log("No stored user ID found");
+      return Promise.resolve();
+    } catch (error) {
+      console.error("OAuth auth initialization failed:", error);
+      return Promise.resolve();
+    }
   }
 
   /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    return this.currentUser !== null;
+    return this.getUserIdFromStorage() !== null;
+  }
+
+  /**
+   * Get user ID from storage
+   */
+  getUserId(): string | null {
+    return this.getUserIdFromStorage();
+  }
+
+  /**
+   * Get current session (returns null for OAuth clients as they don't have Supabase sessions)
+   */
+  getSession(): Promise<AuthSession | null> {
+    return Promise.resolve(null); // OAuth clients don't have Supabase sessions
   }
 
   /**
    * Get access token (not used in centralized auth hub)
    */
-  getAccessToken(): string | null {
-    return null; // Access tokens are managed by the profile service
+  getAccessToken(): Promise<string | null> {
+    return Promise.resolve(null); // Access tokens are managed by the profile service
+  }
+
+  /**
+   * Get user data from localStorage (passed via postMessage from profile page)
+   */
+  getUser(): Promise<User | null> {
+    const userId = this.getUserIdFromStorage();
+    if (!userId) return Promise.resolve(null);
+
+    // Return user data from localStorage - this is set via postMessage from profile page
+    return Promise.resolve(this.getUserDataFromStorage());
   }
 
   /**
    * Sign in - opens login popup
    */
-  async signIn(data?: SignInData): Promise<{ error?: string }> {
+  signIn(_data?: SignInData): Promise<{ error?: string }> {
     this.showLoginModal();
-    return {};
+    return Promise.resolve({});
   }
 
   /**
    * Show login modal/popup
    */
   showLoginModal(): void {
-    console.log("🔍 showLoginModal called");
-    
+    console.log("showLoginModal called");
+
     // Open login page directly in popup
     const loginUrl = new URL("/auth/login", this.profileServiceUrl);
     loginUrl.searchParams.set("modal", "true");
-    
-    console.log("🔍 Opening login popup:", loginUrl.toString());
+
+    console.log("Opening login popup:", loginUrl.toString());
 
     // Open in a popup window
-    const popup = window.open(
+    const popup = globalThis.open(
       loginUrl.toString(),
-      'oauth-login',
-      'width=480,height=600,scrollbars=yes,resizable=yes,status=yes'
+      "oauth-login",
+      "width=480,height=600,scrollbars=yes,resizable=yes,status=yes",
     );
 
     if (!popup) {
@@ -108,80 +245,89 @@ export class OAuthAuthClient {
       return;
     }
 
-    console.log("🔍 Popup opened successfully, setting up message listener");
+    console.log("Popup opened successfully, setting up message listener");
 
     // Listen for postMessage from popup
     const messageHandler = (event: MessageEvent) => {
-      console.log("🔍 Received postMessage:", event.data);
+      console.log("Received postMessage:", event.data);
 
-      if (event.data.type === 'SSO_AUTH_SUCCESS') {
-        console.log("✅ Login popup success, user authenticated");
-        
-        // Set the user from the popup and save to storage
-        this.currentUser = event.data.user;
-        this.saveUserToStorage(this.currentUser);
-        this.emitEvent("login", { user: this.currentUser });
-        console.log("✅ OAuth popup login completed successfully");
+      if (event.data.type === "SSO_AUTH_SUCCESS") {
+        console.log("Login popup success, user authenticated");
+
+        // Store user ID and user data from the profile page
+        this.saveUserIdToStorage(event.data.user.id);
+        this.saveUserDataToStorage(event.data.user);
+        this.emitEvent("login", { userId: event.data.user.id });
+        console.log("OAuth popup login completed successfully");
 
         // Clean up
-        window.removeEventListener("message", messageHandler);
-      } else if (event.data.type === 'OAUTH_ERROR') {
+        globalThis.removeEventListener("message", messageHandler);
+      } else if (event.data.type === "OAUTH_ERROR") {
         console.error("OAuth popup error:", event.data.error);
         this.emitEvent("error", { error: event.data.error });
-        window.removeEventListener("message", messageHandler);
+        globalThis.removeEventListener("message", messageHandler);
       }
     };
 
-    window.addEventListener("message", messageHandler);
+    addEventListener("message", messageHandler);
   }
 
   /**
    * Sign up - opens login popup
    */
-  async signUp(data: SignUpData): Promise<{ error?: string }> {
+  signUp(_data: SignUpData): Promise<{ error?: string }> {
     // Use the popup login modal for sign up as well
     this.showLoginModal();
-    return {};
+    return Promise.resolve({});
   }
 
   /**
    * Reset password - redirects to authorization server
    */
-  async resetPassword(data: ResetPasswordData): Promise<{ error?: string }> {
+  resetPassword(data: ResetPasswordData): Promise<{ error?: string }> {
     const resetUrl = new URL("/auth/reset-password", this.profileServiceUrl);
     resetUrl.searchParams.set("email", data.email);
-    
-    window.location.href = resetUrl.toString();
-    return {};
+
+    globalThis.location.href = resetUrl.toString();
+    return Promise.resolve({});
   }
 
   /**
    * Update user profile
    */
   async updateUser(data: UpdateUserData): Promise<{ error?: string }> {
-    if (!this.currentUser) {
+    const userId = this.getUserIdFromStorage();
+    if (!userId) {
       return { error: "Not authenticated" };
     }
 
     try {
-      // In the centralized auth hub, this would go through the profile service
-      // For now, just update the local user object
-      this.currentUser = {
-        ...this.currentUser,
-        user_metadata: {
-          ...this.currentUser.user_metadata,
-          first_name: data.first_name || this.currentUser.user_metadata.first_name,
-          last_name: data.last_name || this.currentUser.user_metadata.last_name,
-          display_name: data.display_name || this.currentUser.user_metadata.display_name,
-          avatar_url: data.avatar_url || this.currentUser.user_metadata.avatar_url,
-          theme_id: data.theme_id || this.currentUser.user_metadata.theme_id,
-        },
-      };
+      // Prepare update data for public.users table
+      const updateData: Record<string, unknown> = {};
+      if (data.first_name !== undefined) updateData.first_name = data.first_name;
+      if (data.last_name !== undefined) updateData.last_name = data.last_name;
+      if (data.display_name !== undefined) updateData.display_name = data.display_name;
+      if (data.avatar_url !== undefined) updateData.avatar_url = data.avatar_url;
+      if (data.theme_id !== undefined) updateData.theme_id = data.theme_id;
+      if (data.stripe_customer_id !== undefined) {
+        updateData.stripe_customer_id = data.stripe_customer_id;
+      }
+      if (data.role !== undefined) updateData.role = data.role;
 
-      this.saveUserToStorage(this.currentUser);
-      this.emitEvent("profile_change", this.currentUser);
+      // Update user profile in public.users table via profile service
+      const response = await this.apiRequest(`/api/users/${userId}`, {
+        method: "PATCH",
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return { error: errorData.message || "Failed to update profile" };
+      }
+
       return {};
     } catch (error) {
+      console.error("Error updating user profile:", error);
       return { error: "An unexpected error occurred" };
     }
   }
@@ -189,67 +335,85 @@ export class OAuthAuthClient {
   /**
    * Sign out
    */
-  async signOut(): Promise<void> {
+  signOut(): Promise<void> {
     // Clear local state and storage
-    this.currentUser = null;
-    this.clearUserFromStorage();
+    this.clearUserIdFromStorage();
 
     // Open logout popup to clear profile localStorage
     try {
       const logoutUrl = new URL("/auth/logout", this.profileServiceUrl);
       logoutUrl.searchParams.set("popup", "true");
-      
-      console.log("🔍 Opening logout popup:", logoutUrl.toString());
-      
-      const popup = window.open(
+
+      console.log("Opening logout popup:", logoutUrl.toString());
+
+      const popup = globalThis.open(
         logoutUrl.toString(),
-        'oauth-logout',
-        'width=400,height=300,scrollbars=no,resizable=no,status=no'
+        "oauth-logout",
+        "width=400,height=300,scrollbars=no,resizable=no,status=no",
       );
-      
+
       if (popup) {
         // Listen for logout completion
         const messageHandler = (event: MessageEvent) => {
-          if (event.data.type === 'OAUTH_LOGOUT_SUCCESS') {
-            console.log("✅ Profile logout completed");
-            window.removeEventListener("message", messageHandler);
+          if (event.data.type === "OAUTH_LOGOUT_SUCCESS") {
+            console.log("Profile logout completed");
+            removeEventListener("message", messageHandler);
           }
         };
-        
-        window.addEventListener("message", messageHandler);
-        
+
+        addEventListener("message", messageHandler);
+
         // Auto-close popup after 3 seconds if no response
         setTimeout(() => {
           if (popup && !popup.closed) {
             popup.close();
           }
-          window.removeEventListener("message", messageHandler);
+          removeEventListener("message", messageHandler);
         }, 3000);
       }
     } catch (error) {
       console.error("Failed to open logout popup:", error);
     }
 
+    // Clear local storage
+    this.clearUserIdFromStorage();
+    this.clearUserDataFromStorage();
+    
     this.emitEvent("logout");
+    return Promise.resolve();
   }
 
   /**
-   * Make authenticated API request
-   * In the centralized auth hub, this would proxy through the profile service
+   * Sign in with OAuth provider
    */
-  async apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
-    if (!this.currentUser) {
-      throw new Error("Not authenticated");
+  signInWithOAuth(_provider: string): Promise<{ error?: string }> {
+    this.showLoginModal();
+    return Promise.resolve({});
+  }
+
+  /**
+   * Make authenticated API request to the profile service
+   */
+  apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
+    // Construct full URL if endpoint is relative
+    const url = endpoint.startsWith("http") ? endpoint : `${this.profileServiceUrl}${endpoint}`;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...options.headers as Record<string, string>,
+    };
+
+    // Add authentication headers if user is authenticated
+    const userId = this.getUserIdFromStorage();
+    if (userId) {
+      // In a real centralized auth hub, this would include session tokens
+      // For now, include user ID for identification
+      headers["X-User-ID"] = userId;
     }
 
-    // In the centralized auth hub, this would include a session ID
-    // For now, just make the request directly
-    return fetch(endpoint, {
+    return fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
     });
   }
 
@@ -279,10 +443,10 @@ export class OAuthAuthClient {
   /**
    * Emit event to listeners
    */
-  private emitEvent(event: AuthEventType, data?: any): void {
+  private emitEvent(event: AuthEventType, data?: AuthEventData[AuthEventType]): void {
     const callbacks = this.eventCallbacks.get(event);
     if (callbacks) {
-      callbacks.forEach(callback => {
+      callbacks.forEach((callback) => {
         try {
           callback(event, data);
         } catch (error) {
@@ -298,44 +462,4 @@ export class OAuthAuthClient {
   destroy(): void {
     this.eventCallbacks.clear();
   }
-
-  private storageKey = "suppers_oauth_user";
-
-  private saveUserToStorage(user: AuthUser | null): void {
-    if (typeof window !== "undefined") {
-      try {
-        if (user) {
-          localStorage.setItem(this.storageKey, JSON.stringify(user));
-        } else {
-          localStorage.removeItem(this.storageKey);
-        }
-      } catch (error) {
-        console.error("Failed to save user to storage:", error);
-      }
-    }
-  }
-
-  private getUserFromStorage(): AuthUser | null {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem(this.storageKey);
-        return stored ? JSON.parse(stored) : null;
-      } catch (error) {
-        console.error("Failed to get user from storage:", error);
-        return null;
-      }
-    }
-    return null;
-  }
-
-  private clearUserFromStorage(): void {
-    if (typeof window !== "undefined") {
-      try {
-        clearTheme();
-        localStorage.removeItem(this.storageKey);
-      } catch (error) {
-        console.error("Failed to clear user from storage:", error);
-      }
-    }
-  }
-} 
+}

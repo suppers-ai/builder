@@ -5,36 +5,18 @@
 
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
 
-// User metadata stored in auth.users.user_metadata
-export interface UserMetadata {
-  first_name?: string;
-  last_name?: string;
-  display_name?: string;
-  avatar_url?: string;
-  theme_id?: string;
-  role?: string;
-}
+// Re-export the canonical User type from type-mappers
+export type { User } from "../utils/type-mappers.ts";
 
-// Derived Auth Types (based on Supabase auth.users with user_metadata)
-export interface AuthUser {
-  id: string;
-  email?: string;
-  phone?: string;
-  created_at?: string;
-  updated_at?: string;
-  user_metadata: UserMetadata;
-}
-
-// Auth Session with our user type
+// Auth Session - just contains the user ID and Supabase session
 export interface AuthSession {
-  user: AuthUser;
+  userId: string;
   session: Session;
-  supabaseUser: SupabaseUser;
 }
 
-// Auth State
+// Auth State - just tracks if authenticated and user ID
 export interface AuthState {
-  user: AuthUser | null;
+  userId: string | null;
   session: Session | null;
   loading: boolean;
 }
@@ -65,21 +47,21 @@ export interface UpdateUserData {
   display_name?: string;
   avatar_url?: string;
   theme_id?: string;
+  stripe_customer_id?: string;
+  role?: 'user' | 'admin';
 }
 
 export type AuthEventType =
   | "login"
   | "logout"
   | "token_refresh"
-  | "error"
-  | "profile_change";
+  | "error";
 
 export interface AuthEventData {
-  login?: AuthSession;
+  login?: { userId: string };
   logout?: void;
   token_refresh?: AuthSession;
   error?: { error: string; error_description?: string };
-  profile_change?: AuthUser;
 }
 
 export interface AuthEventCallback {

@@ -11,7 +11,7 @@ const UserInfoSpecificPropsSchema = z.object({
   user: z.any()
     .nullable()
     .optional()
-    .describe("AuthUser object containing profile information"),
+    .describe("User object containing profile information"),
 
   dropdownItems: z.array(z.object({
     label: z.string().describe("Display text for the dropdown item"),

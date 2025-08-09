@@ -70,6 +70,8 @@ export type { AlertProps } from "./feedback/alert/Alert.tsx";
 export { Badge } from "./display/badge/Badge.tsx";
 export { Button } from "./action/button/Button.tsx";
 export { Card } from "./display/card/Card.tsx";
+export { ApplicationCard } from "./display/card/ApplicationCard.tsx";
+export type { ApplicationCardProps } from "./display/card/ApplicationCard.tsx";
 export { Checkbox } from "./input/checkbox/Checkbox.tsx";
 export type { CheckboxProps } from "./input/checkbox/Checkbox.schema.ts";
 export { Collapse } from "./display/collapse/Collapse.tsx";

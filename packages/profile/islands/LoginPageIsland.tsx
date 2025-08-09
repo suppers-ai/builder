@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { type AuthUser } from "@suppers/auth-client";
+import type { User } from "@suppers/shared/utils/type-mappers.ts";
 import { Button, Card, EmailInput, Input, Loading, PasswordInput, Toast, Logo } from "@suppers/ui-lib";
 import { getAuthClient } from "../lib/auth.ts";
 
@@ -18,7 +18,7 @@ export default function LoginPageIsland({
   isModal = false,
 }: LoginPageIslandProps) {
 
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(initialMode === "login");
   const [isLoading, setIsLoading] = useState(false);
@@ -26,15 +26,17 @@ export default function LoginPageIsland({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   // Helper function to handle success redirect or postMessage
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = async () => {
     if (isModal) {
       try {
         // Get current user data to include in the message
-        const currentUser = authClient.getUser();
+        const currentUser = await authClient.getUser();
         const message = {
           type: "SSO_AUTH_SUCCESS",
-          user: currentUser,
+          user: currentUser, // Pass the full user object from the profile page
         };
+
+        console.log("🎯 LoginPageIsland: Sending auth success message:", message);
 
         // For popup windows, use window.opener instead of window.parent
         if (globalThis.window.opener) {
@@ -110,7 +112,7 @@ export default function LoginPageIsland({
         });
         
         await Promise.race([initPromise, timeoutPromise]);
-        const currentUser = authClient.getUser();
+        const currentUser = await authClient.getUser();
         console.log("🔍 LoginPageIsland: Current user:", currentUser?.email || 'none');
         setUser(currentUser);
 
@@ -179,7 +181,7 @@ export default function LoginPageIsland({
         if (result.error) {
           throw new Error(result.error);
         }
-        const currentUser = authClient.getUser();
+        const currentUser = await authClient.getUser();
         console.log("currentUser", currentUser);
               setUser(currentUser);
 
@@ -207,7 +209,7 @@ export default function LoginPageIsland({
         }
 
         addToast("Account created successfully!", "success");
-        const currentUser = authClient.getUser();
+        const currentUser = await authClient.getUser();
         console.log("currentUser", currentUser);
         setUser(currentUser);
         

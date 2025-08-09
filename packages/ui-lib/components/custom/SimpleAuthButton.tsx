@@ -1,8 +1,8 @@
 import { useState, useEffect } from "preact/hooks";
 import { Loading } from "../feedback/loading/Loading.tsx";
 import { DirectAuthClient, OAuthAuthClient } from "@suppers/auth-client";
-import type { AuthUser } from "@suppers/shared";
-import { LogIn, LogOut, User } from "lucide-preact";
+import type { User } from "@suppers/shared/utils/type-mappers.ts";
+import { LogIn, LogOut, User as UserIcon } from "lucide-preact";
 import { Button } from "@suppers/ui-lib";
 import { getCurrentTheme, applyTheme, TypeMappers } from "@suppers/shared/utils";
 import config from "../../../../config.ts";
@@ -17,7 +17,7 @@ interface SimpleAuthButtonProps {
 export default function SimpleAuthButton(
   { position = "bottom", authClient }: SimpleAuthButtonProps,
 ) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function SimpleAuthButton(
     const initAuth = async () => {
       try {
         await authClient.initialize();
-        // For all auth clients, set initial user state
+        // Fetch user data if authenticated
         const initialUser = await authClient.getUser();
         console.log("🔍 Initial user from auth client:", initialUser);
         setUser(initialUser);
@@ -50,8 +50,8 @@ export default function SimpleAuthButton(
       console.log("🔍 Auth event received:", event, data);
 
       if (event === "login") {
-        // For all auth clients, update local user state
-        const newUser = data?.user || await authClient.getUser();
+        // Fetch fresh user data from database
+        const newUser = await authClient.getUser();
         console.log("🔍 Setting user from login event:", newUser);
         setUser(newUser);
         
@@ -67,16 +67,6 @@ export default function SimpleAuthButton(
         // Reset to system/default theme when logged out
         const defaultTheme = getCurrentTheme(null);
         applyTheme(defaultTheme);
-      } else if (event === "profile_change") {
-        const newUser = data || await authClient.getUser();
-        console.log("🔍 Setting user from profile_change event:", newUser);
-        setUser(newUser);
-        
-        // Apply updated user theme
-        if (newUser) {
-          const userTheme = getCurrentTheme(newUser);
-          applyTheme(userTheme);
-        }
       }
     };
 
@@ -94,8 +84,19 @@ export default function SimpleAuthButton(
       switch (event.data.type) {
         case 'SUPPERS_PROFILE_UPDATED':
           const updatedUser = event.data.data.user;
-          if (updatedUser.user_metadata) {
-            authClient.updateUser(updatedUser.user_metadata);
+          if (updatedUser) {
+            // Update local state with the updated user data
+            setUser(updatedUser);
+            
+            // If using OAuth auth client, update its stored user data too
+            if (authClient && 'saveUserDataToStorage' in authClient && typeof authClient.saveUserDataToStorage === 'function') {
+              (authClient as any).saveUserDataToStorage(updatedUser);
+            }
+            
+            // Apply theme if it changed
+            if (updatedUser.theme_id) {
+              applyTheme(updatedUser.theme_id);
+            }
           }
           break;
         case 'popup-closing':
@@ -109,7 +110,7 @@ export default function SimpleAuthButton(
 
     authClient.addEventListener("login", handleAuthEvent);
     authClient.addEventListener("logout", handleAuthEvent);
-    authClient.addEventListener("profile_change", handleAuthEvent);
+    // authClient.addEventListener("profile_change", handleAuthEvent);
     
     // Add postMessage listener for popup communication
     window.addEventListener('message', handlePopupMessage);
@@ -117,7 +118,7 @@ export default function SimpleAuthButton(
     return () => {
       authClient.removeEventListener("login", handleAuthEvent);
       authClient.removeEventListener("logout", handleAuthEvent);
-      authClient.removeEventListener("profile_change", handleAuthEvent);
+      // authClient.removeEventListener("profile_change", handleAuthEvent);
       window.removeEventListener('message', handlePopupMessage);
     };
   }, []);
@@ -178,11 +179,11 @@ export default function SimpleAuthButton(
           <div tabIndex={0} role="button" class="btn btn-ghost btn-sm gap-2">
             <div class="avatar">
               <div class="w-6 rounded-full">
-                {user.user_metadata.avatar_url
+                {user.avatar_url
                   ? (
                     <img
                       alt="User avatar"
-                      src={user.user_metadata.avatar_url}
+                      src={user.avatar_url}
                       loading="lazy"
                     />
                   )
@@ -208,7 +209,7 @@ export default function SimpleAuthButton(
                 onClick={handleProfileClick}
                 class="flex items-center gap-2"
               >
-                <User class="w-4 h-4" />
+                <UserIcon class="w-4 h-4" />
                 Profile Settings
               </button>
             </li>

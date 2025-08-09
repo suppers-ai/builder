@@ -281,6 +281,48 @@ export type Database = {
           },
         ]
       }
+      users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          stripe_customer_id: string | null
+          theme_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          stripe_customer_id?: string | null
+          theme_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          stripe_customer_id?: string | null
+          theme_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -298,6 +340,7 @@ export type Database = {
     Enums: {
       access_level: "read" | "write" | "admin"
       application_status: "draft" | "pending" | "published" | "archived"
+      review_status: "pending" | "approved" | "rejected"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -431,6 +474,7 @@ export const Constants = {
     Enums: {
       access_level: ["read", "write", "admin"],
       application_status: ["draft", "pending", "published", "archived"],
+      review_status: ["pending", "approved", "rejected"],
       user_role: ["user", "admin"],
     },
   },

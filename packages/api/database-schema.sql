@@ -56,14 +56,20 @@ end $$;
 -- TABLES
 -- =============================================
 
--- No custom users table - using Supabase auth.users with user_metadata
--- User data is stored in auth.users.user_metadata with these fields:
--- - first_name
--- - last_name  
--- - display_name
--- - avatar_url
--- - role ('user' | 'admin')
--- - theme_id
+-- Users table for storing user profile data
+create table if not exists public.users (
+  id uuid references auth.users(id) on delete cascade primary key,
+  email text not null,
+  first_name text,
+  last_name text,
+  display_name text,
+  avatar_url text,
+  theme_id text,
+  stripe_customer_id text,
+  role user_role default 'user'::user_role not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
 
 -- Applications table
 create table if not exists public.applications (
@@ -117,13 +123,17 @@ create table if not exists public.custom_themes (
 -- =============================================
 
 -- Enable RLS on all tables
+alter table public.users enable row level security;
 alter table public.applications enable row level security;
 alter table public.user_access enable row level security;
 alter table public.application_reviews enable row level security;
 alter table public.custom_themes enable row level security;
 
 -- Drop all existing policies to ensure clean state
--- Note: No user policies needed - using Supabase auth.users directly
+
+drop policy if exists "Users can view their own profile" on public.users;
+drop policy if exists "Users can update their own profile" on public.users;
+drop policy if exists "Users can insert their own profile" on public.users;
 
 drop policy if exists "Users can view their applications" on public.applications;
 drop policy if exists "Users can insert their applications" on public.applications;
@@ -158,12 +168,25 @@ create or replace function public.is_admin(user_id uuid)
 returns boolean as $$
 begin
   return (
-    select (raw_user_meta_data->>'role')::text = 'admin'
-    from auth.users
+    select role = 'admin'
+    from public.users
     where id = user_id
   );
 end;
 $$ language plpgsql security definer;
+
+-- Users policies
+create policy "Users can view their own profile"
+  on public.users for select
+  using (id = auth.uid());
+
+create policy "Users can insert their own profile"
+  on public.users for insert
+  with check (id = auth.uid());
+
+create policy "Users can update their own profile"
+  on public.users for update
+  using (id = auth.uid());
 
 -- Applications policies
 create policy "Users can view their applications"
@@ -311,9 +334,11 @@ drop trigger if exists handle_updated_at_users on public.users;
 drop trigger if exists handle_updated_at_applications on public.applications;
 drop trigger if exists handle_updated_at_custom_themes on public.custom_themes;
 
--- No user creation trigger needed - using Supabase auth.users directly
-
 -- Triggers for updated_at timestamp
+
+create trigger handle_updated_at_users
+  before update on public.users
+  for each row execute procedure public.handle_updated_at();
 
 create trigger handle_updated_at_applications
   before update on public.applications
@@ -327,7 +352,9 @@ create trigger handle_updated_at_custom_themes
 -- INDEXES
 -- =============================================
 
--- No user indexes needed - using Supabase auth.users directly
+-- Users indexes
+create index if not exists idx_users_email on public.users(email);
+create index if not exists idx_users_role on public.users(role);
 
 -- Applications indexes
 create index if not exists idx_applications_owner_id on public.applications(owner_id);

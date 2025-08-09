@@ -1,4 +1,4 @@
-import { AuthUser } from "@suppers/auth-client";
+import type { User } from "@suppers/shared/utils/type-mappers.ts";
 import { UserAvatar } from "../avatar/UserAvatar.tsx";
 import { Dropdown } from "../../action/dropdown/Dropdown.tsx";
 import { Button } from "../../action/button/Button.tsx";

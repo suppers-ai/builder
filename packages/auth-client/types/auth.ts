@@ -1,14 +1,5 @@
 // Import canonical types from shared package
-import type { AuthUser as SharedAuthUser } from "../../shared/types/auth.ts";
-
-// Extended AuthUser with compatibility properties for easier component usage
-export interface AuthUser extends SharedAuthUser {
-  // Camel case aliases for easier component usage
-  firstName?: string;
-  lastName?: string;
-  displayName?: string;
-  avatarUrl?: string;
-}
+import type { User } from "../../shared/utils/type-mappers.ts";
 
 export interface AuthClientConfig {
   storeUrl: string;
@@ -23,7 +14,7 @@ export interface AuthClientSession {
   accessToken: string;
   refreshToken?: string;
   expiresAt: number;
-  user: AuthUser;
+  user: User;
 }
 
 export interface TokenResponse {
@@ -32,7 +23,7 @@ export interface TokenResponse {
   expires_in: number;
   refresh_token?: string;
   scope?: string;
-  user: AuthUser;
+  user: User;
 }
 
 export interface AuthError {

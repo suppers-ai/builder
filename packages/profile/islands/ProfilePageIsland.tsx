@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { UpdateUserData, type AuthUser } from "@suppers/auth-client";
+import { UpdateUserData, type User } from "@suppers/auth-client";
 import { ProfileCard } from "@suppers/ui-lib";
 import { getCurrentTheme, applyTheme } from "@suppers/shared/utils";
 import { getAuthClient } from "../lib/auth.ts";
@@ -8,7 +8,7 @@ import { getAuthClient } from "../lib/auth.ts";
 const authClient = getAuthClient();
 
 export default function ProfilePageIsland() {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -19,7 +19,7 @@ export default function ProfilePageIsland() {
       try {
         console.log("🔍 ProfilePageIsland: Initializing auth client");
         await authClient.initialize();
-        const currentUser = authClient.getUser();
+        const currentUser = await authClient.getUser();
         console.log("🔍 ProfilePageIsland: Auth client initialized, user:", currentUser);
         setUser(currentUser);
         
@@ -40,10 +40,10 @@ export default function ProfilePageIsland() {
     initAuth();
 
     // Listen for auth events
-    const handleAuthEvent = (event: string, data: any) => {
+    const handleAuthEvent = async (event: string, data: any) => {
       console.log("🔍 ProfilePageIsland: Auth event received:", event, data);
       if (event === "login") {
-        const user = data?.user || authClient.getUser();
+        const user = data?.user || await authClient.getUser();
         console.log("🔍 ProfilePageIsland: Setting user after login:", user);
         setUser(user);
         
@@ -59,27 +59,56 @@ export default function ProfilePageIsland() {
         // Reset to system/default theme when logged out
         const defaultTheme = getCurrentTheme(null);
         applyTheme(defaultTheme);
-      } else if (event === "profile_change") {
-        console.log("🔍 ProfilePageIsland: Profile changed, updating user:", data);
-        const updatedUser = data || authClient.getUser();
-        setUser(updatedUser);
-        
-        // Apply updated user theme
-        if (updatedUser) {
-          const userTheme = getCurrentTheme(updatedUser);
-          applyTheme(userTheme);
-        }
       }
+      // else if (event === "profile_change") {
+      //   console.log("🔍 ProfilePageIsland: Profile changed, updating user:", data);
+      //   const updatedUser = data || await authClient.getUser();
+      //   setUser(updatedUser);
+        
+      //   // Apply updated user theme
+      //   if (updatedUser) {
+      //     const userTheme = getCurrentTheme(updatedUser);
+      //     applyTheme(userTheme);
+      //   }
+      // }
     };
 
     authClient.addEventListener("login", handleAuthEvent);
     authClient.addEventListener("logout", handleAuthEvent);
-    authClient.addEventListener("profile_change", handleAuthEvent);
+    // authClient.addEventListener("profile_change", handleAuthEvent);
+
+    // Listen for postMessage events from other applications (cross-origin profile updates)
+    const handlePostMessage = async (event: MessageEvent) => {
+      console.log('🎯 ProfilePageIsland: Received postMessage:', event.data, 'from origin:', event.origin);
+      
+      if (event.data.type === 'SUPPERS_PROFILE_UPDATED') {
+        console.log('🎯 ProfilePageIsland: Profile was updated in another application, refreshing...');
+        
+        // Fetch fresh user data from database to stay in sync
+        try {
+          const refreshedUser = await authClient.getUser();
+          if (refreshedUser) {
+            console.log('🎯 ProfilePageIsland: Setting refreshed user data:', refreshedUser);
+            setUser(refreshedUser);
+            
+            // Apply theme if it changed
+            const userTheme = getCurrentTheme(refreshedUser);
+            applyTheme(userTheme);
+          }
+        } catch (error) {
+          console.error('🎯 ProfilePageIsland: Failed to refresh user data:', error);
+        }
+      }
+    };
+
+    // Add postMessage listener
+    window.addEventListener('message', handlePostMessage);
 
     return () => {
       authClient.removeEventListener("login", handleAuthEvent);
       authClient.removeEventListener("logout", handleAuthEvent);
-      authClient.removeEventListener("profile_change", handleAuthEvent);
+      // authClient.removeEventListener("profile_change", handleAuthEvent);
+      window.removeEventListener('message', handlePostMessage);
     };
   }, []);
 
@@ -96,7 +125,41 @@ export default function ProfilePageIsland() {
         return { success: false, error: result.error };
       } else {
         setSuccess("Profile updated successfully!");
-        // The profile_change event will automatically update the UI
+        
+        // Fetch fresh user data from database after successful update
+        const refreshedUser = await authClient.getUser();
+        if (refreshedUser) {
+          console.log('🎯 ProfilePageIsland: Profile updated, setting fresh user data:', refreshedUser);
+          setUser(refreshedUser);
+          
+          // Apply theme if it changed
+          const userTheme = getCurrentTheme(refreshedUser);
+          applyTheme(userTheme);
+          
+          // Notify other applications about the profile update via postMessage
+          // This will reach any parent windows or popups that opened this profile page
+          try {
+            const message = {
+              type: 'SUPPERS_PROFILE_UPDATED',
+              data: { user: refreshedUser }
+            };
+            
+            // Send to parent window if this is an iframe/popup
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage(message, '*');
+              console.log('🎯 ProfilePageIsland: Sent profile update to parent window');
+            }
+            
+            // Send to opener window if this was opened as a popup
+            if (window.opener) {
+              window.opener.postMessage(message, '*');
+              console.log('🎯 ProfilePageIsland: Sent profile update to opener window');
+            }
+          } catch (error) {
+            console.error('🎯 ProfilePageIsland: Failed to send profile update message:', error);
+          }
+        }
+        
         return { success: true };
       }
     } catch (err) {

@@ -181,6 +181,14 @@ export const PaginationSchema = z.object({
   limit: z.number().int().positive().max(100).default(10),
 });
 
+export const CreateApplicationDataSchema = z.object({
+  name: z.string().min(1, "Application name is required").max(100, "Application name must be 100 characters or less"),
+  description: z.string().max(500, "Description must be 500 characters or less").optional(),
+  templateId: z.string().min(1, "Template selection is required"),
+  configuration: z.record(z.unknown()).default({}),
+  status: z.enum(["draft", "pending", "published", "archived"]).default("draft"),
+});
+
 /**
  * Validation result type
  */

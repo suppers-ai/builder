@@ -15,9 +15,9 @@ export type {
   AuthEventType,
   AuthSession,
   AuthState,
-  AuthUser,
   ResetPasswordData,
   SignInData,
   SignUpData,
   UpdateUserData,
+  User,
 } from "../shared/types/auth.ts";

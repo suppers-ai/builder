@@ -1,24 +1,28 @@
-import { createClient, UserMetadata, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  createClient,
+  type SupabaseClient,
+  type User as SupabaseUser,
+} from "@supabase/supabase-js";
 import type {
   AuthEventCallback,
+  AuthEventData,
   AuthEventType,
   AuthSession,
-  AuthUser,
   ResetPasswordData,
   SignInData,
   SignUpData,
   UpdateUserData,
 } from "../../shared/types/auth.ts";
-import { clearTheme } from "../../shared/utils/theme.ts";
+import type { User } from "../../shared/utils/type-mappers.ts";
 
 /**
  * Direct authentication client for direct Supabase integration
- * This client delegates all authentication to Supabase's built-in functionality
+ * Simplified to only store user ID and fetch user data from database when needed
  */
 export class DirectAuthClient {
   private supabase: SupabaseClient;
   private eventCallbacks: Map<AuthEventType, AuthEventCallback[]> = new Map();
-  private storageKey = "suppers_auth_user";
+  private storageKey = "suppers_user_id";
 
   constructor(supabaseUrl: string, supabaseAnonKey: string) {
     try {
@@ -33,7 +37,7 @@ export class DirectAuthClient {
         return;
       }
 
-      // Initialize Supabase client - let it handle all session management
+      // Initialize Supabase client
       this.supabase = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
           autoRefreshToken: true,
@@ -43,31 +47,18 @@ export class DirectAuthClient {
       });
 
       // Set up auth state change listener
-      this.supabase.auth.onAuthStateChange((event, session) => {
+      this.supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === "SIGNED_IN" && session?.user) {
-          // Convert Supabase user to our AuthUser format and save to storage
-          const currentUser = {
-            id: session.user.id,
-            email: session.user.email || "",
-            created_at: session.user.created_at,
-            updated_at: session.user.updated_at,
-            user_metadata: {
-              first_name: session.user.user_metadata?.first_name || "",
-              last_name: session.user.user_metadata?.last_name || "",
-              display_name: session.user.user_metadata?.display_name || "",
-              avatar_url: session.user.user_metadata?.avatar_url || "",
-              theme_id: session.user.user_metadata?.theme_id || "light",
-              role: session.user.user_metadata?.role || "user",
-            },
-          };
-          this.saveUserToStorage(currentUser);
-          this.emitEvent("login", { user: currentUser });
+          // Store only the user ID
+          this.saveUserIdToStorage(session.user.id);
+          // Ensure user profile exists in database
+          await this.ensureUserProfile(session.user);
+          this.emitEvent("login", { userId: session.user.id });
         } else if (event === "SIGNED_OUT") {
-          this.clearUserFromStorage();
+          this.clearUserIdFromStorage();
           this.emitEvent("logout");
         }
       });
-
     } catch (error) {
       console.error("Failed to initialize Supabase client:", error);
       this.supabase = {} as SupabaseClient;
@@ -75,28 +66,27 @@ export class DirectAuthClient {
   }
 
   /**
-   * Save user to localStorage
+   * Save user ID to localStorage
    */
-  private saveUserToStorage(user: AuthUser): void {
+  private saveUserIdToStorage(userId: string): void {
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(this.storageKey, JSON.stringify(user));
+        localStorage.setItem(this.storageKey, userId);
       } catch (error) {
-        console.error("Failed to save user to storage:", error);
+        console.error("Failed to save user ID to storage:", error);
       }
     }
   }
 
   /**
-   * Get user from localStorage
+   * Get user ID from localStorage
    */
-  private getUserFromStorage(): AuthUser | null {
+  private getUserIdFromStorage(): string | null {
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem(this.storageKey);
-        return stored ? JSON.parse(stored) : null;
+        return localStorage.getItem(this.storageKey);
       } catch (error) {
-        console.error("Failed to get user from storage:", error);
+        console.error("Failed to get user ID from storage:", error);
         return null;
       }
     }
@@ -104,16 +94,72 @@ export class DirectAuthClient {
   }
 
   /**
-   * Clear user from localStorage
+   * Clear user ID from localStorage
    */
-  private clearUserFromStorage(): void {
+  private clearUserIdFromStorage(): void {
     if (typeof window !== "undefined") {
       try {
-        clearTheme();
         localStorage.removeItem(this.storageKey);
       } catch (error) {
-        console.error("Failed to clear user from storage:", error);
+        console.error("Failed to clear user ID from storage:", error);
       }
+    }
+  }
+
+  /**
+   * Ensure user profile exists in public.users table
+   */
+  private async ensureUserProfile(supabaseUser: SupabaseUser): Promise<void> {
+    try {
+      console.log("DirectAuthClient: Checking if user profile exists for:", supabaseUser.id);
+      
+      // Check if user profile exists with timeout
+      const { data: existingUser, error: fetchError } = await Promise.race([
+        this.supabase
+          .from("users")
+          .select("id")
+          .eq("id", supabaseUser.id)
+          .single(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error("Profile fetch timeout")), 2000)
+        )
+      ]);
+
+      if (existingUser && !fetchError) {
+        console.log("DirectAuthClient: User profile already exists");
+        return;
+      }
+
+      console.log("DirectAuthClient: Creating new user profile");
+      
+      // Create new user profile
+      const newUserData = {
+        id: supabaseUser.id,
+        email: supabaseUser.email || "",
+        first_name: supabaseUser.user_metadata?.first_name || null,
+        last_name: supabaseUser.user_metadata?.last_name || null,
+        display_name: supabaseUser.user_metadata?.display_name ||
+          supabaseUser.user_metadata?.full_name || null,
+        avatar_url: supabaseUser.user_metadata?.avatar_url || null,
+        theme_id: supabaseUser.user_metadata?.theme_id || null,
+        stripe_customer_id: null,
+        role: "user" as const,
+      };
+
+      const { error: insertError } = await Promise.race([
+        this.supabase.from("users").insert(newUserData),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error("Profile insert timeout")), 2000)
+        )
+      ]);
+
+      if (insertError) {
+        console.error("Failed to create user profile:", insertError);
+      } else {
+        console.log("DirectAuthClient: User profile created successfully");
+      }
+    } catch (error) {
+      console.error("Error ensuring user profile:", error);
     }
   }
 
@@ -127,62 +173,73 @@ export class DirectAuthClient {
         return;
       }
 
-      // Get current session - Supabase handles all the complexity
-      const { data: { session }, error } = await this.supabase.auth.getSession();
+      console.log("DirectAuthClient: Getting session...");
+      // Get current session with timeout
+      const { data: { session }, error } = await Promise.race([
+        this.supabase.auth.getSession(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error("getSession timeout")), 3000)
+        )
+      ]);
 
       if (error) {
         console.error("Failed to get session:", error);
         return;
       }
 
+      console.log("DirectAuthClient: Session retrieved, user:", !!session?.user);
+      
       if (session?.user) {
-        // Convert Supabase user to our AuthUser format and save to storage
-        const currentUser = {
-          id: session.user.id,
-          email: session.user.email || "",
-          created_at: session.user.created_at,
-          updated_at: session.user.updated_at,
-          user_metadata: {
-            first_name: session.user.user_metadata?.first_name || "",
-            last_name: session.user.user_metadata?.last_name || "",
-            display_name: session.user.user_metadata?.display_name || "",
-            avatar_url: session.user.user_metadata?.avatar_url || "",
-            theme_id: session.user.user_metadata?.theme_id || "light",
-            role: session.user.user_metadata?.role || "user",
-          },
-        };
-        this.saveUserToStorage(currentUser);
-        this.emitEvent("login", { user: currentUser });
+        // Store user ID and ensure profile exists
+        this.saveUserIdToStorage(session.user.id);
+        console.log("DirectAuthClient: Ensuring user profile...");
+        
+        // Don't wait for profile creation if it's slow
+        this.ensureUserProfile(session.user).catch(error => {
+          console.error("Failed to ensure user profile, but continuing:", error);
+        });
+        
+        this.emitEvent("login", { userId: session.user.id });
+        console.log("DirectAuthClient: Initialization complete");
+      } else {
+        console.log("DirectAuthClient: No active session");
       }
     } catch (error) {
       console.error("Auth initialization failed:", error);
+      throw error; // Re-throw so the timeout in LoginPageIsland can catch it
     }
   }
 
   /**
-   * Get current user from storage
+   * Check if user is authenticated
    */
-  getUser(): AuthUser | null {
-    return this.getUserFromStorage();
+  isAuthenticated(): boolean {
+    return this.getUserIdFromStorage() !== null;
   }
 
   /**
-   * Get current session from Supabase (async)
+   * Get user ID from storage
+   */
+  getUserId(): string | null {
+    return this.getUserIdFromStorage();
+  }
+
+  /**
+   * Get current session from Supabase
    */
   async getSession(): Promise<AuthSession | null> {
     if (!this.supabase) return null;
-    
+
     try {
       const { data: { session } } = await this.supabase.auth.getSession();
       if (!session) return null;
-      
-      const currentUser = this.getUserFromStorage();
-      if (!currentUser) return null;
-      
+
+      const userId = this.getUserIdFromStorage();
+      if (!userId) return null;
+
       return {
-        user: currentUser,
+        userId,
         session,
-        supabaseUser: session.user,
       };
     } catch (error) {
       console.error("Error getting session:", error);
@@ -191,23 +248,42 @@ export class DirectAuthClient {
   }
 
   /**
-   * Check if user is authenticated
-   */
-  isAuthenticated(): boolean {
-    return this.getUserFromStorage() !== null;
-  }
-
-  /**
-   * Get access token from Supabase (async)
+   * Get access token from Supabase
    */
   async getAccessToken(): Promise<string | null> {
     if (!this.supabase) return null;
-    
+
     try {
       const { data: { session } } = await this.supabase.auth.getSession();
       return session?.access_token || null;
     } catch (error) {
       console.error("Error getting access token:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Get user data from database
+   */
+  async getUser(): Promise<User | null> {
+    const userId = this.getUserIdFromStorage();
+    if (!userId || !this.supabase) return null;
+
+    try {
+      const { data: user, error } = await this.supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching user:", error);
+        return null;
+      }
+
+      return user;
+    } catch (error) {
+      console.error("Error getting user:", error);
       return null;
     }
   }
@@ -231,7 +307,7 @@ export class DirectAuthClient {
       }
 
       return {};
-    } catch (error) {
+    } catch (_error) {
       return { error: "An unexpected error occurred" };
     }
   }
@@ -262,7 +338,7 @@ export class DirectAuthClient {
       }
 
       return {};
-    } catch (error) {
+    } catch (_error) {
       return { error: "An unexpected error occurred" };
     }
   }
@@ -283,7 +359,7 @@ export class DirectAuthClient {
       }
 
       return {};
-    } catch (error) {
+    } catch (_error) {
       return { error: "An unexpected error occurred" };
     }
   }
@@ -297,45 +373,35 @@ export class DirectAuthClient {
         return { error: "Supabase client not available" };
       }
 
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) {
+      const userId = this.getUserIdFromStorage();
+      if (!userId) {
         return { error: "Not authenticated" };
       }
 
-      const currentUser = this.getUserFromStorage();
-      if (!currentUser) {
-        return { error: "Not authenticated" };
+      // Prepare update data for public.users table
+      const updateData: Record<string, unknown> = {};
+      if (data.first_name !== undefined) updateData.first_name = data.first_name;
+      if (data.last_name !== undefined) updateData.last_name = data.last_name;
+      if (data.display_name !== undefined) updateData.display_name = data.display_name;
+      if (data.avatar_url !== undefined) updateData.avatar_url = data.avatar_url;
+      if (data.theme_id !== undefined) updateData.theme_id = data.theme_id;
+      if (data.stripe_customer_id !== undefined) {
+        updateData.stripe_customer_id = data.stripe_customer_id;
       }
-      const user_metadata: UserMetadata = {
-        ...currentUser.user_metadata,
-        first_name: data.first_name || currentUser.user_metadata.first_name,
-        last_name: data.last_name || currentUser.user_metadata.last_name,
-        display_name: data.display_name || currentUser.user_metadata.display_name,
-        avatar_url: data.avatar_url || currentUser.user_metadata.avatar_url,
-        theme_id: data.theme_id || currentUser.user_metadata.theme_id,
-      };
+      if (data.role !== undefined) updateData.role = data.role;
 
-      // Update user metadata in Supabase Auth
-      const { error } = await this.supabase.auth.updateUser({
-        data: user_metadata,
-      });
+      // Update user profile in public.users table
+      const { error } = await this.supabase
+        .from("users")
+        .update(updateData)
+        .eq("id", userId);
 
       if (error) {
         return { error: error.message };
       }
 
-      const updatedUser = {
-        ...currentUser,
-        user_metadata,
-      };
-      this.saveUserToStorage(updatedUser);
-      this.emitEvent("profile_change", updatedUser);
-
-      // Broadcast the profile change to all connected clients
-      // this.broadcastUserChange(updatedUser);
-
       return {};
-    } catch (error) {
+    } catch (_error) {
       return { error: "An unexpected error occurred" };
     }
   }
@@ -348,7 +414,7 @@ export class DirectAuthClient {
       if (this.supabase) {
         await this.supabase.auth.signOut();
       }
-      this.clearUserFromStorage();
+      this.clearUserIdFromStorage();
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -364,9 +430,9 @@ export class DirectAuthClient {
       }
 
       const { error } = await this.supabase.auth.signInWithOAuth({
-        provider: provider as any,
+        provider: provider as "google" | "github" | "discord" | "facebook",
         options: {
-          redirectTo: redirectTo || window.location.origin,
+          redirectTo: redirectTo || globalThis.location.origin,
         },
       });
 
@@ -375,7 +441,7 @@ export class DirectAuthClient {
       }
 
       return {};
-    } catch (error) {
+    } catch (_error) {
       return { error: "An unexpected error occurred" };
     }
   }
@@ -425,7 +491,7 @@ export class DirectAuthClient {
   /**
    * Emit event to listeners
    */
-  private emitEvent(event: AuthEventType, data?: any): void {
+  private emitEvent(event: AuthEventType, data?: AuthEventData[AuthEventType]): void {
     const callbacks = this.eventCallbacks.get(event);
     if (callbacks) {
       callbacks.forEach((callback) => {

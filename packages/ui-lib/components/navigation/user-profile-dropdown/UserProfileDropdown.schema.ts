@@ -6,18 +6,18 @@
 import { z } from "zod";
 import { BaseComponentPropsSchema, withMetadata } from "../../schemas/base.ts";
 
-// AuthUser Schema (simplified version for validation)
-const AuthUserSchema = z.object({
+// User Schema (simplified version for validation)
+const UserSchema = z.object({
   id: z.string().describe("User unique identifier"),
   email: z.string().email().describe("User email address"),
-  name: z.string().optional().describe("User display name"),
+  display_name: z.string().optional().describe("User display name"),
   avatar_url: z.string().url().optional().describe("User avatar image URL"),
 });
 
 // UserProfileDropdown-specific props
 const UserProfileDropdownSpecificPropsSchema = z.object({
   user: withMetadata(
-    AuthUserSchema.describe("User object containing profile information"),
+    UserSchema.describe("User object containing profile information"),
     { examples: ['{ id: "1", email: "user@example.com", name: "John Doe" }'], since: "1.0.0" },
   ),
 

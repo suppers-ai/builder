@@ -3,11 +3,11 @@ import { useState } from "preact/hooks";
 import { ChevronDown, LogOut, Settings, Shield, User } from "lucide-preact";
 import { UserAvatar } from "../../display/avatar/UserAvatar.tsx";
 import { Dropdown } from "../../action/dropdown/Dropdown.tsx";
-import type { AuthUser } from "../../../../shared/types/auth.ts";
+import type { User } from "../../../../shared/utils/type-mappers.ts";
 import { TypeMappers } from "../../../../shared/utils/type-mappers.ts";
 
 export interface UserProfileDropdownProps {
-  user?: AuthUser;
+  user?: User;
   onLogout?: () => void;
   onProfile?: () => void;
   onSettings?: () => void;
@@ -144,8 +144,7 @@ export function UserProfileDropdown({
           <ChevronDown size={14} class="opacity-60" />
         </label>
       }
-    >
-      {dropdownContent}
-    </Dropdown>
+      content={dropdownContent}
+    />
   );
 }

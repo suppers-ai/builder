@@ -7,10 +7,12 @@ export async function createUser(request: Request, supabase: SupabaseClient): Pr
     id,
     email,
     firstName,
-    middleNames,
     lastName,
     displayName,
     avatarUrl,
+    themeId,
+    stripeCustomerId,
+    role,
   } = body;
 
   if (!id || !email) {
@@ -24,10 +26,12 @@ export async function createUser(request: Request, supabase: SupabaseClient): Pr
     id,
     email,
     first_name: firstName || null,
-    middle_names: middleNames || null,
     last_name: lastName || null,
     display_name: displayName || null,
     avatar_url: avatarUrl || null,
+    theme_id: themeId || null,
+    stripe_customer_id: stripeCustomerId || null,
+    role: role || 'user',
   };
 
   const { data: user, error } = await supabase

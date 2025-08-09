@@ -1,7 +1,7 @@
 import { EntityCard } from "./EntityCard.tsx";
-import type { Application } from "../../../shared/lib/api-helpers.ts";
+import type { Application } from "@suppers/shared";
 
-interface ApplicationCardProps {
+export interface ApplicationCardProps {
   application: Application;
   onEdit?: (application: Application) => void;
   onDelete?: (application: Application) => void;

@@ -38,13 +38,12 @@ function getSavedTheme(): ThemeId | null {
 }
 
 /**
- * Get theme from user metadata
+ * Get theme from user
  */
-function getUserTheme(user: { user_metadata?: { theme_id?: string } } | null): ThemeId | null {
-  if (!user?.user_metadata?.theme_id) return null;
+function getUserTheme(user: { theme_id?: string } | null): ThemeId | null {
+  if (!user?.theme_id) return null;
   
-  const themeId = user.user_metadata.theme_id;
-  return AVAILABLE_THEMES.includes(themeId as ThemeId) ? themeId as ThemeId : null;
+  return AVAILABLE_THEMES.includes(user.theme_id as ThemeId) ? user.theme_id as ThemeId : null;
 }
 
 /**
@@ -111,22 +110,10 @@ export function generateEarlyThemeScript(): string {
         const AVAILABLE_THEMES = ${JSON.stringify(AVAILABLE_THEMES)};
         const DEFAULT_THEME = "${DEFAULT_THEME}";
         
-        // Check auth storage for user theme
+        // Check for user ID in auth storage, then fetch theme from server if needed
         let userTheme = null;
-        const authKeys = ["suppers_oauth_user", "suppers_auth_user"];
-        
-        for (const key of authKeys) {
-          try {
-            const stored = localStorage.getItem(key);
-            if (stored) {
-              const user = JSON.parse(stored);
-              if (user?.user_metadata?.theme_id && AVAILABLE_THEMES.includes(user.user_metadata.theme_id)) {
-                userTheme = user.user_metadata.theme_id;
-                break;
-              }
-            }
-          } catch (e) {}
-        }
+        // For now, just fall back to saved theme - we'll implement server fetch later
+        // This is a temporary simplification during the migration
         
         // Fallback to saved theme or system theme
         let theme = userTheme;

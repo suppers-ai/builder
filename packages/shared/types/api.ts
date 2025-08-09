@@ -3,12 +3,6 @@
  * Common types for API requests, responses, and data structures
  */
 
-import type { Database } from "../generated/database-types.ts";
-
-// Database table types
-type UsersTable = Database["public"]["Tables"]["users"]["Row"];
-type ApplicationsTable = Database["public"]["Tables"]["applications"]["Row"];
-
 // Generic API Response
 export interface ApiResponse<T = any> {
   data?: T;
@@ -23,38 +17,6 @@ export interface ApiResponse<T = any> {
     hasMore?: boolean;
   };
 }
-
-// Derived API Response Types (based on database schema)
-export type UserResponse = Pick<
-  UsersTable,
-  "id" | "email" | "display_name" | "avatar_url" | "created_at"
->;
-
-export interface UserResponseExtended extends UserResponse {
-  full_name: string;
-  initials: string;
-}
-
-export type ApplicationResponse = Pick<
-  ApplicationsTable,
-  "id" | "name" | "description" | "status" | "created_at" | "updated_at"
->;
-
-export interface ApplicationResponseExtended extends ApplicationResponse {
-  owner_name?: string;
-  review_count?: number;
-}
-
-// Update Data Types (derived from database schema)
-export type UserUpdateData = Pick<
-  UsersTable,
-  "first_name" | "middle_names" | "last_name" | "display_name" | "avatar_url"
->;
-export type ApplicationUpdateData = Pick<
-  ApplicationsTable,
-  "name" | "description" | "configuration" | "status"
->;
-
 // API Error Response
 export interface ApiError {
   message: string;
@@ -115,10 +77,6 @@ export interface RequestConfig {
   params?: Record<string, string | number>;
   timeout?: number;
 }
-
-// Application Data Types (use database types as base)
-export type Application = ApplicationsTable;
-
 export interface CreateApplicationData {
   name: string;
   description?: string;
@@ -135,11 +93,6 @@ export interface UpdateApplicationData {
   status?: "draft" | "pending" | "published" | "archived";
 }
 
-// User Data Types (use database types as base)
-export type User = UsersTable;
-
-// User Access Types (use database types as base)
-export type UserAccess = Database["public"]["Tables"]["user_access"]["Row"];
 
 export interface GrantAccessData {
   applicationId: string;
@@ -147,17 +100,11 @@ export interface GrantAccessData {
   accessLevel: "read" | "write" | "admin";
 }
 
-// Application Review Types (use database types as base)
-export type ApplicationReview = Database["public"]["Tables"]["application_reviews"]["Row"];
-
 export interface CreateReviewData {
   applicationId: string;
   action: "approved" | "rejected";
   feedback?: string;
 }
-
-// Custom Theme Types (use database types as base)
-export type CustomTheme = Database["public"]["Tables"]["custom_themes"]["Row"];
 
 export interface CreateCustomThemeData {
   name: string;

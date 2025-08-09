@@ -121,12 +121,6 @@ export interface SiteGeneratorOptions {
   authProviders?: string[];
 }
 
-// Variable Validation Result
-export interface VariableValidationResult {
-  valid: boolean;
-  missingVariables: string[];
-}
-
 // Component Validation Result
 export interface ComponentValidationResult {
   valid: boolean;
