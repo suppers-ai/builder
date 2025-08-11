@@ -2,6 +2,23 @@
 -- Supabase Database Schema (Idempotent Version) 
 -- Uses Supabase's built-in auth.users with user_metadata only
 -- =============================================
+--
+-- STORAGE POLICIES SETUP:
+-- This schema includes storage policies that require elevated permissions.
+-- 
+-- Option 1 (Recommended): Run with service_role connection
+--   psql "postgresql://postgres:[password]@[host]:5432/postgres" -f database-schema.sql
+--
+-- Option 2: Run in Supabase Dashboard SQL Editor
+--   Copy and paste this entire file into the SQL Editor and run
+--
+-- Option 3: If you get permission errors
+--   The script will create the storage bucket but warn about policies
+--   You can then create the policies manually through the Dashboard
+--
+-- File Organization: userId/applicationSlug/filename
+-- Example: 550e8400-e29b-41d4-a716-446655440000/my-blog/config/settings.json
+--
 
 -- Enable Row Level Security
 alter default privileges revoke execute on functions from public;
@@ -27,6 +44,50 @@ begin
         create type application_status as enum ('draft', 'pending', 'published', 'archived');
     end if;
 end $$;
+
+-- =============================================
+-- USERS TABLE
+-- =============================================
+
+-- Users table that syncs with auth.users
+create table if not exists public.users (
+  id uuid references auth.users(id) on delete cascade primary key,
+  email text unique not null,
+  full_name text,
+  avatar_url text,
+  role text default 'user'::text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Function to handle user creation/updates
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.users (id, email, full_name, avatar_url)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', new.email),
+    new.raw_user_meta_data->>'avatar_url'
+  )
+  on conflict (id) do update set
+    email = excluded.email,
+    full_name = excluded.full_name,
+    avatar_url = excluded.avatar_url,
+    updated_at = now();
+  return new;
+end;
+$$;
+
+-- Trigger to sync auth.users with public.users
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert or update on auth.users
+  for each row execute function public.handle_new_user();
 
 -- User role enum for admin permissions (stored in auth.users.user_metadata)
 do $$ 
@@ -376,6 +437,169 @@ create index if not exists idx_application_reviews_reviewer_id on public.applica
 -- Custom themes indexes
 create index if not exists idx_custom_themes_created_by on public.custom_themes(created_by);
 create index if not exists idx_custom_themes_is_public on public.custom_themes(is_public);
+
+-- =============================================
+-- STORAGE BUCKETS AND POLICIES
+-- =============================================
+
+-- Create application storage bucket
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values 
+  ('application-files', 'application-files', false, 52428800, array['image/*', 'text/*', 'application/json', 'application/pdf', 'video/*', 'audio/*'])
+on conflict (id) do nothing;
+
+-- Storage policies for application files (using userId/applicationSlug/filename structure)
+-- File structure: userId/applicationSlug/filename
+-- Example: 550e8400-e29b-41d4-a716-446655440000/my-blog/config/settings.json
+
+do $$
+begin
+  -- Check if we have permission to create policies on storage.objects
+  -- This will succeed if run with service_role or appropriate permissions
+  
+  -- Drop existing policies if they exist
+  drop policy if exists "Users can upload files to their own applications" on storage.objects;
+  drop policy if exists "Users can view files in their own applications" on storage.objects;
+  drop policy if exists "Application collaborators can view files" on storage.objects;
+  drop policy if exists "Application collaborators can upload files" on storage.objects;
+  drop policy if exists "Users can delete files in their own applications" on storage.objects;
+  drop policy if exists "Application collaborators can delete files" on storage.objects;
+  drop policy if exists "Users can update files in their own applications" on storage.objects;
+  drop policy if exists "Application collaborators can update files" on storage.objects;
+  drop policy if exists "Admins can manage all storage files" on storage.objects;
+
+  -- Ensure RLS is enabled (should already be enabled in Supabase)
+  perform 1 from pg_tables where schemaname = 'storage' and tablename = 'objects';
+  if found then
+    alter table storage.objects enable row level security;
+  end if;
+
+  -- Policy 1: Users can upload files to their own applications
+  create policy "Users can upload files to their own applications"
+  on storage.objects for insert 
+  with check (
+    bucket_id = 'application-files' AND
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    exists (
+      select 1 from public.applications
+      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
+    )
+  );
+
+  -- Policy 2: Users can view files in their own applications
+  create policy "Users can view files in their own applications"
+  on storage.objects for select
+  using (
+    bucket_id = 'application-files' AND
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    exists (
+      select 1 from public.applications
+      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
+    )
+  );
+
+  -- Policy 3: Application collaborators can view files
+  create policy "Application collaborators can view files"
+  on storage.objects for select
+  using (
+    bucket_id = 'application-files' AND
+    exists (
+      select 1 from public.applications a
+      join public.user_access ua on a.id = ua.application_id
+      where a.slug = (storage.foldername(name))[2]
+        and a.owner_id = (storage.foldername(name))[1]::uuid
+        and ua.user_id = auth.uid()
+    )
+  );
+
+  -- Policy 4: Application collaborators can upload files
+  create policy "Application collaborators can upload files"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'application-files' AND
+    exists (
+      select 1 from public.applications a
+      join public.user_access ua on a.id = ua.application_id
+      where a.slug = (storage.foldername(name))[2]
+        and a.owner_id = (storage.foldername(name))[1]::uuid
+        and ua.user_id = auth.uid()
+        and ua.access_level in ('write', 'admin')
+    )
+  );
+
+  -- Policy 5: Users can delete files in their own applications
+  create policy "Users can delete files in their own applications"
+  on storage.objects for delete
+  using (
+    bucket_id = 'application-files' AND
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    exists (
+      select 1 from public.applications
+      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
+    )
+  );
+
+  -- Policy 6: Application collaborators can delete files
+  create policy "Application collaborators can delete files"
+  on storage.objects for delete
+  using (
+    bucket_id = 'application-files' AND
+    exists (
+      select 1 from public.applications a
+      join public.user_access ua on a.id = ua.application_id
+      where a.slug = (storage.foldername(name))[2]
+        and a.owner_id = (storage.foldername(name))[1]::uuid
+        and ua.user_id = auth.uid()
+        and ua.access_level in ('write', 'admin')
+    )
+  );
+
+  -- Policy 7: Users can update files in their own applications
+  create policy "Users can update files in their own applications"
+  on storage.objects for update
+  using (
+    bucket_id = 'application-files' AND
+    (storage.foldername(name))[1] = auth.uid()::text AND
+    exists (
+      select 1 from public.applications
+      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
+    )
+  );
+
+  -- Policy 8: Application collaborators can update files
+  create policy "Application collaborators can update files"
+  on storage.objects for update
+  using (
+    bucket_id = 'application-files' AND
+    exists (
+      select 1 from public.applications a
+      join public.user_access ua on a.id = ua.application_id
+      where a.slug = (storage.foldername(name))[2]
+        and a.owner_id = (storage.foldername(name))[1]::uuid
+        and ua.user_id = auth.uid()
+        and ua.access_level in ('write', 'admin')
+    )
+  );
+
+  -- Policy 9: Admins can manage all storage files
+  create policy "Admins can manage all storage files"
+  on storage.objects for all
+  using (
+    bucket_id = 'application-files' AND
+    public.is_admin(auth.uid())
+  );
+
+  -- Log success
+  raise notice 'Storage policies created successfully';
+
+exception
+  when insufficient_privilege then
+    raise warning 'Insufficient privileges to create storage policies. Run this script with service_role permissions or create policies manually through the Supabase Dashboard.';
+    raise warning 'Storage bucket was created successfully, but policies need to be added separately.';
+  when others then
+    raise warning 'Error creating storage policies: %', sqlerrm;
+    raise warning 'Storage bucket was created successfully, but policies need to be added manually.';
+end $$;
 
 -- =============================================
 -- DEFAULT DATA (Development Only)

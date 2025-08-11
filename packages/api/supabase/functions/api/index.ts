@@ -4,6 +4,7 @@ import { corsHeaders } from "./lib/cors.ts";
 import { handleApplications } from "./handlers/applications/index.ts";
 import { handleUserRequest } from "./handlers/user/index.ts";
 import { handleAccess } from "./handlers/access/index.ts";
+import { handleStorage } from "./handlers/storage/index.ts";
 
 console.log("🚀 API Edge Function loaded");
 
@@ -107,11 +108,15 @@ Deno.serve(async (req: Request) => {
         response = await handleAccess(req, { user, supabase, supabaseAdmin, pathSegments: rest });
         break;
 
+      case "storage":
+        response = await handleStorage(req, { user, supabase, supabaseAdmin, pathSegments: rest });
+        break;
+
       default:
         response = new Response(
           JSON.stringify({
             error:
-              `Unknown resource: ${resource}. Available resources: applications, user, access. Auth is handled directly by Supabase.`,
+              `Unknown resource: ${resource}. Available resources: applications, user, access, storage. Auth is handled directly by Supabase.`,
           }),
           {
             status: 404,

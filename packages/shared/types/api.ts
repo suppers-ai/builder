@@ -141,6 +141,45 @@ export interface FileUploadResponse {
   signedUrl?: string;
 }
 
+// Storage Types
+export interface StorageFileInfo {
+  name: string;
+  path: string;
+  size?: number;
+  contentType?: string;
+  lastModified?: string;
+  publicUrl: string;
+}
+
+export interface StorageListResponse {
+  files: StorageFileInfo[];
+  total: number;
+}
+
+export interface StorageUploadRequest {
+  applicationSlug: string;
+  filePath?: string;
+  file?: File;
+  content?: string | ArrayBuffer;
+  contentType?: string;
+}
+
+export interface StorageUploadResponse {
+  success: boolean;
+  data?: {
+    path: string;
+    publicUrl: string;
+    fullPath: string;
+  };
+  error?: string;
+}
+
+export interface StorageOperationResponse {
+  success: boolean;
+  data?: any;
+  error?: string;
+}
+
 // Webhook Types
 export interface WebhookPayload {
   event: string;

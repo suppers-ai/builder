@@ -746,6 +746,218 @@ export class DirectAuthClient {
   }
 
   /**
+   * Upload file to application storage
+   */
+  async uploadFile(applicationSlug: string, file: File, filePath?: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const token = await this.getAccessToken();
+      if (!token) {
+        return { success: false, error: "No access token available" };
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const endpoint = filePath 
+        ? `/api/v1/storage/${applicationSlug}/${filePath}`
+        : `/api/v1/storage/${applicationSlug}`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: result.error || "Upload failed" };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Upload failed" 
+      };
+    }
+  }
+
+  /**
+   * Upload raw content to application storage
+   */
+  async uploadContent(applicationSlug: string, filePath: string, content: string | ArrayBuffer, contentType: string = "text/plain"): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const token = await this.getAccessToken();
+      if (!token) {
+        return { success: false, error: "No access token available" };
+      }
+
+      const endpoint = `/api/v1/storage/${applicationSlug}/${filePath}`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": contentType,
+        },
+        body: content,
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: result.error || "Upload failed" };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Upload failed" 
+      };
+    }
+  }
+
+  /**
+   * List files in application storage
+   */
+  async listFiles(applicationSlug: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const token = await this.getAccessToken();
+      if (!token) {
+        return { success: false, error: "No access token available" };
+      }
+
+      const endpoint = `/api/v1/storage/${applicationSlug}?list=true`;
+
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: result.error || "List failed" };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "List failed" 
+      };
+    }
+  }
+
+  /**
+   * Get file metadata from application storage
+   */
+  async getFileInfo(applicationSlug: string, filePath: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const token = await this.getAccessToken();
+      if (!token) {
+        return { success: false, error: "No access token available" };
+      }
+
+      const endpoint = `/api/v1/storage/${applicationSlug}/${filePath}`;
+
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: result.error || "Get file info failed" };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Get file info failed" 
+      };
+    }
+  }
+
+  /**
+   * Download file content from application storage
+   */
+  async downloadFile(applicationSlug: string, filePath: string): Promise<{ success: boolean; data?: Blob; error?: string }> {
+    try {
+      const token = await this.getAccessToken();
+      if (!token) {
+        return { success: false, error: "No access token available" };
+      }
+
+      const endpoint = `/api/v1/storage/${applicationSlug}/${filePath}?content=true`;
+
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        return { success: false, error: result.error || "Download failed" };
+      }
+
+      const blob = await response.blob();
+      return { success: true, data: blob };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Download failed" 
+      };
+    }
+  }
+
+  /**
+   * Delete file from application storage
+   */
+  async deleteFile(applicationSlug: string, filePath: string): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const token = await this.getAccessToken();
+      if (!token) {
+        return { success: false, error: "No access token available" };
+      }
+
+      const endpoint = `/api/v1/storage/${applicationSlug}/${filePath}`;
+
+      const response = await fetch(endpoint, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        return { success: false, error: result.error || "Delete failed" };
+      }
+
+      return { success: true, data: result.data };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Delete failed" 
+      };
+    }
+  }
+
+  /**
    * Add event listener
    */
   addEventListener(event: AuthEventType, callback: AuthEventCallback): void {
