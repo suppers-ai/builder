@@ -108,7 +108,7 @@ export default function LoginPageIsland({
         // Add timeout to prevent hanging
         const initPromise = authClient.initialize();
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Auth initialization timeout")), 5000);
+          setTimeout(() => reject(new Error("Auth initialization timeout")), 30000);
         });
         
         await Promise.race([initPromise, timeoutPromise]);

@@ -78,10 +78,11 @@ export interface RequestConfig {
   timeout?: number;
 }
 export interface CreateApplicationData {
+  slug: string;
   name: string;
   description?: string;
-  templateId: string;
-  configuration: Record<string, unknown>;
+  templateId?: string;
+  configuration?: Record<string, unknown>;
   status?: "draft" | "pending" | "published" | "archived";
 }
 

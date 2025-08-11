@@ -1,123 +1,100 @@
-import { EntityCard } from "./EntityCard.tsx";
+import { 
+  Rocket, 
+  Clock, 
+  FileText, 
+  Archive,
+  Smartphone
+} from "lucide-preact";
 import type { Application } from "@suppers/shared";
 
 export interface ApplicationCardProps {
   application: Application;
-  onEdit?: (application: Application) => void;
-  onDelete?: (application: Application) => void;
-  onView?: (application: Application) => void;
-  onSubmitForReview?: (application: Application) => void;
   className?: string;
-  showOwnerActions?: boolean;
 }
 
 export function ApplicationCard({
   application,
-  onEdit,
-  onDelete,
-  onView,
-  onSubmitForReview,
   className = "",
-  showOwnerActions = false,
 }: ApplicationCardProps) {
-  const getTemplateDisplayName = (templateId: string): string => {
-    const templates: { [key: string]: string } = {
-      "fresh-basic": "Fresh Basic",
-      "nextjs-basic": "Next.js Basic",
-      "nextjs-supabase": "Next.js + Supabase",
-      "react-spa": "React SPA",
-      "vue-spa": "Vue SPA",
-    };
-    return templates[templateId] || templateId;
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  const applicationStatuses = {
-    published: {
-      value: "published",
-      icon: "🚀",
-      message: "Live and available to users",
-      badgeClass: "badge-success",
-    },
-    pending: {
-      value: "pending",
-      icon: "⏳",
-      message: "Waiting for admin review",
-      badgeClass: "badge-warning",
-    },
-    draft: {
-      value: "draft",
-      icon: "📝",
-      message: "Work in progress",
-      badgeClass: "badge-neutral",
-    },
-    archived: {
-      value: "archived",
-      icon: "📦",
-      message: "No longer active",
-      badgeClass: "badge-error",
-    },
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "published":
+        return <Rocket class="w-3 h-3 text-success" />;
+      case "pending":
+        return <Clock class="w-3 h-3 text-warning" />;
+      case "draft":
+        return <FileText class="w-3 h-3 text-base-content/70" />;
+      case "archived":
+        return <Archive class="w-3 h-3 text-error" />;
+      default:
+        return <FileText class="w-3 h-3 text-base-content/70" />;
+    }
   };
 
-  const canEdit = (status: string): boolean => status === "draft";
-  const canSubmitForReview = (status: string): boolean => status === "draft";
-  const canDelete = (status: string): boolean => status === "draft" || status === "archived";
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case "published":
+        return "badge-success";
+      case "pending":
+        return "badge-warning";
+      case "draft":
+        return "badge-ghost";
+      case "archived":
+        return "badge-error";
+      default:
+        return "badge-ghost";
+    }
+  };
 
-  const actions = [
-    {
-      label: "Edit",
-      icon: "✏️",
-      onClick: () => onEdit?.(application),
-      variant: "success" as const,
-      condition: onEdit && canEdit(application.status),
-    },
-    {
-      label: "Submit",
-      icon: "📋",
-      onClick: () => onSubmitForReview?.(application),
-      variant: "warning" as const,
-      condition: onSubmitForReview && canSubmitForReview(application.status),
-    },
-  ];
-
-  const menuActions = [
-    {
-      label: "Edit",
-      icon: "✏️",
-      onClick: () => onEdit?.(application),
-      condition: onEdit && canEdit(application.status),
-    },
-    {
-      label: "Submit for Review",
-      icon: "📋",
-      onClick: () => onSubmitForReview?.(application),
-      condition: onSubmitForReview && canSubmitForReview(application.status),
-    },
-    {
-      label: "Delete",
-      icon: "🗑️",
-      onClick: () => onDelete?.(application),
-      className: "text-error",
-      condition: onDelete && canDelete(application.status),
-    },
-  ];
+  const handleCardClick = () => {
+    window.location.href = `/applications/${application.id}`;
+  };
 
   return (
-    <EntityCard
-      title={application.name}
-      subtitle={getTemplateDisplayName(application.template_id)}
-      description={application.description}
-      updatedAt={application.updated_at}
-      status={{
-        value: application.status,
-        statuses: applicationStatuses,
-      }}
-      metadata={application.configuration}
-      className={className}
-      actions={actions}
-      menuActions={menuActions}
-      showOwnerActions={showOwnerActions}
-      onView={onView ? () => onView(application) : undefined}
-    />
+    <div 
+      onClick={handleCardClick}
+      class={`card bg-base-100 shadow-sm hover:shadow-lg transition-all duration-200 border border-base-200 hover:border-primary/30 hover:bg-primary/5 cursor-pointer ${className}`}
+    >
+      <div class="card-body p-4">
+        {/* App Icon and Title */}
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+            <Smartphone class="w-4 h-4 text-primary" />
+          </div>
+          <h3 class="font-semibold text-base-content text-sm truncate">
+            {application.name}
+          </h3>
+        </div>
+
+        {/* Status Badge */}
+        <div class="flex items-center gap-2 mb-2">
+          <div class={`badge gap-1 ${getStatusBadgeClass(application.status)} badge-sm`}>
+            {getStatusIcon(application.status)}
+            <span class="capitalize">{application.status}</span>
+          </div>
+        </div>
+
+        {/* Description */}
+        {application.description && (
+          <p class="text-sm text-base-content/70 line-clamp-2 mb-2">
+            {application.description}
+          </p>
+        )}
+
+        {/* Last updated */}
+        <p class="text-xs text-base-content/50">
+          Updated {formatDate(application.updated_at)}
+        </p>
+      </div>
+    </div>
   );
 }
 

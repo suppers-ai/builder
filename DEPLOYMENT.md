@@ -37,6 +37,7 @@ This guide covers deploying your Deno Fresh applications to Google Cloud Run.
 - **profile**: User profile and authentication service
 - **cdn**: Content delivery network for static assets
 - **docs**: Documentation and UI library showcase
+- **dashboard**: Application management dashboard
 
 ## Deployment Methods
 

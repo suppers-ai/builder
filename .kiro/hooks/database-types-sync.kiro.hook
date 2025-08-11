@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Database Types Sync",
+  "description": "Automatically regenerate database types when database schema files are modified to keep TypeScript types in sync with the database structure",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "packages/api/database-schema.sql"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The database schema file has been modified. Please run `deno task types` from the packages/api directory to regenerate the database types and keep them synchronized with the schema changes."
+  }
+}

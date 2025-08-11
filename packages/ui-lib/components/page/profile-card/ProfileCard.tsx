@@ -163,7 +163,7 @@ export function ProfileCard({
         type: "SUPPERS_PROFILE_UPDATED",
         data: { user },
       }, config.docsUrl);
-      console.log('🎯 ProfileCard: Sending profile update to opener:', user);
+      console.log("🎯 ProfileCard: Sending profile update to opener:", user);
     }
   };
 
@@ -175,8 +175,11 @@ export function ProfileCard({
         if (result.success) {
           addToast("Profile updated successfully!", "success");
 
-          console.log('🎯 ProfileCard: editData:', editData);
-          console.log('🎯 ProfileCard: Sending profile update to opener:', user ? { ...user, ...editData } : null);
+          console.log("🎯 ProfileCard: editData:", editData);
+          console.log(
+            "🎯 ProfileCard: Sending profile update to opener:",
+            user ? { ...user, ...editData } : null,
+          );
 
           // Send update to opener window if in popup mode
           sendProfileUpdate(user ? { ...user, ...editData } : null);
@@ -372,6 +375,40 @@ export function ProfileCard({
               </svg>
             </div>
             <span class="text-base-content font-medium">User Profile</span>
+          </div>
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </Button>
+
+        {/* My applications */}
+        <Button
+          onClick={() => window.location.href = "/applications"}
+          class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200 bg-transparent border-none justify-start rounded-none"
+          type="button"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
+              <svg
+                class="w-4 h-4 text-base-content/60"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                />
+              </svg>
+            </div>
+            <span class="text-base-content font-medium">My applications</span>
           </div>
           <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

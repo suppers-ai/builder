@@ -16,6 +16,7 @@ on:
         - profile
         - cdn
         - docs
+        - dashboard
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -27,7 +28,7 @@ jobs:
     environment: main
     strategy:
       matrix:
-        app: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.app_name == 'all' && fromJson('["store", "profile", "cdn", "docs"]') || fromJson(format('["{0}"]', github.event.inputs.app_name))) || fromJson('["store", "profile", "cdn", "docs"]') }}
+        app: ${{ github.event_name == 'workflow_dispatch' && (github.event.inputs.app_name == 'all' && fromJson('["store", "profile", "cdn", "docs", "dashboard"]') || fromJson(format('["{0}"]', github.event.inputs.app_name))) || fromJson('["store", "profile", "cdn", "docs", "dashboard"]') }}
     
     steps:
     - name: Checkout code

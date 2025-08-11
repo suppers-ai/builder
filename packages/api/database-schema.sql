@@ -74,14 +74,16 @@ create table if not exists public.users (
 -- Applications table
 create table if not exists public.applications (
   id uuid default uuid_generate_v4() primary key,
+  slug text not null,
   owner_id uuid references auth.users(id) on delete cascade not null,
   name text not null,
   description text,
-  template_id text not null,
+  template_id text,
   configuration jsonb default '{}'::jsonb not null,
   status application_status default 'draft'::application_status not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(owner_id, slug)
 );
 
 -- User access table for application sharing
@@ -359,6 +361,7 @@ create index if not exists idx_users_role on public.users(role);
 -- Applications indexes
 create index if not exists idx_applications_owner_id on public.applications(owner_id);
 create index if not exists idx_applications_status on public.applications(status);
+create index if not exists idx_applications_slug on public.applications(slug);
 create index if not exists idx_applications_template_id on public.applications(template_id);
 create index if not exists idx_applications_created_at on public.applications(created_at);
 

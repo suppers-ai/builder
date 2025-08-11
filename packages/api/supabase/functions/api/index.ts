@@ -47,7 +47,7 @@ Deno.serve(async (req: Request) => {
 
     let user = null;
     let supabase = supabaseAdmin; // Default to admin client
-    console.log("isPublicAuthEndpoint", isPublicAuthEndpoint);
+    console.log("isPublicAuthEndpoint");
 
     if (!token) {
       console.log("❌ No token provided for protected endpoint:", resource, rest);

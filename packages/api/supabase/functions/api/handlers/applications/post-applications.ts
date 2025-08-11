@@ -7,6 +7,8 @@ export async function createApplication(
 ): Promise<Response> {
   const body = await request.json();
   const {
+    id,
+    slug,
     ownerId,
     name,
     description,
@@ -15,10 +17,10 @@ export async function createApplication(
     status = "draft",
   } = body;
 
-  if (!ownerId || !name || !templateId) {
+  if (!ownerId || !name || !slug) {
     return new Response(
       JSON.stringify({
-        error: "ownerId, name, and templateId are required",
+        error: "ownerId, name, and slug are required",
       }),
       {
         status: 400,
@@ -27,16 +29,40 @@ export async function createApplication(
     );
   }
 
+  // Check if application with this slug already exists for this user
+  const { data: existingApp } = await supabase
+    .from("applications")
+    .select("id")
+    .eq("owner_id", ownerId)
+    .eq("slug", slug)
+    .single();
+
+  if (existingApp) {
+    return new Response(
+      JSON.stringify({
+        error: "An application with this ID already exists",
+      }),
+      {
+        status: 409,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
+
+  // Prepare insert data
+  const insertData: any = {
+    owner_id: ownerId,
+    slug,
+    name,
+    description: description || null,
+    template_id: templateId || null, // Optional template
+    configuration: configuration || {},
+    status,
+  };
+
   const { data: application, error } = await supabase
     .from("applications")
-    .insert({
-      owner_id: ownerId,
-      name,
-      description,
-      template_id: templateId,
-      configuration: configuration || {},
-      status,
-    })
+    .insert(insertData)
     .select()
     .single();
 
