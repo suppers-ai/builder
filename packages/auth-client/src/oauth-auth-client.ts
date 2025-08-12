@@ -20,6 +20,7 @@ export class OAuthAuthClient {
   private clientId: string;
   private storageKey = "suppers_user_id";
   private userStorageKey = "suppers_user_data";
+  private sessionStorageKey = "suppers_session_data";
 
   constructor(
     profileServiceUrl: string = "http://localhost:8001",
@@ -113,6 +114,48 @@ export class OAuthAuthClient {
   }
 
   /**
+   * Save session data to localStorage
+   */
+  private saveSessionToStorage(session: AuthSession): void {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(this.sessionStorageKey, JSON.stringify(session));
+      } catch (error) {
+        console.error("Failed to save session to storage:", error);
+      }
+    }
+  }
+
+  /**
+   * Get session data from localStorage
+   */
+  private getSessionFromStorage(): AuthSession | null {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(this.sessionStorageKey);
+        return stored ? JSON.parse(stored) : null;
+      } catch (error) {
+        console.error("Failed to get session from storage:", error);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Clear session data from localStorage
+   */
+  private clearSessionFromStorage(): void {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(this.sessionStorageKey);
+      } catch (error) {
+        console.error("Failed to clear session from storage:", error);
+      }
+    }
+  }
+
+  /**
    * Ensure user profile exists in public.users table via profile service
    */
   private async ensureUserProfile(
@@ -189,17 +232,19 @@ export class OAuthAuthClient {
   }
 
   /**
-   * Get current session (returns null for OAuth clients as they don't have Supabase sessions)
+   * Get current session from localStorage
    */
   getSession(): Promise<AuthSession | null> {
-    return Promise.resolve(null); // OAuth clients don't have Supabase sessions
+    const session = this.getSessionFromStorage();
+    return Promise.resolve(session);
   }
 
   /**
-   * Get access token (not used in centralized auth hub)
+   * Get access token from stored session
    */
   getAccessToken(): Promise<string | null> {
-    return Promise.resolve(null); // Access tokens are managed by the profile service
+    const session = this.getSessionFromStorage();
+    return Promise.resolve(session?.session?.access_token || null);
   }
 
   /**
@@ -254,9 +299,16 @@ export class OAuthAuthClient {
       if (event.data.type === "SSO_AUTH_SUCCESS") {
         console.log("Login popup success, user authenticated");
 
-        // Store user ID and user data from the profile page
+        // Store user ID, user data, and session from the profile page
         this.saveUserIdToStorage(event.data.user.id);
         this.saveUserDataToStorage(event.data.user);
+
+        // Store session if provided
+        if (event.data.session) {
+          this.saveSessionToStorage(event.data.session);
+          console.log("Session token stored for API authentication");
+        }
+
         this.emitEvent("login", { userId: event.data.user.id });
         console.log("OAuth popup login completed successfully");
 
@@ -378,7 +430,8 @@ export class OAuthAuthClient {
     // Clear local storage
     this.clearUserIdFromStorage();
     this.clearUserDataFromStorage();
-    
+    this.clearSessionFromStorage();
+
     this.emitEvent("logout");
     return Promise.resolve();
   }
@@ -405,10 +458,15 @@ export class OAuthAuthClient {
 
     // Add authentication headers if user is authenticated
     const userId = this.getUserIdFromStorage();
+    const session = this.getSessionFromStorage();
+
     if (userId) {
-      // In a real centralized auth hub, this would include session tokens
-      // For now, include user ID for identification
       headers["X-User-ID"] = userId;
+
+      // Include session token if available
+      if (session?.session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.session.access_token}`;
+      }
     }
 
     return fetch(url, {

@@ -198,11 +198,12 @@ drop policy if exists "Users can view their own profile" on public.users;
 drop policy if exists "Users can update their own profile" on public.users;
 drop policy if exists "Users can insert their own profile" on public.users;
 
-drop policy if exists "Users can view their applications" on public.applications;
+drop policy if exists "Users can view their own applications" on public.applications;
 drop policy if exists "Users can insert their applications" on public.applications;
 drop policy if exists "Users can update their applications" on public.applications;
 drop policy if exists "Users can delete their applications" on public.applications;
 drop policy if exists "Admins can view all applications" on public.applications;
+drop policy if exists "Users can view published applications" on public.applications;
 
 drop policy if exists "Users can view access to applications they own" on public.user_access;
 drop policy if exists "Users can view their own access grants" on public.user_access;
@@ -226,17 +227,8 @@ drop policy if exists "Admins can manage all themes" on public.custom_themes;
 -- POLICIES
 -- =============================================
 
--- Helper function to check if user is admin
-create or replace function public.is_admin(user_id uuid)
-returns boolean as $$
-begin
-  return (
-    select role = 'admin'
-    from public.users
-    where id = user_id
-  );
-end;
-$$ language plpgsql security definer;
+-- Note: Admin checks are handled at the application level, not in RLS policies
+-- This prevents infinite recursion issues with the public.users table
 
 -- Users policies
 create policy "Users can view their own profile"
@@ -252,16 +244,13 @@ create policy "Users can update their own profile"
   using (id = auth.uid());
 
 -- Applications policies
-create policy "Users can view their applications"
+create policy "Users can view their own applications"
   on public.applications for select
-  using (
-    owner_id = auth.uid() OR
-    exists (
-      select 1 from public.user_access
-      where user_id = auth.uid() and application_id = id
-    ) OR
-    public.is_admin(auth.uid())
-  );
+  using (owner_id = auth.uid());
+
+create policy "Users can view published applications"
+  on public.applications for select
+  using (status = 'published');
 
 create policy "Users can insert their applications"
   on public.applications for insert
@@ -273,7 +262,7 @@ create policy "Users can update their applications"
     owner_id = auth.uid() OR
     exists (
       select 1 from public.user_access
-      where user_id = auth.uid() and application_id = id and access_level in ('write', 'admin')
+      where user_id = auth.uid() and application_id = applications.id and access_level in ('write', 'admin')
     )
   );
 
@@ -281,9 +270,8 @@ create policy "Users can delete their applications"
   on public.applications for delete
   using (owner_id = auth.uid());
 
-create policy "Admins can view all applications"
-  on public.applications for all
-  using (public.is_admin(auth.uid()));
+-- Admin operations are handled at the application level
+-- No RLS policy needed for admin access to all applications
 
 -- User access policies
 create policy "Users can view access to applications they own"
@@ -318,10 +306,6 @@ create policy "Application owners can revoke access"
   );
 
 -- Application reviews policies
-create policy "Admins can view all reviews"
-  on public.application_reviews for select
-  using (public.is_admin(auth.uid()));
-
 create policy "Application owners can view reviews of their apps"
   on public.application_reviews for select
   using (
@@ -331,21 +315,8 @@ create policy "Application owners can view reviews of their apps"
     )
   );
 
-create policy "Admins can create reviews"
-  on public.application_reviews for insert
-  with check (
-    public.is_admin(auth.uid()) AND reviewer_id = auth.uid()
-  );
-
-create policy "Admins can update their reviews"
-  on public.application_reviews for update
-  using (
-    reviewer_id = auth.uid() AND public.is_admin(auth.uid())
-  );
-
-create policy "Admins can delete reviews"
-  on public.application_reviews for delete
-  using (public.is_admin(auth.uid()));
+-- Admin operations for reviews are handled at the application level
+-- No RLS policies needed for admin access to reviews
 
 -- Custom themes policies
 create policy "Users can view public themes"
@@ -368,9 +339,8 @@ create policy "Users can delete their own themes"
   on public.custom_themes for delete
   using (created_by = auth.uid());
 
-create policy "Admins can manage all themes"
-  on public.custom_themes for all
-  using (public.is_admin(auth.uid()));
+-- Admin operations for themes are handled at the application level
+-- No RLS policy needed for admin access to themes
 
 -- =============================================
 -- FUNCTIONS
@@ -448,158 +418,46 @@ values
   ('application-files', 'application-files', false, 52428800, array['image/*', 'text/*', 'application/json', 'application/pdf', 'video/*', 'audio/*'])
 on conflict (id) do nothing;
 
--- Storage policies for application files (using userId/applicationSlug/filename structure)
--- File structure: userId/applicationSlug/filename
--- Example: 550e8400-e29b-41d4-a716-446655440000/my-blog/config/settings.json
+-- Storage policies for application files
+-- Drop existing policies if they exist
+drop policy if exists "Users can upload files to their own applications" on storage.objects;
+drop policy if exists "Users can view files in their own applications" on storage.objects;
+drop policy if exists "Application collaborators can view files" on storage.objects;
+drop policy if exists "Application collaborators can upload files" on storage.objects;
+drop policy if exists "Users can delete files in their own applications" on storage.objects;
+drop policy if exists "Application collaborators can delete files" on storage.objects;
+drop policy if exists "Users can update files in their own applications" on storage.objects;
+drop policy if exists "Application collaborators can update files" on storage.objects;
+drop policy if exists "Admins can manage all storage files" on storage.objects;
 
-do $$
-begin
-  -- Check if we have permission to create policies on storage.objects
-  -- This will succeed if run with service_role or appropriate permissions
-  
-  -- Drop existing policies if they exist
-  drop policy if exists "Users can upload files to their own applications" on storage.objects;
-  drop policy if exists "Users can view files in their own applications" on storage.objects;
-  drop policy if exists "Application collaborators can view files" on storage.objects;
-  drop policy if exists "Application collaborators can upload files" on storage.objects;
-  drop policy if exists "Users can delete files in their own applications" on storage.objects;
-  drop policy if exists "Application collaborators can delete files" on storage.objects;
-  drop policy if exists "Users can update files in their own applications" on storage.objects;
-  drop policy if exists "Application collaborators can update files" on storage.objects;
-  drop policy if exists "Admins can manage all storage files" on storage.objects;
-
-  -- Ensure RLS is enabled (should already be enabled in Supabase)
-  perform 1 from pg_tables where schemaname = 'storage' and tablename = 'objects';
-  if found then
-    alter table storage.objects enable row level security;
-  end if;
-
-  -- Policy 1: Users can upload files to their own applications
-  create policy "Users can upload files to their own applications"
+-- Create simple storage policies that don't query any tables
+create policy "Users can upload files to their own folders"
   on storage.objects for insert 
   with check (
     bucket_id = 'application-files' AND
-    (storage.foldername(name))[1] = auth.uid()::text AND
-    exists (
-      select 1 from public.applications
-      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
-    )
+    (storage.foldername(name))[1] = auth.uid()::text
   );
 
-  -- Policy 2: Users can view files in their own applications
-  create policy "Users can view files in their own applications"
+create policy "Users can view files in their own folders"
   on storage.objects for select
   using (
     bucket_id = 'application-files' AND
-    (storage.foldername(name))[1] = auth.uid()::text AND
-    exists (
-      select 1 from public.applications
-      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
-    )
+    (storage.foldername(name))[1] = auth.uid()::text
   );
 
-  -- Policy 3: Application collaborators can view files
-  create policy "Application collaborators can view files"
-  on storage.objects for select
-  using (
-    bucket_id = 'application-files' AND
-    exists (
-      select 1 from public.applications a
-      join public.user_access ua on a.id = ua.application_id
-      where a.slug = (storage.foldername(name))[2]
-        and a.owner_id = (storage.foldername(name))[1]::uuid
-        and ua.user_id = auth.uid()
-    )
-  );
-
-  -- Policy 4: Application collaborators can upload files
-  create policy "Application collaborators can upload files"
-  on storage.objects for insert
-  with check (
-    bucket_id = 'application-files' AND
-    exists (
-      select 1 from public.applications a
-      join public.user_access ua on a.id = ua.application_id
-      where a.slug = (storage.foldername(name))[2]
-        and a.owner_id = (storage.foldername(name))[1]::uuid
-        and ua.user_id = auth.uid()
-        and ua.access_level in ('write', 'admin')
-    )
-  );
-
-  -- Policy 5: Users can delete files in their own applications
-  create policy "Users can delete files in their own applications"
-  on storage.objects for delete
-  using (
-    bucket_id = 'application-files' AND
-    (storage.foldername(name))[1] = auth.uid()::text AND
-    exists (
-      select 1 from public.applications
-      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
-    )
-  );
-
-  -- Policy 6: Application collaborators can delete files
-  create policy "Application collaborators can delete files"
-  on storage.objects for delete
-  using (
-    bucket_id = 'application-files' AND
-    exists (
-      select 1 from public.applications a
-      join public.user_access ua on a.id = ua.application_id
-      where a.slug = (storage.foldername(name))[2]
-        and a.owner_id = (storage.foldername(name))[1]::uuid
-        and ua.user_id = auth.uid()
-        and ua.access_level in ('write', 'admin')
-    )
-  );
-
-  -- Policy 7: Users can update files in their own applications
-  create policy "Users can update files in their own applications"
+create policy "Users can update files in their own folders"
   on storage.objects for update
   using (
     bucket_id = 'application-files' AND
-    (storage.foldername(name))[1] = auth.uid()::text AND
-    exists (
-      select 1 from public.applications
-      where slug = (storage.foldername(name))[2] and owner_id = auth.uid()
-    )
+    (storage.foldername(name))[1] = auth.uid()::text
   );
 
-  -- Policy 8: Application collaborators can update files
-  create policy "Application collaborators can update files"
-  on storage.objects for update
+create policy "Users can delete files in their own folders"
+  on storage.objects for delete
   using (
     bucket_id = 'application-files' AND
-    exists (
-      select 1 from public.applications a
-      join public.user_access ua on a.id = ua.application_id
-      where a.slug = (storage.foldername(name))[2]
-        and a.owner_id = (storage.foldername(name))[1]::uuid
-        and ua.user_id = auth.uid()
-        and ua.access_level in ('write', 'admin')
-    )
+    (storage.foldername(name))[1] = auth.uid()::text
   );
-
-  -- Policy 9: Admins can manage all storage files
-  create policy "Admins can manage all storage files"
-  on storage.objects for all
-  using (
-    bucket_id = 'application-files' AND
-    public.is_admin(auth.uid())
-  );
-
-  -- Log success
-  raise notice 'Storage policies created successfully';
-
-exception
-  when insufficient_privilege then
-    raise warning 'Insufficient privileges to create storage policies. Run this script with service_role permissions or create policies manually through the Supabase Dashboard.';
-    raise warning 'Storage bucket was created successfully, but policies need to be added separately.';
-  when others then
-    raise warning 'Error creating storage policies: %', sqlerrm;
-    raise warning 'Storage bucket was created successfully, but policies need to be added manually.';
-end $$;
 
 -- =============================================
 -- DEFAULT DATA (Development Only)

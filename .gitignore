@@ -47,7 +47,6 @@ playwright-report/
 *-previous.png
 *.trace
 *.webm
-*.mp4
 
 # Node modules (if any)
 node_modules/

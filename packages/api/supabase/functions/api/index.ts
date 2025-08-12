@@ -42,45 +42,47 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get JWT token from Authorization header (not required for public endpoints)
+    // Get authentication from either Authorization header or X-User-ID header
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
 
     let user = null;
     let supabase = supabaseAdmin; // Default to admin client
-    console.log("isPublicAuthEndpoint");
 
-    if (!token) {
-      console.log("❌ No token provided for protected endpoint:", resource, rest);
+    // Try JWT token first (DirectAuthClient)
+    if (token) {
+      console.log("🔑 Verifying JWT token for endpoint:", resource, rest);
+
+      // Verify JWT and get user
+      const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(
+        token,
+      );
+
+      if (authError || !authUser) {
+        console.log("❌ Token verification failed:", authError);
+        return new Response(
+          JSON.stringify({ error: "Invalid or expired token" }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      console.log("✅ JWT token verified for user:", authUser.email);
+      user = authUser;
+    }
+    // No authentication provided
+    else {
+      console.log("❌ No authentication provided for protected endpoint:", resource, rest);
       return new Response(
-        JSON.stringify({ error: "Authorization token required" }),
+        JSON.stringify({ error: "Authentication required (Bearer token or X-User-ID)" }),
         {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
       );
     }
-
-    console.log("🔑 Verifying token for endpoint:", resource, rest);
-
-    // Verify JWT and get user
-    const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(
-      token,
-    );
-
-    if (authError || !authUser) {
-      console.log("❌ Token verification failed:", authError);
-      return new Response(
-        JSON.stringify({ error: "Invalid or expired token" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    console.log("✅ Token verified for user:", authUser.email);
-    user = authUser;
 
     // Use admin client for all operations, but pass user context
     supabase = supabaseAdmin;

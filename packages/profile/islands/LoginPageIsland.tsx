@@ -29,11 +29,13 @@ export default function LoginPageIsland({
   const handleAuthSuccess = async () => {
     if (isModal) {
       try {
-        // Get current user data to include in the message
+        // Get current user data and session to include in the message
         const currentUser = await authClient.getUser();
+        const session = await authClient.getSession();
         const message = {
           type: "SSO_AUTH_SUCCESS",
           user: currentUser, // Pass the full user object from the profile page
+          session: session, // Include the session with JWT token
         };
 
         console.log("🎯 LoginPageIsland: Sending auth success message:", message);

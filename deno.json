@@ -9,7 +9,8 @@
     "packages/auth-client",
     "packages/store",
     "packages/profile",
-    "packages/cdn"
+    "packages/cdn",
+    "applications/recorder"
   ],
   "imports": {
     "daisyui": "npm:daisyui@^5.0.50",

@@ -36,38 +36,30 @@ export type Database = {
     Tables: {
       application_reviews: {
         Row: {
-          action: string
           application_id: string
           feedback: string | null
           id: string
           reviewed_at: string
           reviewer_id: string
+          status: Database["public"]["Enums"]["review_status"]
         }
         Insert: {
-          action: string
           application_id: string
           feedback?: string | null
           id?: string
           reviewed_at?: string
           reviewer_id: string
+          status: Database["public"]["Enums"]["review_status"]
         }
         Update: {
-          action?: string
           application_id?: string
           feedback?: string | null
           id?: string
           reviewed_at?: string
           reviewer_id?: string
+          status?: Database["public"]["Enums"]["review_status"]
         }
-        Relationships: [
-          {
-            foreignKeyName: "application_reviews_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       applications: {
         Row: {
@@ -77,8 +69,9 @@ export type Database = {
           id: string
           name: string
           owner_id: string
+          slug: string
           status: Database["public"]["Enums"]["application_status"]
-          template_id: string
+          template_id: string | null
           updated_at: string
         }
         Insert: {
@@ -88,8 +81,9 @@ export type Database = {
           id?: string
           name: string
           owner_id: string
+          slug: string
           status?: Database["public"]["Enums"]["application_status"]
-          template_id: string
+          template_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -99,8 +93,9 @@ export type Database = {
           id?: string
           name?: string
           owner_id?: string
+          slug?: string
           status?: Database["public"]["Enums"]["application_status"]
-          template_id?: string
+          template_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -112,10 +107,9 @@ export type Database = {
           description: string | null
           id: string
           is_public: boolean
-          label: string
           name: string
+          theme_data: Json
           updated_at: string
-          variables: Json
         }
         Insert: {
           created_at?: string
@@ -123,10 +117,9 @@ export type Database = {
           description?: string | null
           id?: string
           is_public?: boolean
-          label: string
           name: string
+          theme_data: Json
           updated_at?: string
-          variables?: Json
         }
         Update: {
           created_at?: string
@@ -134,115 +127,9 @@ export type Database = {
           description?: string | null
           id?: string
           is_public?: boolean
-          label?: string
           name?: string
+          theme_data?: Json
           updated_at?: string
-          variables?: Json
-        }
-        Relationships: []
-      }
-      oauth_clients: {
-        Row: {
-          allowed_scopes: string[]
-          client_id: string
-          client_secret: string
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          name: string
-          redirect_uris: string[]
-          updated_at: string
-        }
-        Insert: {
-          allowed_scopes: string[]
-          client_id: string
-          client_secret: string
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          name: string
-          redirect_uris: string[]
-          updated_at?: string
-        }
-        Update: {
-          allowed_scopes?: string[]
-          client_id?: string
-          client_secret?: string
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          name?: string
-          redirect_uris?: string[]
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      oauth_codes: {
-        Row: {
-          client_id: string
-          code: string
-          created_at: string
-          expires_at: string
-          id: string
-          redirect_uri: string
-          scope: string
-          state: string | null
-        }
-        Insert: {
-          client_id: string
-          code: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          redirect_uri: string
-          scope: string
-          state?: string | null
-        }
-        Update: {
-          client_id?: string
-          code?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          redirect_uri?: string
-          scope?: string
-          state?: string | null
-        }
-        Relationships: []
-      }
-      oauth_tokens: {
-        Row: {
-          access_token: string
-          client_id: string
-          created_at: string
-          expires_at: string
-          id: string
-          refresh_token: string | null
-          scope: string
-          user_id: string | null
-        }
-        Insert: {
-          access_token: string
-          client_id: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          refresh_token?: string | null
-          scope: string
-          user_id?: string | null
-        }
-        Update: {
-          access_token?: string
-          client_id?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          refresh_token?: string | null
-          scope?: string
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -271,15 +158,7 @@ export type Database = {
           id?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_access_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       users: {
         Row: {
@@ -328,10 +207,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_expired_oauth: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean
