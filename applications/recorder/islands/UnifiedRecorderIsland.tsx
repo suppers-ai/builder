@@ -68,26 +68,29 @@ export default function UnifiedRecorderIsland() {
 
   // Check browser support and authentication on mount
   useEffect(() => {
-    setIsSupported(isRecordingSupported());
+    // Use microtask to prevent initial flicker
+    Promise.resolve().then(() => {
+      setIsSupported(isRecordingSupported());
 
-    const authClient = getAuthClient();
-    setIsAuthenticated(authClient.isAuthenticated());
+      const authClient = getAuthClient();
+      setIsAuthenticated(authClient.isAuthenticated());
 
-    if (authClient.isAuthenticated()) {
-      loadRecordings();
-    } else {
-      setRecordingsLoading(false);
-    }
+      if (authClient.isAuthenticated()) {
+        loadRecordings();
+      } else {
+        setRecordingsLoading(false);
+      }
 
-    // Listen for auth changes
-    authClient.addEventListener('login', () => {
-      setIsAuthenticated(true);
-      loadRecordings();
-    });
-    authClient.addEventListener('logout', () => {
-      setIsAuthenticated(false);
-      setRecordings([]);
-      setRecordingsLoading(false);
+      // Listen for auth changes
+      authClient.addEventListener('login', () => {
+        setIsAuthenticated(true);
+        loadRecordings();
+      });
+      authClient.addEventListener('logout', () => {
+        setIsAuthenticated(false);
+        setRecordings([]);
+        setRecordingsLoading(false);
+      });
     });
 
     return () => {
