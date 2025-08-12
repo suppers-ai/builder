@@ -5,6 +5,7 @@ import { handleApplications } from "./handlers/applications/index.ts";
 import { handleUserRequest } from "./handlers/user/index.ts";
 import { handleAccess } from "./handlers/access/index.ts";
 import { handleStorage } from "./handlers/storage/index.ts";
+import { handleUserStorageGet } from "./handlers/user-storage/index.ts";
 
 console.log("🚀 API Edge Function loaded");
 
@@ -114,11 +115,26 @@ Deno.serve(async (req: Request) => {
         response = await handleStorage(req, { user, supabase, supabaseAdmin, pathSegments: rest });
         break;
 
+      case "user-storage":
+        // Only support GET for user storage info
+        if (req.method === "GET") {
+          response = await handleUserStorageGet(req, { user, supabase });
+        } else {
+          response = new Response(
+            JSON.stringify({ error: `Method ${req.method} not supported for user-storage` }),
+            {
+              status: 405,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            },
+          );
+        }
+        break;
+
       default:
         response = new Response(
           JSON.stringify({
             error:
-              `Unknown resource: ${resource}. Available resources: applications, user, access, storage. Auth is handled directly by Supabase.`,
+              `Unknown resource: ${resource}. Available resources: applications, user, access, storage, user-storage. Auth is handled directly by Supabase.`,
           }),
           {
             status: 404,

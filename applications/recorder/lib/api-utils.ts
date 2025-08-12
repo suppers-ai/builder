@@ -76,9 +76,51 @@ export function validateFile(file: File) {
     throw new Error("Invalid file type. Only video files are allowed.");
   }
 
-  const maxSize = 100 * 1024 * 1024; // 100MB
-  if (file.size > maxSize) {
-    throw new Error("File too large. Maximum size is 100MB.");
+  if (file.size > config.storage.maxFileSize) {
+    const maxSizeMB = Math.round(config.storage.maxFileSize / (1024 * 1024));
+    throw new Error(`File too large. Maximum size is ${maxSizeMB}MB.`);
+  }
+}
+
+export async function validateStorageLimit(supabase: any, userId: string, newFileSize: number) {
+  try {
+    // Get user's storage limit and current usage from database
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('storage_used, storage_limit')
+      .eq('id', userId)
+      .single();
+
+    if (userError) {
+      console.error("Failed to fetch user storage info:", userError.message);
+      throw new Error("Failed to validate storage limit");
+    }
+
+    const userStorageLimit = userData.storage_limit || config.storage.defaultStorageLimit;
+    const currentStorage = userData.storage_used || 0;
+
+    // Check if adding new file would exceed limit
+    const totalAfterUpload = currentStorage + newFileSize;
+    
+    if (totalAfterUpload > userStorageLimit) {
+      const limitMB = Math.round(userStorageLimit / (1024 * 1024));
+      const usedMB = Math.round(currentStorage / (1024 * 1024));
+      const remainingMB = Math.round((userStorageLimit - currentStorage) / (1024 * 1024));
+      
+      throw new Error(`Storage limit exceeded. You have used ${usedMB}MB of ${limitMB}MB. Only ${remainingMB}MB remaining.`);
+    }
+
+    return {
+      currentStorage,
+      totalAfterUpload,
+      remaining: userStorageLimit - totalAfterUpload,
+      userLimit: userStorageLimit
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to validate storage limit");
   }
 }
 

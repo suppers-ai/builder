@@ -52,6 +52,49 @@ export default function UnifiedRecorderIsland() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [currentPreviewRecording, setCurrentPreviewRecording] = useState<Recording | null>(null);
   const [currentPreviewUrl, setCurrentPreviewUrl] = useState<string | null>(null);
+  
+  // Storage tracking state
+  const [storageInfo, setStorageInfo] = useState<{
+    used: number;
+    limit: number;
+    percentage: number;
+    remaining: number;
+  } | null>(null);
+
+  // Fetch user storage info from storage API
+  const fetchUserStorageInfo = async () => {
+    try {
+      const authClient = getAuthClient();
+      const userId = authClient.getUserId();
+      const accessToken = await authClient.getAccessToken();
+
+      if (!userId || !accessToken) {
+        return;
+      }
+
+      const response = await fetch('http://127.0.0.1:54321/functions/v1/api/v1/user-storage', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-User-ID': userId,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.storage) {
+          setStorageInfo({
+            used: data.storage.used,
+            limit: data.storage.limit,
+            percentage: data.storage.percentage,
+            remaining: data.storage.remaining,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch storage info:", error);
+    }
+  };
 
   // Add toast function
   const addToast = (message: string, type: "success" | "error") => {
@@ -77,6 +120,7 @@ export default function UnifiedRecorderIsland() {
 
       if (authClient.isAuthenticated()) {
         loadRecordings();
+        fetchUserStorageInfo();
       } else {
         setRecordingsLoading(false);
       }
@@ -85,11 +129,13 @@ export default function UnifiedRecorderIsland() {
       authClient.addEventListener('login', () => {
         setIsAuthenticated(true);
         loadRecordings();
+        fetchUserStorageInfo();
       });
       authClient.addEventListener('logout', () => {
         setIsAuthenticated(false);
         setRecordings([]);
         setRecordingsLoading(false);
+        setStorageInfo(null);
       });
     });
 
@@ -221,6 +267,12 @@ export default function UnifiedRecorderIsland() {
         setRecordings(recordingsList.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         ));
+        
+        // Extract storage info from the response if available
+        if (result.totalStorage !== undefined) {
+          // Get user's storage limit from storage API
+          fetchUserStorageInfo();
+        }
       } else {
         setRecordingsError('Failed to load recordings');
       }
@@ -234,6 +286,12 @@ export default function UnifiedRecorderIsland() {
   // Recording functions (from original RecorderIsland)
   const startRecording = async () => {
     try {
+      // Check storage limits before starting recording
+      if (storageInfo && storageInfo.percentage > 95) {
+        addToast("Storage is full! Please delete some recordings or upgrade your plan.", "error");
+        return;
+      }
+      
       setRecordingState({ status: 'preparing', duration: 0 });
 
       const constraints = getRecordingConstraints(recordingOptions);
@@ -641,6 +699,26 @@ export default function UnifiedRecorderIsland() {
       <div class="space-y-8">
         {/* Recording Section */}
         <div class="bg-base-200/20 rounded-lg p-6">
+          {/* Storage Warning */}
+          {storageInfo && storageInfo.percentage > 80 && (
+            <div class="mb-4">
+              <Alert color={storageInfo.percentage > 95 ? "error" : "warning"}>
+                <div class="flex items-center gap-2">
+                  <AlertCircle class="w-4 h-4" />
+                  <div class="text-sm">
+                    <div class="font-medium">
+                      {storageInfo.percentage > 95 ? "Storage almost full!" : "Storage running low"}
+                    </div>
+                    <div>
+                      {Math.round(storageInfo.used / (1024 * 1024))}MB of {Math.round(storageInfo.limit / (1024 * 1024))}MB used 
+                      ({storageInfo.percentage}%)
+                    </div>
+                  </div>
+                </div>
+              </Alert>
+            </div>
+          )}
+          
           {/* Status Display */}
           {recordingState.status !== 'idle' && (
             <div class="text-center mb-6">

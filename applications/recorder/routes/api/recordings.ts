@@ -5,6 +5,7 @@ import {
   createSuccessResponse,
   authenticateRequest,
   validateFile,
+  validateStorageLimit,
   createFilePath,
   generateRecordingId,
 } from "../../lib/api-utils.ts";
@@ -41,22 +42,41 @@ export const handler = {
         return createErrorResponse("Failed to list recordings", 500);
       }
 
-      const recordings = (files || []).map(file => {
-        const fullPath = `${folderPath}/${file.name}`;
+      // Get recordings from storage_objects table
+      const { data: storageObjects, error: dbError } = await supabase
+        .from('storage_objects')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('object_type', 'recording')
+        .order('created_at', { ascending: false });
+
+      if (dbError) {
+        console.error("Failed to fetch storage objects:", dbError.message);
+        return createErrorResponse("Failed to fetch recordings from database", 500);
+      }
+
+      // Calculate total storage used for recordings
+      const totalStorage = (storageObjects || []).reduce((total, obj) => {
+        return total + (obj.file_size || 0);
+      }, 0);
+
+      const recordings = (storageObjects || []).map(obj => {
         return {
-          id: file.name,
-          name: file.name,
-          size: file.metadata?.size || 0,
-          createdAt: file.created_at ? new Date(file.created_at).toISOString() : new Date().toISOString(),
-          updatedAt: file.updated_at ? new Date(file.updated_at).toISOString() : new Date().toISOString(),
-          filePath: fullPath,
-          mimeType: file.metadata?.mimetype || 'video/webm',
+          id: obj.id,
+          name: obj.name,
+          size: obj.file_size,
+          createdAt: new Date(obj.created_at).toISOString(),
+          updatedAt: new Date(obj.updated_at).toISOString(),
+          filePath: obj.file_path,
+          mimeType: obj.mime_type,
+          duration: obj.metadata?.duration || 0,
         };
       });
 
       return createSuccessResponse({
         success: true,
-        recordings: recordings
+        recordings: recordings,
+        totalStorage: totalStorage
       });
 
     } catch (error) {
@@ -93,6 +113,9 @@ export const handler = {
 
       validateFile(file);
 
+      // Validate storage limits before upload
+      await validateStorageLimit(supabase, userId, file.size);
+
       const filePath = createFilePath(userId, file.name);
 
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -112,7 +135,43 @@ export const handler = {
         return createErrorResponse("Failed to upload to cloud storage", 500);
       }
 
-      const recordingId = generateRecordingId();
+      // Create storage object record in database
+      const { data: storageObject, error: dbError } = await supabase
+        .from('storage_objects')
+        .insert({
+          user_id: userId,
+          name: file.name,
+          file_path: filePath,
+          file_size: file.size,
+          mime_type: file.type,
+          object_type: 'recording',
+          metadata: {
+            duration: 0, // Will be updated later if duration is available
+            originalName: file.name,
+            uploadedAt: new Date().toISOString()
+          }
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error("Failed to create storage object record:", dbError.message);
+        // Continue anyway, file is uploaded, just missing DB record
+      }
+
+      // Update user's storage usage
+      if (storageObject) {
+        const { error: updateError } = await supabase.rpc('increment_user_storage', {
+          user_id: userId,
+          size_delta: file.size
+        });
+          
+        if (updateError) {
+          console.error("Failed to update user storage usage:", updateError.message);
+        }
+      }
+
+      const recordingId = storageObject?.id || generateRecordingId();
 
       return createSuccessResponse({
         success: true,

@@ -1,17 +1,70 @@
 import { useEffect, useState } from "preact/hooks";
 import { UpdateUserData, type User } from "@suppers/auth-client";
-import { ProfileCard } from "@suppers/ui-lib";
+import { ProfileCard, Progress, Button, Alert, Loading } from "@suppers/ui-lib";
 import { getCurrentTheme, applyTheme } from "@suppers/shared/utils";
+import { HardDrive, Crown, LogOut } from "lucide-preact";
 import { getAuthClient } from "../lib/auth.ts";
 
 // Get the profile auth client (direct Supabase connection)
 const authClient = getAuthClient();
+
+interface StorageInfo {
+  used: number;
+  limit: number;
+  percentage: number;
+  remaining: number;
+  fileCount: number;
+  maxFileSize: number;
+  objectTypes?: Record<string, number>;
+}
 
 export default function ProfilePageIsland() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null);
+  const [storageLoading, setStorageLoading] = useState(false);
+
+  // Fetch storage information
+  const fetchStorageInfo = async (targetUser?: User) => {
+    const userToUse = targetUser || user;
+    if (!userToUse) return;
+    
+    try {
+      setStorageLoading(true);
+      
+      const accessToken = await authClient.getAccessToken();
+      if (!accessToken) {
+        console.error("No access token available for storage request");
+        return;
+      }
+
+      // Call the centralized storage API
+      const response = await fetch('http://127.0.0.1:54321/functions/v1/api/v1/user-storage', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-User-ID': userToUse.id,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setStorageInfo(data.storage);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch storage info:", error);
+    } finally {
+      setStorageLoading(false);
+    }
+  };
+
+  const handleUpgrade = () => {
+    alert("Coming soon! Upgrade options will be available in a future update.");
+  };
 
   useEffect(() => {
     // Initialize auth client
@@ -30,6 +83,11 @@ export default function ProfilePageIsland() {
         }
         
         setLoading(false);
+        
+        // Fetch storage info after user is loaded
+        if (currentUser) {
+          fetchStorageInfo(currentUser);
+        }
       } catch (error) {
         console.error("Auth initialization failed:", error);
         setError("Failed to initialize authentication");
@@ -251,7 +309,7 @@ export default function ProfilePageIsland() {
 
   return (
     <div class="container mx-auto p-4">
-      <div class="max-w-md mx-auto">
+      <div class="max-w-md mx-auto space-y-6">
         <ProfileCard
           user={user as any} // Type conversion for compatibility
           isLoading={loading}
@@ -259,7 +317,6 @@ export default function ProfilePageIsland() {
           success={success}
           onUpdateProfile={handleUpdateProfile}
           onUploadAvatar={handleUploadAvatar}
-          onSignOut={handleSignOut}
           onChangePassword={handleChangePassword}
           // Detect if we're in popup mode
           isPopupMode={!!window.opener}
@@ -276,6 +333,114 @@ export default function ProfilePageIsland() {
             }
           }}
         />
+        
+        {/* Storage Usage Section */}
+        <div class="card bg-base-100 border border-base-200">
+          <div class="card-body">
+            <div class="flex items-center gap-2 mb-4">
+              <HardDrive class="w-5 h-5" />
+              <h3 class="card-title text-lg">Storage Usage</h3>
+            </div>
+            
+            {storageLoading ? (
+              <div class="flex items-center justify-center py-4">
+                <Loading size="sm" />
+              </div>
+            ) : storageInfo ? (
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>Used: {Math.round(storageInfo.used / (1024 * 1024))}MB</span>
+                    <span>Limit: {Math.round(storageInfo.limit / (1024 * 1024))}MB</span>
+                  </div>
+                  <Progress value={storageInfo.percentage} max={100} class="w-full" />
+                  <div class="text-xs text-base-content/60 mt-1">
+                    {storageInfo.fileCount} files • {Math.round(storageInfo.remaining / (1024 * 1024))}MB remaining
+                  </div>
+                  
+                  {/* File type breakdown */}
+                  {storageInfo.objectTypes && Object.keys(storageInfo.objectTypes).length > 0 && (
+                    <div class="mt-3 pt-3 border-t border-base-200/50">
+                      <div class="text-xs font-medium text-base-content/80 mb-2">File Types:</div>
+                      <div class="flex flex-wrap gap-2">
+                        {Object.entries(storageInfo.objectTypes).map(([type, count]) => (
+                          <div key={type} class="flex items-center gap-1 text-xs bg-base-200 px-2 py-1 rounded">
+                            <span class="capitalize">{type}s:</span>
+                            <span class="font-medium">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Usage Summary */}
+                <div class="grid grid-cols-2 gap-4 pt-3 border-t border-base-200/50">
+                  <div class="text-center">
+                    <div class="text-lg font-semibold text-primary">
+                      {Math.round(storageInfo.used / (1024 * 1024))}MB
+                    </div>
+                    <div class="text-xs text-base-content/60">Used</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-lg font-semibold text-success">
+                      {Math.round(storageInfo.remaining / (1024 * 1024))}MB
+                    </div>
+                    <div class="text-xs text-base-content/60">Available</div>
+                  </div>
+                </div>
+                
+                <div class="flex justify-between items-center pt-4 border-t border-base-200">
+                  <div class="text-sm">
+                    <div class="font-medium">Free Plan</div>
+                    <div class="text-base-content/60">
+                      {Math.round(storageInfo.limit / (1024 * 1024))}MB total storage
+                    </div>
+                  </div>
+                  <Button 
+                    color="primary" 
+                    size="sm" 
+                    onClick={handleUpgrade}
+                    class="flex items-center gap-2"
+                  >
+                    <Crown class="w-4 h-4" />
+                    Upgrade
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Alert color="warning">
+                <div class="text-sm">
+                  Unable to load storage information. Please try refreshing the page.
+                </div>
+              </Alert>
+            )}
+          </div>
+        </div>
+        
+        {/* Sign Out Section */}
+        <div class="card bg-base-100 border border-base-200">
+          <div class="card-body">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="card-title text-lg text-base-content">Account Actions</h3>
+                <p class="text-sm text-base-content/60 mt-1">
+                  Sign out of your account on this device
+                </p>
+              </div>
+              <Button 
+                color="error" 
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                class="flex items-center gap-2"
+              >
+                <LogOut class="w-4 h-4" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

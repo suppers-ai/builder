@@ -49,16 +49,7 @@ end $$;
 -- USERS TABLE
 -- =============================================
 
--- Users table that syncs with auth.users
-create table if not exists public.users (
-  id uuid references auth.users(id) on delete cascade primary key,
-  email text unique not null,
-  full_name text,
-  avatar_url text,
-  role text default 'user'::text not null,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+-- Note: Main users table is defined below in the TABLES section
 
 -- Function to handle user creation/updates
 create or replace function public.handle_new_user()
@@ -80,6 +71,20 @@ begin
     avatar_url = excluded.avatar_url,
     updated_at = now();
   return new;
+end;
+$$;
+
+-- Function to increment user storage usage
+create or replace function public.increment_user_storage(user_id uuid, size_delta bigint)
+returns void
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  update public.users 
+  set storage_used = storage_used + size_delta,
+      updated_at = now()
+  where id = user_id;
 end;
 $$;
 
@@ -127,6 +132,8 @@ create table if not exists public.users (
   avatar_url text,
   theme_id text,
   stripe_customer_id text,
+  storage_used bigint default 0 not null, -- Total storage used in bytes
+  storage_limit bigint default (250 * 1024 * 1024) not null, -- Storage limit in bytes (default 250MB)
   role user_role default 'user'::user_role not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -145,6 +152,20 @@ create table if not exists public.applications (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(owner_id, slug)
+);
+
+-- Storage objects table for all file types (recordings, images, documents, etc.)
+create table if not exists public.storage_objects (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  name text not null,
+  file_path text not null,
+  file_size bigint not null, -- File size in bytes
+  mime_type text not null, -- MIME type of the file
+  object_type text not null, -- Type category: 'recording', 'image', 'document', etc.
+  metadata jsonb default '{}'::jsonb not null, -- Flexible metadata (duration for videos, dimensions for images, etc.)
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- User access table for application sharing
@@ -188,6 +209,7 @@ create table if not exists public.custom_themes (
 -- Enable RLS on all tables
 alter table public.users enable row level security;
 alter table public.applications enable row level security;
+alter table public.storage_objects enable row level security;
 alter table public.user_access enable row level security;
 alter table public.application_reviews enable row level security;
 alter table public.custom_themes enable row level security;
@@ -204,6 +226,10 @@ drop policy if exists "Users can update their applications" on public.applicatio
 drop policy if exists "Users can delete their applications" on public.applications;
 drop policy if exists "Admins can view all applications" on public.applications;
 drop policy if exists "Users can view published applications" on public.applications;
+drop policy if exists "Users can view their own storage objects" on public.storage_objects;
+drop policy if exists "Users can insert their own storage objects" on public.storage_objects;
+drop policy if exists "Users can update their own storage objects" on public.storage_objects;
+drop policy if exists "Users can delete their own storage objects" on public.storage_objects;
 
 drop policy if exists "Users can view access to applications they own" on public.user_access;
 drop policy if exists "Users can view their own access grants" on public.user_access;
@@ -272,6 +298,23 @@ create policy "Users can delete their applications"
 
 -- Admin operations are handled at the application level
 -- No RLS policy needed for admin access to all applications
+
+-- Storage objects policies
+create policy "Users can view their own storage objects"
+  on public.storage_objects for select
+  using (user_id = auth.uid());
+
+create policy "Users can insert their own storage objects"
+  on public.storage_objects for insert
+  with check (user_id = auth.uid());
+
+create policy "Users can update their own storage objects"
+  on public.storage_objects for update
+  using (user_id = auth.uid());
+
+create policy "Users can delete their own storage objects"
+  on public.storage_objects for delete
+  using (user_id = auth.uid());
 
 -- User access policies
 create policy "Users can view access to applications they own"
@@ -429,6 +472,12 @@ drop policy if exists "Application collaborators can delete files" on storage.ob
 drop policy if exists "Users can update files in their own applications" on storage.objects;
 drop policy if exists "Application collaborators can update files" on storage.objects;
 drop policy if exists "Admins can manage all storage files" on storage.objects;
+
+-- Drop the simple folder-based policies
+drop policy if exists "Users can upload files to their own folders" on storage.objects;
+drop policy if exists "Users can view files in their own folders" on storage.objects;
+drop policy if exists "Users can update files in their own folders" on storage.objects;
+drop policy if exists "Users can delete files in their own folders" on storage.objects;
 
 -- Create simple storage policies that don't query any tables
 create policy "Users can upload files to their own folders"
