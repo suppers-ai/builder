@@ -22,7 +22,6 @@ export interface ProfileCardProps extends BaseComponentProps {
   success?: string | null;
   onUpdateProfile?: (data: UpdateUserData) => Promise<{ success?: boolean; error?: string }>;
   onUploadAvatar?: (file: File) => Promise<void>;
-  onSignOut?: () => void;
   onChangePassword?: (currentPassword: string, newPassword: string) => Promise<void>;
   // Popup-specific options
   isPopupMode?: boolean;
@@ -38,7 +37,6 @@ export function ProfileCard({
   success,
   onUpdateProfile,
   onUploadAvatar,
-  onSignOut,
   onChangePassword,
   isPopupMode = false,
   parentOrigin,
@@ -514,29 +512,8 @@ export function ProfileCard({
         )}
       </div>
 
-      {/* Logout Button */}
-      <div class="p-6 pt-4">
-        <Button
-          onClick={() => {
-            if (onSignOut) {
-              onSignOut();
-
-              // Communicate with parent window if in popup mode
-              if (isPopupMode && parentOrigin && window.parent) {
-                window.parent.postMessage({
-                  type: "sign-out",
-                }, parentOrigin);
-              }
-            }
-          }}
-          disabled={isLoading}
-          variant="outline"
-          color="error"
-          class="w-full"
-        >
-          Sign Out
-        </Button>
-      </div>
+      {/* Bottom Padding */}
+      <div class="pb-6"></div>
 
       {/* Edit Form Modal */}
       {isEditing && (

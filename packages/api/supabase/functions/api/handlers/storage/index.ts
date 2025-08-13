@@ -2,6 +2,8 @@ import { corsHeaders } from "../../lib/cors.ts";
 import { handleStorageUpload } from "./post-storage.ts";
 import { handleStorageGet } from "./get-storage.ts";
 import { handleStorageDelete } from "./delete-storage.ts";
+import { handleStorageDownload } from "./download-storage.ts";
+import { handleUserStorageGet } from "./get-user-storage.ts";
 
 interface StorageContext {
   user: any;
@@ -18,7 +20,7 @@ export async function handleStorage(
   
   if (pathSegments.length === 0) {
     return new Response(
-      JSON.stringify({ error: "Application slug is required" }),
+      JSON.stringify({ error: "Storage path is required" }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -26,10 +28,32 @@ export async function handleStorage(
     );
   }
 
-  const applicationSlug = pathSegments[0];
-  const filePath = pathSegments.slice(1).join("/");
+  const storageType = pathSegments[0];
+  const resourcePath = pathSegments.slice(1).join("/");
 
-  console.log("🗄️ Storage request:", req.method, "slug:", applicationSlug, "path:", filePath);
+  console.log("🗄️ Unified storage request:", req.method, "type:", storageType, "path:", resourcePath);
+
+  // Handle user storage info (special case)
+  if (storageType === "user") {
+    // GET /storage/user - Get user storage info
+    if (req.method === "GET" && pathSegments.length === 1) {
+      return await handleUserStorageGet(req, context);
+    }
+    return new Response(
+      JSON.stringify({ error: `Method ${req.method} not allowed for user storage` }),
+      {
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
+  }
+
+  // All other paths are treated as application storage (generic pattern)
+  // Examples: /storage/recorder/file.webm, /storage/paint-app/image.png, etc.
+  const applicationSlug = storageType;
+  const filePath = resourcePath;
+
+  console.log("🗄️ Application storage request:", req.method, "app:", applicationSlug, "path:", filePath);
 
   try {
     switch (req.method) {
@@ -38,7 +62,16 @@ export async function handleStorage(
         return await handleStorageUpload(req, { ...context, applicationSlug, filePath });
       
       case "GET":
-        return await handleStorageGet(req, { ...context, applicationSlug, filePath });
+      case "HEAD":
+        // Check if this is a download request (has ?download=true parameter)
+        const url = new URL(req.url);
+        const isDownload = url.searchParams.get("download") === "true";
+        
+        if (isDownload) {
+          return await handleStorageDownload(req, { ...context, applicationSlug, filePath });
+        } else {
+          return await handleStorageGet(req, { ...context, applicationSlug, filePath });
+        }
       
       case "DELETE":
         return await handleStorageDelete(req, { ...context, applicationSlug, filePath });

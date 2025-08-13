@@ -28,7 +28,7 @@ export async function handleUserStorageGet(
     // Get user's storage limit and usage from database
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('storage_used, storage_limit')
+      .select('storage_used, storage_limit, bandwidth_used, bandwidth_limit')
       .eq('id', user.id)
       .single();
 
@@ -45,6 +45,8 @@ export async function handleUserStorageGet(
 
     const userStorageLimit = userData.storage_limit || (250 * 1024 * 1024); // Default 250MB
     const userStorageUsed = userData.storage_used || 0;
+    const userBandwidthLimit = userData.bandwidth_limit || (250 * 1024 * 1024); // Default 250MB per month
+    const userBandwidthUsed = userData.bandwidth_used || 0;
 
     // Get storage objects for detailed breakdown
     const { data: storageObjects, error: objectsError } = await supabase
@@ -76,12 +78,21 @@ export async function handleUserStorageGet(
       }, {} as Record<string, number>),
     };
 
+    const bandwidthInfo = {
+      used: userBandwidthUsed,
+      limit: userBandwidthLimit,
+      percentage: Math.round((userBandwidthUsed / userBandwidthLimit) * 100),
+      remaining: userBandwidthLimit - userBandwidthUsed,
+    };
+
     console.log("✅ Storage usage calculated for user:", user.id, "used:", userStorageUsed, "limit:", userStorageLimit);
+    console.log("✅ Bandwidth usage calculated for user:", user.id, "used:", userBandwidthUsed, "limit:", userBandwidthLimit);
 
     return new Response(
       JSON.stringify({
         success: true,
-        storage: storageInfo
+        storage: storageInfo,
+        bandwidth: bandwidthInfo
       }),
       {
         status: 200,

@@ -30,7 +30,7 @@ export async function handleStorageGet(
   console.log("📥 Get request for app:", applicationSlug, "file:", filePath, "list:", listFiles);
 
   try {
-    // Verify user has access to this application
+    // All applications require database entries - check database for access control
     const { data: application, error: appError } = await supabase
       .from("applications")
       .select("id, owner_id, slug")
@@ -51,6 +51,7 @@ export async function handleStorageGet(
     // Check if user is owner or has read access
     const isOwner = application.owner_id === user.id;
     let hasReadAccess = isOwner;
+    const applicationId = application.id;
 
     if (!isOwner) {
       const { data: access } = await supabase
@@ -75,21 +76,20 @@ export async function handleStorageGet(
     }
 
     if (listFiles) {
-      // List files in the user's application folder
-      const userAppFolder = `${user.id}/${applicationSlug}`;
-      console.log("📋 Listing files for user app folder:", userAppFolder);
+      // List files from storage_objects table for accurate tracking
+      console.log("📋 Listing files for user:", user.id, "application:", applicationSlug);
       
-      const { data: files, error } = await supabase.storage
-        .from("application-files")
-        .list(userAppFolder, {
-          limit: 100,
-          offset: 0,
-        });
+      const { data: storageObjects, error } = await supabase
+        .from('storage_objects')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('object_type', applicationSlug)
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error("❌ List files error:", error);
+        console.error("❌ Failed to fetch storage objects:", error.message);
         return new Response(
-          JSON.stringify({ error: error.message }),
+          JSON.stringify({ error: "Failed to fetch files from database" }),
           {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -97,31 +97,34 @@ export async function handleStorageGet(
         );
       }
 
-      // Get public URLs for all files
-      const filesWithUrls = files.map(file => {
-        const fullPath = `${user.id}/${applicationSlug}/${file.name}`;
-        const { data: publicUrlData } = supabase.storage
-          .from("application-files")
-          .getPublicUrl(fullPath);
+      // Calculate total storage used for this application
+      const totalStorage = (storageObjects || []).reduce((total, obj) => {
+        return total + (obj.file_size || 0);
+      }, 0);
 
+      // Format files without complex preview URLs
+      const filesWithUrls = (storageObjects || []).map(obj => {
         return {
-          name: file.name,
-          size: file.metadata?.size,
-          contentType: file.metadata?.mimetype,
-          lastModified: file.updated_at,
-          publicUrl: publicUrlData.publicUrl,
-          path: fullPath,
+          id: obj.id,
+          name: obj.name,
+          size: obj.file_size,
+          contentType: obj.mime_type,
+          lastModified: obj.updated_at,
+          createdAt: obj.created_at,
+          path: obj.file_path,
+          metadata: obj.metadata,
         };
       });
 
-      console.log("✅ Found", files.length, "files");
+      console.log("✅ Found", storageObjects.length, "files");
 
       return new Response(
         JSON.stringify({
           success: true,
           data: {
             files: filesWithUrls,
-            total: files.length,
+            total: storageObjects.length,
+            totalStorage: totalStorage,
           },
         }),
         {
@@ -144,103 +147,46 @@ export async function handleStorageGet(
       const fullPath = `${user.id}/${applicationSlug}/${filePath}`;
       console.log("📄 Getting file:", fullPath);
 
-      // Check if we should return file content or just metadata
-      const includeContent = url.searchParams.get("content") === "true";
+      // Return file metadata only - no content download from this endpoint
+      const { data: storageObject, error: fetchError } = await supabase
+        .from('storage_objects')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('file_path', fullPath)
+        .single();
 
-      if (includeContent) {
-        // Download and return file content
-        const { data, error } = await supabase.storage
-          .from("application-files")
-          .download(fullPath);
-
-        if (error) {
-          console.error("❌ Download error:", error);
-          if (error.message.includes("Object not found")) {
-            return new Response(
-              JSON.stringify({ error: "File not found" }),
-              {
-                status: 404,
-                headers: { ...corsHeaders, "Content-Type": "application/json" },
-              },
-            );
-          }
-          return new Response(
-            JSON.stringify({ error: error.message }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            },
-          );
-        }
-
-        // Return file content with appropriate headers
-        const contentType = data.type || "application/octet-stream";
-        console.log("✅ File downloaded:", fullPath, "type:", contentType);
-
-        return new Response(data, {
-          status: 200,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": contentType,
-            "Content-Disposition": `attachment; filename="${filePath}"`,
-          },
-        });
-      } else {
-        // Return file metadata and public URL
-        const { data: publicUrlData } = supabase.storage
-          .from("application-files")
-          .getPublicUrl(fullPath);
-
-        // Get file info (this will error if file doesn't exist)
-        const userAppFolder = `${user.id}/${applicationSlug}`;
-        const { data, error } = await supabase.storage
-          .from("application-files")
-          .list(userAppFolder, {
-            search: filePath.split("/").pop(), // Get just the filename
-          });
-
-        if (error) {
-          console.error("❌ File info error:", error);
-          return new Response(
-            JSON.stringify({ error: error.message }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            },
-          );
-        }
-
-        const fileInfo = data.find(f => f.name === filePath.split("/").pop());
-        if (!fileInfo) {
-          return new Response(
-            JSON.stringify({ error: "File not found" }),
-            {
-              status: 404,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            },
-          );
-        }
-
-        console.log("✅ File info retrieved:", fullPath);
-
+      if (fetchError || !storageObject) {
+        console.error("❌ File not found:", fetchError?.message);
         return new Response(
-          JSON.stringify({
-            success: true,
-            data: {
-              name: fileInfo.name,
-              path: fullPath,
-              size: fileInfo.metadata?.size,
-              contentType: fileInfo.metadata?.mimetype,
-              lastModified: fileInfo.updated_at,
-              publicUrl: publicUrlData.publicUrl,
-            },
-          }),
+          JSON.stringify({ error: "File not found" }),
           {
-            status: 200,
+            status: 404,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           },
         );
       }
+
+      console.log("✅ File info retrieved:", fullPath);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            id: storageObject.id,
+            name: storageObject.name,
+            path: storageObject.file_path,
+            size: storageObject.file_size,
+            contentType: storageObject.mime_type,
+            lastModified: storageObject.updated_at,
+            createdAt: storageObject.created_at,
+            metadata: storageObject.metadata,
+          },
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
     }
   } catch (error) {
     console.error("❌ Storage get error:", error);

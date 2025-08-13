@@ -10,6 +10,10 @@ interface Config {
     apiUrl: string;
     supabaseUrl: string;
     supabaseAnonKey: string;
+    storage: {
+        maxFileSize: number; // Maximum file size in bytes (50MB)
+        defaultStorageLimit: number; // Default storage limit for new users (250MB)
+    };
 }
 
 // TODO: Read from environment variables to set up production and development environments
@@ -25,6 +29,10 @@ const config: Config = {
     apiUrl: "http://127.0.0.1:54321/functions/v1",
     supabaseUrl: "http://localhost:54321",
     supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
+    storage: {
+        maxFileSize: 50 * 1024 * 1024, // 50MB in bytes
+        defaultStorageLimit: 250 * 1024 * 1024, // 250MB in bytes for new users
+    },
 }
 
 export default config;

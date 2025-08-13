@@ -51,6 +51,28 @@ end $$;
 
 -- Note: Main users table is defined below in the TABLES section
 
+-- Add bandwidth columns if they don't exist (for backward compatibility)
+do $$ 
+begin
+    if not exists (
+        select 1 from information_schema.columns 
+        where table_schema = 'public' 
+        and table_name = 'users' 
+        and column_name = 'bandwidth_used'
+    ) then
+        alter table public.users add column bandwidth_used bigint default 0 not null;
+    end if;
+    
+    if not exists (
+        select 1 from information_schema.columns 
+        where table_schema = 'public' 
+        and table_name = 'users' 
+        and column_name = 'bandwidth_limit'
+    ) then
+        alter table public.users add column bandwidth_limit bigint default (250 * 1024 * 1024) not null;
+    end if;
+end $$;
+
 -- Function to handle user creation/updates
 create or replace function public.handle_new_user()
 returns trigger
@@ -85,6 +107,33 @@ begin
   set storage_used = storage_used + size_delta,
       updated_at = now()
   where id = user_id;
+end;
+$$;
+
+-- Function to increment user bandwidth usage
+create or replace function public.increment_user_bandwidth(user_id uuid, bandwidth_delta bigint)
+returns void
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  update public.users 
+  set bandwidth_used = bandwidth_used + bandwidth_delta,
+      updated_at = now()
+  where id = user_id;
+end;
+$$;
+
+-- Function to reset all users' monthly bandwidth usage (for cronjob)
+create or replace function public.reset_monthly_bandwidth()
+returns void
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  update public.users 
+  set bandwidth_used = 0,
+      updated_at = now();
 end;
 $$;
 
@@ -134,6 +183,8 @@ create table if not exists public.users (
   stripe_customer_id text,
   storage_used bigint default 0 not null, -- Total storage used in bytes
   storage_limit bigint default (250 * 1024 * 1024) not null, -- Storage limit in bytes (default 250MB)
+  bandwidth_used bigint default 0 not null, -- Total bandwidth used in bytes (monthly)
+  bandwidth_limit bigint default (250 * 1024 * 1024) not null, -- Bandwidth limit in bytes (default 250MB per month)
   role user_role default 'user'::user_role not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null

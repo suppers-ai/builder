@@ -9,6 +9,56 @@ interface StorageUploadContext {
   filePath: string;
 }
 
+function validateFile(file: File, applicationSlug: string) {
+  const maxSize = 500 * 1024 * 1024; // 500MB
+
+  if (file.size > maxSize) {
+    const maxSizeMB = Math.round(maxSize / (1024 * 1024));
+    const fileSizeMB = Math.round(file.size / (1024 * 1024));
+    throw new Error(`File too large: ${fileSizeMB}MB. Maximum allowed: ${maxSizeMB}MB`);
+  }
+
+  // Application-specific validation
+  if (applicationSlug === "recorder") {
+    const allowedTypes = ['video/webm', 'video/mp4', 'video/avi', 'video/mov', 'video/quicktime'];
+    // Check if file type starts with any allowed type (to handle codec specifications like video/webm;codecs=vp9)
+    const isValidType = allowedTypes.some(type => file.type.startsWith(type));
+    
+    if (!isValidType) {
+      throw new Error(`Invalid file type: ${file.type}. Allowed types: ${allowedTypes.join(', ')}`);
+    }
+  }
+  // Add validation for other built-in apps as needed
+}
+
+async function validateStorageLimit(supabase: SupabaseClient, userId: string, fileSize: number) {
+  // Get user's current storage usage and limit
+  const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('storage_used, storage_limit')
+    .eq('id', userId)
+    .single();
+
+  if (userError) {
+    throw new Error("Failed to check storage limits");
+  }
+
+  const currentStorage = userData.storage_used || 0;
+  const storageLimit = userData.storage_limit || (250 * 1024 * 1024); // Default 250MB
+
+  // Check if this upload would exceed the limit
+  if (currentStorage + fileSize > storageLimit) {
+    const usedMB = Math.round(currentStorage / (1024 * 1024));
+    const limitMB = Math.round(storageLimit / (1024 * 1024));
+    const uploadMB = Math.round(fileSize / (1024 * 1024));
+    const remainingMB = Math.round((storageLimit - currentStorage) / (1024 * 1024));
+    
+    throw new Error(
+      `Storage limit exceeded. You have used ${usedMB}MB of ${limitMB}MB. This upload (${uploadMB}MB) would exceed your remaining ${remainingMB}MB.`
+    );
+  }
+}
+
 export async function handleStorageUpload(
   req: Request,
   context: StorageUploadContext,
@@ -28,7 +78,7 @@ export async function handleStorageUpload(
   console.log("📤 Upload request for app:", applicationSlug, "file:", filePath);
 
   try {
-    // Verify user has access to this application
+    // All applications require database entries - check database for access control
     const { data: application, error: appError } = await supabase
       .from("applications")
       .select("id, owner_id, slug")
@@ -49,6 +99,7 @@ export async function handleStorageUpload(
     // Check if user is owner or has write access
     const isOwner = application.owner_id === user.id;
     let hasWriteAccess = isOwner;
+    const applicationId = application.id;
 
     if (!isOwner) {
       const { data: access } = await supabase
@@ -90,6 +141,34 @@ export async function handleStorageUpload(
         );
       }
 
+      // Validate file based on application type
+      try {
+        validateFile(file, applicationSlug);
+      } catch (error) {
+        console.error("❌ File validation failed:", error.message);
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
+      // Validate storage limits before upload
+      try {
+        await validateStorageLimit(supabase, user.id, file.size);
+      } catch (error) {
+        console.error("❌ Storage limit validation failed:", error.message);
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
+
       const fileBuffer = await file.arrayBuffer();
       const fileName = filePath || file.name;
       const fullPath = `${user.id}/${applicationSlug}/${fileName}`;
@@ -115,6 +194,44 @@ export async function handleStorageUpload(
         );
       }
 
+      // Create storage object record in database for tracking
+      const { data: storageObject, error: dbError } = await supabase
+        .from('storage_objects')
+        .insert({
+          user_id: user.id,
+          name: fileName,
+          file_path: fullPath,
+          file_size: file.size,
+          mime_type: file.type,
+          object_type: applicationSlug, // Use application slug as object type
+          metadata: {
+            originalName: file.name,
+            uploadedAt: new Date().toISOString(),
+            application: applicationSlug
+          }
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error("❌ Failed to create storage object record:", dbError.message);
+        // Continue anyway, file is uploaded, just missing DB record
+      }
+
+      // Update user's storage usage
+      if (storageObject || !dbError) {
+        const { error: updateError } = await supabase.rpc('increment_user_storage', {
+          user_id: user.id,
+          size_delta: file.size
+        });
+          
+        if (updateError) {
+          console.error("❌ Failed to update user storage usage:", updateError.message);
+        } else {
+          console.log("✅ User storage usage updated:", file.size, "bytes for user:", user.id);
+        }
+      }
+
       // Get public URL
       const { data: publicUrlData } = supabase.storage
         .from("application-files")
@@ -125,6 +242,12 @@ export async function handleStorageUpload(
       return new Response(
         JSON.stringify({
           success: true,
+          id: storageObject?.id || null,
+          filename: fileName,
+          filePath: fullPath,
+          size: file.size,
+          type: file.type,
+          uploadedAt: new Date().toISOString(),
           data: {
             path: data.path,
             publicUrl: publicUrlData.publicUrl,

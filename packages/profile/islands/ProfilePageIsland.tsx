@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { UpdateUserData, type User } from "@suppers/auth-client";
 import { ProfileCard, Progress, Button, Alert, Loading } from "@suppers/ui-lib";
 import { getCurrentTheme, applyTheme } from "@suppers/shared/utils";
-import { HardDrive, Crown, LogOut } from "lucide-preact";
+import { HardDrive, Crown, LogOut, Wifi } from "lucide-preact";
 import { getAuthClient } from "../lib/auth.ts";
 
 // Get the profile auth client (direct Supabase connection)
@@ -18,12 +18,20 @@ interface StorageInfo {
   objectTypes?: Record<string, number>;
 }
 
+interface BandwidthInfo {
+  used: number;
+  limit: number;
+  percentage: number;
+  remaining: number;
+}
+
 export default function ProfilePageIsland() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [storageInfo, setStorageInfo] = useState<StorageInfo | null>(null);
+  const [bandwidthInfo, setBandwidthInfo] = useState<BandwidthInfo | null>(null);
   const [storageLoading, setStorageLoading] = useState(false);
 
   // Fetch storage information
@@ -41,7 +49,7 @@ export default function ProfilePageIsland() {
       }
 
       // Call the centralized storage API
-      const response = await fetch('http://127.0.0.1:54321/functions/v1/api/v1/user-storage', {
+      const response = await fetch('http://127.0.0.1:54321/functions/v1/api/v1/storage/user', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -53,6 +61,7 @@ export default function ProfilePageIsland() {
         const data = await response.json();
         if (data.success) {
           setStorageInfo(data.storage);
+          setBandwidthInfo(data.bandwidth);
         }
       }
     } catch (error) {
@@ -334,67 +343,51 @@ export default function ProfilePageIsland() {
           }}
         />
         
-        {/* Storage Usage Section */}
+        {/* Usage Section */}
         <div class="card bg-base-100 border border-base-200">
           <div class="card-body">
             <div class="flex items-center gap-2 mb-4">
               <HardDrive class="w-5 h-5" />
-              <h3 class="card-title text-lg">Storage Usage</h3>
+              <h3 class="card-title text-lg">Usage</h3>
             </div>
             
             {storageLoading ? (
               <div class="flex items-center justify-center py-4">
                 <Loading size="sm" />
               </div>
-            ) : storageInfo ? (
-              <div class="space-y-4">
+            ) : storageInfo && bandwidthInfo ? (
+              <div class="space-y-6">
+                {/* Storage Usage */}
                 <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span class="font-medium">Storage</span>
+                    <span>{storageInfo.fileCount} files</span>
+                  </div>
                   <div class="flex justify-between text-sm mb-2">
                     <span>Used: {Math.round(storageInfo.used / (1024 * 1024))}MB</span>
                     <span>Limit: {Math.round(storageInfo.limit / (1024 * 1024))}MB</span>
                   </div>
                   <Progress value={storageInfo.percentage} max={100} class="w-full" />
-                  <div class="text-xs text-base-content/60 mt-1">
-                    {storageInfo.fileCount} files • {Math.round(storageInfo.remaining / (1024 * 1024))}MB remaining
-                  </div>
-                  
-                  {/* File type breakdown */}
-                  {storageInfo.objectTypes && Object.keys(storageInfo.objectTypes).length > 0 && (
-                    <div class="mt-3 pt-3 border-t border-base-200/50">
-                      <div class="text-xs font-medium text-base-content/80 mb-2">File Types:</div>
-                      <div class="flex flex-wrap gap-2">
-                        {Object.entries(storageInfo.objectTypes).map(([type, count]) => (
-                          <div key={type} class="flex items-center gap-1 text-xs bg-base-200 px-2 py-1 rounded">
-                            <span class="capitalize">{type}s:</span>
-                            <span class="font-medium">{count}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
                 
-                {/* Usage Summary */}
-                <div class="grid grid-cols-2 gap-4 pt-3 border-t border-base-200/50">
-                  <div class="text-center">
-                    <div class="text-lg font-semibold text-primary">
-                      {Math.round(storageInfo.used / (1024 * 1024))}MB
-                    </div>
-                    <div class="text-xs text-base-content/60">Used</div>
+                {/* Bandwidth Usage */}
+                <div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span class="font-medium">Bandwidth</span>
+                    <span class="text-xs text-base-content/60">(Monthly)</span>
                   </div>
-                  <div class="text-center">
-                    <div class="text-lg font-semibold text-success">
-                      {Math.round(storageInfo.remaining / (1024 * 1024))}MB
-                    </div>
-                    <div class="text-xs text-base-content/60">Available</div>
+                  <div class="flex justify-between text-sm mb-2">
+                    <span>Used: {Math.round(bandwidthInfo.used / (1024 * 1024))}MB</span>
+                    <span>Limit: {Math.round(bandwidthInfo.limit / (1024 * 1024))}MB</span>
                   </div>
+                  <Progress value={bandwidthInfo.percentage} max={100} class="w-full" />
                 </div>
                 
                 <div class="flex justify-between items-center pt-4 border-t border-base-200">
                   <div class="text-sm">
                     <div class="font-medium">Free Plan</div>
                     <div class="text-base-content/60">
-                      {Math.round(storageInfo.limit / (1024 * 1024))}MB total storage
+                      {Math.round(storageInfo.limit / (1024 * 1024))}MB storage • {Math.round(bandwidthInfo.limit / (1024 * 1024))}MB monthly bandwidth
                     </div>
                   </div>
                   <Button 
@@ -411,7 +404,7 @@ export default function ProfilePageIsland() {
             ) : (
               <Alert color="warning">
                 <div class="text-sm">
-                  Unable to load storage information. Please try refreshing the page.
+                  Unable to load usage information. Please try refreshing the page.
                 </div>
               </Alert>
             )}
@@ -421,24 +414,18 @@ export default function ProfilePageIsland() {
         {/* Sign Out Section */}
         <div class="card bg-base-100 border border-base-200">
           <div class="card-body">
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="card-title text-lg text-base-content">Account Actions</h3>
-                <p class="text-sm text-base-content/60 mt-1">
-                  Sign out of your account on this device
-                </p>
-              </div>
-              <Button 
-                color="error" 
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                class="flex items-center gap-2"
-              >
-                <LogOut class="w-4 h-4" />
-                Sign Out
-              </Button>
+            <div class="text-center mb-4">
+              <h3 class="card-title text-lg text-base-content">Account Actions</h3>
             </div>
+            <Button 
+              color="error" 
+              variant="outline"
+              onClick={handleSignOut}
+              class="w-full flex items-center justify-center gap-2"
+            >
+              <LogOut class="w-4 h-4" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </div>

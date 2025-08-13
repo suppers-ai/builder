@@ -59,7 +59,15 @@ export type Database = {
           reviewer_id?: string
           status?: Database["public"]["Enums"]["review_status"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "application_reviews_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       applications: {
         Row: {
@@ -133,6 +141,45 @@ export type Database = {
         }
         Relationships: []
       }
+      storage_objects: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size: number
+          id: string
+          metadata: Json
+          mime_type: string
+          name: string
+          object_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size: number
+          id?: string
+          metadata?: Json
+          mime_type: string
+          name: string
+          object_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          metadata?: Json
+          mime_type?: string
+          name?: string
+          object_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_access: {
         Row: {
           access_level: Database["public"]["Enums"]["access_level"]
@@ -158,6 +205,50 @@ export type Database = {
           id?: string
           user_id?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "user_access_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paintings: {
+        Row: {
+          created_at: string
+          drawing_data: Json
+          file_size: number
+          id: string
+          is_public: boolean
+          name: string
+          thumbnail: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          drawing_data: Json
+          file_size?: number
+          id?: string
+          is_public?: boolean
+          name: string
+          thumbnail?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          drawing_data?: Json
+          file_size?: number
+          id?: string
+          is_public?: boolean
+          name?: string
+          thumbnail?: string | null
+          updated_at?: string
+          user_id?: string
+        }
         Relationships: []
       }
       users: {
@@ -170,6 +261,8 @@ export type Database = {
           id: string
           last_name: string | null
           role: Database["public"]["Enums"]["user_role"]
+          storage_limit: number
+          storage_used: number
           stripe_customer_id: string | null
           theme_id: string | null
           updated_at: string
@@ -183,6 +276,8 @@ export type Database = {
           id: string
           last_name?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          storage_limit?: number
+          storage_used?: number
           stripe_customer_id?: string | null
           theme_id?: string | null
           updated_at?: string
@@ -196,6 +291,8 @@ export type Database = {
           id?: string
           last_name?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          storage_limit?: number
+          storage_used?: number
           stripe_customer_id?: string | null
           theme_id?: string | null
           updated_at?: string
@@ -207,9 +304,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: {
-        Args: { user_id: string }
-        Returns: boolean
+      increment_user_storage: {
+        Args: { size_delta: number; user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
