@@ -3,6 +3,7 @@ import { handleStorageUpload } from "./post-storage.ts";
 import { handleStorageGet } from "./get-storage.ts";
 import { handleStorageDelete } from "./delete-storage.ts";
 import { handleStorageDownload } from "./download-storage.ts";
+import { handleStorageShare } from "./share-storage.ts";
 import { handleUserStorageGet } from "./get-user-storage.ts";
 
 interface StorageContext {
@@ -72,6 +73,10 @@ export async function handleStorage(
         } else {
           return await handleStorageGet(req, { ...context, applicationSlug, filePath });
         }
+      
+      case "PATCH":
+        // Handle sharing operations
+        return await handleStorageShare(req, { ...context, applicationSlug, filePath });
       
       case "DELETE":
         return await handleStorageDelete(req, { ...context, applicationSlug, filePath });

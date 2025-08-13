@@ -113,6 +113,8 @@ export async function handleStorageGet(
           createdAt: obj.created_at,
           path: obj.file_path,
           metadata: obj.metadata,
+          isPublic: obj.is_public || false,
+          shareToken: obj.share_token || null,
         };
       });
 
@@ -180,6 +182,8 @@ export async function handleStorageGet(
             lastModified: storageObject.updated_at,
             createdAt: storageObject.created_at,
             metadata: storageObject.metadata,
+            isPublic: storageObject.is_public || false,
+            shareToken: storageObject.share_token || null,
           },
         }),
         {

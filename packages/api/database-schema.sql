@@ -215,6 +215,8 @@ create table if not exists public.storage_objects (
   mime_type text not null, -- MIME type of the file
   object_type text not null, -- Type category: 'recording', 'image', 'document', etc.
   metadata jsonb default '{}'::jsonb not null, -- Flexible metadata (duration for videos, dimensions for images, etc.)
+  is_public boolean default false not null, -- Public access without authentication
+  share_token text unique, -- Random token for private sharing
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -354,6 +356,14 @@ create policy "Users can delete their applications"
 create policy "Users can view their own storage objects"
   on public.storage_objects for select
   using (user_id = auth.uid());
+
+create policy "Anyone can view public storage objects"
+  on public.storage_objects for select
+  using (is_public = true);
+
+create policy "Anyone can view shared storage objects with token"
+  on public.storage_objects for select
+  using (share_token is not null);
 
 create policy "Users can insert their own storage objects"
   on public.storage_objects for insert
