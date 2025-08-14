@@ -13,6 +13,7 @@ export interface Recording {
   publicUrl?: string;
   isPublic: boolean;
   shareId?: string;
+  shareToken?: string;
   mimeType: string;
   thumbnail?: string;
 }

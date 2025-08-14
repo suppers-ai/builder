@@ -5,7 +5,7 @@ import { handleApplications } from "./handlers/applications/index.ts";
 import { handleUserRequest } from "./handlers/user/index.ts";
 import { handleAccess } from "./handlers/access/index.ts";
 import { handleStorage } from "./handlers/storage/index.ts";
-import { handleUserStorageGet } from "./handlers/user-storage/index.ts";
+import { handleShare } from "./handlers/share/index.ts";
 
 console.log("🚀 API Edge Function loaded");
 
@@ -43,9 +43,22 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get authentication from either Authorization header or X-User-ID header
+    // Get authentication from either Authorization header, X-User-ID header, or query parameters
     const authHeader = req.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "");
+    let token = authHeader?.replace("Bearer ", "");
+    let userId = req.headers.get("X-User-ID");
+
+    // If not in headers, check query parameters (for video content requests)
+    if (!token || !userId) {
+      const url = new URL(req.url);
+      const queryToken = url.searchParams.get("token");
+      const queryUserId = url.searchParams.get("userId");
+      
+      if (queryToken && queryUserId) {
+        token = queryToken;
+        userId = queryUserId;
+      }
+    }
 
     let user = null;
     let supabase = supabaseAdmin; // Default to admin client
@@ -75,14 +88,20 @@ Deno.serve(async (req: Request) => {
     }
     // No authentication provided
     else {
-      console.log("❌ No authentication provided for protected endpoint:", resource, rest);
-      return new Response(
-        JSON.stringify({ error: "Authentication required (Bearer token or X-User-ID)" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      // Share endpoints are public and don't require authentication
+      if (resource === "share") {
+        console.log("✅ Public share endpoint, no authentication required");
+        user = null; // No user for public access
+      } else {
+        console.log("❌ No authentication provided for protected endpoint:", resource, rest);
+        return new Response(
+          JSON.stringify({ error: "Authentication required (Bearer token or X-User-ID)" }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
+      }
     }
 
     // Use admin client for all operations, but pass user context
@@ -115,26 +134,16 @@ Deno.serve(async (req: Request) => {
         response = await handleStorage(req, { user, supabase, supabaseAdmin, pathSegments: rest });
         break;
 
-      case "user-storage":
-        // Only support GET for user storage info
-        if (req.method === "GET") {
-          response = await handleUserStorageGet(req, { user, supabase });
-        } else {
-          response = new Response(
-            JSON.stringify({ error: `Method ${req.method} not supported for user-storage` }),
-            {
-              status: 405,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            },
-          );
-        }
+      case "share":
+        response = await handleShare(req, { user, supabase, supabaseAdmin, pathSegments: rest });
         break;
+
 
       default:
         response = new Response(
           JSON.stringify({
             error:
-              `Unknown resource: ${resource}. Available resources: applications, user, access, storage, user-storage. Auth is handled directly by Supabase.`,
+              `Unknown resource: ${resource}. Available resources: applications, user, access, storage, share. Auth is handled directly by Supabase.`,
           }),
           {
             status: 404,

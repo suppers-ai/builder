@@ -205,7 +205,7 @@ create table if not exists public.applications (
   unique(owner_id, slug)
 );
 
--- Storage objects table for all file types (recordings, images, documents, etc.)
+-- Storage objects table for all file types (recordings, images, documents, paintings, etc.)
 create table if not exists public.storage_objects (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references auth.users(id) on delete cascade not null,
@@ -213,8 +213,12 @@ create table if not exists public.storage_objects (
   file_path text not null,
   file_size bigint not null, -- File size in bytes
   mime_type text not null, -- MIME type of the file
-  object_type text not null, -- Type category: 'recording', 'image', 'document', etc.
-  metadata jsonb default '{}'::jsonb not null, -- Flexible metadata (duration for videos, dimensions for images, etc.)
+  object_type text not null, -- Type category: 'recording', 'image', 'document', 'painting', etc.
+  metadata jsonb default '{}'::jsonb not null, -- Flexible metadata (duration for videos, dimensions for images, drawing_data for paintings, etc.)
+  thumbnail_url text, -- URL to thumbnail image (not base64)
+  is_public boolean default false not null, -- Public access without authentication
+  share_token text unique, -- Random token for private sharing
+  application_id uuid references public.applications(id) on delete cascade, -- Optional application association
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -355,6 +359,14 @@ create policy "Users can view their own storage objects"
   on public.storage_objects for select
   using (user_id = auth.uid());
 
+create policy "Anyone can view public storage objects"
+  on public.storage_objects for select
+  using (is_public = true);
+
+create policy "Anyone can view shared storage objects with token"
+  on public.storage_objects for select
+  using (share_token is not null);
+
 create policy "Users can insert their own storage objects"
   on public.storage_objects for insert
   with check (user_id = auth.uid());
@@ -489,6 +501,14 @@ create index if not exists idx_applications_status on public.applications(status
 create index if not exists idx_applications_slug on public.applications(slug);
 create index if not exists idx_applications_template_id on public.applications(template_id);
 create index if not exists idx_applications_created_at on public.applications(created_at);
+
+-- Storage objects indexes
+create index if not exists idx_storage_objects_user_id on public.storage_objects(user_id);
+create index if not exists idx_storage_objects_object_type on public.storage_objects(object_type);
+create index if not exists idx_storage_objects_application_id on public.storage_objects(application_id);
+create index if not exists idx_storage_objects_user_created on public.storage_objects(user_id, created_at desc);
+create index if not exists idx_storage_objects_public_created on public.storage_objects(is_public, created_at desc) where is_public = true;
+create index if not exists idx_storage_objects_type_user on public.storage_objects(object_type, user_id);
 
 -- User access indexes
 create index if not exists idx_user_access_user_id on public.user_access(user_id);
