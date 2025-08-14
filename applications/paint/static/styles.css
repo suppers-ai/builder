@@ -1,0 +1,270 @@
+@import "tailwindcss";
+
+/* Custom styles for the paint application */
+
+/* Canvas styles with enhanced visual feedback */
+.paint-canvas {
+  cursor: crosshair;
+  touch-action: none; /* Prevent scrolling while drawing */
+  border-radius: 0.5rem;
+  border: 2px solid hsl(var(--b3));
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.paint-canvas:focus {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.paint-canvas-container {
+  /* Ensure container is responsive */
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  position: relative;
+}
+
+/* Canvas loading state */
+.paint-canvas-loading {
+  background: linear-gradient(90deg, hsl(var(--b2)) 25%, hsl(var(--b3)) 50%, hsl(var(--b2)) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Enhanced toolbar styles */
+.paint-toolbar {
+  @apply bg-base-200 p-4 rounded-lg shadow-lg border border-base-300;
+  backdrop-filter: blur(10px);
+  background: hsl(var(--b2) / 0.95);
+}
+
+.paint-tool-button {
+  @apply btn btn-sm btn-outline transition-all duration-200;
+  border-width: 1px;
+}
+
+.paint-tool-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.paint-tool-button:active {
+  transform: translateY(0);
+}
+
+.paint-tool-button.active {
+  @apply btn-primary;
+  box-shadow: 0 0 0 2px hsl(var(--p) / 0.2);
+}
+
+.paint-tool-button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+  transform: none !important;
+}
+
+/* Color palette enhancements */
+.color-palette-button {
+  @apply w-8 h-8 rounded-full border-2 border-base-300 cursor-pointer transition-all duration-200;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.color-palette-button:hover {
+  transform: scale(1.1);
+  border-color: hsl(var(--p));
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.color-palette-button.selected {
+  border-color: hsl(var(--p));
+  border-width: 3px;
+  box-shadow: 0 0 0 2px hsl(var(--p) / 0.3);
+}
+
+/* Width slider enhancements */
+.width-slider {
+  @apply range range-primary;
+  background: linear-gradient(to right, hsl(var(--p)) 0%, hsl(var(--p)) var(--value, 50%), hsl(var(--b3)) var(--value, 50%), hsl(var(--b3)) 100%);
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .paint-canvas-container {
+    min-height: 300px;
+    padding: 0.5rem;
+  }
+  
+  .paint-canvas {
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100vh - 250px);
+  }
+
+  .paint-toolbar {
+    padding: 0.75rem;
+  }
+
+  /* Larger touch targets on mobile */
+  .paint-tool-button {
+    @apply btn-md;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .color-palette-button {
+    @apply w-10 h-10;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .paint-canvas {
+    cursor: default; /* Remove crosshair cursor on touch devices */
+  }
+  
+  /* Remove hover effects on touch devices */
+  .paint-tool-button:hover {
+    transform: none;
+  }
+  
+  .color-palette-button:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .paint-canvas {
+    border: 2px solid;
+  }
+  
+  .paint-tool-button {
+    border-width: 2px;
+  }
+  
+  .color-palette-button {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .paint-tool-button,
+  .color-palette-button,
+  .paint-canvas {
+    transition: none;
+  }
+  
+  .paint-tool-button:hover,
+  .color-palette-button:hover {
+    transform: none;
+  }
+  
+  @keyframes loading {
+    0%, 100% { background-position: 0 0; }
+  }
+}
+
+/* Focus styles for better accessibility */
+.paint-tool-button:focus-visible {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}
+
+.color-palette-button:focus-visible {
+  outline: 2px solid hsl(var(--p));
+  outline-offset: 2px;
+}
+
+/* Skip link styles */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only:focus,
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Enhanced card styles */
+.card {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Status indicators */
+.status-indicator {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.modified {
+  @apply bg-warning/20 text-warning;
+}
+
+.status-indicator.saved {
+  @apply bg-success/20 text-success;
+}
+
+/* Toast enhancements */
+.toast-container {
+  z-index: 9999;
+}
+
+/* Loading spinner for canvas operations */
+.canvas-spinner {
+  @apply absolute inset-0 flex items-center justify-center bg-base-100/80 backdrop-blur-sm rounded-lg;
+  z-index: 10;
+}
+
+/* Responsive grid improvements */
+@media (min-width: 1024px) {
+  .paint-interface-grid {
+    grid-template-columns: 300px 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .paint-toolbar,
+  .toast-container,
+  nav,
+  footer {
+    display: none !important;
+  }
+  
+  .paint-canvas {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}

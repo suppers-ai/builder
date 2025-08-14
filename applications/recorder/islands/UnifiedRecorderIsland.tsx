@@ -1,5 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
-import { Toast } from "@suppers-ai/ui-lib";
+import { Toast, ShareModal } from "@suppers-ai/ui-lib";
+import type { ShareItem } from "@suppers-ai/ui-lib";
 import { Loader2 } from "lucide-preact";
 import { isRecordingSupported, formatDuration, generateRecordingFilename, formatFileSize, formatDate } from "../lib/recorder-utils.ts";
 
@@ -15,7 +16,6 @@ import RecordingControls from "../components/RecordingControls.tsx";
 import RecordingStatus from "../components/RecordingStatus.tsx";
 import VideoPreview from "../components/VideoPreview.tsx";
 import RecordingsList from "../components/RecordingsList.tsx";
-import ShareModal from "../components/ShareModal.tsx";
 import DeleteModal from "../components/DeleteModal.tsx";
 
 // Import services
@@ -165,8 +165,28 @@ export default function UnifiedRecorderIsland() {
     }
   };
 
-  const handleShareModalDownload = async (recording: Recording) => {
-    await handleDownloadExisting(recording);
+  const handleShareModalDownload = async (shareItem: ShareItem) => {
+    if (selectedRecording) {
+      await handleDownloadExisting(selectedRecording);
+    }
+  };
+
+  // Get auth headers for ShareModal
+  const getAuthHeaders = async () => {
+    const { getAuthClient } = await import("../lib/auth.ts");
+    const authClient = getAuthClient();
+    const accessToken = await authClient.getAccessToken();
+    const userId = authClient.getUserId();
+    
+    if (!accessToken || !userId) {
+      throw new Error('Authentication required');
+    }
+    
+    return {
+      'Authorization': `Bearer ${accessToken}`,
+      'X-User-ID': userId,
+      'Content-Type': 'application/json'
+    };
   };
 
   // Loading states
@@ -299,13 +319,25 @@ export default function UnifiedRecorderIsland() {
 
       {/* Modals */}
       <ShareModal
-        recording={selectedRecording}
+        item={selectedRecording ? {
+          id: selectedRecording.id,
+          name: selectedRecording.name,
+          size: selectedRecording.size,
+          createdAt: selectedRecording.createdAt,
+          filePath: selectedRecording.filePath
+        } : null}
         isOpen={showShareModal}
         onClose={() => {
           setShowShareModal(false);
           setSelectedRecording(null);
         }}
         onDownload={handleShareModalDownload}
+        applicationSlug="recorder"
+        apiBaseUrl="http://127.0.0.1:54321/functions/v1/api/v1"
+        sharePageBaseUrl="http://localhost:8002"
+        getAuthHeaders={getAuthHeaders}
+        formatFileSize={formatFileSize}
+        formatDate={formatDate}
       />
 
       <DeleteModal

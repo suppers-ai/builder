@@ -13,6 +13,7 @@ interface Config {
     storage: {
         maxFileSize: number; // Maximum file size in bytes (50MB)
         defaultStorageLimit: number; // Default storage limit for new users (250MB)
+        defaultBandwidthLimit: number; // Default monthly bandwidth limit for new users (250MB)
     };
 }
 
@@ -32,6 +33,7 @@ const config: Config = {
     storage: {
         maxFileSize: 50 * 1024 * 1024, // 50MB in bytes
         defaultStorageLimit: 250 * 1024 * 1024, // 250MB in bytes for new users
+        defaultBandwidthLimit: 250 * 1024 * 1024, // 250MB in bytes per month for new users
     },
 }
 

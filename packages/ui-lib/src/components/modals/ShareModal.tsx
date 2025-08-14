@@ -1,14 +1,26 @@
 import { useState, useEffect } from "preact/hooks";
-import { Button, Alert } from "@suppers-ai/ui-lib";
-import { Copy, Download, Globe, Link, Shield, AlertTriangle } from "lucide-preact";
-import type { Recording } from "../types/recorder.ts";
-import { formatFileSize, formatDate } from "../lib/recorder-utils.ts";
+import { Button, Alert } from "../../../components/mod.ts";
+import { Copy, Download, Globe, Link, Shield, AlertTriangle, X } from "lucide-preact";
 
-interface ShareModalProps {
-  recording: Recording | null;
+export interface ShareItem {
+  id: string;
+  name: string;
+  size?: number;
+  createdAt: string | Date;
+  filePath?: string;
+}
+
+export interface ShareModalProps {
+  item: ShareItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onDownload: (recording: Recording) => void;
+  onDownload?: (item: ShareItem) => void;
+  applicationSlug: string;
+  apiBaseUrl: string;
+  sharePageBaseUrl: string;
+  getAuthHeaders: () => Promise<Record<string, string>>;
+  formatFileSize?: (bytes: number) => string;
+  formatDate?: (date: string | Date) => string;
 }
 
 interface ShareUrls {
@@ -17,52 +29,48 @@ interface ShareUrls {
 }
 
 export default function ShareModal({
-  recording,
+  item,
   isOpen,
   onClose,
   onDownload,
+  applicationSlug,
+  apiBaseUrl,
+  sharePageBaseUrl,
+  getAuthHeaders,
+  formatFileSize = (bytes: number) => `${Math.round(bytes / 1024)} KB`,
+  formatDate = (date: string | Date) => new Date(date).toLocaleDateString(),
 }: ShareModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shareUrls, setShareUrls] = useState<ShareUrls>({});
   const [isPublic, setIsPublic] = useState(false);
   const [shareToken, setShareToken] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
 
   // Load current sharing state when modal opens
   useEffect(() => {
-    if (isOpen && recording) {
+    if (isOpen && item) {
       loadCurrentSharingState();
     }
-  }, [isOpen, recording]);
+  }, [isOpen, item]);
 
-  if (!isOpen || !recording) return null;
-
-  const API_BASE_URL = 'http://127.0.0.1:54321/functions/v1/api/v1';
-
-  // Get auth client for making requests
-  const getAuthHeaders = async () => {
-    const authClient = (await import("../lib/auth.ts")).getAuthClient();
-    const accessToken = await authClient.getAccessToken();
-    const userId = authClient.getUserId();
-    
-    if (!accessToken || !userId) {
-      throw new Error('Authentication required');
+  // Clear copy success message after 2 seconds
+  useEffect(() => {
+    if (copySuccess) {
+      const timer = setTimeout(() => setCopySuccess(null), 2000);
+      return () => clearTimeout(timer);
     }
-    
-    return {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-User-ID': userId,
-      'Content-Type': 'application/json'
-    };
-  };
+  }, [copySuccess]);
+
+  if (!isOpen || !item) return null;
 
   const loadCurrentSharingState = async () => {
     try {
       const headers = await getAuthHeaders();
-      const filename = recording.filePath.split('/').pop();
+      const filename = item.filePath?.split('/').pop() || item.name;
       
       // Fetch current sharing state from the database via API
-      const response = await fetch(`${API_BASE_URL}/storage/recorder/${filename}`, {
+      const response = await fetch(`${apiBaseUrl}/storage/${applicationSlug}/${filename}`, {
         method: 'GET',
         headers
       });
@@ -81,10 +89,10 @@ export default function ShareModal({
           // Generate URLs based on current database state
           const urls: ShareUrls = {};
           if (isCurrentlyPublic) {
-            urls.publicUrl = `http://localhost:8002/share/public/recorder/${filename}`;
+            urls.publicUrl = `${sharePageBaseUrl}/share/public/${applicationSlug}/${filename}`;
           }
           if (currentShareToken) {
-            urls.tokenUrl = `http://localhost:8002/share/${currentShareToken}`;
+            urls.tokenUrl = `${sharePageBaseUrl}/share/${currentShareToken}`;
           }
           setShareUrls(urls);
         }
@@ -100,9 +108,9 @@ export default function ShareModal({
     
     try {
       const headers = await getAuthHeaders();
-      const filename = recording.filePath.split('/').pop();
+      const filename = item.filePath?.split('/').pop() || item.name;
       
-      const response = await fetch(`${API_BASE_URL}/storage/recorder/${filename}`, {
+      const response = await fetch(`${apiBaseUrl}/storage/${applicationSlug}/${filename}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({ action })
@@ -128,12 +136,13 @@ export default function ShareModal({
     }
   };
 
-  const copyToClipboard = async (text: string) => {
+  const copyToClipboard = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      // Could add a toast notification here
+      setCopySuccess(`${label} copied!`);
     } catch (err) {
       console.error('Failed to copy to clipboard:', err);
+      setCopySuccess('Copy failed');
     }
   };
 
@@ -141,27 +150,46 @@ export default function ShareModal({
     <div class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="fixed inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
       <div class="bg-base-100 p-6 rounded-lg shadow-xl max-w-lg w-full m-4 relative z-10">
-        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Shield class="w-5 h-5" />
-          Share: {recording.name}
-        </h3>
+        {/* Header */}
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold flex items-center gap-2">
+            <Shield class="w-5 h-5" />
+            Share: {item.name}
+          </h3>
+          <button
+            onClick={onClose}
+            class="btn btn-sm btn-ghost btn-circle"
+            aria-label="Close"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
         
         <div class="space-y-6">
-          {/* Recording Details */}
+          {/* Item Details */}
           <div class="bg-base-200 p-4 rounded-lg space-y-2">
             <div class="flex justify-between">
               <span class="font-medium">Name:</span>
-              <span class="text-sm">{recording.name}</span>
+              <span class="text-sm">{item.name}</span>
             </div>
-            <div class="flex justify-between">
-              <span class="font-medium">Size:</span>
-              <span class="text-sm">{formatFileSize(recording.size)}</span>
-            </div>
+            {item.size && (
+              <div class="flex justify-between">
+                <span class="font-medium">Size:</span>
+                <span class="text-sm">{formatFileSize(item.size)}</span>
+              </div>
+            )}
             <div class="flex justify-between">
               <span class="font-medium">Created:</span>
-              <span class="text-sm">{formatDate(recording.createdAt)}</span>
+              <span class="text-sm">{formatDate(item.createdAt)}</span>
             </div>
           </div>
+
+          {/* Copy Success Message */}
+          {copySuccess && (
+            <Alert color="success" class="text-sm">
+              <span>{copySuccess}</span>
+            </Alert>
+          )}
 
           {error && (
             <Alert color="error">
@@ -198,7 +226,7 @@ export default function ShareModal({
                     <div class="flex items-center gap-2">
                       <AlertTriangle class="w-4 h-4" />
                       <span class="text-sm">
-                        Your recording is public.
+                        Your {applicationSlug === 'recorder' ? 'recording' : 'painting'} is public.
                       </span>
                     </div>
                   </Alert>
@@ -214,7 +242,7 @@ export default function ShareModal({
                       <Button
                         size="sm"
                         variant="ghost"
-                        onClick={() => copyToClipboard(shareUrls.publicUrl!)}
+                        onClick={() => copyToClipboard(shareUrls.publicUrl!, 'Public link')}
                       >
                         <Copy class="w-4 h-4" />
                       </Button>
@@ -256,7 +284,7 @@ export default function ShareModal({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => copyToClipboard(shareUrls.tokenUrl!)}
+                    onClick={() => copyToClipboard(shareUrls.tokenUrl!, 'Private link')}
                   >
                     <Copy class="w-4 h-4" />
                   </Button>
@@ -264,7 +292,7 @@ export default function ShareModal({
               )}
               
               <p class="text-sm text-base-content/60">
-                Be careful with who you share this link with. Anyone with the link can view this recording.
+                Be careful with who you share this link with. Anyone with the link can view this {applicationSlug === 'recorder' ? 'recording' : 'painting'}.
               </p>
             </div>
           </div>
@@ -277,13 +305,15 @@ export default function ShareModal({
             >
               Close
             </Button>
-            <Button
-              onClick={() => onDownload(recording)}
-              class="flex items-center gap-2"
-            >
-              <Download class="w-4 h-4" />
-              Download
-            </Button>
+            {onDownload && (
+              <Button
+                onClick={() => onDownload(item)}
+                class="flex items-center gap-2"
+              >
+                <Download class="w-4 h-4" />
+                Download
+              </Button>
+            )}
           </div>
         </div>
       </div>

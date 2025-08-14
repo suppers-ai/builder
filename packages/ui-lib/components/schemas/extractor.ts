@@ -228,25 +228,6 @@ function getZodTypeString(zodType: z.ZodTypeAny): string {
 }
 
 /**
- * Add metadata to a Zod schema
- */
-export function withMetadata<T extends z.ZodTypeAny>(
-  schema: T,
-  metadata: {
-    examples?: string[];
-    deprecated?: boolean;
-    since?: string;
-    category?: string;
-  },
-): T {
-  (schema as any)._def.metadata = {
-    ...(schema as any)._def.metadata,
-    ...metadata,
-  };
-  return schema;
-}
-
-/**
  * Create a schema with enhanced documentation
  */
 export function createDocumentedSchema<T extends z.ZodRawShape>(

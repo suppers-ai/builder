@@ -12,6 +12,8 @@ export { SearchButton } from "./action/search-button/SearchButton.tsx";
 export type { SearchButtonProps } from "./action/search-button/SearchButton.tsx";
 export { SearchModal } from "./action/search-modal/SearchModal.tsx";
 export type { SearchModalProps, SearchResult } from "./action/search-modal/SearchModal.tsx";
+export { default as ShareModal } from "../src/components/modals/ShareModal.tsx";
+export type { ShareModalProps, ShareItem } from "../src/components/modals/ShareModal.tsx";
 export { UserProfileDropdown } from "./navigation/user-profile-dropdown/UserProfileDropdown.tsx";
 export type {
   UserProfileDropdownProps,
