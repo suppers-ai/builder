@@ -8,10 +8,7 @@ import { deleteApplication } from "./delete-applications.ts";
 export async function handleApplications(
   request: Request,
   context: {
-    user: any;
     supabase: SupabaseClient;
-    supabaseAdmin: SupabaseClient;
-    pathSegments: string[];
   },
 ): Promise<Response> {
   const { supabase } = context;

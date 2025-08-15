@@ -14,8 +14,6 @@ export class OneSignalEmailProvider extends BaseNotificationProvider {
   name = 'onesignal';
   type: 'email' = 'email';
 
-  private config: OneSignalConfig;
-
   constructor(config: OneSignalConfig) {
     super(config);
     this.config = config;

@@ -6,8 +6,11 @@ import { updateUser } from "./put-user.ts";
 
 export async function handleUserRequest(
   request: Request,
-  supabase: SupabaseClient,
+  context: {
+    supabase: SupabaseClient;
+  },
 ): Promise<Response> {
+  const { supabase } = context;
   const url = new URL(request.url);
   const method = request.method;
 

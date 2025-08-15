@@ -2,9 +2,8 @@ import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface StorageGetContext {
-  user: any;
+  userId: string;
   supabase: SupabaseClient;
-  supabaseAdmin: SupabaseClient;
   applicationSlug: string;
   filePath: string;
 }
@@ -13,11 +12,11 @@ export async function handleStorageGet(
   req: Request,
   context: StorageGetContext,
 ): Promise<Response> {
-  const { user, supabase, applicationSlug, filePath } = context;
+  const { userId, supabase, applicationSlug, filePath } = context;
   const url = new URL(req.url);
   const listFiles = url.searchParams.get("list") === "true";
 
-  if (!user) {
+  if (!userId) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       {
@@ -48,26 +47,13 @@ export async function handleStorageGet(
       );
     }
 
-    // Check if user is owner or has read access
-    const isOwner = application.owner_id === user.id;
-    let hasReadAccess = isOwner;
-    const applicationId = application.id;
+    // Check if user is owner (only owners can access storage files)
+    const isOwner = application.owner_id === userId;
 
     if (!isOwner) {
-      const { data: access } = await supabase
-        .from("user_access")
-        .select("access_level")
-        .eq("application_id", application.id)
-        .eq("user_id", user.id)
-        .single();
-
-      hasReadAccess = access ? ["read", "write", "admin"].includes(access.access_level) : false;
-    }
-
-    if (!hasReadAccess) {
-      console.log("❌ User lacks read access:", user.id);
+      console.log("❌ User is not owner:", userId);
       return new Response(
-        JSON.stringify({ error: "Read access required" }),
+        JSON.stringify({ error: "Owner access required" }),
         {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -77,12 +63,12 @@ export async function handleStorageGet(
 
     if (listFiles) {
       // List files from storage_objects table for accurate tracking
-      console.log("📋 Listing files for user:", user.id, "application:", applicationSlug);
+      console.log("📋 Listing files for user:", userId, "application:", applicationSlug);
       
       const { data: storageObjects, error } = await supabase
         .from('storage_objects')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('object_type', applicationSlug)
         .order('created_at', { ascending: false });
 
@@ -146,14 +132,14 @@ export async function handleStorageGet(
         );
       }
 
-      const fullPath = `${user.id}/${applicationSlug}/${filePath}`;
+      const fullPath = `${userId}/${applicationSlug}/${filePath}`;
       console.log("📄 Getting file:", fullPath);
 
       // Return file metadata only - no content download from this endpoint
       const { data: storageObject, error: fetchError } = await supabase
         .from('storage_objects')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .eq('file_path', fullPath)
         .single();
 

@@ -2,9 +2,8 @@ import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface StorageUploadContext {
-  user: any;
+  userId: string;
   supabase: SupabaseClient;
-  supabaseAdmin: SupabaseClient;
   applicationSlug: string;
   filePath: string;
 }
@@ -63,9 +62,9 @@ export async function handleStorageUpload(
   req: Request,
   context: StorageUploadContext,
 ): Promise<Response> {
-  const { user, supabase, applicationSlug, filePath } = context;
+  const { userId, supabase, applicationSlug, filePath } = context;
 
-  if (!user) {
+  if (!userId) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       {
@@ -96,26 +95,13 @@ export async function handleStorageUpload(
       );
     }
 
-    // Check if user is owner or has write access
-    const isOwner = application.owner_id === user.id;
-    let hasWriteAccess = isOwner;
-    const applicationId = application.id;
+    // Check if user is owner (only owners can upload to storage)
+    const isOwner = application.owner_id === userId;
 
     if (!isOwner) {
-      const { data: access } = await supabase
-        .from("user_access")
-        .select("access_level")
-        .eq("application_id", application.id)
-        .eq("user_id", user.id)
-        .single();
-
-      hasWriteAccess = access ? ["write", "admin"].includes(access.access_level) : false;
-    }
-
-    if (!hasWriteAccess) {
-      console.log("❌ User lacks write access:", user.id);
+      console.log("❌ User is not owner:", userId);
       return new Response(
-        JSON.stringify({ error: "Write access required" }),
+        JSON.stringify({ error: "Owner access required" }),
         {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -157,7 +143,7 @@ export async function handleStorageUpload(
 
       // Validate storage limits before upload
       try {
-        await validateStorageLimit(supabase, user.id, file.size);
+        await validateStorageLimit(supabase, userId, file.size);
       } catch (error) {
         console.error("❌ Storage limit validation failed:", error.message);
         return new Response(
@@ -171,7 +157,7 @@ export async function handleStorageUpload(
 
       const fileBuffer = await file.arrayBuffer();
       const fileName = filePath || file.name;
-      const fullPath = `${user.id}/${applicationSlug}/${fileName}`;
+      const fullPath = `${userId}/${applicationSlug}/${fileName}`;
 
       console.log("📁 Uploading file:", fullPath, "size:", fileBuffer.byteLength);
 
@@ -198,7 +184,7 @@ export async function handleStorageUpload(
       const { data: storageObject, error: dbError } = await supabase
         .from('storage_objects')
         .insert({
-          user_id: user.id,
+          user_id: userId,
           name: fileName,
           file_path: fullPath,
           file_size: file.size,
@@ -221,7 +207,7 @@ export async function handleStorageUpload(
       // Update user's storage usage
       if (storageObject || !dbError) {
         const { error: updateError } = await supabase.rpc('increment_user_storage', {
-          user_id: user.id,
+          user_id: userId,
           size_delta: file.size
         });
           
@@ -272,7 +258,7 @@ export async function handleStorageUpload(
       }
 
       const contentBuffer = await req.arrayBuffer();
-      const fullPath = `${user.id}/${applicationSlug}/${filePath}`;
+      const fullPath = `${userId}/${applicationSlug}/${filePath}`;
 
       console.log("📝 Uploading content to:", fullPath, "size:", contentBuffer.byteLength);
 

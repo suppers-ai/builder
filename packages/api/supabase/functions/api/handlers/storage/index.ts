@@ -7,9 +7,8 @@ import { handleStorageShare } from "./share-storage.ts";
 import { handleUserStorageGet } from "./get-user-storage.ts";
 
 interface StorageContext {
-  user: any;
-  supabase: any;
-  supabaseAdmin: any;
+  userId: string;
+  supabase: SupabaseClient;
   pathSegments: string[];
 }
 
@@ -17,7 +16,7 @@ export async function handleStorage(
   req: Request,
   context: StorageContext,
 ): Promise<Response> {
-  const { pathSegments } = context;
+  const { supabase, pathSegments } = context;
   
   if (pathSegments.length === 0) {
     return new Response(
@@ -55,12 +54,11 @@ export async function handleStorage(
   const filePath = resourcePath;
 
   console.log("🗄️ Application storage request:", req.method, "app:", applicationSlug, "path:", filePath);
-
   try {
     switch (req.method) {
       case "POST":
       case "PUT":
-        return await handleStorageUpload(req, { ...context, applicationSlug, filePath });
+        return await handleStorageUpload(req, { userId, supabase, applicationSlug, filePath });
       
       case "GET":
       case "HEAD":
@@ -69,17 +67,17 @@ export async function handleStorage(
         const isDownload = url.searchParams.get("download") === "true";
         
         if (isDownload) {
-          return await handleStorageDownload(req, { ...context, applicationSlug, filePath });
+          return await handleStorageDownload(req, { userId, supabase, applicationSlug, filePath });
         } else {
-          return await handleStorageGet(req, { ...context, applicationSlug, filePath });
+          return await handleStorageGet(req, { userId, supabase, applicationSlug, filePath });
         }
       
       case "PATCH":
         // Handle sharing operations
-        return await handleStorageShare(req, { ...context, applicationSlug, filePath });
+        return await handleStorageShare(req, { userId, supabase, applicationSlug, filePath });
       
       case "DELETE":
-        return await handleStorageDelete(req, { ...context, applicationSlug, filePath });
+        return await handleStorageDelete(req, { userId, supabase, applicationSlug, filePath });
       
       default:
         return new Response(

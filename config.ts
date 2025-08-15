@@ -7,6 +7,8 @@ interface Config {
     storePort: number;
     cdnUrl: string;
     cdnPort: number;
+    adminUrl: string;
+    adminPort: number;
     apiUrl: string;
     supabaseUrl: string;
     supabaseAnonKey: string;
@@ -14,6 +16,14 @@ interface Config {
         maxFileSize: number; // Maximum file size in bytes (50MB)
         defaultStorageLimit: number; // Default storage limit for new users (250MB)
         defaultBandwidthLimit: number; // Default monthly bandwidth limit for new users (250MB)
+    };
+    notifications: {
+        provider: 'onesignal'; // Currently only: 'onesignal' could later expand
+        emailSharing: {
+            defaultExpiryHours: number; // Default: 168 (7 days)
+            rateLimit: number; // Default: 10 shares per hour
+            maxRecipients: number; // Default: 20 per share
+        };
     };
 }
 
@@ -27,6 +37,8 @@ const config: Config = {
     storePort: 8000,
     cdnUrl: "http://localhost:8003",
     cdnPort: 8003,
+    adminUrl: "http://localhost:8004",
+    adminPort: 8004,
     apiUrl: "http://127.0.0.1:54321/functions/v1",
     supabaseUrl: "http://localhost:54321",
     supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0",
@@ -34,6 +46,14 @@ const config: Config = {
         maxFileSize: 50 * 1024 * 1024, // 50MB in bytes
         defaultStorageLimit: 250 * 1024 * 1024, // 250MB in bytes for new users
         defaultBandwidthLimit: 250 * 1024 * 1024, // 250MB in bytes per month for new users
+    },
+    notifications: {
+        provider: 'onesignal',
+        emailSharing: {
+            defaultExpiryHours: 168,
+            rateLimit: 10,
+            maxRecipients: 20,
+        },
     },
 }
 

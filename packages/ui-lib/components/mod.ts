@@ -1,9 +1,18 @@
 // Export types
 export type * from "./types.ts";
 
+// Export global signals and sidebar utilities
+export {
+  globalSidebarOpen,
+  closeGlobalSidebar,
+  toggleGlobalSidebar,
+} from "../utils/signals.ts";
+
 // Export all display components and their types
 export { Toast } from "./feedback/toast/Toast.tsx";
 export type { ToastProps } from "./feedback/toast/Toast.tsx";
+export { ToastContainer } from "./feedback/toast/ToastContainer.tsx";
+export type { ToastNotification, ToastManager } from "./feedback/toast/ToastContainer.tsx";
 
 // Export new authentication and search components
 export { LoginButton } from "./action/login-button/LoginButton.tsx";
@@ -32,8 +41,8 @@ export { Table } from "./display/table/Table.tsx";
 export type { TableColumn, TableProps } from "./display/table/Table.tsx";
 export { Pagination } from "./navigation/pagination/Pagination.tsx";
 export type { PaginationProps } from "./navigation/pagination/Pagination.tsx";
-export { Sidebar } from "./navigation/sidebar/Sidebar.tsx";
-export type { SidebarProps } from "./navigation/sidebar/Sidebar.tsx";
+export { default as CustomSidebar } from "./custom/CustomSidebar.tsx";
+export type { CustomSidebarProps, } from "./custom/CustomSidebar.schema.ts";
 export { Countdown } from "./display/countdown/Countdown.tsx";
 export type { CountdownProps } from "./display/countdown/Countdown.tsx";
 export {
@@ -45,6 +54,8 @@ export { ChatBubble } from "./display/chat-bubble/ChatBubble.tsx";
 export type { ChatBubbleProps } from "./display/chat-bubble/ChatBubble.tsx";
 export { Stat } from "./display/stat/Stat.tsx";
 export type { StatProps } from "./display/stat/Stat.tsx";
+export { MetricCard } from "./display/metric-card/MetricCard.tsx";
+export type { MetricCardProps } from "./display/metric-card/MetricCard.tsx";
 export { Dock } from "./navigation/dock/Dock.tsx";
 export type { DockItem, DockProps } from "./navigation/dock/Dock.tsx";
 export { Link } from "./navigation/link/Link.tsx";
@@ -96,6 +107,8 @@ export type { RangeProps } from "./input/range/Range.tsx";
 export { Select } from "./input/select/Select.tsx";
 export type { SelectProps } from "./input/select/Select.schema.ts";
 export { Skeleton } from "./feedback/skeleton/Skeleton.tsx";
+export { ErrorState } from "./feedback/error-state/ErrorState.tsx";
+export type { ErrorStateProps } from "./feedback/error-state/ErrorState.tsx";
 export { Swap } from "./action/swap/Swap.tsx";
 export type { SwapProps } from "./action/swap/Swap.tsx";
 export { Tabs } from "./navigation/tabs/Tabs.tsx";
@@ -110,10 +123,6 @@ export { Accordion } from "./display/accordion/Accordion.tsx";
 export type { AccordionItemProps, AccordionProps } from "./display/accordion/Accordion.tsx";
 export { Breadcrumbs } from "./navigation/breadcrumbs/Breadcrumbs.tsx";
 export type { BreadcrumbsProps } from "./navigation/breadcrumbs/Breadcrumbs.tsx";
-
-// Layout components
-export { CleanSidebarLayout } from "./layout/clean-sidebar-layout/CleanSidebarLayout.tsx";
-export type { CleanSidebarLayoutProps } from "./layout/clean-sidebar-layout/CleanSidebarLayout.tsx";
 
 // Page components
 export { LoginPage } from "./page/login-page/LoginPage.tsx";
@@ -211,7 +220,6 @@ export { linkMetadata } from "./navigation/link/Link.metadata.tsx";
 export { menuMetadata } from "./navigation/menu/Menu.metadata.tsx";
 export { navbarMetadata } from "./navigation/navbar/Navbar.metadata.tsx";
 export { paginationMetadata } from "./navigation/pagination/Pagination.metadata.tsx";
-export { sidebarMetadata } from "./navigation/sidebar/Sidebar.metadata.tsx";
 export { stepsMetadata } from "./navigation/steps/Steps.metadata.tsx";
 export { tabsMetadata } from "./navigation/tabs/Tabs.metadata.tsx";
 export { checkboxMetadata } from "./input/checkbox/Checkbox.metadata.tsx";

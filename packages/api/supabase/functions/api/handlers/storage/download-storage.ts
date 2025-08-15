@@ -2,9 +2,8 @@ import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface StorageDownloadContext {
-  user: any;
+  userId: string;
   supabase: SupabaseClient;
-  supabaseAdmin: SupabaseClient;
   applicationSlug: string;
   filePath: string;
 }
@@ -13,7 +12,7 @@ export async function handleStorageDownload(
   req: Request,
   context: StorageDownloadContext,
 ): Promise<Response> {
-  let { user, supabase, applicationSlug, filePath } = context;
+  let { userId, supabase, applicationSlug, filePath } = context;
   const url = new URL(req.url);
 
   // Handle authentication from query parameters for video previews
@@ -21,17 +20,17 @@ export async function handleStorageDownload(
   const tokenFromQuery = url.searchParams.get("token");
   const userIdFromQuery = url.searchParams.get("userId");
   
-  if (!user && tokenFromQuery && userIdFromQuery) {
+  if (!userId && tokenFromQuery && userIdFromQuery) {
     // Validate the token and get user info
     const { data: tokenUser, error: tokenError } = await supabase.auth.getUser(tokenFromQuery);
     
     if (!tokenError && tokenUser?.user?.id === userIdFromQuery) {
-      user = tokenUser.user;
-      console.log("✅ Authenticated via query token for user:", user.id);
+      userId = tokenUser.user.id;
+      console.log("✅ Authenticated via query token for user:", userId);
     }
   }
 
-  if (!user) {
+  if (!userId) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       {
@@ -72,25 +71,13 @@ export async function handleStorageDownload(
       );
     }
 
-    // Check if user is owner or has read access
-    const isOwner = application.owner_id === user.id;
-    let hasReadAccess = isOwner;
+    // Check if user is owner (only owners can download from storage)
+    const isOwner = application.owner_id === userId;
 
     if (!isOwner) {
-      const { data: access } = await supabase
-        .from("user_access")
-        .select("access_level")
-        .eq("application_id", application.id)
-        .eq("user_id", user.id)
-        .single();
-
-      hasReadAccess = access ? ["read", "write", "admin"].includes(access.access_level) : false;
-    }
-
-    if (!hasReadAccess) {
-      console.log("❌ User lacks read access:", user.id);
+      console.log("❌ User is not owner:", userId);
       return new Response(
-        JSON.stringify({ error: "Read access required" }),
+        JSON.stringify({ error: "Owner access required" }),
         {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -98,7 +85,7 @@ export async function handleStorageDownload(
       );
     }
 
-    const fullPath = `${user.id}/${applicationSlug}/${filePath}`;
+    const fullPath = `${userId}/${applicationSlug}/${filePath}`;
     console.log("📄 Downloading file:", fullPath);
 
     // For HEAD requests, we just check permissions and bandwidth limits without downloading
@@ -108,7 +95,7 @@ export async function handleStorageDownload(
     const { data: storageObject, error: fetchError } = await supabase
       .from('storage_objects')
       .select('file_size, mime_type')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('file_path', fullPath)
       .single();
 
@@ -125,7 +112,7 @@ export async function handleStorageDownload(
 
     const fileSize = storageObject.file_size;
     const contentType = storageObject.mime_type || "application/octet-stream";
-    console.log("📊 Checking bandwidth limits for download:", fileSize, "bytes for user:", user.id);
+    console.log("📊 Checking bandwidth limits for download:", fileSize, "bytes for user:", userId);
 
     // Check bandwidth limits before allowing download
     try {
@@ -133,7 +120,7 @@ export async function handleStorageDownload(
       const { data: userData, error: userError } = await supabase
         .from('users')
         .select('bandwidth_used, bandwidth_limit')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
 
       if (userError) {
@@ -185,7 +172,7 @@ export async function handleStorageDownload(
 
       // Track bandwidth usage before serving file (only for actual downloads, not HEAD)
       const { error: bandwidthError } = await supabase.rpc('increment_user_bandwidth', {
-        user_id: user.id,
+        user_id: userId,
         bandwidth_delta: fileSize
       });
 
@@ -199,7 +186,7 @@ export async function handleStorageDownload(
           },
         );
       } else {
-        console.log("✅ Bandwidth usage tracked:", fileSize, "bytes for user:", user.id);
+        console.log("✅ Bandwidth usage tracked:", fileSize, "bytes for user:", userId);
       }
     } catch (bandwidthTrackingError) {
       console.error("❌ Bandwidth tracking error:", bandwidthTrackingError);

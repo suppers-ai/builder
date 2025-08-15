@@ -151,13 +151,6 @@ begin
     end if;
 end $$;
 
--- Access level enum  
-do $$ 
-begin
-    if not exists (select 1 from pg_type where typname = 'access_level') then
-        create type access_level as enum ('read', 'write', 'admin');
-    end if;
-end $$;
 
 -- Review status enum
 do $$ 
@@ -223,16 +216,6 @@ create table if not exists public.storage_objects (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- User access table for application sharing
-create table if not exists public.user_access (
-  id uuid default uuid_generate_v4() primary key,
-  user_id uuid references auth.users(id) on delete cascade not null,
-  application_id uuid references public.applications(id) on delete cascade not null,
-  access_level access_level not null,
-  granted_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  granted_by uuid references auth.users(id) on delete cascade not null,
-  unique(user_id, application_id)
-);
 
 -- Application reviews table for admin review process
 create table if not exists public.application_reviews (
@@ -265,7 +248,6 @@ create table if not exists public.custom_themes (
 alter table public.users enable row level security;
 alter table public.applications enable row level security;
 alter table public.storage_objects enable row level security;
-alter table public.user_access enable row level security;
 alter table public.application_reviews enable row level security;
 alter table public.custom_themes enable row level security;
 
@@ -286,10 +268,6 @@ drop policy if exists "Users can insert their own storage objects" on public.sto
 drop policy if exists "Users can update their own storage objects" on public.storage_objects;
 drop policy if exists "Users can delete their own storage objects" on public.storage_objects;
 
-drop policy if exists "Users can view access to applications they own" on public.user_access;
-drop policy if exists "Users can view their own access grants" on public.user_access;
-drop policy if exists "Application owners can grant access" on public.user_access;
-drop policy if exists "Application owners can revoke access" on public.user_access;
 
 drop policy if exists "Admins can view all reviews" on public.application_reviews;
 drop policy if exists "Application owners can view reviews of their apps" on public.application_reviews;
@@ -339,13 +317,7 @@ create policy "Users can insert their applications"
 
 create policy "Users can update their applications"
   on public.applications for update
-  using (
-    owner_id = auth.uid() OR
-    exists (
-      select 1 from public.user_access
-      where user_id = auth.uid() and application_id = applications.id and access_level in ('write', 'admin')
-    )
-  );
+  using (owner_id = auth.uid());
 
 create policy "Users can delete their applications"
   on public.applications for delete
@@ -379,37 +351,6 @@ create policy "Users can delete their own storage objects"
   on public.storage_objects for delete
   using (user_id = auth.uid());
 
--- User access policies
-create policy "Users can view access to applications they own"
-  on public.user_access for select
-  using (
-    exists (
-      select 1 from public.applications
-      where id = application_id and owner_id = auth.uid()
-    )
-  );
-
-create policy "Users can view their own access grants"
-  on public.user_access for select
-  using (user_id = auth.uid());
-
-create policy "Application owners can grant access"
-  on public.user_access for insert
-  with check (
-    exists (
-      select 1 from public.applications
-      where id = application_id and owner_id = auth.uid()
-    )
-  );
-
-create policy "Application owners can revoke access"
-  on public.user_access for delete
-  using (
-    exists (
-      select 1 from public.applications
-      where id = application_id and owner_id = auth.uid()
-    )
-  );
 
 -- Application reviews policies
 create policy "Application owners can view reviews of their apps"
@@ -510,9 +451,6 @@ create index if not exists idx_storage_objects_user_created on public.storage_ob
 create index if not exists idx_storage_objects_public_created on public.storage_objects(is_public, created_at desc) where is_public = true;
 create index if not exists idx_storage_objects_type_user on public.storage_objects(object_type, user_id);
 
--- User access indexes
-create index if not exists idx_user_access_user_id on public.user_access(user_id);
-create index if not exists idx_user_access_application_id on public.user_access(application_id);
 
 -- Application reviews indexes
 create index if not exists idx_application_reviews_application_id on public.application_reviews(application_id);

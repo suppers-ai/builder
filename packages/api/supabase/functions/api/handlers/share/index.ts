@@ -2,9 +2,7 @@ import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface ShareContext {
-  user: any;
   supabase: SupabaseClient;
-  supabaseAdmin: SupabaseClient;
   pathSegments: string[];
 }
 

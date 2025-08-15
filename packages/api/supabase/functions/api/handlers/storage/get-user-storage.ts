@@ -2,7 +2,7 @@ import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface UserStorageGetContext {
-  user: any;
+  userId: string;
   supabase: SupabaseClient;
 }
 
@@ -10,9 +10,9 @@ export async function handleUserStorageGet(
   req: Request,
   context: UserStorageGetContext,
 ): Promise<Response> {
-  const { user, supabase } = context;
+  const { userId, supabase } = context;
 
-  if (!user) {
+  if (!userId) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       {
@@ -22,14 +22,14 @@ export async function handleUserStorageGet(
     );
   }
 
-  console.log("📊 Getting storage usage for user:", user.id);
+  console.log("📊 Getting storage usage for user:", userId);
 
   try {
     // Get user's storage limit and usage from database
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('storage_used, storage_limit, bandwidth_used, bandwidth_limit')
-      .eq('id', user.id)
+      .eq('id', userId)
       .single();
 
     if (userError) {
@@ -52,7 +52,7 @@ export async function handleUserStorageGet(
     const { data: storageObjects, error: objectsError } = await supabase
       .from('storage_objects')
       .select('file_size, object_type, mime_type')
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (objectsError) {
       console.error("❌ Failed to fetch storage objects:", objectsError.message);
@@ -85,8 +85,8 @@ export async function handleUserStorageGet(
       remaining: userBandwidthLimit - userBandwidthUsed,
     };
 
-    console.log("✅ Storage usage calculated for user:", user.id, "used:", userStorageUsed, "limit:", userStorageLimit);
-    console.log("✅ Bandwidth usage calculated for user:", user.id, "used:", userBandwidthUsed, "limit:", userBandwidthLimit);
+    console.log("✅ Storage usage calculated for user:", userId, "used:", userStorageUsed, "limit:", userStorageLimit);
+    console.log("✅ Bandwidth usage calculated for user:", userId, "used:", userBandwidthUsed, "limit:", userBandwidthLimit);
 
     return new Response(
       JSON.stringify({

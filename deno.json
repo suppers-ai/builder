@@ -10,7 +10,9 @@
     "packages/store",
     "packages/profile",
     "packages/cdn",
-    "applications/recorder"
+    "packages/admin",
+    "applications/recorder",
+    "applications/paint"
   ],
   "imports": {
     "daisyui": "npm:daisyui@^5.0.50",

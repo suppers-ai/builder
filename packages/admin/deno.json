@@ -1,0 +1,36 @@
+{
+  "name": "@suppers/admin",
+  "version": "1.0.0",
+  "exports": "./mod.ts",
+  "tasks": {
+    "dev": "deno run --allow-all --watch=static/,routes/,islands/,components/,lib/ dev.ts",
+    "build": "deno run --allow-all dev.ts build",
+    "start": "deno run --allow-all main.ts",
+    "preview": "deno run --allow-all main.ts",
+    "update": "deno run --allow-all -r https://fresh.deno.dev/update .",
+    "test": "deno test --allow-all --run",
+    "test:watch": "deno test --allow-all --watch",
+    "test:coverage": "deno test --allow-all --coverage=coverage",
+    "check": "deno check **/*.ts",
+    "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "lint": "deno lint"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["fresh", "recommended"]
+    }
+  },
+  "exclude": ["**/_fresh/*"],
+  "imports": {
+    "@/": "./",
+    "@suppers/shared": "../shared/mod.ts",
+    "@suppers/ui-lib": "../ui-lib/mod.ts",
+    "@suppers/auth-client": "../auth-client/mod.ts",
+    "@suppers/api": "../api/mod.ts"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
+}

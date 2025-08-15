@@ -1,6 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
 import { Button, Alert } from "../../../components/mod.ts";
-import { Copy, Download, Globe, Link, Shield, AlertTriangle, X } from "lucide-preact";
+import { Copy, Download, Globe, Link, Shield, AlertTriangle, X, Mail, Users } from "lucide-preact";
 
 export interface ShareItem {
   id: string;
@@ -28,6 +28,13 @@ interface ShareUrls {
   tokenUrl?: string;
 }
 
+interface EmailShareState {
+  emails: string;
+  loading: boolean;
+  error: string | null;
+  success: boolean;
+}
+
 export default function ShareModal({
   item,
   isOpen,
@@ -45,7 +52,17 @@ export default function ShareModal({
   const [shareUrls, setShareUrls] = useState<ShareUrls>({});
   const [isPublic, setIsPublic] = useState(false);
   const [shareToken, setShareToken] = useState<string | null>(null);
+  const [sharedWithEmails, setSharedWithEmails] = useState<string[]>([]);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'public' | 'email'>('public');
+  
+  // Email sharing state
+  const [emailShare, setEmailShare] = useState<EmailShareState>({
+    emails: '',
+    loading: false,
+    error: null,
+    success: false,
+  });
 
   // Load current sharing state when modal opens
   useEffect(() => {
@@ -82,9 +99,11 @@ export default function ShareModal({
           const dbData = result.data;
           const isCurrentlyPublic = dbData.isPublic || false;
           const currentShareToken = dbData.shareToken || null;
+          const currentSharedEmails = dbData.sharedWithEmails || [];
           
           setIsPublic(isCurrentlyPublic);
           setShareToken(currentShareToken);
+          setSharedWithEmails(currentSharedEmails);
           
           // Generate URLs based on current database state
           const urls: ShareUrls = {};
@@ -102,7 +121,7 @@ export default function ShareModal({
     }
   };
 
-  const handleShareAction = async (action: 'create_token' | 'remove_token' | 'make_public' | 'make_private' | 'make_private_only') => {
+  const handleShareAction = async (action: 'create_token' | 'remove_token' | 'make_public' | 'make_private' | 'make_private_only' | 'share_with_emails', emails?: string[]) => {
     setLoading(true);
     setError(null);
     
@@ -110,10 +129,12 @@ export default function ShareModal({
       const headers = await getAuthHeaders();
       const filename = item.filePath?.split('/').pop() || item.name;
       
+      const body = { action, ...(emails && { emails }) };
+      
       const response = await fetch(`${apiBaseUrl}/storage/${applicationSlug}/${filename}`, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ action })
+        body: JSON.stringify(body)
       });
 
       if (!response.ok) {
@@ -125,6 +146,7 @@ export default function ShareModal({
       if (result.success) {
         setIsPublic(result.data.isPublic);
         setShareToken(result.data.shareToken);
+        setSharedWithEmails(result.data.sharedWithEmails || []);
         setShareUrls(result.data.shareUrls || {});
       } else {
         throw new Error('Failed to update sharing settings');
@@ -133,6 +155,44 @@ export default function ShareModal({
       setError(err instanceof Error ? err.message : 'Failed to update sharing');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const validateEmails = (emailsText: string): string[] => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emails = emailsText.split(/[,\n]/).map(e => e.trim()).filter(Boolean);
+    return emails.filter(email => emailRegex.test(email));
+  };
+
+  const handleEmailShare = async () => {
+    const validEmails = validateEmails(emailShare.emails);
+    
+    if (validEmails.length === 0) {
+      setEmailShare(prev => ({ ...prev, error: 'Please enter at least one valid email address' }));
+      return;
+    }
+
+    setEmailShare(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      await handleShareAction('share_with_emails', validEmails);
+      
+      setEmailShare(prev => ({
+        ...prev,
+        success: true,
+        emails: '',
+        error: null,
+      }));
+      
+      // Reload sharing state to get updated emails
+      await loadCurrentSharingState();
+    } catch (err) {
+      setEmailShare(prev => ({
+        ...prev,
+        error: err instanceof Error ? err.message : 'Email sharing failed'
+      }));
+    } finally {
+      setEmailShare(prev => ({ ...prev, loading: false }));
     }
   };
 
@@ -149,7 +209,7 @@ export default function ShareModal({
   return (
     <div class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="fixed inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
-      <div class="bg-base-100 p-6 rounded-lg shadow-xl max-w-lg w-full m-4 relative z-10">
+      <div class="bg-base-100 p-6 rounded-lg shadow-xl max-w-2xl w-full m-4 relative z-10 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold flex items-center gap-2">
@@ -164,8 +224,27 @@ export default function ShareModal({
             <X class="w-4 h-4" />
           </button>
         </div>
-        
-        <div class="space-y-6">
+
+        {/* Tabs */}
+        <div class="tabs tabs-boxed mb-4">
+          <button 
+            class={`tab ${activeTab === 'public' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('public')}
+          >
+            <Globe class="w-4 h-4 mr-2" />
+            Public & Link
+          </button>
+          <button 
+            class={`tab ${activeTab === 'email' ? 'tab-active' : ''}`}
+            onClick={() => setActiveTab('email')}
+          >
+            <Mail class="w-4 h-4 mr-2" />
+            Email Share
+          </button>
+        </div>
+
+        {/* Content Area */}
+        <div class="flex-1 overflow-y-auto space-y-4">
           {/* Item Details */}
           <div class="bg-base-200 p-4 rounded-lg space-y-2">
             <div class="flex justify-between">
@@ -184,7 +263,7 @@ export default function ShareModal({
             </div>
           </div>
 
-          {/* Copy Success Message */}
+          {/* Success/Error Messages */}
           {copySuccess && (
             <Alert color="success" class="text-sm">
               <span>{copySuccess}</span>
@@ -198,9 +277,16 @@ export default function ShareModal({
             </Alert>
           )}
 
-          {/* Sharing Options */}
-          <div class="space-y-4">
-            <h4 class="font-medium">Sharing Options</h4>
+          {emailShare.success && (
+            <Alert color="success">
+              <Mail class="w-4 h-4" />
+              <span>Email invitations sent successfully!</span>
+            </Alert>
+          )}
+
+          {/* Tab Content */}
+          {activeTab === 'public' && (
+            <div class="space-y-4">
             
             {/* Public Sharing */}
             <div class="border border-base-300 rounded-lg p-4">
@@ -295,26 +381,104 @@ export default function ShareModal({
                 Be careful with who you share this link with. Anyone with the link can view this {applicationSlug === 'recorder' ? 'recording' : 'painting'}.
               </p>
             </div>
-          </div>
+            </div>
+          )}
 
-          {/* Actions */}
-          <div class="flex justify-end gap-2">
+          {activeTab === 'email' && (
+            <div class="space-y-4">
+              <div class="border border-base-300 rounded-lg p-4">
+                <h4 class="font-medium mb-3 flex items-center gap-2">
+                  <Mail class="w-4 h-4" />
+                  Share via Email
+                </h4>
+
+                {emailShare.error && (
+                  <Alert color="error" class="mb-3">
+                    <AlertTriangle class="w-4 h-4" />
+                    <span>{emailShare.error}</span>
+                  </Alert>
+                )}
+
+                <div class="space-y-3">
+                  <div>
+                    <label class="label">
+                      <span class="label-text">Email addresses (comma separated)</span>
+                    </label>
+                    <textarea
+                      class="textarea textarea-bordered w-full"
+                      rows="3"
+                      placeholder="user@example.com, another@example.com"
+                      value={emailShare.emails}
+                      onChange={(e) => setEmailShare(prev => ({ 
+                        ...prev, 
+                        emails: (e.target as HTMLTextAreaElement).value,
+                        error: null 
+                      }))}
+                      disabled={emailShare.loading}
+                    />
+                  </div>
+
+                  <Button
+                    class="w-full"
+                    onClick={handleEmailShare}
+                    disabled={emailShare.loading || !emailShare.emails.trim()}
+                  >
+                    {emailShare.loading ? (
+                      <>
+                        <span class="loading loading-spinner loading-sm"></span>
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <Mail class="w-4 h-4" />
+                        Share with these emails
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Current shared emails */}
+                {sharedWithEmails.length > 0 && (
+                  <div class="mt-4 pt-4 border-t border-base-300">
+                    <h5 class="font-medium mb-2 flex items-center gap-2">
+                      <Users class="w-4 h-4" />
+                      Currently shared with:
+                    </h5>
+                    <div class="flex flex-wrap gap-1">
+                      {sharedWithEmails.map((email, index) => (
+                        <span key={index} class="badge badge-info badge-sm">
+                          {email}
+                        </span>
+                      ))}
+                    </div>
+                    <p class="text-sm text-base-content/60 mt-2">
+                      These recipients can access the file using the private link above.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* Actions */}
+        <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-base-300">
+          <Button
+            variant="ghost"
+            onClick={onClose}
+          >
+            Close
+          </Button>
+          {onDownload && (
             <Button
-              variant="ghost"
-              onClick={onClose}
+              onClick={() => onDownload(item)}
+              class="flex items-center gap-2"
             >
-              Close
+              <Download class="w-4 h-4" />
+              Download
             </Button>
-            {onDownload && (
-              <Button
-                onClick={() => onDownload(item)}
-                class="flex items-center gap-2"
-              >
-                <Download class="w-4 h-4" />
-                Download
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>

@@ -8,7 +8,6 @@ import type { Database } from "../generated/database-types.ts";
 // Database table types
 type UsersTable = Database["public"]["Tables"]["users"]["Row"];
 type ApplicationsTable = Database["public"]["Tables"]["applications"]["Row"];
-type UserAccessTable = Database["public"]["Tables"]["user_access"]["Row"];
 type ApplicationReviewsTable = Database["public"]["Tables"]["application_reviews"]["Row"];
 type CustomThemesTable = Database["public"]["Tables"]["custom_themes"]["Row"];
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -16,7 +15,6 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 // Re-export database types as canonical types
 export type User = UsersTable;
 export type Application = ApplicationsTable;
-export type UserAccess = UserAccessTable;
 export type ApplicationReview = ApplicationReviewsTable;
 export type CustomTheme = CustomThemesTable;
 
@@ -101,6 +99,8 @@ export class TypeMappers {
       theme_id: existingUser?.theme_id || supabaseUser.user_metadata?.theme_id || null,
       stripe_customer_id: existingUser?.stripe_customer_id || null,
       role: (existingUser?.role as 'user' | 'admin') || "user",
+      storage_limit: existingUser?.storage_limit || 1073741824, // 1GB default
+      storage_used: existingUser?.storage_used || 0,
       created_at: existingUser?.created_at || supabaseUser.created_at || now,
       updated_at: existingUser?.updated_at || supabaseUser.updated_at || supabaseUser.created_at || now,
     };

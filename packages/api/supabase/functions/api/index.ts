@@ -3,9 +3,9 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import { corsHeaders } from "./lib/cors.ts";
 import { handleApplications } from "./handlers/applications/index.ts";
 import { handleUserRequest } from "./handlers/user/index.ts";
-import { handleAccess } from "./handlers/access/index.ts";
 import { handleStorage } from "./handlers/storage/index.ts";
 import { handleShare } from "./handlers/share/index.ts";
+import { handleAdmin } from "./handlers/admin/index.ts";
 
 console.log("🚀 API Edge Function loaded");
 
@@ -53,7 +53,7 @@ Deno.serve(async (req: Request) => {
       const url = new URL(req.url);
       const queryToken = url.searchParams.get("token");
       const queryUserId = url.searchParams.get("userId");
-      
+
       if (queryToken && queryUserId) {
         token = queryToken;
         userId = queryUserId;
@@ -61,8 +61,6 @@ Deno.serve(async (req: Request) => {
     }
 
     let user = null;
-    let supabase = supabaseAdmin; // Default to admin client
-
     // Try JWT token first (DirectAuthClient)
     if (token) {
       console.log("🔑 Verifying JWT token for endpoint:", resource, rest);
@@ -104,9 +102,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Use admin client for all operations, but pass user context
-    supabase = supabaseAdmin;
-
     // Route to appropriate handler based on resource
     let response: Response;
 
@@ -115,35 +110,31 @@ Deno.serve(async (req: Request) => {
     switch (resource) {
       case "applications":
         response = await handleApplications(req, {
-          user,
-          supabase,
-          supabaseAdmin,
-          pathSegments: rest,
+          supabase: supabaseAdmin,
         });
         break;
 
       case "user":
-        response = await handleUserRequest(req, supabase);
-        break;
-
-      case "access":
-        response = await handleAccess(req, { user, supabase, supabaseAdmin, pathSegments: rest });
+        response = await handleUserRequest(req, { supabase: supabaseAdmin });
         break;
 
       case "storage":
-        response = await handleStorage(req, { user, supabase, supabaseAdmin, pathSegments: rest });
+        response = await handleStorage(req, { userId, supabase: supabaseAdmin, pathSegments: rest });
         break;
 
       case "share":
-        response = await handleShare(req, { user, supabase, supabaseAdmin, pathSegments: rest });
+        response = await handleShare(req, { supabase: supabaseAdmin, pathSegments: rest });
         break;
 
+      case "admin":
+        response = await handleAdmin(req, { userId, supabase: supabaseAdmin, pathSegments: rest });
+        break;
 
       default:
         response = new Response(
           JSON.stringify({
             error:
-              `Unknown resource: ${resource}. Available resources: applications, user, access, storage, share. Auth is handled directly by Supabase.`,
+              `Unknown resource: ${resource}. Available resources: applications, user, access, storage, share, admin. Auth is handled directly by Supabase.`,
           }),
           {
             status: 404,
