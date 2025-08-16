@@ -17,38 +17,56 @@ export async function handleAdminApplications(
 
   try {
     // Route based on path segments
-    const [action, id, ...rest] = pathSegments;
+    // pathSegments could be [] for list, ["id"] for CRUD, or ["action", "id"] for special actions
+    const [firstSegment, secondSegment, ...rest] = pathSegments;
 
     switch (method) {
+      case "OPTIONS":
+        // Handle CORS preflight requests
+        return new Response(null, {
+          status: 200,
+          headers: corsHeaders,
+        });
+
       case "GET":
-        if (!action || action === "list") {
+        if (!firstSegment) {
+          // GET /admin/applications - list all
           return await getApplicationsList(supabase, url);
-        } else if (id) {
-          return await getApplicationById(supabase, id);
+        } else {
+          // GET /admin/applications/{id} - get by ID
+          return await getApplicationById(supabase, firstSegment);
         }
         break;
 
       case "POST":
-        if (!action || action === "create") {
+        if (!firstSegment) {
+          // POST /admin/applications - create new
           return await createApplication(supabase, req);
         }
         break;
 
       case "PUT":
-        if (id) {
-          return await updateApplication(supabase, id, req);
+        if (firstSegment) {
+          // PUT /admin/applications/{id} - update application
+          return await updateApplication(supabase, firstSegment, req);
         }
         break;
 
       case "DELETE":
-        if (id) {
-          return await deleteApplication(supabase, id);
+        if (firstSegment) {
+          // DELETE /admin/applications/{id} - delete application
+          return await deleteApplication(supabase, firstSegment);
         }
         break;
 
       case "PATCH":
-        if (id && action === "status") {
-          return await updateApplicationStatus(supabase, id, req);
+        console.log("🔧 PATCH request received:", { firstSegment, secondSegment, rest });
+        if (firstSegment === "status" && secondSegment) {
+          // PATCH /admin/applications/status/{id} - update status
+          return await updateApplicationStatus(supabase, secondSegment, req);
+        } else if (firstSegment === "bulk-status") {
+          // PATCH /admin/applications/bulk-status - bulk update status
+          return await bulkUpdateApplicationStatus(supabase, req);
         }
         break;
     }
@@ -90,16 +108,7 @@ async function getApplicationsList(supabaseAdmin: SupabaseClient, url: URL): Pro
     // Build query
     let query = supabaseAdmin
       .from("applications")
-      .select(`
-        *,
-        owner:users!applications_owner_id_fkey(
-          id,
-          email,
-          display_name,
-          first_name,
-          last_name
-        )
-      `);
+      .select(`*`);
 
     // Apply filters
     if (search) {
@@ -159,16 +168,7 @@ async function getApplicationById(supabaseAdmin: SupabaseClient, id: string): Pr
 
     const { data: application, error } = await supabaseAdmin
       .from("applications")
-      .select(`
-        *,
-        owner:users!applications_owner_id_fkey(
-          id,
-          email,
-          display_name,
-          first_name,
-          last_name
-        )
-      `)
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -207,13 +207,13 @@ async function getApplicationById(supabaseAdmin: SupabaseClient, id: string): Pr
 async function createApplication(supabaseAdmin: SupabaseClient, req: Request): Promise<Response> {
   try {
     const body = await req.json();
-    const { name, slug, description, owner_id, template_id, status = "draft", configuration = {} } = body;
+    const { name, slug, description, website_url, thumbnail_url, status = "draft" } = body;
 
-    console.log("📝 Creating application:", { name, slug, owner_id });
+    console.log("📝 Creating application:", { name, slug });
 
     // Validate required fields
-    if (!name || !slug || !owner_id) {
-      return new Response(JSON.stringify({ error: "Name, slug, and owner_id are required" }), {
+    if (!name || !slug) {
+      return new Response(JSON.stringify({ error: "Name and slug are required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -240,21 +240,11 @@ async function createApplication(supabaseAdmin: SupabaseClient, req: Request): P
         name,
         slug,
         description,
-        owner_id,
-        template_id,
+        website_url,
+        thumbnail_url,
         status,
-        configuration,
       })
-      .select(`
-        *,
-        owner:users!applications_owner_id_fkey(
-          id,
-          email,
-          display_name,
-          first_name,
-          last_name
-        )
-      `)
+      .select("*")
       .single();
 
     if (error) {
@@ -286,7 +276,7 @@ async function createApplication(supabaseAdmin: SupabaseClient, req: Request): P
 async function updateApplication(supabaseAdmin: SupabaseClient, id: string, req: Request): Promise<Response> {
   try {
     const body = await req.json();
-    const { name, slug, description, template_id, status, configuration } = body;
+    const { name, slug, description, website_url, thumbnail_url, status } = body;
 
     console.log("📝 Updating application:", id, { name, slug, status });
 
@@ -326,25 +316,16 @@ async function updateApplication(supabaseAdmin: SupabaseClient, id: string, req:
     if (name !== undefined) updateData.name = name;
     if (slug !== undefined) updateData.slug = slug;
     if (description !== undefined) updateData.description = description;
-    if (template_id !== undefined) updateData.template_id = template_id;
+    if (website_url !== undefined) updateData.website_url = website_url;
+    if (thumbnail_url !== undefined) updateData.thumbnail_url = thumbnail_url;
     if (status !== undefined) updateData.status = status;
-    if (configuration !== undefined) updateData.configuration = configuration;
     updateData.updated_at = new Date().toISOString();
 
     const { data: application, error } = await supabaseAdmin
       .from("applications")
       .update(updateData)
       .eq("id", id)
-      .select(`
-        *,
-        owner:users!applications_owner_id_fkey(
-          id,
-          email,
-          display_name,
-          first_name,
-          last_name
-        )
-      `)
+      .select("*")
       .single();
 
     if (error) {
@@ -395,16 +376,7 @@ async function updateApplicationStatus(supabaseAdmin: SupabaseClient, id: string
         updated_at: new Date().toISOString()
       })
       .eq("id", id)
-      .select(`
-        *,
-        owner:users!applications_owner_id_fkey(
-          id,
-          email,
-          display_name,
-          first_name,
-          last_name
-        )
-      `)
+      .select("*")
       .single();
 
     if (error) {
@@ -478,4 +450,61 @@ async function deleteApplication(supabaseAdmin: SupabaseClient, id: string): Pro
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-} 
+}
+
+/**
+ * Bulk update application status
+ */
+async function bulkUpdateApplicationStatus(supabaseAdmin: SupabaseClient, req: Request): Promise<Response> {
+  try {
+    const body = await req.json();
+    const { ids, status } = body;
+
+    console.log("📝 Bulk updating application status:", { ids, status });
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return new Response(JSON.stringify({ error: "Application IDs are required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!status) {
+      return new Response(JSON.stringify({ error: "Status is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Update all applications
+    const { data: applications, error } = await supabaseAdmin
+      .from("applications")
+      .update({ 
+        status,
+        updated_at: new Date().toISOString()
+      })
+      .in("id", ids)
+      .select("*");
+
+    if (error) {
+      console.error("❌ Error bulk updating application status:", error);
+      return new Response(JSON.stringify({ error: "Failed to update application status" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`✅ Bulk updated ${applications?.length || 0} applications to ${status}`);
+
+    return new Response(JSON.stringify({ data: applications }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("❌ Error in bulkUpdateApplicationStatus:", error);
+    return new Response(JSON.stringify({ error: "Failed to bulk update application status" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+}

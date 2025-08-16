@@ -22,7 +22,7 @@ import {
   AlertCircle
 } from "lucide-preact";
 import { formatBytes } from "@suppers/admin";
-import { createAdminApiClient } from "../lib/api-client.ts";
+import { DashboardApiClient } from "../lib/api-client/dashboard/dashboard-api.ts";
 import { getAuthClient } from "../lib/auth.ts";
 
 // Types
@@ -45,7 +45,7 @@ export default function AdminDashboardIsland() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Initialize API client
-  const apiClient = createAdminApiClient(getAuthClient());
+  const apiClient = new DashboardApiClient(getAuthClient());
 
   // Load dashboard data
   const loadDashboardData = async (showRefreshing = false) => {

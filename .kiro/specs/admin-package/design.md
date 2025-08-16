@@ -127,16 +127,6 @@ interface DashboardMetrics {
     published: number;
     archived: number;
   };
-  recentActivity: ActivityItem[];
-}
-
-interface ActivityItem {
-  id: string;
-  type: 'application_created' | 'user_registered' | 'subscription_created';
-  description: string;
-  timestamp: string;
-  userId?: string;
-  applicationId?: string;
 }
 ```
 

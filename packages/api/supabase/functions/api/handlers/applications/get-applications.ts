@@ -2,8 +2,8 @@ import { corsHeaders } from "../../lib/cors.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getApplications(supabase: SupabaseClient, url: URL): Promise<Response> {
-  const ownerId = url.searchParams.get("owner_id");
   const applicationId = url.searchParams.get("application_id");
+  const status = url.searchParams.get("status");
 
   if (applicationId) {
     // Get specific application
@@ -31,13 +31,18 @@ export async function getApplications(supabase: SupabaseClient, url: URL): Promi
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } else if (ownerId) {
-    // Get applications by owner
-    const { data: applications, error } = await supabase
+  } else {
+    // Get all applications or filter by status
+    let query = supabase
       .from("applications")
       .select("*")
-      .eq("owner_id", ownerId)
       .order("updated_at", { ascending: false });
+
+    if (status) {
+      query = query.eq("status", status);
+    }
+
+    const { data: applications, error } = await query;
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
@@ -50,13 +55,5 @@ export async function getApplications(supabase: SupabaseClient, url: URL): Promi
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } else {
-    return new Response(
-      JSON.stringify({ error: "owner_id or application_id parameter is required" }),
-      {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
   }
 }
