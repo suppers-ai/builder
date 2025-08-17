@@ -1,4 +1,9 @@
-export function formatBytes(bytes: number, decimals: number = 2): string {
+export function formatBytes(bytes: number | null | undefined, decimals: number = 2): string {
+  // Handle null, undefined, NaN, or negative values
+  if (bytes === null || bytes === undefined || isNaN(bytes) || bytes < 0) {
+    return '0 Bytes';
+  }
+  
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;
