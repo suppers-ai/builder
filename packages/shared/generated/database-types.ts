@@ -71,100 +71,37 @@ export type Database = {
       }
       applications: {
         Row: {
-          configuration: Json
           created_at: string
           description: string | null
           id: string
           name: string
-          owner_id: string
           slug: string
           status: Database["public"]["Enums"]["application_status"]
-          template_id: string | null
+          thumbnail_url: string | null
           updated_at: string
+          website_url: string | null
         }
         Insert: {
-          configuration?: Json
           created_at?: string
           description?: string | null
           id?: string
           name: string
-          owner_id: string
           slug: string
           status?: Database["public"]["Enums"]["application_status"]
-          template_id?: string | null
+          thumbnail_url?: string | null
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
-          configuration?: Json
           created_at?: string
           description?: string | null
           id?: string
           name?: string
-          owner_id?: string
           slug?: string
           status?: Database["public"]["Enums"]["application_status"]
-          template_id?: string | null
+          thumbnail_url?: string | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      audit_logs: {
-        Row: {
-          action: Database["public"]["Enums"]["audit_action"]
-          admin_email: string
-          admin_user_id: string | null
-          after_data: Json | null
-          before_data: Json | null
-          created_at: string
-          description: string
-          error_message: string | null
-          id: string
-          ip_address: unknown | null
-          metadata: Json
-          resource_id: string | null
-          resource_name: string | null
-          resource_type: string
-          session_id: string | null
-          success: boolean
-          user_agent: string | null
-        }
-        Insert: {
-          action: Database["public"]["Enums"]["audit_action"]
-          admin_email: string
-          admin_user_id?: string | null
-          after_data?: Json | null
-          before_data?: Json | null
-          created_at?: string
-          description: string
-          error_message?: string | null
-          id?: string
-          ip_address?: unknown | null
-          metadata?: Json
-          resource_id?: string | null
-          resource_name?: string | null
-          resource_type: string
-          session_id?: string | null
-          success?: boolean
-          user_agent?: string | null
-        }
-        Update: {
-          action?: Database["public"]["Enums"]["audit_action"]
-          admin_email?: string
-          admin_user_id?: string | null
-          after_data?: Json | null
-          before_data?: Json | null
-          created_at?: string
-          description?: string
-          error_message?: string | null
-          id?: string
-          ip_address?: unknown | null
-          metadata?: Json
-          resource_id?: string | null
-          resource_name?: string | null
-          resource_type?: string
-          session_id?: string | null
-          success?: boolean
-          user_agent?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -213,6 +150,7 @@ export type Database = {
           mime_type: string
           name: string
           object_type: string
+          parent_id: string | null
           share_token: string | null
           shared_with_emails: string[] | null
           thumbnail_url: string | null
@@ -230,6 +168,7 @@ export type Database = {
           mime_type: string
           name: string
           object_type: string
+          parent_id?: string | null
           share_token?: string | null
           shared_with_emails?: string[] | null
           thumbnail_url?: string | null
@@ -247,6 +186,7 @@ export type Database = {
           mime_type?: string
           name?: string
           object_type?: string
+          parent_id?: string | null
           share_token?: string | null
           shared_with_emails?: string[] | null
           thumbnail_url?: string | null
@@ -261,84 +201,76 @@ export type Database = {
             referencedRelation: "applications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "storage_objects_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "storage_objects"
+            referencedColumns: ["id"]
+          },
         ]
       }
       subscription_plans: {
         Row: {
+          application_id: string | null
           created_at: string
           currency: string
-          description: string
-          features: Json
+          description: string | null
+          features: Json | null
           id: string
           interval: Database["public"]["Enums"]["subscription_interval"]
-          is_popular: boolean
-          limits: Json
+          is_popular: boolean | null
+          metadata: Json | null
           name: string
+          plan_type: Database["public"]["Enums"]["subscription_plan_type"]
           price: number
+          sort_order: number | null
           status: Database["public"]["Enums"]["subscription_plan_status"]
           stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string
         }
         Insert: {
+          application_id?: string | null
           created_at?: string
           currency?: string
-          description: string
-          features?: Json
-          id?: string
-          interval: Database["public"]["Enums"]["subscription_interval"]
-          is_popular?: boolean
-          limits?: Json
-          name: string
-          price: number
-          status?: Database["public"]["Enums"]["subscription_plan_status"]
-          stripe_price_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          currency?: string
-          description?: string
-          features?: Json
+          description?: string | null
+          features?: Json | null
           id?: string
           interval?: Database["public"]["Enums"]["subscription_interval"]
-          is_popular?: boolean
-          limits?: Json
-          name?: string
+          is_popular?: boolean | null
+          metadata?: Json | null
+          name: string
+          plan_type: Database["public"]["Enums"]["subscription_plan_type"]
           price?: number
+          sort_order?: number | null
           status?: Database["public"]["Enums"]["subscription_plan_status"]
           stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
         }
-        Relationships: []
-      }
-      user_access: {
-        Row: {
-          access_level: Database["public"]["Enums"]["access_level"]
-          application_id: string
-          granted_at: string
-          granted_by: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          access_level: Database["public"]["Enums"]["access_level"]
-          application_id: string
-          granted_at?: string
-          granted_by: string
-          id?: string
-          user_id: string
-        }
         Update: {
-          access_level?: Database["public"]["Enums"]["access_level"]
-          application_id?: string
-          granted_at?: string
-          granted_by?: string
+          application_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          features?: Json | null
           id?: string
-          user_id?: string
+          interval?: Database["public"]["Enums"]["subscription_interval"]
+          is_popular?: boolean | null
+          metadata?: Json | null
+          name?: string
+          plan_type?: Database["public"]["Enums"]["subscription_plan_type"]
+          price?: number
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["subscription_plan_status"]
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "user_access_application_id_fkey"
+            foreignKeyName: "subscription_plans_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
@@ -348,37 +280,46 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
-          cancel_at_period_end: boolean
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
           created_at: string
           current_period_end: string
           current_period_start: string
           id: string
+          metadata: Json | null
           plan_id: string
           status: Database["public"]["Enums"]["user_subscription_status"]
+          stripe_customer_id: string | null
           stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
-          cancel_at_period_end?: boolean
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
           created_at?: string
           current_period_end: string
           current_period_start: string
           id?: string
+          metadata?: Json | null
           plan_id: string
-          status: Database["public"]["Enums"]["user_subscription_status"]
+          status?: Database["public"]["Enums"]["user_subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
-          cancel_at_period_end?: boolean
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
           created_at?: string
           current_period_end?: string
           current_period_start?: string
           id?: string
+          metadata?: Json | null
           plan_id?: string
           status?: Database["public"]["Enums"]["user_subscription_status"]
+          stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
@@ -405,6 +346,7 @@ export type Database = {
           id: string
           last_name: string | null
           role: Database["public"]["Enums"]["user_role"]
+          status: Database["public"]["Enums"]["user_status"]
           storage_limit: number
           storage_used: number
           stripe_customer_id: string | null
@@ -422,6 +364,7 @@ export type Database = {
           id: string
           last_name?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          status?: Database["public"]["Enums"]["user_status"]
           storage_limit?: number
           storage_used?: number
           stripe_customer_id?: string | null
@@ -439,6 +382,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          status?: Database["public"]["Enums"]["user_status"]
           storage_limit?: number
           storage_used?: number
           stripe_customer_id?: string | null
@@ -452,78 +396,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_audit_log: {
-        Args: {
-          p_action: Database["public"]["Enums"]["audit_action"]
-          p_admin_email: string
-          p_admin_user_id: string
-          p_after_data?: Json
-          p_before_data?: Json
-          p_description?: string
-          p_error_message?: string
-          p_ip_address?: unknown
-          p_metadata?: Json
-          p_resource_id?: string
-          p_resource_name?: string
-          p_resource_type: string
-          p_session_id?: string
-          p_success?: boolean
-          p_user_agent?: string
-        }
-        Returns: string
-      }
-      get_audit_log_stats: {
-        Args: { p_end_date?: string; p_start_date?: string }
-        Returns: Json
-      }
-      get_audit_logs: {
-        Args: {
-          p_action?: Database["public"]["Enums"]["audit_action"]
-          p_admin_user_id?: string
-          p_end_date?: string
-          p_limit?: number
-          p_offset?: number
-          p_resource_id?: string
-          p_resource_type?: string
-          p_start_date?: string
-        }
-        Returns: {
-          action: Database["public"]["Enums"]["audit_action"]
-          admin_email: string
-          admin_user_id: string
-          after_data: Json
-          before_data: Json
-          created_at: string
-          description: string
-          error_message: string
-          id: string
-          ip_address: unknown
-          metadata: Json
-          resource_id: string
-          resource_name: string
-          resource_type: string
-          session_id: string
-          success: boolean
-          user_agent: string
-        }[]
-      }
       get_plan_subscriber_count: {
         Args: { plan_id: string }
         Returns: number
       }
-      get_user_subscription: {
-        Args: { user_id: string }
+      get_user_application_subscriptions: {
+        Args: { user_uuid: string }
         Returns: {
-          cancel_at_period_end: boolean
+          application_id: string
+          application_name: string
           current_period_end: string
-          current_period_start: string
-          id: string
-          plan_currency: string
+          features: Json
           plan_id: string
-          plan_interval: Database["public"]["Enums"]["subscription_interval"]
           plan_name: string
-          plan_price: number
-          status: Database["public"]["Enums"]["user_subscription_status"]
+          subscription_id: string
+        }[]
+      }
+      get_user_general_subscription: {
+        Args: { user_uuid: string }
+        Returns: {
+          bandwidth_limit: number
+          bandwidth_used: number
+          current_period_end: string
+          plan_id: string
+          plan_name: string
+          storage_limit: number
+          storage_used: number
+          subscription_id: string
         }[]
       }
       increment_user_bandwidth: {
@@ -538,36 +437,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      user_has_application_feature: {
+        Args: { app_uuid: string; feature_key_param: string; user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      access_level: "read" | "write" | "admin"
       application_status: "draft" | "pending" | "published" | "archived"
-      audit_action:
-        | "user_created"
-        | "user_updated"
-        | "user_deleted"
-        | "user_role_changed"
-        | "user_status_changed"
-        | "application_created"
-        | "application_updated"
-        | "application_deleted"
-        | "application_status_changed"
-        | "application_reviewed"
-        | "subscription_plan_created"
-        | "subscription_plan_updated"
-        | "subscription_plan_deleted"
-        | "subscription_plan_status_changed"
-        | "user_subscription_created"
-        | "user_subscription_updated"
-        | "user_subscription_cancelled"
-        | "admin_login"
-        | "admin_logout"
-        | "bulk_operation"
-        | "system_configuration_changed"
       review_status: "pending" | "approved" | "rejected"
-      subscription_interval: "month" | "year"
+      subscription_interval: "monthly" | "yearly"
       subscription_plan_status: "active" | "inactive" | "archived"
+      subscription_plan_type: "general" | "application"
       user_role: "user" | "admin"
+      user_status: "active" | "suspended" | "deleted"
       user_subscription_status:
         | "active"
         | "canceled"
@@ -704,35 +586,13 @@ export const Constants = {
   },
   public: {
     Enums: {
-      access_level: ["read", "write", "admin"],
       application_status: ["draft", "pending", "published", "archived"],
-      audit_action: [
-        "user_created",
-        "user_updated",
-        "user_deleted",
-        "user_role_changed",
-        "user_status_changed",
-        "application_created",
-        "application_updated",
-        "application_deleted",
-        "application_status_changed",
-        "application_reviewed",
-        "subscription_plan_created",
-        "subscription_plan_updated",
-        "subscription_plan_deleted",
-        "subscription_plan_status_changed",
-        "user_subscription_created",
-        "user_subscription_updated",
-        "user_subscription_cancelled",
-        "admin_login",
-        "admin_logout",
-        "bulk_operation",
-        "system_configuration_changed",
-      ],
       review_status: ["pending", "approved", "rejected"],
-      subscription_interval: ["month", "year"],
+      subscription_interval: ["monthly", "yearly"],
       subscription_plan_status: ["active", "inactive", "archived"],
+      subscription_plan_type: ["general", "application"],
       user_role: ["user", "admin"],
+      user_status: ["active", "suspended", "deleted"],
       user_subscription_status: [
         "active",
         "canceled",

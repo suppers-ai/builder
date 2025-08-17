@@ -239,6 +239,7 @@ pre {
   @apply badge badge-sm;
 }
 
+
 .admin-modal {
   @apply modal-box w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto;
 }
@@ -255,4 +256,63 @@ pre {
   .admin-sr-only {
     @apply not-sr-only;
   }
+}
+
+/* Ensure modals appear above sidebar - sidebar uses z-50 on mobile, z-30 on desktop */
+.modal {
+  z-index: 100 !important;
+  position: fixed !important;
+}
+
+.modal-open {
+  z-index: 100 !important;
+  position: fixed !important;
+}
+
+.modal-backdrop {
+  z-index: 99 !important;
+}
+
+.modal-box {
+  z-index: 101 !important;
+  position: relative !important;
+}
+
+/* Specific override for any modal container */
+div:has(.modal-open), 
+.modal-open {
+  z-index: 100 !important;
+  position: fixed !important;
+}
+
+/* Fix dropdown positioning in tables */
+.table .dropdown {
+  position: relative !important;
+}
+
+.table .dropdown-content,
+.table .dropdown .dropdown-content {
+  position: absolute !important;
+  z-index: 1000 !important;
+  min-width: 200px !important;
+  top: 100% !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  margin-top: 4px !important;
+}
+
+/* Ensure dropdown content appears above table rows */
+.dropdown-content {
+  z-index: 1000 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Prevent table overflow from hiding dropdowns */
+.overflow-x-auto:has(.table) {
+  overflow: visible !important;
+}
+
+/* Alternative: make the table container have visible overflow when dropdown is open */
+.table-container {
+  overflow: visible !important;
 }

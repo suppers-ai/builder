@@ -49,30 +49,6 @@ end $$;
 -- USERS TABLE
 -- =============================================
 
--- Note: Main users table is defined below in the TABLES section
-
--- Add bandwidth columns if they don't exist (for backward compatibility)
-do $$ 
-begin
-    if not exists (
-        select 1 from information_schema.columns 
-        where table_schema = 'public' 
-        and table_name = 'users' 
-        and column_name = 'bandwidth_used'
-    ) then
-        alter table public.users add column bandwidth_used bigint default 0 not null;
-    end if;
-    
-    if not exists (
-        select 1 from information_schema.columns 
-        where table_schema = 'public' 
-        and table_name = 'users' 
-        and column_name = 'bandwidth_limit'
-    ) then
-        alter table public.users add column bandwidth_limit bigint default (250 * 1024 * 1024) not null;
-    end if;
-end $$;
-
 -- Function to handle user creation/updates
 create or replace function public.handle_new_user()
 returns trigger
@@ -151,6 +127,14 @@ begin
     end if;
 end $$;
 
+-- User status enum for account status
+do $$ 
+begin
+    if not exists (select 1 from pg_type where typname = 'user_status') then
+        create type user_status as enum ('active', 'suspended', 'deleted');
+    end if;
+end $$;
+
 
 -- Review status enum
 do $$ 
@@ -179,6 +163,7 @@ create table if not exists public.users (
   bandwidth_used bigint default 0 not null, -- Total bandwidth used in bytes (monthly)
   bandwidth_limit bigint default (250 * 1024 * 1024) not null, -- Bandwidth limit in bytes (default 250MB per month)
   role user_role default 'user'::user_role not null,
+  status user_status default 'active'::user_status not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -186,16 +171,14 @@ create table if not exists public.users (
 -- Applications table
 create table if not exists public.applications (
   id uuid default uuid_generate_v4() primary key,
-  slug text not null,
-  owner_id uuid references auth.users(id) on delete cascade not null,
+  slug text not null unique,
   name text not null,
   description text,
-  template_id text,
-  configuration jsonb default '{}'::jsonb not null,
+  website_url text,
+  thumbnail_url text,
   status application_status default 'draft'::application_status not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  unique(owner_id, slug)
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- Storage objects table for all file types (recordings, images, documents, paintings, etc.)
@@ -302,29 +285,28 @@ create policy "Users can update their own profile"
   on public.users for update
   using (id = auth.uid());
 
--- Applications policies
-create policy "Users can view their own applications"
-  on public.applications for select
-  using (owner_id = auth.uid());
-
+-- Applications policies - simplified access control
 create policy "Users can view published applications"
   on public.applications for select
   using (status = 'published');
 
-create policy "Users can insert their applications"
-  on public.applications for insert
-  with check (owner_id = auth.uid());
-
-create policy "Users can update their applications"
-  on public.applications for update
-  using (owner_id = auth.uid());
-
-create policy "Users can delete their applications"
-  on public.applications for delete
-  using (owner_id = auth.uid());
-
 -- Admin operations are handled at the application level
 -- No RLS policy needed for admin access to all applications
+
+-- =============================================
+-- SUBSCRIPTION TABLES (see migration 20240102000000_subscription_tables.sql)
+-- =============================================
+-- Note: Full subscription tables are defined in the migration file
+-- This is just a reference of the key tables:
+
+-- subscription_plans (plan_type: 'general' | 'application', application_id for app-specific plans)
+-- user_subscriptions (users can have multiple: one general + multiple app-specific)
+-- 
+-- Key differences from old model:
+-- - No more application/customDomains/apiCalls limits (admin creates apps)
+-- - General plans: only storage_limit + bandwidth_limit
+-- - Application plans: linked to specific apps with custom features
+-- - Users can have one general subscription + multiple app-specific subscriptions
 
 -- Storage objects policies
 create policy "Users can view their own storage objects"
@@ -353,14 +335,9 @@ create policy "Users can delete their own storage objects"
 
 
 -- Application reviews policies
-create policy "Application owners can view reviews of their apps"
+create policy "Authenticated users can view application reviews"
   on public.application_reviews for select
-  using (
-    exists (
-      select 1 from public.applications
-      where id = application_id and owner_id = auth.uid()
-    )
-  );
+  using (auth.uid() is not null);
 
 -- Admin operations for reviews are handled at the application level
 -- No RLS policies needed for admin access to reviews
@@ -435,12 +412,11 @@ create trigger handle_updated_at_custom_themes
 -- Users indexes
 create index if not exists idx_users_email on public.users(email);
 create index if not exists idx_users_role on public.users(role);
+create index if not exists idx_users_status on public.users(status);
 
 -- Applications indexes
-create index if not exists idx_applications_owner_id on public.applications(owner_id);
 create index if not exists idx_applications_status on public.applications(status);
 create index if not exists idx_applications_slug on public.applications(slug);
-create index if not exists idx_applications_template_id on public.applications(template_id);
 create index if not exists idx_applications_created_at on public.applications(created_at);
 
 -- Storage objects indexes
