@@ -21,11 +21,11 @@ export function useStorage() {
         return;
       }
 
-      const response = await fetch('http://127.0.0.1:54321/functions/v1/api/v1/storage/user', {
-        method: 'GET',
+      const response = await fetch("http://127.0.0.1:54321/functions/v1/api/v1/storage/user", {
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 

@@ -1,6 +1,15 @@
 import { useEffect, useState } from "preact/hooks";
 import type { User } from "@suppers/shared/utils/type-mappers.ts";
-import { Button, Card, EmailInput, Input, Loading, PasswordInput, Toast, Logo } from "@suppers/ui-lib";
+import {
+  Button,
+  Card,
+  EmailInput,
+  Input,
+  Loading,
+  Logo,
+  PasswordInput,
+  Toast,
+} from "@suppers/ui-lib";
 import { getAuthClient } from "../lib/auth.ts";
 
 // Get the profile auth client (direct Supabase connection)
@@ -17,7 +26,6 @@ export default function LoginPageIsland({
   redirectTo = "/profile",
   isModal = false,
 }: LoginPageIslandProps) {
-
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(initialMode === "login");
@@ -103,19 +111,19 @@ export default function LoginPageIsland({
     const checkAuth = async () => {
       try {
         console.log("🔍 LoginPageIsland: Starting auth check, isModal:", isModal);
-        
+
         // Try to initialize auth client for both modal and non-modal contexts
         console.log("🔍 LoginPageIsland: Initializing auth client...");
-        
-        // Add timeout to prevent hanging
+
+        // Add timeout to prevent hanging (10 seconds should be enough)
         const initPromise = authClient.initialize();
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Auth initialization timeout")), 30000);
+          setTimeout(() => reject(new Error("Auth initialization timeout")), 10000);
         });
-        
+
         await Promise.race([initPromise, timeoutPromise]);
         const currentUser = await authClient.getUser();
-        console.log("🔍 LoginPageIsland: Current user:", currentUser?.email || 'none');
+        console.log("🔍 LoginPageIsland: Current user:", currentUser?.email || "none");
         setUser(currentUser);
 
         if (currentUser && !isModal) {
@@ -124,7 +132,9 @@ export default function LoginPageIsland({
           console.log("🔍 LoginPageIsland: User authenticated, redirecting (non-modal)");
           handleAuthSuccess();
         } else if (currentUser && isModal) {
-          console.log("🔍 LoginPageIsland: User authenticated in modal mode, waiting for user action");
+          console.log(
+            "🔍 LoginPageIsland: User authenticated in modal mode, waiting for user action",
+          );
           // In modal mode with authenticated user, just show the form but don't auto-redirect
           // This prevents infinite loops in OAuth popup flows
         }
@@ -185,10 +195,10 @@ export default function LoginPageIsland({
         }
         const currentUser = await authClient.getUser();
         console.log("currentUser", currentUser);
-              setUser(currentUser);
+        setUser(currentUser);
 
         addToast("Sign in successful!", "success");
-        
+
         // Redirect to intended destination
         setTimeout(() => {
           handleAuthSuccess();
@@ -214,7 +224,7 @@ export default function LoginPageIsland({
         const currentUser = await authClient.getUser();
         console.log("currentUser", currentUser);
         setUser(currentUser);
-        
+
         // Redirect to intended destination
         setTimeout(() => {
           handleAuthSuccess();
@@ -235,7 +245,7 @@ export default function LoginPageIsland({
       setError(null);
       const result = await authClient.signInWithOAuth(
         provider,
-        window.location.origin + redirectTo,
+        globalThis.location.origin + redirectTo,
       );
 
       if (result.error) {
@@ -290,7 +300,7 @@ export default function LoginPageIsland({
             key={toast.id}
             message={toast.message}
             type={toast.type}
-            dismissible={true}
+            dismissible
             onDismiss={() => removeToast(toast.id)}
           />
         ))}
@@ -307,205 +317,207 @@ export default function LoginPageIsland({
               </div>
             </div>
 
-          {!showForgotPassword
-            ? (
-              <>
-                {/* OAuth Buttons */}
-                <div class="space-y-1 mb-2">
-                  {/* Google Sign-In Button - Following Google Branding Guidelines */}
-                  <button
-                    class="w-full h-9 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm"
-                    onClick={() => handleOAuthLogin("google")}
-                    disabled={isLoading}
-                    style={{ fontFamily: 'Roboto, sans-serif' }}
-                  >
-                    <svg class="w-4 h-4 mr-3" viewBox="0 0 24 24">
-                      <path
-                        fill="#4285F4"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      />
-                    </svg>
-                    <span class="text-xs font-medium text-gray-700">
-                      {isLogin ? "Sign in with Google" : "Sign up with Google"}
-                    </span>
-                  </button>
+            {!showForgotPassword
+              ? (
+                <>
+                  {/* OAuth Buttons */}
+                  <div class="space-y-1 mb-2">
+                    {/* Google Sign-In Button - Following Google Branding Guidelines */}
+                    <button
+                      class="w-full h-9 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+                      onClick={() => handleOAuthLogin("google")}
+                      disabled={isLoading}
+                      style={{ fontFamily: "Roboto, sans-serif" }}
+                    >
+                      <svg class="w-4 h-4 mr-3" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                      <span class="text-xs font-medium text-gray-700">
+                        {isLogin ? "Sign in with Google" : "Sign up with Google"}
+                      </span>
+                    </button>
 
-                  <button
-                    class="w-full h-9 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm"
-                    onClick={() => handleOAuthLogin("github")}
-                    disabled={isLoading}
-                  >
-                    <svg class="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.30.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                    </svg>
-                    <span class="text-xs font-medium text-gray-700">
-                      {isLogin ? "Sign in with GitHub" : "Sign up with GitHub"}
-                    </span>
-                  </button>
-                </div>
+                    <button
+                      class="w-full h-9 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors duration-200 shadow-sm"
+                      onClick={() => handleOAuthLogin("github")}
+                      disabled={isLoading}
+                    >
+                      <svg class="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.30.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                      </svg>
+                      <span class="text-xs font-medium text-gray-700">
+                        {isLogin ? "Sign in with GitHub" : "Sign up with GitHub"}
+                      </span>
+                    </button>
+                  </div>
 
-                <div class="divider my-2 text-xs">OR USE YOUR ACCOUNT</div>
+                  <div class="divider my-2 text-xs">OR USE YOUR ACCOUNT</div>
 
-                {/* Email/Password Form */}
-                <form onSubmit={handleSubmit} class="space-y-2">
-                  {!isLogin && (
-                    <div class="grid grid-cols-2 gap-1">
-                      <Input
-                        value={formData.firstName}
+                  {/* Email/Password Form */}
+                  <form onSubmit={handleSubmit} class="space-y-2">
+                    {!isLogin && (
+                      <div class="grid grid-cols-2 gap-1">
+                        <Input
+                          value={formData.firstName}
+                          onInput={(e) =>
+                            handleInputChange("firstName", (e.target as HTMLInputElement).value)}
+                          required={!isLogin}
+                          disabled={isLoading}
+                          placeholder="First"
+                          class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
+                        />
+                        <Input
+                          value={formData.lastName}
+                          onInput={(e) =>
+                            handleInputChange("lastName", (e.target as HTMLInputElement).value)}
+                          required={!isLogin}
+                          disabled={isLoading}
+                          placeholder="Last"
+                          class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
+                        />
+                      </div>
+                    )}
+
+                    <div class="form-control">
+                      <EmailInput
+                        value={formData.email}
                         onInput={(e) =>
-                          handleInputChange("firstName", (e.target as HTMLInputElement).value)}
-                        required={!isLogin}
+                          handleInputChange("email", (e.target as HTMLInputElement).value)}
+                        required
                         disabled={isLoading}
-                        placeholder="First"
-                        class="input input-xs input-bordered bg-base-200/50 focus:bg-base-100"
-                      />
-                      <Input
-                        value={formData.lastName}
-                        onInput={(e) =>
-                          handleInputChange("lastName", (e.target as HTMLInputElement).value)}
-                        required={!isLogin}
-                        disabled={isLoading}
-                        placeholder="Last"
-                        class="input input-xs input-bordered bg-base-200/50 focus:bg-base-100"
+                        placeholder="email@example.com"
+                        class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
                       />
                     </div>
-                  )}
 
-                  <div class="form-control">
-                    <EmailInput
-                      value={formData.email}
-                      onInput={(e) =>
-                        handleInputChange("email", (e.target as HTMLInputElement).value)}
-                      required
+                    <div class="form-control">
+                      <PasswordInput
+                        value={formData.password}
+                        onInput={(e) =>
+                          handleInputChange("password", (e.target as HTMLInputElement).value)}
+                        required
+                        disabled={isLoading}
+                        placeholder="password"
+                        class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
+                      />
+                    </div>
+
+                    {!isLogin && (
+                      <PasswordInput
+                        value={formData.confirmPassword}
+                        onInput={(e) =>
+                          handleInputChange(
+                            "confirmPassword",
+                            (e.target as HTMLInputElement).value,
+                          )}
+                        required={!isLogin}
+                        disabled={isLoading}
+                        placeholder="confirm"
+                        class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
+                      />
+                    )}
+
+                    <Button
+                      type="submit"
+                      color="primary"
+                      size="sm"
+                      class="w-full h-8 mt-2 font-semibold"
                       disabled={isLoading}
-                      placeholder="email@example.com"
-                      class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
-                    />
+                    >
+                      {isLoading ? <Loading variant="spinner" size="xs" /> : isLogin
+                        ? (
+                          "Sign In"
+                        )
+                        : (
+                          "Create Account"
+                        )}
+                    </Button>
+                  </form>
+
+                  <div class="mt-2 text-center space-y-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleToggleMode}
+                      class="text-xs h-8 px-3"
+                      disabled={isLoading}
+                    >
+                      {isLogin ? "Need account? Sign up" : "Have account? Sign in"}
+                    </Button>
+
+                    {isLogin && (
+                      <div class="pt-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleShowForgotPassword}
+                          class="text-xs h-8 px-3 text-base-content/60 hover:text-base-content"
+                          disabled={isLoading}
+                        >
+                          Forgot password?
+                        </Button>
+                      </div>
+                    )}
                   </div>
+                </>
+              )
+              : (
+                /* Forgot Password Form */
+                <form onSubmit={handleForgotPassword} class="space-y-2">
+                  <h3 class="text-xs font-semibold mb-2">Reset Password</h3>
+                  <p class="text-xs text-gray-600 mb-2">
+                    Enter email for reset link.
+                  </p>
 
-                  <div class="form-control">
-                    <PasswordInput
-                      value={formData.password}
-                      onInput={(e) =>
-                        handleInputChange("password", (e.target as HTMLInputElement).value)}
-                      required
-                      disabled={isLoading}
-                      placeholder="password"
-                      class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
-                    />
-                  </div>
-
-                  {!isLogin && (
-                    <PasswordInput
-                      value={formData.confirmPassword}
-                      onInput={(e) =>
-                        handleInputChange("confirmPassword", (e.target as HTMLInputElement).value)}
-                      required={!isLogin}
-                      disabled={isLoading}
-                      placeholder="confirm"
-                      class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
-                    />
-                  )}
+                  <EmailInput
+                    value={formData.email}
+                    onInput={(e) =>
+                      handleInputChange("email", (e.target as HTMLInputElement).value)}
+                    required
+                    disabled={isLoading}
+                    placeholder="Email"
+                    class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
+                  />
 
                   <Button
                     type="submit"
-                    color="primary"
                     size="sm"
-                    class="w-full h-8 mt-2 font-semibold"
+                    class="w-full h-8"
                     disabled={isLoading}
                   >
-                    {isLoading ? <Loading variant="spinner" size="xs" /> : isLogin
-                      ? (
-                        "Sign In"
-                      )
-                      : (
-                        "Create Account"
-                      )}
+                    {isLoading ? <Loading variant="spinner" size="xs" /> : (
+                      "Send Link"
+                    )}
                   </Button>
+
+                  <div class="text-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleHideForgotPassword}
+                      class="text-xs h-8 px-3 text-primary hover:text-primary-focus"
+                      disabled={isLoading}
+                    >
+                      Back to Sign In
+                    </Button>
+                  </div>
                 </form>
-
-                <div class="mt-2 text-center space-y-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleToggleMode}
-                    class="text-xs h-8 px-3"
-                    disabled={isLoading}
-                  >
-                    {isLogin
-                      ? "Need account? Sign up"
-                      : "Have account? Sign in"}
-                  </Button>
-                  
-                  {isLogin && (
-                    <div class="pt-0">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleShowForgotPassword}
-                        class="text-xs h-8 px-3 text-base-content/60 hover:text-base-content"
-                        disabled={isLoading}
-                      >
-                        Forgot password?
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )
-            : (
-              /* Forgot Password Form */
-              <form onSubmit={handleForgotPassword} class="space-y-2">
-                <h3 class="text-xs font-semibold mb-2">Reset Password</h3>
-                <p class="text-xs text-gray-600 mb-2">
-                  Enter email for reset link.
-                </p>
-
-                <EmailInput
-                  value={formData.email}
-                  onInput={(e) => handleInputChange("email", (e.target as HTMLInputElement).value)}
-                  required
-                  disabled={isLoading}
-                  placeholder="Email"
-                  class="input input-sm input-bordered bg-base-200/50 focus:bg-base-100"
-                />
-
-                <Button
-                  type="submit"
-                  size="sm"
-                  class="w-full h-8"
-                  disabled={isLoading}
-                >
-                  {isLoading ? <Loading variant="spinner" size="xs" /> : (
-                    "Send Link"
-                  )}
-                </Button>
-
-                <div class="text-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleHideForgotPassword}
-                    class="text-xs h-8 px-3 text-primary hover:text-primary-focus"
-                    disabled={isLoading}
-                  >
-                    Back to Sign In
-                  </Button>
-                </div>
-              </form>
-            )}
+              )}
           </div>
         </Card>
       </div>

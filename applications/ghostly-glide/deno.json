@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "build": "deno run -A dev.ts build",
+    "dev": "deno run -A --watch=static/,routes/ dev.ts",
+    "preview": "deno run -A main.ts",
+    "update": "deno run -A -r https://fresh.deno.dev/update ."
+  },
+  "exclude": ["**/_fresh/*"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
+}

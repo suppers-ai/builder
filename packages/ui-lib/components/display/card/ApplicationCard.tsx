@@ -1,10 +1,4 @@
-import { 
-  Rocket, 
-  Clock, 
-  FileText, 
-  Archive,
-  Smartphone
-} from "lucide-preact";
+import { Archive, Clock, FileText, Rocket, Smartphone } from "lucide-preact";
 import type { Application } from "@suppers/shared";
 
 export interface ApplicationCardProps {
@@ -55,11 +49,11 @@ export function ApplicationCard({
   };
 
   const handleCardClick = () => {
-    window.location.href = `/applications/${application.id}`;
+    globalThis.location.href = `/applications/${application.id}`;
   };
 
   return (
-    <div 
+    <div
       onClick={handleCardClick}
       class={`card bg-base-100 shadow-sm hover:shadow-lg transition-all duration-200 border border-base-200 hover:border-primary/30 hover:bg-primary/5 cursor-pointer ${className}`}
     >

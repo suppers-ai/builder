@@ -7,9 +7,9 @@ export default function App({ Component, state }: PageProps) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Suppers App - SSO Authentication Service</title>
+        <title>Suppers - Build, Monetize, Scale</title>
         <link rel="stylesheet" href="/styles.css" />
-        
+
         {/* Early theme application to prevent flicker */}
         <script
           dangerouslySetInnerHTML={{

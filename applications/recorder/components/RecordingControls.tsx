@@ -1,13 +1,6 @@
-import { Button, Alert } from "@suppers-ai/ui-lib";
-import { 
-  Video, 
-  Square, 
-  Play, 
-  Pause, 
-  Cloud, 
-  AlertCircle 
-} from "lucide-preact";
-import type { RecordingState, RecordingOptions } from "../types/recorder.ts";
+import { Alert, Button } from "@suppers/ui-lib";
+import { AlertCircle, Cloud, Pause, Play, Square, Video } from "lucide-preact";
+import type { RecordingOptions, RecordingState } from "../types/recorder.ts";
 
 interface RecordingControlsProps {
   recordingState: RecordingState;
@@ -52,20 +45,20 @@ export default function RecordingControls({
                   {storageInfo.percentage > 95 ? "Storage almost full!" : "Storage running low"}
                 </div>
                 <div>
-                  {Math.round(storageInfo.used / (1024 * 1024))}MB of {Math.round(storageInfo.limit / (1024 * 1024))}MB used 
-                  ({storageInfo.percentage}%)
+                  {Math.round(storageInfo.used / (1024 * 1024))}MB of{" "}
+                  {Math.round(storageInfo.limit / (1024 * 1024))}MB used ({storageInfo.percentage}%)
                 </div>
               </div>
             </div>
           </Alert>
         </div>
       )}
-      
+
       {/* Recording Controls Row */}
       <div class="flex items-center justify-center gap-8">
         {/* Main Controls */}
         <div class="flex justify-center gap-3">
-          {recordingState.status === 'idle' && isAuthenticated && (
+          {recordingState.status === "idle" && isAuthenticated && (
             <Button
               onClick={onStartRecording}
               color="primary"
@@ -77,7 +70,7 @@ export default function RecordingControls({
             </Button>
           )}
 
-          {recordingState.status === 'recording' && (
+          {recordingState.status === "recording" && (
             <>
               <Button
                 onClick={onPauseRecording}
@@ -100,7 +93,7 @@ export default function RecordingControls({
             </>
           )}
 
-          {recordingState.status === 'paused' && (
+          {recordingState.status === "paused" && (
             <>
               <Button
                 onClick={onResumeRecording}
@@ -123,7 +116,7 @@ export default function RecordingControls({
             </>
           )}
 
-          {recordingState.status === 'uploading' && (
+          {recordingState.status === "uploading" && (
             <Button
               disabled
               size="lg"
@@ -136,7 +129,7 @@ export default function RecordingControls({
         </div>
 
         {/* Recording Settings - Only show when idle and authenticated */}
-        {recordingState.status === 'idle' && isAuthenticated && (
+        {recordingState.status === "idle" && isAuthenticated && (
           <div class="bg-base-200/30 rounded-lg p-4 space-y-3">
             <div class="form-control">
               <select
@@ -147,7 +140,7 @@ export default function RecordingControls({
                   if (target) {
                     onRecordingOptionsChange({
                       ...recordingOptions,
-                      quality: target.value as RecordingOptions['quality']
+                      quality: target.value as RecordingOptions["quality"],
                     });
                   }
                 }}
@@ -165,10 +158,11 @@ export default function RecordingControls({
                   type="checkbox"
                   class="checkbox checkbox-sm"
                   checked={recordingOptions.includeAudio}
-                  onChange={(e) => onRecordingOptionsChange({
-                    ...recordingOptions,
-                    includeAudio: e.currentTarget.checked
-                  })}
+                  onChange={(e) =>
+                    onRecordingOptionsChange({
+                      ...recordingOptions,
+                      includeAudio: e.currentTarget.checked,
+                    })}
                 />
                 <span class="text-xs">Audio</span>
               </label>
@@ -178,10 +172,11 @@ export default function RecordingControls({
                   type="checkbox"
                   class="checkbox checkbox-sm"
                   checked={recordingOptions.includeMicrophone}
-                  onChange={(e) => onRecordingOptionsChange({
-                    ...recordingOptions,
-                    includeMicrophone: e.currentTarget.checked
-                  })}
+                  onChange={(e) =>
+                    onRecordingOptionsChange({
+                      ...recordingOptions,
+                      includeMicrophone: e.currentTarget.checked,
+                    })}
                 />
                 <span class="text-xs">Mic</span>
               </label>

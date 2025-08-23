@@ -1,5 +1,5 @@
 // Performance monitoring system for drawing operations
-import type { Stroke, InsertedImage, DrawingState } from '../types/paint.ts';
+import type { DrawingState, InsertedImage, Stroke } from "../types/paint.ts";
 
 /**
  * Performance metrics for different operations
@@ -9,17 +9,17 @@ export interface PerformanceMetrics {
   strokeDrawTime: number;
   imageDrawTime: number;
   canvasRedrawTime: number;
-  
+
   // Memory operations
   memoryUsage: number;
   gcTime: number;
   compressionTime: number;
-  
+
   // User interaction
   inputLatency: number;
   frameRate: number;
   droppedFrames: number;
-  
+
   // System resources
   cpuUsage: number;
   memoryPressure: number;
@@ -53,8 +53,8 @@ export interface PerformanceThresholds {
  * Performance optimization suggestions
  */
 export interface OptimizationSuggestion {
-  type: 'memory' | 'rendering' | 'input' | 'system';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "memory" | "rendering" | "input" | "system";
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
   action: string;
   impact: string;
@@ -118,7 +118,7 @@ export class PerformanceMonitor {
    */
   private initializePerformanceObservers(): void {
     // Performance Observer for measuring paint and layout times
-    if (typeof PerformanceObserver !== 'undefined') {
+    if (typeof PerformanceObserver !== "undefined") {
       try {
         this.performanceObserver = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
@@ -126,16 +126,16 @@ export class PerformanceMonitor {
           }
         });
 
-        this.performanceObserver.observe({ 
-          entryTypes: ['measure', 'navigation', 'paint', 'layout-shift'] 
+        this.performanceObserver.observe({
+          entryTypes: ["measure", "navigation", "paint", "layout-shift"],
         });
       } catch (error) {
-        console.warn('Performance Observer not supported:', error);
+        console.warn("Performance Observer not supported:", error);
       }
     }
 
     // Memory pressure observer (if available)
-    if ('memory' in performance && (performance as any).memory) {
+    if ("memory" in performance && (performance as any).memory) {
       this.memoryObserver = (performance as any).memory;
     }
   }
@@ -145,13 +145,13 @@ export class PerformanceMonitor {
    */
   private handlePerformanceEntry(entry: PerformanceEntry): void {
     switch (entry.entryType) {
-      case 'measure':
+      case "measure":
         this.handleMeasureEntry(entry);
         break;
-      case 'paint':
+      case "paint":
         this.handlePaintEntry(entry);
         break;
-      case 'layout-shift':
+      case "layout-shift":
         this.handleLayoutShiftEntry(entry as any);
         break;
     }
@@ -162,14 +162,14 @@ export class PerformanceMonitor {
    */
   private handleMeasureEntry(entry: PerformanceEntry): void {
     const duration = entry.duration;
-    
-    if (entry.name.includes('stroke-draw')) {
+
+    if (entry.name.includes("stroke-draw")) {
       this.currentMetrics.strokeDrawTime = duration;
-    } else if (entry.name.includes('image-draw')) {
+    } else if (entry.name.includes("image-draw")) {
       this.currentMetrics.imageDrawTime = duration;
-    } else if (entry.name.includes('canvas-redraw')) {
+    } else if (entry.name.includes("canvas-redraw")) {
       this.currentMetrics.canvasRedrawTime = duration;
-    } else if (entry.name.includes('input-latency')) {
+    } else if (entry.name.includes("input-latency")) {
       this.currentMetrics.inputLatency = duration;
     }
   }
@@ -183,18 +183,19 @@ export class PerformanceMonitor {
     if (this.lastFrameTime > 0) {
       const frameDuration = currentTime - this.lastFrameTime;
       this.frameTimeHistory.push(frameDuration);
-      
+
       // Keep only last 60 frame times (1 second at 60fps)
       if (this.frameTimeHistory.length > 60) {
         this.frameTimeHistory.shift();
       }
-      
+
       // Calculate current frame rate
-      const averageFrameTime = this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length;
+      const averageFrameTime = this.frameTimeHistory.reduce((a, b) => a + b, 0) /
+        this.frameTimeHistory.length;
       this.currentMetrics.frameRate = 1000 / averageFrameTime;
-      
+
       // Count dropped frames (frames taking longer than 16.67ms for 60fps)
-      const droppedFrames = this.frameTimeHistory.filter(time => time > 16.67).length;
+      const droppedFrames = this.frameTimeHistory.filter((time) => time > 16.67).length;
       this.currentMetrics.droppedFrames = droppedFrames;
     }
     this.lastFrameTime = currentTime;
@@ -206,7 +207,7 @@ export class PerformanceMonitor {
   private handleLayoutShiftEntry(entry: any): void {
     // Layout shifts can indicate performance issues
     if (entry.value > 0.1) {
-      console.warn('Significant layout shift detected:', entry.value);
+      console.warn("Significant layout shift detected:", entry.value);
     }
   }
 
@@ -242,13 +243,13 @@ export class PerformanceMonitor {
     // Update memory usage
     if (this.memoryObserver) {
       this.currentMetrics.memoryUsage = this.memoryObserver.usedJSHeapSize || 0;
-      this.currentMetrics.memoryPressure = this.memoryObserver.totalJSHeapSizeLimit > 0 
-        ? this.memoryObserver.usedJSHeapSize / this.memoryObserver.totalJSHeapSizeLimit 
+      this.currentMetrics.memoryPressure = this.memoryObserver.totalJSHeapSizeLimit > 0
+        ? this.memoryObserver.usedJSHeapSize / this.memoryObserver.totalJSHeapSizeLimit
         : 0;
     }
 
     // Update battery level (if available)
-    if ('getBattery' in navigator) {
+    if ("getBattery" in navigator) {
       (navigator as any).getBattery().then((battery: any) => {
         this.currentMetrics.batteryLevel = battery.level * 100;
       }).catch(() => {
@@ -260,7 +261,7 @@ export class PerformanceMonitor {
     const sample: PerformanceSample = {
       timestamp: Date.now(),
       metrics: { ...this.currentMetrics },
-      operation: 'monitoring',
+      operation: "monitoring",
       duration: 0,
     };
 
@@ -273,9 +274,9 @@ export class PerformanceMonitor {
   public startTiming(operationName: string): void {
     const startTime = performance.now();
     this.operationTimers.set(operationName, startTime);
-    
+
     // Use Performance API for more detailed timing
-    if (typeof performance.mark === 'function') {
+    if (typeof performance.mark === "function") {
       performance.mark(`${operationName}-start`);
     }
   }
@@ -286,7 +287,7 @@ export class PerformanceMonitor {
   public endTiming(operationName: string): number {
     const endTime = performance.now();
     const startTime = this.operationTimers.get(operationName);
-    
+
     if (startTime === undefined) {
       console.warn(`No start time found for operation: ${operationName}`);
       return 0;
@@ -296,7 +297,7 @@ export class PerformanceMonitor {
     this.operationTimers.delete(operationName);
 
     // Use Performance API for more detailed timing
-    if (typeof performance.mark === 'function' && typeof performance.measure === 'function') {
+    if (typeof performance.mark === "function" && typeof performance.measure === "function") {
       performance.mark(`${operationName}-end`);
       performance.measure(operationName, `${operationName}-start`, `${operationName}-end`);
     }
@@ -317,10 +318,10 @@ export class PerformanceMonitor {
    * Measure stroke drawing performance
    */
   public measureStrokeDrawing(stroke: Stroke, drawFunction: () => void): number {
-    this.startTiming('stroke-draw');
+    this.startTiming("stroke-draw");
     drawFunction();
-    const duration = this.endTiming('stroke-draw');
-    
+    const duration = this.endTiming("stroke-draw");
+
     this.currentMetrics.strokeDrawTime = duration;
     return duration;
   }
@@ -329,10 +330,10 @@ export class PerformanceMonitor {
    * Measure image drawing performance
    */
   public measureImageDrawing(image: InsertedImage, drawFunction: () => void): number {
-    this.startTiming('image-draw');
+    this.startTiming("image-draw");
     drawFunction();
-    const duration = this.endTiming('image-draw');
-    
+    const duration = this.endTiming("image-draw");
+
     this.currentMetrics.imageDrawTime = duration;
     return duration;
   }
@@ -341,10 +342,10 @@ export class PerformanceMonitor {
    * Measure canvas redraw performance
    */
   public measureCanvasRedraw(drawFunction: () => void): number {
-    this.startTiming('canvas-redraw');
+    this.startTiming("canvas-redraw");
     drawFunction();
-    const duration = this.endTiming('canvas-redraw');
-    
+    const duration = this.endTiming("canvas-redraw");
+
     this.currentMetrics.canvasRedrawTime = duration;
     return duration;
   }
@@ -353,10 +354,10 @@ export class PerformanceMonitor {
    * Measure input latency
    */
   public measureInputLatency(inputFunction: () => void): number {
-    this.startTiming('input-latency');
+    this.startTiming("input-latency");
     inputFunction();
-    const duration = this.endTiming('input-latency');
-    
+    const duration = this.endTiming("input-latency");
+
     this.currentMetrics.inputLatency = duration;
     return duration;
   }
@@ -366,7 +367,7 @@ export class PerformanceMonitor {
    */
   private addSample(sample: PerformanceSample): void {
     this.samples.push(sample);
-    
+
     // Keep only last 1000 samples to prevent memory growth
     if (this.samples.length > 1000) {
       this.samples.shift();
@@ -385,15 +386,15 @@ export class PerformanceMonitor {
    */
   public getSamples(startTime?: number, endTime?: number): PerformanceSample[] {
     let filteredSamples = this.samples;
-    
+
     if (startTime !== undefined) {
-      filteredSamples = filteredSamples.filter(sample => sample.timestamp >= startTime);
+      filteredSamples = filteredSamples.filter((sample) => sample.timestamp >= startTime);
     }
-    
+
     if (endTime !== undefined) {
-      filteredSamples = filteredSamples.filter(sample => sample.timestamp <= endTime);
+      filteredSamples = filteredSamples.filter((sample) => sample.timestamp <= endTime);
     }
-    
+
     return filteredSamples;
   }
 
@@ -422,23 +423,23 @@ export class PerformanceMonitor {
     }
 
     const strokeDrawTimes = this.samples
-      .filter(s => s.operation === 'stroke-draw')
-      .map(s => s.duration);
-    
-    const imageDrawTimes = this.samples
-      .filter(s => s.operation === 'image-draw')
-      .map(s => s.duration);
-    
-    const canvasRedrawTimes = this.samples
-      .filter(s => s.operation === 'canvas-redraw')
-      .map(s => s.duration);
-    
-    const inputLatencies = this.samples
-      .filter(s => s.operation === 'input-latency')
-      .map(s => s.duration);
+      .filter((s) => s.operation === "stroke-draw")
+      .map((s) => s.duration);
 
-    const frameRates = this.samples.map(s => s.metrics.frameRate);
-    const memoryUsages = this.samples.map(s => s.metrics.memoryUsage);
+    const imageDrawTimes = this.samples
+      .filter((s) => s.operation === "image-draw")
+      .map((s) => s.duration);
+
+    const canvasRedrawTimes = this.samples
+      .filter((s) => s.operation === "canvas-redraw")
+      .map((s) => s.duration);
+
+    const inputLatencies = this.samples
+      .filter((s) => s.operation === "input-latency")
+      .map((s) => s.duration);
+
+    const frameRates = this.samples.map((s) => s.metrics.frameRate);
+    const memoryUsages = this.samples.map((s) => s.metrics.memoryUsage);
 
     return {
       averageStrokeDrawTime: this.average(strokeDrawTimes),
@@ -469,77 +470,89 @@ export class PerformanceMonitor {
     // Check stroke drawing performance
     if (stats.averageStrokeDrawTime > this.thresholds.maxStrokeDrawTime) {
       suggestions.push({
-        type: 'rendering',
-        severity: stats.averageStrokeDrawTime > this.thresholds.maxStrokeDrawTime * 2 ? 'high' : 'medium',
+        type: "rendering",
+        severity: stats.averageStrokeDrawTime > this.thresholds.maxStrokeDrawTime * 2
+          ? "high"
+          : "medium",
         message: `Stroke drawing is slow (${stats.averageStrokeDrawTime.toFixed(1)}ms average)`,
-        action: 'Consider reducing stroke complexity or enabling stroke simplification',
-        impact: 'Improved drawing responsiveness',
+        action: "Consider reducing stroke complexity or enabling stroke simplification",
+        impact: "Improved drawing responsiveness",
       });
     }
 
     // Check image drawing performance
     if (stats.averageImageDrawTime > this.thresholds.maxImageDrawTime) {
       suggestions.push({
-        type: 'rendering',
-        severity: stats.averageImageDrawTime > this.thresholds.maxImageDrawTime * 2 ? 'high' : 'medium',
+        type: "rendering",
+        severity: stats.averageImageDrawTime > this.thresholds.maxImageDrawTime * 2
+          ? "high"
+          : "medium",
         message: `Image drawing is slow (${stats.averageImageDrawTime.toFixed(1)}ms average)`,
-        action: 'Consider reducing image sizes or enabling image compression',
-        impact: 'Faster image rendering',
+        action: "Consider reducing image sizes or enabling image compression",
+        impact: "Faster image rendering",
       });
     }
 
     // Check canvas redraw performance
     if (stats.averageCanvasRedrawTime > this.thresholds.maxCanvasRedrawTime) {
       suggestions.push({
-        type: 'rendering',
-        severity: stats.averageCanvasRedrawTime > this.thresholds.maxCanvasRedrawTime * 2 ? 'high' : 'medium',
+        type: "rendering",
+        severity: stats.averageCanvasRedrawTime > this.thresholds.maxCanvasRedrawTime * 2
+          ? "high"
+          : "medium",
         message: `Canvas redrawing is slow (${stats.averageCanvasRedrawTime.toFixed(1)}ms average)`,
-        action: 'Enable dirty region optimization or reduce canvas complexity',
-        impact: 'Smoother canvas updates',
+        action: "Enable dirty region optimization or reduce canvas complexity",
+        impact: "Smoother canvas updates",
       });
     }
 
     // Check input latency
     if (stats.averageInputLatency > this.thresholds.maxInputLatency) {
       suggestions.push({
-        type: 'input',
-        severity: stats.averageInputLatency > this.thresholds.maxInputLatency * 2 ? 'high' : 'medium',
+        type: "input",
+        severity: stats.averageInputLatency > this.thresholds.maxInputLatency * 2
+          ? "high"
+          : "medium",
         message: `Input latency is high (${stats.averageInputLatency.toFixed(1)}ms average)`,
-        action: 'Optimize event handlers or reduce processing in input callbacks',
-        impact: 'More responsive drawing experience',
+        action: "Optimize event handlers or reduce processing in input callbacks",
+        impact: "More responsive drawing experience",
       });
     }
 
     // Check frame rate
     if (stats.averageFrameRate < this.thresholds.minFrameRate) {
       suggestions.push({
-        type: 'rendering',
-        severity: stats.averageFrameRate < this.thresholds.minFrameRate * 0.5 ? 'critical' : 'high',
+        type: "rendering",
+        severity: stats.averageFrameRate < this.thresholds.minFrameRate * 0.5 ? "critical" : "high",
         message: `Frame rate is low (${stats.averageFrameRate.toFixed(1)} fps average)`,
-        action: 'Enable performance optimizations or reduce visual complexity',
-        impact: 'Smoother animation and interaction',
+        action: "Enable performance optimizations or reduce visual complexity",
+        impact: "Smoother animation and interaction",
       });
     }
 
     // Check memory usage
     if (stats.peakMemoryUsage > this.thresholds.maxMemoryUsage) {
       suggestions.push({
-        type: 'memory',
-        severity: stats.peakMemoryUsage > this.thresholds.maxMemoryUsage * 2 ? 'critical' : 'high',
-        message: `Memory usage is high (${(stats.peakMemoryUsage / 1024 / 1024).toFixed(1)}MB peak)`,
-        action: 'Enable memory compression or reduce history size',
-        impact: 'Reduced memory pressure and better stability',
+        type: "memory",
+        severity: stats.peakMemoryUsage > this.thresholds.maxMemoryUsage * 2 ? "critical" : "high",
+        message: `Memory usage is high (${
+          (stats.peakMemoryUsage / 1024 / 1024).toFixed(1)
+        }MB peak)`,
+        action: "Enable memory compression or reduce history size",
+        impact: "Reduced memory pressure and better stability",
       });
     }
 
     // Check dropped frames
     if (this.currentMetrics.droppedFrames > this.thresholds.maxDroppedFrames) {
       suggestions.push({
-        type: 'rendering',
-        severity: this.currentMetrics.droppedFrames > this.thresholds.maxDroppedFrames * 2 ? 'high' : 'medium',
+        type: "rendering",
+        severity: this.currentMetrics.droppedFrames > this.thresholds.maxDroppedFrames * 2
+          ? "high"
+          : "medium",
         message: `High number of dropped frames (${this.currentMetrics.droppedFrames})`,
-        action: 'Reduce rendering complexity or enable frame rate limiting',
-        impact: 'Smoother visual experience',
+        action: "Reduce rendering complexity or enable frame rate limiting",
+        impact: "Smoother visual experience",
       });
     }
 
@@ -555,15 +568,24 @@ export class PerformanceMonitor {
 
     // Deduct points for performance issues
     if (stats.averageStrokeDrawTime > this.thresholds.maxStrokeDrawTime) {
-      score -= Math.min(20, (stats.averageStrokeDrawTime / this.thresholds.maxStrokeDrawTime - 1) * 20);
+      score -= Math.min(
+        20,
+        (stats.averageStrokeDrawTime / this.thresholds.maxStrokeDrawTime - 1) * 20,
+      );
     }
 
     if (stats.averageImageDrawTime > this.thresholds.maxImageDrawTime) {
-      score -= Math.min(15, (stats.averageImageDrawTime / this.thresholds.maxImageDrawTime - 1) * 15);
+      score -= Math.min(
+        15,
+        (stats.averageImageDrawTime / this.thresholds.maxImageDrawTime - 1) * 15,
+      );
     }
 
     if (stats.averageCanvasRedrawTime > this.thresholds.maxCanvasRedrawTime) {
-      score -= Math.min(20, (stats.averageCanvasRedrawTime / this.thresholds.maxCanvasRedrawTime - 1) * 20);
+      score -= Math.min(
+        20,
+        (stats.averageCanvasRedrawTime / this.thresholds.maxCanvasRedrawTime - 1) * 20,
+      );
     }
 
     if (stats.averageInputLatency > this.thresholds.maxInputLatency) {
@@ -623,12 +645,12 @@ export class PerformanceMonitor {
    */
   public dispose(): void {
     this.stopMonitoring();
-    
+
     if (this.performanceObserver) {
       this.performanceObserver.disconnect();
       this.performanceObserver = null;
     }
-    
+
     this.clearData();
   }
 }

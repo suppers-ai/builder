@@ -1,0 +1,8 @@
+<!-- SVG favicon for sorted-storage app -->
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#4A5568"/>
+  <rect x="6" y="8" width="20" height="2" fill="#E2E8F0"/>
+  <rect x="6" y="12" width="14" height="2" fill="#CBD5E0"/>
+  <rect x="6" y="16" width="18" height="2" fill="#CBD5E0"/>
+  <rect x="6" y="20" width="12" height="2" fill="#E2E8F0"/>
+</svg>

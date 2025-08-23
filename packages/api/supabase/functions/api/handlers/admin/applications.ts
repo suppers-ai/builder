@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { corsHeaders } from "../../lib/cors.ts";
+import { corsHeaders } from "../../_common/index.ts";
 
 /**
  * Admin applications handler
@@ -8,7 +8,7 @@ import { corsHeaders } from "../../lib/cors.ts";
 export async function handleAdminApplications(
   req: Request,
   supabase: SupabaseClient,
-  pathSegments: string[]
+  pathSegments: string[],
 ): Promise<Response> {
   const method = req.method;
   const url = new URL(req.url);
@@ -36,7 +36,6 @@ export async function handleAdminApplications(
           // GET /admin/applications/{id} - get by ID
           return await getApplicationById(supabase, firstSegment);
         }
-        break;
 
       case "POST":
         if (!firstSegment) {
@@ -71,10 +70,13 @@ export async function handleAdminApplications(
         break;
     }
 
-    return new Response(JSON.stringify({ error: `Method ${method} not allowed for admin applications` }), {
-      status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: `Method ${method} not allowed for admin applications` }),
+      {
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
     console.error("Admin applications handler error:", error);
     return new Response(
@@ -85,7 +87,7 @@ export async function handleAdminApplications(
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }
@@ -103,7 +105,14 @@ async function getApplicationsList(supabaseAdmin: SupabaseClient, url: URL): Pro
     const sortBy = searchParams.get("sort_by") || "updated_at";
     const sortOrder = searchParams.get("sort_order") || "desc";
 
-    console.log("📋 Getting applications list with filters:", { limit, offset, search, status, sortBy, sortOrder });
+    console.log("📋 Getting applications list with filters:", {
+      limit,
+      offset,
+      search,
+      status,
+      sortBy,
+      sortOrder,
+    });
 
     // Build query
     let query = supabaseAdmin
@@ -148,7 +157,7 @@ async function getApplicationsList(supabaseAdmin: SupabaseClient, url: URL): Pro
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("❌ Error in getApplicationsList:", error);
@@ -273,7 +282,11 @@ async function createApplication(supabaseAdmin: SupabaseClient, req: Request): P
 /**
  * Update application
  */
-async function updateApplication(supabaseAdmin: SupabaseClient, id: string, req: Request): Promise<Response> {
+async function updateApplication(
+  supabaseAdmin: SupabaseClient,
+  id: string,
+  req: Request,
+): Promise<Response> {
   try {
     const body = await req.json();
     const { name, slug, description, website_url, thumbnail_url, status } = body;
@@ -304,10 +317,13 @@ async function updateApplication(supabaseAdmin: SupabaseClient, id: string, req:
         .single();
 
       if (slugConflict) {
-        return new Response(JSON.stringify({ error: "Application with this slug already exists" }), {
-          status: 409,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Application with this slug already exists" }),
+          {
+            status: 409,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
     }
 
@@ -354,7 +370,11 @@ async function updateApplication(supabaseAdmin: SupabaseClient, id: string, req:
 /**
  * Update application status
  */
-async function updateApplicationStatus(supabaseAdmin: SupabaseClient, id: string, req: Request): Promise<Response> {
+async function updateApplicationStatus(
+  supabaseAdmin: SupabaseClient,
+  id: string,
+  req: Request,
+): Promise<Response> {
   try {
     const body = await req.json();
     const { status } = body;
@@ -371,9 +391,9 @@ async function updateApplicationStatus(supabaseAdmin: SupabaseClient, id: string
     // Update status
     const { data: application, error } = await supabaseAdmin
       .from("applications")
-      .update({ 
+      .update({
         status,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq("id", id)
       .select("*")
@@ -455,7 +475,10 @@ async function deleteApplication(supabaseAdmin: SupabaseClient, id: string): Pro
 /**
  * Bulk update application status
  */
-async function bulkUpdateApplicationStatus(supabaseAdmin: SupabaseClient, req: Request): Promise<Response> {
+async function bulkUpdateApplicationStatus(
+  supabaseAdmin: SupabaseClient,
+  req: Request,
+): Promise<Response> {
   try {
     const body = await req.json();
     const { ids, status } = body;
@@ -479,9 +502,9 @@ async function bulkUpdateApplicationStatus(supabaseAdmin: SupabaseClient, req: R
     // Update all applications
     const { data: applications, error } = await supabaseAdmin
       .from("applications")
-      .update({ 
+      .update({
         status,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .in("id", ids)
       .select("*");

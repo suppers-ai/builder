@@ -25,23 +25,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+  static override getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
       error,
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+  override componentDidCatch(error: Error, errorInfo: any) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+
     this.setState({
       error,
       errorInfo,
     });
 
     // Show toast notification
-    const context = this.props.context || 'Application';
+    const context = this.props.context || "Application";
     showError(`${context} Error: ${error.message}`, {
       duration: 8000,
     });
@@ -51,7 +51,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       try {
         this.props.onError(error, errorInfo);
       } catch (handlerError) {
-        console.error('Error in custom error handler:', handlerError);
+        console.error("Error in custom error handler:", handlerError);
       }
     }
   }
@@ -64,7 +64,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       // Custom fallback UI
       if (this.props.fallback) {
@@ -75,14 +75,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         <div class="flex flex-col items-center justify-center p-8 bg-base-100 rounded-lg border border-error/20">
           <AlertTriangle class="w-16 h-16 text-error mb-4" />
-          
+
           <h3 class="text-lg font-semibold text-base-content mb-2">
             Something went wrong
           </h3>
-          
+
           <p class="text-base-content/70 text-center mb-4 max-w-md">
-            {this.props.context || 'The application'} encountered an unexpected error. 
-            Please try again or refresh the page.
+            {this.props.context || "The application"}{" "}
+            encountered an unexpected error. Please try again or refresh the page.
           </p>
 
           {/* Error details (only in development) */}
@@ -108,9 +108,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <RefreshCw class="w-4 h-4 mr-2" />
               Try Again
             </button>
-            
+
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => globalThis.location.reload()}
               class="btn btn-outline btn-sm"
             >
               Refresh Page
@@ -128,7 +128,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 export function CanvasErrorBoundary({ children }: { children: ComponentChildren }) {
   const handleCanvasError = (error: Error, errorInfo: any) => {
     // Log canvas-specific error details
-    console.error('Canvas Error Details:', {
+    console.error("Canvas Error Details:", {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -145,11 +145,11 @@ export function CanvasErrorBoundary({ children }: { children: ComponentChildren 
       fallback={
         <div class="flex flex-col items-center justify-center p-8 bg-base-100 rounded-lg border border-error/20 min-h-[400px]">
           <AlertTriangle class="w-16 h-16 text-error mb-4" />
-          
+
           <h3 class="text-lg font-semibold text-base-content mb-2">
             Canvas Error
           </h3>
-          
+
           <p class="text-base-content/70 text-center mb-4 max-w-md">
             The drawing canvas encountered an error. This might be due to:
           </p>
@@ -163,13 +163,13 @@ export function CanvasErrorBoundary({ children }: { children: ComponentChildren 
 
           <div class="flex gap-2">
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => globalThis.location.reload()}
               class="btn btn-primary btn-sm"
             >
               <RefreshCw class="w-4 h-4 mr-2" />
               Restart Canvas
             </button>
-            
+
             <a href="/gallery" class="btn btn-outline btn-sm">
               Go to Gallery
             </a>

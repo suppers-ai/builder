@@ -1,6 +1,6 @@
 import { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import { ChevronDown, LogOut, Settings, Shield, User } from "lucide-preact";
+import { ChevronDown, LogOut, Settings, Shield, User as UserIcon } from "lucide-preact";
 import { UserAvatar } from "../../display/avatar/UserAvatar.tsx";
 import { Dropdown } from "../../action/dropdown/Dropdown.tsx";
 import type { User } from "../../../../shared/utils/type-mappers.ts";
@@ -69,7 +69,7 @@ export function UserProfileDropdown({
           }}
           class="flex items-center gap-3"
         >
-          <User size={16} />
+          <UserIcon size={16} />
           Profile
         </a>
       </li>

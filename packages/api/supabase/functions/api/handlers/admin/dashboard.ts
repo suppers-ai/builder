@@ -1,7 +1,11 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { corsHeaders } from "../../_common/index.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function getAdminDashboard(supabase: SupabaseClient, url: URL, userRole: string): Promise<Response> {
+export async function getAdminDashboard(
+  supabase: SupabaseClient,
+  url: URL,
+  userRole: string,
+): Promise<Response> {
   try {
     if (userRole !== "admin") {
       return new Response(JSON.stringify({ error: "Admin access required" }), {
@@ -10,7 +14,7 @@ export async function getAdminDashboard(supabase: SupabaseClient, url: URL, user
       });
     }
 
-    // Get users count  
+    // Get users count
     const { count: usersCount, error: usersError } = await supabase
       .from("users")
       .select("*", { count: "exact", head: true });
@@ -22,7 +26,7 @@ export async function getAdminDashboard(supabase: SupabaseClient, url: URL, user
     // Calculate monthly active users (users created in last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     const { count: monthlyActiveCount, error: monthlyError } = await supabase
       .from("users")
       .select("*", { count: "exact", head: true })
@@ -32,20 +36,13 @@ export async function getAdminDashboard(supabase: SupabaseClient, url: URL, user
       console.error("Error counting monthly active users:", monthlyError);
     }
 
-    // Get users with subscriptions
-    const { count: subscribedUsersCount, error: subscribedError } = await supabase
-      .from("user_subscriptions")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "active");
+    // For now, set subscribed users to 0 since subscription tables aren't set up yet
+    const subscribedUsersCount = 0;
 
-    if (subscribedError) {
-      console.error("Error counting subscribed users:", subscribedError);
-    }
-
-    // Calculate total storage used by all users
+    // Calculate total storage used by all users from the users table
     const { data: storageData, error: storageError } = await supabase
-      .from("user_storage")
-      .select("storage_used");
+      .from("users")
+      .select("storage_used, bandwidth_used, storage_limit, bandwidth_limit");
 
     if (storageError) {
       console.error("Error fetching storage data:", storageError);
@@ -55,33 +52,15 @@ export async function getAdminDashboard(supabase: SupabaseClient, url: URL, user
       return total + (item.storage_used || 0);
     }, 0);
 
-    // Calculate total bandwidth used by all users
-    const { data: bandwidthData, error: bandwidthError } = await supabase
-      .from("user_storage")
-      .select("bandwidth_used");
-
-    if (bandwidthError) {
-      console.error("Error fetching bandwidth data:", bandwidthError);
-    }
-
-    const totalBandwidthUsed = (bandwidthData || []).reduce((total, item) => {
+    const totalBandwidthUsed = (storageData || []).reduce((total, item) => {
       return total + (item.bandwidth_used || 0);
     }, 0);
 
-    // Calculate total storage allocation (sum of all user limits)
-    const { data: allocationData, error: allocationError } = await supabase
-      .from("user_storage")
-      .select("storage_limit, bandwidth_limit");
-
-    if (allocationError) {
-      console.error("Error fetching allocation data:", allocationError);
-    }
-
-    const totalStorageAllocated = (allocationData || []).reduce((total, item) => {
+    const totalStorageAllocated = (storageData || []).reduce((total, item) => {
       return total + (item.storage_limit || 0);
     }, 0);
 
-    const totalBandwidthAllocated = (allocationData || []).reduce((total, item) => {
+    const totalBandwidthAllocated = (storageData || []).reduce((total, item) => {
       return total + (item.bandwidth_limit || 0);
     }, 0);
 

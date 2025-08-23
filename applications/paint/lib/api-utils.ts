@@ -1,10 +1,10 @@
-import type { SavedPainting, SavePaintingRequest, DrawingState } from "../types/paint.ts";
+import type { DrawingState, SavedPainting, SavePaintingRequest } from "../types/paint.ts";
 import { getAuthClient } from "./auth.ts";
 import { showError, showSuccess, showWarning } from "./toast-manager.ts";
 
 // API utility functions for paint application
 // Base URL for centralized API
-const API_BASE_URL = 'http://127.0.0.1:54321/functions/v1/api/v1';
+const API_BASE_URL = "http://127.0.0.1:54321/functions/v1/api/v1";
 
 export interface ApiResponse<T> {
   data?: T;
@@ -18,10 +18,10 @@ export class ApiError extends Error {
     message: string,
     public status?: number,
     public code?: string,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
   }
 }
 
@@ -30,64 +30,64 @@ export function getErrorMessage(error: any): string {
   if (error instanceof ApiError) {
     switch (error.status) {
       case 401:
-        return 'Please log in to continue';
+        return "Please log in to continue";
       case 403:
-        return 'You don\'t have permission to perform this action';
+        return "You don't have permission to perform this action";
       case 404:
-        return 'The requested item was not found';
+        return "The requested item was not found";
       case 413:
-        return 'The file is too large to upload';
+        return "The file is too large to upload";
       case 429:
-        return 'Too many requests. Please try again later';
+        return "Too many requests. Please try again later";
       case 500:
-        return 'Server error. Please try again later';
+        return "Server error. Please try again later";
       case 503:
-        return 'Service temporarily unavailable';
+        return "Service temporarily unavailable";
       default:
-        return error.message || 'An unexpected error occurred';
+        return error.message || "An unexpected error occurred";
     }
   }
-  
-  if (error.name === 'NetworkError' || error.message?.includes('fetch')) {
-    return 'Network error. Please check your connection and try again';
+
+  if (error.name === "NetworkError" || error.message?.includes("fetch")) {
+    return "Network error. Please check your connection and try again";
   }
-  
-  if (error.message?.includes('timeout')) {
-    return 'Request timed out. Please try again';
+
+  if (error.message?.includes("timeout")) {
+    return "Request timed out. Please try again";
   }
-  
-  return error.message || 'An unexpected error occurred';
+
+  return error.message || "An unexpected error occurred";
 }
 
 // Retry logic for failed API requests
 export async function withRetry<T>(
   operation: () => Promise<T>,
   maxRetries: number = 3,
-  delay: number = 1000
+  delay: number = 1000,
 ): Promise<T> {
   let lastError: Error;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error as Error;
-      
+
       // Don't retry on client errors (4xx)
       if (error instanceof ApiError && error.status && error.status >= 400 && error.status < 500) {
         throw error;
       }
-      
+
       if (attempt === maxRetries) {
         break;
       }
-      
+
       // Exponential backoff
       const waitTime = delay * Math.pow(2, attempt - 1);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   }
-  
+
   throw lastError!;
 }
 
@@ -120,14 +120,14 @@ export async function fetchPaintings(
       const accessToken = await authClient.getAccessToken();
 
       if (!userId || !accessToken) {
-        throw new ApiError('Authentication required', 401);
+        throw new ApiError("Authentication required", 401);
       }
 
       const response = await fetch(`${API_BASE_URL}/storage/paint?list=true`, {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 
@@ -137,7 +137,7 @@ export async function fetchPaintings(
         const apiError = new ApiError(
           apiData.error || "Failed to fetch paintings",
           response.status,
-          apiData.code
+          apiData.code,
         );
         throw apiError;
       }
@@ -151,7 +151,7 @@ export async function fetchPaintings(
             page: page,
             limit: limit,
             totalPages: 1,
-          }
+          },
         };
       }
 
@@ -159,26 +159,35 @@ export async function fetchPaintings(
       // For now, we'll need to fetch the actual painting data for each file
       // This is not optimal but necessary to get the painting metadata
       const paintings: SavedPainting[] = [];
-      
+
       for (const file of apiData.data.files.slice((page - 1) * limit, page * limit)) {
         try {
           // Get the actual painting data from the file using download endpoint
-          const paintingResponse = await fetch(`${API_BASE_URL}/storage/paint/${file.name}?download=true`, {
-            method: "GET",
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'X-User-ID': userId,
+          const paintingResponse = await fetch(
+            `${API_BASE_URL}/storage/paint/${file.name}?download=true`,
+            {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "X-User-ID": userId,
+              },
             },
-          });
+          );
 
           if (paintingResponse.ok) {
             const paintingText = await paintingResponse.text();
             const paintingData = JSON.parse(paintingText);
-            if (paintingData && typeof paintingData === 'object') {
+            if (paintingData && typeof paintingData === "object") {
               paintings.push({
                 id: file.id,
-                name: paintingData.name || file.name.replace('.json', ''),
-                drawingData: paintingData.drawingData || { strokes: [], images: [], canvasSize: { width: 800, height: 600 }, backgroundColor: '#ffffff' },
+                name: paintingData.name || file.name.replace(".json", ""),
+                drawingData: paintingData.drawingData ||
+                  {
+                    strokes: [],
+                    images: [],
+                    canvasSize: { width: 800, height: 600 },
+                    backgroundColor: "#ffffff",
+                  },
                 thumbnail: paintingData.thumbnail,
                 isPublic: file.isPublic || false,
                 shareToken: file.shareToken || null,
@@ -195,8 +204,13 @@ export async function fetchPaintings(
           // Create a basic painting entry even if we can't load the data
           paintings.push({
             id: file.id,
-            name: file.name.replace('.json', ''),
-            drawingData: { strokes: [], images: [], canvasSize: { width: 800, height: 600 }, backgroundColor: '#ffffff' },
+            name: file.name.replace(".json", ""),
+            drawingData: {
+              strokes: [],
+              images: [],
+              canvasSize: { width: 800, height: 600 },
+              backgroundColor: "#ffffff",
+            },
             thumbnail: undefined,
             isPublic: file.isPublic || false,
             shareToken: file.shareToken || null,
@@ -220,13 +234,13 @@ export async function fetchPaintings(
           page: page,
           limit: limit,
           totalPages: totalPages,
-        }
+        },
       };
     });
   } catch (error) {
     console.error("Fetch paintings error:", error);
     const errorMessage = getErrorMessage(error);
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -237,7 +251,9 @@ export async function fetchPaintings(
 /**
  * Fetch a specific painting by ID
  */
-export async function fetchPainting(paintingId: string): Promise<ApiResponse<{ painting: SavedPainting }>> {
+export async function fetchPainting(
+  paintingId: string,
+): Promise<ApiResponse<{ painting: SavedPainting }>> {
   try {
     return await withRetry(async () => {
       const authClient = getAuthClient();
@@ -245,35 +261,35 @@ export async function fetchPainting(paintingId: string): Promise<ApiResponse<{ p
       const accessToken = await authClient.getAccessToken();
 
       if (!userId || !accessToken) {
-        throw new ApiError('Authentication required', 401);
+        throw new ApiError("Authentication required", 401);
       }
-      
+
       // First get the file info to get the filename
       const listResponse = await fetch(`${API_BASE_URL}/storage/paint?list=true`, {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 
       if (!listResponse.ok) {
-        throw new ApiError('Failed to fetch painting list', listResponse.status);
+        throw new ApiError("Failed to fetch painting list", listResponse.status);
       }
 
       const listData = await listResponse.json();
       const file = listData.data?.files?.find((f: any) => f.id === paintingId);
-      
+
       if (!file) {
-        throw new ApiError('Painting not found', 404);
+        throw new ApiError("Painting not found", 404);
       }
 
       // Now download the actual painting content
       const response = await fetch(`${API_BASE_URL}/storage/paint/${file.name}?download=true`, {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 
@@ -288,7 +304,7 @@ export async function fetchPainting(paintingId: string): Promise<ApiResponse<{ p
         const apiError = new ApiError(
           errorData.error || "Failed to fetch painting content",
           response.status,
-          errorData.code
+          errorData.code,
         );
         throw apiError;
       }
@@ -299,8 +315,14 @@ export async function fetchPainting(paintingId: string): Promise<ApiResponse<{ p
       // Transform to SavedPainting format
       const painting: SavedPainting = {
         id: file.id,
-        name: paintingData.name || file.name.replace('.json', ''),
-        drawingData: paintingData.drawingData || { strokes: [], images: [], canvasSize: { width: 800, height: 600 }, backgroundColor: '#ffffff' },
+        name: paintingData.name || file.name.replace(".json", ""),
+        drawingData: paintingData.drawingData ||
+          {
+            strokes: [],
+            images: [],
+            canvasSize: { width: 800, height: 600 },
+            backgroundColor: "#ffffff",
+          },
         thumbnail: paintingData.thumbnail,
         isPublic: file.isPublic || false,
         shareToken: file.shareToken || null,
@@ -319,7 +341,7 @@ export async function fetchPainting(paintingId: string): Promise<ApiResponse<{ p
   } catch (error) {
     console.error("Fetch painting error:", error);
     const errorMessage = getErrorMessage(error);
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -341,7 +363,7 @@ export async function savePainting(
     // Validate painting name
     const nameValidation = validatePaintingName(name);
     if (!nameValidation.isValid) {
-      const errorMessage = nameValidation.error || 'Invalid painting name';
+      const errorMessage = nameValidation.error || "Invalid painting name";
       showError(errorMessage);
       return {
         success: false,
@@ -353,7 +375,9 @@ export async function savePainting(
     const dataSize = estimateDrawingSize(drawingData);
     const maxSize = 10 * 1024 * 1024; // 10MB limit
     if (dataSize > maxSize) {
-      const errorMessage = `Drawing data is too large (${formatFileSize(dataSize)}). Maximum size is ${formatFileSize(maxSize)}.`;
+      const errorMessage = `Drawing data is too large (${
+        formatFileSize(dataSize)
+      }). Maximum size is ${formatFileSize(maxSize)}.`;
       showError(errorMessage);
       return {
         success: false,
@@ -367,9 +391,9 @@ export async function savePainting(
       const accessToken = await authClient.getAccessToken();
 
       if (!userId || !accessToken) {
-        throw new ApiError('Authentication required', 401);
+        throw new ApiError("Authentication required", 401);
       }
-      
+
       // Generate thumbnail if canvas is provided
       let thumbnail: string | undefined;
       if (canvas) {
@@ -378,12 +402,12 @@ export async function savePainting(
             maxWidth: 200,
             maxHeight: 200,
             quality: 0.8,
-            format: 'jpeg',
+            format: "jpeg",
             padding: 4,
           });
         } catch (thumbnailError) {
-          console.warn('Failed to generate thumbnail:', thumbnailError);
-          showWarning('Could not generate thumbnail, but painting will still be saved');
+          console.warn("Failed to generate thumbnail:", thumbnailError);
+          showWarning("Could not generate thumbnail, but painting will still be saved");
         }
       }
 
@@ -400,20 +424,20 @@ export async function savePainting(
 
       // Convert painting data to JSON and create a file
       const jsonString = JSON.stringify(paintingData, null, 2);
-      const filename = `${name.replace(/[^a-zA-Z0-9-_]/g, '_')}_${Date.now()}.json`;
+      const filename = `${name.replace(/[^a-zA-Z0-9-_]/g, "_")}_${Date.now()}.json`;
       const file = new File([jsonString], filename, {
-        type: 'application/json'
+        type: "application/json",
       });
 
       // Create FormData for file upload
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       const response = await fetch(`${API_BASE_URL}/storage/paint`, {
         method: "POST",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
         body: formData,
       });
@@ -424,7 +448,7 @@ export async function savePainting(
         const apiError = new ApiError(
           data.error || "Failed to save painting",
           response.status,
-          data.code
+          data.code,
         );
         throw apiError;
       }
@@ -441,7 +465,7 @@ export async function savePainting(
     console.error("Save painting error:", error);
     const errorMessage = getErrorMessage(error);
     showError(`Failed to save painting: ${errorMessage}`);
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -464,7 +488,7 @@ export async function savePaintingWithThumbnail(
     // Validate painting name
     const nameValidation = validatePaintingName(name);
     if (!nameValidation.isValid) {
-      const errorMessage = nameValidation.error || 'Invalid painting name';
+      const errorMessage = nameValidation.error || "Invalid painting name";
       showError(errorMessage);
       return {
         success: false,
@@ -478,15 +502,15 @@ export async function savePaintingWithThumbnail(
       const accessToken = await authClient.getAccessToken();
 
       if (!userId || !accessToken) {
-        throw new ApiError('Authentication required', 401);
+        throw new ApiError("Authentication required", 401);
       }
-      
+
       let thumbnail: string;
       try {
         thumbnail = generateThumbnail(canvas, thumbnailOptions);
       } catch (thumbnailError) {
-        console.warn('Failed to generate custom thumbnail:', thumbnailError);
-        showWarning('Could not generate custom thumbnail, using default settings');
+        console.warn("Failed to generate custom thumbnail:", thumbnailError);
+        showWarning("Could not generate custom thumbnail, using default settings");
         thumbnail = generateThumbnail(canvas); // Fallback to default
       }
 
@@ -503,20 +527,20 @@ export async function savePaintingWithThumbnail(
 
       // Convert painting data to JSON and create a file
       const jsonString = JSON.stringify(paintingData, null, 2);
-      const filename = `${name.replace(/[^a-zA-Z0-9-_]/g, '_')}_${Date.now()}.json`;
+      const filename = `${name.replace(/[^a-zA-Z0-9-_]/g, "_")}_${Date.now()}.json`;
       const file = new File([jsonString], filename, {
-        type: 'application/json'
+        type: "application/json",
       });
 
       // Create FormData for file upload
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       const response = await fetch(`${API_BASE_URL}/storage/paint`, {
         method: "POST",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
         body: formData,
       });
@@ -527,7 +551,7 @@ export async function savePaintingWithThumbnail(
         const apiError = new ApiError(
           data.error || "Failed to save painting",
           response.status,
-          data.code
+          data.code,
         );
         throw apiError;
       }
@@ -543,7 +567,7 @@ export async function savePaintingWithThumbnail(
     console.error("Save painting error:", error);
     const errorMessage = getErrorMessage(error);
     showError(`Failed to save painting: ${errorMessage}`);
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -554,16 +578,18 @@ export async function savePaintingWithThumbnail(
 /**
  * Delete a painting
  */
-export async function deletePainting(paintingId: string): Promise<ApiResponse<{ message: string }>> {
+export async function deletePainting(
+  paintingId: string,
+): Promise<ApiResponse<{ message: string }>> {
   try {
     return await withRetry(async () => {
       const authClient = getAuthClient();
-      
+
       const userId = authClient.getUserId();
       const accessToken = await authClient.getAccessToken();
 
       if (!userId || !accessToken) {
-        throw new ApiError('Authentication required', 401);
+        throw new ApiError("Authentication required", 401);
       }
 
       // First, we need to get the filename from the painting ID
@@ -571,27 +597,27 @@ export async function deletePainting(paintingId: string): Promise<ApiResponse<{ 
       const listResponse = await fetch(`${API_BASE_URL}/storage/paint?list=true`, {
         method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 
       if (!listResponse.ok) {
-        throw new ApiError('Failed to fetch painting list for deletion', listResponse.status);
+        throw new ApiError("Failed to fetch painting list for deletion", listResponse.status);
       }
 
       const listData = await listResponse.json();
       const file = listData.data?.files?.find((f: any) => f.id === paintingId);
-      
+
       if (!file) {
-        throw new ApiError('Painting not found', 404);
+        throw new ApiError("Painting not found", 404);
       }
 
       const response = await fetch(`${API_BASE_URL}/storage/paint/${file.name}`, {
         method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 
@@ -601,12 +627,12 @@ export async function deletePainting(paintingId: string): Promise<ApiResponse<{ 
         const apiError = new ApiError(
           data.error || "Failed to delete painting",
           response.status,
-          data.code
+          data.code,
         );
         throw apiError;
       }
 
-      showSuccess('Painting deleted successfully');
+      showSuccess("Painting deleted successfully");
 
       return {
         success: true,
@@ -617,7 +643,7 @@ export async function deletePainting(paintingId: string): Promise<ApiResponse<{ 
     console.error("Delete painting error:", error);
     const errorMessage = getErrorMessage(error);
     showError(`Failed to delete painting: ${errorMessage}`);
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -632,7 +658,7 @@ export interface ThumbnailOptions {
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
-  format?: 'jpeg' | 'png' | 'webp';
+  format?: "jpeg" | "png" | "webp";
   backgroundColor?: string;
   padding?: number;
 }
@@ -641,22 +667,22 @@ export interface ThumbnailOptions {
  * Generate a thumbnail from canvas with enhanced options
  */
 export function generateThumbnail(
-  canvas: HTMLCanvasElement, 
-  options: ThumbnailOptions = {}
+  canvas: HTMLCanvasElement,
+  options: ThumbnailOptions = {},
 ): string {
   const {
     maxWidth = 200,
     maxHeight = 200,
     quality = 0.8,
-    format = 'jpeg',
-    backgroundColor = '#ffffff',
+    format = "jpeg",
+    backgroundColor = "#ffffff",
     padding = 4,
   } = options;
 
   // Create a temporary canvas for the thumbnail
   const thumbnailCanvas = document.createElement("canvas");
   const ctx = thumbnailCanvas.getContext("2d");
-  
+
   if (!ctx) {
     throw new Error("Failed to get canvas context for thumbnail");
   }
@@ -684,15 +710,15 @@ export function generateThumbnail(
 
   // Enable high-quality scaling
   ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
+  ctx.imageSmoothingQuality = "high";
 
   // Draw the scaled image with padding
   ctx.drawImage(
-    canvas, 
-    padding, 
-    padding, 
-    thumbWidth, 
-    thumbHeight
+    canvas,
+    padding,
+    padding,
+    thumbWidth,
+    thumbHeight,
   );
 
   // Return as base64 data URL with specified format and quality
@@ -720,20 +746,20 @@ export function generateThumbnailSet(canvas: HTMLCanvasElement): {
  */
 export function generateThumbnailFromDrawingState(
   drawingState: DrawingState,
-  options: ThumbnailOptions = {}
+  options: ThumbnailOptions = {},
 ): string {
   const {
     maxWidth = 200,
     maxHeight = 200,
     quality = 0.8,
-    format = 'jpeg',
-    backgroundColor = '#ffffff',
+    format = "jpeg",
+    backgroundColor = "#ffffff",
   } = options;
 
   // Create a temporary canvas
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
-  
+
   if (!ctx) {
     throw new Error("Failed to get canvas context for thumbnail generation");
   }
@@ -747,19 +773,19 @@ export function generateThumbnailFromDrawingState(
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   // Configure context for high-quality rendering
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
   ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
+  ctx.imageSmoothingQuality = "high";
 
   // Draw all strokes
-  drawingState.strokes.forEach(stroke => {
+  drawingState.strokes.forEach((stroke) => {
     if (stroke.points.length === 0) return;
-    
+
     ctx.strokeStyle = stroke.color;
     ctx.lineWidth = stroke.width;
     ctx.beginPath();
-    
+
     if (stroke.points.length === 1) {
       // Single point - draw a small circle
       const point = stroke.points[0];
@@ -773,17 +799,17 @@ export function generateThumbnailFromDrawingState(
     } else {
       // Smooth curve for multiple points
       ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-      
+
       for (let i = 1; i < stroke.points.length - 1; i++) {
         const currentPoint = stroke.points[i];
         const nextPoint = stroke.points[i + 1];
-        
+
         const controlX = (currentPoint.x + nextPoint.x) / 2;
         const controlY = (currentPoint.y + nextPoint.y) / 2;
-        
+
         ctx.quadraticCurveTo(currentPoint.x, currentPoint.y, controlX, controlY);
       }
-      
+
       const lastPoint = stroke.points[stroke.points.length - 1];
       ctx.lineTo(lastPoint.x, lastPoint.y);
       ctx.stroke();

@@ -1,19 +1,24 @@
 # Monthly Bandwidth Reset Setup
 
-This document explains how to set up the monthly bandwidth reset cronjob for the Suppers AI Builder platform.
+This document explains how to set up the monthly bandwidth reset cronjob for the Suppers AI Builder
+platform.
 
 ## Overview
 
-The bandwidth tracking system limits users to 250MB of download bandwidth per month by default. To reset these limits monthly, we need to set up a scheduled task (cronjob) that calls the reset function.
+The bandwidth tracking system limits users to 250MB of download bandwidth per month by default. To
+reset these limits monthly, we need to set up a scheduled task (cronjob) that calls the reset
+function.
 
 ## Edge Function
 
 The reset functionality is implemented as a Supabase Edge Function in:
+
 ```
 packages/api/supabase/functions/reset-monthly-bandwidth/index.ts
 ```
 
 This function:
+
 - Resets all users' `bandwidth_used` to 0
 - Logs the reset operation
 - Returns success/failure status
@@ -28,6 +33,7 @@ deno task api:deploy
 ```
 
 Or manually:
+
 ```bash
 supabase functions deploy reset-monthly-bandwidth
 ```
@@ -75,7 +81,7 @@ name: Monthly Bandwidth Reset
 on:
   schedule:
     # Run on the 1st day of every month at 12:01 AM UTC
-    - cron: '1 0 1 * *'
+    - cron: "1 0 1 * *"
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -92,7 +98,8 @@ jobs:
 
 ## Security Considerations
 
-1. **Service Role Key**: Keep your Supabase service role key secure and use it only for admin operations
+1. **Service Role Key**: Keep your Supabase service role key secure and use it only for admin
+   operations
 2. **Access Control**: Consider adding API key verification to the reset function if needed
 3. **Monitoring**: Set up alerts to ensure the reset runs successfully each month
 
@@ -109,4 +116,5 @@ curl -X POST \
 
 ## Monitoring
 
-Check the function logs in your Supabase dashboard under Functions > reset-monthly-bandwidth to monitor successful resets.
+Check the function logs in your Supabase dashboard under Functions > reset-monthly-bandwidth to
+monitor successful resets.

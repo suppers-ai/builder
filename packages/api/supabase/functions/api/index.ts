@@ -1,161 +1,243 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
-import { corsHeaders } from "./lib/cors.ts";
-import { handleApplications } from "./handlers/applications/index.ts";
-import { handleUserRequest } from "./handlers/user/index.ts";
-import { handleStorage } from "./handlers/storage/index.ts";
-import { handleShare } from "./handlers/share/index.ts";
-import { handleAdmin } from "./handlers/admin/index.ts";
+/**
+ * Main API entry point
+ * Handles routing to resource-specific handlers
+ */
 
-console.log("🚀 API Edge Function loaded");
+import {
+  createHandler,
+  createRouter,
+  config,
+  errorResponse,
+  getAuthContext,
+  handleOptionsRequest,
+  middleware,
+  type HandlerContext,
+} from './_common/index.ts';
 
-// Initialize Supabase client with service role key for admin operations
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Import resource handlers
+import { handleApplications } from './handlers/applications/index.ts';
+import { handleUserRequest } from './handlers/user/index.ts';
+import { handleUsers } from './handlers/users/index.ts';
+import { handleStorage } from './handlers/storage/index.ts';
+import { handleShare } from './handlers/share/index.ts';
+import { handleAdmin } from './handlers/admin/index.ts';
+import { handleTools } from './handlers/tools/index.ts';
+import { handleEntity } from './handlers/entity/index.ts';
+import { handleProduct } from './handlers/product/index.ts';
+import { handlePrice } from './handlers/price/index.ts';
+import { handlePurchase } from './handlers/purchase/index.ts';
+import { handleImageUpload } from './handlers/upload/index.ts';
+import { createServiceClient } from './_common/database.ts';
 
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+console.log('🚀 API Edge Function loaded');
 
-Deno.serve(async (req: Request) => {
-  console.log("---------------------------", req);
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+// Create main API handler
+const apiHandler = createHandler([
+  // Health check endpoint
+  {
+    method: 'GET',
+    pattern: 'health',
+    handler: () => {
+      return new Response(JSON.stringify({ status: 'healthy', timestamp: new Date().toISOString() }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+  },
 
-  try {
-    const url = new URL(req.url);
-    console.log("url", url);
-    const pathSegments = url.pathname.split("/").filter((segment) => segment);
+  // API version check
+  {
+    method: 'GET',
+    pattern: 'api/version',
+    handler: () => {
+      return new Response(JSON.stringify({ version: config.api.version }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+  },
 
-    // Extract API version and resource from path
-    // Expected format: /api/v1/{resource}/{...}
-    const [api, version, resource, ...rest] = pathSegments;
+  // Applications resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/applications/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      return handleApplications(context.request);
+    },
+  },
 
-    if (api !== "api" || version !== "v1") {
-      return new Response(
-        JSON.stringify({ error: "Invalid API path. Expected /api/v1/{resource}" }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
+  // User resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/user/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      return handleUserRequest(context.request);
+    },
+  },
+
+  // Users resource
+  {
+    method: ['GET', 'POST'],
+    pattern: 'api/v1/users/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      return handleUsers(context.request);
+    },
+  },
+
+  // Storage resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/storage/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      if (!context.auth || !context.auth.user.id) {
+        throw new Error('Authentication context missing');
+      }
+      const userId = context.auth.user.id;
+      const pathSegments = context.pathSegments.slice(3); // Remove api/v1/storage
+      return handleStorage(context.request, { userId, pathSegments });
+    },
+  },
+
+  // Share resource (public, no auth required)
+  {
+    method: ['GET', 'POST'],
+    pattern: 'api/v1/share/*',
+    requireAuth: false,
+    handler: async (context: HandlerContext) => {
+      const pathSegments = context.pathSegments.slice(3); // Remove api/v1/share
+      return handleShare(context.request, { pathSegments });
+    },
+  },
+
+  // Admin resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/admin/*',
+    requireAuth: true,
+    requireAdmin: true,
+    handler: async (context: HandlerContext) => {
+      // Since requireAuth is true, auth should always be present
+      if (!context.auth || !context.auth.user.id) {
+        throw new Error('Authentication context missing');
+      }
+      const userId = context.auth.user.id;
+      const pathSegments = context.pathSegments.slice(3); // Remove api/v1/admin
+      return handleAdmin(context.request, { userId, pathSegments });
+    },
+  },
+
+  // Tools resource
+  {
+    method: ['GET', 'POST'],
+    pattern: 'api/v1/tools/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      const pathSegments = context.pathSegments.slice(3); // Remove api/v1/tools
+      return handleTools(context.request, pathSegments);
+    },
+  },
+
+  // Entity resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/entity/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      if (!context.auth || !context.auth.user.id) {
+        throw new Error('Authentication context missing');
+      }
+      const userId = context.auth.user.id;
+      return handleEntity(context.request, { userId });
+    },
+  },
+
+  // Product resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/product/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      if (!context.auth || !context.auth.user.id) {
+        throw new Error('Authentication context missing');
+      }
+      const userId = context.auth.user.id;
+      return handleProduct(context.request, { userId });
+    },
+  },
+
+  // Price resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/price/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      if (!context.auth || !context.auth.user.id) {
+        throw new Error('Authentication context missing');
+      }
+      const userId = context.auth.user.id;
+      return handlePrice(context.request, { userId });
+    },
+  },
+
+  // Purchase resource
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: 'api/v1/purchase/*',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      if (!context.auth || !context.auth.user.id) {
+        throw new Error('Authentication context missing');
+      }
+      const userId = context.auth.user.id;
+      return handlePurchase(context.request, { userId });
+    },
+  },
+
+  // Image upload endpoint
+  {
+    method: 'POST',
+    pattern: 'api/upload-image',
+    requireAuth: true,
+    handler: async (context: HandlerContext) => {
+      if (!context.auth || !context.auth.user.id) {
+        throw new Error('Authentication context missing');
+      }
+      const userId = context.auth.user.id;
+      return handleImageUpload(context.request, { userId });
+    },
+  },
+
+  // Catch-all for unmatched routes
+  {
+    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    pattern: '*',
+    handler: (context: HandlerContext) => {
+      const availableResources = [
+        'applications',
+        'user',
+        'users',
+        'storage',
+        'share',
+        'admin',
+        'tools',
+        'entity',
+        'product',
+        'price',
+        'purchase',
+        'upload-image',
+      ];
+      
+      return errorResponse(
+        `Unknown resource. Available resources: ${availableResources.join(', ')}`,
+        { status: 404, origin: context.origin || undefined }
       );
-    }
+    },
+  },
+]);
 
-    // Get authentication from either Authorization header, X-User-ID header, or query parameters
-    const authHeader = req.headers.get("Authorization");
-    let token = authHeader?.replace("Bearer ", "");
-    let userId = req.headers.get("X-User-ID");
-
-    // If not in headers, check query parameters (for video content requests)
-    if (!token || !userId) {
-      const url = new URL(req.url);
-      const queryToken = url.searchParams.get("token");
-      const queryUserId = url.searchParams.get("userId");
-
-      if (queryToken && queryUserId) {
-        token = queryToken;
-        userId = queryUserId;
-      }
-    }
-
-    let user = null;
-    // Try JWT token first (DirectAuthClient)
-    if (token) {
-      console.log("🔑 Verifying JWT token for endpoint:", resource, rest);
-
-      // Verify JWT and get user
-      const { data: { user: authUser }, error: authError } = await supabaseAdmin.auth.getUser(
-        token,
-      );
-
-      if (authError || !authUser) {
-        console.log("❌ Token verification failed:", authError);
-        return new Response(
-          JSON.stringify({ error: "Invalid or expired token" }),
-          {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
-      }
-
-      console.log("✅ JWT token verified for user:", authUser.email);
-      user = authUser;
-    }
-    // No authentication provided
-    else {
-      // Share endpoints are public and don't require authentication
-      if (resource === "share") {
-        console.log("✅ Public share endpoint, no authentication required");
-        user = null; // No user for public access
-      } else {
-        console.log("❌ No authentication provided for protected endpoint:", resource, rest);
-        return new Response(
-          JSON.stringify({ error: "Authentication required (Bearer token or X-User-ID)" }),
-          {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
-      }
-    }
-
-    // Route to appropriate handler based on resource
-    let response: Response;
-
-    console.log("🎯 Routing request to resource:", resource, "with rest:", rest);
-
-    switch (resource) {
-      case "applications":
-        response = await handleApplications(req, {
-          supabase: supabaseAdmin,
-        });
-        break;
-
-      case "user":
-        response = await handleUserRequest(req, { supabase: supabaseAdmin });
-        break;
-
-      case "storage":
-        response = await handleStorage(req, { userId, supabase: supabaseAdmin, pathSegments: rest });
-        break;
-
-      case "share":
-        response = await handleShare(req, { supabase: supabaseAdmin, pathSegments: rest });
-        break;
-
-      case "admin":
-        response = await handleAdmin(req, { userId, supabase: supabaseAdmin, pathSegments: rest });
-        break;
-
-      default:
-        response = new Response(
-          JSON.stringify({
-            error:
-              `Unknown resource: ${resource}. Available resources: applications, user, access, storage, share, admin. Auth is handled directly by Supabase.`,
-          }),
-          {
-            status: 404,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          },
-        );
-    }
-
-    return response;
-  } catch (error) {
-    console.error("API Error:", error);
-
-    return new Response(
-      JSON.stringify({
-        error: "Internal server error",
-        message: error instanceof Error ? error.message : "Unknown error",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
-  }
-});
+// Export the handler for Deno.serve
+Deno.serve(apiHandler);

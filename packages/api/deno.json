@@ -1,17 +1,16 @@
 {
-  "name": "@suppers/supabase",
+  "name": "@suppers/api",
   "version": "1.0.0",
   "exports": {
     ".": "./mod.ts"
   },
   "imports": {
     "@supabase/supabase-js": "jsr:@supabase/supabase-js@2",
-    "@supabase/functions-js": "jsr:@supabase/functions-js",
-    "@suppers/shared": "../shared/mod.ts"
+    "@supabase/functions-js": "jsr:@supabase/functions-js"
   },
   "tasks": {
     "serve": "npx supabase functions serve --no-verify-jwt",
-    "dev": "npx supabase start",
+    "dev": "npx supabase start -x vector ",
     "stop": "npx supabase stop",
     "reset": "npx supabase db reset",
     "deploy": "npx supabase functions deploy --no-verify-jwt",

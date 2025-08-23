@@ -3,32 +3,32 @@
  */
 
 export { handleImageTools } from "./handler.ts";
-export { 
-  getTool, 
-  getAvailableTools, 
-  registerTool, 
+export {
+  checkDependencies,
+  getAvailableTools,
+  getTool,
   getToolsInfo,
-  checkDependencies 
+  registerTool,
 } from "./tools-registry.ts";
-export type { 
-  ImageTool, 
-  ImageToolRequest, 
-  ImageToolResponse, 
+export type {
   ImageProcessingOptions,
+  ImageProcessingResult,
+  ImageTool,
+  ImageToolRequest,
+  ImageToolResponse,
   ThumbnailOptions,
-  ImageProcessingResult 
 } from "./types.ts";
-export { 
-  createThumbnail, 
-  resizeImage, 
+export {
+  checkFFmpegAvailable,
   convertFormat,
-  checkFFmpegAvailable 
+  createThumbnail,
+  resizeImage,
 } from "./ffmpeg-processor.ts";
-export { 
-  isValidImageFormat,
-  generateTempPath,
+export {
   cleanupTempFiles,
-  validateImageOptions,
+  generateTempPath,
+  isValidImageFormat,
   SUPPORTED_INPUT_FORMATS,
-  SUPPORTED_OUTPUT_FORMATS
+  SUPPORTED_OUTPUT_FORMATS,
+  validateImageOptions,
 } from "./utils.ts";

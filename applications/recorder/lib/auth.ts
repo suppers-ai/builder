@@ -2,7 +2,7 @@
  * Authentication utilities for the recorder application
  */
 
-import { OAuthAuthClient } from "@suppers-ai/auth-client";
+import { OAuthAuthClient } from "@suppers/auth-client";
 import config from "../../../config.ts";
 
 // Profile service URL - this should be the URL where the profile app is running

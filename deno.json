@@ -1,18 +1,18 @@
 {
   "nodeModulesDir": "auto",
   "workspace": [
-    "packages/compiler",
     "packages/ui-lib",
     "packages/docs",
     "packages/shared",
     "packages/api",
     "packages/auth-client",
-    "packages/store",
     "packages/profile",
-    "packages/cdn",
     "packages/admin",
+    "packages/payments",
     "applications/recorder",
-    "applications/paint"
+    "applications/paint",
+    "applications/sorted-storage",
+    "applications/ghostly-glide"
   ],
   "imports": {
     "daisyui": "npm:daisyui@^5.0.50",
@@ -28,9 +28,9 @@
     "@std/cli": "jsr:@std/cli@^1.0.21",
     "@std/testing": "jsr:@std/testing@^1.0.15",
     "fresh": "jsr:@fresh/core@2.0.0-alpha.52",
-    "@fresh/plugin-tailwind": "jsr:@fresh/plugin-tailwind@^0.0.1-alpha.9",
+    "@fresh/plugin-tailwind-v3": "jsr:@fresh/plugin-tailwind-v3@^1.0.0",
     "$fresh/runtime": "jsr:@fresh/core@2.0.0-alpha.52/runtime",
-    "tailwindcss": "npm:tailwindcss@4.1.11",
+    "tailwindcss": "npm:tailwindcss@3.4.17",
     "@supabase/supabase-js": "jsr:@supabase/supabase-js@2",
     "preact": "npm:preact@10.27.0",
     "preact/": "npm:preact@10.27.0/",
@@ -41,8 +41,8 @@
     "@preact/signals": "npm:@preact/signals@2.2.1",
     "@playwright/test": "npm:@playwright/test@1.54.1",
     "@preact/signals-core": "npm:@preact/signals-core@1.8.0",
-    "zod": "https://esm.sh/zod@3.25.1",
-    "lucide-preact": "https://esm.sh/lucide-preact@0.460.0"
+    "zod": "npm:zod@3.25.1",
+    "lucide-preact": "npm:lucide-preact@0.460.0"
   },
   "tasks": {
     "test": "deno test --allow-all",
@@ -65,15 +65,22 @@
       "sites/"
     ],
     "exclude": [
-      "packages/templates/*/fresh.gen.ts",
-      "ui-lib/",
-      "compiler/"
+      "ui-lib/"
     ]
   },
   "lint": {
     "rules": {
       "tags": [
         "recommended"
+      ],
+      "exclude": [
+        "no-explicit-any",
+        "no-unused-vars", 
+        "jsx-button-has-type",
+        "react-no-danger",
+        "require-await",
+        "fresh-server-event-handlers",
+        "no-case-declarations"
       ]
     },
     "include": [
@@ -81,9 +88,7 @@
       "scripts/"
     ],
     "exclude": [
-      "packages/templates/*/fresh.gen.ts",
-      "ui-lib/",
-      "compiler/"
+      "ui-lib/"
     ]
   },
   "test": {

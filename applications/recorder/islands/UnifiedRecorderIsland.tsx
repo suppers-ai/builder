@@ -1,8 +1,14 @@
-import { useState, useEffect } from "preact/hooks";
-import { Toast, ShareModal } from "@suppers-ai/ui-lib";
-import type { ShareItem } from "@suppers-ai/ui-lib";
+import { useEffect, useState } from "preact/hooks";
+import { ShareModal, Toast } from "@suppers/ui-lib";
+import type { ShareItem } from "@suppers/ui-lib";
 import { Loader2 } from "lucide-preact";
-import { isRecordingSupported, formatDuration, generateRecordingFilename, formatFileSize, formatDate } from "../lib/recorder-utils.ts";
+import {
+  formatDate,
+  formatDuration,
+  formatFileSize,
+  generateRecordingFilename,
+  isRecordingSupported,
+} from "../lib/recorder-utils.ts";
 
 // Import hooks
 import { useAuth } from "../hooks/useAuth.ts";
@@ -32,28 +38,28 @@ export default function UnifiedRecorderIsland() {
   const { isAuthenticated, signIn } = useAuth();
   const { toasts, addToast, removeToast } = useToasts();
   const { storageInfo, fetchStorageInfo, clearStorageInfo } = useStorage();
-  const { 
-    recordingState, 
-    recordingOptions, 
-    previewUrl, 
-    startRecording, 
-    stopRecording, 
-    pauseRecording, 
-    resumeRecording, 
-    saveRecording, 
-    setRecordingOptions 
+  const {
+    recordingState,
+    recordingOptions,
+    previewUrl,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resumeRecording,
+    saveRecording,
+    setRecordingOptions,
   } = useRecording();
-  const { 
-    recordings, 
-    loading: recordingsLoading, 
-    error: recordingsError, 
-    currentPreviewRecording, 
-    currentPreviewUrl, 
-    loadRecordings, 
-    clearRecordings, 
-    findRecordingById, 
+  const {
+    recordings,
+    loading: recordingsLoading,
+    error: recordingsError,
+    currentPreviewRecording,
+    currentPreviewUrl,
+    loadRecordings,
+    clearRecordings,
+    findRecordingById,
     setCurrentPreview,
-    setRecordings 
+    setRecordings,
   } = useRecordings();
 
   // Initialize on mount
@@ -74,7 +80,7 @@ export default function UnifiedRecorderIsland() {
 
   // Auto-save recording when stopped
   useEffect(() => {
-    if (recordingState.status === 'stopped' && recordingState.recordedBlob && isAuthenticated) {
+    if (recordingState.status === "stopped" && recordingState.recordedBlob && isAuthenticated) {
       const timer = setTimeout(() => {
         handleSaveRecording();
       }, 1000);
@@ -100,11 +106,11 @@ export default function UnifiedRecorderIsland() {
           setCurrentPreview(null, previewUrl);
         }
         await loadRecordings();
-        
+
         // Set current preview to saved recording
         if (recordingId) {
-          setRecordings(currentRecordings => {
-            const savedRecording = currentRecordings.find(r => r.id === recordingId);
+          setRecordings((currentRecordings) => {
+            const savedRecording = currentRecordings.find((r) => r.id === recordingId);
             if (savedRecording && previewUrl) {
               setCurrentPreview(savedRecording, previewUrl);
             } else if (currentRecordings.length > 0 && previewUrl) {
@@ -114,7 +120,7 @@ export default function UnifiedRecorderIsland() {
           });
         }
       },
-      (error) => addToast(error, "error")
+      (error) => addToast(error, "error"),
     );
   };
 
@@ -128,7 +134,7 @@ export default function UnifiedRecorderIsland() {
       const url = await recordingService.getPreviewUrl(recording);
       setCurrentPreview(recording, url);
     } catch (error) {
-      addToast(error instanceof Error ? error.message : 'Preview failed', 'error');
+      addToast(error instanceof Error ? error.message : "Preview failed", "error");
     }
   };
 
@@ -136,7 +142,7 @@ export default function UnifiedRecorderIsland() {
     try {
       await recordingService.downloadExisting(recording);
     } catch (error) {
-      addToast(error instanceof Error ? error.message : 'Download failed', 'error');
+      addToast(error instanceof Error ? error.message : "Download failed", "error");
     }
   };
 
@@ -144,7 +150,7 @@ export default function UnifiedRecorderIsland() {
     try {
       await recordingService.downloadExisting(recording);
     } catch (error) {
-      addToast('Failed to download video', 'error');
+      addToast("Failed to download video", "error");
     }
   };
 
@@ -156,12 +162,12 @@ export default function UnifiedRecorderIsland() {
   const handleDeleteRecording = async (recording: Recording) => {
     try {
       await recordingService.delete(recording);
-      setRecordings(prev => prev.filter(r => r.id !== recording.id));
+      setRecordings((prev) => prev.filter((r) => r.id !== recording.id));
       setShowDeleteModal(false);
       setSelectedRecording(null);
       addToast("Recording deleted successfully", "success");
     } catch (error) {
-      addToast(error instanceof Error ? error.message : 'Delete failed', 'error');
+      addToast(error instanceof Error ? error.message : "Delete failed", "error");
     }
   };
 
@@ -177,15 +183,15 @@ export default function UnifiedRecorderIsland() {
     const authClient = getAuthClient();
     const accessToken = await authClient.getAccessToken();
     const userId = authClient.getUserId();
-    
+
     if (!accessToken || !userId) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
-    
+
     return {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-User-ID': userId,
-      'Content-Type': 'application/json'
+      "Authorization": `Bearer ${accessToken}`,
+      "X-User-ID": userId,
+      "Content-Type": "application/json",
     };
   };
 
@@ -203,7 +209,9 @@ export default function UnifiedRecorderIsland() {
       <div class="bg-error/10 border border-error/20 rounded-lg p-4">
         <div>
           <h3 class="font-bold text-error">Browser Not Supported</h3>
-          <div class="text-sm text-error/80">Your browser doesn't support screen recording. Please use Chrome, Firefox, or Edge.</div>
+          <div class="text-sm text-error/80">
+            Your browser doesn't support screen recording. Please use Chrome, Firefox, or Edge.
+          </div>
         </div>
       </div>
     );
@@ -218,7 +226,7 @@ export default function UnifiedRecorderIsland() {
             key={toast.id}
             message={toast.message}
             type={toast.type}
-            dismissible={true}
+            dismissible
             onDismiss={() => removeToast(toast.id)}
           />
         ))}
@@ -228,7 +236,7 @@ export default function UnifiedRecorderIsland() {
         {/* Recording Section */}
         <div>
           <RecordingStatus recordingState={recordingState} />
-          
+
           <RecordingControls
             recordingState={recordingState}
             recordingOptions={recordingOptions}
@@ -247,23 +255,23 @@ export default function UnifiedRecorderIsland() {
         {(currentPreviewUrl || previewUrl) && (
           <VideoPreview
             videoUrl={currentPreviewUrl || previewUrl!}
-            title={
-              currentPreviewRecording 
-                ? `Preview: ${currentPreviewRecording.name}` 
-                : recordingState.status === 'stopped' 
-                ? "Your Recording" 
-                : "Preview"
-            }
-            metadata={
-              currentPreviewRecording
-                ? `${formatFileSize(currentPreviewRecording.size)} • ${formatDate(currentPreviewRecording.createdAt)}`
-                : recordingState.recordedBlob
-                ? `${formatDuration(recordingState.duration)} • ${(recordingState.recordedBlob.size / (1024 * 1024)).toFixed(1)} MB`
-                : undefined
-            }
-            showDownloadShare={true}
+            title={currentPreviewRecording
+              ? `Preview: ${currentPreviewRecording.name}`
+              : recordingState.status === "stopped"
+              ? "Your Recording"
+              : "Preview"}
+            metadata={currentPreviewRecording
+              ? `${formatFileSize(currentPreviewRecording.size)} • ${
+                formatDate(currentPreviewRecording.createdAt)
+              }`
+              : recordingState.recordedBlob
+              ? `${formatDuration(recordingState.duration)} • ${
+                (recordingState.recordedBlob.size / (1024 * 1024)).toFixed(1)
+              } MB`
+              : undefined}
+            showDownloadShare
             onDownload={() => {
-              if (currentPreviewRecording && currentPreviewRecording.id !== 'preview') {
+              if (currentPreviewRecording && currentPreviewRecording.id !== "preview") {
                 // Existing recording - use API with bandwidth tracking
                 handleDownloadExisting(currentPreviewRecording);
               } else {
@@ -279,16 +287,16 @@ export default function UnifiedRecorderIsland() {
               } else if (recordingState.recordedBlob && previewUrl) {
                 // Create temporary recording object for share modal
                 const tempRecording: Recording = {
-                  id: 'preview',
+                  id: "preview",
                   name: generateRecordingFilename(),
                   duration: recordingState.duration,
                   size: recordingState.recordedBlob.size,
                   createdAt: new Date(),
                   updatedAt: new Date(),
-                  filePath: 'preview',
+                  filePath: "preview",
                   publicUrl: previewUrl,
                   isPublic: false,
-                  mimeType: recordingState.recordedBlob.type || 'video/webm',
+                  mimeType: recordingState.recordedBlob.type || "video/webm",
                 };
                 handleShareRecording(tempRecording);
               }
@@ -319,13 +327,15 @@ export default function UnifiedRecorderIsland() {
 
       {/* Modals */}
       <ShareModal
-        item={selectedRecording ? {
-          id: selectedRecording.id,
-          name: selectedRecording.name,
-          size: selectedRecording.size,
-          createdAt: selectedRecording.createdAt,
-          filePath: selectedRecording.filePath
-        } : null}
+        item={selectedRecording
+          ? {
+            id: selectedRecording.id,
+            name: selectedRecording.name,
+            size: selectedRecording.size,
+            createdAt: selectedRecording.createdAt,
+            filePath: selectedRecording.filePath,
+          }
+          : null}
         isOpen={showShareModal}
         onClose={() => {
           setShowShareModal(false);

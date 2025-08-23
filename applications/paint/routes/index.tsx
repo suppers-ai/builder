@@ -1,19 +1,19 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import Layout from "../components/Layout.tsx";
-import { Palette, Images } from "lucide-preact";
+import { Images, Palette } from "lucide-preact";
 import PaintCanvasIsland from "../islands/PaintCanvasIsland.tsx";
 import ToolbarIsland from "../islands/ToolbarIsland.tsx";
 import ToastContainer from "../islands/ToastContainer.tsx";
-import { ErrorBoundary, CanvasErrorBoundary } from "../components/ErrorBoundary.tsx";
+import { CanvasErrorBoundary, ErrorBoundary } from "../components/ErrorBoundary.tsx";
 import { DEFAULT_PENCIL_COLOR, DEFAULT_PENCIL_WIDTH } from "../lib/paint-utils.ts";
-import { showSuccess, showInfo } from "../lib/toast-manager.ts";
+import { showInfo, showSuccess } from "../lib/toast-manager.ts";
 import type { SavedPainting } from "../types/paint.ts";
 
 export default function Home() {
   // Shared state for color and width between toolbar and canvas
   const [pencilColor, setPencilColor] = useState(DEFAULT_PENCIL_COLOR);
   const [pencilWidth, setPencilWidth] = useState(DEFAULT_PENCIL_WIDTH);
-  
+
   // Undo/redo state
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -57,13 +57,13 @@ export default function Home() {
 
   // Handle save action
   const handleSave = (format: string, filename?: string) => {
-    console.log(`Saving canvas as ${format}${filename ? ` with filename: ${filename}` : ''}`);
+    console.log(`Saving canvas as ${format}${filename ? ` with filename: ${filename}` : ""}`);
     // Additional save logic can be added here if needed
   };
 
   // Handle clear action
   const handleClear = () => {
-    console.log('Canvas cleared');
+    console.log("Canvas cleared");
     // Additional clear logic can be added here if needed
   };
 
@@ -75,37 +75,37 @@ export default function Home() {
 
   // Check for loaded painting from gallery
   useEffect(() => {
-    const loadPaintingData = sessionStorage.getItem('loadPainting');
+    const loadPaintingData = sessionStorage.getItem("loadPainting");
     if (loadPaintingData) {
       try {
         const painting: SavedPainting = JSON.parse(loadPaintingData);
         setLoadedPainting(painting);
         showSuccess(`Loaded painting: ${painting.name}`);
         // Clear from sessionStorage after loading
-        sessionStorage.removeItem('loadPainting');
+        sessionStorage.removeItem("loadPainting");
       } catch (error) {
-        console.error('Error parsing loaded painting data:', error);
-        showInfo('Failed to load painting data from gallery');
+        console.error("Error parsing loaded painting data:", error);
+        showInfo("Failed to load painting data from gallery");
       }
     }
   }, []);
 
   // Listen for global events from islands
   useEffect(() => {
-    console.log('🏠 Main route setting up event listeners');
-    
+    console.log("🏠 Main route setting up event listeners");
+
     // Listen for color changes from toolbar
     const handleColorChange = (event: CustomEvent) => {
-      console.log('🏠 Main route received color change:', event.detail);
+      console.log("🏠 Main route received color change:", event.detail);
       setPencilColor(event.detail);
-      console.log('🏠 Main route updated pencilColor to:', event.detail);
+      console.log("🏠 Main route updated pencilColor to:", event.detail);
     };
 
     // Listen for width changes from toolbar
     const handleWidthChange = (event: CustomEvent) => {
-      console.log('🏠 Main route received width change:', event.detail);
+      console.log("🏠 Main route received width change:", event.detail);
       setPencilWidth(event.detail);
-      console.log('🏠 Main route updated pencilWidth to:', event.detail);
+      console.log("🏠 Main route updated pencilWidth to:", event.detail);
     };
 
     // Listen for history changes from canvas
@@ -115,15 +115,15 @@ export default function Home() {
     };
 
     // Add event listeners
-    window.addEventListener('paintColorChange', handleColorChange as EventListener);
-    window.addEventListener('paintWidthChange', handleWidthChange as EventListener);
-    window.addEventListener('paintHistoryChange', handleHistoryChange as EventListener);
+    globalThis.addEventListener("paintColorChange", handleColorChange as EventListener);
+    globalThis.addEventListener("paintWidthChange", handleWidthChange as EventListener);
+    globalThis.addEventListener("paintHistoryChange", handleHistoryChange as EventListener);
 
     // Cleanup
     return () => {
-      window.removeEventListener('paintColorChange', handleColorChange as EventListener);
-      window.removeEventListener('paintWidthChange', handleWidthChange as EventListener);
-      window.removeEventListener('paintHistoryChange', handleHistoryChange as EventListener);
+      globalThis.removeEventListener("paintColorChange", handleColorChange as EventListener);
+      globalThis.removeEventListener("paintWidthChange", handleWidthChange as EventListener);
+      globalThis.removeEventListener("paintHistoryChange", handleHistoryChange as EventListener);
     };
   }, []);
 
@@ -136,78 +136,73 @@ export default function Home() {
       }
 
       // Undo: Ctrl+Z or Cmd+Z
-      if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+      if ((event.ctrlKey || event.metaKey) && event.key === "z" && !event.shiftKey) {
         event.preventDefault();
         if (canUndo) {
           handleUndo();
-          showInfo('Undid last action');
+          showInfo("Undid last action");
         }
-      }
-      // Redo: Ctrl+Y or Ctrl+Shift+Z or Cmd+Shift+Z
+      } // Redo: Ctrl+Y or Ctrl+Shift+Z or Cmd+Shift+Z
       else if (
-        ((event.ctrlKey || event.metaKey) && event.key === 'y') ||
-        ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'Z')
+        ((event.ctrlKey || event.metaKey) && event.key === "y") ||
+        ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === "Z")
       ) {
         event.preventDefault();
         if (canRedo) {
           handleRedo();
-          showInfo('Redid last action');
+          showInfo("Redid last action");
         }
-      }
-      // Save: Ctrl+S or Cmd+S
-      else if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      } // Save: Ctrl+S or Cmd+S
+      else if ((event.ctrlKey || event.metaKey) && event.key === "s") {
         event.preventDefault();
-        handleSave('png');
-        showInfo('Saving canvas...');
-      }
-      // Clear: Ctrl+Delete or Cmd+Delete
-      else if ((event.ctrlKey || event.metaKey) && event.key === 'Delete') {
+        handleSave("png");
+        showInfo("Saving canvas...");
+      } // Clear: Ctrl+Delete or Cmd+Delete
+      else if ((event.ctrlKey || event.metaKey) && event.key === "Delete") {
         event.preventDefault();
-        if (confirm('Are you sure you want to clear the canvas? This action cannot be undone.')) {
+        if (confirm("Are you sure you want to clear the canvas? This action cannot be undone.")) {
           handleClear();
-          showInfo('Canvas cleared');
+          showInfo("Canvas cleared");
         }
-      }
-      // Gallery: Ctrl+G or Cmd+G
-      else if ((event.ctrlKey || event.metaKey) && event.key === 'g') {
+      } // Gallery: Ctrl+G or Cmd+G
+      else if ((event.ctrlKey || event.metaKey) && event.key === "g") {
         event.preventDefault();
-        window.location.href = '/gallery';
-      }
-      // Help: F1 or ?
-      else if (event.key === 'F1' || (event.shiftKey && event.key === '?')) {
+        globalThis.location.href = "/gallery";
+      } // Help: F1 or ?
+      else if (event.key === "F1" || (event.shiftKey && event.key === "?")) {
         event.preventDefault();
         showKeyboardShortcutsHelp();
       }
     };
 
     // Add event listener
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     // Cleanup
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [canUndo, canRedo, handleUndo, handleRedo]);
 
   // Show keyboard shortcuts help
   const showKeyboardShortcutsHelp = () => {
     const shortcuts = [
-      'Ctrl/Cmd + Z: Undo',
-      'Ctrl/Cmd + Y: Redo',
-      'Ctrl/Cmd + S: Save',
-      'Ctrl/Cmd + Delete: Clear canvas',
-      'Ctrl/Cmd + G: Go to gallery',
-      'F1 or Shift + ?: Show this help'
+      "Ctrl/Cmd + Z: Undo",
+      "Ctrl/Cmd + Y: Redo",
+      "Ctrl/Cmd + S: Save",
+      "Ctrl/Cmd + Delete: Clear canvas",
+      "Ctrl/Cmd + G: Go to gallery",
+      "F1 or Shift + ?: Show this help",
     ];
-    showInfo(`Keyboard Shortcuts:\n${shortcuts.join('\n')}`, { duration: 8000 });
+    showInfo(`Keyboard Shortcuts:\n${shortcuts.join("\n")}`, { duration: 8000 });
   };
 
   return (
     <Layout title="Paint App">
       <ErrorBoundary context="Paint Application">
         {/* Skip to main content link for screen readers */}
-        <a 
-          href="#main-canvas" 
+        <a
+          href="#main-canvas"
           class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 btn btn-primary btn-sm"
         >
           Skip to canvas
@@ -223,21 +218,21 @@ export default function Home() {
               Paint App
             </h1>
             <p class="text-base-content/60 text-sm" id="app-description">
-              Create digital artwork with our intuitive paint application. 
-              Use keyboard shortcuts for faster workflow.
+              Create digital artwork with our intuitive paint application. Use keyboard shortcuts
+              for faster workflow.
             </p>
-            
+
             {/* Navigation to Gallery */}
             <nav class="mt-4" aria-label="Application navigation">
-              <a 
-                href="/gallery" 
+              <a
+                href="/gallery"
                 class="btn btn-outline btn-sm hover:btn-primary transition-colors"
                 aria-describedby="app-description"
               >
                 <Images class="w-4 h-4 mr-2" aria-hidden="true" />
                 My Gallery
               </a>
-              
+
               {/* Help button */}
               <button
                 onClick={showKeyboardShortcutsHelp}
@@ -251,7 +246,7 @@ export default function Home() {
 
             {/* Loaded Painting Indicator with enhanced accessibility */}
             {loadedPainting && (
-              <div 
+              <div
                 class="alert alert-info mt-4 max-w-md mx-auto shadow-sm"
                 role="status"
                 aria-live="polite"
@@ -294,10 +289,11 @@ export default function Home() {
                 <div class="card-body p-4">
                   <h2 class="card-title text-lg mb-4 flex items-center justify-between">
                     <span class="flex items-center">
-                      <span class="w-2 h-2 bg-secondary rounded-full mr-2" aria-hidden="true"></span>
+                      <span class="w-2 h-2 bg-secondary rounded-full mr-2" aria-hidden="true">
+                      </span>
                       Canvas
                     </span>
-                    
+
                     {/* Canvas status indicators */}
                     <div class="flex items-center gap-2 text-xs text-base-content/60">
                       <span class="badge badge-outline badge-xs">
@@ -308,15 +304,15 @@ export default function Home() {
                       </span>
                       {(canUndo || canRedo) && (
                         <span class="badge badge-primary badge-xs">
-                          {canUndo ? 'Modified' : 'Saved'}
+                          {canUndo ? "Modified" : "Saved"}
                         </span>
                       )}
                     </div>
                   </h2>
-                  
+
                   <CanvasErrorBoundary>
                     <div id="main-canvas" tabindex="-1">
-                      <PaintCanvasIsland 
+                      <PaintCanvasIsland
                         width={800}
                         height={600}
                         className="w-full"
@@ -330,10 +326,9 @@ export default function Home() {
               </div>
             </section>
           </main>
-
         </div>
       </ErrorBoundary>
-      
+
       {/* Toast Container for notifications */}
       <ToastContainer />
     </Layout>

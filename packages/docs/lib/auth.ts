@@ -11,7 +11,7 @@ export function getAuthClient(): OAuthAuthClient {
   if (!oauthClient) {
     oauthClient = new OAuthAuthClient(
       config.profileUrl, // http://localhost:8001
-      "docs" // client ID for the docs package
+      "docs", // client ID for the docs package
     );
   }
   return oauthClient;

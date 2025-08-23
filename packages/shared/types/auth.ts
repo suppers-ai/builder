@@ -1,69 +1,57 @@
 /**
- * Shared Authentication Types
- * Common types for authentication and user management across packages
+ * Authentication types shared across the application
  */
 
-import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
-
-// Re-export the canonical User type from type-mappers
-export type { User } from "../utils/type-mappers.ts";
-
-// Auth Session - just contains the user ID and Supabase session
 export interface AuthSession {
-  userId: string;
-  session: Session;
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+  expires_at?: number;
+  token_type?: string;
+  user?: AuthUser;
 }
 
-// Auth State - just tracks if authenticated and user ID
-export interface AuthState {
-  userId: string | null;
-  session: Session | null;
-  loading: boolean;
+export interface AuthUser {
+  id: string;
+  email?: string;
+  email_verified?: boolean;
+  phone?: string;
+  phone_verified?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  app_metadata?: Record<string, any>;
+  user_metadata?: Record<string, any>;
+  role?: string;
 }
 
-// Sign Up Data
-export interface SignUpData {
-  email: string;
-  password: string;
-  first_name?: string;
-  last_name?: string;
-  display_name?: string;
-}
-
-// Sign In Data
-export interface SignInData {
-  email: string;
-  password: string;
-}
-
-// Reset Password Data
-export interface ResetPasswordData {
-  email: string;
-}
-
-export interface UpdateUserData {
-  first_name?: string;
-  last_name?: string;
-  display_name?: string;
-  avatar_url?: string;
-  theme_id?: string;
-  stripe_customer_id?: string;
-  role?: 'user' | 'admin';
-}
-
-export type AuthEventType =
+export type AuthEventType = 
+  | "SIGNED_IN"
+  | "SIGNED_OUT"
+  | "TOKEN_REFRESHED"
+  | "USER_UPDATED"
+  | "PASSWORD_RECOVERY"
   | "login"
-  | "logout"
-  | "token_refresh"
-  | "error";
+  | "logout";
 
 export interface AuthEventData {
-  login?: { userId: string };
-  logout?: void;
-  token_refresh?: AuthSession;
-  error?: { error: string; error_description?: string };
+  SIGNED_IN: { session: AuthSession };
+  SIGNED_OUT: { session: null };
+  TOKEN_REFRESHED: { session: AuthSession };
+  USER_UPDATED: { user: AuthUser };
+  PASSWORD_RECOVERY: { user: AuthUser };
+  login: { session: AuthSession };
+  logout: { session: null };
 }
 
-export interface AuthEventCallback {
-  (event: AuthEventType, data?: AuthEventData[AuthEventType]): void;
+export type AuthEventCallback = (event: AuthEventType, data?: any) => void;
+
+export interface AuthError {
+  message: string;
+  status?: number;
+  code?: string;
+}
+
+export interface AuthResponse<T> {
+  data?: T;
+  error?: AuthError;
 }

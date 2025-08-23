@@ -24,6 +24,7 @@
   "exclude": ["**/_fresh/*"],
   "imports": {
     "@/": "./",
+    "@fresh/plugin-tailwind-v3": "jsr:@fresh/plugin-tailwind-v3@^1.0.0",
     "@suppers/shared": "../shared/mod.ts",
     "@suppers/ui-lib": "../ui-lib/mod.ts",
     "@suppers/auth-client": "../auth-client/mod.ts",

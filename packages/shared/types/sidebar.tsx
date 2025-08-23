@@ -3,7 +3,7 @@ export interface SidebarLink {
   path: string;
   icon?: any;
   description?: string;
-  badge?: string | number;
+  badge?: string;
   external?: boolean;
 }
 
@@ -13,7 +13,7 @@ export interface SidebarSection {
   icon?: any;
   links: SidebarLink[];
   defaultOpen?: boolean;
-  badge?: string | number;
+  badge?: string;
 }
 
 export interface SidebarConfig {

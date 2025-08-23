@@ -1,6 +1,6 @@
 import SimpleAuthButton from "./SimpleAuthButton.tsx";
 import { Logo } from "@suppers/ui-lib";
-import { Palette, Images } from "lucide-preact";
+import { Images, Palette } from "lucide-preact";
 
 export default function SimpleNavbar() {
   return (
@@ -13,7 +13,7 @@ export default function SimpleNavbar() {
           size="lg"
         />
       </div>
-      
+
       <div class="navbar-center">
         <div class="flex gap-2">
           <a href="/" class="btn btn-ghost btn-sm">
@@ -26,7 +26,7 @@ export default function SimpleNavbar() {
           </a>
         </div>
       </div>
-      
+
       <div class="navbar-end">
         <SimpleAuthButton />
       </div>

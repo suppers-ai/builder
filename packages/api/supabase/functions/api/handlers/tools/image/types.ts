@@ -46,7 +46,7 @@ export interface ImageToolResponse {
 
 export type ImageProcessingFunction = (
   input: string | Uint8Array,
-  options: Record<string, any>
+  options: Record<string, any>,
 ) => Promise<ImageProcessingResult>;
 
 export interface ImageTool {

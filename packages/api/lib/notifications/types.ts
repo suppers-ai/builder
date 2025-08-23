@@ -18,12 +18,12 @@ export interface TemplateContext {
 export interface EmailDeliveryOptions {
   retries?: number;
   timeout?: number;
-  priority?: 'low' | 'normal' | 'high';
+  priority?: "low" | "normal" | "high";
 }
 
 export interface RateLimitInfo {
   userId: string;
-  action: 'email_share';
+  action: "email_share";
   windowMs: number;
   maxRequests: number;
 }

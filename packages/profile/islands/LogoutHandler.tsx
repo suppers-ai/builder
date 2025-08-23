@@ -11,8 +11,8 @@ export default function LogoutHandler() {
   const [success, setSuccess] = useState<string | null>(null);
 
   // Check if this is a popup logout
-  const isPopup = typeof globalThis.window !== "undefined" && 
-                  new URLSearchParams(globalThis.window.location.search).get("popup") === "true";
+  const isPopup = typeof globalThis.window !== "undefined" &&
+    new URLSearchParams(globalThis.window.location.search).get("popup") === "true";
 
   useEffect(() => {
     const handleLogout = async () => {
@@ -24,10 +24,10 @@ export default function LogoutHandler() {
           // Send success message to parent window and close popup
           if (globalThis.window.opener) {
             globalThis.window.opener.postMessage({
-              type: 'OAUTH_LOGOUT_SUCCESS'
-            }, '*');
+              type: "OAUTH_LOGOUT_SUCCESS",
+            }, "*");
           }
-          
+
           setTimeout(() => {
             globalThis.window.close();
           }, 1000);

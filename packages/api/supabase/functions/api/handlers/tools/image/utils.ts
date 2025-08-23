@@ -2,18 +2,27 @@
  * Image processing utilities and helper functions
  */
 
-import { join, extname } from "https://deno.land/std@0.208.0/path/mod.ts";
+import { extname, join } from "https://deno.land/std@0.208.0/path/mod.ts";
 import { exists } from "https://deno.land/std@0.208.0/fs/mod.ts";
 
 /**
  * Supported image formats for processing
  */
 export const SUPPORTED_INPUT_FORMATS = [
-  ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff", ".tif"
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".gif",
+  ".bmp",
+  ".tiff",
+  ".tif",
 ];
 
 export const SUPPORTED_OUTPUT_FORMATS = [
-  "jpeg", "png", "webp"
+  "jpeg",
+  "png",
+  "webp",
 ];
 
 /**
@@ -51,7 +60,9 @@ export async function cleanupTempFiles(filePaths: string[]): Promise<void> {
 /**
  * Validates image processing options
  */
-export function validateImageOptions(options: Record<string, any>): { valid: boolean; errors: string[] } {
+export function validateImageOptions(
+  options: Record<string, any>,
+): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   if (options.width !== undefined) {
@@ -80,7 +91,7 @@ export function validateImageOptions(options: Record<string, any>): { valid: boo
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 

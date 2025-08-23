@@ -22,7 +22,7 @@ export function Modal({
 }: ModalProps) {
   // For documentation purposes, show modal content even when closed
   const isDocumentationMode = typeof window === "undefined" ||
-    window.location?.pathname?.includes("/components/");
+    globalThis.location?.pathname?.includes("/components/");
 
   if (!open && !isDocumentationMode) return null;
 

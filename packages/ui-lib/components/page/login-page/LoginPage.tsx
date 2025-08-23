@@ -117,13 +117,13 @@ export function LoginPage<TUser = any>({
         <Card class="shadow-xl">
           {/* Error/Success Messages */}
           {error && (
-            <Alert type="error" class="mb-4">
+            <Alert color="error" class="mb-4">
               {error}
             </Alert>
           )}
 
           {success && (
-            <Alert type="success" class="mb-4">
+            <Alert color="success" class="mb-4">
               {success}
             </Alert>
           )}
@@ -237,13 +237,14 @@ export function LoginPage<TUser = any>({
                     <div class="grid grid-cols-2 gap-3">
                       <div>
                         <label htmlFor="firstName" class="label">
-                          <span class="label-text">First name</span>
+                          <span class="label-text">
+                            First name <span class="text-base-content/60">(optional)</span>
+                          </span>
                         </label>
                         <Input
                           id="firstName"
                           name="firstName"
                           type="text"
-                          required
                           value={formData.firstName}
                           onInput={(e) =>
                             onInputChange("firstName", (e.target as HTMLInputElement).value)}
@@ -254,13 +255,14 @@ export function LoginPage<TUser = any>({
 
                       <div>
                         <label htmlFor="lastName" class="label">
-                          <span class="label-text">Last name</span>
+                          <span class="label-text">
+                            Last name <span class="text-base-content/60">(optional)</span>
+                          </span>
                         </label>
                         <Input
                           id="lastName"
                           name="lastName"
                           type="text"
-                          required
                           value={formData.lastName}
                           onInput={(e) =>
                             onInputChange("lastName", (e.target as HTMLInputElement).value)}

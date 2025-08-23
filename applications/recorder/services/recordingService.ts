@@ -3,7 +3,7 @@ import { downloadBlob } from "../lib/recorder-utils.ts";
 import type { Recording } from "../types/recorder.ts";
 
 // Base URL for centralized API
-const API_BASE_URL = 'http://127.0.0.1:54321/functions/v1/api/v1';
+const API_BASE_URL = "http://127.0.0.1:54321/functions/v1/api/v1";
 
 export const recordingService = {
   async downloadExisting(recording: Recording): Promise<void> {
@@ -12,17 +12,17 @@ export const recordingService = {
     const accessToken = await authClient.getAccessToken();
 
     if (!userId || !accessToken) {
-      throw new Error('Authentication required for download');
+      throw new Error("Authentication required for download");
     }
 
     // Extract filename from filePath (e.g., "userId/recorder/filename.webm" -> "filename.webm")
-    const filename = recording.filePath.split('/').pop();
-    
+    const filename = recording.filePath.split("/").pop();
+
     const response = await fetch(`${API_BASE_URL}/storage/recorder/${filename}?download=true`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'X-User-ID': userId,
+        "Authorization": `Bearer ${accessToken}`,
+        "X-User-ID": userId,
       },
     });
 
@@ -36,22 +36,22 @@ export const recordingService = {
           }
         } catch (jsonError) {
           // If we can't parse JSON, fall back to a descriptive message
-          throw new Error('Download failed: Bandwidth limit exceeded');
+          throw new Error("Download failed: Bandwidth limit exceeded");
         }
-        throw new Error('Download failed: Bandwidth limit exceeded');
+        throw new Error("Download failed: Bandwidth limit exceeded");
       } else {
-        throw new Error('Download failed: ' + response.statusText);
+        throw new Error("Download failed: " + response.statusText);
       }
     }
 
     // Download endpoint returns the file content directly, not JSON
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
+
+    const a = document.createElement("a");
     a.href = url;
     a.download = recording.name;
-    a.style.display = 'none';
+    a.style.display = "none";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -65,31 +65,31 @@ export const recordingService = {
     const accessToken = await authClient.getAccessToken();
 
     if (!userId || !accessToken) {
-      throw new Error('Authentication required for preview');
+      throw new Error("Authentication required for preview");
     }
 
     // Extract filename from filePath (e.g., "userId/recorder/filename.webm" -> "filename.webm")
-    const filename = recording.filePath.split('/').pop();
-    
+    const filename = recording.filePath.split("/").pop();
+
     // First, test the download URL to check for bandwidth limits
     // We do a HEAD request to check without actually downloading
     const testUrl = `${API_BASE_URL}/storage/recorder/${filename}?download=true`;
-    
+
     try {
       const testResponse = await fetch(testUrl, {
-        method: 'HEAD',
+        method: "HEAD",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 
       if (!testResponse.ok) {
         if (testResponse.status === 429) {
           // Bandwidth limit exceeded
-          const errorText = await testResponse.text().catch(() => '');
-          let errorMessage = 'Bandwidth limit exceeded';
-          
+          const errorText = await testResponse.text().catch(() => "");
+          let errorMessage = "Bandwidth limit exceeded";
+
           try {
             const errorData = JSON.parse(errorText);
             if (errorData.error) {
@@ -98,7 +98,7 @@ export const recordingService = {
           } catch {
             // If we can't parse the error, use default message
           }
-          
+
           throw new Error(errorMessage);
         } else {
           throw new Error(`Preview failed: ${testResponse.statusText}`);
@@ -108,7 +108,7 @@ export const recordingService = {
       // Re-throw the error to be handled by the calling code
       throw error;
     }
-    
+
     // If the test passed, create a signed URL for video preview
     // This allows the video element to load the content without CORS issues
     return `${API_BASE_URL}/storage/recorder/${filename}?download=true&token=${accessToken}&userId=${userId}`;
@@ -120,29 +120,31 @@ export const recordingService = {
     const accessToken = await authClient.getAccessToken();
 
     if (!userId || !accessToken) {
-      throw new Error('Authentication required for delete');
+      throw new Error("Authentication required for delete");
     }
 
     // Extract filename from filePath (e.g., "userId/recorder/filename.webm" -> "filename.webm")
-    const filename = recording.filePath.split('/').pop();
-    
+    const filename = recording.filePath.split("/").pop();
+
     const response = await fetch(`${API_BASE_URL}/storage/recorder/${filename}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'X-User-ID': userId,
+        "Authorization": `Bearer ${accessToken}`,
+        "X-User-ID": userId,
       },
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: 'Failed to delete recording' }));
-      throw new Error('Delete failed: ' + errorData.error);
+      const errorData = await response.json().catch(() => ({
+        error: "Failed to delete recording",
+      }));
+      throw new Error("Delete failed: " + errorData.error);
     }
 
     const result = await response.json();
-    
+
     if (!result.success) {
-      throw new Error('Failed to delete recording');
+      throw new Error("Failed to delete recording");
     }
   },
 

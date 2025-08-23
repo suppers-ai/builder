@@ -21,12 +21,12 @@ export interface Recording {
 export interface RecordingOptions {
   includeAudio: boolean;
   includeMicrophone: boolean;
-  quality: 'low' | 'medium' | 'high' | 'ultra';
+  quality: "low" | "medium" | "high" | "ultra";
   maxDuration?: number; // in seconds
 }
 
 export interface RecordingState {
-  status: 'idle' | 'preparing' | 'recording' | 'paused' | 'stopped' | 'uploading' | 'error';
+  status: "idle" | "preparing" | "recording" | "paused" | "stopped" | "uploading" | "error";
   duration: number;
   error?: string;
   recordedBlob?: Blob;

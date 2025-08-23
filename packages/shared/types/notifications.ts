@@ -61,3 +61,12 @@ export interface NotificationProviderConfig {
     maxRecipients: number;
   };
 }
+
+export interface EmailShareTokenVerification {
+  valid: boolean;
+  token?: string;
+  email?: string;
+  error?: string;
+  storageObject?: any;
+  session?: any;
+}

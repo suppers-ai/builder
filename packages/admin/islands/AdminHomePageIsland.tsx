@@ -7,7 +7,7 @@ export default function AdminHomePageIsland() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Get the auth client
   const authClient = getAuthClient();
 
@@ -73,7 +73,5 @@ export default function AdminHomePageIsland() {
     );
   }
 
-  return (
-    <AdminDashboardIsland />
-  );
-} 
+  return <AdminDashboardIsland />;
+}

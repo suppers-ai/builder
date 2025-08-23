@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "@supabase/supabase-js";
 
 console.log("🔄 Monthly Bandwidth Reset Function loaded");
 
@@ -14,7 +14,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 Deno.serve(async (req: Request) => {
   // This function should only be called internally or via cron
   // Optionally add API key verification here for security
-  
+
   if (req.method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
@@ -30,15 +30,15 @@ Deno.serve(async (req: Request) => {
 
     // Get current count of users before reset
     const { count: totalUsers, error: countError } = await supabaseAdmin
-      .from('users')
-      .select('*', { count: 'exact', head: true });
+      .from("users")
+      .select("*", { count: "exact", head: true });
 
     if (countError) {
       console.error("❌ Failed to count users:", countError.message);
     }
 
     // Call the database function to reset all users' bandwidth usage
-    const { error } = await supabaseAdmin.rpc('reset_monthly_bandwidth');
+    const { error } = await supabaseAdmin.rpc("reset_monthly_bandwidth");
 
     if (error) {
       console.error("❌ Failed to reset monthly bandwidth:", error.message);
@@ -56,7 +56,9 @@ Deno.serve(async (req: Request) => {
     }
 
     const resetTime = new Date().toISOString();
-    console.log(`✅ Monthly bandwidth reset completed at ${resetTime} for ${totalUsers || 'all'} users`);
+    console.log(
+      `✅ Monthly bandwidth reset completed at ${resetTime} for ${totalUsers || "all"} users`,
+    );
 
     return new Response(
       JSON.stringify({
@@ -70,7 +72,6 @@ Deno.serve(async (req: Request) => {
         headers: { "Content-Type": "application/json" },
       },
     );
-
   } catch (error) {
     console.error("❌ Monthly bandwidth reset error:", error);
 

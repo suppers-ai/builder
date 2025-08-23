@@ -6,11 +6,13 @@
     "./types": "./types/mod.ts",
     "./utils": "./utils/mod.ts",
     "./utils/component-route-generator.tsx": "./utils/component-route-generator.tsx",
-    "./utils/preview-generator.ts": "./utils/preview-generator.ts",
     "./utils/type-mappers.ts": "./utils/type-mappers.ts",
     "./constants": "./constants/mod.ts",
     "./schemas": "./schemas/mod.ts",
     "./generated/database-types": "./generated/database-types.ts"
+  },
+  "tasks": {
+    "check": "deno check **/*.ts"
   },
   "compilerOptions": {
     "lib": ["dom", "dom.asynciterable", "deno.ns"],

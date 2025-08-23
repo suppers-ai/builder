@@ -1,5 +1,5 @@
 // Advanced memory management for canvas history and drawing operations
-import type { DrawingState, Stroke, InsertedImage } from '../types/paint.ts';
+import type { DrawingState, InsertedImage, Stroke } from "../types/paint.ts";
 
 /**
  * Memory usage statistics
@@ -106,7 +106,7 @@ export class AdvancedMemoryManager {
    * Initialize compression worker for background compression
    */
   private initializeCompressionWorker(): void {
-    if (this.config.enableCompression && typeof Worker !== 'undefined') {
+    if (this.config.enableCompression && typeof Worker !== "undefined") {
       try {
         // Create a simple compression worker inline
         const workerCode = `
@@ -138,14 +138,14 @@ export class AdvancedMemoryManager {
           };
         `;
 
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const blob = new Blob([workerCode], { type: "application/javascript" });
         this.compressionWorker = new Worker(URL.createObjectURL(blob));
-        
+
         this.compressionWorker.onmessage = (e) => {
           this.handleCompressionResult(e.data);
         };
       } catch (error) {
-        console.warn('Failed to initialize compression worker:', error);
+        console.warn("Failed to initialize compression worker:", error);
         this.compressionWorker = null;
       }
     }
@@ -157,7 +157,7 @@ export class AdvancedMemoryManager {
   private handleCompressionResult(result: any): void {
     if (result.success) {
       // Find and update the history state
-      const historyState = this.history.find(state => state.id === result.id);
+      const historyState = this.history.find((state) => state.id === result.id);
       if (historyState && !historyState.isCompressed) {
         // Replace with compressed version
         const compressedState: CompressedHistoryState = {
@@ -171,7 +171,7 @@ export class AdvancedMemoryManager {
 
         const index = this.history.indexOf(historyState);
         this.history[index] = compressedState;
-        
+
         // Update memory stats
         this.updateMemoryStats();
       }
@@ -182,7 +182,7 @@ export class AdvancedMemoryManager {
    * Save current canvas state to history
    */
   public saveState(): void {
-    const ctx = this.canvas.getContext('2d');
+    const ctx = this.canvas.getContext("2d");
     if (!ctx) return;
 
     try {
@@ -214,7 +214,7 @@ export class AdvancedMemoryManager {
 
       this.updateMemoryStats();
     } catch (error) {
-      console.error('Failed to save canvas state:', error);
+      console.error("Failed to save canvas state:", error);
     }
   }
 
@@ -250,12 +250,12 @@ export class AdvancedMemoryManager {
 
     this.currentIndex--;
     const state = this.history[this.currentIndex];
-    
+
     if (state) {
       this.restoreState(state);
       return true;
     }
-    
+
     return false;
   }
 
@@ -267,12 +267,12 @@ export class AdvancedMemoryManager {
 
     this.currentIndex++;
     const state = this.history[this.currentIndex];
-    
+
     if (state) {
       this.restoreState(state);
       return true;
     }
-    
+
     return false;
   }
 
@@ -280,7 +280,7 @@ export class AdvancedMemoryManager {
    * Restore canvas state from history
    */
   private async restoreState(state: HistoryState): Promise<void> {
-    const ctx = this.canvas.getContext('2d');
+    const ctx = this.canvas.getContext("2d");
     if (!ctx) return;
 
     try {
@@ -295,7 +295,7 @@ export class AdvancedMemoryManager {
 
       ctx.putImageData(imageData, 0, 0);
     } catch (error) {
-      console.error('Failed to restore canvas state:', error);
+      console.error("Failed to restore canvas state:", error);
     }
   }
 
@@ -305,17 +305,17 @@ export class AdvancedMemoryManager {
   private async decompressState(state: CompressedHistoryState): Promise<ImageData> {
     try {
       const decompressed = JSON.parse(state.compressedData);
-      
+
       // Reconstruct ImageData
       const imageData = new ImageData(
         new Uint8ClampedArray(decompressed.data),
         decompressed.width,
-        decompressed.height
+        decompressed.height,
       );
-      
+
       return imageData;
     } catch (error) {
-      console.error('Failed to decompress state:', error);
+      console.error("Failed to decompress state:", error);
       throw error;
     }
   }
@@ -360,7 +360,7 @@ export class AdvancedMemoryManager {
     this.history = [];
     this.currentIndex = -1;
     this.updateMemoryStats();
-    
+
     // Save current state as new initial state
     this.saveState();
   }
@@ -386,7 +386,7 @@ export class AdvancedMemoryManager {
    */
   private performMemoryOptimization(): void {
     // Compress oldest uncompressed states first
-    const uncompressedStates = this.history.filter(state => !state.isCompressed);
+    const uncompressedStates = this.history.filter((state) => !state.isCompressed);
     const oldestStates = uncompressedStates
       .sort((a, b) => a.timestamp - b.timestamp)
       .slice(0, Math.ceil(uncompressedStates.length / 2));
@@ -398,7 +398,9 @@ export class AdvancedMemoryManager {
     }
 
     // If still over limit, remove oldest states
-    while (this.memoryStats.totalMemoryUsage > this.config.maxMemoryUsage && this.history.length > 10) {
+    while (
+      this.memoryStats.totalMemoryUsage > this.config.maxMemoryUsage && this.history.length > 10
+    ) {
       this.history.shift();
       this.currentIndex--;
     }
@@ -413,7 +415,7 @@ export class AdvancedMemoryManager {
     const startTime = performance.now();
 
     // Remove any orphaned or corrupted states
-    this.history = this.history.filter(state => {
+    this.history = this.history.filter((state) => {
       if (state.isCompressed) {
         return state.compressedData && state.compressedData.length > 0;
       } else {
@@ -430,7 +432,7 @@ export class AdvancedMemoryManager {
     this.updateMemoryStats();
 
     // Force browser garbage collection if available
-    if ('gc' in window && typeof (window as any).gc === 'function') {
+    if ("gc" in window && typeof (window as any).gc === "function") {
       try {
         (window as any).gc();
       } catch (error) {
@@ -461,7 +463,9 @@ export class AdvancedMemoryManager {
 
     this.memoryStats.historyMemoryUsage = historyMemoryUsage;
     this.memoryStats.totalMemoryUsage = historyMemoryUsage; // Add other memory usage here
-    this.memoryStats.compressionRatio = totalOriginalSize > 0 ? totalCompressedSize / totalOriginalSize : 1;
+    this.memoryStats.compressionRatio = totalOriginalSize > 0
+      ? totalCompressedSize / totalOriginalSize
+      : 1;
   }
 
   /**
@@ -476,7 +480,7 @@ export class AdvancedMemoryManager {
    */
   public updateConfig(newConfig: Partial<MemoryConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    
+
     // Restart GC timer if interval changed
     if (newConfig.gcInterval !== undefined) {
       if (this.gcTimer) {
@@ -484,7 +488,7 @@ export class AdvancedMemoryManager {
       }
       this.initializeGarbageCollection();
     }
-    
+
     // Trigger memory management if limits changed
     if (newConfig.maxHistorySteps !== undefined || newConfig.maxMemoryUsage !== undefined) {
       this.manageMemory();
@@ -522,11 +526,11 @@ export class AdvancedMemoryManager {
   public optimizeDrawingData(drawingState: DrawingState): DrawingState {
     const optimized: DrawingState = {
       ...drawingState,
-      strokes: drawingState.strokes.map(stroke => ({
+      strokes: drawingState.strokes.map((stroke) => ({
         ...stroke,
         points: this.optimizeStrokePoints(stroke.points),
       })),
-      images: drawingState.images.map(image => ({
+      images: drawingState.images.map((image) => ({
         ...image,
         src: this.optimizeImageSrc(image.src),
       })),
@@ -548,17 +552,19 @@ export class AdvancedMemoryManager {
     for (let i = 1; i < points.length - 1; i++) {
       const lastPoint = optimized[optimized.length - 1];
       const currentPoint = points[i];
-      
+
       const distance = Math.sqrt(
-        Math.pow(currentPoint.x - lastPoint.x, 2) + 
-        Math.pow(currentPoint.y - lastPoint.y, 2)
+        Math.pow(currentPoint.x - lastPoint.x, 2) +
+          Math.pow(currentPoint.y - lastPoint.y, 2),
       );
 
       if (distance >= minDistance) {
         optimized.push({
           x: Math.round(currentPoint.x * 10) / 10, // Round to 1 decimal
           y: Math.round(currentPoint.y * 10) / 10,
-          pressure: currentPoint.pressure ? Math.round(currentPoint.pressure * 100) / 100 : undefined,
+          pressure: currentPoint.pressure
+            ? Math.round(currentPoint.pressure * 100) / 100
+            : undefined,
         });
       }
     }

@@ -68,9 +68,7 @@ export function MetricCard({
               <Skeleton class="h-6 sm:h-8 w-16" />
               <Skeleton class="h-3 w-24" />
             </div>
-            {icon && (
-              <Skeleton class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg" />
-            )}
+            {icon && <Skeleton class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg" />}
           </div>
         </div>
       </div>
@@ -95,7 +93,9 @@ export function MetricCard({
             )}
           </div>
           {icon && (
-            <div class={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center bg-${color}/10 text-${color}`}>
+            <div
+              class={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center bg-${color}/10 text-${color}`}
+            >
               {icon}
             </div>
           )}

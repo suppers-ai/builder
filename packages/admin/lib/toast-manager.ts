@@ -3,7 +3,7 @@
 export interface ToastNotification {
   id: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   duration?: number;
   dismissible?: boolean;
   timestamp: number;
@@ -11,7 +11,7 @@ export interface ToastNotification {
 }
 
 export interface ToastOptions {
-  type?: 'info' | 'success' | 'warning' | 'error';
+  type?: "info" | "success" | "warning" | "error";
   duration?: number;
   dismissible?: boolean;
 }
@@ -27,7 +27,7 @@ class ToastManager {
     const toast: ToastNotification = {
       id,
       message,
-      type: options.type || 'info',
+      type: options.type || "info",
       duration: options.duration ?? this.defaultDuration,
       dismissible: options.dismissible ?? true,
       timestamp: Date.now(),
@@ -48,32 +48,32 @@ class ToastManager {
   }
 
   // Show success toast
-  success(message: string, options: Omit<ToastOptions, 'type'> = {}): string {
-    return this.show(message, { ...options, type: 'success' });
+  success(message: string, options: Omit<ToastOptions, "type"> = {}): string {
+    return this.show(message, { ...options, type: "success" });
   }
 
   // Show error toast
-  error(message: string, options: Omit<ToastOptions, 'type'> = {}): string {
-    return this.show(message, { 
-      ...options, 
-      type: 'error',
+  error(message: string, options: Omit<ToastOptions, "type"> = {}): string {
+    return this.show(message, {
+      ...options,
+      type: "error",
       duration: options.duration ?? 8000, // Longer duration for errors
     });
   }
 
   // Show warning toast
-  warning(message: string, options: Omit<ToastOptions, 'type'> = {}): string {
-    return this.show(message, { ...options, type: 'warning' });
+  warning(message: string, options: Omit<ToastOptions, "type"> = {}): string {
+    return this.show(message, { ...options, type: "warning" });
   }
 
   // Show info toast
-  info(message: string, options: Omit<ToastOptions, 'type'> = {}): string {
-    return this.show(message, { ...options, type: 'info' });
+  info(message: string, options: Omit<ToastOptions, "type"> = {}): string {
+    return this.show(message, { ...options, type: "info" });
   }
 
   // Dismiss a specific toast
   dismiss(id: string): void {
-    const toastIndex = this.toasts.findIndex(toast => toast.id === id);
+    const toastIndex = this.toasts.findIndex((toast) => toast.id === id);
     if (toastIndex !== -1) {
       const toast = this.toasts[toastIndex];
       // Clear timeout if it exists
@@ -88,7 +88,7 @@ class ToastManager {
   // Clear all toasts
   clear(): void {
     // Clear all timeouts
-    this.toasts.forEach(toast => {
+    this.toasts.forEach((toast) => {
       if (toast.timeoutId) {
         clearTimeout(toast.timeoutId);
       }
@@ -105,20 +105,20 @@ class ToastManager {
   // Subscribe to toast changes
   subscribe(listener: (toasts: ToastNotification[]) => void): () => void {
     this.listeners.push(listener);
-    
+
     // Return unsubscribe function
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   // Notify all listeners of changes
   private notifyListeners(): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener([...this.toasts]);
       } catch (error) {
-        console.error('Error in toast listener:', error);
+        console.error("Error in toast listener:", error);
       }
     });
   }
@@ -127,11 +127,11 @@ class ToastManager {
   cleanup(): void {
     const now = Date.now();
     const maxAge = 30000; // 30 seconds
-    
-    this.toasts = this.toasts.filter(toast => {
+
+    this.toasts = this.toasts.filter((toast) => {
       return (now - toast.timestamp) < maxAge;
     });
-    
+
     this.notifyListeners();
   }
 }
@@ -140,22 +140,33 @@ class ToastManager {
 export const toastManager = new ToastManager();
 
 // Convenience functions for global access
-export const showToast = (message: string, options?: ToastOptions) => 
+export const showToast = (message: string, options?: ToastOptions) =>
   toastManager.show(message, options);
 
-export const showSuccess = (message: string, options?: Omit<ToastOptions, 'type'>) => 
+export const showSuccess = (message: string, options?: Omit<ToastOptions, "type">) =>
   toastManager.success(message, options);
 
-export const showError = (message: string, options?: Omit<ToastOptions, 'type'>) => 
+export const showError = (message: string, options?: Omit<ToastOptions, "type">) =>
   toastManager.error(message, options);
 
-export const showWarning = (message: string, options?: Omit<ToastOptions, 'type'>) => 
+export const showWarning = (message: string, options?: Omit<ToastOptions, "type">) =>
   toastManager.warning(message, options);
 
-export const showInfo = (message: string, options?: Omit<ToastOptions, 'type'>) => 
+export const showInfo = (message: string, options?: Omit<ToastOptions, "type">) =>
   toastManager.info(message, options);
 
 // Periodic cleanup
 setInterval(() => {
   toastManager.cleanup();
 }, 10000); // Clean up every 10 seconds
+
+// Default export with common methods
+export default {
+  success: showSuccess,
+  error: showError,
+  warning: showWarning,
+  info: showInfo,
+  show: showToast,
+  dismiss: (id: string) => toastManager.dismiss(id),
+  clear: () => toastManager.clear(),
+};

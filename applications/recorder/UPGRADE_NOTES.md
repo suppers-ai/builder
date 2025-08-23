@@ -2,20 +2,24 @@
 
 ## ✅ **Upgrade Complete: Canary → Alpha.52**
 
-The recorder application has been successfully upgraded to use Fresh 2 Alpha.52, matching the structure used in the store package.
+The recorder application has been successfully upgraded to use Fresh 2 Alpha.52, matching the
+structure used in the store package.
 
 ## 🔄 **Changes Made**
 
 ### **Removed Files**
+
 - ❌ `fresh.config.ts` - No longer needed in alpha.52
 
 ### **Updated Files**
+
 - ✅ `deno.json` - Simplified imports, removed Fresh-specific URLs
 - ✅ `dev.ts` - Now uses `Builder` class with tailwind plugin
 - ✅ `main.ts` - Now uses `App` class with static files and fsRoutes
 - ✅ All route files - Updated imports from `$fresh/` to `fresh`
 
 ### **New Structure Benefits**
+
 1. **Simplified Configuration**: No config file required
 2. **Better Plugin System**: TailwindCSS integrated via dev.ts Builder
 3. **Cleaner Imports**: Direct imports from "fresh" instead of "$fresh/"
@@ -24,6 +28,7 @@ The recorder application has been successfully upgraded to use Fresh 2 Alpha.52,
 ## 🏗️ **Architecture Changes**
 
 ### **Before (Canary)**
+
 ```typescript
 // fresh.config.ts
 import { defineConfig } from "$fresh/server.ts";
@@ -36,6 +41,7 @@ export default defineConfig({
 ```
 
 ### **After (Alpha.52)**
+
 ```typescript
 // dev.ts
 import { Builder } from "fresh/dev";
@@ -44,7 +50,7 @@ import { tailwind } from "@fresh/plugin-tailwind";
 const builder = new Builder({ target: "safari12" });
 tailwind(builder);
 
-// main.ts  
+// main.ts
 import { App, staticFiles } from "fresh";
 
 export const app = new App()
@@ -55,6 +61,7 @@ export const app = new App()
 ## 📋 **Import Changes**
 
 ### **Route Files**
+
 ```typescript
 // Before
 import { PageProps } from "$fresh/server.ts";
@@ -66,6 +73,7 @@ import { Head } from "fresh/runtime";
 ```
 
 ### **Dependencies**
+
 ```json
 // Before - Complex with specific Fresh URLs
 "imports": {
@@ -89,7 +97,7 @@ import { Head } from "fresh/runtime";
 After upgrade, verify these features still work:
 
 - [ ] **Development Server**: `deno task dev` starts on port 8002
-- [ ] **Build Process**: `deno task build` completes successfully  
+- [ ] **Build Process**: `deno task build` completes successfully
 - [ ] **Authentication**: Login/logout with SimpleAuthButton
 - [ ] **Screen Recording**: All recording functions work
 - [ ] **Storage Upload**: Files save to cloud storage
@@ -115,7 +123,7 @@ deno task dev
 
 - **Store Package**: Used as reference for alpha.52 structure
 - **Fresh 2 Docs**: https://fresh.deno.dev/docs
-- **Implementation Checklist**: See `IMPLEMENTATION_CHECKLIST.md` 
+- **Implementation Checklist**: See `IMPLEMENTATION_CHECKLIST.md`
 - **Current Status**: See `CURRENT_STATUS.md`
 
 **The application is now using Fresh 2 Alpha.52 with a cleaner, more maintainable structure!** 🎉

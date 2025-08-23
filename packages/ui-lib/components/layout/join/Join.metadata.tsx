@@ -7,9 +7,9 @@ const joinExamples: ComponentExample[] = [
     description: "Simple horizontal button group",
     props: {
       children: [
-        <button class="btn join-item">Button 1</button>,
-        <button class="btn join-item btn-active">Button 2</button>,
-        <button class="btn join-item">Button 3</button>,
+        <button key="btn1" class="btn join-item">Button 1</button>,
+        <button key="btn2" class="btn join-item btn-active">Button 2</button>,
+        <button key="btn3" class="btn join-item">Button 3</button>,
       ],
     },
   },
@@ -19,9 +19,9 @@ const joinExamples: ComponentExample[] = [
     props: {
       vertical: true,
       children: [
-        <input class="input input-bordered join-item" placeholder="Email" />,
-        <input class="input input-bordered join-item" placeholder="Password" />,
-        <button class="btn btn-primary join-item">Sign In</button>,
+        <input key="email" class="input input-bordered join-item" placeholder="Email" />,
+        <input key="password" class="input input-bordered join-item" placeholder="Password" />,
+        <button key="signin" class="btn btn-primary join-item">Sign In</button>,
       ],
     },
   },

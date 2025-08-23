@@ -1,41 +1,29 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { errorResponses, jsonResponse, corsHeaders } from "../../_common/index.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
+
 
 interface StorageDownloadContext {
   userId: string;
   supabase: SupabaseClient;
   applicationSlug: string;
   filePath: string;
+  userEmail?: string;
+  shareToken?: string;
 }
 
 export async function handleStorageDownload(
   req: Request,
   context: StorageDownloadContext,
 ): Promise<Response> {
-  let { userId, supabase, applicationSlug, filePath } = context;
-  const url = new URL(req.url);
-
-  // Handle authentication from query parameters for video previews
-  // This allows video elements to load content without CORS issues
-  const tokenFromQuery = url.searchParams.get("token");
-  const userIdFromQuery = url.searchParams.get("userId");
-  
-  if (!userId && tokenFromQuery && userIdFromQuery) {
-    // Validate the token and get user info
-    const { data: tokenUser, error: tokenError } = await supabase.auth.getUser(tokenFromQuery);
-    
-    if (!tokenError && tokenUser?.user?.id === userIdFromQuery) {
-      userId = tokenUser.user.id;
-      console.log("✅ Authenticated via query token for user:", userId);
-    }
-  }
+  const { userId, supabase, applicationSlug, filePath, userEmail, shareToken } = context;
+  const origin = req.headers.get('origin');
 
   if (!userId) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
@@ -45,67 +33,45 @@ export async function handleStorageDownload(
       JSON.stringify({ error: "File path is required" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
 
-  console.log("📥 Download request for app:", applicationSlug, "file:", filePath);
-
   try {
-    // All applications require database entries - check database for access control
-    const { data: application, error: appError } = await supabase
-      .from("applications")
-      .select("id, owner_id, slug")
-      .eq("slug", applicationSlug)
-      .single();
-
-    if (appError || !application) {
-      console.log("❌ Application not found:", applicationSlug);
-      return new Response(
-        JSON.stringify({ error: "Application not found or access denied" }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    // Check if user is owner (only owners can download from storage)
-    const isOwner = application.owner_id === userId;
-
-    if (!isOwner) {
-      console.log("❌ User is not owner:", userId);
-      return new Response(
-        JSON.stringify({ error: "Owner access required" }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
     const fullPath = `${userId}/${applicationSlug}/${filePath}`;
     console.log("📄 Downloading file:", fullPath);
 
     // For HEAD requests, we just check permissions and bandwidth limits without downloading
     const isHeadRequest = req.method === "HEAD";
-    
+
     // Get file info from database first to check size for bandwidth limits
     const { data: storageObject, error: fetchError } = await supabase
-      .from('storage_objects')
-      .select('file_size, mime_type')
-      .eq('user_id', userId)
-      .eq('file_path', fullPath)
+      .from("storage_objects")
+      .select("file_size, mime_type, user_id, share_token, shared_with_emails")
+      .eq("file_path", fullPath)
       .single();
 
+    if (
+      storageObject?.user_id !== userId || storageObject?.share_token !== shareToken ||
+      !storageObject?.shared_with_emails?.includes(userEmail)
+    ) {
+      return new Response(
+        JSON.stringify({ error: "You are not authorized to delete this file" }),
+        {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
     if (fetchError || !storageObject) {
-      console.error("❌ File not found in database:", fetchError?.message);
+      console.error("❌ File not found in database:", fetchError);
       return new Response(
         JSON.stringify({ error: "File not found" }),
         {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
@@ -118,9 +84,9 @@ export async function handleStorageDownload(
     try {
       // Get user's current bandwidth usage and limit
       const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('bandwidth_used, bandwidth_limit')
-        .eq('id', userId)
+        .from("users")
+        .select("bandwidth_used, bandwidth_limit")
+        .eq("id", userId)
         .single();
 
       if (userError) {
@@ -129,7 +95,7 @@ export async function handleStorageDownload(
           JSON.stringify({ error: "Failed to check bandwidth limits" }),
           {
             status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" },
           },
         );
       }
@@ -143,16 +109,25 @@ export async function handleStorageDownload(
         const limitMB = Math.round(bandwidthLimit / (1024 * 1024));
         const downloadMB = Math.round(fileSize / (1024 * 1024));
         const remainingMB = Math.round((bandwidthLimit - currentBandwidth) / (1024 * 1024));
-        console.log("❌ Bandwidth limit exceeded:", usedMB, "MB of", limitMB, "MB. This download would exceed your remaining", remainingMB, "MB.");
-        
+        console.log(
+          "❌ Bandwidth limit exceeded:",
+          usedMB,
+          "MB of",
+          limitMB,
+          "MB. This download would exceed your remaining",
+          remainingMB,
+          "MB.",
+        );
+
         return new Response(
           JSON.stringify({
-            error: `Bandwidth limit exceeded. You have used ${usedMB}MB of ${limitMB}MB. This download (${downloadMB}MB) would exceed your remaining ${remainingMB}MB.`,
-            code: "BANDWIDTH_LIMIT_EXCEEDED"
+            error:
+              `Bandwidth limit exceeded. You have used ${usedMB}MB of ${limitMB}MB. This download (${downloadMB}MB) would exceed your remaining ${remainingMB}MB.`,
+            code: "BANDWIDTH_LIMIT_EXCEEDED",
           }),
           {
             status: 429,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" },
           },
         );
       }
@@ -171,9 +146,9 @@ export async function handleStorageDownload(
       }
 
       // Track bandwidth usage before serving file (only for actual downloads, not HEAD)
-      const { error: bandwidthError } = await supabase.rpc('increment_user_bandwidth', {
+      const { error: bandwidthError } = await supabase.rpc("increment_user_bandwidth", {
         user_id: userId,
-        bandwidth_delta: fileSize
+        bandwidth_delta: fileSize,
       });
 
       if (bandwidthError) {
@@ -182,7 +157,7 @@ export async function handleStorageDownload(
           JSON.stringify({ error: "Failed to track bandwidth usage" }),
           {
             status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" },
           },
         );
       } else {
@@ -194,7 +169,7 @@ export async function handleStorageDownload(
         JSON.stringify({ error: "Failed to process bandwidth tracking" }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
@@ -211,7 +186,7 @@ export async function handleStorageDownload(
           JSON.stringify({ error: "File not found" }),
           {
             status: 404,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" },
           },
         );
       }
@@ -219,7 +194,7 @@ export async function handleStorageDownload(
         JSON.stringify({ error: error.message }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
@@ -244,7 +219,7 @@ export async function handleStorageDownload(
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }

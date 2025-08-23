@@ -1,7 +1,9 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { errorResponses, jsonResponse } from "../../_common/index.ts";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function updateUser(request: Request, supabase: SupabaseClient): Promise<Response> {
+  const origin = request.headers.get('origin');
   const body = await request.json();
   const {
     id,
@@ -18,10 +20,7 @@ export async function updateUser(request: Request, supabase: SupabaseClient): Pr
   console.log(body);
 
   if (!id) {
-    return new Response(JSON.stringify({ error: "User ID is required" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponses.badRequest("User ID is required", origin || undefined);
   }
 
   const updateData: Record<string, unknown> = {
@@ -45,14 +44,8 @@ export async function updateUser(request: Request, supabase: SupabaseClient): Pr
     .single();
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponses.internalServerError(error.message, origin || undefined);
   }
 
-  return new Response(JSON.stringify({ user }), {
-    status: 200,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse({ user }, { status: 200, origin: origin || undefined });
 }

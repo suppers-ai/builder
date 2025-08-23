@@ -301,7 +301,7 @@ function formatJSXChildToString(child: any): string {
 
   // Handle JSX objects
   if (typeof child === "object" && child !== null && typeof child.type !== "undefined") {
-    return formatJSXObjectToString(child).replace(/^\(\n  /, "").replace(/\n\)$/, "");
+    return formatJSXObjectToString(child).replace(/^\(\n {2}/, "").replace(/\n\)$/, "");
   }
 
   // Fallback

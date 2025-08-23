@@ -1,6 +1,6 @@
 /**
  * Storage API Usage Example
- * 
+ *
  * This file demonstrates how to use the application storage functionality
  * with the DirectAuthClient.
  */
@@ -12,7 +12,7 @@ export async function storageUsageExample() {
   // Initialize the auth client (would normally be done in your app)
   const authClient = new DirectAuthClient(
     "your-supabase-url",
-    "your-supabase-anon-key"
+    "your-supabase-anon-key",
   );
 
   // Assume user is authenticated

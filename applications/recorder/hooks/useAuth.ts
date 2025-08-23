@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { getAuthClient } from "../lib/auth.ts";
 
 export function useAuth() {
@@ -12,12 +12,12 @@ export function useAuth() {
     const handleLogin = () => setIsAuthenticated(true);
     const handleLogout = () => setIsAuthenticated(false);
 
-    authClient.addEventListener('login', handleLogin);
-    authClient.addEventListener('logout', handleLogout);
+    authClient.addEventListener("login", handleLogin);
+    authClient.addEventListener("logout", handleLogout);
 
     return () => {
-      authClient.removeEventListener('login', handleLogin);
-      authClient.removeEventListener('logout', handleLogout);
+      authClient.removeEventListener("login", handleLogin);
+      authClient.removeEventListener("logout", handleLogout);
     };
   }, []);
 

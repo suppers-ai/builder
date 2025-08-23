@@ -11,7 +11,7 @@ export default function GalleryPage() {
             View, download, and manage your saved artwork
           </p>
         </div>
-        
+
         <PaintingGalleryIsland />
       </div>
     </Layout>

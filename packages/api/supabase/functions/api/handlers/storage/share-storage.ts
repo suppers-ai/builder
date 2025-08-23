@@ -1,5 +1,6 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { errorResponses, jsonResponse } from "../../_common/index.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
+
 
 interface StorageShareContext {
   userId: string;
@@ -9,20 +10,26 @@ interface StorageShareContext {
 }
 
 interface ShareRequest {
-  action: 'create_token' | 'remove_token' | 'make_public' | 'make_private' | 'make_private_only' | 'share_with_emails';
+  action:
+    | "create_token"
+    | "remove_token"
+    | "make_public"
+    | "make_private"
+    | "make_private_only"
+    | "share_with_emails";
   emails?: string[];
 }
 
 // Generate a secure random token
 function generateShareToken(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
   const length = 32;
-  
+
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  
+
   return result;
 }
 
@@ -31,13 +38,14 @@ export async function handleStorageShare(
   context: StorageShareContext,
 ): Promise<Response> {
   const { userId, supabase, applicationSlug, filePath } = context;
+  const origin = req.headers.get('origin');
 
   if (!userId) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
@@ -47,7 +55,7 @@ export async function handleStorageShare(
       JSON.stringify({ error: "File path is required" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
@@ -55,47 +63,36 @@ export async function handleStorageShare(
   console.log("🔗 Share request for app:", applicationSlug, "file:", filePath);
 
   try {
-    // All applications require database entries - check database for access control
+    // Check if application exists
     const { data: application, error: appError } = await supabase
       .from("applications")
-      .select("id, owner_id, slug")
+      .select("id, slug")
       .eq("slug", applicationSlug)
       .single();
 
     if (appError || !application) {
       console.log("❌ Application not found:", applicationSlug);
       return new Response(
-        JSON.stringify({ error: "Application not found or access denied" }),
+        JSON.stringify({ error: "Application not found" }),
         {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
 
-    // Check if user is owner (only owners can share storage files)
-    const isOwner = application.owner_id === userId;
-
-    if (!isOwner) {
-      console.log("❌ User is not owner:", userId);
-      return new Response(
-        JSON.stringify({ error: "Owner access required" }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
+    // For simplified approach, authenticated users can access all application storage files
+    // Admin access control is handled at the application level
 
     const fullPath = `${userId}/${applicationSlug}/${filePath}`;
     console.log("🔗 Managing sharing for file:", fullPath);
 
     // Get the storage object
     const { data: storageObject, error: fetchError } = await supabase
-      .from('storage_objects')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('file_path', fullPath)
+      .from("storage_objects")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("file_path", fullPath)
       .single();
 
     if (fetchError || !storageObject) {
@@ -104,67 +101,67 @@ export async function handleStorageShare(
         JSON.stringify({ error: "File not found" }),
         {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
 
     // Parse the request body
     const shareRequest: ShareRequest = await req.json();
-    
-    let updates: any = {
-      updated_at: new Date().toISOString()
+
+    const updates: any = {
+      updated_at: new Date().toISOString(),
     };
 
     switch (shareRequest.action) {
-      case 'create_token':
+      case "create_token":
         // Generate a new share token (don't change public setting)
         const shareToken = generateShareToken();
         updates.share_token = shareToken;
         break;
 
-      case 'remove_token':
+      case "remove_token":
         // Remove the share token (don't change public setting)
         updates.share_token = null;
         break;
 
-      case 'make_public':
+      case "make_public":
         // Make file publicly accessible (keep existing token if any)
         updates.is_public = true;
         break;
 
-      case 'make_private':
+      case "make_private":
         // Make file private (remove both public and token access)
         updates.is_public = false;
         updates.share_token = null;
         break;
 
-      case 'make_private_only':
+      case "make_private_only":
         // Turn off public access but keep token if it exists
         updates.is_public = false;
         break;
 
-      case 'share_with_emails':
+      case "share_with_emails":
         // Share with specific email addresses
         if (!shareRequest.emails || !Array.isArray(shareRequest.emails)) {
           return new Response(
             JSON.stringify({ error: "Emails array is required for share_with_emails action" }),
             {
               status: 400,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json" },
             },
           );
         }
 
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const invalidEmails = shareRequest.emails.filter(email => !emailRegex.test(email));
+        const invalidEmails = shareRequest.emails.filter((email) => !emailRegex.test(email));
         if (invalidEmails.length > 0) {
           return new Response(
-            JSON.stringify({ error: `Invalid email addresses: ${invalidEmails.join(', ')}` }),
+            JSON.stringify({ error: `Invalid email addresses: ${invalidEmails.join(", ")}` }),
             {
               status: 400,
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              headers: { "Content-Type": "application/json" },
             },
           );
         }
@@ -173,27 +170,30 @@ export async function handleStorageShare(
         if (!storageObject.share_token) {
           updates.share_token = generateShareToken();
         }
-        
+
         // Update shared emails list
         updates.shared_with_emails = shareRequest.emails;
         break;
 
       default:
         return new Response(
-          JSON.stringify({ error: "Invalid action. Must be: create_token, remove_token, make_public, make_private, make_private_only, or share_with_emails" }),
+          JSON.stringify({
+            error:
+              "Invalid action. Must be: create_token, remove_token, make_public, make_private, make_private_only, or share_with_emails",
+          }),
           {
             status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" },
           },
         );
     }
 
     // Update the storage object
     const { data: updatedObject, error: updateError } = await supabase
-      .from('storage_objects')
+      .from("storage_objects")
       .update(updates)
-      .eq('id', storageObject.id)
-      .eq('user_id', userId)
+      .eq("id", storageObject.id)
+      .eq("user_id", userId)
       .select()
       .single();
 
@@ -203,7 +203,7 @@ export async function handleStorageShare(
         JSON.stringify({ error: "Failed to update sharing settings" }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
@@ -212,7 +212,7 @@ export async function handleStorageShare(
 
     // Generate share URLs that point to the recorder share pages
     // These URLs will show a proper video preview page, not just serve the file
-    let shareUrls: any = {};
+    const shareUrls: any = {};
 
     if (updatedObject.is_public) {
       shareUrls.publicUrl = `http://localhost:8002/share/public/${applicationSlug}/${filePath}`;
@@ -237,7 +237,7 @@ export async function handleStorageShare(
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   } catch (error) {
@@ -249,7 +249,7 @@ export async function handleStorageShare(
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }

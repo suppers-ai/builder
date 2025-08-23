@@ -1,7 +1,9 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { errorResponses, jsonResponse } from "../../_common/index.ts";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function createUser(request: Request, supabase: SupabaseClient): Promise<Response> {
+  const origin = request.headers.get('origin');
   const body = await request.json();
   const {
     id,
@@ -16,10 +18,7 @@ export async function createUser(request: Request, supabase: SupabaseClient): Pr
   } = body;
 
   if (!id || !email) {
-    return new Response(JSON.stringify({ error: "ID and email are required" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponses.badRequest("ID and email are required", origin || undefined);
   }
 
   const userData = {
@@ -31,7 +30,7 @@ export async function createUser(request: Request, supabase: SupabaseClient): Pr
     avatar_url: avatarUrl || null,
     theme_id: themeId || null,
     stripe_customer_id: stripeCustomerId || null,
-    role: role || 'user',
+    role: role || "user",
   };
 
   const { data: user, error } = await supabase
@@ -41,14 +40,8 @@ export async function createUser(request: Request, supabase: SupabaseClient): Pr
     .single();
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponses.internalServerError(error.message, origin || undefined);
   }
 
-  return new Response(JSON.stringify({ user }), {
-    status: 201,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse({ user }, { status: 201, origin: origin || undefined });
 }

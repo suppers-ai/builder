@@ -2,6 +2,8 @@
 .branches
 .temp
 
+# sorted-storage/
+
 _fresh/
 
 # Environment variables files

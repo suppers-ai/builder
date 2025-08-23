@@ -10,7 +10,7 @@ import { GlobalThemeController } from "../../action/theme-controller/ThemeContro
 import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
 import { applyTheme, type ThemeId } from "@suppers/shared/utils";
 import config from "../../../../../config.ts";
-import { ChevronDown, Palette } from "lucide-preact";
+import { ChevronDown, Crown, LogOut, Package, Palette } from "lucide-preact";
 import { UpdateUserData } from "@suppers/auth-client";
 
 import type { User } from "@suppers/shared/utils/type-mappers.ts";
@@ -23,6 +23,7 @@ export interface ProfileCardProps extends BaseComponentProps {
   onUpdateProfile?: (data: UpdateUserData) => Promise<{ success?: boolean; error?: string }>;
   onUploadAvatar?: (file: File) => Promise<void>;
   onChangePassword?: (currentPassword: string, newPassword: string) => Promise<void>;
+  onSignOut?: () => Promise<void>;
   // Popup-specific options
   isPopupMode?: boolean;
   parentOrigin?: string;
@@ -38,6 +39,7 @@ export function ProfileCard({
   onUpdateProfile,
   onUploadAvatar,
   onChangePassword,
+  onSignOut,
   isPopupMode = false,
   parentOrigin,
   onPopupClose,
@@ -85,25 +87,25 @@ export function ProfileCard({
             break;
           case "ping":
             // Respond to parent window ping
-            if (window.parent) {
-              window.parent.postMessage({ type: "pong" }, parentOrigin);
+            if (globalThis.parent) {
+              globalThis.parent.postMessage({ type: "pong" }, parentOrigin);
             }
             break;
         }
       };
 
-      window.addEventListener("message", handleMessage);
+      globalThis.addEventListener("message", handleMessage);
 
       // Notify parent window that popup is ready
-      if (window.parent) {
-        window.parent.postMessage({
+      if (globalThis.parent) {
+        globalThis.parent.postMessage({
           type: "popup-ready",
           data: { userId: user?.id },
         }, parentOrigin);
       }
 
       return () => {
-        window.removeEventListener("message", handleMessage);
+        globalThis.removeEventListener("message", handleMessage);
       };
     }
   }, [isPopupMode, parentOrigin, onPopupClose, user?.id]);
@@ -112,17 +114,17 @@ export function ProfileCard({
   useEffect(() => {
     if (isPopupMode && parentOrigin) {
       const handleBeforeUnload = () => {
-        if (window.parent) {
-          window.parent.postMessage({
+        if (globalThis.parent) {
+          globalThis.parent.postMessage({
             type: "popup-closing",
           }, parentOrigin);
         }
       };
 
-      window.addEventListener("beforeunload", handleBeforeUnload);
+      globalThis.addEventListener("beforeunload", handleBeforeUnload);
 
       return () => {
-        window.removeEventListener("beforeunload", handleBeforeUnload);
+        globalThis.removeEventListener("beforeunload", handleBeforeUnload);
       };
     }
   }, [isPopupMode, parentOrigin]);
@@ -156,8 +158,8 @@ export function ProfileCard({
   }
 
   const sendProfileUpdate = (user: User | null) => {
-    if (isPopupMode && window.opener && !window.opener.closed) {
-      window.opener.postMessage({
+    if (isPopupMode && globalThis.opener && !globalThis.opener.closed) {
+      globalThis.opener.postMessage({
         type: "SUPPERS_PROFILE_UPDATED",
         data: { user },
       }, config.docsUrl);
@@ -215,8 +217,8 @@ export function ProfileCard({
         addToast("Avatar updated successfully!", "success");
 
         // Communicate with parent window if in popup mode
-        if (isPopupMode && parentOrigin && window.parent) {
-          window.parent.postMessage({
+        if (isPopupMode && parentOrigin && globalThis.parent) {
+          globalThis.parent.postMessage({
             type: "avatar-updated",
             data: { avatarUrl: URL.createObjectURL(file) },
           }, parentOrigin);
@@ -301,7 +303,7 @@ export function ProfileCard({
             key={toast.id}
             message={toast.message}
             type={toast.type}
-            dismissible={true}
+            dismissible
             onDismiss={() => removeToast(toast.id)}
           />
         ))}
@@ -318,7 +320,7 @@ export function ProfileCard({
       </div>
 
       {/* User Header Section */}
-      <div class="flex items-center justify-between p-6 mb-6">
+      <div class="flex items-center justify-between p-6 mb-2">
         <div class="flex items-center gap-4">
           <Button
             type="button"
@@ -327,7 +329,7 @@ export function ProfileCard({
             disabled={isLoading}
           >
             <Avatar
-              src={user?.avatar_url}
+              src={user?.avatar_url || undefined}
               alt="Profile"
               initials={initials}
               size="lg"
@@ -384,29 +386,61 @@ export function ProfileCard({
           </svg>
         </Button>
 
-        {/* My applications */}
+        {/* Subscriptions */}
         <Button
-          onClick={() => window.location.href = "/applications"}
+          onClick={() => globalThis.location.href = "/subscriptions"}
           class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200 bg-transparent border-none justify-start rounded-none"
           type="button"
         >
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
-              <svg
-                class="w-4 h-4 text-base-content/60"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                />
-              </svg>
+              <Crown class="w-4 h-4 text-base-content/60" />
             </div>
-            <span class="text-base-content font-medium">My applications</span>
+            <span class="text-base-content font-medium">My Subscriptions</span>
+          </div>
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </Button>
+
+        {/* My Products */}
+        <Button
+          onClick={() => globalThis.location.href = "/products"}
+          class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200 bg-transparent border-none justify-start rounded-none"
+          type="button"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
+              <Package class="w-4 h-4 text-base-content/60" />
+            </div>
+            <span class="text-base-content font-medium">My Products</span>
+          </div>
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </Button>
+
+        {/* View Applications */}
+        <Button
+          onClick={() => globalThis.location.href = "/applications"}
+          class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200 bg-transparent border-none justify-start rounded-none"
+          type="button"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
+              <Package class="w-4 h-4 text-base-content/60" />
+            </div>
+            <span class="text-base-content font-medium">View Applications</span>
           </div>
           <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -467,6 +501,20 @@ export function ProfileCard({
           <div class="flex items-center gap-2">
             <span class="text-sm text-base-content/70 capitalize">{currentTheme}</span>
             <ChevronDown size={16} class="text-base-content/50" />
+          </div>
+        </Button>
+
+        {/* Logout */}
+        <Button
+          onClick={() => onSignOut?.()}
+          class="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors border-b border-base-200 bg-transparent border-none justify-start rounded-none"
+          type="button"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
+              <LogOut size={16} class="text-error" />
+            </div>
+            <span class="text-base-content font-medium text-error">Logout</span>
           </div>
         </Button>
 
@@ -553,7 +601,7 @@ export function ProfileCard({
                       }))}
                     placeholder="Enter first name"
                     size="md"
-                    bordered={true}
+                    bordered
                     class="w-full"
                   />
                 </div>

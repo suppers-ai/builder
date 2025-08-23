@@ -1,1 +1,1 @@
-export * from "./ThemeProvider.tsx";
+export * from "./GlobalSessionProvider.tsx";

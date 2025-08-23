@@ -1,15 +1,7 @@
-import { Button, Alert } from "@suppers-ai/ui-lib";
-import { 
-  Video, 
-  Play, 
-  Download, 
-  Share, 
-  Trash2, 
-  AlertCircle, 
-  Loader2 
-} from "lucide-preact";
+import { Alert, Button } from "@suppers/ui-lib";
+import { AlertCircle, Download, Loader2, Play, Share, Trash2, Video } from "lucide-preact";
 import type { Recording } from "../types/recorder.ts";
-import { formatFileSize, formatDate } from "../lib/recorder-utils.ts";
+import { formatDate, formatFileSize } from "../lib/recorder-utils.ts";
 
 interface RecordingsListProps {
   recordings: Recording[];
@@ -58,7 +50,9 @@ export default function RecordingsList({
       <div class="text-center py-8">
         <Video class="w-12 h-12 text-base-content/30 mx-auto mb-3" />
         <p class="text-base-content/60">No recordings yet</p>
-        <p class="text-base-content/40 text-sm">Your recordings will appear here after you save them</p>
+        <p class="text-base-content/40 text-sm">
+          Your recordings will appear here after you save them
+        </p>
       </div>
     );
   }
@@ -75,10 +69,12 @@ export default function RecordingsList({
           </tr>
         </thead>
         <tbody>
-          {recordings.map(recording => (
-            <tr 
-              key={recording.id} 
-              class={currentPreviewRecording?.id === recording.id ? "bg-primary/10 border-primary/20" : ""}
+          {recordings.map((recording) => (
+            <tr
+              key={recording.id}
+              class={currentPreviewRecording?.id === recording.id
+                ? "bg-primary/10 border-primary/20"
+                : ""}
             >
               <td>
                 <div class="flex items-center gap-3">

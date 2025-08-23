@@ -1,5 +1,5 @@
-import { useState, useEffect } from "preact/hooks";
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from "lucide-preact";
+import { useEffect, useState } from "preact/hooks";
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from "lucide-preact";
 
 // Toast notification interface
 export interface ToastNotification {
@@ -21,24 +21,30 @@ export interface ToastManager {
 
 interface ToastContainerProps {
   toastManager: ToastManager;
-  position?: "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right";
+  position?:
+    | "top-left"
+    | "top-center"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-center"
+    | "bottom-right";
   maxToasts?: number;
 }
 
-export function ToastContainer({ 
-  toastManager, 
+export function ToastContainer({
+  toastManager,
   position = "top-right",
-  maxToasts = 5 
+  maxToasts = 5,
 }: ToastContainerProps) {
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   useEffect(() => {
     // Subscribe to toast changes
     const unsubscribe = toastManager.subscribe(setToasts);
-    
+
     // Get initial toasts
     setToasts(toastManager.getToasts());
-    
+
     return unsubscribe;
   }, [toastManager]);
 
@@ -46,15 +52,15 @@ export function ToastContainer({
     toastManager.dismiss(id);
   };
 
-  const getIcon = (type: ToastNotification['type']) => {
+  const getIcon = (type: ToastNotification["type"]) => {
     switch (type) {
-      case 'success':
+      case "success":
         return <CheckCircle class="w-5 h-5" />;
-      case 'error':
+      case "error":
         return <AlertCircle class="w-5 h-5" />;
-      case 'warning':
+      case "warning":
         return <AlertTriangle class="w-5 h-5" />;
-      case 'info':
+      case "info":
       default:
         return <Info class="w-5 h-5" />;
     }
@@ -96,20 +102,20 @@ export function ToastContainer({
             toast.type === "success" ? "alert-success" : "",
             toast.type === "error" ? "alert-error" : "",
             toast.type === "warning" ? "alert-warning" : "",
-            toast.type === "info" ? "alert-info" : ""
+            toast.type === "info" ? "alert-info" : "",
           ].filter(Boolean).join(" ")}
         >
           <div class="flex items-start gap-3 w-full">
             <div class="flex-shrink-0 mt-0.5">
               {getIcon(toast.type)}
             </div>
-            
+
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium break-words">
                 {toast.message}
               </p>
             </div>
-            
+
             {toast.dismissible && (
               <button
                 onClick={() => handleDismiss(toast.id)}
@@ -124,4 +130,4 @@ export function ToastContainer({
       ))}
     </div>
   );
-} 
+}

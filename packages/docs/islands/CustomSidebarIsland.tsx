@@ -1,10 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import {
-  Accordion,
-  closeGlobalSidebar,
-  globalSidebarOpen,
-  Logo,
-} from "@suppers/ui-lib";
+import { Accordion, closeGlobalSidebar, globalSidebarOpen, Logo } from "@suppers/ui-lib";
 import type { AccordionItemProps } from "@suppers/ui-lib";
 import { defaultUISidebarConfig } from "../utils/sidebar-config.tsx";
 import SimpleAuthButton from "./SimpleAuthButton.tsx";
@@ -148,7 +143,7 @@ export default function CustomSidebarIsland({
                   </div>
                 ),
               }))}
-              multiple={true}
+              multiple
               openItems={openSections}
               onToggle={handleAccordionToggle}
               class="space-y-1"

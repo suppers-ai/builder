@@ -14,7 +14,7 @@ export class NotificationFactory {
 
   private static createProvider(config: NotificationProviderConfig): NotificationProvider {
     switch (config.provider) {
-      case 'onesignal':
+      case "onesignal":
         return new OneSignalEmailProvider(config.onesignal);
       default:
         throw new Error(`Unsupported notification provider: ${config.provider}`);
@@ -26,7 +26,7 @@ export class NotificationFactory {
       const provider = this.createProvider(config);
       return provider.validateConfig();
     } catch (error) {
-      console.error('Provider validation failed:', error);
+      console.error("Provider validation failed:", error);
       return false;
     }
   }
@@ -38,7 +38,7 @@ export class NotificationFactory {
 }
 
 export class ProviderRegistry {
-  private static supportedProviders = ['onesignal'] as const;
+  private static supportedProviders = ["onesignal"] as const;
 
   static getSupportedProviders(): readonly string[] {
     return this.supportedProviders;
@@ -48,13 +48,15 @@ export class ProviderRegistry {
     return this.supportedProviders.includes(provider as any);
   }
 
-  static getProviderInfo(provider: string): { name: string; type: string; description: string } | null {
+  static getProviderInfo(
+    provider: string,
+  ): { name: string; type: string; description: string } | null {
     switch (provider) {
-      case 'onesignal':
+      case "onesignal":
         return {
-          name: 'OneSignal',
-          type: 'email',
-          description: 'Professional email delivery service with templates and analytics'
+          name: "OneSignal",
+          type: "email",
+          description: "Professional email delivery service with templates and analytics",
         };
       default:
         return null;
@@ -69,13 +71,13 @@ export class TemplateProcessor {
 
     // Simple mustache-style template processing
     for (const [key, value] of Object.entries(data)) {
-      const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
-      processed = processed.replace(regex, String(value || ''));
+      const regex = new RegExp(`{{\\s*${key}\\s*}}`, "g");
+      processed = processed.replace(regex, String(value || ""));
     }
 
     // Handle conditionals {{#if key}}...{{/if}}
     processed = processed.replace(/{{#if\s+(\w+)}}(.*?){{\/if}}/gs, (match, key, content) => {
-      return data[key] ? content : '';
+      return data[key] ? content : "";
     });
 
     return processed;
@@ -106,7 +108,7 @@ export class RateLimiter {
     const attempts = this.attempts.get(key) || [];
 
     // Filter out old attempts outside the window
-    const recentAttempts = attempts.filter(timestamp => timestamp > windowStart);
+    const recentAttempts = attempts.filter((timestamp) => timestamp > windowStart);
 
     // Update the attempts array
     this.attempts.set(key, recentAttempts);
@@ -126,7 +128,7 @@ export class RateLimiter {
     const windowStart = now - windowMs;
 
     const attempts = this.attempts.get(key) || [];
-    const recentAttempts = attempts.filter(timestamp => timestamp > windowStart);
+    const recentAttempts = attempts.filter((timestamp) => timestamp > windowStart);
 
     return Math.max(0, maxAttempts - recentAttempts.length);
   }

@@ -24,25 +24,6 @@ export function EnhancedSearchBar({
   className = "",
   showClearButton = true,
 }: EnhancedSearchBarProps) {
-  // SSR safety check - return simplified version during server-side rendering
-  if (typeof document === "undefined") {
-    return (
-      <div class={`relative ${className}`}>
-        <div class="relative flex items-center border rounded-lg bg-white border-gray-300">
-          <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-            🔍
-          </div>
-          <input
-            type="text"
-            placeholder={placeholder}
-            class="w-full pl-10 pr-20 py-3 rounded-lg focus:outline-none"
-            disabled
-          />
-        </div>
-      </div>
-    );
-  }
-
   const [query, setQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
   const [showFilters, setShowFilters] = useState(false);
@@ -66,6 +47,25 @@ export function EnhancedSearchBar({
       }
     };
   }, [query, activeFilters, onSearch, debounceMs]);
+
+  // SSR safety check - return simplified version during server-side rendering
+  if (typeof document === "undefined") {
+    return (
+      <div class={`relative ${className}`}>
+        <div class="relative flex items-center border rounded-lg bg-white border-gray-300">
+          <div class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            🔍
+          </div>
+          <input
+            type="text"
+            placeholder={placeholder}
+            class="w-full pl-10 pr-20 py-3 rounded-lg focus:outline-none"
+            disabled
+          />
+        </div>
+      </div>
+    );
+  }
 
   const handleQueryChange = (e: JSX.TargetedEvent<HTMLInputElement, Event>) => {
     setQuery((e.target as HTMLInputElement).value);

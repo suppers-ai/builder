@@ -1,5 +1,5 @@
 {
-  "name": "@suppers-ai/recorder",
+  "name": "@suppers/recorder",
   "version": "1.0.0",
   "exports": "./main.ts",
   "tasks": {
@@ -22,9 +22,9 @@
   },
   "imports": {
     "@/": "./",
-    "@suppers-ai/ui-lib": "../../packages/ui-lib/mod.ts",
-    "@suppers-ai/auth-client": "../../packages/auth-client/mod.ts",
-    "@suppers-ai/shared": "../../packages/shared/mod.ts"
+    "@suppers/ui-lib": "../../packages/ui-lib/mod.ts",
+    "@suppers/auth-client": "../../packages/auth-client/mod.ts",
+    "@suppers/shared": "../../packages/shared/mod.ts"
   },
   "lint": {
     "rules": {

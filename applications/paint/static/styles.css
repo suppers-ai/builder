@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Custom styles for the paint application */
 
@@ -39,8 +41,12 @@
 }
 
 @keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Enhanced toolbar styles */
@@ -95,7 +101,13 @@
 /* Width slider enhancements */
 .width-slider {
   @apply range range-primary;
-  background: linear-gradient(to right, hsl(var(--p)) 0%, hsl(var(--p)) var(--value, 50%), hsl(var(--b3)) var(--value, 50%), hsl(var(--b3)) 100%);
+  background: linear-gradient(
+    to right,
+    hsl(var(--p)) 0%,
+    hsl(var(--p)) var(--value, 50%),
+    hsl(var(--b3)) var(--value, 50%),
+    hsl(var(--b3)) 100%
+  );
 }
 
 /* Mobile-specific optimizations */
@@ -104,7 +116,7 @@
     min-height: 300px;
     padding: 0.5rem;
   }
-  
+
   .paint-canvas {
     max-width: calc(100vw - 1rem);
     max-height: calc(100vh - 250px);
@@ -133,12 +145,12 @@
   .paint-canvas {
     cursor: default; /* Remove crosshair cursor on touch devices */
   }
-  
+
   /* Remove hover effects on touch devices */
   .paint-tool-button:hover {
     transform: none;
   }
-  
+
   .color-palette-button:hover {
     transform: none;
   }
@@ -149,11 +161,11 @@
   .paint-canvas {
     border: 2px solid;
   }
-  
+
   .paint-tool-button {
     border-width: 2px;
   }
-  
+
   .color-palette-button {
     border-width: 3px;
   }
@@ -166,14 +178,16 @@
   .paint-canvas {
     transition: none;
   }
-  
+
   .paint-tool-button:hover,
   .color-palette-button:hover {
     transform: none;
   }
-  
+
   @keyframes loading {
-    0%, 100% { background-position: 0 0; }
+    0%, 100% {
+      background-position: 0 0;
+    }
   }
 }
 
@@ -243,7 +257,8 @@
 
 /* Loading spinner for canvas operations */
 .canvas-spinner {
-  @apply absolute inset-0 flex items-center justify-center bg-base-100/80 backdrop-blur-sm rounded-lg;
+  @apply absolute inset-0 flex items-center justify-center bg-base-100/80 backdrop-blur-sm
+    rounded-lg;
   z-index: 10;
 }
 
@@ -262,7 +277,7 @@
   footer {
     display: none !important;
   }
-  
+
   .paint-canvas {
     box-shadow: none;
     border: 1px solid #000;

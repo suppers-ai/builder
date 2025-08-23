@@ -1,6 +1,6 @@
 /**
  * Storage Setup Test Script
- * 
+ *
  * This script helps verify that your storage system is configured correctly.
  * Run this after setting up the storage bucket and policies.
  */
@@ -34,7 +34,7 @@ async function testStorageSetup() {
     await authClient.initialize();
     console.log("   ✅ Auth client initialized successfully");
   } catch (error) {
-    console.log("   ❌ Auth client initialization failed:", error.message);
+    console.log("   ❌ Auth client initialization failed:", error instanceof Error ? error.message : String(error));
     return;
   }
 
@@ -53,14 +53,14 @@ async function testStorageSetup() {
 
   // Test 3: Test API endpoint accessibility
   console.log("\n3️⃣ Testing storage API endpoints...");
-  
+
   const testApplicationSlug = "test-app";
-  
+
   try {
     // Test list files endpoint (should fail gracefully if not authenticated)
     console.log(`   📂 Testing list files for app: ${testApplicationSlug}`);
     const listResult = await authClient.listFiles(testApplicationSlug);
-    
+
     if (listResult.success) {
       console.log("   ✅ List files endpoint working");
       console.log(`   📁 Found ${listResult.data?.files?.length || 0} files`);
@@ -73,7 +73,7 @@ async function testStorageSetup() {
       }
     }
   } catch (error) {
-    console.log("   ❌ API endpoint test failed:", error.message);
+    console.log("   ❌ API endpoint test failed:", error instanceof Error ? error.message : String(error));
   }
 
   // Test 4: Verify file path structure
@@ -82,7 +82,7 @@ async function testStorageSetup() {
   const testAppSlug = "my-app";
   const testFileName = "test-file.txt";
   const expectedPath = `${testUserId}/${testAppSlug}/${testFileName}`;
-  
+
   console.log(`   📁 Expected file path structure: ${expectedPath}`);
   console.log("   ✅ Path structure follows userId/applicationSlug/filename format");
 
@@ -91,11 +91,13 @@ async function testStorageSetup() {
   console.log("   🪣 Bucket name: application-files");
   console.log("   🔒 Bucket type: Private (not public)");
   console.log("   📏 File size limit: 50MB (52428800 bytes)");
-  console.log("   📄 Allowed MIME types: image/*, text/*, application/json, application/pdf, video/*, audio/*");
+  console.log(
+    "   📄 Allowed MIME types: image/*, text/*, application/json, application/pdf, video/*, audio/*",
+  );
 
   console.log("\n📋 Next Steps:");
   console.log("===============");
-  
+
   if (!isAuthenticated) {
     console.log("1. 🔐 Authenticate a user to fully test the storage system");
     console.log("2. 📱 Create a test application in your system");
@@ -105,7 +107,7 @@ async function testStorageSetup() {
     console.log("2. 📤 Try uploading a test file");
     console.log("3. 📋 List files to verify the upload worked");
   }
-  
+
   console.log("4. 📖 Check the storage-setup.md guide if you encounter issues");
   console.log("5. 🔍 Verify storage policies are applied in your Supabase dashboard");
 

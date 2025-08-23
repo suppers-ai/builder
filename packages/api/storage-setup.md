@@ -9,7 +9,7 @@ Go to your Supabase Dashboard → Storage, and create a new bucket with these se
 - **Bucket Name**: `application-files`
 - **Public**: `false` (private bucket)
 - **File Size Limit**: `50MB` (52428800 bytes)
-- **Allowed MIME Types**: 
+- **Allowed MIME Types**:
   - `image/*`
   - `text/*`
   - `application/json`
@@ -39,29 +39,32 @@ VALUES (
 3. Add the following policies:
 
 #### Policy 1: "Users can manage files in their own applications"
+
 - **Action**: `ALL`
 - **Target roles**: `authenticated`
 - **Using expression**:
+
 ```sql
 bucket_id = 'application-files' 
 AND (storage.foldername(name))[1] = auth.uid()::text 
 AND EXISTS (
   SELECT 1 FROM public.applications
-  WHERE slug = (storage.foldername(name))[2] AND owner_id = auth.uid()
+  WHERE slug = (storage.foldername(name))[2]
 )
 ```
 
 #### Policy 2: "Application collaborators can access files"
+
 - **Action**: `ALL`
 - **Target roles**: `authenticated`
 - **Using expression**:
+
 ```sql
 bucket_id = 'application-files' 
 AND EXISTS (
   SELECT 1 FROM public.applications a
   JOIN public.user_access ua ON a.id = ua.application_id
   WHERE a.slug = (storage.foldername(name))[2]
-    AND a.owner_id = (storage.foldername(name))[1]::uuid
     AND ua.user_id = auth.uid()
     AND (
       ua.access_level IN ('write', 'admin') 
@@ -71,9 +74,11 @@ AND EXISTS (
 ```
 
 #### Policy 3: "Admins can manage all application files"
+
 - **Action**: `ALL`
 - **Target roles**: `authenticated`
 - **Using expression**:
+
 ```sql
 bucket_id = 'application-files' 
 AND EXISTS (
@@ -99,6 +104,7 @@ psql "your-database-url" -f packages/api/storage-policies.sql
 Files are organized as: `userId/applicationSlug/filename`
 
 Examples:
+
 - `550e8400-e29b-41d4-a716-446655440000/my-blog/config/settings.json`
 - `550e8400-e29b-41d4-a716-446655440000/ecommerce-site/images/logo.png`
 - `550e8400-e29b-41d4-a716-446655440000/portfolio/documents/resume.pdf`
@@ -117,19 +123,20 @@ After setup, you can test the storage functionality:
 
 ```typescript
 // Test file upload
-const result = await authClient.uploadFile('my-app', file, 'documents/test.pdf');
-console.log(result.success ? 'Upload successful' : 'Upload failed:', result.error);
+const result = await authClient.uploadFile("my-app", file, "documents/test.pdf");
+console.log(result.success ? "Upload successful" : "Upload failed:", result.error);
 
 // Test file listing
-const files = await authClient.listFiles('my-app');
-console.log('Files:', files.data?.files);
+const files = await authClient.listFiles("my-app");
+console.log("Files:", files.data?.files);
 ```
 
 ## 6. Troubleshooting
 
 ### Error: "42501: must be owner of table objects"
 
-This means you're trying to create policies without sufficient permissions. Use one of these solutions:
+This means you're trying to create policies without sufficient permissions. Use one of these
+solutions:
 
 1. **Use Supabase Dashboard**: Create policies through the web interface
 2. **Use Service Role**: Run SQL with service role connection string

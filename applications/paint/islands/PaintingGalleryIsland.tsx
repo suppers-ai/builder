@@ -1,9 +1,18 @@
-import { useState, useEffect } from "preact/hooks";
-import { Trash2, Eye, Calendar, FileImage, AlertTriangle, Loader2, Globe, Link2 } from "lucide-preact";
+import { useEffect, useState } from "preact/hooks";
+import {
+  AlertTriangle,
+  Calendar,
+  Eye,
+  FileImage,
+  Globe,
+  Link2,
+  Loader2,
+  Trash2,
+} from "lucide-preact";
 import type { SavedPainting } from "../types/paint.ts";
-import { fetchPaintings, deletePainting, formatFileSize } from "../lib/api-utils.ts";
+import { deletePainting, fetchPaintings, formatFileSize } from "../lib/api-utils.ts";
 import { getAuthClient } from "../lib/auth.ts";
-import { showError, showSuccess, showWarning, showInfo } from "../lib/toast-manager.ts";
+import { showError, showInfo, showSuccess, showWarning } from "../lib/toast-manager.ts";
 
 interface PaintingGalleryIslandProps {
   onLoadPainting?: (painting: SavedPainting) => void;
@@ -42,19 +51,23 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
     setError(null);
 
     try {
-      showInfo('Loading paintings...');
-      
+      showInfo("Loading paintings...");
+
       const response = await fetchPaintings(pageNum, 12);
-      
+
       if (response.success && response.data) {
         setPaintings(response.data.paintings);
         setTotalPages(response.data.totalPages);
         setPage(pageNum);
-        
+
         if (response.data.paintings.length === 0 && pageNum === 1) {
-          showInfo('No paintings found. Create your first masterpiece!');
+          showInfo("No paintings found. Create your first masterpiece!");
         } else {
-          showSuccess(`Loaded ${response.data.paintings.length} painting${response.data.paintings.length !== 1 ? 's' : ''}`);
+          showSuccess(
+            `Loaded ${response.data.paintings.length} painting${
+              response.data.paintings.length !== 1 ? "s" : ""
+            }`,
+          );
         }
       } else {
         const errorMessage = response.error || "Failed to load paintings";
@@ -82,7 +95,7 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
   const handleDelete = async (paintingId: string) => {
     if (!deleteConfirm || deleteConfirm !== paintingId) {
       setDeleteConfirm(paintingId);
-      showWarning('Click delete again to confirm');
+      showWarning("Click delete again to confirm");
       return;
     }
 
@@ -90,13 +103,13 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
     setDeleteConfirm(null);
 
     try {
-      showInfo('Deleting painting...');
-      
+      showInfo("Deleting painting...");
+
       const response = await deletePainting(paintingId);
-      
+
       if (response.success) {
         // Remove from local state
-        setPaintings(prev => prev.filter(p => p.id !== paintingId));
+        setPaintings((prev) => prev.filter((p) => p.id !== paintingId));
         // Success toast is already shown by the API function
       } else {
         const errorMessage = response.error || "Failed to delete painting";
@@ -119,20 +132,19 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
       onLoadPainting(painting);
     } else {
       // Navigate to preview page
-      window.location.href = `/preview/${painting.id}`;
+      globalThis.location.href = `/preview/${painting.id}`;
     }
   };
 
-
   // Format date for display
   const formatDate = (date: Date | string) => {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    const d = typeof date === "string" ? new Date(date) : date;
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -178,8 +190,8 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
         <AlertTriangle class="w-16 h-16 text-error mx-auto mb-4" />
         <h3 class="text-xl font-semibold mb-2">Error Loading Paintings</h3>
         <p class="text-base-content/60 mb-4">{error}</p>
-        <button 
-          class="btn btn-primary" 
+        <button
+          class="btn btn-primary"
           onClick={() => loadPaintings(page)}
         >
           Try Again
@@ -208,22 +220,27 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
       {/* Gallery Grid */}
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {paintings.map((painting) => (
-          <div key={painting.id} class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+          <div
+            key={painting.id}
+            class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow"
+          >
             {/* Thumbnail */}
             <figure class="aspect-square bg-base-200 relative overflow-hidden">
-              {painting.thumbnail ? (
-                <img 
-                  src={painting.thumbnail} 
-                  alt={painting.name}
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div class="w-full h-full flex items-center justify-center">
-                  <FileImage class="w-12 h-12 text-base-content/40" />
-                </div>
-              )}
-              
+              {painting.thumbnail
+                ? (
+                  <img
+                    src={painting.thumbnail}
+                    alt={painting.name}
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                )
+                : (
+                  <div class="w-full h-full flex items-center justify-center">
+                    <FileImage class="w-12 h-12 text-base-content/40" />
+                  </div>
+                )}
+
               {/* Overlay with actions */}
               <div class="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <button
@@ -234,16 +251,16 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
                   <Eye class="w-4 h-4" />
                 </button>
                 <button
-                  class={`btn btn-sm ${deleteConfirm === painting.id ? 'btn-error' : 'btn-ghost'}`}
+                  class={`btn btn-sm ${deleteConfirm === painting.id ? "btn-error" : "btn-ghost"}`}
                   onClick={() => handleDelete(painting.id)}
                   disabled={deleting === painting.id}
-                  title={deleteConfirm === painting.id ? "Click again to confirm" : "Delete painting"}
+                  title={deleteConfirm === painting.id
+                    ? "Click again to confirm"
+                    : "Delete painting"}
                 >
-                  {deleting === painting.id ? (
-                    <div class="loading loading-spinner loading-xs"></div>
-                  ) : (
-                    <Trash2 class="w-4 h-4" />
-                  )}
+                  {deleting === painting.id
+                    ? <div class="loading loading-spinner loading-xs"></div>
+                    : <Trash2 class="w-4 h-4" />}
                 </button>
               </div>
             </figure>
@@ -253,7 +270,7 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
               <h3 class="card-title text-sm font-medium truncate" title={painting.name}>
                 {painting.name}
               </h3>
-              
+
               <div class="text-xs text-base-content/60 space-y-1">
                 <div class="flex items-center gap-1">
                   <Calendar class="w-3 h-3" />
@@ -272,7 +289,10 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
                     </div>
                   )}
                   {painting.shareToken && (
-                    <div class="flex items-center gap-1 text-secondary" title="Private share link available">
+                    <div
+                      class="flex items-center gap-1 text-secondary"
+                      title="Private share link available"
+                    >
                       <Link2 class="w-3 h-3" />
                       <span>Link</span>
                     </div>
@@ -286,13 +306,13 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
                   <div class="text-xs">
                     <p class="font-medium">Delete this painting?</p>
                     <div class="flex gap-2 mt-2">
-                      <button 
+                      <button
                         class="btn btn-xs btn-error"
                         onClick={() => handleDelete(painting.id)}
                       >
                         Delete
                       </button>
-                      <button 
+                      <button
                         class="btn btn-xs btn-ghost"
                         onClick={cancelDelete}
                       >
@@ -311,25 +331,25 @@ export default function PaintingGalleryIsland({ onLoadPainting }: PaintingGaller
       {totalPages > 1 && (
         <div class="flex justify-center">
           <div class="join">
-            <button 
+            <button
               class="join-item btn btn-sm"
               onClick={() => handlePageChange(page - 1)}
               disabled={page <= 1}
             >
               «
             </button>
-            
+
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
               <button
                 key={pageNum}
-                class={`join-item btn btn-sm ${pageNum === page ? 'btn-active' : ''}`}
+                class={`join-item btn btn-sm ${pageNum === page ? "btn-active" : ""}`}
                 onClick={() => handlePageChange(pageNum)}
               >
                 {pageNum}
               </button>
             ))}
-            
-            <button 
+
+            <button
               class="join-item btn btn-sm"
               onClick={() => handlePageChange(page + 1)}
               disabled={page >= totalPages}

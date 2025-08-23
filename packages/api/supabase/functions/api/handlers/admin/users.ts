@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { corsHeaders } from "../../lib/cors.ts";
+import { corsHeaders } from "../../_common/index.ts";
 
 /**
  * Handle admin user management requests
@@ -7,7 +7,7 @@ import { corsHeaders } from "../../lib/cors.ts";
 export async function handleAdminUsers(
   req: Request,
   supabase: SupabaseClient,
-  pathSegments: string[]
+  pathSegments: string[],
 ): Promise<Response> {
   const method = req.method;
   const url = new URL(req.url);
@@ -18,28 +18,28 @@ export async function handleAdminUsers(
     switch (method) {
       case "GET":
         return await getUsersList(supabase, url);
-      
+
       case "PUT":
         if (pathSegments.length > 0) {
           const userId = pathSegments[0];
           return await updateUser(req, supabase, userId);
         }
         break;
-      
+
       case "PATCH":
         if (pathSegments.length >= 1) {
           const firstSegment = pathSegments[0];
-          
+
           // Handle bulk operations
           if (firstSegment === "bulk-status") {
             return await bulkUpdateUserStatus(req, supabase);
           }
-          
+
           // Handle individual user updates
           if (pathSegments.length >= 2) {
             const userId = pathSegments[0];
             const action = pathSegments[1];
-            
+
             switch (action) {
               case "status":
                 return await updateUserStatus(req, supabase, userId);
@@ -49,17 +49,20 @@ export async function handleAdminUsers(
                 return await updateUserLimits(req, supabase, userId);
               default:
                 return new Response(
-                  JSON.stringify({ error: `Unknown PATCH action: ${action}. Available actions: status, role, limits, bulk-status` }),
+                  JSON.stringify({
+                    error:
+                      `Unknown PATCH action: ${action}. Available actions: status, role, limits, bulk-status`,
+                  }),
                   {
                     status: 400,
                     headers: { ...corsHeaders, "Content-Type": "application/json" },
-                  }
+                  },
                 );
             }
           }
         }
         break;
-      
+
       case "DELETE":
         if (pathSegments.length > 0) {
           const userId = pathSegments[0];
@@ -73,7 +76,7 @@ export async function handleAdminUsers(
       {
         status: 405,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("Admin users handler error:", error);
@@ -85,7 +88,7 @@ export async function handleAdminUsers(
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }
@@ -104,13 +107,17 @@ async function getUsersList(supabase: SupabaseClient, url: URL): Promise<Respons
 
   let query = supabase
     .from("users")
-    .select("id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at")
+    .select(
+      "id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at",
+    )
     .range(offset, offset + limit - 1)
     .order(sortBy, { ascending: sortOrder === "asc" });
 
   // Add search filter if provided
   if (search) {
-    query = query.or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,display_name.ilike.%${search}%`);
+    query = query.or(
+      `email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,display_name.ilike.%${search}%`,
+    );
   }
 
   const { data: users, error: usersError } = await query;
@@ -122,7 +129,7 @@ async function getUsersList(supabase: SupabaseClient, url: URL): Promise<Respons
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -132,7 +139,9 @@ async function getUsersList(supabase: SupabaseClient, url: URL): Promise<Respons
     .select("id", { count: "exact", head: true });
 
   if (search) {
-    countQuery = countQuery.or(`email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,display_name.ilike.%${search}%`);
+    countQuery = countQuery.or(
+      `email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,display_name.ilike.%${search}%`,
+    );
   }
 
   const { count, error: countError } = await countQuery;
@@ -144,7 +153,7 @@ async function getUsersList(supabase: SupabaseClient, url: URL): Promise<Respons
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -163,22 +172,34 @@ async function getUsersList(supabase: SupabaseClient, url: URL): Promise<Respons
     {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    },
   );
 }
 
 /**
  * Update user information
  */
-async function updateUser(req: Request, supabase: SupabaseClient, userId: string): Promise<Response> {
+async function updateUser(
+  req: Request,
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<Response> {
   const updates = await req.json();
-  
+
   console.log("✏️ Updating user:", userId, "with updates:", updates);
 
   // Validate allowed fields
-  const allowedFields = ["first_name", "last_name", "display_name", "role", "status", "storage_limit", "bandwidth_limit"];
+  const allowedFields = [
+    "first_name",
+    "last_name",
+    "display_name",
+    "role",
+    "status",
+    "storage_limit",
+    "bandwidth_limit",
+  ];
   const filteredUpdates = Object.keys(updates)
-    .filter(key => allowedFields.includes(key))
+    .filter((key) => allowedFields.includes(key))
     .reduce((obj, key) => {
       obj[key] = updates[key];
       return obj;
@@ -186,11 +207,13 @@ async function updateUser(req: Request, supabase: SupabaseClient, userId: string
 
   if (Object.keys(filteredUpdates).length === 0) {
     return new Response(
-      JSON.stringify({ error: "No valid fields to update. Allowed fields: " + allowedFields.join(", ") }),
+      JSON.stringify({
+        error: "No valid fields to update. Allowed fields: " + allowedFields.join(", "),
+      }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -201,7 +224,9 @@ async function updateUser(req: Request, supabase: SupabaseClient, userId: string
       updated_at: new Date().toISOString(),
     })
     .eq("id", userId)
-    .select("id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at")
+    .select(
+      "id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at",
+    )
     .single();
 
   if (error) {
@@ -211,7 +236,7 @@ async function updateUser(req: Request, supabase: SupabaseClient, userId: string
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -222,7 +247,7 @@ async function updateUser(req: Request, supabase: SupabaseClient, userId: string
     {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    },
   );
 }
 
@@ -239,7 +264,9 @@ async function deleteUser(supabase: SupabaseClient, userId: string): Promise<Res
       updated_at: new Date().toISOString(),
     })
     .eq("id", userId)
-    .select("id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at")
+    .select(
+      "id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at",
+    )
     .single();
 
   if (error) {
@@ -249,7 +276,7 @@ async function deleteUser(supabase: SupabaseClient, userId: string): Promise<Res
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -260,25 +287,29 @@ async function deleteUser(supabase: SupabaseClient, userId: string): Promise<Res
     {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    },
   );
 }
 
 /**
  * Update user status only
  */
-async function updateUserStatus(req: Request, supabase: SupabaseClient, userId: string): Promise<Response> {
+async function updateUserStatus(
+  req: Request,
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<Response> {
   const { status } = await req.json();
-  
+
   console.log("🔄 Updating user status:", userId, "to:", status);
 
-  if (!status || !['active', 'suspended', 'deleted'].includes(status)) {
+  if (!status || !["active", "suspended", "deleted"].includes(status)) {
     return new Response(
       JSON.stringify({ error: "Invalid status. Must be one of: active, suspended, deleted" }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -289,7 +320,9 @@ async function updateUserStatus(req: Request, supabase: SupabaseClient, userId: 
       updated_at: new Date().toISOString(),
     })
     .eq("id", userId)
-    .select("id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at")
+    .select(
+      "id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at",
+    )
     .single();
 
   if (error) {
@@ -299,7 +332,7 @@ async function updateUserStatus(req: Request, supabase: SupabaseClient, userId: 
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -310,25 +343,29 @@ async function updateUserStatus(req: Request, supabase: SupabaseClient, userId: 
     {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    },
   );
 }
 
 /**
  * Update user role only
  */
-async function updateUserRole(req: Request, supabase: SupabaseClient, userId: string): Promise<Response> {
+async function updateUserRole(
+  req: Request,
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<Response> {
   const { role } = await req.json();
-  
+
   console.log("🔑 Updating user role:", userId, "to:", role);
 
-  if (!role || !['user', 'admin'].includes(role)) {
+  if (!role || !["user", "admin"].includes(role)) {
     return new Response(
       JSON.stringify({ error: "Invalid role. Must be one of: user, admin" }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -339,7 +376,9 @@ async function updateUserRole(req: Request, supabase: SupabaseClient, userId: st
       updated_at: new Date().toISOString(),
     })
     .eq("id", userId)
-    .select("id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at")
+    .select(
+      "id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at",
+    )
     .single();
 
   if (error) {
@@ -349,7 +388,7 @@ async function updateUserRole(req: Request, supabase: SupabaseClient, userId: st
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -360,22 +399,26 @@ async function updateUserRole(req: Request, supabase: SupabaseClient, userId: st
     {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    },
   );
 }
 
 /**
  * Update user storage/bandwidth limits
  */
-async function updateUserLimits(req: Request, supabase: SupabaseClient, userId: string): Promise<Response> {
+async function updateUserLimits(
+  req: Request,
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<Response> {
   const limits = await req.json();
-  
+
   console.log("💾 Updating user limits:", userId, "with:", limits);
 
   // Validate allowed limit fields
   const allowedFields = ["storage_limit", "bandwidth_limit"];
   const filteredLimits = Object.keys(limits)
-    .filter(key => allowedFields.includes(key))
+    .filter((key) => allowedFields.includes(key))
     .reduce((obj, key) => {
       // Ensure values are positive numbers
       const value = parseInt(limits[key]);
@@ -388,11 +431,13 @@ async function updateUserLimits(req: Request, supabase: SupabaseClient, userId: 
 
   if (Object.keys(filteredLimits).length === 0) {
     return new Response(
-      JSON.stringify({ error: "No valid limit fields provided. Allowed fields: " + allowedFields.join(", ") }),
+      JSON.stringify({
+        error: "No valid limit fields provided. Allowed fields: " + allowedFields.join(", "),
+      }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -403,7 +448,9 @@ async function updateUserLimits(req: Request, supabase: SupabaseClient, userId: 
       updated_at: new Date().toISOString(),
     })
     .eq("id", userId)
-    .select("id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at")
+    .select(
+      "id, email, first_name, last_name, display_name, role, status, storage_used, storage_limit, bandwidth_used, bandwidth_limit, created_at, updated_at",
+    )
     .single();
 
   if (error) {
@@ -413,7 +460,7 @@ async function updateUserLimits(req: Request, supabase: SupabaseClient, userId: 
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -424,7 +471,7 @@ async function updateUserLimits(req: Request, supabase: SupabaseClient, userId: 
     {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-    }
+    },
   );
 }
 
@@ -433,7 +480,7 @@ async function updateUserLimits(req: Request, supabase: SupabaseClient, userId: 
  */
 async function bulkUpdateUserStatus(req: Request, supabase: SupabaseClient): Promise<Response> {
   const { user_ids, status } = await req.json();
-  
+
   console.log("🔄 Bulk updating user status:", { user_ids, status });
 
   // Validate inputs
@@ -443,17 +490,17 @@ async function bulkUpdateUserStatus(req: Request, supabase: SupabaseClient): Pro
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
-  if (!status || !['active', 'suspended', 'deleted'].includes(status)) {
+  if (!status || !["active", "suspended", "deleted"].includes(status)) {
     return new Response(
       JSON.stringify({ error: "Invalid status. Must be one of: active, suspended, deleted" }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -464,7 +511,7 @@ async function bulkUpdateUserStatus(req: Request, supabase: SupabaseClient): Pro
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -486,7 +533,7 @@ async function bulkUpdateUserStatus(req: Request, supabase: SupabaseClient): Pro
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -503,7 +550,7 @@ async function bulkUpdateUserStatus(req: Request, supabase: SupabaseClient): Pro
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   } catch (error) {
     console.error("Unexpected error during bulk update:", error);
@@ -512,7 +559,7 @@ async function bulkUpdateUserStatus(req: Request, supabase: SupabaseClient): Pro
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }

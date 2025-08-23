@@ -44,7 +44,7 @@ export interface CanvasState {
 }
 
 // Tool settings and configurations
-export type ToolType = 'pencil' | 'eraser' | 'image';
+export type ToolType = "pencil" | "eraser" | "image";
 
 export interface ToolSettings {
   pencil: {
@@ -97,7 +97,6 @@ export interface StorageObject {
   file_path: string;
   file_size: number;
   mime_type: string;
-  object_type: string; // 'painting', 'recording', 'image', 'document', etc.
   metadata: Record<string, any>; // Flexible metadata (drawing_data for paintings, duration for videos, etc.)
   thumbnail_url: string | null; // URL to thumbnail image
   is_public: boolean;
@@ -164,7 +163,7 @@ export interface ApiResponse<T> {
 }
 
 // Utility types for canvas operations
-export type CanvasExportFormat = 'png' | 'jpeg' | 'webp';
+export type CanvasExportFormat = "png" | "jpeg" | "webp";
 
 export interface ExportOptions {
   format: CanvasExportFormat;
@@ -190,7 +189,11 @@ export interface CanvasPointerEvent {
   x: number;
   y: number;
   pressure?: number;
-  type: 'mouse' | 'touch';
+  type: "mouse" | "touch";
+  altKey?: boolean;
+  metaKey?: boolean;
+  ctrlKey?: boolean;
+  shiftKey?: boolean;
 }
 
 export interface ToolChangeEvent {

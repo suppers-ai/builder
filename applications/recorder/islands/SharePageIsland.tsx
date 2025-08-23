@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
-import { Button, Alert, Loading } from "@suppers-ai/ui-lib";
-import { Download, Shield, Globe, Link, AlertTriangle, Play } from "lucide-preact";
-import { formatFileSize, formatDate } from "../lib/recorder-utils.ts";
+import { Alert, Button, Loading } from "@suppers/ui-lib";
+import { AlertTriangle, Download, Globe, Link, Play, Shield } from "lucide-preact";
+import { formatDate, formatFileSize } from "../lib/recorder-utils.ts";
 
 interface SharePageProps {
   shareToken?: string;
@@ -23,13 +23,13 @@ export default function SharePageIsland({
   shareToken,
   applicationSlug,
   filename,
-  isPublic = false
+  isPublic = false,
 }: SharePageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [recording, setRecording] = useState<SharedRecording | null>(null);
 
-  const API_BASE_URL = 'http://127.0.0.1:54321/functions/v1/api/v1';
+  const API_BASE_URL = "http://127.0.0.1:54321/functions/v1/api/v1";
 
   useEffect(() => {
     loadSharedRecording();
@@ -41,7 +41,7 @@ export default function SharePageIsland({
 
     try {
       let url: string;
-      
+
       if (shareToken) {
         // Token-based sharing
         url = `${API_BASE_URL}/share/token/${shareToken}`;
@@ -49,15 +49,15 @@ export default function SharePageIsland({
         // Public sharing
         url = `${API_BASE_URL}/share/public/${applicationSlug}/${filename}`;
       } else {
-        throw new Error('Invalid share parameters');
+        throw new Error("Invalid share parameters");
       }
 
       // First, make a HEAD request to get metadata
-      const headResponse = await fetch(url, { method: 'HEAD' });
-      
+      const headResponse = await fetch(url, { method: "HEAD" });
+
       if (!headResponse.ok) {
         if (headResponse.status === 404) {
-          setError('This shared recording could not be found or may have been removed.');
+          setError("This shared recording could not be found or may have been removed.");
         } else {
           setError(`Failed to load recording: ${headResponse.statusText}`);
         }
@@ -65,23 +65,23 @@ export default function SharePageIsland({
       }
 
       // Extract metadata from headers
-      const contentType = headResponse.headers.get('Content-Type') || 'video/webm';
-      const contentLength = parseInt(headResponse.headers.get('Content-Length') || '0');
-      const lastModified = headResponse.headers.get('Last-Modified');
-      
+      const contentType = headResponse.headers.get("Content-Type") || "video/webm";
+      const contentLength = parseInt(headResponse.headers.get("Content-Length") || "0");
+      const lastModified = headResponse.headers.get("Last-Modified");
+
       // Create recording object
       const sharedRecording: SharedRecording = {
         id: shareToken || `${applicationSlug}-${filename}`,
-        name: filename || 'Shared Recording',
+        name: filename || "Shared Recording",
         size: contentLength,
         contentType,
         createdAt: lastModified || new Date().toISOString(),
-        downloadUrl: url
+        downloadUrl: url,
       };
 
       setRecording(sharedRecording);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load shared recording');
+      setError(err instanceof Error ? err.message : "Failed to load shared recording");
     } finally {
       setLoading(false);
     }
@@ -92,15 +92,15 @@ export default function SharePageIsland({
 
     try {
       // Create a link and trigger download
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = recording.downloadUrl;
       a.download = recording.name;
-      a.style.display = 'none';
+      a.style.display = "none";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
     } catch (err) {
-      setError('Failed to download recording');
+      setError("Failed to download recording");
     }
   };
 
@@ -127,7 +127,7 @@ export default function SharePageIsland({
             </div>
           </Alert>
           <div class="text-center mt-6">
-            <Button onClick={() => window.location.reload()}>
+            <Button onClick={() => globalThis.location.reload()}>
               Try Again
             </Button>
           </div>
@@ -152,20 +152,17 @@ export default function SharePageIsland({
       {/* Header */}
       <div class="text-center mb-8">
         <div class="flex items-center justify-center gap-2 mb-2">
-          {isPublic ? (
-            <Globe class="w-6 h-6 text-primary" />
-          ) : (
-            <Link class="w-6 h-6 text-primary" />
-          )}
+          {isPublic
+            ? <Globe class="w-6 h-6 text-primary" />
+            : <Link class="w-6 h-6 text-primary" />}
           <h1 class="text-2xl font-bold">
-            {isPublic ? 'Public Recording' : 'Shared Recording'}
+            {isPublic ? "Public Recording" : "Shared Recording"}
           </h1>
         </div>
         <p class="text-base-content/60">
-          {isPublic 
-            ? 'This recording has been shared publicly' 
-            : 'Someone shared this recording with you'
-          }
+          {isPublic
+            ? "This recording has been shared publicly"
+            : "Someone shared this recording with you"}
         </p>
       </div>
 
@@ -189,7 +186,7 @@ export default function SharePageIsland({
           <Shield class="w-5 h-5" />
           Recording Details
         </h2>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-3">
             <div>
@@ -216,23 +213,24 @@ export default function SharePageIsland({
         {/* Sharing Info */}
         <div class="mt-6 p-4 bg-base-200 rounded-lg">
           <div class="flex items-center gap-2 mb-2">
-            {isPublic ? (
-              <>
-                <Globe class="w-4 h-4 text-info" />
-                <span class="font-medium text-info">Public Access</span>
-              </>
-            ) : (
-              <>
-                <Link class="w-4 h-4 text-warning" />
-                <span class="font-medium text-warning">Private Share</span>
-              </>
-            )}
+            {isPublic
+              ? (
+                <>
+                  <Globe class="w-4 h-4 text-info" />
+                  <span class="font-medium text-info">Public Access</span>
+                </>
+              )
+              : (
+                <>
+                  <Link class="w-4 h-4 text-warning" />
+                  <span class="font-medium text-warning">Private Share</span>
+                </>
+              )}
           </div>
           <p class="text-sm text-base-content/60">
-            {isPublic 
-              ? 'This recording is publicly accessible to anyone with the link.'
-              : 'This recording was shared privately and access can be revoked by the owner.'
-            }
+            {isPublic
+              ? "This recording is publicly accessible to anyone with the link."
+              : "This recording was shared privately and access can be revoked by the owner."}
           </p>
         </div>
       </div>

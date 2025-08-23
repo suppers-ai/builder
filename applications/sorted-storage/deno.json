@@ -1,0 +1,52 @@
+{
+  "name": "@suppers/sorted-storage",
+  "version": "0.1.0",
+  "exports": "./main.ts",
+  "tasks": {
+    "dev": "deno run --allow-all --watch=static/,routes/,islands/,components/,lib/ dev.ts",
+    "build": "deno run --allow-all dev.ts build",
+    "start": "deno run --allow-all main.ts",
+    "preview": "deno run --allow-all main.ts",
+    "update": "deno run --allow-all -r https://fresh.deno.dev/update .",
+    "test": "deno run --allow-all test-runner.ts",
+    "test:unit": "deno run --allow-all test-runner.ts --unit",
+    "test:integration": "deno run --allow-all test-runner.ts --integration",
+    "test:e2e": "deno run --allow-all test-runner.ts --e2e",
+    "test:performance": "deno run --allow-all test-runner.ts --performance",
+    "test:watch": "deno test --allow-all --watch",
+    "test:coverage": "deno run --allow-all test-runner.ts --coverage",
+    "test:verbose": "deno run --allow-all test-runner.ts --verbose",
+    "test:ci": "deno run --allow-all test-runner.ts --coverage --fail-fast",
+    "check": "deno check **/*.ts",
+    "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "lint": "deno lint",
+    "polish": "deno run --allow-all scripts/final-polish.ts",
+    "integration-test": "deno run --allow-all -c 'import { runIntegrationTests } from \"./lib/integration-test.ts\"; await runIntegrationTests();'"
+  },
+  "lint": {
+    "rules": {
+      "tags": [
+        "fresh",
+        "recommended"
+      ]
+    }
+  },
+  "exclude": [
+    "**/_fresh/*"
+  ],
+  "imports": {
+    "@/": "./",
+    "@suppers/ui-lib": "../../packages/ui-lib/mod.ts",
+    "@suppers/auth-client": "../../packages/auth-client/mod.ts",
+    "@suppers/shared": "../../packages/shared/mod.ts",
+    "@testing-library/preact": "npm:@testing-library/preact@^3.2.4",
+    "@testing-library/preact-hooks": "npm:@testing-library/preact-hooks@^1.1.0",
+    "@testing-library/user-event": "npm:@testing-library/user-event@^14.5.2",
+    "@testing-library/jest-dom": "npm:@testing-library/jest-dom@^6.6.3"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact"
+  }
+}

@@ -1,5 +1,5 @@
 // Compression utilities for painting data serialization and storage optimization
-import type { DrawingState, Stroke, Point, InsertedImage } from "../types/paint.ts";
+import type { DrawingState, InsertedImage, Point, Stroke } from "../types/paint.ts";
 
 /**
  * Compression options for painting data
@@ -108,34 +108,34 @@ export function compressDrawingData(
 ): string {
   try {
     // Compress strokes
-    const compressedStrokes: CompressedStroke[] = drawingState.strokes.map(stroke => {
+    const compressedStrokes: CompressedStroke[] = drawingState.strokes.map((stroke) => {
       let points = stroke.points;
-      
+
       // Simplify points if tolerance is set
       if (options.pointTolerance > 0) {
         points = simplifyPoints(points, options.pointTolerance);
       }
-      
+
       // Limit points per stroke if specified
       if (options.maxPointsPerStroke > 0 && points.length > options.maxPointsPerStroke) {
         points = downsamplePoints(points, options.maxPointsPerStroke);
       }
-      
+
       // Convert to compressed format
-      const compressedPoints: CompressedPoint[] = points.map(point => {
+      const compressedPoints: CompressedPoint[] = points.map((point) => {
         const compressed: CompressedPoint = {
           x: Math.round(point.x * 10) / 10, // Round to 1 decimal place
           y: Math.round(point.y * 10) / 10,
         };
-        
+
         // Only include pressure if it's not default (1.0)
         if (point.pressure !== undefined && point.pressure !== 1.0) {
           compressed.p = Math.round(point.pressure * 100) / 100; // Round to 2 decimal places
         }
-        
+
         return compressed;
       });
-      
+
       return {
         id: stroke.id,
         pts: compressedPoints,
@@ -144,16 +144,16 @@ export function compressDrawingData(
         t: stroke.timestamp,
       };
     });
-    
+
     // Compress images
-    const compressedImages: CompressedImage[] = drawingState.images.map(image => {
+    const compressedImages: CompressedImage[] = drawingState.images.map((image) => {
       let src = image.src;
-      
+
       // Compress image data URLs if enabled
-      if (options.compressImages && src.startsWith('data:image/')) {
+      if (options.compressImages && src.startsWith("data:image/")) {
         src = compressImageDataURL(src, options.imageQuality);
       }
-      
+
       return {
         id: image.id,
         src,
@@ -164,7 +164,7 @@ export function compressDrawingData(
         t: image.timestamp,
       };
     });
-    
+
     // Create compressed state
     const compressed: CompressedDrawingState = {
       s: compressedStrokes,
@@ -176,14 +176,14 @@ export function compressDrawingData(
       bg: drawingState.backgroundColor,
       v: 1, // Version for future compatibility
     };
-    
+
     // Convert to JSON string
     const jsonString = JSON.stringify(compressed);
-    
+
     // Apply additional compression if available (could add gzip here in the future)
     return jsonString;
   } catch (error) {
-    console.error('Failed to compress drawing data:', error);
+    console.error("Failed to compress drawing data:", error);
     // Fallback to uncompressed data
     return JSON.stringify(drawingState);
   }
@@ -195,16 +195,16 @@ export function compressDrawingData(
 export function decompressDrawingData(compressedData: string): DrawingState {
   try {
     const parsed = JSON.parse(compressedData);
-    
+
     // Check if data is already in compressed format
     if (parsed.v && parsed.s && parsed.i && parsed.cs) {
       // Decompress from compressed format
       const compressed = parsed as CompressedDrawingState;
-      
+
       // Decompress strokes
-      const strokes: Stroke[] = compressed.s.map(compressedStroke => ({
+      const strokes: Stroke[] = compressed.s.map((compressedStroke) => ({
         id: compressedStroke.id,
-        points: compressedStroke.pts.map(pt => ({
+        points: compressedStroke.pts.map((pt) => ({
           x: pt.x,
           y: pt.y,
           pressure: pt.p || 1.0,
@@ -213,9 +213,9 @@ export function decompressDrawingData(compressedData: string): DrawingState {
         width: compressedStroke.w,
         timestamp: compressedStroke.t,
       }));
-      
+
       // Decompress images
-      const images: InsertedImage[] = compressed.i.map(compressedImage => ({
+      const images: InsertedImage[] = compressed.i.map((compressedImage) => ({
         id: compressedImage.id,
         src: compressedImage.src,
         x: compressedImage.x,
@@ -224,7 +224,7 @@ export function decompressDrawingData(compressedData: string): DrawingState {
         height: compressedImage.h,
         timestamp: compressedImage.t,
       }));
-      
+
       return {
         strokes,
         images,
@@ -239,8 +239,8 @@ export function decompressDrawingData(compressedData: string): DrawingState {
       return parsed as DrawingState;
     }
   } catch (error) {
-    console.error('Failed to decompress drawing data:', error);
-    throw new Error('Invalid compressed drawing data');
+    console.error("Failed to decompress drawing data:", error);
+    throw new Error("Invalid compressed drawing data");
   }
 }
 
@@ -249,7 +249,7 @@ export function decompressDrawingData(compressedData: string): DrawingState {
  */
 function simplifyPoints(points: Point[], tolerance: number): Point[] {
   if (points.length <= 2) return points;
-  
+
   return douglasPeucker(points, tolerance);
 }
 
@@ -258,14 +258,14 @@ function simplifyPoints(points: Point[], tolerance: number): Point[] {
  */
 function douglasPeucker(points: Point[], tolerance: number): Point[] {
   if (points.length <= 2) return points;
-  
+
   // Find the point with maximum distance from the line between first and last points
   let maxDistance = 0;
   let maxIndex = 0;
-  
+
   const firstPoint = points[0];
   const lastPoint = points[points.length - 1];
-  
+
   for (let i = 1; i < points.length - 1; i++) {
     const distance = perpendicularDistance(points[i], firstPoint, lastPoint);
     if (distance > maxDistance) {
@@ -273,12 +273,12 @@ function douglasPeucker(points: Point[], tolerance: number): Point[] {
       maxIndex = i;
     }
   }
-  
+
   // If max distance is greater than tolerance, recursively simplify
   if (maxDistance > tolerance) {
     const leftPoints = douglasPeucker(points.slice(0, maxIndex + 1), tolerance);
     const rightPoints = douglasPeucker(points.slice(maxIndex), tolerance);
-    
+
     // Combine results (remove duplicate point at junction)
     return leftPoints.slice(0, -1).concat(rightPoints);
   } else {
@@ -293,19 +293,19 @@ function douglasPeucker(points: Point[], tolerance: number): Point[] {
 function perpendicularDistance(point: Point, lineStart: Point, lineEnd: Point): number {
   const dx = lineEnd.x - lineStart.x;
   const dy = lineEnd.y - lineStart.y;
-  
+
   if (dx === 0 && dy === 0) {
     // Line is actually a point
     return Math.sqrt(
-      Math.pow(point.x - lineStart.x, 2) + Math.pow(point.y - lineStart.y, 2)
+      Math.pow(point.x - lineStart.x, 2) + Math.pow(point.y - lineStart.y, 2),
     );
   }
-  
+
   const numerator = Math.abs(
-    dy * point.x - dx * point.y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x
+    dy * point.x - dx * point.y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x,
   );
   const denominator = Math.sqrt(dx * dx + dy * dy);
-  
+
   return numerator / denominator;
 }
 
@@ -314,15 +314,15 @@ function perpendicularDistance(point: Point, lineStart: Point, lineEnd: Point): 
  */
 function downsamplePoints(points: Point[], maxPoints: number): Point[] {
   if (points.length <= maxPoints) return points;
-  
+
   const result: Point[] = [points[0]]; // Always include first point
   const step = (points.length - 1) / (maxPoints - 1);
-  
+
   for (let i = 1; i < maxPoints - 1; i++) {
     const index = Math.round(i * step);
     result.push(points[index]);
   }
-  
+
   result.push(points[points.length - 1]); // Always include last point
   return result;
 }
@@ -333,16 +333,16 @@ function downsamplePoints(points: Point[], maxPoints: number): Point[] {
 function compressImageDataURL(dataURL: string, quality: number): string {
   try {
     // Only compress JPEG and WebP images
-    if (!dataURL.includes('data:image/jpeg') && !dataURL.includes('data:image/webp')) {
+    if (!dataURL.includes("data:image/jpeg") && !dataURL.includes("data:image/webp")) {
       return dataURL;
     }
-    
+
     // For now, return the original data URL
     // In a real implementation, you'd need to handle this asynchronously
     // or use a different approach for server-side compression
     return dataURL;
   } catch (error) {
-    console.warn('Failed to compress image data URL:', error);
+    console.warn("Failed to compress image data URL:", error);
     return dataURL;
   }
 }
@@ -357,10 +357,10 @@ export function estimateCompressionRatio(
   try {
     const originalSize = JSON.stringify(originalData).length;
     const compressedSize = compressDrawingData(originalData, options).length;
-    
+
     return originalSize > 0 ? compressedSize / originalSize : 1;
   } catch (error) {
-    console.error('Failed to estimate compression ratio:', error);
+    console.error("Failed to estimate compression ratio:", error);
     return 1;
   }
 }
@@ -381,13 +381,13 @@ export function getCompressionStats(
   try {
     const originalJson = JSON.stringify(originalData);
     const compressedJson = compressDrawingData(originalData, options);
-    
+
     const originalSize = originalJson.length;
     const compressedSize = compressedJson.length;
     const compressionRatio = originalSize > 0 ? compressedSize / originalSize : 1;
     const spaceSaved = originalSize - compressedSize;
     const spaceSavedPercent = originalSize > 0 ? (spaceSaved / originalSize) * 100 : 0;
-    
+
     return {
       originalSize,
       compressedSize,
@@ -396,7 +396,7 @@ export function getCompressionStats(
       spaceSavedPercent,
     };
   } catch (error) {
-    console.error('Failed to get compression stats:', error);
+    console.error("Failed to get compression stats:", error);
     return {
       originalSize: 0,
       compressedSize: 0,
@@ -413,18 +413,18 @@ export function getCompressionStats(
 export function validateCompressedData(compressedData: string): boolean {
   try {
     const decompressed = decompressDrawingData(compressedData);
-    
+
     // Basic validation checks
     return (
       Array.isArray(decompressed.strokes) &&
       Array.isArray(decompressed.images) &&
-      typeof decompressed.canvasSize === 'object' &&
-      typeof decompressed.canvasSize.width === 'number' &&
-      typeof decompressed.canvasSize.height === 'number' &&
-      typeof decompressed.backgroundColor === 'string'
+      typeof decompressed.canvasSize === "object" &&
+      typeof decompressed.canvasSize.width === "number" &&
+      typeof decompressed.canvasSize.height === "number" &&
+      typeof decompressed.backgroundColor === "string"
     );
   } catch (error) {
-    console.error('Compressed data validation failed:', error);
+    console.error("Compressed data validation failed:", error);
     return false;
   }
 }

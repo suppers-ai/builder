@@ -3,7 +3,7 @@ import { getAuthClient } from "../lib/auth.ts";
 import type { Recording } from "../types/recorder.ts";
 
 // Base URL for centralized API
-const API_BASE_URL = 'http://127.0.0.1:54321/functions/v1/api/v1';
+const API_BASE_URL = "http://127.0.0.1:54321/functions/v1/api/v1";
 
 export function useRecordings() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
@@ -22,29 +22,31 @@ export function useRecordings() {
       const accessToken = await authClient.getAccessToken();
 
       if (!userId || !accessToken) {
-        setError('Authentication required');
+        setError("Authentication required");
         return;
       }
 
       const response = await fetch(`${API_BASE_URL}/storage/recorder?list=true`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'X-User-ID': userId,
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+          "X-User-ID": userId,
         },
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to load recordings' }));
-        
-        if (errorData.code === 'TOKEN_EXPIRED' || response.status === 401) {
-          setError('Your session has expired. Please log in again.');
+        const errorData = await response.json().catch(() => ({
+          error: "Failed to load recordings",
+        }));
+
+        if (errorData.code === "TOKEN_EXPIRED" || response.status === 401) {
+          setError("Your session has expired. Please log in again.");
           authClient.signOut();
           return;
         }
-        
-        setError(errorData.error || 'Failed to load recordings');
+
+        setError(errorData.error || "Failed to load recordings");
         return;
       }
 
@@ -53,7 +55,7 @@ export function useRecordings() {
       if (result.success && result.data?.files) {
         const recordingsList: Recording[] = result.data.files.map((file: any) => {
           const createdDate = file.lastModified ? new Date(file.lastModified) : new Date();
-          
+
           return {
             id: file.path, // Use full path as ID
             name: file.name,
@@ -62,20 +64,22 @@ export function useRecordings() {
             createdAt: createdDate,
             updatedAt: createdDate,
             filePath: file.path,
-            publicUrl: file.publicUrl || '',
+            publicUrl: file.publicUrl || "",
             isPublic: false,
-            mimeType: file.contentType || 'video/webm',
+            mimeType: file.contentType || "video/webm",
           };
         });
 
-        setRecordings(recordingsList.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        ));
+        setRecordings(
+          recordingsList.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          ),
+        );
       } else {
-        setError('Failed to load recordings');
+        setError("Failed to load recordings");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load recordings');
+      setError(err instanceof Error ? err.message : "Failed to load recordings");
     } finally {
       setLoading(false);
     }
@@ -92,7 +96,7 @@ export function useRecordings() {
   };
 
   const findRecordingById = (id: string): Recording | undefined => {
-    return recordings.find(r => r.id === id);
+    return recordings.find((r) => r.id === id);
   };
 
   const setCurrentPreview = (recording: Recording | null, url?: string) => {
@@ -100,7 +104,7 @@ export function useRecordings() {
     if (currentPreviewUrl && url !== currentPreviewUrl) {
       URL.revokeObjectURL(currentPreviewUrl);
     }
-    
+
     setCurrentPreviewRecording(recording);
     setCurrentPreviewUrl(url || null);
   };

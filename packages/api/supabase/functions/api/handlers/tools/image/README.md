@@ -1,6 +1,7 @@
 # Image Tools API
 
-This module provides image processing capabilities using FFmpeg for high-quality, efficient image manipulation.
+This module provides image processing capabilities using FFmpeg for high-quality, efficient image
+manipulation.
 
 ## Features
 
@@ -13,11 +14,13 @@ This module provides image processing capabilities using FFmpeg for high-quality
 ## API Endpoints
 
 ### Get Available Tools
+
 ```bash
 GET /api/v1/tools/image/tools
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -41,11 +44,13 @@ Response:
 ```
 
 ### Check System Status
+
 ```bash
 GET /api/v1/tools/image/status
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -62,17 +67,20 @@ Response:
 ```
 
 ### Process Image
+
 ```bash
 POST /api/v1/tools/image/process
 Content-Type: multipart/form-data
 ```
 
 Form fields:
+
 - `tool`: Tool name ("thumbnail", "resize", "convert")
 - `image`: Image file
 - `options`: JSON string with tool options
 
 Example with curl:
+
 ```bash
 curl -X POST \
   -F "tool=thumbnail" \
@@ -82,6 +90,7 @@ curl -X POST \
 ```
 
 Alternative JSON API:
+
 ```bash
 POST /api/v1/tools/image/process
 Content-Type: application/json
@@ -102,38 +111,42 @@ Content-Type: application/json
 ## Tool Options
 
 ### Thumbnail Tool
+
 ```json
 {
-  "width": 150,              // Required: thumbnail width in pixels
-  "height": 150,             // Required: thumbnail height in pixels
-  "format": "jpeg",          // Output format: "jpeg", "png", "webp"
-  "quality": 80,             // Quality 1-100 (JPEG/WebP only)
+  "width": 150, // Required: thumbnail width in pixels
+  "height": 150, // Required: thumbnail height in pixels
+  "format": "jpeg", // Output format: "jpeg", "png", "webp"
+  "quality": 80, // Quality 1-100 (JPEG/WebP only)
   "maintainAspectRatio": true // Maintain original aspect ratio
 }
 ```
 
 ### Resize Tool
+
 ```json
 {
-  "width": 800,              // Target width (optional if height provided)
-  "height": 600,             // Target height (optional if width provided)
-  "format": "jpeg",          // Output format
-  "quality": 80,             // Quality 1-100
+  "width": 800, // Target width (optional if height provided)
+  "height": 600, // Target height (optional if width provided)
+  "format": "jpeg", // Output format
+  "quality": 80, // Quality 1-100
   "maintainAspectRatio": true // Maintain aspect ratio
 }
 ```
 
 ### Convert Tool
+
 ```json
 {
-  "format": "webp",          // Required: target format
-  "quality": 80              // Quality 1-100 (format dependent)
+  "format": "webp", // Required: target format
+  "quality": 80 // Quality 1-100 (format dependent)
 }
 ```
 
 ## Response Format
 
 Success response:
+
 ```json
 {
   "success": true,
@@ -142,14 +155,15 @@ Success response:
   "metadata": {
     "originalSize": 1024000,
     "processedSize": 25600,
-    "originalDimensions": {"width": 1920, "height": 1080},
-    "processedDimensions": {"width": 200, "height": 200},
+    "originalDimensions": { "width": 1920, "height": 1080 },
+    "processedDimensions": { "width": 200, "height": 200 },
     "processingTime": 150
   }
 }
 ```
 
 Error response:
+
 ```json
 {
   "error": "Error description",
@@ -175,7 +189,7 @@ export const newTool: ImageTool = {
   process: async (input, options) => {
     // Implementation
     return await newToolFunction(input, options);
-  }
+  },
 };
 
 // Register the tool
@@ -208,6 +222,7 @@ brew install ffmpeg
 ## Error Handling
 
 The API handles various error conditions:
+
 - Missing FFmpeg installation
 - Invalid image formats
 - Processing failures

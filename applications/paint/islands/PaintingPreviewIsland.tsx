@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "preact/hooks";
-import { Download, Share, AlertTriangle, Loader2, ArrowLeft } from "lucide-preact";
-import type { SavedPainting, DrawingState, Stroke, InsertedImage } from "../types/paint.ts";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { AlertTriangle, ArrowLeft, Download, Loader2, Share } from "lucide-preact";
+import type { DrawingState, InsertedImage, SavedPainting, Stroke } from "../types/paint.ts";
 import { fetchPainting } from "../lib/api-utils.ts";
 import { getAuthClient } from "../lib/auth.ts";
-import { showError, showSuccess, showInfo } from "../lib/toast-manager.ts";
-import { drawStroke, drawInsertedImage, DEFAULT_CANVAS_SETTINGS } from "../lib/paint-utils.ts";
-import { ShareModal, type ShareItem } from "@suppers/ui-lib";
+import { showError, showInfo, showSuccess } from "../lib/toast-manager.ts";
+import { DEFAULT_CANVAS_SETTINGS, drawInsertedImage, drawStroke } from "../lib/paint-utils.ts";
+import { type ShareItem, ShareModal } from "@suppers/ui-lib";
 
 interface PaintingPreviewIslandProps {
   paintingId: string;
@@ -18,7 +18,7 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
@@ -43,10 +43,10 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetchPainting(paintingId);
-        
-        if (response.success && response.data.painting) {
+
+        if (response.success && response.data && response.data.painting) {
           setPainting(response.data.painting);
         } else {
           setError(response.error || "Failed to load painting");
@@ -67,7 +67,7 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
     if (!painting || !painting.drawingData || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     ctxRef.current = ctx;
@@ -76,7 +76,7 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
     const drawingData = painting.drawingData;
     const canvasWidth = drawingData.canvasSize?.width || DEFAULT_CANVAS_SETTINGS.width;
     const canvasHeight = drawingData.canvasSize?.height || DEFAULT_CANVAS_SETTINGS.height;
-    
+
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
@@ -99,20 +99,24 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
           try {
             const img = new Image();
             img.crossOrigin = "anonymous";
-            
+
             await new Promise<void>((resolve, reject) => {
               img.onload = () => {
-                drawInsertedImage(ctx, {
-                  ...imageData,
-                  image: img,
-                });
+                // Draw the image directly since drawInsertedImage creates its own Image
+                ctx.drawImage(
+                  img,
+                  imageData.x,
+                  imageData.y,
+                  imageData.width,
+                  imageData.height,
+                );
                 resolve();
               };
               img.onerror = () => reject(new Error(`Failed to load image: ${imageData.src}`));
               img.src = imageData.src;
             });
           } catch (error) {
-            console.warn('Failed to load image:', imageData.src, error);
+            console.warn("Failed to load image:", imageData.src, error);
           }
         }
       };
@@ -127,33 +131,36 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
 
     try {
       setIsDownloading(true);
-      showInfo('Downloading painting...');
+      showInfo("Downloading painting...");
 
       const canvas = canvasRef.current;
-      
+
       // Convert canvas to blob
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          showError('Failed to generate image');
-          return;
-        }
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            showError("Failed to generate image");
+            return;
+          }
 
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${painting.name.replace(/[^a-zA-Z0-9-_]/g, '_')}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+          // Create download link
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `${painting.name.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
 
-        showSuccess(`Downloaded "${painting.name}" as PNG`);
-      }, 'image/png', 0.95);
-
+          showSuccess(`Downloaded "${painting.name}" as PNG`);
+        },
+        "image/png",
+        0.95,
+      );
     } catch (error) {
-      console.error('Download error:', error);
-      showError('Failed to download painting');
+      console.error("Download error:", error);
+      showError("Failed to download painting");
     } finally {
       setIsDownloading(false);
     }
@@ -164,15 +171,15 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
     const authClient = getAuthClient();
     const accessToken = await authClient.getAccessToken();
     const userId = authClient.getUserId();
-    
+
     if (!accessToken || !userId) {
-      throw new Error('Authentication required');
+      throw new Error("Authentication required");
     }
-    
+
     return {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-User-ID': userId,
-      'Content-Type': 'application/json'
+      "Authorization": `Bearer ${accessToken}`,
+      "X-User-ID": userId,
+      "Content-Type": "application/json",
     };
   };
 
@@ -182,20 +189,20 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -257,7 +264,7 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
       <div class="text-center">
         <h2 class="text-2xl font-bold mb-2">{painting.name}</h2>
         <p class="text-base-content/60">
-          Created {new Date(painting.createdAt).toLocaleDateString()} • 
+          Created {new Date(painting.createdAt).toLocaleDateString()} •
           {Math.round((painting.size || 0) / 1024)} KB
         </p>
       </div>
@@ -270,7 +277,7 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
               <canvas
                 ref={canvasRef}
                 class="border border-base-300 rounded-lg shadow-sm max-w-full h-auto"
-                style={{ maxWidth: '100%', height: 'auto' }}
+                style={{ maxWidth: "100%", height: "auto" }}
               />
             </div>
           </div>
@@ -282,19 +289,21 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
         <button
           onClick={handleDownloadPNG}
           disabled={isDownloading}
-          class={`btn btn-primary btn-lg ${isDownloading ? 'loading' : ''}`}
+          class={`btn btn-primary btn-lg ${isDownloading ? "loading" : ""}`}
         >
-          {isDownloading ? (
-            <>
-              <span class="loading loading-spinner loading-sm"></span>
-              Downloading...
-            </>
-          ) : (
-            <>
-              <Download class="w-5 h-5 mr-2" />
-              Download as PNG
-            </>
-          )}
+          {isDownloading
+            ? (
+              <>
+                <span class="loading loading-spinner loading-sm"></span>
+                Downloading...
+              </>
+            )
+            : (
+              <>
+                <Download class="w-5 h-5 mr-2" />
+                Download as PNG
+              </>
+            )}
         </button>
 
         <button
@@ -314,7 +323,7 @@ export default function PaintingPreviewIsland({ paintingId }: PaintingPreviewIsl
             name: painting.name,
             size: painting.size,
             createdAt: painting.createdAt,
-            filePath: painting.fileName || painting.name
+            filePath: painting.fileName || painting.name,
           }}
           isOpen={showShareModal}
           onClose={() => setShowShareModal(false)}

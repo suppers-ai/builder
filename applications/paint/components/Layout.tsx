@@ -6,7 +6,7 @@ interface LayoutProps {
   title?: string;
 }
 
-export default function Layout({ children, title = "Paint App" }: LayoutProps) {
+export default function Layout({ children, title: _title = "Paint App" }: LayoutProps) {
   return (
     <div class="min-h-screen bg-base-100">
       {/* Top Navigation */}

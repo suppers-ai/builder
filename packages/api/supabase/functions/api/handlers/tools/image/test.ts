@@ -4,8 +4,8 @@
 
 import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
 import { checkFFmpegAvailable, getImageMetadata } from "./ffmpeg-processor.ts";
-import { validateImageOptions, isValidImageFormat } from "./utils.ts";
-import { getTool, getToolsInfo, checkDependencies } from "./tools-registry.ts";
+import { isValidImageFormat, validateImageOptions } from "./utils.ts";
+import { checkDependencies, getTool, getToolsInfo } from "./tools-registry.ts";
 
 Deno.test("Image Tools - Utils Tests", async (t) => {
   await t.step("validates image formats correctly", () => {
@@ -35,8 +35,8 @@ Deno.test("Image Tools - Registry Tests", async (t) => {
   await t.step("gets available tools", () => {
     const tools = getToolsInfo();
     assertEquals(tools.length >= 3, true); // thumbnail, resize, convert
-    
-    const toolNames = tools.map(tool => tool.name);
+
+    const toolNames = tools.map((tool) => tool.name);
     assertEquals(toolNames.includes("thumbnail"), true);
     assertEquals(toolNames.includes("resize"), true);
     assertEquals(toolNames.includes("convert"), true);
@@ -46,7 +46,7 @@ Deno.test("Image Tools - Registry Tests", async (t) => {
     const thumbnailTool = getTool("thumbnail");
     assertEquals(thumbnailTool !== undefined, true);
     assertEquals(thumbnailTool?.name, "thumbnail");
-    
+
     const nonExistentTool = getTool("nonexistent");
     assertEquals(nonExistentTool, undefined);
   });
@@ -70,7 +70,7 @@ Deno.test("Image Tools - FFmpeg Tests", async (t) => {
 // Integration test with a sample image (if FFmpeg is available)
 Deno.test("Image Tools - Integration Test", async (t) => {
   const ffmpegAvailable = await checkFFmpegAvailable();
-  
+
   if (!ffmpegAvailable) {
     console.log("⚠️ Skipping integration test: FFmpeg not available");
     return;
@@ -79,15 +79,75 @@ Deno.test("Image Tools - Integration Test", async (t) => {
   await t.step("creates thumbnail from sample image", async () => {
     // Create a simple 1x1 pixel red PNG image as test data
     const simplePngBytes = new Uint8Array([
-      0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, // PNG signature
-      0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52, // IHDR chunk header
-      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1x1 dimensions
-      0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, // bit depth, color type, etc.
-      0xDE, 0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, // IDAT chunk header
-      0x54, 0x08, 0x57, 0x63, 0x60, 0x60, 0x60, 0x00, // compressed pixel data
-      0x00, 0x00, 0x04, 0x00, 0x01, 0x27, 0x2B, 0xDE,
-      0xFC, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, // IEND chunk
-      0x44, 0xAE, 0x42, 0x60, 0x82
+      0x89,
+      0x50,
+      0x4E,
+      0x47,
+      0x0D,
+      0x0A,
+      0x1A,
+      0x0A, // PNG signature
+      0x00,
+      0x00,
+      0x00,
+      0x0D,
+      0x49,
+      0x48,
+      0x44,
+      0x52, // IHDR chunk header
+      0x00,
+      0x00,
+      0x00,
+      0x01,
+      0x00,
+      0x00,
+      0x00,
+      0x01, // 1x1 dimensions
+      0x08,
+      0x02,
+      0x00,
+      0x00,
+      0x00,
+      0x90,
+      0x77,
+      0x53, // bit depth, color type, etc.
+      0xDE,
+      0x00,
+      0x00,
+      0x00,
+      0x0C,
+      0x49,
+      0x44,
+      0x41, // IDAT chunk header
+      0x54,
+      0x08,
+      0x57,
+      0x63,
+      0x60,
+      0x60,
+      0x60,
+      0x00, // compressed pixel data
+      0x00,
+      0x00,
+      0x04,
+      0x00,
+      0x01,
+      0x27,
+      0x2B,
+      0xDE,
+      0xFC,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x49,
+      0x45,
+      0x4E, // IEND chunk
+      0x44,
+      0xAE,
+      0x42,
+      0x60,
+      0x82,
     ]);
 
     const thumbnailTool = getTool("thumbnail");
@@ -98,13 +158,13 @@ Deno.test("Image Tools - Integration Test", async (t) => {
         width: 100,
         height: 100,
         format: "jpeg",
-        quality: 80
+        quality: 80,
       });
 
       assertEquals(result.success, true);
       assertEquals(result.outputBuffer !== undefined, true);
       assertEquals(result.metadata !== undefined, true);
-      
+
       if (result.metadata) {
         assertEquals(result.metadata.processedDimensions?.width, 100);
         assertEquals(result.metadata.processedDimensions?.height, 100);
@@ -118,14 +178,14 @@ Deno.test("Image Tools - Integration Test", async (t) => {
 Deno.test("Image Tools - Handler Test", async (t) => {
   await t.step("handles tools list request", async () => {
     const { handleImageTools } = await import("./handler.ts");
-    
+
     const request = new Request("http://localhost/api/v1/tools/image/tools", {
-      method: "GET"
+      method: "GET",
     });
 
     const response = await handleImageTools(request);
     assertEquals(response.status, 200);
-    
+
     const data = await response.json();
     assertEquals(data.success, true);
     assertEquals(Array.isArray(data.data.tools), true);
@@ -133,14 +193,14 @@ Deno.test("Image Tools - Handler Test", async (t) => {
 
   await t.step("handles status request", async () => {
     const { handleImageTools } = await import("./handler.ts");
-    
+
     const request = new Request("http://localhost/api/v1/tools/image/status", {
-      method: "GET"
+      method: "GET",
     });
 
     const response = await handleImageTools(request);
     assertEquals(response.status, 200);
-    
+
     const data = await response.json();
     assertEquals(data.success, true);
     assertEquals(typeof data.data.status, "string");

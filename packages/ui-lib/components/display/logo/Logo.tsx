@@ -47,7 +47,10 @@ export function Logo({
       currentTheme === "coffee";
 
     const themeType = isDark ? "dark" : "light";
-    return `https://cdn.suppers.ai/logos/${variant}_${themeType}.png`;
+    const baseUrl = typeof Deno !== "undefined" 
+      ? Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"
+      : "http://localhost:8001";
+    return `${baseUrl}/static/logos/${variant}_${themeType}.png`;
   };
 
   const sizeClass = getSizeClasses(size);

@@ -1,7 +1,8 @@
 #!/usr/bin/env deno run -A --watch=static/,routes/,islands/,components/,lib/,hooks/,providers/,pages/
+console.log("profile dev");
 import { loadSync } from "@std/dotenv";
 import { Builder } from "fresh/dev";
-import { tailwind } from "@fresh/plugin-tailwind";
+import { tailwind } from "@fresh/plugin-tailwind-v3";
 import config from "../../config.ts";
 
 // Load environment variables

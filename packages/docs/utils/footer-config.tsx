@@ -1,4 +1,4 @@
-import { FooterSection, SocialLink } from "../components/layout/footer/Footer.tsx";
+import { FooterSection, SocialLink } from "../../ui-lib/components/layout/footer/Footer.tsx";
 
 // Default footer configuration for the component library
 export const defaultFooterSections: FooterSection[] = [

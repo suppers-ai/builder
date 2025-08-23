@@ -3,12 +3,9 @@ import type {
   AuthEventData,
   AuthEventType,
   AuthSession,
-  ResetPasswordData,
-  SignInData,
-  SignUpData,
-  UpdateUserData,
 } from "../../shared/types/auth.ts";
 import type { User } from "../../shared/utils/type-mappers.ts";
+import type { SignInData, SignUpData, UpdateUserData, ResetPasswordData } from "./direct-auth-client.ts";
 
 /**
  * OAuth authentication client for centralized auth hub
@@ -206,7 +203,9 @@ export class OAuthAuthClient {
       const userId = this.getUserIdFromStorage();
       if (userId) {
         console.log("Found stored user ID, emitting login event");
-        this.emitEvent("login", { userId });
+        // Get session to emit with login event
+        const session = this.getSessionFromStorage();
+        this.emitEvent("login", { session: session || null });
         return Promise.resolve();
       }
       console.log("No stored user ID found");
@@ -244,7 +243,10 @@ export class OAuthAuthClient {
    */
   getAccessToken(): Promise<string | null> {
     const session = this.getSessionFromStorage();
-    return Promise.resolve(session?.session?.access_token || null);
+    console.log("OAuthAuthClient.getAccessToken - stored session:", session);
+    const token = session?.access_token || null;
+    console.log("OAuthAuthClient.getAccessToken - returning token:", token ? "Token exists" : "No token");
+    return Promise.resolve(token);
   }
 
   /**
@@ -305,18 +307,22 @@ export class OAuthAuthClient {
 
         // Store session if provided
         if (event.data.session) {
+          console.log("OAuthAuthClient - Saving session:", event.data.session);
           this.saveSessionToStorage(event.data.session);
           console.log("Session token stored for API authentication");
+        } else {
+          console.log("OAuthAuthClient - No session in message");
         }
 
-        this.emitEvent("login", { userId: event.data.user.id });
+        this.emitEvent("login", { session: event.data.session || null });
         console.log("OAuth popup login completed successfully");
 
         // Clean up
         globalThis.removeEventListener("message", messageHandler);
       } else if (event.data.type === "OAUTH_ERROR") {
         console.error("OAuth popup error:", event.data.error);
-        this.emitEvent("error", { error: event.data.error });
+        // Error event is not a valid AuthEventType, log instead
+        console.error("OAuth error event:", event.data.error);
         globalThis.removeEventListener("message", messageHandler);
       }
     };
@@ -464,8 +470,8 @@ export class OAuthAuthClient {
       headers["X-User-ID"] = userId;
 
       // Include session token if available
-      if (session?.session?.access_token) {
-        headers["Authorization"] = `Bearer ${session.session.access_token}`;
+      if (session?.access_token) {
+        headers["Authorization"] = `Bearer ${session.access_token}`;
       }
     }
 

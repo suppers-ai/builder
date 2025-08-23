@@ -1,4 +1,4 @@
-import { Button } from "@suppers-ai/ui-lib";
+import { Button } from "@suppers/ui-lib";
 import { Download, Share } from "lucide-preact";
 import type { Recording } from "../types/recorder.ts";
 
@@ -32,16 +32,20 @@ export default function VideoPreview({
         >
           Your browser does not support video playback.
         </video>
-        
+
         {metadata && (
           <div class="text-center text-sm text-base-content/60">
             {metadata}
           </div>
         )}
-        
+
         {showDownloadShare && (onDownload || onShare) && (
           <div class="flex justify-center gap-3 pt-2">
-            {console.log('VideoPreview: Rendering buttons', { showDownloadShare, hasOnDownload: !!onDownload, hasOnShare: !!onShare })}
+            {console.log("VideoPreview: Rendering buttons", {
+              showDownloadShare,
+              hasOnDownload: !!onDownload,
+              hasOnShare: !!onShare,
+            })}
             {onDownload && (
               <Button
                 onClick={onDownload}
@@ -57,7 +61,7 @@ export default function VideoPreview({
             {onShare && (
               <Button
                 onClick={() => {
-                  console.log('VideoPreview: Share button clicked!');
+                  console.log("VideoPreview: Share button clicked!");
                   onShare();
                 }}
                 color="primary"

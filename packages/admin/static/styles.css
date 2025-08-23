@@ -1,12 +1,6 @@
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes: all;
-}
-
-/*
-  Since we lazy load components, we need to tell Tailwind to scan for classes in them.
-*/
-@source "./../../ui-lib/components/**/*.tsx";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
   font-family:
@@ -57,18 +51,26 @@ pre {
   grid-template-columns: 1fr;
   gap: 1rem;
   width: 100%;
+  overflow-x: hidden;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 480px) {
   .admin-grid-responsive {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .admin-grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .admin-grid-responsive {
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 2rem;
   }
 }
 
@@ -79,235 +81,252 @@ pre {
   }
 }
 
-.admin-grid-metrics {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
+/* Ensure grid items don't overflow */
+
+.admin-grid-responsive > * {
+  min-width: 0;
+  overflow: hidden;
 }
 
-@media (min-width: 640px) {
-  .admin-grid-metrics {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+/* Admin sidebar aware layout */
 
-@media (min-width: 1024px) {
-  .admin-grid-metrics {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.admin-grid-dashboard {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 1024px) {
-  .admin-grid-dashboard {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Sidebar layout */
-.admin-layout {
-  min-height: 100vh;
-  background-color: hsl(var(--b2));
-}
-
-.admin-sidebar {
-  width: 16rem; /* w-64 */
-  background-color: hsl(var(--b1));
-  min-height: 100vh;
-  border-right: 1px solid hsl(var(--b3));
-}
-
-.admin-content {
-  flex: 1;
-  padding: 1rem;
-}
-
-@media (min-width: 1024px) {
-  .admin-content {
-    padding: 1.5rem;
-  }
-}
-
-/* Header styles */
-.admin-header {
-  background-color: hsl(var(--b1));
-  border-bottom: 1px solid hsl(var(--b3));
-  min-height: 4rem;
-}
-/* Sidebar-aware layout styles */
-.sidebar-aware-layout {
-  transition: margin-left 0.3s ease-in-out;
-  position: relative;
-  z-index: 10;
-  min-height: 100vh;
-}
-
-/* Mobile - sidebar overlay, no margin */
-.sidebar-aware-layout {
+.admin-sidebar-aware-layout {
   margin-left: 0;
+  transition: margin-left 200ms ease-out;
 }
 
-/* Desktop - sidebar always visible, content has left margin */
 @media (min-width: 1024px) {
-  .sidebar-aware-layout {
-    margin-left: 20rem; /* w-80 = 320px = 20rem */
+  .admin-sidebar-aware-layout {
+    margin-left: 320px;
   }
-  
-  /* Even when sidebar is "closed" on desktop, it should still be visible */
-  body.sidebar-closed .sidebar-aware-layout {
+
+  body.sidebar-closed .admin-sidebar-aware-layout {
+    margin-left: 0;
+  }
+}
+
+/* Admin theme transition */
+
+.admin-theme-transition {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Admin scrollbar styling */
+
+.admin-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--bc) / 0.2);
+  border-radius: 4px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--bc) / 0.3);
+}
+
+/* Admin toast container positioning */
+
+.admin-toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.admin-toast-container > * {
+  pointer-events: auto;
+}
+
+/* Admin mobile navigation padding */
+
+@media (max-width: 1023px) {
+  .admin-mobile-nav-padding {
+    padding-bottom: 4rem;
+  }
+}
+
+/* Admin card hover effects */
+
+.admin-card-hover {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Admin sidebar layout - matches CustomSidebar component */
+@media (min-width: 1024px) {
+  body.sidebar-open .admin-sidebar-aware-layout {
     margin-left: 20rem;
   }
 }
 
-/* Admin-specific component styles */
-.admin-card {
-  @apply card bg-base-100 shadow-sm border border-base-200;
-}
-
-.admin-card-body {
-  @apply card-body;
-}
-
-.admin-card-compact {
-  @apply card-body p-4;
-}
-
-.admin-btn-mobile {
-  @apply btn btn-sm;
-}
-
-@media (min-width: 640px) {
-  .admin-btn-mobile {
-    @apply btn;
+/* Admin-specific component styles with @apply directives */
+@layer components {
+  .admin-card {
+    @apply card bg-base-100 shadow-sm border border-base-200;
   }
-}
 
-.admin-btn-desktop {
-  @apply hidden sm:inline-flex btn;
-}
+  .admin-card-body {
+    @apply card-body;
+  }
 
-.admin-btn-group {
-  @apply flex flex-col sm:flex-row gap-2;
-}
+  .admin-card-compact .admin-card-body {
+    @apply card-body p-4;
+  }
 
-.admin-filters {
-  @apply flex flex-col lg:flex-row gap-4;
-}
-
-.admin-filters-search {
-  @apply flex-1;
-}
-
-.admin-filters-controls {
-  @apply flex flex-wrap gap-2;
-}
-
-.admin-form-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
-}
-
-.admin-form-grid-full {
-  @apply md:col-span-2;
-}
-
-.admin-form-actions {
-  @apply flex flex-col sm:flex-row gap-2 justify-end;
-}
-
-.admin-list-item {
-  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4;
-}
-
-.admin-list-item-content {
-  @apply flex-1 min-w-0;
-}
-
-.admin-list-item-meta {
-  @apply flex flex-wrap gap-4 text-sm text-base-content/60 mt-2;
-}
-
-.admin-list-item-actions {
-  @apply flex flex-wrap gap-2;
-}
-
-.admin-status-badge {
-  @apply badge badge-sm;
-}
+  .admin-btn-primary {
+    @apply btn btn-sm;
+  }
 
 
-.admin-modal {
-  @apply modal-box w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto;
-}
+  .admin-btn-hidden-mobile {
+    @apply hidden sm:inline-flex btn;
+  }
 
-.admin-focus-visible {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
-}
+  .admin-actions-group {
+    @apply flex flex-col sm:flex-row gap-2;
+  }
 
-.admin-sr-only {
-  @apply sr-only;
-}
+  .admin-flex-container {
+    @apply flex flex-col lg:flex-row gap-4;
+  }
 
-@media (min-width: 1024px) {
+  .admin-flex-item {
+    @apply flex-1;
+  }
+
+  .admin-badge-group {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .admin-form-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+  }
+
+  .admin-form-full-width {
+    @apply md:col-span-2;
+  }
+
+  .admin-form-actions {
+    @apply flex flex-col sm:flex-row gap-2 justify-end;
+  }
+
+  .admin-list-item-header {
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4;
+  }
+
+  .admin-list-item-content {
+    @apply flex-1 min-w-0;
+  }
+
+  .admin-list-item-meta {
+    @apply flex flex-wrap gap-4 text-sm mt-2;
+  }
+
+  .admin-list-item-actions {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .admin-status-badge {
+    @apply badge badge-sm;
+  }
+
+  .admin-modal-box {
+    @apply modal-box w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto;
+  }
+
+  .admin-focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100;
+  }
+
   .admin-sr-only {
-    @apply not-sr-only;
+    @apply sr-only;
+  }
+
+  @media (min-width: 640px) {
+    .admin-sr-only-mobile {
+      @apply not-sr-only;
+    }
   }
 }
 
-/* Ensure modals appear above sidebar - sidebar uses z-50 on mobile, z-30 on desktop */
-.modal {
-  z-index: 100 !important;
-  position: fixed !important;
+/* Additional opacity style for meta text */
+.admin-list-item-meta {
+  opacity: 0.6;
 }
 
-.modal-open {
-  z-index: 100 !important;
-  position: fixed !important;
+/* Admin table styles */
+
+.admin-table-container {
+  overflow-x: auto;
+  width: 100%;
 }
 
-.modal-backdrop {
-  z-index: 99 !important;
+.admin-table {
+  min-width: 100%;
 }
 
-.modal-box {
-  z-index: 101 !important;
-  position: relative !important;
+.admin-table th {
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-/* Specific override for any modal container */
-div:has(.modal-open), 
-.modal-open {
-  z-index: 100 !important;
-  position: fixed !important;
+.admin-table td {
+  white-space: nowrap;
 }
 
-/* Fix dropdown positioning in tables */
-.table .dropdown {
-  position: relative !important;
+.admin-table-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.table .dropdown-content,
-.table .dropdown .dropdown-content {
-  position: absolute !important;
+/* Admin dashboard stats */
+
+.admin-stat-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: hsl(var(--b1));
+  border: 1px solid hsl(var(--b2));
+}
+
+.admin-stat-value {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.admin-stat-title {
+  font-size: 0.875rem;
+  opacity: 0.6;
+  margin-top: 0.5rem;
+}
+
+/* Fix dropdown menu z-index issues in tables */
+.dropdown .dropdown-content {
   z-index: 1000 !important;
-  min-width: 200px !important;
-  top: 100% !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  margin-top: 4px !important;
 }
 
-/* Ensure dropdown content appears above table rows */
-.dropdown-content {
-  z-index: 1000 !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+/* Ensure overflow visible for table containers with dropdowns */
+.overflow-x-auto:has(.dropdown-open) {
+  overflow: visible !important;
 }
 
-/* Prevent table overflow from hiding dropdowns */
 .overflow-x-auto:has(.table) {
   overflow: visible !important;
 }

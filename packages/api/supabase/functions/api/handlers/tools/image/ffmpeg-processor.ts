@@ -3,13 +3,13 @@
  */
 
 import type { ImageProcessingResult, ThumbnailOptions } from "./types.ts";
-import { 
-  generateTempPath, 
-  cleanupTempFiles, 
-  getFileSize, 
+import {
+  cleanupTempFiles,
+  ensureDir,
+  generateTempPath,
+  getFileSize,
   readFileAsBytes,
   writeBytesToFile,
-  ensureDir 
 } from "./utils.ts";
 
 /**
@@ -41,32 +41,34 @@ export async function getImageMetadata(inputPath: string): Promise<{
   try {
     const process = new Deno.Command("ffprobe", {
       args: [
-        "-v", "quiet",
-        "-print_format", "json",
+        "-v",
+        "quiet",
+        "-print_format",
+        "json",
         "-show_format",
         "-show_streams",
-        inputPath
+        inputPath,
       ],
       stdout: "piped",
       stderr: "piped",
     });
 
     const result = await process.output();
-    
+
     if (!result.success) {
       throw new Error("FFprobe failed to analyze image");
     }
 
     const output = new TextDecoder().decode(result.stdout);
     const metadata = JSON.parse(output);
-    
+
     const videoStream = metadata.streams?.find((stream: any) => stream.codec_type === "video");
-    
+
     return {
       width: videoStream?.width,
       height: videoStream?.height,
       format: metadata.format?.format_name,
-      duration: parseFloat(metadata.format?.duration || "0")
+      duration: parseFloat(metadata.format?.duration || "0"),
     };
   } catch (error) {
     console.warn("Failed to get image metadata:", error);
@@ -79,15 +81,15 @@ export async function getImageMetadata(inputPath: string): Promise<{
  */
 export async function createThumbnail(
   input: string | Uint8Array,
-  options: ThumbnailOptions
+  options: ThumbnailOptions,
 ): Promise<ImageProcessingResult> {
   const startTime = Date.now();
   const tempFiles: string[] = [];
-  
+
   try {
     // Ensure temp directory exists
     await ensureDir("/tmp");
-    
+
     // Handle input
     let inputPath: string;
     if (typeof input === "string") {
@@ -109,9 +111,15 @@ export async function createThumbnail(
 
     // Build FFmpeg command
     const ffmpegArgs = [
-      "-i", inputPath,
-      "-vf", `scale=${options.width}:${options.height}${options.maintainAspectRatio ? ":force_original_aspect_ratio=decrease,pad=${options.width}:${options.height}:(ow-iw)/2:(oh-ih)/2" : ""}`,
-      "-y" // Overwrite output file
+      "-i",
+      inputPath,
+      "-vf",
+      `scale=${options.width}:${options.height}${
+        options.maintainAspectRatio
+          ? ":force_original_aspect_ratio=decrease,pad=${options.width}:${options.height}:(ow-iw)/2:(oh-ih)/2"
+          : ""
+      }`,
+      "-y", // Overwrite output file
     ];
 
     // Add quality settings
@@ -162,23 +170,22 @@ export async function createThumbnail(
         processedSize,
         originalDimensions: {
           width: originalMetadata.width || 0,
-          height: originalMetadata.height || 0
+          height: originalMetadata.height || 0,
         },
         processedDimensions: {
           width: options.width,
-          height: options.height
+          height: options.height,
         },
-        processingTime
-      }
+        processingTime,
+      },
     };
-
   } catch (error) {
     // Cleanup temp files on error
     await cleanupTempFiles(tempFiles);
-    
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred"
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
@@ -194,14 +201,14 @@ export async function resizeImage(
     maintainAspectRatio?: boolean;
     format?: string;
     quality?: number;
-  }
+  },
 ): Promise<ImageProcessingResult> {
   const startTime = Date.now();
   const tempFiles: string[] = [];
 
   try {
     await ensureDir("/tmp");
-    
+
     // Handle input
     let inputPath: string;
     if (typeof input === "string") {
@@ -235,9 +242,11 @@ export async function resizeImage(
     }
 
     const ffmpegArgs = [
-      "-i", inputPath,
-      "-vf", scaleFilter,
-      "-y"
+      "-i",
+      inputPath,
+      "-vf",
+      scaleFilter,
+      "-y",
     ];
 
     if (options.quality !== undefined && outputFormat === "jpeg") {
@@ -273,18 +282,17 @@ export async function resizeImage(
         processedSize,
         originalDimensions: {
           width: originalMetadata.width || 0,
-          height: originalMetadata.height || 0
+          height: originalMetadata.height || 0,
         },
-        processingTime
-      }
+        processingTime,
+      },
     };
-
   } catch (error) {
     await cleanupTempFiles(tempFiles);
-    
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred"
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
@@ -297,14 +305,14 @@ export async function convertFormat(
   options: {
     format: string;
     quality?: number;
-  }
+  },
 ): Promise<ImageProcessingResult> {
   const startTime = Date.now();
   const tempFiles: string[] = [];
 
   try {
     await ensureDir("/tmp");
-    
+
     let inputPath: string;
     if (typeof input === "string") {
       inputPath = input;
@@ -351,16 +359,15 @@ export async function convertFormat(
       metadata: {
         originalSize,
         processedSize,
-        processingTime
-      }
+        processingTime,
+      },
     };
-
   } catch (error) {
     await cleanupTempFiles(tempFiles);
-    
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error occurred"
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }

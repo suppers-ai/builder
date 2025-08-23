@@ -1,18 +1,17 @@
-import { useEffect, useState, useRef } from "preact/hooks";
-import { Download, Shield, Globe, Link, AlertTriangle, ArrowLeft } from "lucide-preact";
+import { useEffect, useRef, useState } from "preact/hooks";
+import { AlertTriangle, ArrowLeft, Download, Globe, Link, Shield } from "lucide-preact";
 import { formatFileSize } from "../lib/api-utils.ts";
-import { drawStroke, drawInsertedImage, DEFAULT_CANVAS_SETTINGS } from "../lib/paint-utils.ts";
+import { DEFAULT_CANVAS_SETTINGS, drawInsertedImage, drawStroke } from "../lib/paint-utils.ts";
 import type { DrawingState, Stroke } from "../types/paint.ts";
 import { Alert, Button, Loading } from "@suppers/ui-lib";
 
-
 const formatDate = (date: string | Date) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -37,7 +36,7 @@ export default function SharePageIsland({
   shareToken,
   applicationSlug,
   filename,
-  isPublic = false
+  isPublic = false,
 }: SharePageProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +44,7 @@ export default function SharePageIsland({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  const API_BASE_URL = 'http://127.0.0.1:54321/functions/v1/api/v1';
+  const API_BASE_URL = "http://127.0.0.1:54321/functions/v1/api/v1";
 
   useEffect(() => {
     loadSharedPainting();
@@ -56,7 +55,7 @@ export default function SharePageIsland({
     if (!painting || !painting.paintingData || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     ctxRef.current = ctx;
@@ -65,7 +64,7 @@ export default function SharePageIsland({
     const drawingData = painting.paintingData;
     const canvasWidth = drawingData.canvasSize?.width || DEFAULT_CANVAS_SETTINGS.width;
     const canvasHeight = drawingData.canvasSize?.height || DEFAULT_CANVAS_SETTINGS.height;
-    
+
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
@@ -88,20 +87,24 @@ export default function SharePageIsland({
           try {
             const img = new Image();
             img.crossOrigin = "anonymous";
-            
+
             await new Promise<void>((resolve, reject) => {
               img.onload = () => {
-                drawInsertedImage(ctx, {
-                  ...imageData,
-                  image: img,
-                });
+                // Draw the image directly since drawInsertedImage creates its own Image
+                ctx.drawImage(
+                  img,
+                  imageData.x,
+                  imageData.y,
+                  imageData.width,
+                  imageData.height,
+                );
                 resolve();
               };
               img.onerror = () => reject(new Error(`Failed to load image: ${imageData.src}`));
               img.src = imageData.src;
             });
           } catch (error) {
-            console.warn('Failed to load image:', imageData.src, error);
+            console.warn("Failed to load image:", imageData.src, error);
           }
         }
       };
@@ -116,7 +119,7 @@ export default function SharePageIsland({
 
     try {
       let url: string;
-      
+
       if (shareToken) {
         // Token-based sharing
         url = `${API_BASE_URL}/share/token/${shareToken}`;
@@ -124,15 +127,15 @@ export default function SharePageIsland({
         // Public sharing
         url = `${API_BASE_URL}/share/public/${applicationSlug}/${filename}`;
       } else {
-        throw new Error('Invalid share parameters');
+        throw new Error("Invalid share parameters");
       }
 
       // Fetch the painting data
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          setError('This shared painting could not be found or may have been removed.');
+          setError("This shared painting could not be found or may have been removed.");
         } else {
           setError(`Failed to load painting: ${response.statusText}`);
         }
@@ -141,21 +144,27 @@ export default function SharePageIsland({
 
       const paintingText = await response.text();
       const paintingData = JSON.parse(paintingText);
-      
+
       // Create painting object
       const sharedPainting: SharedPainting = {
         id: shareToken || `${applicationSlug}-${filename}`,
-        name: paintingData.name || filename || 'Shared Painting',
+        name: paintingData.name || filename || "Shared Painting",
         size: new Blob([paintingText]).size,
-        contentType: 'application/json',
+        contentType: "application/json",
         createdAt: paintingData.createdAt || new Date().toISOString(),
         downloadUrl: url,
-        paintingData: paintingData.drawingData || { strokes: [], images: [], canvasSize: { width: 800, height: 600 }, backgroundColor: '#ffffff' }
+        paintingData: paintingData.drawingData ||
+          {
+            strokes: [],
+            images: [],
+            canvasSize: { width: 800, height: 600 },
+            backgroundColor: "#ffffff",
+          },
       };
 
       setPainting(sharedPainting);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load shared painting');
+      setError(err instanceof Error ? err.message : "Failed to load shared painting");
     } finally {
       setLoading(false);
     }
@@ -166,27 +175,30 @@ export default function SharePageIsland({
 
     try {
       const canvas = canvasRef.current;
-      
+
       // Convert canvas to blob
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          setError('Failed to generate image');
-          return;
-        }
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            setError("Failed to generate image");
+            return;
+          }
 
-        // Create download link
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${painting.name.replace(/[^a-zA-Z0-9-_]/g, '_')}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 'image/png', 0.95);
-
+          // Create download link
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `${painting.name.replace(/[^a-zA-Z0-9-_]/g, "_")}.png`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        },
+        "image/png",
+        0.95,
+      );
     } catch (error) {
-      setError('Failed to download painting');
+      setError("Failed to download painting");
     }
   };
 
@@ -195,15 +207,15 @@ export default function SharePageIsland({
 
     try {
       // Create a link and trigger download
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = painting.downloadUrl;
-      a.download = painting.name.endsWith('.json') ? painting.name : `${painting.name}.json`;
-      a.style.display = 'none';
+      a.download = painting.name.endsWith(".json") ? painting.name : `${painting.name}.json`;
+      a.style.display = "none";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
     } catch (err) {
-      setError('Failed to download painting');
+      setError("Failed to download painting");
     }
   };
 
@@ -230,7 +242,7 @@ export default function SharePageIsland({
             </div>
           </Alert>
           <div class="text-center mt-6">
-            <Button onClick={() => window.location.reload()}>
+            <Button onClick={() => globalThis.location.reload()}>
               Try Again
             </Button>
           </div>
@@ -255,20 +267,17 @@ export default function SharePageIsland({
       {/* Header */}
       <div class="text-center mb-8">
         <div class="flex items-center justify-center gap-2 mb-2">
-          {isPublic ? (
-            <Globe class="w-6 h-6 text-primary" />
-          ) : (
-            <Link class="w-6 h-6 text-primary" />
-          )}
+          {isPublic
+            ? <Globe class="w-6 h-6 text-primary" />
+            : <Link class="w-6 h-6 text-primary" />}
           <h1 class="text-2xl font-bold">
-            {isPublic ? 'Public Painting' : 'Shared Painting'}
+            {isPublic ? "Public Painting" : "Shared Painting"}
           </h1>
         </div>
         <p class="text-base-content/60">
-          {isPublic 
-            ? 'This painting has been shared publicly' 
-            : 'Someone shared this painting with you'
-          }
+          {isPublic
+            ? "This painting has been shared publicly"
+            : "Someone shared this painting with you"}
         </p>
       </div>
 
@@ -288,7 +297,7 @@ export default function SharePageIsland({
               <canvas
                 ref={canvasRef}
                 class="border border-base-300 rounded-lg shadow-sm max-w-full h-auto"
-                style={{ maxWidth: '100%', height: 'auto' }}
+                style={{ maxWidth: "100%", height: "auto" }}
               />
             </div>
           </div>
@@ -304,7 +313,7 @@ export default function SharePageIsland({
           <Download class="w-5 h-5 mr-2" />
           Download as PNG
         </Button>
-        
+
         <Button
           onClick={handleDownloadJSON}
           variant="outline"

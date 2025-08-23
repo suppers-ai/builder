@@ -1,12 +1,6 @@
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes: all;
-}
-
-/*
-  Since we lazy load components, we need to tell Tailwind to scan for classes in them.
-*/
-@source "./../../ui-lib/components/**/*.tsx";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
   font-family:
@@ -97,7 +91,7 @@ pre {
 /* Hero background using actual image */
 
 .hero-gradient-bg {
-  background-image: url("https://cdn.suppers.ai/backgrounds/hero-gradient.webp");
+  background-image: var(--hero-gradient-bg, url("http://localhost:8001/static/backgrounds/hero-gradient.webp"));
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;

@@ -1,5 +1,5 @@
 import { Context } from "fresh";
-import { createClient } from "jsr:@supabase/supabase-js@2";
+import { createClient } from "@supabase/supabase-js";
 import config from "../../../config.ts";
 
 const corsHeaders = {
@@ -44,13 +44,13 @@ export function createSupabaseClient(accessToken: string) {
 
 export async function authenticateRequest(ctx: Context<unknown>) {
   const userId = ctx.req.headers.get("X-User-ID");
-  
+
   if (!userId) {
     throw new Error("Authentication required");
   }
 
   const authHeader = ctx.req.headers.get("Authorization");
-  
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     throw new Error("Authorization required");
   }
@@ -61,7 +61,10 @@ export async function authenticateRequest(ctx: Context<unknown>) {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    throw new Error("Invalid or expired token. Please log in again.");
+    const error = new Error("Invalid or expired token. Please log in again.");
+    (error as any).code = "token_expired";
+    (error as any).status = 401;
+    throw error;
   }
 
   if (user.id !== userId) {
@@ -72,7 +75,7 @@ export async function authenticateRequest(ctx: Context<unknown>) {
 }
 
 export function validateFile(file: File) {
-  if (!file.type.startsWith('video/')) {
+  if (!file.type.startsWith("video/")) {
     throw new Error("Invalid file type. Only video files are allowed.");
   }
 
@@ -86,9 +89,9 @@ export async function validateStorageLimit(supabase: any, userId: string, newFil
   try {
     // Get user's storage limit and current usage from database
     const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('storage_used, storage_limit')
-      .eq('id', userId)
+      .from("users")
+      .select("storage_used, storage_limit")
+      .eq("id", userId)
       .single();
 
     if (userError) {
@@ -101,20 +104,22 @@ export async function validateStorageLimit(supabase: any, userId: string, newFil
 
     // Check if adding new file would exceed limit
     const totalAfterUpload = currentStorage + newFileSize;
-    
+
     if (totalAfterUpload > userStorageLimit) {
       const limitMB = Math.round(userStorageLimit / (1024 * 1024));
       const usedMB = Math.round(currentStorage / (1024 * 1024));
       const remainingMB = Math.round((userStorageLimit - currentStorage) / (1024 * 1024));
-      
-      throw new Error(`Storage limit exceeded. You have used ${usedMB}MB of ${limitMB}MB. Only ${remainingMB}MB remaining.`);
+
+      throw new Error(
+        `Storage limit exceeded. You have used ${usedMB}MB of ${limitMB}MB. Only ${remainingMB}MB remaining.`,
+      );
     }
 
     return {
       currentStorage,
       totalAfterUpload,
       remaining: userStorageLimit - totalAfterUpload,
-      userLimit: userStorageLimit
+      userLimit: userStorageLimit,
     };
   } catch (error) {
     if (error instanceof Error) {
@@ -125,7 +130,7 @@ export async function validateStorageLimit(supabase: any, userId: string, newFil
 }
 
 export function sanitizeFilename(filename: string): string {
-  return filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+  return filename.replace(/[^a-zA-Z0-9.-]/g, "_");
 }
 
 export function createFilePath(userId: string, filename: string): string {

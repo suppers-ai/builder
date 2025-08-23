@@ -1,5 +1,5 @@
 // Optimized canvas rendering system with dirty region tracking and selective redrawing
-import type { Stroke, InsertedImage, DrawingState, Point } from '../types/paint.ts';
+import type { DrawingState, InsertedImage, Point, Stroke } from "../types/paint.ts";
 
 /**
  * Dirty region for tracking canvas areas that need redrawing
@@ -16,7 +16,7 @@ export interface DirtyRegion {
  */
 export interface RenderLayer {
   id: string;
-  type: 'background' | 'image' | 'stroke' | 'current';
+  type: "background" | "image" | "stroke" | "current";
   zIndex: number;
   isDirty: boolean;
   bounds?: DirtyRegion;
@@ -46,19 +46,19 @@ export class OptimizedCanvasRenderer {
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) {
-      throw new Error('Failed to get 2D rendering context');
+      throw new Error("Failed to get 2D rendering context");
     }
     this.ctx = ctx;
 
     // Create offscreen canvas for double buffering
-    this.offscreenCanvas = document.createElement('canvas');
+    this.offscreenCanvas = document.createElement("canvas");
     this.offscreenCanvas.width = canvas.width;
     this.offscreenCanvas.height = canvas.height;
-    const offscreenCtx = this.offscreenCanvas.getContext('2d');
+    const offscreenCtx = this.offscreenCanvas.getContext("2d");
     if (!offscreenCtx) {
-      throw new Error('Failed to create offscreen rendering context');
+      throw new Error("Failed to create offscreen rendering context");
     }
     this.offscreenCtx = offscreenCtx;
 
@@ -70,30 +70,30 @@ export class OptimizedCanvasRenderer {
    * Initialize render layers for organized drawing
    */
   private initializeRenderLayers(): void {
-    this.renderLayers.set('background', {
-      id: 'background',
-      type: 'background',
+    this.renderLayers.set("background", {
+      id: "background",
+      type: "background",
       zIndex: 0,
       isDirty: true,
     });
 
-    this.renderLayers.set('images', {
-      id: 'images',
-      type: 'image',
+    this.renderLayers.set("images", {
+      id: "images",
+      type: "image",
       zIndex: 1,
       isDirty: false,
     });
 
-    this.renderLayers.set('strokes', {
-      id: 'strokes',
-      type: 'stroke',
+    this.renderLayers.set("strokes", {
+      id: "strokes",
+      type: "stroke",
       zIndex: 2,
       isDirty: false,
     });
 
-    this.renderLayers.set('current', {
-      id: 'current',
-      type: 'current',
+    this.renderLayers.set("current", {
+      id: "current",
+      type: "current",
       zIndex: 3,
       isDirty: false,
     });
@@ -141,7 +141,7 @@ export class OptimizedCanvasRenderer {
     const merged = this.mergeRegions(region1, region2);
     const originalArea = region1.width * region1.height + region2.width * region2.height;
     const mergedArea = merged.width * merged.height;
-    
+
     // Merge if the combined area is not more than 150% of the original areas
     return mergedArea <= originalArea * 1.5;
   }
@@ -238,14 +238,20 @@ export class OptimizedCanvasRenderer {
     for (const region of this.dirtyRegions) {
       this.ctx.drawImage(
         this.offscreenCanvas,
-        region.x, region.y, region.width, region.height,
-        region.x, region.y, region.width, region.height
+        region.x,
+        region.y,
+        region.width,
+        region.height,
+        region.x,
+        region.y,
+        region.width,
+        region.height,
       );
     }
 
     // Clear dirty regions and reset layer states
     this.dirtyRegions = [];
-    this.renderLayers.forEach(layer => {
+    this.renderLayers.forEach((layer) => {
       layer.isDirty = false;
     });
 
@@ -266,7 +272,7 @@ export class OptimizedCanvasRenderer {
    * Render background layer
    */
   public renderBackground(backgroundColor: string): void {
-    const layer = this.renderLayers.get('background');
+    const layer = this.renderLayers.get("background");
     if (!layer) return;
 
     // Only render if background layer is dirty or there are dirty regions
@@ -292,7 +298,7 @@ export class OptimizedCanvasRenderer {
    * Render all strokes with dirty region optimization
    */
   public renderStrokes(strokes: Stroke[]): void {
-    const layer = this.renderLayers.get('strokes');
+    const layer = this.renderLayers.get("strokes");
     if (!layer) return;
 
     const ctx = this.offscreenCtx;
@@ -319,7 +325,7 @@ export class OptimizedCanvasRenderer {
    * Render all images with dirty region optimization
    */
   public renderImages(images: InsertedImage[], imageCache: Map<string, HTMLImageElement>): void {
-    const layer = this.renderLayers.get('images');
+    const layer = this.renderLayers.get("images");
     if (!layer) return;
 
     const ctx = this.offscreenCtx;
@@ -346,13 +352,13 @@ export class OptimizedCanvasRenderer {
    * Render current stroke being drawn
    */
   public renderCurrentStroke(stroke: Stroke | null): void {
-    const layer = this.renderLayers.get('current');
+    const layer = this.renderLayers.get("current");
     if (!layer) return;
 
     if (stroke) {
       const ctx = this.offscreenCtx;
       this.renderStroke(ctx, stroke);
-      
+
       // Add dirty region for current stroke
       const bounds = this.getStrokeBounds(stroke);
       this.addDirtyRegion(bounds);
@@ -369,8 +375,8 @@ export class OptimizedCanvasRenderer {
 
     ctx.strokeStyle = stroke.color;
     ctx.lineWidth = stroke.width;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
     ctx.beginPath();
 
     if (stroke.points.length === 2) {
@@ -406,7 +412,7 @@ export class OptimizedCanvasRenderer {
   private renderImage(
     ctx: CanvasRenderingContext2D,
     image: InsertedImage,
-    imageCache: Map<string, HTMLImageElement>
+    imageCache: Map<string, HTMLImageElement>,
   ): void {
     const cachedImg = imageCache.get(image.id);
     if (cachedImg) {
@@ -419,7 +425,7 @@ export class OptimizedCanvasRenderer {
    */
   private strokeIntersectsDirtyRegions(stroke: Stroke): boolean {
     const strokeBounds = this.getStrokeBounds(stroke);
-    return this.dirtyRegions.some(region => this.regionsIntersect(strokeBounds, region));
+    return this.dirtyRegions.some((region) => this.regionsIntersect(strokeBounds, region));
   }
 
   /**
@@ -432,7 +438,7 @@ export class OptimizedCanvasRenderer {
       width: image.width,
       height: image.height,
     };
-    return this.dirtyRegions.some(region => this.regionsIntersect(imageBounds, region));
+    return this.dirtyRegions.some((region) => this.regionsIntersect(imageBounds, region));
   }
 
   /**
@@ -488,7 +494,7 @@ export class OptimizedCanvasRenderer {
       height: this.canvas.height,
     }];
 
-    this.renderLayers.forEach(layer => {
+    this.renderLayers.forEach((layer) => {
       layer.isDirty = true;
     });
 
@@ -521,11 +527,11 @@ export class OptimizedCanvasRenderer {
   private updateRenderStats(renderTime: number): void {
     this.renderStats.totalRenders++;
     this.renderStats.lastRenderTime = renderTime;
-    
+
     // Calculate rolling average
     const alpha = 0.1; // Smoothing factor
-    this.renderStats.averageRenderTime = 
-      this.renderStats.averageRenderTime * (1 - alpha) + renderTime * alpha;
+    this.renderStats.averageRenderTime = this.renderStats.averageRenderTime * (1 - alpha) +
+      renderTime * alpha;
   }
 
   /**
@@ -556,7 +562,7 @@ export class OptimizedCanvasRenderer {
       cancelAnimationFrame(this.frameRequestId);
       this.frameRequestId = null;
     }
-    
+
     this.dirtyRegions = [];
     this.renderLayers.clear();
   }

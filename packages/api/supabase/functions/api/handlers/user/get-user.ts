@@ -1,14 +1,13 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { errorResponses, jsonResponse } from "../../_common/index.ts";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getUser(supabase: SupabaseClient, url: URL): Promise<Response> {
   const userId = url.searchParams.get("user_id");
+  const origin = undefined; // Called internally, no direct request context
 
   if (!userId) {
-    return new Response(JSON.stringify({ error: "User ID is required" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponses.badRequest("User ID is required", origin);
   }
 
   const { data: user, error } = await supabase
@@ -19,20 +18,11 @@ export async function getUser(supabase: SupabaseClient, url: URL): Promise<Respo
 
   if (error) {
     if (error.code === "PGRST116") {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return errorResponses.notFound("User not found", origin);
     }
 
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return errorResponses.internalServerError(error.message, origin);
   }
 
-  return new Response(JSON.stringify({ user }), {
-    status: 200,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return jsonResponse({ user }, { status: 200, origin });
 }

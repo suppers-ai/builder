@@ -18,7 +18,7 @@ export default function PreviewPage(props: PageProps<never, PreviewPageProps>) {
     <Layout>
       <div class="container mx-auto px-4 py-8">
         <PaintingPreviewIsland paintingId={paintingId} />
-        
+
         <div class="mt-8 text-center">
           <a href="/gallery" class="btn btn-outline">
             ← Back to Gallery

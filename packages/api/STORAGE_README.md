@@ -1,10 +1,12 @@
 # Application Storage System
 
-This directory contains a complete file storage solution for applications using the `userId/applicationSlug/filename` structure.
+This directory contains a complete file storage solution for applications using the
+`userId/applicationSlug/filename` structure.
 
 ## ✅ Everything is in `database-schema.sql`
 
-The **complete storage system** is now consolidated in the main `database-schema.sql` file, including:
+The **complete storage system** is now consolidated in the main `database-schema.sql` file,
+including:
 
 - ✅ Storage bucket creation (`application-files`)
 - ✅ All 9 storage policies with proper access control
@@ -27,9 +29,11 @@ psql "postgresql://postgres:[password]@[host]:5432/postgres" -f database-schema.
 2. Copy and paste the entire `database-schema.sql` file
 3. Click **Run**
 
-The script includes automatic error handling - if it can't create storage policies due to permissions, it will:
+The script includes automatic error handling - if it can't create storage policies due to
+permissions, it will:
+
 - ✅ Still create the storage bucket successfully
-- ⚠️  Show helpful warnings about policies
+- ⚠️ Show helpful warnings about policies
 - 💡 Guide you to create policies manually if needed
 
 ## 📁 File Organization
@@ -37,6 +41,7 @@ The script includes automatic error handling - if it can't create storage polici
 Files are organized as: `userId/applicationSlug/filename`
 
 **Examples:**
+
 ```
 550e8400-e29b-41d4-a716-446655440000/my-blog/config/settings.json
 550e8400-e29b-41d4-a716-446655440000/ecommerce-site/images/logo.png
@@ -59,16 +64,16 @@ import { DirectAuthClient } from "../auth-client/src/direct-auth-client.ts";
 const authClient = new DirectAuthClient(supabaseUrl, supabaseAnonKey);
 
 // Upload a file
-const result = await authClient.uploadFile('my-app', file, 'documents/report.pdf');
+const result = await authClient.uploadFile("my-app", file, "documents/report.pdf");
 
 // List all files in an application
-const files = await authClient.listFiles('my-app');
+const files = await authClient.listFiles("my-app");
 
 // Download a file
-const blob = await authClient.downloadFile('my-app', 'documents/report.pdf');
+const blob = await authClient.downloadFile("my-app", "documents/report.pdf");
 
 // Delete a file
-await authClient.deleteFile('my-app', 'documents/report.pdf');
+await authClient.deleteFile("my-app", "documents/report.pdf");
 ```
 
 ## 📋 API Endpoints
@@ -96,7 +101,7 @@ The `userId/applicationSlug/filename` structure provides:
 - `storage-usage-example.ts` - Comprehensive usage examples
 - `test-storage-setup.ts` - Verification script for setup
 - Legacy files (no longer needed but kept for reference):
-  - `storage-policies.sql` 
+  - `storage-policies.sql`
   - `storage-setup.md`
 
 **Everything you need is in `database-schema.sql`** - just run it and you're ready to go! 🎉

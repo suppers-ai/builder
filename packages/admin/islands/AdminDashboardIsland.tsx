@@ -3,23 +3,19 @@
  * Dashboard overview with metrics cards, loading states, and error handling
  */
 
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { showError, showSuccess } from "../lib/toast-manager.ts";
-import { 
-  MetricCard, 
-  ErrorState, 
-  Button, 
-  Loading} from "@suppers/ui-lib";
-import { 
-  RefreshCw, 
-  Users, 
-  TrendingUp, 
-  DollarSign, 
-  Package,
+import { Button, ErrorState, Loading, MetricCard } from "@suppers/ui-lib";
+import {
   Activity,
+  AlertCircle,
   BarChart3,
-  AlertCircle
+  DollarSign,
+  Package,
+  RefreshCw,
+  TrendingUp,
+  Users,
 } from "lucide-preact";
 import { formatBytes } from "@suppers/admin";
 import { DashboardApiClient } from "../lib/api-client/dashboard/dashboard-api.ts";
@@ -55,15 +51,18 @@ export default function AdminDashboardIsland() {
       } else {
         isLoading.value = true;
       }
-      
+
       error.value = null;
 
       const response = await apiClient.getDashboardMetrics();
-      
+
       if (response.error) {
-        error.value = response.error;
+        const errorMessage = typeof response.error === 'string' 
+          ? response.error 
+          : response.error.message || 'Failed to load dashboard data';
+        error.value = errorMessage;
         dashboardData.value = null;
-        showError(response.error);
+        showError(errorMessage);
       } else {
         dashboardData.value = response.data || null;
         if (showRefreshing) {
@@ -126,24 +125,26 @@ export default function AdminDashboardIsland() {
           <h1 class="text-2xl sm:text-3xl font-bold text-base-content">Dashboard</h1>
           <p class="text-base-content/70 mt-1">Platform overview and key metrics</p>
         </div>
-        <Button 
+        <Button
           variant="outline"
           size="sm"
           onClick={handleRefresh}
           disabled={refreshing}
           class="gap-2"
         >
-          {refreshing ? (
-            <>
-              <Loading size="sm" />
-              Refreshing...
-            </>
-          ) : (
-            <>
-              <RefreshCw size={16} />
-              Refresh
-            </>
-          )}
+          {refreshing
+            ? (
+              <>
+                <Loading size="sm" />
+                Refreshing...
+              </>
+            )
+            : (
+              <>
+                <RefreshCw size={16} />
+                Refresh
+              </>
+            )}
         </Button>
       </div>
 
@@ -225,4 +226,4 @@ export default function AdminDashboardIsland() {
 }
 
 // Export utility functions
-export { dashboardData, isLoading, error };
+export { dashboardData, error, isLoading };

@@ -1,15 +1,15 @@
 // Unit tests for drawing calculations and utilities
-import { assertEquals, assertExists, assert } from '@std/assert';
+import { assert, assertEquals, assertExists } from "@std/assert";
 import {
   calculateDistance,
-  simplifyStroke,
-  isPointInCanvas,
   clampPointToCanvas,
+  drawSmoothLine,
   getCanvasCoordinatesFromMouse,
   getCanvasCoordinatesFromTouch,
-  drawSmoothLine,
-} from './paint-utils.ts';
-import type { Point, Stroke } from '../types/paint.ts';
+  isPointInCanvas,
+  simplifyStroke,
+} from "./paint-utils.ts";
+import type { Point, Stroke } from "../types/paint.ts";
 
 // Mock canvas for testing
 class MockCanvas {
@@ -32,11 +32,11 @@ class MockCanvas {
 }
 
 class MockCanvasRenderingContext2D {
-  lineCap = 'butt';
-  lineJoin = 'miter';
-  strokeStyle = '#000000';
+  lineCap = "butt";
+  lineJoin = "miter";
+  strokeStyle = "#000000";
   lineWidth = 1;
-  
+
   beginPath(): void {}
   moveTo(x: number, y: number): void {}
   lineTo(x: number, y: number): void {}
@@ -44,7 +44,7 @@ class MockCanvasRenderingContext2D {
   stroke(): void {}
 }
 
-Deno.test('Drawing Calculations - Distance calculations', () => {
+Deno.test("Drawing Calculations - Distance calculations", () => {
   // Test basic distance calculation
   const point1: Point = { x: 0, y: 0 };
   const point2: Point = { x: 3, y: 4 };
@@ -65,7 +65,7 @@ Deno.test('Drawing Calculations - Distance calculations', () => {
   assertEquals(calculateDistance(decPoint1, decPoint2), 5);
 });
 
-Deno.test('Drawing Calculations - Stroke simplification', () => {
+Deno.test("Drawing Calculations - Stroke simplification", () => {
   // Test empty stroke
   assertEquals(simplifyStroke([], 2).length, 0);
 
@@ -100,7 +100,7 @@ Deno.test('Drawing Calculations - Stroke simplification', () => {
   assertEquals(simplifiedFar.length, 4); // All points should be kept
 });
 
-Deno.test('Drawing Calculations - Canvas bounds checking', () => {
+Deno.test("Drawing Calculations - Canvas bounds checking", () => {
   const canvasWidth = 800;
   const canvasHeight = 600;
 
@@ -123,7 +123,7 @@ Deno.test('Drawing Calculations - Canvas bounds checking', () => {
   assertEquals(isPointInCanvas(negativePoint, canvasWidth, canvasHeight), false);
 });
 
-Deno.test('Drawing Calculations - Point clamping', () => {
+Deno.test("Drawing Calculations - Point clamping", () => {
   const canvasWidth = 800;
   const canvasHeight = 600;
 
@@ -152,15 +152,15 @@ Deno.test('Drawing Calculations - Point clamping', () => {
   assertEquals(clampedMixed.y, canvasHeight);
 });
 
-Deno.test('Drawing Calculations - Mouse coordinate conversion', () => {
+Deno.test("Drawing Calculations - Mouse coordinate conversion", () => {
   const canvas = new MockCanvas() as any;
-  
+
   // Test basic coordinate conversion
   const mouseEvent = {
     clientX: 110, // 10 (canvas left) + 100
     clientY: 120, // 20 (canvas top) + 100
   } as MouseEvent;
-  
+
   const point = getCanvasCoordinatesFromMouse(mouseEvent, canvas);
   assertEquals(point.x, 100);
   assertEquals(point.y, 100);
@@ -170,15 +170,15 @@ Deno.test('Drawing Calculations - Mouse coordinate conversion', () => {
     clientX: 10, // Canvas left edge
     clientY: 20, // Canvas top edge
   } as MouseEvent;
-  
+
   const edgePoint = getCanvasCoordinatesFromMouse(edgeEvent, canvas);
   assertEquals(edgePoint.x, 0);
   assertEquals(edgePoint.y, 0);
 });
 
-Deno.test('Drawing Calculations - Touch coordinate conversion', () => {
+Deno.test("Drawing Calculations - Touch coordinate conversion", () => {
   const canvas = new MockCanvas() as any;
-  
+
   // Test basic touch coordinate conversion
   const touchEvent = {
     touches: [{
@@ -187,7 +187,7 @@ Deno.test('Drawing Calculations - Touch coordinate conversion', () => {
       force: 0.8,
     }],
   } as any;
-  
+
   const point = getCanvasCoordinatesFromTouch(touchEvent, canvas);
   assertEquals(point.x, 150);
   assertEquals(point.y, 150);
@@ -200,7 +200,7 @@ Deno.test('Drawing Calculations - Touch coordinate conversion', () => {
       clientY: 120,
     }],
   } as any;
-  
+
   const pointNoForce = getCanvasCoordinatesFromTouch(touchEventNoForce, canvas);
   assertEquals(pointNoForce.x, 100);
   assertEquals(pointNoForce.y, 100);
@@ -211,25 +211,25 @@ Deno.test('Drawing Calculations - Touch coordinate conversion', () => {
     touches: [],
     changedTouches: [],
   } as any;
-  
+
   const emptyPoint = getCanvasCoordinatesFromTouch(emptyTouchEvent, canvas);
   assertEquals(emptyPoint.x, 0);
   assertEquals(emptyPoint.y, 0);
   assertEquals(emptyPoint.pressure, 1);
 });
 
-Deno.test('Drawing Calculations - Smooth line drawing', () => {
+Deno.test("Drawing Calculations - Smooth line drawing", () => {
   const ctx = new MockCanvasRenderingContext2D() as any;
-  
+
   // Test empty points array (should not throw, but won't set properties)
   const initialLineWidth = ctx.lineWidth;
-  drawSmoothLine(ctx, [], '#000000', 2);
+  drawSmoothLine(ctx, [], "#000000", 2);
   // Properties should remain unchanged for empty array
   assertEquals(ctx.lineWidth, initialLineWidth);
 
   // Test single point (should not throw, but won't set properties)
   const singlePoint: Point[] = [{ x: 10, y: 10 }];
-  drawSmoothLine(ctx, singlePoint, '#ff0000', 3);
+  drawSmoothLine(ctx, singlePoint, "#ff0000", 3);
   // Properties should remain unchanged for single point
   assertEquals(ctx.lineWidth, initialLineWidth);
 
@@ -238,8 +238,8 @@ Deno.test('Drawing Calculations - Smooth line drawing', () => {
     { x: 0, y: 0 },
     { x: 10, y: 10 },
   ];
-  drawSmoothLine(ctx, twoPoints, '#00ff00', 4);
-  assertEquals(ctx.strokeStyle, '#00ff00');
+  drawSmoothLine(ctx, twoPoints, "#00ff00", 4);
+  assertEquals(ctx.strokeStyle, "#00ff00");
   assertEquals(ctx.lineWidth, 4);
 
   // Test multiple points (should draw smooth curves)
@@ -249,20 +249,20 @@ Deno.test('Drawing Calculations - Smooth line drawing', () => {
     { x: 20, y: 10 },
     { x: 30, y: 5 },
   ];
-  drawSmoothLine(ctx, multiplePoints, '#0000ff', 5);
-  assertEquals(ctx.strokeStyle, '#0000ff');
+  drawSmoothLine(ctx, multiplePoints, "#0000ff", 5);
+  assertEquals(ctx.strokeStyle, "#0000ff");
   assertEquals(ctx.lineWidth, 5);
 });
 
-Deno.test('Drawing Calculations - Pressure sensitivity', () => {
+Deno.test("Drawing Calculations - Pressure sensitivity", () => {
   // Test pressure value normalization
   const testPressures = [0, 0.25, 0.5, 0.75, 1.0, 1.5]; // Including out-of-range value
-  
-  testPressures.forEach(pressure => {
+
+  testPressures.forEach((pressure) => {
     const normalizedPressure = Math.max(0, Math.min(1, pressure));
     assertEquals(normalizedPressure >= 0, true);
     assertEquals(normalizedPressure <= 1, true);
-    
+
     if (pressure <= 0) {
       assertEquals(normalizedPressure, 0);
     } else if (pressure >= 1) {
@@ -273,16 +273,16 @@ Deno.test('Drawing Calculations - Pressure sensitivity', () => {
   });
 });
 
-Deno.test('Drawing Calculations - Stroke width calculations', () => {
+Deno.test("Drawing Calculations - Stroke width calculations", () => {
   // Test width scaling based on pressure
   const baseWidth = 5;
   const testPressures = [0.1, 0.5, 0.8, 1.0];
-  
-  testPressures.forEach(pressure => {
+
+  testPressures.forEach((pressure) => {
     const scaledWidth = baseWidth * pressure;
     assertEquals(scaledWidth >= 0, true);
     assertEquals(scaledWidth <= baseWidth, true);
-    
+
     if (pressure === 1.0) {
       assertEquals(scaledWidth, baseWidth);
     } else if (pressure === 0.5) {
@@ -291,7 +291,7 @@ Deno.test('Drawing Calculations - Stroke width calculations', () => {
   });
 });
 
-Deno.test('Drawing Calculations - Bezier curve calculations', () => {
+Deno.test("Drawing Calculations - Bezier curve calculations", () => {
   // Test quadratic bezier curve point calculation
   const calculateQuadraticBezier = (t: number, p0: Point, p1: Point, p2: Point): Point => {
     const x = (1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x;
@@ -319,4 +319,4 @@ Deno.test('Drawing Calculations - Bezier curve calculations', () => {
   assertEquals(middle.y, 50); // Should be influenced by control point
 });
 
-console.log('✅ All drawing calculation tests completed successfully!');
+console.log("✅ All drawing calculation tests completed successfully!");

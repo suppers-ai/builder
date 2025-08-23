@@ -1,4 +1,4 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { corsHeaders } from "../../_common/index.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getApplications(supabase: SupabaseClient, url: URL): Promise<Response> {

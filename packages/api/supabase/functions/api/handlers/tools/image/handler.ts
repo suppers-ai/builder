@@ -2,34 +2,32 @@
  * Image tools handler - processes image manipulation requests
  */
 
-import { corsHeaders } from "../../../lib/cors.ts";
+import { corsHeaders, errorResponses, jsonResponse } from "../../../_common/index.ts";
 import type { ImageToolRequest, ImageToolResponse } from "./types.ts";
-import { 
-  getTool, 
-  getToolsInfo, 
-  checkDependencies 
-} from "./tools-registry.ts";
-import { 
-  isValidImageFormat, 
-  generateTempPath, 
-  cleanupTempFiles, 
-  writeBytesToFile, 
+import { checkDependencies, getTool, getToolsInfo } from "./tools-registry.ts";
+import {
   bytesToBase64,
-  ensureDir 
+  cleanupTempFiles,
+  ensureDir,
+  generateTempPath,
+  isValidImageFormat,
+  writeBytesToFile,
 } from "./utils.ts";
 
 /**
  * Main image tools handler
  */
 export async function handleImageTools(req: Request): Promise<Response> {
+  const origin = req.headers.get('origin');
+  
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   const url = new URL(req.url);
-  const pathSegments = url.pathname.split("/").filter(segment => segment);
-  
+  const pathSegments = url.pathname.split("/").filter((segment) => segment);
+
   // Extract tool action from path: /api/v1/tools/image/{action}
   const action = pathSegments[pathSegments.length - 1];
 
@@ -40,25 +38,19 @@ export async function handleImageTools(req: Request): Promise<Response> {
       case "POST":
         return await handlePostRequest(action, req);
       default:
-        return new Response(
-          JSON.stringify({ error: `Method ${req.method} not allowed` }),
-          {
-            status: 405,
-            headers: { ...corsHeaders, "Content-Type": "application/json" }
-          }
-        );
+        return errorResponses.methodNotAllowed(`Method ${req.method} not allowed`, origin || undefined);
     }
   } catch (error) {
     console.error("Image tools handler error:", error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 }
@@ -82,15 +74,15 @@ async function handleGetRequest(action: string, url: URL): Promise<Response> {
               parameters: {
                 tool: "Tool name (thumbnail, resize, convert)",
                 image: "Image file or base64 data",
-                options: "Tool-specific options object"
-              }
-            }
-          }
+                options: "Tool-specific options object",
+              },
+            },
+          },
         }),
         {
           status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
 
     case "status":
@@ -101,13 +93,13 @@ async function handleGetRequest(action: string, url: URL): Promise<Response> {
           data: {
             status: dependencies.allReady ? "ready" : "dependencies_missing",
             dependencies,
-            availableTools: getToolsInfo().length
-          }
+            availableTools: getToolsInfo().length,
+          },
         }),
         {
           status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
 
     case "health":
@@ -116,24 +108,24 @@ async function handleGetRequest(action: string, url: URL): Promise<Response> {
           success: true,
           data: {
             status: "healthy",
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         }),
         {
           status: 200,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
 
     default:
       return new Response(
         JSON.stringify({
-          error: `Unknown action: ${action}. Available actions: tools, status, health`
+          error: `Unknown action: ${action}. Available actions: tools, status, health`,
         }),
         {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
   }
 }
@@ -145,12 +137,12 @@ async function handlePostRequest(action: string, req: Request): Promise<Response
   if (action !== "process") {
     return new Response(
       JSON.stringify({
-        error: `POST action '${action}' not supported. Use 'process' for image processing.`
+        error: `POST action '${action}' not supported. Use 'process' for image processing.`,
       }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -160,12 +152,12 @@ async function handlePostRequest(action: string, req: Request): Promise<Response
     return new Response(
       JSON.stringify({
         error: "Required dependencies not available",
-        missing: dependencies.missing
+        missing: dependencies.missing,
       }),
       {
         status: 503,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -178,12 +170,12 @@ async function handlePostRequest(action: string, req: Request): Promise<Response
   } else {
     return new Response(
       JSON.stringify({
-        error: "Unsupported content type. Use multipart/form-data or application/json"
+        error: "Unsupported content type. Use multipart/form-data or application/json",
       }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 }
@@ -202,8 +194,8 @@ async function handleMultipartRequest(req: Request): Promise<Response> {
       JSON.stringify({ error: "Tool parameter is required" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -212,8 +204,8 @@ async function handleMultipartRequest(req: Request): Promise<Response> {
       JSON.stringify({ error: "Image file is required" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -226,8 +218,8 @@ async function handleMultipartRequest(req: Request): Promise<Response> {
         JSON.stringify({ error: "Invalid options JSON" }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
   }
@@ -238,8 +230,8 @@ async function handleMultipartRequest(req: Request): Promise<Response> {
       JSON.stringify({ error: "Unsupported image format" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -259,8 +251,8 @@ async function handleJsonRequest(req: Request): Promise<Response> {
       JSON.stringify({ error: "Tool parameter is required" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -269,24 +261,24 @@ async function handleJsonRequest(req: Request): Promise<Response> {
       JSON.stringify({ error: "Image data is required" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
   let inputBuffer: Uint8Array;
-  
+
   if (typeof image === "string") {
     // Assume base64 encoded image
     try {
-      inputBuffer = Uint8Array.from(atob(image), c => c.charCodeAt(0));
+      inputBuffer = Uint8Array.from(atob(image), (c) => c.charCodeAt(0));
     } catch {
       return new Response(
         JSON.stringify({ error: "Invalid base64 image data" }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
   } else {
@@ -294,8 +286,8 @@ async function handleJsonRequest(req: Request): Promise<Response> {
       JSON.stringify({ error: "Image must be base64 string for JSON requests" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -307,24 +299,24 @@ async function handleJsonRequest(req: Request): Promise<Response> {
  */
 async function processImage(request: ImageToolRequest): Promise<Response> {
   const toolHandler = getTool(request.tool);
-  
+
   if (!toolHandler) {
     return new Response(
       JSON.stringify({
         error: `Unknown tool: ${request.tool}`,
-        availableTools: getToolsInfo().map(t => t.name)
+        availableTools: getToolsInfo().map((t) => t.name),
       }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
   try {
     // Merge with default options
     const finalOptions = { ...toolHandler.defaultOptions, ...request.options };
-    
+
     // Process the image
     const input = request.inputPath || request.inputBuffer!;
     const result = await toolHandler.process(input, finalOptions);
@@ -333,20 +325,20 @@ async function processImage(request: ImageToolRequest): Promise<Response> {
       return new Response(
         JSON.stringify({
           error: "Image processing failed",
-          details: result.error
+          details: result.error,
         }),
         {
           status: 422,
-          headers: { ...corsHeaders, "Content-Type": "application/json" }
-        }
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
 
     // Prepare response based on output format
-    let responseData: any = {
+    const responseData: any = {
       success: true,
       tool: request.tool,
-      metadata: result.metadata
+      metadata: result.metadata,
     };
 
     if (request.outputFormat === "buffer" && result.outputBuffer) {
@@ -356,8 +348,10 @@ async function processImage(request: ImageToolRequest): Promise<Response> {
         headers: {
           ...corsHeaders,
           "Content-Type": getContentType(finalOptions.format || "jpeg"),
-          "Content-Disposition": `attachment; filename="processed.${finalOptions.format || "jpeg"}"`
-        }
+          "Content-Disposition": `attachment; filename="processed.${
+            finalOptions.format || "jpeg"
+          }"`,
+        },
       });
     } else if (request.outputFormat === "base64" && result.outputBuffer) {
       responseData.data = bytesToBase64(result.outputBuffer);
@@ -369,21 +363,20 @@ async function processImage(request: ImageToolRequest): Promise<Response> {
       JSON.stringify(responseData),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
-
   } catch (error) {
     console.error("Image processing error:", error);
     return new Response(
       JSON.stringify({
         error: "Image processing failed",
-        message: error instanceof Error ? error.message : "Unknown error"
+        message: error instanceof Error ? error.message : "Unknown error",
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 }

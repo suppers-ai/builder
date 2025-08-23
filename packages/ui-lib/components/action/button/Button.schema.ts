@@ -56,6 +56,7 @@ export const ButtonPropsSchema = ButtonBaseSchema
 // Infer TypeScript type from schema and make properties with defaults optional
 export type ButtonProps = Partial<z.infer<typeof ButtonPropsSchema>> & {
   children?: any; // ComponentChildren from preact
+  [key: string]: any; // Allow additional HTML attributes
 };
 
 // Export validation function

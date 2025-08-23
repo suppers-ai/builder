@@ -89,7 +89,7 @@ function highlightCode(code: string, language: string): string {
   }
 
   // First escape HTML entities
-  let escaped = code
+  const escaped = code
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

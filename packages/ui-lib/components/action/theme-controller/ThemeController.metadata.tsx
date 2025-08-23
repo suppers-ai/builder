@@ -21,8 +21,8 @@ export const themeControllerMetadata: ComponentMetadata = {
     <div class="flex items-center justify-center">
       <ThemeController
         currentTheme="light"
-        showButton={true}
-        showLabel={true}
+        showButton
+        showLabel
       />
     </div>
   ),

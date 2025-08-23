@@ -2,21 +2,20 @@
  * Shared theme utilities for consistent theme management across all packages
  */
 
-import { THEME_NAMES, DEFAULT_THEME, User } from "@suppers/shared";
+import { DEFAULT_THEME, THEME_NAMES, User } from "../mod.ts";
 
 export type ThemeId = string;
 export const AVAILABLE_THEMES: ThemeId[] = THEME_NAMES;
-
 
 /**
  * Get system theme preference
  */
 function getSystemTheme(): ThemeId {
   if (typeof window === "undefined") return DEFAULT_THEME;
-  
+
   try {
-    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches 
-      ? "dark" 
+    return globalThis.matchMedia && globalThis.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
       : "light";
   } catch {
     return DEFAULT_THEME;
@@ -28,7 +27,7 @@ function getSystemTheme(): ThemeId {
  */
 function getSavedTheme(): ThemeId | null {
   if (typeof window === "undefined") return null;
-  
+
   try {
     const saved = localStorage.getItem("theme");
     return saved && AVAILABLE_THEMES.includes(saved as ThemeId) ? saved as ThemeId : null;
@@ -40,9 +39,9 @@ function getSavedTheme(): ThemeId | null {
 /**
  * Get theme from user
  */
-function getUserTheme(user: { theme_id?: string } | null): ThemeId | null {
+function getUserTheme(user: { theme_id?: string | null } | null): ThemeId | null {
   if (!user?.theme_id) return null;
-  
+
   return AVAILABLE_THEMES.includes(user.theme_id as ThemeId) ? user.theme_id as ThemeId : null;
 }
 
@@ -57,15 +56,15 @@ export function getCurrentTheme(user?: User | null): ThemeId {
   // Priority 1: User metadata
   const userTheme = getUserTheme(user || null);
   if (userTheme) return userTheme;
-  
+
   // Priority 2: Saved theme
   const savedTheme = getSavedTheme();
   if (savedTheme) return savedTheme;
-  
+
   // Priority 3: System preference
   const systemTheme = getSystemTheme();
   if (systemTheme) return systemTheme;
-  
+
   // Priority 4: Default
   return DEFAULT_THEME;
 }
@@ -81,18 +80,20 @@ export function clearTheme() {
  */
 export function applyTheme(theme: ThemeId): void {
   if (typeof document === "undefined") return;
-  
+
   try {
     // Apply to DOM
     document.documentElement.setAttribute("data-theme", theme);
-    
+
     // Save to localStorage
     localStorage.setItem("theme", theme);
-    
+
     // Dispatch custom event for other components to listen
-    window.dispatchEvent(new CustomEvent("theme-changed", { 
-      detail: { theme } 
-    }));
+    globalThis.dispatchEvent(
+      new CustomEvent("theme-changed", {
+        detail: { theme },
+      }),
+    );
   } catch (error) {
     console.warn("Failed to apply theme:", error);
   }
@@ -136,4 +137,3 @@ export function generateEarlyThemeScript(): string {
     })();
   `.trim();
 }
-

@@ -36,7 +36,7 @@ export default function Home() {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
               <div class="flex justify-center mb-4">
-                <img src="https://cdn.suppers.ai/logos/deno.svg" alt="Deno" class="w-12 h-12" />
+                <img src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/deno.svg`} alt="Deno" class="w-12 h-12" />
               </div>
               <h3 class="text-xl mb-2 font-semibold">Deno</h3>
               <p class="text-base-content/70">
@@ -46,7 +46,7 @@ export default function Home() {
 
             <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
               <div class="flex justify-center mb-4">
-                <img src="https://cdn.suppers.ai/logos/fresh.svg" alt="Fresh" class="w-12 h-12" />
+                <img src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/fresh.svg`} alt="Fresh" class="w-12 h-12" />
               </div>
               <h3 class="text-xl mb-2 font-semibold">Fresh</h3>
               <p class="text-base-content/70">
@@ -56,7 +56,7 @@ export default function Home() {
 
             <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
               <div class="flex justify-center mb-4">
-                <img src="https://cdn.suppers.ai/logos/preact.svg" alt="Preact" class="w-12 h-12" />
+                <img src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/preact.svg`} alt="Preact" class="w-12 h-12" />
               </div>
               <h3 class="text-xl mb-2 font-semibold">Preact</h3>
               <p class="text-base-content/70">
@@ -67,7 +67,7 @@ export default function Home() {
             <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
               <div class="flex justify-center mb-4">
                 <img
-                  src="https://cdn.suppers.ai/logos/daisyui.svg"
+                  src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/daisyui.svg`}
                   alt="daisyUI"
                   class="w-12 h-12"
                 />

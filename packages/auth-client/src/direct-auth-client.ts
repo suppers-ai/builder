@@ -8,12 +8,39 @@ import type {
   AuthEventData,
   AuthEventType,
   AuthSession,
-  ResetPasswordData,
-  SignInData,
-  SignUpData,
-  UpdateUserData,
 } from "../../shared/types/auth.ts";
 import type { User } from "../../shared/utils/type-mappers.ts";
+
+// Define auth data types
+export interface SignInData {
+  email: string;
+  password: string;
+}
+
+export interface SignUpData {
+  email: string;
+  password: string;
+  name?: string;
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+}
+
+export interface UpdateUserData {
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  theme_id?: string;
+  stripe_customer_id?: string;
+  role?: string;
+}
+
+export interface ResetPasswordData {
+  email: string;
+}
 
 /**
  * Direct authentication client for direct Supabase integration
@@ -26,7 +53,7 @@ export class DirectAuthClient {
 
   constructor(supabaseUrl: string, supabaseAnonKey: string) {
     console.log("DirectAuthClient: Initializing with URL:", supabaseUrl ? "provided" : "missing");
-    
+
     try {
       if (!createClient) {
         console.warn("DirectAuthClient: createClient not available - running in offline mode");
@@ -40,7 +67,7 @@ export class DirectAuthClient {
       }
 
       console.log("DirectAuthClient: Creating Supabase client...");
-      
+
       // Initialize Supabase client
       this.supabase = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
@@ -66,10 +93,10 @@ export class DirectAuthClient {
           // Store only the user ID
           this.saveUserIdToStorage(session.user.id);
           // Don't block on profile creation - let it happen on-demand
-          this.ensureUserProfile(session.user).catch(error => {
+          this.ensureUserProfile(session.user).catch((error) => {
             console.error("Failed to ensure user profile, but continuing:", error);
           });
-          this.emitEvent("login", { userId: session.user.id });
+          this.emitEvent("login", { session: await this.getSession() });
         } else if (event === "SIGNED_OUT") {
           this.clearUserIdFromStorage();
           this.emitEvent("logout");
@@ -130,40 +157,52 @@ export class DirectAuthClient {
   private async ensureUserProfile(supabaseUser: SupabaseUser): Promise<void> {
     try {
       console.log("DirectAuthClient: Checking if user profile exists for:", supabaseUser.id);
-      
+
       if (!this.supabase || !this.supabase.auth) {
         console.warn("DirectAuthClient: Supabase client not available for profile check");
         return;
       }
-      
+
       // First, let's test if we can connect to the database at all
       console.log("DirectAuthClient: Testing database connection...");
       try {
-        const testQuery = await this.supabase
+        const testQueryPromise = this.supabase
           .from("users")
           .select("count")
           .limit(1);
+        
+        const timeoutPromise = new Promise<{ data: null, error: Error }>((resolve) => {
+          setTimeout(() => resolve({ data: null, error: new Error("Database connection timeout") }), 3000);
+        });
+        
+        const testQuery = await Promise.race([testQueryPromise, timeoutPromise]);
+        
+        if (testQuery.error) {
+          console.log("DirectAuthClient: Database connection test failed or timed out:", testQuery.error.message);
+          return;
+        }
+        
         console.log("DirectAuthClient: Database connection test result:", testQuery);
       } catch (testError) {
         console.error("DirectAuthClient: Database connection test failed:", testError);
         return;
       }
-      
+
       console.log("DirectAuthClient: Database connection successful, checking user profile...");
-      
+
       // Try to check if user profile exists - this might fail due to RLS if user doesn't exist yet
       let existingUser = null;
       let fetchError = null;
-      
+
       try {
         const profileCheckPromise = this.supabase
           .from("users")
           .select("id")
           .eq("id", supabaseUser.id)
           .single();
-          
-        const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error("Profile check timeout")), 5000);
+
+        const timeoutPromise = new Promise<{ data: null, error: Error }>((resolve) => {
+          setTimeout(() => resolve({ data: null, error: new Error("Profile check timeout") }), 5000);
         });
 
         const result = await Promise.race([profileCheckPromise, timeoutPromise]);
@@ -182,7 +221,7 @@ export class DirectAuthClient {
       }
 
       console.log("DirectAuthClient: Creating new user profile");
-      
+
       // Create new user profile - this should work because the user is authenticated
       const newUserData = {
         id: supabaseUser.id,
@@ -201,21 +240,23 @@ export class DirectAuthClient {
 
       try {
         const insertPromise = this.supabase.from("users").insert(newUserData);
-        const insertTimeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error("Profile insert timeout")), 10000);
+        const insertTimeoutPromise = new Promise<{ error: Error }>((resolve) => {
+          setTimeout(() => resolve({ error: new Error("Profile insert timeout") }), 10000);
         });
 
         const { error: insertError } = await Promise.race([
           insertPromise,
-          insertTimeoutPromise
+          insertTimeoutPromise,
         ]);
 
         if (insertError) {
           console.error("Failed to create user profile:", insertError);
-          
+
           // If RLS is blocking the insert, we might need to handle this differently
           if (insertError.message.includes("new row violates row-level security policy")) {
-            console.log("DirectAuthClient: RLS policy blocked insert, this might be expected for new users");
+            console.log(
+              "DirectAuthClient: RLS policy blocked insert, this might be expected for new users",
+            );
             // The profile will be created when the user first accesses their profile
           }
         } else {
@@ -235,55 +276,70 @@ export class DirectAuthClient {
   async initialize(): Promise<void> {
     try {
       console.log("DirectAuthClient: Starting initialization...");
-      
+
       if (!this.supabase || !this.supabase.auth) {
         console.warn("DirectAuthClient: Supabase client not available - running in offline mode");
         return;
       }
 
       console.log("DirectAuthClient: Supabase client available, checking session...");
-      
+
       // Check if we already have a user ID in storage first
       const storedUserId = this.getUserIdFromStorage();
       if (storedUserId) {
         console.log("DirectAuthClient: Found stored user ID:", storedUserId);
-        // Emit login event for stored user
-        this.emitEvent("login", { userId: storedUserId });
-        console.log("DirectAuthClient: Initialization complete with stored user");
-        return;
+        // Check if we have a valid session for this stored user
+        const currentSession = await this.getSession();
+        if (currentSession) {
+          // We have both stored user ID and valid session
+          this.emitEvent("login", { session: currentSession });
+          console.log("DirectAuthClient: Initialization complete with stored user and valid session");
+          return;
+        } else {
+          // Stored user ID but no valid session - clear the stored ID
+          console.log("DirectAuthClient: Stored user ID found but no valid session, clearing storage");
+          this.clearUserIdFromStorage();
+        }
       }
 
       console.log("DirectAuthClient: No stored user ID, checking Supabase session...");
-      
-      // Get current session from Supabase with a reasonable timeout
-      const sessionPromise = this.supabase.auth.getSession();
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Session check timeout")), 10000);
-      });
 
-      const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]);
-
-      if (error) {
-        console.error("Failed to get session:", error);
-        return;
-      }
-
-      console.log("DirectAuthClient: Session retrieved, user:", !!session?.user);
-      
-      if (session?.user) {
-        // Store user ID and ensure profile exists
-        this.saveUserIdToStorage(session.user.id);
-        console.log("DirectAuthClient: Ensuring user profile...");
-        
-        // Don't wait for profile creation if it's slow
-        this.ensureUserProfile(session.user).catch(error => {
-          console.error("Failed to ensure user profile, but continuing:", error);
+      try {
+        // Get current session from Supabase with a reasonable timeout
+        const sessionPromise = this.supabase.auth.getSession();
+        const timeoutPromise = new Promise<{ data: { session: null }, error: Error }>((resolve) => {
+          setTimeout(() => resolve({ data: { session: null }, error: new Error("Session check timeout") }), 5000);
         });
+
+        const result = await Promise.race([sessionPromise, timeoutPromise]);
         
-        this.emitEvent("login", { userId: session.user.id });
-        console.log("DirectAuthClient: Initialization complete");
-      } else {
-        console.log("DirectAuthClient: No active session");
+        if (result.error) {
+          console.log("DirectAuthClient: Session check failed or timed out:", result.error.message);
+          return;
+        }
+
+        const { data: { session } } = result;
+
+        console.log("DirectAuthClient: Session retrieved, user:", !!session?.user);
+
+        if (session?.user) {
+          // Store user ID and ensure profile exists
+          this.saveUserIdToStorage(session.user.id);
+          console.log("DirectAuthClient: Ensuring user profile...");
+
+          // Don't wait for profile creation if it's slow
+          this.ensureUserProfile(session.user).catch((error) => {
+            console.error("Failed to ensure user profile, but continuing:", error);
+          });
+
+          this.emitEvent("login", { session: await this.getSession() });
+          console.log("DirectAuthClient: Initialization complete");
+        } else {
+          console.log("DirectAuthClient: No active session");
+        }
+      } catch (innerError) {
+        console.log("DirectAuthClient: Error during session check:", innerError);
+        // Continue initialization even if session check fails
       }
     } catch (error) {
       console.error("Auth initialization failed:", error);
@@ -366,15 +422,33 @@ export class DirectAuthClient {
     if (!this.supabase || !this.supabase.auth) return null;
 
     try {
-      const { data: { session } } = await this.supabase.auth.getSession();
+      // Add timeout to prevent hanging
+      const sessionPromise = this.supabase.auth.getSession();
+      const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) => {
+        setTimeout(() => resolve({ data: { session: null } }), 5000);
+      });
+
+      const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
       if (!session) return null;
 
-      const userId = this.getUserIdFromStorage();
-      if (!userId) return null;
-
+      // Convert Supabase session to our AuthSession type
       return {
-        userId,
-        session,
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_in: session.expires_in,
+        expires_at: session.expires_at,
+        token_type: session.token_type,
+        user: session.user ? {
+          id: session.user.id,
+          email: session.user.email,
+          email_verified: session.user.email_confirmed_at ? true : false,
+          phone: session.user.phone,
+          created_at: session.user.created_at,
+          updated_at: session.user.updated_at,
+          app_metadata: session.user.app_metadata,
+          user_metadata: session.user.user_metadata,
+          role: session.user.role,
+        } : undefined,
       };
     } catch (error) {
       console.error("Error getting session:", error);
@@ -416,7 +490,7 @@ export class DirectAuthClient {
   async quickAuthCheck(): Promise<{ isAuthenticated: boolean; userId?: string; error?: string }> {
     try {
       console.log("DirectAuthClient: Quick auth check starting...");
-      
+
       // Check local storage first (fastest)
       const storedUserId = this.getUserIdFromStorage();
       if (storedUserId) {
@@ -431,7 +505,7 @@ export class DirectAuthClient {
       }
 
       console.log("DirectAuthClient: Quick auth check - checking Supabase session...");
-      
+
       // Check Supabase session with timeout
       const sessionPromise = this.supabase.auth.getSession();
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -439,7 +513,7 @@ export class DirectAuthClient {
       });
 
       const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
-      
+
       if (session?.user) {
         console.log("DirectAuthClient: Quick auth check - found Supabase session");
         return { isAuthenticated: true, userId: session.user.id };
@@ -449,7 +523,10 @@ export class DirectAuthClient {
       return { isAuthenticated: false };
     } catch (error) {
       console.error("Quick auth check failed:", error);
-      return { isAuthenticated: false, error: error instanceof Error ? error.message : "Unknown error" };
+      return {
+        isAuthenticated: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 
@@ -536,9 +613,9 @@ export class DirectAuthClient {
 
       if (error) {
         console.error("Error fetching user:", error);
-        
+
         // If user doesn't exist, try to create the profile
-        if (error.code === 'PGRST116') { // No rows returned
+        if (error.code === "PGRST116") { // No rows returned
           console.log("DirectAuthClient: User profile not found, attempting to create...");
           const created = await this.createUserProfileIfNeeded();
           if (created) {
@@ -548,16 +625,16 @@ export class DirectAuthClient {
               .select("*")
               .eq("id", userId)
               .single();
-              
+
             if (newError) {
               console.error("Error fetching user after creation:", newError);
               return null;
             }
-            
+
             return newUser;
           }
         }
-        
+
         return null;
       }
 
@@ -577,10 +654,17 @@ export class DirectAuthClient {
         return { error: "Supabase client not available" };
       }
 
-      const { error } = await this.supabase.auth.signInWithPassword({
+      // Add timeout to prevent hanging
+      const signInPromise = this.supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
+      
+      const timeoutPromise = new Promise<{ error: Error }>((resolve) => {
+        setTimeout(() => resolve({ error: new Error("Sign in timeout - please try again") }), 10000);
+      });
+      
+      const { error } = await Promise.race([signInPromise, timeoutPromise]);
 
       if (error) {
         return { error: error.message };
@@ -601,7 +685,8 @@ export class DirectAuthClient {
         return { error: "Supabase client not available" };
       }
 
-      const { error } = await this.supabase.auth.signUp({
+      // Add timeout to prevent hanging
+      const signUpPromise = this.supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -612,6 +697,12 @@ export class DirectAuthClient {
           },
         },
       });
+      
+      const timeoutPromise = new Promise<{ error: Error }>((resolve) => {
+        setTimeout(() => resolve({ error: new Error("Sign up timeout - please try again") }), 10000);
+      });
+      
+      const { error } = await Promise.race([signUpPromise, timeoutPromise]);
 
       if (error) {
         return { error: error.message };
@@ -632,7 +723,14 @@ export class DirectAuthClient {
         return { error: "Supabase client not available" };
       }
 
-      const { error } = await this.supabase.auth.resetPasswordForEmail(data.email);
+      // Add timeout to prevent hanging
+      const resetPromise = this.supabase.auth.resetPasswordForEmail(data.email);
+      
+      const timeoutPromise = new Promise<{ error: Error }>((resolve) => {
+        setTimeout(() => resolve({ error: new Error("Reset password timeout - please try again") }), 10000);
+      });
+      
+      const { error } = await Promise.race([resetPromise, timeoutPromise]);
 
       if (error) {
         return { error: error.message };
@@ -670,11 +768,17 @@ export class DirectAuthClient {
       }
       if (data.role !== undefined) updateData.role = data.role;
 
-      // Update user profile in public.users table
-      const { error } = await this.supabase
+      // Update user profile in public.users table with timeout
+      const updatePromise = this.supabase
         .from("users")
         .update(updateData)
         .eq("id", userId);
+      
+      const timeoutPromise = new Promise<{ error: Error }>((resolve) => {
+        setTimeout(() => resolve({ error: new Error("Update user timeout - please try again") }), 10000);
+      });
+      
+      const { error } = await Promise.race([updatePromise, timeoutPromise]);
 
       if (error) {
         return { error: error.message };
@@ -692,7 +796,12 @@ export class DirectAuthClient {
   async signOut(): Promise<void> {
     try {
       if (this.supabase) {
-        await this.supabase.auth.signOut();
+        // Add timeout to prevent hanging
+        const signOutPromise = this.supabase.auth.signOut();
+        const timeoutPromise = new Promise<void>((resolve) => {
+          setTimeout(() => resolve(), 5000);
+        });
+        await Promise.race([signOutPromise, timeoutPromise]);
       }
       this.clearUserIdFromStorage();
     } catch (error) {
@@ -709,12 +818,19 @@ export class DirectAuthClient {
         return { error: "Supabase client not available" };
       }
 
-      const { error } = await this.supabase.auth.signInWithOAuth({
+      // Add timeout to prevent hanging
+      const oauthPromise = this.supabase.auth.signInWithOAuth({
         provider: provider as "google" | "github" | "discord" | "facebook",
         options: {
           redirectTo: redirectTo || globalThis.location.origin,
         },
       });
+      
+      const timeoutPromise = new Promise<{ error: Error }>((resolve) => {
+        setTimeout(() => resolve({ error: new Error("OAuth sign in timeout - please try again") }), 10000);
+      });
+      
+      const { error } = await Promise.race([oauthPromise, timeoutPromise]);
 
       if (error) {
         return { error: error.message };
@@ -748,7 +864,11 @@ export class DirectAuthClient {
   /**
    * Upload file to application storage
    */
-  async uploadFile(applicationSlug: string, file: File, filePath?: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async uploadFile(
+    applicationSlug: string,
+    file: File,
+    filePath?: string,
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const token = await this.getAccessToken();
       if (!token) {
@@ -758,7 +878,7 @@ export class DirectAuthClient {
       const formData = new FormData();
       formData.append("file", file);
 
-      const endpoint = filePath 
+      const endpoint = filePath
         ? `/api/v1/storage/${applicationSlug}/${filePath}`
         : `/api/v1/storage/${applicationSlug}`;
 
@@ -771,16 +891,16 @@ export class DirectAuthClient {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
         return { success: false, error: result.error || "Upload failed" };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Upload failed" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Upload failed",
       };
     }
   }
@@ -788,7 +908,12 @@ export class DirectAuthClient {
   /**
    * Upload raw content to application storage
    */
-  async uploadContent(applicationSlug: string, filePath: string, content: string | ArrayBuffer, contentType: string = "text/plain"): Promise<{ success: boolean; data?: any; error?: string }> {
+  async uploadContent(
+    applicationSlug: string,
+    filePath: string,
+    content: string | ArrayBuffer,
+    contentType: string = "text/plain",
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const token = await this.getAccessToken();
       if (!token) {
@@ -807,16 +932,16 @@ export class DirectAuthClient {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
         return { success: false, error: result.error || "Upload failed" };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Upload failed" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Upload failed",
       };
     }
   }
@@ -824,7 +949,9 @@ export class DirectAuthClient {
   /**
    * List files in application storage
    */
-  async listFiles(applicationSlug: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async listFiles(
+    applicationSlug: string,
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const token = await this.getAccessToken();
       if (!token) {
@@ -841,16 +968,16 @@ export class DirectAuthClient {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
         return { success: false, error: result.error || "List failed" };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "List failed" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "List failed",
       };
     }
   }
@@ -858,7 +985,10 @@ export class DirectAuthClient {
   /**
    * Get file metadata from application storage
    */
-  async getFileInfo(applicationSlug: string, filePath: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async getFileInfo(
+    applicationSlug: string,
+    filePath: string,
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const token = await this.getAccessToken();
       if (!token) {
@@ -875,16 +1005,16 @@ export class DirectAuthClient {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
         return { success: false, error: result.error || "Get file info failed" };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Get file info failed" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Get file info failed",
       };
     }
   }
@@ -892,7 +1022,10 @@ export class DirectAuthClient {
   /**
    * Download file content from application storage
    */
-  async downloadFile(applicationSlug: string, filePath: string): Promise<{ success: boolean; data?: Blob; error?: string }> {
+  async downloadFile(
+    applicationSlug: string,
+    filePath: string,
+  ): Promise<{ success: boolean; data?: Blob; error?: string }> {
     try {
       const token = await this.getAccessToken();
       if (!token) {
@@ -916,9 +1049,9 @@ export class DirectAuthClient {
       const blob = await response.blob();
       return { success: true, data: blob };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Download failed" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Download failed",
       };
     }
   }
@@ -926,7 +1059,10 @@ export class DirectAuthClient {
   /**
    * Delete file from application storage
    */
-  async deleteFile(applicationSlug: string, filePath: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  async deleteFile(
+    applicationSlug: string,
+    filePath: string,
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const token = await this.getAccessToken();
       if (!token) {
@@ -943,16 +1079,16 @@ export class DirectAuthClient {
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
         return { success: false, error: result.error || "Delete failed" };
       }
 
       return { success: true, data: result.data };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Delete failed" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Delete failed",
       };
     }
   }

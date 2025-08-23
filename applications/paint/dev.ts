@@ -1,7 +1,7 @@
 #!/usr/bin/env deno run -A --watch=static/,routes/,islands/,components/,lib/
 import { loadSync } from "@std/dotenv";
 import { Builder } from "fresh/dev";
-import { tailwind } from "@fresh/plugin-tailwind";
+import { tailwind } from "@fresh/plugin-tailwind-v3";
 
 // Load environment variables
 try {

@@ -1,5 +1,5 @@
 import SimpleAuthButton from "./SimpleAuthButton.tsx";
-import { Logo } from "@suppers-ai/ui-lib";
+import { Logo } from "@suppers/ui-lib";
 
 export default function SimpleNavbar() {
   return (
@@ -12,7 +12,7 @@ export default function SimpleNavbar() {
           size="lg"
         />
       </div>
-      
+
       <div class="navbar-end">
         <SimpleAuthButton />
       </div>

@@ -80,7 +80,7 @@ export const buttonMetadata: ComponentMetadata = {
     <div class="flex gap-2">
       <Button color="primary">Primary</Button>
       <Button variant="outline">Outline</Button>
-      <Button loading={true}>Loading</Button>
+      <Button loading>Loading</Button>
     </div>
   ),
   examples: buttonExamples,

@@ -113,7 +113,7 @@ export function SearchModal({
 
   // For documentation purposes, show modal content as a static card
   const isDocumentationMode = typeof window === "undefined" ||
-    window.location?.pathname?.includes("/components/");
+    globalThis.location?.pathname?.includes("/components/");
 
   if (isDocumentationMode && !isOpen) {
     return (
@@ -228,8 +228,6 @@ export function SearchModal({
       open={isOpen}
       onClose={onClose}
       class={`modal-top ${className}`}
-      closeOnBackdrop
-      showCloseButton={false}
     >
       <div class="modal-box w-full max-w-2xl mx-auto mt-16 p-0 bg-base-100">
         <div class="p-6 border-b border-base-300">
@@ -238,11 +236,10 @@ export function SearchModal({
               <div class="flex items-center">
                 <Search size={20} class="absolute left-3 text-base-content/60" />
                 <Input
-                  ref={inputRef}
                   type="text"
                   placeholder={placeholder}
                   value={searchQuery}
-                  onInput={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
+                  onChange={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
                   class="pl-10 pr-4 w-full border-0 focus:ring-0 bg-transparent text-lg"
                 />
               </div>

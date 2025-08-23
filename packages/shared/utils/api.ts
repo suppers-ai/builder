@@ -122,12 +122,12 @@ export function parseQueryParams(url: string): QueryParams {
 
   // Custom filters (any param starting with "filter_")
   const filters: Record<string, any> = {};
-  for (const [key, value] of urlObj.searchParams.entries()) {
+  urlObj.searchParams.forEach((value, key) => {
     if (key.startsWith("filter_")) {
       const filterKey = key.substring(7); // Remove "filter_" prefix
       filters[filterKey] = value;
     }
-  }
+  });
   if (Object.keys(filters).length > 0) {
     params.filters = filters;
   }

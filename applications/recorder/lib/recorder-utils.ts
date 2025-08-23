@@ -2,13 +2,13 @@
  * Utility functions for screen recording functionality
  */
 
-import type { RecordingOptions, RecorderConfig } from "../types/recorder.ts";
+import type { RecorderConfig, RecordingOptions } from "../types/recorder.ts";
 
 // Default recorder configuration
 export const RECORDER_CONFIG: RecorderConfig = {
   maxFileSize: 500 * 1024 * 1024, // 500MB
   maxDuration: 30 * 60, // 30 minutes
-  supportedFormats: ['video/webm', 'video/mp4'],
+  supportedFormats: ["video/webm", "video/mp4"],
   uploadChunkSize: 5 * 1024 * 1024, // 5MB chunks
 };
 
@@ -22,21 +22,21 @@ export function isRecordingSupported(): boolean {
     navigator.mediaDevices &&
     navigator.mediaDevices.getDisplayMedia &&
     MediaRecorder.isTypeSupported &&
-    (MediaRecorder.isTypeSupported('video/webm') || MediaRecorder.isTypeSupported('video/mp4'))
+    (MediaRecorder.isTypeSupported("video/webm") || MediaRecorder.isTypeSupported("video/mp4"))
   );
 }
 
 // Get the best supported video format for recording
 export function getBestSupportedFormat(): string {
   if (typeof MediaRecorder === "undefined" || !MediaRecorder.isTypeSupported) {
-    return 'video/webm'; // Default fallback for server-side
+    return "video/webm"; // Default fallback for server-side
   }
 
   const formats = [
-    'video/webm;codecs=vp9',
-    'video/webm;codecs=vp8',
-    'video/webm',
-    'video/mp4',
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
+    "video/webm",
+    "video/mp4",
   ];
 
   for (const format of formats) {
@@ -45,33 +45,33 @@ export function getBestSupportedFormat(): string {
     }
   }
 
-  return 'video/webm'; // fallback
+  return "video/webm"; // fallback
 }
 
 // Convert recording quality setting to MediaRecorder constraints
 export function getRecordingConstraints(options: RecordingOptions): MediaStreamConstraints {
-  const video: MediaTrackConstraints = {
-    mediaSource: 'screen',
+  const video: MediaTrackConstraints & { mediaSource?: string } = {
+    mediaSource: "screen",
   };
 
   // Set quality constraints
   switch (options.quality) {
-    case 'low':
+    case "low":
       video.width = { max: 1280 };
       video.height = { max: 720 };
       video.frameRate = { max: 15 };
       break;
-    case 'medium':
+    case "medium":
       video.width = { max: 1920 };
       video.height = { max: 1080 };
       video.frameRate = { max: 30 };
       break;
-    case 'high':
+    case "high":
       video.width = { max: 2560 };
       video.height = { max: 1440 };
       video.frameRate = { max: 30 };
       break;
-    case 'ultra':
+    case "ultra":
       video.width = { max: 3840 };
       video.height = { max: 2160 };
       video.frameRate = { max: 60 };
@@ -86,13 +86,13 @@ export function getRecordingConstraints(options: RecordingOptions): MediaStreamC
 
 // Format file size for display
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
 
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 }
 
 // Format duration for display (seconds to HH:MM:SS or MM:SS)
@@ -102,17 +102,19 @@ export function formatDuration(seconds: number): string {
   const secs = Math.floor(seconds % 60);
 
   if (hrs > 0) {
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${
+      secs.toString().padStart(2, "0")
+    }`;
   }
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 }
 
 // Generate a unique recording filename
 export function generateRecordingFilename(): string {
   const now = new Date();
   const timestamp = now.toISOString()
-    .replace(/[:.]/g, '-')
-    .replace('T', '_')
+    .replace(/[:.]/g, "-")
+    .replace("T", "_")
     .slice(0, -5); // Remove milliseconds and 'Z'
 
   return `recording_${timestamp}.webm`;
@@ -127,7 +129,7 @@ export function validateRecordingOptions(options: RecordingOptions): string[] {
   }
 
   if (options.maxDuration && options.maxDuration < 1) {
-    errors.push('Minimum duration is 1 second');
+    errors.push("Minimum duration is 1 second");
   }
 
   return errors;
@@ -142,24 +144,24 @@ export function formatDate(date: Date): string {
   if (diffInHours < 24) {
     if (diffInHours < 1) {
       const diffInMinutes = Math.floor(diffInHours * 60);
-      return diffInMinutes <= 0 ? 'Just now' : `${diffInMinutes}m ago`;
+      return diffInMinutes <= 0 ? "Just now" : `${diffInMinutes}m ago`;
     } else {
       return `${Math.floor(diffInHours)}h ago`;
     }
   }
 
   // Otherwise show date
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
   });
 }
 
 // Create a download link for a blob
 export function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);

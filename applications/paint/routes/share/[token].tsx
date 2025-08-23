@@ -1,7 +1,11 @@
 import { type Context } from "fresh";
 import SharePageIsland from "../../islands/SharePageIsland.tsx";
 
-export default function ShareTokenPage(ctx: Context<any>) {
+interface RouteParams {
+  token: string;
+}
+
+export default function ShareTokenPage(ctx: Context<RouteParams>) {
   const token = ctx.params.token;
 
   return (

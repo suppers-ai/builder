@@ -3,7 +3,12 @@
  */
 
 import type { ImageTool } from "./types.ts";
-import { createThumbnail, resizeImage, convertFormat, checkFFmpegAvailable } from "./ffmpeg-processor.ts";
+import {
+  checkFFmpegAvailable,
+  convertFormat,
+  createThumbnail,
+  resizeImage,
+} from "./ffmpeg-processor.ts";
 import { validateImageOptions } from "./utils.ts";
 
 /**
@@ -18,7 +23,7 @@ export const thumbnailTool: ImageTool = {
     height: 150,
     format: "jpeg",
     quality: 80,
-    maintainAspectRatio: true
+    maintainAspectRatio: true,
   },
   process: async (input, options) => {
     // Validate options
@@ -26,7 +31,7 @@ export const thumbnailTool: ImageTool = {
     if (!validation.valid) {
       return {
         success: false,
-        error: `Invalid options: ${validation.errors.join(", ")}`
+        error: `Invalid options: ${validation.errors.join(", ")}`,
       };
     }
 
@@ -34,7 +39,7 @@ export const thumbnailTool: ImageTool = {
     if (!options.width || !options.height) {
       return {
         success: false,
-        error: "Width and height are required for thumbnail generation"
+        error: "Width and height are required for thumbnail generation",
       };
     }
 
@@ -43,9 +48,9 @@ export const thumbnailTool: ImageTool = {
       height: options.height,
       format: options.format || "jpeg",
       quality: options.quality || 80,
-      maintainAspectRatio: options.maintainAspectRatio !== false
+      maintainAspectRatio: options.maintainAspectRatio !== false,
     });
-  }
+  },
 };
 
 /**
@@ -60,21 +65,21 @@ export const resizeTool: ImageTool = {
     height: 600,
     format: "jpeg",
     quality: 80,
-    maintainAspectRatio: true
+    maintainAspectRatio: true,
   },
   process: async (input, options) => {
     const validation = validateImageOptions(options);
     if (!validation.valid) {
       return {
         success: false,
-        error: `Invalid options: ${validation.errors.join(", ")}`
+        error: `Invalid options: ${validation.errors.join(", ")}`,
       };
     }
 
     if (!options.width && !options.height) {
       return {
         success: false,
-        error: "At least width or height must be specified"
+        error: "At least width or height must be specified",
       };
     }
 
@@ -83,9 +88,9 @@ export const resizeTool: ImageTool = {
       height: options.height,
       format: options.format || "jpeg",
       quality: options.quality || 80,
-      maintainAspectRatio: options.maintainAspectRatio !== false
+      maintainAspectRatio: options.maintainAspectRatio !== false,
     });
-  }
+  },
 };
 
 /**
@@ -97,13 +102,13 @@ export const convertTool: ImageTool = {
   supportedFormats: ["jpeg", "png", "webp", "gif", "bmp", "tiff"],
   defaultOptions: {
     format: "jpeg",
-    quality: 80
+    quality: 80,
   },
   process: async (input, options) => {
     if (!options.format) {
       return {
         success: false,
-        error: "Target format is required for conversion"
+        error: "Target format is required for conversion",
       };
     }
 
@@ -111,15 +116,15 @@ export const convertTool: ImageTool = {
     if (!validation.valid) {
       return {
         success: false,
-        error: `Invalid options: ${validation.errors.join(", ")}`
+        error: `Invalid options: ${validation.errors.join(", ")}`,
       };
     }
 
     return await convertFormat(input, {
       format: options.format,
-      quality: options.quality || 80
+      quality: options.quality || 80,
     });
-  }
+  },
 };
 
 /**
@@ -128,7 +133,7 @@ export const convertTool: ImageTool = {
 export const imageToolsRegistry = new Map<string, ImageTool>([
   [thumbnailTool.name, thumbnailTool],
   [resizeTool.name, resizeTool],
-  [convertTool.name, convertTool]
+  [convertTool.name, convertTool],
 ]);
 
 /**
@@ -162,7 +167,7 @@ export async function checkDependencies(): Promise<{
 }> {
   const ffmpegAvailable = await checkFFmpegAvailable();
   const missing: string[] = [];
-  
+
   if (!ffmpegAvailable) {
     missing.push("ffmpeg");
   }
@@ -170,7 +175,7 @@ export async function checkDependencies(): Promise<{
   return {
     ffmpeg: ffmpegAvailable,
     allReady: missing.length === 0,
-    missing
+    missing,
   };
 }
 
@@ -183,10 +188,10 @@ export function getToolsInfo(): Array<{
   supportedFormats: string[];
   defaultOptions: Record<string, any>;
 }> {
-  return getAvailableTools().map(tool => ({
+  return getAvailableTools().map((tool) => ({
     name: tool.name,
     description: tool.description,
     supportedFormats: tool.supportedFormats,
-    defaultOptions: tool.defaultOptions
+    defaultOptions: tool.defaultOptions,
   }));
 }

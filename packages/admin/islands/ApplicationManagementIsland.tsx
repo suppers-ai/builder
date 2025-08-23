@@ -6,6 +6,7 @@
 import { useEffect, useState } from "preact/hooks";
 import { signal } from "@preact/signals";
 import { showError, showSuccess } from "../lib/toast-manager.ts";
+import { handleSessionExpiredError } from "@suppers/ui-lib";
 import type {
   AdminApplication,
   ApplicationFilters,
@@ -14,22 +15,22 @@ import type {
   CreateApplicationData,
   UpdateApplicationData,
 } from "../types/admin.ts";
-import { 
-  EmptyState, 
-  LoadingButton, 
-  Skeleton, 
-  Card,
-  Input,
-  Select,
-  Button,
-  Badge,
-  Modal,
+import {
   Alert,
+  Badge,
+  Button,
+  Card,
+  Checkbox,
   Dropdown,
+  EmptyState,
+  Input,
+  LoadingButton,
+  Modal,
+  Select,
+  Skeleton,
   Table,
   type TableColumn,
-  Checkbox,
-  Textarea
+  Textarea,
 } from "@suppers/ui-lib";
 import { getAuthClient } from "../lib/auth.ts";
 import { ApplicationApiClient } from "../lib/api-client/applications/application-api.ts";
@@ -143,7 +144,7 @@ function ApplicationList({
         if (!app) return null;
         return (
           <div>
-            <div class="font-semibold text-base-content">{app.name || 'Untitled'}</div>
+            <div class="font-semibold text-base-content">{app.name || "Untitled"}</div>
             {app.description && (
               <div class="text-sm text-base-content/70 mt-1 line-clamp-2">
                 {app.description}
@@ -168,13 +169,20 @@ function ApplicationList({
                   {app.status}
                 </Badge>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </Button>
             }
             content={
               <div>
-                {(["draft", "pending", "published", "archived"] as ApplicationStatus[]).map((status) => (
+                {(["draft", "pending", "published", "archived"] as ApplicationStatus[]).map((
+                  status,
+                ) => (
                   <button
                     key={status}
                     type="button"
@@ -203,8 +211,10 @@ function ApplicationList({
         if (!app) return null;
         return (
           <div class="text-sm">
-            <div>Created: {app.created_at ? formatDate(app.created_at) : 'N/A'}</div>
-            <div class="text-base-content/60">Updated: {app.updated_at ? formatDate(app.updated_at) : 'N/A'}</div>
+            <div>Created: {app.created_at ? formatDate(app.created_at) : "N/A"}</div>
+            <div class="text-base-content/60">
+              Updated: {app.updated_at ? formatDate(app.updated_at) : "N/A"}
+            </div>
           </div>
         );
       },
@@ -236,7 +246,7 @@ function ApplicationList({
               variant="primary"
               size="sm"
               onClick={() => onEdit(app)}
-              aria-label={`Edit ${app.name || 'application'}`}
+              aria-label={`Edit ${app.name || "application"}`}
             >
               Edit
             </Button>
@@ -245,7 +255,7 @@ function ApplicationList({
               color="error"
               size="sm"
               onClick={() => onDelete(app.id)}
-              aria-label={`Delete ${app.name || 'application'}`}
+              aria-label={`Delete ${app.name || "application"}`}
             >
               Delete
             </Button>
@@ -332,7 +342,7 @@ function ApplicationModal(
   };
 
   const generateSlug = (name: string) => {
-    if (!name || typeof name !== 'string') {
+    if (!name || typeof name !== "string") {
       return "";
     }
     return name
@@ -381,7 +391,8 @@ function ApplicationModal(
             </label>
             <Input
               value={formData.slug || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, slug: (e.target as HTMLInputElement).value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, slug: (e.target as HTMLInputElement).value }))}
               placeholder="application-slug"
               disabled={loading}
               class="font-mono"
@@ -398,7 +409,11 @@ function ApplicationModal(
           </label>
           <Textarea
             value={formData.description || ""}
-            onChange={(e) => setFormData((prev) => ({ ...prev, description: (e.target as HTMLTextAreaElement).value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                description: (e.target as HTMLTextAreaElement).value,
+              }))}
             placeholder="Enter application description (optional)"
             rows={3}
             disabled={loading}
@@ -414,11 +429,16 @@ function ApplicationModal(
             <Input
               type="url"
               value={formData.website_url || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, website_url: (e.target as HTMLInputElement).value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  website_url: (e.target as HTMLInputElement).value,
+                }))}
               placeholder="https://example.com"
               disabled={loading}
             />
-            {errors.website_url && <span class="text-error text-sm mt-1">{errors.website_url}</span>}
+            {errors.website_url && <span class="text-error text-sm mt-1">{errors.website_url}
+            </span>}
           </div>
 
           <div class="form-control">
@@ -428,11 +448,17 @@ function ApplicationModal(
             <Input
               type="url"
               value={formData.thumbnail_url || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, thumbnail_url: (e.target as HTMLInputElement).value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  thumbnail_url: (e.target as HTMLInputElement).value,
+                }))}
               placeholder="https://example.com/thumbnail.jpg"
               disabled={loading}
             />
-            {errors.thumbnail_url && <span class="text-error text-sm mt-1">{errors.thumbnail_url}</span>}
+            {errors.thumbnail_url && (
+              <span class="text-error text-sm mt-1">{errors.thumbnail_url}</span>
+            )}
           </div>
         </div>
 
@@ -442,7 +468,11 @@ function ApplicationModal(
           </label>
           <Select
             value={formData.status || "draft"}
-            onChange={(e) => setFormData((prev) => ({ ...prev, status: (e.target as HTMLSelectElement).value as unknown as ApplicationStatus }))}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                status: (e.target as HTMLSelectElement).value as unknown as ApplicationStatus,
+              }))}
             disabled={loading}
             options={[
               { value: "draft", label: "Draft" },
@@ -500,25 +530,33 @@ export default function ApplicationManagementIsland() {
       console.log("Loading applications with filters:", filters);
       const response = await apiClient.getApplicationsFiltered(filters);
       console.log("API response:", response);
-      
+
       if (response.error) {
         console.error("API error:", response.error);
-        error.value = response.error;
-        applications.value = [];
-        showError(response.error);
+        if (!handleSessionExpiredError({ message: response.error })) {
+          error.value = response.error;
+          applications.value = [];
+          showError(response.error);
+        }
       } else if (response.data?.data) {
         applications.value = response.data.data;
-        console.log("Successfully loaded applications:", applications.value.length, applications.value);
+        console.log(
+          "Successfully loaded applications:",
+          applications.value.length,
+          applications.value,
+        );
       } else {
         console.warn("No data in response, defaulting to empty array", response);
         applications.value = [];
       }
     } catch (err) {
       console.error("Failed to load applications:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to load applications";
-      error.value = errorMessage;
-      applications.value = [];
-      showError(errorMessage);
+      if (!handleSessionExpiredError(err)) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to load applications";
+        error.value = errorMessage;
+        applications.value = [];
+        showError(errorMessage);
+      }
     } finally {
       isLoading.value = false;
     }
@@ -577,8 +615,10 @@ export default function ApplicationManagementIsland() {
       }
 
       if (response.error) {
-        error.value = response.error;
-        showError(response.error);
+        if (!handleSessionExpiredError({ message: response.error })) {
+          error.value = response.error;
+          showError(response.error);
+        }
       } else {
         setShowModal(false);
         await loadApplications();
@@ -590,9 +630,11 @@ export default function ApplicationManagementIsland() {
       }
     } catch (err) {
       console.error("Failed to submit application:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to save application";
-      error.value = errorMessage;
-      showError(errorMessage);
+      if (!handleSessionExpiredError(err)) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to save application";
+        error.value = errorMessage;
+        showError(errorMessage);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -603,17 +645,21 @@ export default function ApplicationManagementIsland() {
       const response = await apiClient.updateApplicationStatus(appId, status);
 
       if (response.error) {
-        error.value = response.error;
-        showError(response.error);
+        if (!handleSessionExpiredError({ message: response.error })) {
+          error.value = response.error;
+          showError(response.error);
+        }
       } else {
         await loadApplications();
         showSuccess(`Application status updated to ${status}`);
       }
     } catch (err) {
       console.error("Failed to update status:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to update status";
-      error.value = errorMessage;
-      showError(errorMessage);
+      if (!handleSessionExpiredError(err)) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to update status";
+        error.value = errorMessage;
+        showError(errorMessage);
+      }
     }
   };
 
@@ -628,17 +674,21 @@ export default function ApplicationManagementIsland() {
       const response = await apiClient.deleteApplication(appId);
 
       if (response.error) {
-        error.value = response.error;
-        showError(response.error);
+        if (!handleSessionExpiredError({ message: response.error })) {
+          error.value = response.error;
+          showError(response.error);
+        }
       } else {
         await loadApplications();
         showSuccess("Application deleted successfully");
       }
     } catch (err) {
       console.error("Failed to delete application:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to delete application";
-      error.value = errorMessage;
-      showError(errorMessage);
+      if (!handleSessionExpiredError(err)) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to delete application";
+        error.value = errorMessage;
+        showError(errorMessage);
+      }
     }
   };
 
@@ -670,7 +720,9 @@ export default function ApplicationManagementIsland() {
       );
 
       if (response.error) {
-        error.value = response.error;
+        if (!handleSessionExpiredError({ message: response.error })) {
+          error.value = response.error;
+        }
       } else {
         selectedApplications.value = new Set();
         setBulkAction("");
@@ -734,7 +786,10 @@ export default function ApplicationManagementIsland() {
           <div class="flex flex-wrap gap-2">
             <Select
               value={filters.status || ""}
-              onChange={(e) => handleStatusFilter((e.target as HTMLSelectElement).value as unknown as ApplicationStatus)}
+              onChange={(e) =>
+                handleStatusFilter(
+                  (e.target as HTMLSelectElement).value as unknown as ApplicationStatus,
+                )}
               placeholder="All Status"
               options={[
                 { value: "", label: "All Status" },
@@ -770,7 +825,7 @@ export default function ApplicationManagementIsland() {
               )}
             </Button>
             <Button
-              variant="outline" 
+              variant="outline"
               size="sm"
               onClick={() => handleSort("updated_at")}
               aria-label="Sort by updated date"
@@ -791,7 +846,7 @@ export default function ApplicationManagementIsland() {
                     d="M5 15l7-7 7 7"
                   />
                 </svg>
-                )}
+              )}
             </Button>
           </div>
         </div>
@@ -807,7 +862,10 @@ export default function ApplicationManagementIsland() {
             <div class="flex flex-col sm:flex-row gap-2">
               <Select
                 value={bulkAction}
-                onChange={(e) => setBulkAction((e.target as HTMLSelectElement).value as unknown as ApplicationStatus)}
+                onChange={(e) =>
+                  setBulkAction(
+                    (e.target as HTMLSelectElement).value as unknown as ApplicationStatus,
+                  )}
                 placeholder="Select action..."
                 size="sm"
                 options={[

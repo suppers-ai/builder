@@ -7,9 +7,9 @@ const stackExamples: ComponentExample[] = [
     description: "Simple layered content stack",
     props: {
       children: [
-        <div class="bg-primary text-primary-content p-6 rounded-lg">Layer 1</div>,
-        <div class="bg-secondary text-secondary-content p-6 rounded-lg">Layer 2</div>,
-        <div class="bg-accent text-accent-content p-6 rounded-lg">Layer 3</div>,
+        <div key="layer1" class="bg-primary text-primary-content p-6 rounded-lg">Layer 1</div>,
+        <div key="layer2" class="bg-secondary text-secondary-content p-6 rounded-lg">Layer 2</div>,
+        <div key="layer3" class="bg-accent text-accent-content p-6 rounded-lg">Layer 3</div>,
       ],
     },
   },

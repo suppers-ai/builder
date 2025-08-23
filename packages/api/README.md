@@ -1,206 +1,252 @@
 # API Package
 
-This package contains the backend API integration for the UI library builder, including database
-schema, Edge Functions, and **comprehensive SSO/OAuth support** for external applications.
+Standalone API package for Supabase Edge Functions with clean, modular architecture.
 
-## 📁 Package Structure
+## Configuration
+
+The API uses environment variables for configuration. Copy `.env.example` to `.env` and configure:
+
+```bash
+cp .env.example .env
+```
+
+Key configuration variables:
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_ANON_KEY` - Public anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key for admin operations
+- See `.env.example` for full list
+
+## Architecture
+
+### Directory Structure
 
 ```
 packages/api/
-├── README.md                    # This file
-├── supabase-setup.md           # Complete setup guide
-├── sso-configuration.md        # SSO setup for external apps
-├── database-schema.sql         # Database schema with OAuth tables
-├── config.toml                 # Supabase local development config
-└── functions/
-    ├── api/                    # Main API endpoints
-    │   ├── index.ts           # API router
-    │   └── handlers/          # Auth, apps, profile, access
-    └── oauth/                 # OAuth server for external apps
-        ├── authorize.ts       # OAuth authorization endpoint
-        ├── callback.ts        # OAuth callback handler
-        └── deno.json         # OAuth function config
+├── .env                           # Environment configuration
+├── supabase/
+│   └── functions/
+│       └── api/
+│           ├── _common/           # Shared utilities (standalone, no external deps)
+│           │   ├── auth.ts        # Authentication & JWT handling
+│           │   ├── config.ts      # Configuration management
+│           │   ├── cors.ts        # CORS utilities
+│           │   ├── database.ts    # Database client & queries
+│           │   ├── errors.ts      # Error handling & custom errors
+│           │   ├── handler.ts     # Request routing & middleware
+│           │   ├── response.ts    # Response utilities
+│           │   ├── validation.ts  # Input validation
+│           │   └── index.ts       # Central exports
+│           ├── handlers/          # Resource handlers
+│           │   ├── admin/         # Admin endpoints
+│           │   ├── entity/        # Entity CRUD
+│           │   ├── storage/       # File storage
+│           │   ├── product/       # Product management
+│           │   └── ...           # Other resources
+│           └── index.ts           # Main entry point
 ```
 
-## 🔐 SSO & OAuth Features
+### Common Utilities
 
-### **Built-in OAuth Providers**
+All common functionality is in `_common/` - standalone modules with no external dependencies:
 
-✅ Google, GitHub, Microsoft Azure, Apple, Discord, Twitter, LinkedIn, Slack, Spotify, Zoom
+#### Configuration (`config.ts`)
+- Loads environment variables
+- Provides typed configuration
+- Singleton pattern for consistency
 
-### **External App Integration**
+#### Authentication (`auth.ts`)
+- JWT token verification
+- User context extraction
+- Role-based access control
+- API key management
 
-✅ **Custom OAuth Server** - Let external apps authenticate via your backend\
-✅ **JWT Token Exchange** - Secure API access for external applications\
-✅ **PKCE Support** - Secure mobile app authentication\
-✅ **Enterprise SSO** - SAML 2.0 and OIDC via WorkOS integration
+#### Database (`database.ts`)
+- Standalone Supabase client implementation
+- Query builders
+- Transaction support
+- Pagination helpers
 
-### **Database Tables for OAuth**
+#### Response (`response.ts`)
+- Consistent API responses
+- Success/error formatting
+- CORS header injection
+- Streaming support
 
-- `oauth_clients` - Registered external applications
-- `oauth_codes` - Authorization codes for OAuth flow
-- `oauth_tokens` - Access/refresh tokens for external apps
-- Row-level security policies for all OAuth data
+#### Validation (`validation.ts`)
+- Input validation rules
+- Type checking
+- Sanitization
+- Common validation patterns
 
-## 🚀 Quick Start
+#### Error Handling (`errors.ts`)
+- Custom error classes
+- HTTP status mapping
+- Error logging
+- Graceful error handling
 
-### 1. **Standard Setup**
+#### Request Handler (`handler.ts`)
+- Route matching
+- Middleware support
+- Request context
+- Method routing
 
-Follow the setup guide: See `supabase-setup.md` for detailed instructions
+## Usage Examples
 
-### 2. **SSO for External Apps**
+### Creating a New Handler
 
-Follow the SSO guide: See `sso-configuration.md` for external app integration
+```typescript
+import {
+  createHandler,
+  successResponse,
+  errorResponse,
+  requireAuth,
+  validate,
+  commonRules,
+} from '../_common/index.ts';
 
-### 3. **OAuth Server Setup**
-
-```bash
-# Deploy OAuth functions
-cd packages/api
-deno task deploy
-
-# OAuth endpoints will be available at:
-# https://your-project.supabase.co/functions/v1/oauth/authorize
-# https://your-project.supabase.co/functions/v1/oauth/callback
-```
-
-### 4. **External App Flow**
-
-```javascript
-// External app redirects to your OAuth server
-const authUrl = "https://your-project.supabase.co/functions/v1/oauth/authorize?" +
-  "client_id=external-web-app&" +
-  "redirect_uri=https://external-app.com/callback&" +
-  "response_type=code&" +
-  "scope=openid email profile";
-
-window.location.href = authUrl;
-```
-
-## 🔗 Integration Examples
-
-### **React Component**
-
-```tsx
-import { SSOLogin, SSOCallback } from '@suppers/ui-lib';
-
-// Multi-provider login
-<SSOLogin 
-  providers={['google', 'github', 'microsoft']}
-  onSuccess={() => console.log('Logged in!')}
-/>
-
-// Handle OAuth callbacks
-<SSOCallback 
-  successRedirect="/dashboard"
-  errorRedirect="/login"
-/>
-```
-
-### **External API Access**
-
-```javascript
-// External app gets JWT token after OAuth
-const response = await fetch("https://your-api.com/user/apps", {
-  headers: {
-    "Authorization": `Bearer ${jwtToken}`,
-    "Content-Type": "application/json",
+// Define your handler
+const myHandler = createHandler([
+  {
+    method: 'GET',
+    pattern: 'api/v1/resource/:id',
+    requireAuth: true,
+    handler: async (context) => {
+      const { id } = extractPathParams('api/v1/resource/:id', context.pathSegments);
+      
+      // Your logic here
+      const data = await fetchResource(id);
+      
+      return successResponse(data);
+    },
   },
-});
-```
-
-### **Mobile Apps (React Native)**
-
-```javascript
-import { supabase } from "@suppers/api";
-
-const { data, error } = await supabase.auth.signInWithOAuth({
-  provider: "google",
-  options: {
-    redirectTo: "com.yourapp://callback",
-    pkce: true,
+  {
+    method: 'POST',
+    pattern: 'api/v1/resource',
+    requireAuth: true,
+    handler: async (context) => {
+      // Parse and validate body
+      const body = await parseJsonBody(context.request);
+      const validated = validateOrThrow(body, [
+        { field: 'name', required: true, type: 'string', min: 1, max: 100 },
+        commonRules.email('email'),
+      ]);
+      
+      // Your logic here
+      const created = await createResource(validated);
+      
+      return successResponse(created, { status: 201 });
+    },
   },
+]);
+```
+
+### Using Database Client
+
+```typescript
+import { createServiceClient, createClient } from '../_common/database.ts';
+
+// Service client (admin access)
+const db = createServiceClient();
+
+// User-scoped client
+const userDb = createClient(userToken);
+
+// Query examples
+const { data, error } = await db.select('users', {
+  select: 'id, email, created_at',
+  filters: { role: 'admin' },
+  orderBy: { column: 'created_at', ascending: false },
+  limit: 10,
 });
+
+// Insert
+const { data: newUser } = await db.insert('users', {
+  email: 'user@example.com',
+  role: 'user',
+});
+
+// Update
+const { data: updated } = await db.update('users', userId, {
+  role: 'admin',
+});
+
+// Delete
+await db.delete('users', userId);
 ```
 
-## 🏢 Enterprise Features
+### Error Handling
 
-- **SAML 2.0** via WorkOS integration
-- **Active Directory** and Google Workspace
-- **Custom OIDC** providers
-- **Multi-tenant** support with organization isolation
-- **Audit logging** for compliance
+```typescript
+import {
+  ValidationError,
+  NotFoundError,
+  ForbiddenError,
+  toApiError,
+  logError,
+} from '../_common/errors.ts';
 
-## 🔒 Security Features
+try {
+  // Your logic
+  if (!resource) {
+    throw new NotFoundError('Resource');
+  }
+  
+  if (!hasPermission) {
+    throw new ForbiddenError('You do not have permission to access this resource');
+  }
+  
+  if (!isValid) {
+    throw new ValidationError('Invalid input', { field: 'email' });
+  }
+} catch (error) {
+  const apiError = toApiError(error);
+  logError(apiError, { endpoint: 'resource', method: 'GET' });
+  throw apiError; // Will be handled by the handler wrapper
+}
+```
 
-- **Row Level Security** on all tables
-- **JWT signature verification** for external apps
-- **PKCE flow** for mobile applications
-- **Scope-based permissions** (read, write, admin)
-- **Token expiration** and automatic cleanup
-- **Rate limiting** and abuse protection
+## Testing
 
-## 🎯 Use Cases
-
-### **Internal Applications**
-
-- User management with profiles and avatars
-- Application sharing with granular permissions
-- Real-time authentication state management
-
-### **External Integrations**
-
-- **Partner APIs** - Let partners access user data via OAuth
-- **Mobile Apps** - Native iOS/Android authentication
-- **Third-party Tools** - Integrate with external services
-- **Webhooks** - Secure API access for automated systems
-
-## 🛠️ Development Commands
-
+Run tests:
 ```bash
-# Start local Supabase
-deno task dev
-
-# Deploy all functions
-deno task deploy
-
-# Generate TypeScript types
-deno task types
-
-# View function logs
-deno task logs
+deno task test
 ```
 
-## 📚 Documentation
+Test specific handler:
+```bash
+deno test packages/api/supabase/functions/api/handlers/admin/handler.test.ts
+```
 
-- **Setup Guide**: `supabase-setup.md` - Complete Supabase setup
-- **SSO Configuration**: `sso-configuration.md` - External app integration
-- **Database Schema**: `database-schema.sql` - Tables and security policies
-- **API Documentation**: See handler files for endpoint specifications
+## Deployment
 
-## 🎉 Ready for Production!
+Deploy to Supabase:
+```bash
+deno task api:deploy
+```
 
-Your API package provides enterprise-grade authentication with:
+## Security
 
-- ✅ **Multi-provider SSO** (Google, GitHub, Microsoft, etc.)
-- ✅ **Custom OAuth server** for external app integration
-- ✅ **Mobile app support** with PKCE security
-- ✅ **Enterprise SSO** (SAML, OIDC)
-- ✅ **JWT-based APIs** with proper validation
-- ✅ **Comprehensive security** with RLS and scope management
+- All endpoints require authentication by default (except `/share`)
+- Admin endpoints require admin role verification
+- Input validation and sanitization on all endpoints
+- Rate limiting available via middleware
+- CORS configuration via environment variables
+- JWT token verification with expiration checks
 
-Perfect for SaaS platforms, mobile apps, and enterprise integrations! 🚀
+## Performance
 
-### Database Schema
+- Lightweight standalone implementation
+- No external dependencies in core utilities
+- Efficient routing with pattern matching
+- Connection pooling for database
+- Response streaming for large data
+- Caching support via middleware
 
-The package includes a complete database schema with:
+## Migration from Old Structure
 
-- **`users`** - User profile information with flexible name fields (first_name, middle_names,
-  last_name, display_name)
-- **`applications`** - User-created applications with owner_id and template_id references
-- **`user_access`** - Granular access control (read/write/admin)
-- **`oauth_codes`** - Authorization codes for OAuth flow
-- **`oauth_tokens`** - Access/refresh tokens for external apps
-- **`oauth_clients`** - Registered external applications
+The API maintains backward compatibility through re-exports:
+- Old `corsHeaders` imports still work
+- `response-utils.ts` functions still available
+- `supabase-client.ts` exports still function
 
-All tables include Row Level Security (RLS) policies for secure multi-tenant access.
+However, new code should use the `_common/` utilities directly for better tree-shaking and cleaner imports.

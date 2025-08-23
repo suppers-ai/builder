@@ -31,22 +31,24 @@ export function ErrorState({
   ].filter(Boolean).join(" ");
 
   const defaultIcon = (
-    <AlertTriangle 
-      size={variant === "minimal" ? 32 : 48} 
-      class="text-error opacity-60 mx-auto" 
+    <AlertTriangle
+      size={variant === "minimal" ? 32 : 48}
+      class="text-error opacity-60 mx-auto"
     />
   );
 
-  const defaultActions = onRetry ? (
-    <button 
-      type="button"
-      class="btn btn-primary btn-sm gap-2"
-      onClick={onRetry}
-    >
-      <RefreshCw size={16} />
-      {retryText}
-    </button>
-  ) : null;
+  const defaultActions = onRetry
+    ? (
+      <button
+        type="button"
+        class="btn btn-primary btn-sm gap-2"
+        onClick={onRetry}
+      >
+        <RefreshCw size={16} />
+        {retryText}
+      </button>
+    )
+    : null;
 
   return (
     <div class={containerClasses} id={id} {...props}>
@@ -58,16 +60,20 @@ export function ErrorState({
 
         {/* Content */}
         <div class="space-y-2">
-          <h3 class={`font-semibold text-base-content ${
-            variant === "minimal" ? "text-lg" : "text-xl"
-          }`}>
+          <h3
+            class={`font-semibold text-base-content ${
+              variant === "minimal" ? "text-lg" : "text-xl"
+            }`}
+          >
             {title}
           </h3>
-          
+
           {description && (
-            <p class={`text-base-content/70 max-w-md mx-auto ${
-              variant === "minimal" ? "text-sm" : "text-base"
-            }`}>
+            <p
+              class={`text-base-content/70 max-w-md mx-auto ${
+                variant === "minimal" ? "text-sm" : "text-base"
+              }`}
+            >
               {description}
             </p>
           )}

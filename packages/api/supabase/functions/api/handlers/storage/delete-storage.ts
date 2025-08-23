@@ -1,5 +1,6 @@
-import { corsHeaders } from "../../lib/cors.ts";
+import { errorResponses, jsonResponse } from "../../_common/index.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
+
 
 interface StorageDeleteContext {
   userId: string;
@@ -13,13 +14,14 @@ export async function handleStorageDelete(
   context: StorageDeleteContext,
 ): Promise<Response> {
   const { userId, supabase, applicationSlug, filePath } = context;
+  const origin = req.headers.get('origin');
 
   if (!userId) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       {
         status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
@@ -29,7 +31,7 @@ export async function handleStorageDelete(
       JSON.stringify({ error: "File path is required" }),
       {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }
@@ -37,47 +39,15 @@ export async function handleStorageDelete(
   console.log("🗑️ Delete request for app:", applicationSlug, "file:", filePath);
 
   try {
-    // All applications require database entries - check database for access control
-    const { data: application, error: appError } = await supabase
-      .from("applications")
-      .select("id, owner_id, slug")
-      .eq("slug", applicationSlug)
-      .single();
-
-    if (appError || !application) {
-      console.log("❌ Application not found:", applicationSlug);
-      return new Response(
-        JSON.stringify({ error: "Application not found or access denied" }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
-    // Check if user is owner (only owners can delete from storage)
-    const isOwner = application.owner_id === userId;
-
-    if (!isOwner) {
-      console.log("❌ User is not owner:", userId);
-      return new Response(
-        JSON.stringify({ error: "Owner access required" }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
-
     const fullPath = `${userId}/${applicationSlug}/${filePath}`;
     console.log("🗂️ Deleting file:", fullPath);
 
     // First, get the storage object record to get file size for storage update
     const { data: storageObject, error: fetchError } = await supabase
-      .from('storage_objects')
-      .select('id, file_size, file_path')
-      .eq('user_id', userId)
-      .eq('file_path', fullPath)
+      .from("storage_objects")
+      .select("id, file_size, file_path")
+      .eq("user_id", userId)
+      .eq("file_path", fullPath)
       .single();
 
     if (fetchError || !storageObject) {
@@ -86,17 +56,17 @@ export async function handleStorageDelete(
         JSON.stringify({ error: "File not found" }),
         {
           status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
 
     // Delete the record from storage_objects table
     const { error: dbDeleteError } = await supabase
-      .from('storage_objects')
+      .from("storage_objects")
       .delete()
-      .eq('id', storageObject.id)
-      .eq('user_id', userId);
+      .eq("id", storageObject.id)
+      .eq("user_id", userId);
 
     if (dbDeleteError) {
       console.error("❌ Failed to delete storage object record:", dbDeleteError.message);
@@ -104,22 +74,27 @@ export async function handleStorageDelete(
         JSON.stringify({ error: "Failed to delete file record" }),
         {
           status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
 
     // Update user's storage usage
-    const { error: storageUpdateError } = await supabase.rpc('increment_user_storage', {
+    const { error: storageUpdateError } = await supabase.rpc("increment_user_storage", {
       user_id: userId,
-      size_delta: -storageObject.file_size // Negative to reduce storage used
+      size_delta: -storageObject.file_size, // Negative to reduce storage used
     });
 
     if (storageUpdateError) {
       console.error("❌ Failed to update user storage:", storageUpdateError.message);
       // Continue anyway - file will be deleted but storage counter might be off
     } else {
-      console.log("✅ User storage usage updated:", -storageObject.file_size, "bytes for user:", userId);
+      console.log(
+        "✅ User storage usage updated:",
+        -storageObject.file_size,
+        "bytes for user:",
+        userId,
+      );
     }
 
     // Delete from Supabase Storage
@@ -130,7 +105,9 @@ export async function handleStorageDelete(
     if (error) {
       console.error("❌ Storage delete error:", error.message);
       // Even if storage delete fails, the database record is gone, so return success
-      console.warn("File deleted from database but storage delete failed - this is a cleanup issue");
+      console.warn(
+        "File deleted from database but storage delete failed - this is a cleanup issue",
+      );
     }
 
     console.log("✅ File deleted:", fullPath);
@@ -146,7 +123,7 @@ export async function handleStorageDelete(
       }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   } catch (error) {
@@ -158,7 +135,7 @@ export async function handleStorageDelete(
       }),
       {
         status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
       },
     );
   }

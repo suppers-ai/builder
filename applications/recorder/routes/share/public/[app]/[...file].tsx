@@ -3,7 +3,7 @@ import SharePageIsland from "../../../../islands/SharePageIsland.tsx";
 
 export default function SharePublicPage(ctx: Context<any>) {
   const { app, file } = ctx.params;
-  const filename = Array.isArray(file) ? file.join('/') : file;
+  const filename = Array.isArray(file) ? file.join("/") : file;
 
   return (
     <>
@@ -15,10 +15,10 @@ export default function SharePublicPage(ctx: Context<any>) {
         <meta property="og:type" content="video.other" />
       </head>
       <div class="min-h-screen bg-base-200">
-        <SharePageIsland 
+        <SharePageIsland
           applicationSlug={app}
           filename={filename}
-          isPublic={true}
+          isPublic
         />
       </div>
     </>

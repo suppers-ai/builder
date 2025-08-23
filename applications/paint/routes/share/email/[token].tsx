@@ -1,6 +1,6 @@
-import { PageProps } from "$fresh/server.ts";
-import { useState, useEffect } from "preact/hooks";
-import type { EmailShareTokenVerification } from "../../../../../packages/shared/types/email-sharing.ts";
+import { PageProps } from "fresh";
+import { useEffect, useState } from "preact/hooks";
+import type { EmailShareTokenVerification } from "../../../../../packages/shared/types/notifications.ts";
 import config from "../../../../../config.ts";
 
 interface EmailSharePageData {
@@ -19,9 +19,9 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
   const verifyToken = async () => {
     try {
       const response = await fetch(`${config.apiUrl}/api/v1/email-sharing/verify/${params.token}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
@@ -30,11 +30,11 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
       if (response.ok && result.valid) {
         setVerification(result);
       } else {
-        setError(result.error || 'Invalid share token');
+        setError(result.error || "Invalid share token");
       }
     } catch (err) {
-      console.error('Token verification failed:', err);
-      setError('Failed to verify share token');
+      console.error("Token verification failed:", err);
+      setError("Failed to verify share token");
     } finally {
       setLoading(false);
     }
@@ -80,7 +80,8 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
             <div class="text-center mb-6">
               <h1 class="text-3xl font-bold mb-2">Shared Painting</h1>
               <p class="text-base-content/70">
-                Shared by {session?.sender_id} • Expires {new Date(session?.expires_at || '').toLocaleDateString()}
+                Shared by {session?.sender_id} • Expires{" "}
+                {new Date(session?.expires_at || "").toLocaleDateString()}
               </p>
             </div>
 
@@ -107,12 +108,6 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
                       {Math.round((storageObject?.file_size || 0) / 1024)} KB
                     </div>
                   </div>
-                  <div class="stat">
-                    <div class="stat-title">Type</div>
-                    <div class="stat-value text-lg capitalize">
-                      {storageObject?.object_type}
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -130,9 +125,18 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
                 <div class="space-y-2">
                   <h4 class="font-semibold">Share Details</h4>
                   <div class="text-sm space-y-1">
-                    <p><span class="font-medium">Created:</span> {new Date(storageObject?.created_at || '').toLocaleDateString()}</p>
-                    <p><span class="font-medium">Shared:</span> {new Date(session?.created_at || '').toLocaleDateString()}</p>
-                    <p><span class="font-medium">Expires:</span> {new Date(session?.expires_at || '').toLocaleDateString()}</p>
+                    <p>
+                      <span class="font-medium">Created:</span>{" "}
+                      {new Date(storageObject?.created_at || "").toLocaleDateString()}
+                    </p>
+                    <p>
+                      <span class="font-medium">Shared:</span>{" "}
+                      {new Date(session?.created_at || "").toLocaleDateString()}
+                    </p>
+                    <p>
+                      <span class="font-medium">Expires:</span>{" "}
+                      {new Date(session?.expires_at || "").toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
 
@@ -145,8 +149,20 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
                     class="btn btn-primary flex-1"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      >
+                      </path>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      >
+                      </path>
                     </svg>
                     View Full Size
                   </a>
@@ -157,7 +173,13 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
                     class="btn btn-outline flex-1"
                   >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      >
+                      </path>
                     </svg>
                     Download
                   </a>
@@ -169,7 +191,9 @@ export default function EmailSharePage({ params }: PageProps<void, EmailSharePag
             <div class="divider"></div>
             <div class="text-center text-sm text-base-content/60">
               <p>This content was shared with you via Suppers AI Builder</p>
-              <p>The share link will expire on {new Date(session?.expires_at || '').toLocaleString()}</p>
+              <p>
+                The share link will expire on {new Date(session?.expires_at || "").toLocaleString()}
+              </p>
             </div>
           </div>
         </div>

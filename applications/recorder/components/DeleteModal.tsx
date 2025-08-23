@@ -1,4 +1,4 @@
-import { Button } from "@suppers-ai/ui-lib";
+import { Button } from "@suppers/ui-lib";
 import type { Recording } from "../types/recorder.ts";
 
 interface DeleteModalProps {

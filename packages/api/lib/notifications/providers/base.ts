@@ -1,13 +1,13 @@
-import type { 
-  NotificationProvider, 
-  NotificationMessage, 
+import type {
+  EmailMessage,
+  NotificationMessage,
+  NotificationProvider,
   NotificationResult,
-  EmailMessage 
 } from "../types.ts";
 
 export abstract class BaseNotificationProvider implements NotificationProvider {
   abstract name: string;
-  abstract type: 'email' | 'sms' | 'push';
+  abstract type: "email" | "sms" | "push";
 
   constructor(protected config: Record<string, any>) {}
 
@@ -15,18 +15,18 @@ export abstract class BaseNotificationProvider implements NotificationProvider {
   abstract validateConfig(): boolean;
 
   protected validateEmailMessage(message: NotificationMessage): EmailMessage {
-    if (message.type !== 'email') {
+    if (message.type !== "email") {
       throw new Error(`Provider ${this.name} only supports email messages`);
     }
 
     const emailMessage = message as EmailMessage;
-    
+
     if (!emailMessage.to || emailMessage.to.length === 0) {
-      throw new Error('Email message must have at least one recipient');
+      throw new Error("Email message must have at least one recipient");
     }
 
     if (!emailMessage.subject || !emailMessage.htmlBody) {
-      throw new Error('Email message must have subject and htmlBody');
+      throw new Error("Email message must have subject and htmlBody");
     }
 
     return emailMessage;
@@ -34,7 +34,7 @@ export abstract class BaseNotificationProvider implements NotificationProvider {
 
   protected validateEmailAddresses(emails: string[]): void {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     for (const email of emails) {
       if (!emailRegex.test(email)) {
         throw new Error(`Invalid email address: ${email}`);
@@ -45,9 +45,9 @@ export abstract class BaseNotificationProvider implements NotificationProvider {
   protected sanitizeHtml(html: string): string {
     // Basic HTML sanitization - in production, use a proper library like DOMPurify
     return html
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/javascript:/gi, '')
-      .replace(/on\w+\s*=/gi, '');
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/javascript:/gi, "")
+      .replace(/on\w+\s*=/gi, "");
   }
 
   protected logSendAttempt(message: NotificationMessage, result: NotificationResult): void {

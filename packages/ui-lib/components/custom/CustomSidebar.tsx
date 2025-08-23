@@ -1,11 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import type { ComponentChildren } from "preact";
-import {
-  Accordion,
-  closeGlobalSidebar,
-  globalSidebarOpen,
-  Logo,
-} from "../mod.ts";
+import { Accordion, closeGlobalSidebar, globalSidebarOpen, Logo } from "../mod.ts";
 import type { AccordionItemProps } from "../mod.ts";
 import type { SidebarConfig } from "./CustomSidebar.schema.ts";
 
@@ -35,7 +30,7 @@ export default function CustomSidebar({
   },
 }: CustomSidebarProps) {
   const [openSections, setOpenSections] = useState<string[]>(() =>
-    config.sections.filter(s => s.defaultOpen !== false).map((s) => s.id)
+    config.sections.filter((s) => s.defaultOpen !== false).map((s) => s.id)
   );
 
   const sidebarOpen = globalSidebarOpen.value;
@@ -88,7 +83,7 @@ export default function CustomSidebar({
       onLinkClick(path);
     }
     // Close sidebar on mobile after link click
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+    if (typeof window !== "undefined" && globalThis.innerWidth < 1024) {
       closeGlobalSidebar();
     }
   };
@@ -105,8 +100,9 @@ export default function CustomSidebar({
 
       {/* Sidebar */}
       <aside
-        class={`fixed top-0 left-0 h-full w-80 bg-base-100 border-r border-base-300 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } z-50 lg:z-30 flex flex-col`}
+        class={`fixed top-0 left-0 h-full w-80 bg-base-100 border-r border-base-300 transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } z-50 lg:z-30 flex flex-col`}
       >
         {/* Sidebar Header */}
         <div class="p-4 pr-16 border-b border-base-300 bg-base-100">
@@ -124,10 +120,11 @@ export default function CustomSidebar({
                     <a
                       key={link.path}
                       href={link.path}
-                      class={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${currentPath === link.path
-                        ? "bg-primary text-primary-content"
-                        : "text-base-content hover:bg-base-200"
-                        }`}
+                      class={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPath === link.path
+                          ? "bg-primary text-primary-content"
+                          : "text-base-content hover:bg-base-200"
+                      }`}
                       onClick={() => handleLinkClick(link.path)}
                     >
                       {link.icon}
@@ -160,10 +157,11 @@ export default function CustomSidebar({
                       <a
                         key={link.path || link.name}
                         href={link.path}
-                        class={`block px-3 py-2 rounded text-sm transition-colors ${currentPath === link.path
-                          ? "bg-primary text-primary-content font-medium"
-                          : "text-base-content/80 hover:text-base-content hover:bg-base-200"
-                          }`}
+                        class={`block px-3 py-2 rounded text-sm transition-colors ${
+                          currentPath === link.path
+                            ? "bg-primary text-primary-content font-medium"
+                            : "text-base-content/80 hover:text-base-content hover:bg-base-200"
+                        }`}
                         onClick={() => handleLinkClick(link.path)}
                       >
                         <div class="flex items-center justify-between">
@@ -177,7 +175,7 @@ export default function CustomSidebar({
                   </div>
                 ),
               }))}
-              multiple={true}
+              multiple
               openItems={openSections}
               onToggle={handleAccordionToggle}
               class="space-y-1"
