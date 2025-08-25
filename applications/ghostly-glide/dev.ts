@@ -36,7 +36,7 @@ if (Deno.args.includes("build")) {
   }
 } else {
   // Start the development server
-  const port = parseInt(Deno.env.get("PORT") || "8010");
+  const port = parseInt(Deno.env.get("PORT") || "8810");
   await builder.listen(() => import("./main.ts").then((m) => m.app), {
     port,
   });

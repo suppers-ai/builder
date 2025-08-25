@@ -8,6 +8,8 @@ export const LogoSchema = BaseComponentSchema.extend({
   ),
   href: z.string().optional().describe("Optional URL to wrap the logo in a link"),
   size: SizeSchema.default("md").describe("Size of the logo"),
+  lightSrc: z.string().optional().describe("Custom logo source for light themes"),
+  darkSrc: z.string().optional().describe("Custom logo source for dark themes"),
 });
 
 export type LogoProps = z.infer<typeof LogoSchema>;

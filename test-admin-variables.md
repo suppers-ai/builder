@@ -96,10 +96,10 @@ The component uses these endpoints:
 4. Verify you're logged in as an admin user
 
 ### If variables don't load:
-1. Check that the `global_variable_definitions` table exists
+1. Check that system variables exist in the `variables` table with `is_system = true`
 2. Run the migration if needed:
    ```bash
-   psql $DATABASE_URL < packages/payments/database-schema.sql
+   psql $DATABASE_URL < packages/api/supabase/migrations/20250823000000_merge_global_variables.sql
    ```
 
 ### If API calls fail:

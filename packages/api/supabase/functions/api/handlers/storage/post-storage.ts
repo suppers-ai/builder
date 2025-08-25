@@ -138,6 +138,10 @@ export async function handleStorageUpload(
         return errorResponses.internalServerError(error.message, origin || undefined);
       }
 
+      // Get parent_folder_id from form data if provided
+      const parentFolderId = formData.get("parent_folder_id") as string || null;
+      const objectType = formData.get("object_type") as string || "file";
+
       // Create storage object record in database for tracking
       const { data: storageObject, error: dbError } = await supabase
         .from("storage_objects")
@@ -147,6 +151,8 @@ export async function handleStorageUpload(
           file_path: fullPath,
           file_size: file.size,
           mime_type: file.type,
+          object_type: objectType,
+          parent_folder_id: parentFolderId,
           application_id: application.id,
           metadata: {
             originalName: file.name,
@@ -202,12 +208,13 @@ export async function handleStorageUpload(
       const jsonData = await req.json();
       
       // Check if this is a folder creation request
-      if (jsonData.contentType === "application/x-folder" || jsonData.metadata?.object_type === "folder") {
+      if (jsonData.contentType === "application/x-folder" || jsonData.object_type === "folder") {
         const folderName = jsonData.name;
         const folderPath = jsonData.path || filePath;
         const metadata = jsonData.metadata || {};
+        const parentFolderId = jsonData.parent_folder_id || null;
         
-        console.log("📁 Creating folder:", folderName, "at path:", folderPath);
+        console.log("📁 Creating folder:", folderName, "at path:", folderPath, "parent:", parentFolderId);
         
         // Create folder record in database
         const { data: folderObject, error: dbError } = await supabase
@@ -218,10 +225,11 @@ export async function handleStorageUpload(
             file_path: folderPath,
             file_size: 0,
             mime_type: "application/x-folder",
+            object_type: "folder",
+            parent_folder_id: parentFolderId,
             application_id: application.id,
             metadata: {
               ...metadata,
-              object_type: "folder",
               createdAt: new Date().toISOString(),
               application: applicationSlug,
             },

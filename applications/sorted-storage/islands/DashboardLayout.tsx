@@ -19,6 +19,8 @@ import type { StorageObject } from "../types/storage.ts";
 import { storageApi } from "../lib/storage-api.ts";
 import { getAuthClient, getCurrentUserId } from "../lib/auth.ts";
 import ContextMenu from "../components/ContextMenu.tsx";
+import SimpleAuthButton from "./SimpleAuthButton.tsx";
+import config from "../../../config.ts";
 
 interface ViewMode {
   type: "list" | "grid";
@@ -39,59 +41,34 @@ export default function DashboardLayout() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedShareItem, setSelectedShareItem] = useState<StorageObject | null>(null);
   const [breadcrumbs, setBreadcrumbs] = useState<Array<{id: string | null, name: string}>>([
-    { id: null, name: "My Drive" }
+    { id: null, name: "Home" }
   ]);
   const [contextMenu, setContextMenu] = useState<{x: number, y: number, item: StorageObject} | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Sidebar configuration
   const sidebarConfig = {
     sections: [
       {
-        title: "",
-        items: [
+        id: "navigation",
+        title: "Navigation",
+        defaultOpen: true,
+        links: [
           {
-            id: "my-drive",
-            label: "My Drive",
-            icon: (
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            ),
-            isActive: true,
-            onClick: () => {
-              setCurrentFolderId(null);
-              setBreadcrumbs([{ id: null, name: "My Drive" }]);
-            }
+            name: "My Drive",
+            path: "#my-drive"
           },
           {
-            id: "recent",
-            label: "Recent",
-            icon: (
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            ),
-            onClick: () => alert("Recent files - Coming soon!")
+            name: "Recent",
+            path: "#recent"
           },
           {
-            id: "starred",
-            label: "Starred",
-            icon: (
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            ),
-            onClick: () => alert("Starred files - Coming soon!")
+            name: "Starred",
+            path: "#starred"
           },
           {
-            id: "trash",
-            label: "Trash",
-            icon: (
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            ),
-            onClick: () => alert("Trash - Coming soon!")
+            name: "Trash",
+            path: "#trash"
           }
         ]
       }
@@ -178,9 +155,33 @@ export default function DashboardLayout() {
     }
   };
 
-  const handleUploadFile = () => {
-    alert("File upload will be implemented soon");
-    setShowNewMenu(false);
+  const handleUploadFile = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    
+    input.onchange = async (event) => {
+      const files = (event.target as HTMLInputElement).files;
+      if (!files || files.length === 0) return;
+      
+      try {
+        setIsLoading(true);
+        for (const file of Array.from(files)) {
+          await storageApi.uploadFile(file, {
+            currentFolderId: currentFolderId || undefined,
+          });
+        }
+        await loadStorageData();
+        setShowNewMenu(false);
+      } catch (err: any) {
+        console.error("Failed to upload files:", err);
+        setError(`Failed to upload files: ${err.message || err}`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    input.click();
   };
 
   const navigateToFolder = (folder: StorageObject) => {
@@ -209,16 +210,28 @@ export default function DashboardLayout() {
     setContextMenu({ x: e.clientX, y: e.clientY, item });
   };
 
-  const handleRename = (item: StorageObject) => {
+  const handleRename = async (item: StorageObject) => {
     const newName = prompt("Enter new name:", item.name);
     if (newName && newName !== item.name) {
-      alert(`Rename ${item.name} to ${newName} - Coming soon!`);
+      try {
+        await storageApi.updateStorageObject(item.id, { name: newName });
+        await loadStorageData();
+      } catch (err: any) {
+        console.error("Failed to rename:", err);
+        setError(`Failed to rename: ${err.message || err}`);
+      }
     }
   };
 
-  const handleDelete = (item: StorageObject) => {
+  const handleDelete = async (item: StorageObject) => {
     if (confirm(`Are you sure you want to delete ${item.name}?`)) {
-      alert(`Delete ${item.name} - Coming soon!`);
+      try {
+        await storageApi.deleteStorageObject(item.id);
+        await loadStorageData();
+      } catch (err: any) {
+        console.error("Failed to delete:", err);
+        setError(`Failed to delete: ${err.message || err}`);
+      }
     }
   };
 
@@ -227,8 +240,50 @@ export default function DashboardLayout() {
     setShowShareModal(true);
   };
 
-  const handleDownload = (item: StorageObject) => {
-    alert(`Download ${item.name} - Coming soon!`);
+  const handleDownload = async (item: StorageObject) => {
+    if (item.object_type === "folder") {
+      setError("Folder download not yet supported");
+      return;
+    }
+    
+    try {
+      // Create a download link
+      const authClient = getAuthClient();
+      const accessToken = await authClient.getAccessToken();
+      const apiUrl = config.apiUrl || "http://localhost:54321/functions/v1";
+      const downloadUrl = `${apiUrl}/api/v1/storage/sorted-storage/${item.file_path}`;
+      
+      // Create a temporary link with auth
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = item.name;
+      link.target = '_blank';
+      
+      // Add auth header via fetch and blob
+      const response = await fetch(downloadUrl, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Download failed');
+      }
+      
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      link.href = blobUrl;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+    } catch (err: any) {
+      console.error("Failed to download:", err);
+      setError(`Failed to download: ${err.message || err}`);
+    }
   };
 
   const handleSearch = (query: string) => {
@@ -242,6 +297,17 @@ export default function DashboardLayout() {
 
   const folders = filteredItems.filter(item => item.object_type === "folder");
   const files = filteredItems.filter(item => item.object_type === "file");
+  
+  // Separate media files from regular files
+  const mediaExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'mp4', 'webm', 'mp3', 'wav'];
+  const mediaFiles = files.filter(file => {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    return ext && mediaExtensions.includes(ext);
+  });
+  const regularFiles = files.filter(file => {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    return !ext || !mediaExtensions.includes(ext);
+  });
 
   // Calculate storage metrics
   const totalFiles = files.length;
@@ -255,7 +321,7 @@ export default function DashboardLayout() {
         <Card class="p-8">
           <ErrorState
             title="Authentication Required"
-            message="You need to be logged in to access storage"
+            description="You need to be logged in to access storage"
             icon="🔐"
           />
         </Card>
@@ -264,296 +330,205 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div class="flex h-screen bg-white">
-      {/* Sidebar */}
-      <div class="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
-        <div class="p-4">
-          <Dropdown
-            trigger={
-              <Button 
-                variant="outline" 
-                size="lg"
-                class="w-full justify-start gap-3"
-              >
-                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span class="font-medium">New</span>
-              </Button>
-            }
-            align="left"
-          >
-            <div class="py-2 min-w-[200px]">
-              <button
-                onClick={handleCreateFolder}
-                class="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-3"
-              >
-                <span>📁</span>
-                <span>New folder</span>
-              </button>
-              <div class="divider my-1"></div>
-              <button
-                onClick={handleUploadFile}
-                class="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-3"
-              >
-                <span>📤</span>
-                <span>File upload</span>
-              </button>
-              <button
-                onClick={handleUploadFile}
-                class="w-full px-4 py-2 text-left hover:bg-gray-100 flex items-center gap-3"
-              >
-                <span>📁</span>
-                <span>Folder upload</span>
-              </button>
-            </div>
-          </Dropdown>
-        </div>
-        
-        <div class="flex-1 px-2">
-          <CustomSidebar {...sidebarConfig} />
-        </div>
-        
-        <div class="p-4 border-t border-gray-200">
-          <MetricCard
-            title="Storage used"
-            value={`${formatFileSize(totalSize)}`}
-            subtitle={`of 25 GB used`}
-            trend={{ value: storageUsedPercent, isPositive: storageUsedPercent < 80 }}
-            class="bg-white"
-          />
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div class="flex-1 flex flex-col">
-        {/* Header */}
-        <header class="border-b border-gray-200 px-4 py-2">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center flex-1 max-w-2xl gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSearchModal(true)}
-              >
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </Button>
-              <Input
-                type="text"
-                placeholder="Search in Drive"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery((e.target as HTMLInputElement).value)}
-                class="flex-1"
-              />
-            </div>
-            
-            <div class="flex items-center gap-2 ml-4">
-              <Button variant="ghost" size="sm">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </Button>
-              
-              <div class="flex items-center border-l border-gray-300 pl-2">
-                <Button
-                  variant={viewMode === "list" ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                >
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                </Button>
-                <Button
-                  variant={viewMode === "grid" ? "primary" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Breadcrumb */}
-        <div class="px-4 py-2 flex items-center gap-2 text-sm">
-          <nav class="breadcrumbs">
-            <ul>
-              {breadcrumbs.map((crumb, index) => (
-                <li key={index}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigateToBreadcrumb(index)}
-                  >
-                    {crumb.name}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div class="px-4">
-            <Alert variant="error" onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          </div>
-        )}
-
-        {/* Status Bar */}
-        <div class="px-4 py-2 flex items-center justify-between bg-gray-50 border-b">
-          <div class="flex items-center gap-4">
-            <Badge variant="info">{totalFiles} files</Badge>
-            <Badge variant="info">{totalFolders} folders</Badge>
-            {selectedItems.size > 0 && (
-              <Badge variant="primary">{selectedItems.size} selected</Badge>
-            )}
-          </div>
+    <div class="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header class="bg-gray-800 border-b border-gray-700 px-6 py-3">
+        <div class="flex items-center justify-between">
+          {/* Breadcrumbs */}
           <div class="flex items-center gap-2">
-            <LoadingButton
-              loading={isLoading}
-              onClick={loadStorageData}
+            <button onClick={() => navigateToBreadcrumb(0)} class="text-gray-400 hover:text-white">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            {breadcrumbs.map((crumb, index) => (
+              <div key={index} class="flex items-center">
+                <span class="text-gray-500 mx-2">›</span>
+                <button
+                  onClick={() => navigateToBreadcrumb(index)}
+                  class="text-gray-300 hover:text-white"
+                >
+                  {crumb.name}
+                </button>
+              </div>
+            ))}
+          </div>
+          
+          {/* Action Buttons */}
+          <div class="flex items-center gap-3">
+            <Button
+              variant={isEditMode ? "primary" : "ghost"}
+              size="sm"
+              onClick={() => setIsEditMode(!isEditMode)}
+              class="text-gray-300 hover:text-white"
+            >
+              <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none">
+                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              EDIT
+            </Button>
+            <Button
               variant="ghost"
               size="sm"
+              onClick={() => setShowShareModal(true)}
+              class="text-gray-300 hover:text-white"
             >
-              Refresh
-            </LoadingButton>
+              <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none">
+                <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.032 4.026a3 3 0 10-2.684 0m2.684 0a3 3 0 01-2.684 0M6.316 10.658a3 3 0 100 2.684" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              SHARE
+            </Button>
+            <Dropdown
+              trigger={
+                <Button variant="primary" size="sm" class="bg-orange-500 hover:bg-orange-600">
+                  <svg class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 4v16m8-8H4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  NEW
+                </Button>
+              }
+            >
+              <div class="py-2 bg-gray-800 border border-gray-700 rounded-lg min-w-[200px]">
+                <button
+                  onClick={handleCreateFolder}
+                  class="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-3 text-gray-300"
+                >
+                  <span>📁</span>
+                  <span>New Folder</span>
+                </button>
+                <button
+                  onClick={handleUploadFile}
+                  class="w-full px-4 py-2 text-left hover:bg-gray-700 flex items-center gap-3 text-gray-300"
+                >
+                  <span>📄</span>
+                  <span>New File</span>
+                </button>
+              </div>
+            </Dropdown>
+            <div class="ml-4 border-l border-gray-700 pl-4">
+              <SimpleAuthButton />
+            </div>
           </div>
         </div>
+      </header>
 
-        {/* Content Area */}
-        <div class="flex-1 overflow-auto p-4">
-          {isLoading ? (
-            <div class="flex items-center justify-center h-full">
-              <Card class="p-8">
-                <div class="text-center">
-                  <div class="loading loading-spinner loading-lg"></div>
-                  <p class="mt-4 text-gray-600">Loading your files...</p>
+      {/* Main Content */}
+      <div class="p-6">
+        {isLoading ? (
+          <div class="flex items-center justify-center h-96">
+            <div class="text-center">
+              <div class="loading loading-spinner loading-lg"></div>
+              <p class="mt-4 text-gray-400">Loading your files...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <Alert type="error" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        ) : (
+          <div class="space-y-8">
+            {/* Media Section */}
+            {mediaFiles.length > 0 && (
+              <section>
+                <h2 class="text-lg font-semibold mb-4 text-gray-300">Media</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                  {mediaFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      class="bg-gray-800 rounded-lg overflow-hidden cursor-pointer hover:bg-gray-700 transition-colors"
+                      onContextMenu={(e) => handleContextMenu(e, file)}
+                    >
+                      <div class="aspect-square bg-gray-700 flex items-center justify-center">
+                        {file.mime_type?.startsWith('image/') ? (
+                          <span class="text-4xl">🖼️</span>
+                        ) : file.mime_type?.startsWith('video/') ? (
+                          <span class="text-4xl">🎬</span>
+                        ) : (
+                          <span class="text-4xl">🎵</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </Card>
-            </div>
-          ) : filteredItems.length === 0 ? (
-            <EmptyState
-              title={searchQuery ? "No matching files or folders" : "This folder is empty"}
-              message={searchQuery ? "Try a different search term" : "Create a folder or upload files to get started"}
-              icon="📁"
-              action={
-                !searchQuery && (
-                  <Button variant="primary" onClick={handleCreateFolder}>
-                    Create New Folder
-                  </Button>
-                )
-              }
-            />
-          ) : viewMode === "list" ? (
-            <div class="space-y-1">
-              {/* List Header */}
-              <div class="flex items-center px-4 py-2 text-sm text-gray-600 border-b font-medium">
-                <div class="flex-1 flex items-center gap-2">
-                  <input type="checkbox" class="checkbox checkbox-sm" />
-                  <span>Name</span>
+              </section>
+            )}
+
+            {/* Files Section */}
+            {regularFiles.length > 0 && (
+              <section>
+                <h2 class="text-lg font-semibold mb-4 text-gray-300">Files</h2>
+                <div class="space-y-2">
+                  {regularFiles.map((file) => (
+                    <div
+                      key={file.id}
+                      class="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
+                      onContextMenu={(e) => handleContextMenu(e, file)}
+                    >
+                      <span class="text-2xl">📄</span>
+                      <div class="flex-1">
+                        <div class="font-medium text-gray-200">{file.name}</div>
+                        <div class="text-sm text-gray-500">
+                          {formatFileSize(file.file_size || 0)} • Modified {new Date(file.updated_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <button class="p-2 hover:bg-gray-600 rounded">
+                        <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                <div class="w-32">Owner</div>
-                <div class="w-32">Last modified</div>
-                <div class="w-24">File size</div>
-              </div>
-              
-              {/* Folders */}
-              {folders.map((folder) => (
-                <Card
-                  key={folder.id}
-                  class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
-                  onDblClick={() => navigateToFolder(folder)}
-                  onContextMenu={(e) => handleContextMenu(e, folder)}
-                >
-                  <div class="flex-1 flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-sm"
-                      checked={selectedItems.has(folder.id)}
-                      onChange={() => toggleItemSelection(folder.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <span class="text-blue-500">📁</span>
-                    <span class="font-medium">{folder.name}</span>
-                  </div>
-                  <div class="w-32 text-sm text-gray-600">me</div>
-                  <div class="w-32 text-sm text-gray-600">
-                    {new Date(folder.updated_at).toLocaleDateString()}
-                  </div>
-                  <div class="w-24 text-sm text-gray-600">—</div>
-                </Card>
-              ))}
-              
-              {/* Files */}
-              {files.map((file) => (
-                <Card
-                  key={file.id}
-                  class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
-                  onContextMenu={(e) => handleContextMenu(e, file)}
-                >
-                  <div class="flex-1 flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-sm"
-                      checked={selectedItems.has(file.id)}
-                      onChange={() => toggleItemSelection(file.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <span class="text-gray-500">📄</span>
-                    <span>{file.name}</span>
-                  </div>
-                  <div class="w-32 text-sm text-gray-600">me</div>
-                  <div class="w-32 text-sm text-gray-600">
-                    {new Date(file.updated_at).toLocaleDateString()}
-                  </div>
-                  <div class="w-24 text-sm text-gray-600">
-                    {formatFileSize(file.file_size || 0)}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            /* Grid View */
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {folders.map((folder) => (
-                <Card
-                  key={folder.id}
-                  class="p-4 hover:shadow-lg cursor-pointer transition-shadow"
-                  onDblClick={() => navigateToFolder(folder)}
-                  onContextMenu={(e) => handleContextMenu(e, folder)}
-                >
-                  <div class="flex justify-center mb-2">
-                    <span class="text-5xl text-blue-500">📁</span>
-                  </div>
-                  <div class="text-center text-sm truncate">{folder.name}</div>
-                </Card>
-              ))}
-              
-              {files.map((file) => (
-                <Card
-                  key={file.id}
-                  class="p-4 hover:shadow-lg cursor-pointer transition-shadow"
-                  onContextMenu={(e) => handleContextMenu(e, file)}
-                >
-                  <div class="flex justify-center mb-2">
-                    <span class="text-5xl text-gray-500">📄</span>
-                  </div>
-                  <div class="text-center text-sm truncate">{file.name}</div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+              </section>
+            )}
+
+            {/* Folders Section */}
+            {folders.length > 0 && (
+              <section>
+                <h2 class="text-lg font-semibold mb-4 text-gray-300">Folders</h2>
+                <div class="space-y-2">
+                  {folders.map((folder) => (
+                    <div
+                      key={folder.id}
+                      class="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
+                      onDblClick={() => navigateToFolder(folder)}
+                      onContextMenu={(e) => handleContextMenu(e, folder)}
+                    >
+                      <span class="text-2xl">📁</span>
+                      <div class="flex-1">
+                        <div class="font-medium text-gray-200">{folder.name}</div>
+                        <div class="text-sm text-gray-500">
+                          Modified {new Date(folder.updated_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <button class="p-2 hover:bg-gray-600 rounded">
+                        <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Empty State */}
+            {filteredItems.length === 0 && (
+              <EmptyState
+                title={searchQuery ? "No matching files or folders" : "This folder is empty"}
+                description={searchQuery ? "Try a different search term" : "Create a folder or upload files to get started"}
+                icon="📁"
+                action={
+                  !searchQuery && (
+                    <Button variant="primary" onClick={handleCreateFolder}>
+                      Create New Folder
+                    </Button>
+                  )
+                }
+              />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modals */}
@@ -564,17 +539,16 @@ export default function DashboardLayout() {
         placeholder="Search files and folders..."
       />
 
-      {showShareModal && selectedShareItem && (
+      {showShareModal && (
         <ShareModal
           isOpen={showShareModal}
           onClose={() => {
             setShowShareModal(false);
             setSelectedShareItem(null);
           }}
-          itemName={selectedShareItem.name}
-          onShare={(shareData) => {
+          onShare={(shareData: any) => {
             console.log("Share data:", shareData);
-            alert(`Sharing ${selectedShareItem.name} - Coming soon!`);
+            alert(`Sharing ${selectedShareItem?.name || "items"} - Coming soon!`);
             setShowShareModal(false);
             setSelectedShareItem(null);
           }}
@@ -598,7 +572,11 @@ export default function DashboardLayout() {
                 }
               }
             },
-            { divider: true },
+            {
+              label: "divider",
+              action: () => {},
+              divider: true
+            },
             {
               label: "Share",
               icon: "🔗",
@@ -609,13 +587,21 @@ export default function DashboardLayout() {
               icon: "✏️",
               action: () => handleRename(contextMenu.item)
             },
-            { divider: true },
+            {
+              label: "divider",
+              action: () => {},
+              divider: true
+            },
             {
               label: "Download",
               icon: "⬇️",
               action: () => handleDownload(contextMenu.item)
             },
-            { divider: true },
+            {
+              label: "divider",
+              action: () => {},
+              divider: true
+            },
             {
               label: "Delete",
               icon: "🗑️",

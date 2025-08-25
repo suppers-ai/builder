@@ -89,7 +89,7 @@ const apiHandler = createHandler([
 
   // Storage resource
   {
-    method: ['GET', 'POST', 'PUT', 'DELETE'],
+    method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     pattern: 'api/v1/storage/*',
     requireAuth: true,
     handler: async (context: HandlerContext) => {

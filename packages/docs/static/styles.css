@@ -91,7 +91,7 @@ pre {
 /* Hero background using actual image */
 
 .hero-gradient-bg {
-  background-image: var(--hero-gradient-bg, url("http://localhost:8001/static/backgrounds/hero-gradient.webp"));
+  background-image: var(--hero-gradient-bg, url("/static/backgrounds/hero-gradient.webp"));
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;

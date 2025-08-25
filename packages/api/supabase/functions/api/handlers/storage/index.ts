@@ -4,6 +4,7 @@ import { handleStorageGet } from "./get-storage.ts";
 import { handleStorageDelete } from "./delete-storage.ts";
 import { handleStorageDownload } from "./download-storage.ts";
 import { handleStorageShare } from "./share-storage.ts";
+import { handleStorageUpdate } from "./update-storage.ts";
 import { handleUserStorageGet } from "./get-user-storage.ts";
 
 interface StorageContext {
@@ -78,8 +79,8 @@ export async function handleStorage(
         }
 
       case "PATCH":
-        // Handle sharing operations
-        return await handleStorageShare(req, { userId, supabase, applicationSlug, filePath });
+        // Handle object updates (metadata, name, emoji, etc.)
+        return await handleStorageUpdate(req, { userId, supabase, applicationSlug, filePath });
 
       case "DELETE":
         return await handleStorageDelete(req, { userId, supabase, applicationSlug, filePath });

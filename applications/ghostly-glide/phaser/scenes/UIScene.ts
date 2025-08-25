@@ -69,37 +69,39 @@ export default class UIScene extends Phaser.Scene {
       fontFamily: 'Arial'
     });
     
-    // Listen for events from MainScene
-    const mainScene = this.scene.get('MainScene');
+    // Listen for events from MainSceneArcade
+    const mainScene = this.scene.get('MainSceneArcade');
     
-    mainScene.events.on('scoreChanged', (score: number) => {
-      this.score = score;
-      this.scoreText.setText(`Score: ${score}`);
-    });
-    
-    mainScene.events.on('livesChanged', (lives: number) => {
-      this.lives = lives;
-      this.livesText.setText(`Lives: ${lives}`);
-      
-      // Flash red when losing a life
-      this.livesText.setColor('#ff0000');
-      this.time.delayedCall(200, () => {
-        this.livesText.setColor('#ffffff');
+    if (mainScene && mainScene.events) {
+      mainScene.events.on('scoreChanged', (score: number) => {
+        this.score = score;
+        this.scoreText.setText(`Score: ${score}`);
       });
-    });
-    
-    mainScene.events.on('levelChanged', (level: number) => {
-      this.level = level;
-      this.levelText.setText(`Level: ${level}/10`);
-    });
-    
-    mainScene.events.on('gameOver', (finalScore: number) => {
-      this.showGameOver(finalScore);
-    });
-    
-    mainScene.events.on('gameComplete', (finalScore: number) => {
-      this.showVictory(finalScore);
-    });
+      
+      mainScene.events.on('livesChanged', (lives: number) => {
+        this.lives = lives;
+        this.livesText.setText(`Lives: ${lives}`);
+        
+        // Flash red when losing a life
+        this.livesText.setColor('#ff0000');
+        this.time.delayedCall(200, () => {
+          this.livesText.setColor('#ffffff');
+        });
+      });
+      
+      mainScene.events.on('levelChanged', (level: number) => {
+        this.level = level;
+        this.levelText.setText(`Level: ${level}/10`);
+      });
+      
+      mainScene.events.on('gameOver', (finalScore: number) => {
+        this.showGameOver(finalScore);
+      });
+      
+      mainScene.events.on('gameComplete', (finalScore: number) => {
+        this.showVictory(finalScore);
+      });
+    }
   }
 
   showGameOver(finalScore: number) {

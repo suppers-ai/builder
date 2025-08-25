@@ -5,6 +5,8 @@ export interface LogoProps extends BaseComponentProps, SizeProps {
   alt?: string;
   variant?: "long" | "short";
   href?: string;
+  lightSrc?: string;
+  darkSrc?: string;
 }
 
 export function Logo({
@@ -13,6 +15,8 @@ export function Logo({
   alt = "Suppers Logo",
   variant = "long",
   href,
+  lightSrc,
+  darkSrc,
   id,
   ...props
 }: LogoProps) {
@@ -46,6 +50,12 @@ export function Logo({
       currentTheme === "night" ||
       currentTheme === "coffee";
 
+    // Use custom sources if provided
+    if (lightSrc && darkSrc) {
+      return isDark ? darkSrc : lightSrc;
+    }
+
+    // Fall back to default logo paths
     const themeType = isDark ? "dark" : "light";
     const baseUrl = typeof Deno !== "undefined" 
       ? Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"

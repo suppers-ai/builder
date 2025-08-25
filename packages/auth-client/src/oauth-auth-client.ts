@@ -5,7 +5,7 @@ import type {
   AuthSession,
 } from "../../shared/types/auth.ts";
 import type { User } from "../../shared/utils/type-mappers.ts";
-import type { SignInData, SignUpData, UpdateUserData, ResetPasswordData } from "./direct-auth-client.ts";
+import type { SignInData, SignUpData, UpdateUserData, ResetPasswordData } from "../../profile/lib/auth-client/types.ts";
 
 /**
  * OAuth authentication client for centralized auth hub
@@ -18,6 +18,7 @@ export class OAuthAuthClient {
   private storageKey = "suppers_user_id";
   private userStorageKey = "suppers_user_data";
   private sessionStorageKey = "suppers_session_data";
+  private tokenCheckInterval: number | null = null;
 
   constructor(
     profileServiceUrl: string = "http://localhost:8001",
@@ -25,6 +26,9 @@ export class OAuthAuthClient {
   ) {
     this.profileServiceUrl = profileServiceUrl;
     this.clientId = clientId;
+    
+    // Start periodic token expiration check
+    this.startTokenExpirationCheck();
   }
 
   /**
@@ -116,7 +120,31 @@ export class OAuthAuthClient {
   private saveSessionToStorage(session: AuthSession): void {
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(this.sessionStorageKey, JSON.stringify(session));
+        // Normalize the session to always have expires_at as an ISO string
+        let normalizedSession = { ...session };
+        
+        // Convert expires_in to expires_at if needed
+        if ('expires_in' in session && !session.expires_at) {
+          const expiresIn = (session as any).expires_in;
+          normalizedSession.expires_at = new Date(Date.now() + (expiresIn * 1000)).toISOString();
+          console.log(`Converted expires_in (${expiresIn}s) to expires_at: ${normalizedSession.expires_at}`);
+        }
+        // Convert Unix timestamp to ISO string if needed
+        else if (session.expires_at && typeof session.expires_at === 'number') {
+          // Check if it's in seconds (10 digits or less) or milliseconds
+          const timestamp = session.expires_at < 10000000000 
+            ? session.expires_at * 1000 
+            : session.expires_at;
+          normalizedSession.expires_at = new Date(timestamp).toISOString();
+          console.log(`Converted expires_at timestamp to ISO string: ${normalizedSession.expires_at}`);
+        }
+        // Ensure it's a valid ISO string
+        else if (session.expires_at && typeof session.expires_at === 'string') {
+          // Try to parse and re-format to ensure consistency
+          normalizedSession.expires_at = new Date(session.expires_at).toISOString();
+        }
+        
+        localStorage.setItem(this.sessionStorageKey, JSON.stringify(normalizedSession));
       } catch (error) {
         console.error("Failed to save session to storage:", error);
       }
@@ -206,6 +234,10 @@ export class OAuthAuthClient {
         // Get session to emit with login event
         const session = this.getSessionFromStorage();
         this.emitEvent("login", { session: session || null });
+        
+        // Start token expiration checking if user is logged in
+        this.startTokenExpirationCheck();
+        
         return Promise.resolve();
       }
       console.log("No stored user ID found");
@@ -274,8 +306,8 @@ export class OAuthAuthClient {
   showLoginModal(): void {
     console.log("showLoginModal called");
 
-    // Open login page directly in popup
-    const loginUrl = new URL("/auth/login", this.profileServiceUrl);
+    // Open login page directly in popup (home page is now login)
+    const loginUrl = new URL("/", this.profileServiceUrl);
     loginUrl.searchParams.set("modal", "true");
 
     console.log("Opening login popup:", loginUrl.toString());
@@ -316,6 +348,9 @@ export class OAuthAuthClient {
 
         this.emitEvent("login", { session: event.data.session || null });
         console.log("OAuth popup login completed successfully");
+        
+        // Restart token expiration checking after login
+        this.startTokenExpirationCheck();
 
         // Clean up
         globalThis.removeEventListener("message", messageHandler);
@@ -438,6 +473,9 @@ export class OAuthAuthClient {
     this.clearUserDataFromStorage();
     this.clearSessionFromStorage();
 
+    // Stop token expiration checking after logout
+    this.stopTokenExpirationCheck();
+
     this.emitEvent("logout");
     return Promise.resolve();
   }
@@ -451,9 +489,72 @@ export class OAuthAuthClient {
   }
 
   /**
+   * Check if the current session token is expired
+   */
+  private isTokenExpired(session: AuthSession | null): boolean {
+    if (!session || !session.expires_at) {
+      return false;
+    }
+    
+    // expires_at is always stored as an ISO string (normalized in saveSessionToStorage)
+    const expiresAt = new Date(session.expires_at).getTime();
+    const now = Date.now();
+    
+    // Token is expired if current time has passed the expiration time
+    // We'll show the warning 5 minutes before actual expiration
+    const bufferTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+    const timeUntilExpiry = expiresAt - now;
+    const isExpired = now > (expiresAt - bufferTime);
+    
+    if (isExpired) {
+      console.log(`⚠️ Token will expire in ${Math.round(timeUntilExpiry / 1000 / 60)} minutes`);
+    }
+    
+    return isExpired;
+  }
+
+  /**
+   * Start periodic token expiration checking
+   */
+  private startTokenExpirationCheck(): void {
+    // Clear any existing interval
+    this.stopTokenExpirationCheck();
+    
+    // Log initial session info
+    const session = this.getSessionFromStorage();
+    if (session?.expires_at) {
+      const expiresAt = new Date(session.expires_at);
+      const now = new Date();
+      const hoursUntilExpiry = (expiresAt.getTime() - now.getTime()) / 1000 / 60 / 60;
+      console.log(`🔐 Starting token expiration check. Token expires at: ${expiresAt.toISOString()} (in ${hoursUntilExpiry.toFixed(2)} hours)`);
+    }
+    
+    // Check every 30 seconds
+    this.tokenCheckInterval = globalThis.setInterval(() => {
+      const session = this.getSessionFromStorage();
+      if (this.isTokenExpired(session)) {
+        console.log("🔒 Token expiration detected during periodic check");
+        this.emitEvent("session_expired", { error: "Token expired" });
+        // Stop checking once expired
+        this.stopTokenExpirationCheck();
+      }
+    }, 30000);
+  }
+
+  /**
+   * Stop periodic token expiration checking
+   */
+  private stopTokenExpirationCheck(): void {
+    if (this.tokenCheckInterval !== null) {
+      globalThis.clearInterval(this.tokenCheckInterval);
+      this.tokenCheckInterval = null;
+    }
+  }
+
+  /**
    * Make authenticated API request to the profile service
    */
-  apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
+  async apiRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
     // Construct full URL if endpoint is relative
     const url = endpoint.startsWith("http") ? endpoint : `${this.profileServiceUrl}${endpoint}`;
 
@@ -466,6 +567,17 @@ export class OAuthAuthClient {
     const userId = this.getUserIdFromStorage();
     const session = this.getSessionFromStorage();
 
+    // Check if token is expired before making request
+    if (this.isTokenExpired(session)) {
+      console.log("Token expired, emitting session_expired event");
+      this.emitEvent("session_expired", { error: "Token expired" });
+      // Return a response that indicates unauthorized
+      return new Response(JSON.stringify({ error: "Token expired" }), {
+        status: 401,
+        statusText: "Unauthorized",
+      });
+    }
+
     if (userId) {
       headers["X-User-ID"] = userId;
 
@@ -475,10 +587,18 @@ export class OAuthAuthClient {
       }
     }
 
-    return fetch(url, {
+    const response = await fetch(url, {
       ...options,
       headers,
     });
+
+    // Check if response indicates token expiration
+    if (response.status === 401) {
+      console.log("Received 401 response, token may be expired");
+      this.emitEvent("session_expired", { error: "Unauthorized" });
+    }
+
+    return response;
   }
 
   /**

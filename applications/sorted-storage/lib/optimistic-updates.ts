@@ -377,9 +377,7 @@ export const optimisticHelpers = {
     file_size: file.size,
     mime_type: file.type,
     object_type: "file",
-    parent_id: folderId || null,
-    is_public: false,
-    share_token: null,
+    parent_folder_id: folderId || null,
     thumbnail_url: null,
     metadata: {
       original_name: file.name,
@@ -401,9 +399,7 @@ export const optimisticHelpers = {
     file_size: 0,
     mime_type: "application/x-folder",
     object_type: "folder",
-    parent_id: parentId || null,
-    is_public: false,
-    share_token: null,
+    parent_folder_id: parentId || null,
     thumbnail_url: null,
     metadata: {
       custom_name: name,

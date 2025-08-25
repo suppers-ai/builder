@@ -6,6 +6,49 @@ import SidebarAwareLayout from "../islands/SidebarAwareLayout.tsx";
 
 export default function Layout({ Component, url }: PageProps) {
   const currentPath = url.pathname;
+  const isHomePage = currentPath === "/";
+
+  // Don't show sidebar and floating menu on home page
+  if (isHomePage) {
+    return (
+      <div class="min-h-screen bg-base-100">
+        <main class="flex-1 min-h-screen">
+          <Component />
+          {/* Footer */}
+          <Footer
+            sections={[
+              {
+                title: "Components",
+                links: [
+                  { text: "UI Library", href: "/components" },
+                  { text: "Browse All", href: "/components" },
+                  { text: "Getting Started", href: "/docs" },
+                ],
+              },
+              {
+                title: "Builder",
+                links: [
+                  { text: "Generate App", href: "/generate" },
+                  { text: "Templates", href: "/templates" },
+                  { text: "API Reference", href: "/api" },
+                ],
+              },
+              {
+                title: "Resources",
+                links: [
+                  { text: "Documentation", href: "/docs" },
+                  { text: "Deno", href: "https://fresh.deno.dev" },
+                  { text: "daisyUI", href: "https://daisyui.com" },
+                ],
+              },
+            ]}
+            copyright="© 2025 Suppers Software Limited. Built with Deno, Fresh, Preact & DaisyUI."
+            socialLinks={[]}
+          />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div class="min-h-screen bg-base-100">

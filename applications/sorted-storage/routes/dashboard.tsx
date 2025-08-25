@@ -1,5 +1,5 @@
-import DashboardLayout from "../islands/DashboardLayout.tsx";
+import SortedStorageLayout from "../islands/SortedStorageLayout.tsx";
 
 export default function Dashboard() {
-  return <DashboardLayout />;
+  return <SortedStorageLayout />;
 }

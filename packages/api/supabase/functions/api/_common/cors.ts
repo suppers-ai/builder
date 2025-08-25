@@ -12,7 +12,7 @@ export function getCorsHeaders(origin?: string | null): HeadersInit {
   
   // Default headers
   const headers: HeadersInit = {
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-user-id',
     'Access-Control-Max-Age': '86400', // 24 hours
   };

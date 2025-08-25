@@ -4,6 +4,7 @@
  */
 
 import type { ShareInfo, ShareOptions, StorageObject } from "../types/storage.ts";
+import { shareStorageObject, getObjectShares, removeShare, generatePublicLink } from "./storage-api.ts";
 import config from "../../../config.ts";
 
 // Generate a secure random token for sharing
@@ -18,39 +19,18 @@ export async function createShareLink(
   storageObject: StorageObject,
   options: ShareOptions = {},
 ): Promise<ShareInfo> {
-  const token = generateShareToken();
   const expiresAt = options.expiresAt || getDefaultExpiryDate();
 
   try {
-    // Update the storage object with share token
-    const response = await fetch(`${config.apiUrl}/api/v1/storage/share`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${await getAuthToken()}`,
-      },
-      body: JSON.stringify({
-        objectId: storageObject.id,
-        shareToken: token,
-        expiresAt,
-        options,
-      }),
+    // Use the new shareStorageObject API method
+    const shareInfo = await shareStorageObject(storageObject.id, {
+      isPublic: true,
+      permissionLevel: options.allowDownload ? "view" : "view",
+      inheritToChildren: storageObject.object_type === "folder",
+      expiresAt,
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to create share link: ${response.statusText}`);
-    }
-
-    const shareUrl = `${globalThis.location?.origin || "http://localhost:8000"}/share/${token}`;
-
-    return {
-      token,
-      url: shareUrl,
-      expiresAt,
-      createdAt: new Date().toISOString(),
-      accessCount: 0,
-      options,
-    };
+    return shareInfo;
   } catch (error) {
     console.error("Error creating share link:", error);
     throw error;
@@ -60,19 +40,14 @@ export async function createShareLink(
 // Revoke a share link
 export async function revokeShareLink(storageObject: StorageObject): Promise<void> {
   try {
-    const response = await fetch(`${config.apiUrl}/api/v1/storage/share/revoke`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${await getAuthToken()}`,
-      },
-      body: JSON.stringify({
-        objectId: storageObject.id,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to revoke share link: ${response.statusText}`);
+    // Get all shares for this object
+    const shares = await getObjectShares(storageObject.id);
+    
+    // Find and remove all public shares
+    const publicShares = shares.filter((share: any) => share.is_public);
+    
+    for (const share of publicShares) {
+      await removeShare(share.id);
     }
   } catch (error) {
     console.error("Error revoking share link:", error);
@@ -117,31 +92,27 @@ export async function validateShareToken(token: string): Promise<{
 
 // Get share information for a storage object
 export async function getShareInfo(storageObject: StorageObject): Promise<ShareInfo | null> {
-  if (!storageObject.share_token) {
-    return null;
-  }
-
   try {
-    const response = await fetch(`${config.apiUrl}/api/v1/storage/share/info/${storageObject.id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${await getAuthToken()}`,
-      },
-    });
-
-    if (!response.ok) {
+    // Get all shares for this object
+    const shares = await getObjectShares(storageObject.id);
+    
+    // Find the first public share
+    const publicShare = shares.find((share: any) => share.is_public && share.share_token);
+    
+    if (!publicShare) {
       return null;
     }
 
-    const data = await response.json();
     return {
-      token: storageObject.share_token,
-      url: `${globalThis.location.origin}/share/${storageObject.share_token}`,
-      expiresAt: data.expiresAt,
-      createdAt: data.createdAt,
-      accessCount: data.accessCount || 0,
-      options: data.options || {},
+      token: publicShare.share_token,
+      url: `${globalThis.location?.origin || "http://localhost:8000"}/share/${publicShare.share_token}`,
+      expiresAt: publicShare.expires_at,
+      createdAt: publicShare.created_at,
+      accessCount: 0, // This would need to be tracked separately
+      options: {
+        allowDownload: publicShare.permission_level !== "view",
+        expiresAt: publicShare.expires_at,
+      },
     };
   } catch (error) {
     console.error("Error getting share info:", error);
@@ -235,25 +206,40 @@ export async function createEmailShare(
   error?: string;
 }> {
   try {
-    const response = await fetch(`${config.apiUrl}/api/v1/storage/share/email`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${await getAuthToken()}`,
-      },
-      body: JSON.stringify({
-        objectId: storageObject.id,
-        emails,
-        message,
-        expiresIn,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to create email share: ${response.statusText}`);
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + expiresIn);
+    
+    const recipients = [];
+    
+    // Create a share for each email
+    for (const email of emails) {
+      try {
+        const shareInfo = await shareStorageObject(storageObject.id, {
+          sharedWithEmail: email,
+          permissionLevel: "view",
+          inheritToChildren: storageObject.object_type === "folder",
+          expiresAt: expiresAt.toISOString(),
+        });
+        
+        recipients.push({
+          email,
+          token: shareInfo.token,
+          status: "sent" as const,
+        });
+      } catch (err) {
+        recipients.push({
+          email,
+          token: "",
+          status: "failed" as const,
+        });
+      }
     }
 
-    return await response.json();
+    return {
+      success: recipients.some(r => r.status === "sent"),
+      sessionId: crypto.randomUUID(),
+      recipients,
+    };
   } catch (error) {
     console.error("Error creating email share:", error);
     return {

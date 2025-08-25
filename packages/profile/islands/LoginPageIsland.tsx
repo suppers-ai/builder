@@ -130,7 +130,10 @@ export default function LoginPageIsland({
           // User is already logged in and this is not a modal, redirect to intended destination
           // For modal mode, we don't auto-redirect as it might be part of OAuth flow
           console.log("🔍 LoginPageIsland: User authenticated, redirecting (non-modal)");
+          // Keep loading state during redirect to prevent flash
           handleAuthSuccess();
+          // Don't set loading to false here, let the redirect happen
+          return;
         } else if (currentUser && isModal) {
           console.log(
             "🔍 LoginPageIsland: User authenticated in modal mode, waiting for user action",
@@ -285,8 +288,11 @@ export default function LoginPageIsland({
 
   if (loading) {
     return (
-      <div class="min-h-screen flex items-center justify-center">
-        <Loading variant="spinner" size="lg" />
+      <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-200 to-base-300">
+        <div class="text-center">
+          <Loading variant="spinner" size="lg" />
+          <p class="mt-4 text-base-content/60 text-sm">Loading...</p>
+        </div>
       </div>
     );
   }

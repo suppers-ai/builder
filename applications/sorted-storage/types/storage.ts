@@ -12,14 +12,13 @@ export interface StorageObject {
   file_size: number;
   mime_type: string;
   object_type: "file" | "folder";
-  parent_id: string | null;
-  is_public: boolean;
-  share_token: string | null;
+  parent_folder_id: string | null;
   thumbnail_url: string | null;
   metadata: StorageMetadata;
   created_at: string;
   updated_at: string;
   application_id?: string | null;
+  path_segments?: string[];
 }
 
 // Custom metadata interface for personalization (Requirement 5.1, 5.2, 5.3, 5.4, 5.5)
@@ -30,6 +29,7 @@ export interface StorageMetadata {
   folder_color?: string;
   tags?: string[];
   last_accessed?: string;
+  display_date?: string;
   [key: string]: unknown;
 }
 

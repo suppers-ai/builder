@@ -19,34 +19,28 @@ if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === "") {
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function testVariableDefinitions() {
-  console.log("🧪 Testing Variable Definitions Functionality\n");
+  console.log("🧪 Testing Variable Definitions (System Variables) Functionality\n");
 
-  // Check if global_variable_definitions table exists
-  console.log("1️⃣ Checking if global_variable_definitions table exists...");
-  const { data: tables, error: tablesError } = await supabase
-    .rpc('get_tables', {})
-    .select('*');
+  // Check if variables table has system variables
+  console.log("1️⃣ Checking system variables in variables table...");
   
-  if (tablesError) {
-    console.log("   ⚠️  Could not query tables (this is normal if RPC doesn't exist)");
-  }
-
-  // Query the table directly
-  console.log("\n2️⃣ Querying global_variable_definitions table...");
+  // Query system variables
+  console.log("\n2️⃣ Querying system variables...");
   const { data: variables, error: variablesError } = await supabase
-    .from("global_variable_definitions")
+    .from("variables")
     .select("*")
+    .eq("is_system", true)
     .limit(5);
 
   if (variablesError) {
     console.error("   ❌ Error querying table:", variablesError.message);
-    console.log("\n   💡 The table might not exist. You may need to run the migration:");
-    console.log("      psql $DATABASE_URL < packages/payments/database-schema.sql");
+    console.log("\n   💡 The migration might not have been run. You may need to run:");
+    console.log("      psql $DATABASE_URL < packages/api/supabase/migrations/20250823000000_merge_global_variables.sql");
   } else {
     console.log("   ✅ Table exists!");
-    console.log(`   📊 Found ${variables?.length || 0} variable definitions`);
+    console.log(`   📊 Found ${variables?.length || 0} system variable definitions`);
     if (variables && variables.length > 0) {
-      console.log("\n   Sample variables:");
+      console.log("\n   Sample system variables:");
       variables.slice(0, 3).forEach(v => {
         console.log(`      - ${v.variable_id}: ${v.name} (${v.value_type})`);
       });

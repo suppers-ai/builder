@@ -169,10 +169,8 @@ class StorageApiClient {
       file_path: file.path,
       file_size: file.size,
       mime_type: file.contentType,
-      object_type: file.metadata?.object_type || "file",
-      parent_id: file.metadata?.parent_id || null,
-      is_public: file.isPublic,
-      share_token: file.shareToken,
+      object_type: file.object_type || "file",
+      parent_folder_id: file.parent_folder_id || null,
       thumbnail_url: file.metadata?.thumbnail_url || null,
       metadata: file.metadata || {},
       created_at: file.createdAt,
@@ -183,7 +181,7 @@ class StorageApiClient {
     // Filter by folder if specified
     let filteredObjects = objects;
     if (folderId !== undefined) {
-      filteredObjects = objects.filter((obj) => obj.parent_id === folderId);
+      filteredObjects = objects.filter((obj) => obj.parent_folder_id === folderId);
     }
 
     // Cache the results
@@ -251,11 +249,9 @@ class StorageApiClient {
       throw error;
     }
 
-    // Create folder metadata
+    // Create folder metadata (no longer storing parent_id here)
     const folderMetadata: StorageMetadata = {
       ...metadata,
-      object_type: "folder",
-      parent_id: parentId || null,
     };
 
     // Create a virtual file path for the folder
@@ -265,6 +261,8 @@ class StorageApiClient {
       name: name.trim(),
       path: folderPath,
       contentType: "application/x-folder",
+      object_type: "folder",
+      parent_folder_id: parentId || null,
       metadata: folderMetadata,
     };
 
@@ -291,9 +289,7 @@ class StorageApiClient {
       file_size: 0,
       mime_type: "application/x-folder",
       object_type: "folder",
-      parent_id: parentId || null,
-      is_public: false,
-      share_token: null,
+      parent_folder_id: parentId || null,
       thumbnail_url: null,
       metadata: folderMetadata,
       created_at: new Date().toISOString(),
@@ -342,10 +338,8 @@ class StorageApiClient {
     const fileId = crypto.randomUUID();
     const filePath = `${userId}/${this.applicationSlug}/${fileId}-${file.name}`;
 
-    // Create file metadata
+    // Create file metadata (no longer storing parent_id here)
     const fileMetadata: StorageMetadata = {
-      object_type: "file",
-      parent_id: options.currentFolderId || null,
       original_name: file.name,
     };
 
@@ -364,6 +358,10 @@ class StorageApiClient {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("metadata", JSON.stringify(fileMetadata));
+      formData.append("object_type", "file");
+      if (options.currentFolderId) {
+        formData.append("parent_folder_id", options.currentFolderId);
+      }
 
       const endpoint = `/storage/${this.applicationSlug}/${filePath}`;
 
@@ -416,9 +414,7 @@ class StorageApiClient {
         file_size: file.size,
         mime_type: file.type,
         object_type: "file",
-        parent_id: options.currentFolderId || null,
-        is_public: false,
-        share_token: null,
+        parent_folder_id: options.currentFolderId || null,
         thumbnail_url: data.data.thumbnailUrl || null,
         metadata: fileMetadata,
         created_at: new Date().toISOString(),
@@ -452,14 +448,24 @@ class StorageApiClient {
       throw new Error("Storage object not found");
     }
 
-    // For now, we'll implement this as a client-side update
-    // In a full implementation, this would make a PATCH request to the API
-    const updatedObject: StorageObject = {
-      ...object,
-      ...updates,
-      updated_at: new Date().toISOString(),
-    };
+    // Make PATCH request to update the storage object
+    const endpoint = `/storage/${this.applicationSlug}/objects/${id}`;
+    const response = await this.makeRequest(endpoint, {
+      method: "PATCH",
+      body: JSON.stringify({
+        name: updates.name !== undefined ? updates.name : object.name,
+        metadata: updates.metadata !== undefined ? {
+          ...object.metadata,
+          ...updates.metadata
+        } : object.metadata
+      }),
+    });
 
+    const updatedObject = await response.json();
+    
+    // Invalidate cache for the parent folder
+    cacheInvalidation.invalidateFolder(object.parent_folder_id);
+    
     return updatedObject;
   }
 
@@ -478,7 +484,7 @@ class StorageApiClient {
     });
 
     // Invalidate relevant caches
-    cacheInvalidation.invalidateFolder(object.parent_id);
+    cacheInvalidation.invalidateFolder(object.parent_folder_id);
   }
 
   /**
@@ -493,7 +499,7 @@ class StorageApiClient {
         return null;
       }
 
-      const children = objects.filter((obj) => obj.parent_id === folderId);
+      const children = objects.filter((obj) => obj.parent_folder_id === folderId);
       const totalSize = children.reduce((sum, child) => sum + child.file_size, 0);
       const lastModified = children.reduce((latest, child) => {
         return child.updated_at > latest ? child.updated_at : latest;
@@ -509,7 +515,7 @@ class StorageApiClient {
     }
 
     // Return root folder structure
-    const rootChildren = objects.filter((obj) => obj.parent_id === null);
+    const rootChildren = objects.filter((obj) => obj.parent_folder_id === null);
     const totalSize = rootChildren.reduce((sum, child) => sum + child.file_size, 0);
     const lastModified = rootChildren.reduce((latest, child) => {
       return child.updated_at > latest ? child.updated_at : latest;
@@ -524,9 +530,7 @@ class StorageApiClient {
       file_size: 0,
       mime_type: "application/x-folder",
       object_type: "folder",
-      parent_id: null,
-      is_public: false,
-      share_token: null,
+      parent_folder_id: null,
       thumbnail_url: null,
       metadata: {
         custom_name: "Home",
@@ -569,7 +573,7 @@ class StorageApiClient {
         path: `/folder/${folder.id}`,
       });
 
-      currentId = folder.parent_id;
+      currentId = folder.parent_folder_id;
     }
 
     // Add root at the beginning
@@ -585,10 +589,10 @@ class StorageApiClient {
     const objects = await this.getStorageObjects();
 
     if (!folderId || folderId === "root") {
-      return objects.filter((obj) => obj.object_type === "folder" && obj.parent_id === null);
+      return objects.filter((obj) => obj.object_type === "folder" && obj.parent_folder_id === null);
     }
 
-    return objects.filter((obj) => obj.object_type === "folder" && obj.parent_id === folderId);
+    return objects.filter((obj) => obj.object_type === "folder" && obj.parent_folder_id === folderId);
   }
 
   /**
@@ -647,6 +651,155 @@ class StorageApiClient {
       hasMore: false, // For now, we return all results
     };
   }
+
+  /**
+   * Share a storage object with specific permissions
+   */
+  async shareStorageObject(
+    objectId: string,
+    shareOptions: {
+      sharedWithUserId?: string;
+      sharedWithEmail?: string;
+      permissionLevel?: "view" | "edit" | "admin";
+      inheritToChildren?: boolean;
+      expiresAt?: string;
+      isPublic?: boolean;
+    },
+  ): Promise<ShareInfo> {
+    const userId = getCurrentUserId();
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    // If making public, generate a share token
+    let shareToken: string | undefined;
+    if (shareOptions.isPublic) {
+      shareToken = crypto.randomUUID();
+    }
+
+    const shareData = {
+      object_id: objectId,
+      shared_with_user_id: shareOptions.sharedWithUserId,
+      shared_with_email: shareOptions.sharedWithEmail,
+      permission_level: shareOptions.permissionLevel || "view",
+      inherit_to_children: shareOptions.inheritToChildren !== false,
+      share_token: shareToken,
+      is_public: shareOptions.isPublic || false,
+      expires_at: shareOptions.expiresAt,
+      created_by: userId,
+    };
+
+    const endpoint = `/storage/${this.applicationSlug}/share`;
+    const response = await this.makeRequest(endpoint, {
+      method: "POST",
+      body: JSON.stringify(shareData),
+    });
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || "Failed to share object");
+    }
+
+    // Return share info
+    return {
+      token: shareToken || "",
+      url: shareToken ? `${window.location.origin}/share/${shareToken}` : "",
+      expiresAt: shareOptions.expiresAt,
+      createdAt: new Date().toISOString(),
+      accessCount: 0,
+      options: {
+        expiresAt: shareOptions.expiresAt,
+        allowDownload: shareOptions.permissionLevel !== "view",
+        requirePassword: false,
+      },
+    };
+  }
+
+  /**
+   * Get shares for a storage object
+   */
+  async getObjectShares(objectId: string): Promise<any[]> {
+    const endpoint = `/storage/${this.applicationSlug}/shares/${objectId}`;
+    const response = await this.makeRequest(endpoint);
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error || "Failed to fetch shares");
+    }
+
+    return data.data || [];
+  }
+
+  /**
+   * Update a share
+   */
+  async updateShare(
+    shareId: string,
+    updates: {
+      permissionLevel?: "view" | "edit" | "admin";
+      expiresAt?: string;
+      inheritToChildren?: boolean;
+    },
+  ): Promise<void> {
+    const endpoint = `/storage/${this.applicationSlug}/share/${shareId}`;
+    const response = await this.makeRequest(endpoint, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    });
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || "Failed to update share");
+    }
+  }
+
+  /**
+   * Remove a share
+   */
+  async removeShare(shareId: string): Promise<void> {
+    const endpoint = `/storage/${this.applicationSlug}/share/${shareId}`;
+    const response = await this.makeRequest(endpoint, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error || "Failed to remove share");
+    }
+  }
+
+  /**
+   * Generate a public share link
+   */
+  async generatePublicLink(
+    objectId: string,
+    options?: {
+      expiresAt?: string;
+      permissionLevel?: "view" | "edit";
+    },
+  ): Promise<string> {
+    const shareInfo = await this.shareStorageObject(objectId, {
+      isPublic: true,
+      permissionLevel: options?.permissionLevel || "view",
+      expiresAt: options?.expiresAt,
+    });
+
+    return shareInfo.url;
+  }
+
+  /**
+   * Check if user has permission to access an object
+   */
+  async checkPermission(
+    objectId: string,
+    requiredLevel: "view" | "edit" | "admin" = "view",
+  ): Promise<boolean> {
+    const endpoint = `/storage/${this.applicationSlug}/permission/${objectId}?level=${requiredLevel}`;
+    const response = await this.makeRequest(endpoint);
+    const data = await response.json();
+
+    return data.success && data.data?.hasPermission;
+  }
 }
 
 // Export singleton instance
@@ -664,4 +817,10 @@ export const {
   getBreadcrumbPath,
   getFolderHierarchy,
   searchStorageObjects,
+  shareStorageObject,
+  getObjectShares,
+  updateShare,
+  removeShare,
+  generatePublicLink,
+  checkPermission,
 } = storageApi;

@@ -1,4 +1,4 @@
-import { DirectAuthClient } from "@suppers/auth-client";
+import { DirectAuthClient } from "../auth-client/index.ts";
 import config from "../../../../config.ts";
 
 export interface ApiResponse<T> {
@@ -27,7 +27,7 @@ export abstract class BaseApiClientDirect {
 
   constructor(
     authClient: DirectAuthClient,
-    baseUrl: string = config.apiUrl || "http://127.0.0.1:54321/functions/v1/api/v1",
+    baseUrl: string = `${config.apiUrl}/api/v1` || "http://127.0.0.1:54321/functions/v1/api/v1",
   ) {
     this.authClient = authClient;
     this.baseUrl = baseUrl;
@@ -44,18 +44,17 @@ export abstract class BaseApiClientDirect {
         throw new Error("User not found - please sign in");
       }
 
-      // Get the Supabase client and session
-      const supabase = this.authClient.getSupabaseClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      // Get the access token directly from DirectAuthClient
+      const accessToken = await this.authClient.getAccessToken();
       
-      if (!session?.access_token) {
+      if (!accessToken) {
         throw new Error("No access token available - please sign in");
       }
 
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
         headers: {
-          "Authorization": `Bearer ${session.access_token}`,
+          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
           "X-User-ID": user.id || "",
           ...options.headers,
@@ -78,14 +77,8 @@ export abstract class BaseApiClientDirect {
 
         // Handle session expired errors
         if (response.status === 401) {
-          // Try to refresh the session
-          const { data: { session: newSession } } = await supabase.auth.refreshSession();
-          if (!newSession) {
-            // Session refresh failed, user needs to login again
-            throw new Error("Session expired - please sign in again");
-          }
-          // Retry the request with new token
-          return this.makeRequest<T>(endpoint, options);
+          // Session expired - user needs to login again
+          throw new Error("Session expired - please sign in again");
         }
 
         throw new Error(errorMessage);

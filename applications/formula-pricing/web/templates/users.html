@@ -1,0 +1,637 @@
+{{template "base.html" .}}
+
+{{define "styles"}}
+<link rel="stylesheet" href="https://unpkg.com/lucide@latest/font/lucide.min.css">
+<style>
+    .main-card {
+        padding: 2rem;
+    }
+    .content-area {
+        padding: 2rem;
+    }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    .btn-primary {
+        background: #333;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #555;
+    }
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    .btn-danger:hover {
+        background: #c82333;
+    }
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+    }
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+    .btn-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+    }
+    .data-table th {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 2px solid #e0e0e0;
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #666;
+    }
+    .data-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .data-table tr:hover {
+        background: #f8f9fa;
+    }
+    .role-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .role-badge.admin {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    .role-badge.viewer {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+    .empty-state h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    .current-user-badge {
+        background: #10b981;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.2s;
+    }
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        width: 90%;
+        max-width: 500px;
+        animation: slideIn 0.3s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .close-btn:hover {
+        color: #666;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .form-label span {
+        color: #dc3545;
+    }
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        background: #f8f9fa;
+    }
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    .help-text {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0.25rem;
+    }
+    .warning-text {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        color: #856404;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+<div class="main-wrapper">
+    <div class="header">
+        <div class="logo">
+            <span>FormulaPricing</span>
+        </div>
+        <div>
+            <span style="margin-right: 1rem; color: #666;">{{.UserEmail}}</span>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <a href="/dashboard" class="tab">Dashboard</a>
+        <a href="/variables" class="tab">Variables</a>
+        <a href="/calculations" class="tab">Calculations</a>
+        <a href="/conditions" class="tab">Conditions</a>
+        <a href="/pricing" class="tab">Pricing</a>
+        <a href="/calculate" class="tab">Calculate</a>
+        <a href="/users" class="tab active">Users</a>
+        <a href="/dashboard/logs" class="tab">Logs</a>
+        <a href="/dashboard/settings" class="tab">Settings</a>
+    </div>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="content-area">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i data-lucide="users" style="width: 28px; height: 28px; color: #8b5cf6;"></i>
+                        User Management
+                    </h1>
+                    {{if eq .UserRole "admin"}}
+                    <button class="btn btn-primary" onclick="createUser()">
+                        <i data-lucide="user-plus" style="width: 20px; height: 20px;"></i>
+                        New User
+                    </button>
+                    {{end}}
+                </div>
+
+                {{if .Users}}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Created</th>
+                            <th>Last Updated</th>
+                            {{if eq $.UserRole "admin"}}<th style="width: 200px;">Actions</th>{{end}}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Users}}
+                        <tr>
+                            <td>
+                                {{.Email}}
+                                {{if eq .Email $.UserEmail}}
+                                    <span class="current-user-badge">Current User</span>
+                                {{end}}
+                            </td>
+                            <td>
+                                <span class="role-badge {{.Role}}">
+                                    {{if eq .Role "admin"}}Admin{{else}}Viewer{{end}}
+                                </span>
+                            </td>
+                            <td>{{.CreatedAt.Format "Jan 02, 2006"}}</td>
+                            <td>{{.UpdatedAt.Format "Jan 02, 2006"}}</td>
+                            {{if eq $.UserRole "admin"}}
+                            <td>
+                                <div class="actions">
+                                    <button class="btn btn-secondary btn-sm" onclick="changePassword('{{.ID}}', '{{.Email}}')" title="Change Password">
+                                        <i data-lucide="key" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm" onclick="changeRole('{{.ID}}', '{{.Email}}', '{{.Role}}')" title="Change Role">
+                                        <i data-lucide="shield" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                    {{if ne .Email $.UserEmail}}
+                                    <button class="btn btn-danger btn-sm" onclick="deleteUser('{{.ID}}', '{{.Email}}')" title="Delete User">
+                                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                    {{else}}
+                                    <button class="btn btn-danger btn-sm" disabled title="Cannot delete current user">
+                                        <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                    </button>
+                                    {{end}}
+                                </div>
+                            </td>
+                            {{end}}
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+                {{else}}
+                <div class="empty-state">
+                    <i data-lucide="users" style="width: 64px; height: 64px; margin: 0 auto 1rem; color: #999;"></i>
+                    <h3>No Users Yet</h3>
+                    <p>Create your first user to manage access.</p>
+                    <button class="btn btn-primary" onclick="createUser()">
+                        <i data-lucide="user-plus" style="width: 20px; height: 20px;"></i>
+                        Create User
+                    </button>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Modal -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">New User</h2>
+            <button class="close-btn" onclick="closeModal()">
+                <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+            </button>
+        </div>
+        <form id="userForm">
+            <div class="form-group">
+                <label class="form-label">
+                    Email <span>*</span>
+                </label>
+                <input type="email" id="userEmail" class="form-input" placeholder="user@example.com" required />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Password <span>*</span>
+                </label>
+                <input type="password" id="userPassword" class="form-input" placeholder="Enter password" required />
+                <div class="help-text">Minimum 8 characters</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Confirm Password <span>*</span>
+                </label>
+                <input type="password" id="userPasswordConfirm" class="form-input" placeholder="Confirm password" required />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Role <span>*</span>
+                </label>
+                <select id="userRole" class="form-input" required>
+                    <option value="viewer">Viewer (Read-only)</option>
+                    <option value="admin">Admin (Full access)</option>
+                </select>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Change Password</h2>
+            <button class="close-btn" onclick="closePasswordModal()">
+                <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+            </button>
+        </div>
+        <form id="passwordForm">
+            <input type="hidden" id="passwordUserId" />
+            
+            <div class="form-group">
+                <label class="form-label">User</label>
+                <input type="text" id="passwordUserEmail" class="form-input" readonly />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    New Password <span>*</span>
+                </label>
+                <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" required />
+                <div class="help-text">Minimum 8 characters</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Confirm New Password <span>*</span>
+                </label>
+                <input type="password" id="newPasswordConfirm" class="form-input" placeholder="Confirm new password" required />
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closePasswordModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Role Modal -->
+<div id="roleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Change User Role</h2>
+            <button class="close-btn" onclick="closeRoleModal()">
+                <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+            </button>
+        </div>
+        <form id="roleForm">
+            <input type="hidden" id="roleUserId" />
+            
+            <div class="form-group">
+                <label class="form-label">User</label>
+                <input type="text" id="roleUserEmail" class="form-input" readonly />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Role <span>*</span>
+                </label>
+                <select id="roleSelect" class="form-input" required>
+                    <option value="viewer">Viewer (Read-only)</option>
+                    <option value="admin">Admin (Full access)</option>
+                </select>
+                <div class="help-text">Viewers can only view data, while Admins can make changes.</div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeRoleModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Change Role</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+    lucide.createIcons();
+    
+    function createUser() {
+        document.getElementById('modalTitle').textContent = 'New User';
+        document.getElementById('userForm').reset();
+        document.getElementById('userModal').classList.add('show');
+    }
+    
+    function closeModal() {
+        document.getElementById('userModal').classList.remove('show');
+    }
+    
+    function changePassword(id, email) {
+        document.getElementById('passwordUserId').value = id;
+        document.getElementById('passwordUserEmail').value = email;
+        document.getElementById('passwordForm').reset();
+        document.getElementById('passwordUserEmail').value = email;
+        document.getElementById('passwordModal').classList.add('show');
+    }
+    
+    function closePasswordModal() {
+        document.getElementById('passwordModal').classList.remove('show');
+    }
+    
+    function changeRole(id, email, currentRole) {
+        document.getElementById('roleUserId').value = id;
+        document.getElementById('roleUserEmail').value = email;
+        document.getElementById('roleSelect').value = currentRole;
+        document.getElementById('roleModal').classList.add('show');
+    }
+    
+    function closeRoleModal() {
+        document.getElementById('roleModal').classList.remove('show');
+    }
+    
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('userEmail').value;
+        const password = document.getElementById('userPassword').value;
+        const passwordConfirm = document.getElementById('userPasswordConfirm').value;
+        const role = document.getElementById('userRole').value;
+        
+        if (password !== passwordConfirm) {
+            alert('Passwords do not match');
+            return;
+        }
+        
+        if (password.length < 8) {
+            alert('Password must be at least 8 characters');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, role })
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.error || 'Failed to create user'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+    
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userId = document.getElementById('passwordUserId').value;
+        const password = document.getElementById('newPassword').value;
+        const passwordConfirm = document.getElementById('newPasswordConfirm').value;
+        
+        if (password !== passwordConfirm) {
+            alert('Passwords do not match');
+            return;
+        }
+        
+        if (password.length < 8) {
+            alert('Password must be at least 8 characters');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/users/${userId}/password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            
+            if (response.ok) {
+                alert('Password changed successfully');
+                closePasswordModal();
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.error || 'Failed to change password'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+    
+    async function deleteUser(id, email) {
+        if (confirm(`Are you sure you want to delete user "${email}"?\n\nThis action cannot be undone.`)) {
+            try {
+                const response = await fetch(`/api/users/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.error || 'Failed to delete user'));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    }
+    
+    document.getElementById('roleForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userId = document.getElementById('roleUserId').value;
+        const role = document.getElementById('roleSelect').value;
+        
+        try {
+            const response = await fetch(`/api/users/${userId}/role`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role })
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.error || 'Failed to change role'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const userModal = document.getElementById('userModal');
+        const passwordModal = document.getElementById('passwordModal');
+        const roleModal = document.getElementById('roleModal');
+        if (event.target == userModal) {
+            closeModal();
+        }
+        if (event.target == passwordModal) {
+            closePasswordModal();
+        }
+        if (event.target == roleModal) {
+            closeRoleModal();
+        }
+    }
+</script>
+{{end}}

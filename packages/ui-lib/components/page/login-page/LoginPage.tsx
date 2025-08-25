@@ -7,7 +7,7 @@ import { Card } from "../../display/card/Card.tsx";
 import { Divider } from "../../layout/divider/Divider.tsx";
 
 // Import AuthUser type for typed components
-export type { AuthUser } from "@suppers/auth-client";
+export type { AuthUser } from "@suppers/shared/types";
 
 interface FormData {
   email: string;

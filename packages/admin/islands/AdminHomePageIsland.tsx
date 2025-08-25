@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { type User } from "@suppers/auth-client";
+import type { User } from "@suppers/shared/utils/type-mappers.ts";
 import { getAuthClient } from "../lib/auth.ts";
 import AdminDashboardIsland from "./AdminDashboardIsland.tsx";
 

@@ -251,7 +251,8 @@ export async function handleGetVariableDefinitions(
     const category = url.searchParams.get("category");
 
     let query = supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .select("*")
       .order("display_order", { ascending: true });
 
@@ -268,7 +269,8 @@ export async function handleGetVariableDefinitions(
 
     // Get unique categories
     const { data: categoriesData, error: categoriesError } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .select("category")
       .order("category");
 
@@ -310,7 +312,8 @@ export async function handleCreateVariableDefinition(
     }
 
     const { data, error } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .insert({
         variable_id,
         name,
@@ -351,7 +354,8 @@ export async function handleUpdateVariableDefinition(
 
     // Check if variable exists and is not system-protected
     const { data: existing, error: checkError } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .select("is_system")
       .eq("id", variableId)
       .single();
@@ -374,7 +378,8 @@ export async function handleUpdateVariableDefinition(
     if (body.display_order !== undefined) updates.display_order = body.display_order;
 
     const { data, error } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .update(updates)
       .eq("id", variableId)
       .select()
@@ -401,7 +406,8 @@ export async function handleDeleteVariableDefinition(
     const supabase = getSupabaseClient();
     // Check if variable exists and is not system-protected
     const { data: existing, error: checkError } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .select("is_system")
       .eq("id", variableId)
       .single();
@@ -415,7 +421,8 @@ export async function handleDeleteVariableDefinition(
     }
 
     const { error } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .delete()
       .eq("id", variableId);
 
@@ -470,7 +477,8 @@ export async function handleGetPricingTemplates(
 
     // Get variable definitions for templates
     const { data: variablesData, error: variablesError } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
+      .eq("is_system", true)
       .select("*")
       .order("display_order");
 

@@ -1,0 +1,784 @@
+{{template "base.html" .}}
+
+{{define "styles"}}
+<link rel="stylesheet" href="https://unpkg.com/lucide@latest/font/lucide.min.css">
+<style>
+    .main-card {
+        padding: 2rem;
+    }
+    .content-area {
+        padding: 2rem;
+    }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+    .btn-primary {
+        background: #333;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #555;
+    }
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    .btn-danger:hover {
+        background: #c82333;
+    }
+    .btn-sm {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+    }
+    .data-table th {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 2px solid #e0e0e0;
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #666;
+    }
+    .data-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .data-table tr:hover {
+        background: #f8f9fa;
+    }
+    .type-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .type-text { background: #e3f2fd; color: #1976d2; }
+    .type-number { background: #f3e5f5; color: #7b1fa2; }
+    .type-boolean { background: #e8f5e9; color: #388e3c; }
+    .type-date { background: #fff3e0; color: #f57c00; }
+    .type-datetime { background: #fff8e1; color: #f9a825; }
+    .type-enum { background: #fce4ec; color: #c2185b; }
+    .type-char { background: #f3e5f5; color: #6a1b9a; }
+    .type-array { background: #e8eaf6; color: #3f51b5; }
+    .type-point { background: #e1f5fe; color: #0277bd; }
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+    .empty-state h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    .empty-state-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        color: #999;
+    }
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.2s;
+    }
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        width: 90%;
+        max-width: 500px;
+        animation: slideIn 0.3s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .close-btn:hover {
+        color: #666;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .form-label span {
+        color: #dc3545;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+        background: #f8f9fa;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+    }
+    .form-textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    .form-checkbox {
+        margin-right: 0.5rem;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    .btn-cancel {
+        background: #6c757d;
+        color: white;
+    }
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+<div class="main-wrapper">
+    <div class="header">
+    <div class="logo">
+        <span>FormulaPricing</span>
+    </div>
+    <div>
+        <span style="margin-right: 1rem; color: #666;">{{.UserEmail}}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="/dashboard" class="tab">Dashboard</a>
+    <a href="/variables" class="tab active">Variables</a>
+    <a href="/calculations" class="tab">Calculations</a>
+    <a href="/conditions" class="tab">Conditions</a>
+    <a href="/pricing" class="tab">Pricing</a>
+    <a href="/calculate" class="tab">Calculate</a>
+    {{if eq .UserRole "admin"}}<a href="/users" class="tab">Users</a>{{end}}
+    <a href="/dashboard/logs" class="tab">Logs</a>
+    <a href="/dashboard/settings" class="tab">Settings</a>
+</div>
+
+<div class="container">
+    <div class="main-card">
+        <div class="content-area">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i data-lucide="variable" style="width: 28px; height: 28px;"></i>
+                    Variables Management
+                </h1>
+                <button class="btn btn-primary" onclick="createVariable()">
+                    <i data-lucide="plus" style="width: 20px; height: 20px;"></i>
+                    New Variable
+                </button>
+            </div>
+
+            {{if .Variables}}
+            <!-- System Variables Section -->
+            {{$hasUnique := false}}
+            {{range .Variables}}
+                {{if .IsUnique}}{{$hasUnique = true}}{{end}}
+            {{end}}
+            
+            {{if $hasUnique}}
+            <div style="margin-bottom: 2rem;">
+                <h2 style="font-size: 1.25rem; margin-bottom: 1rem; color: #667eea; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="zap" style="width: 24px; height: 24px;"></i>
+                    System Variables
+                </h2>
+                <div style="background: #f3f4fd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <p style="margin: 0; color: #4c51bf; font-size: 0.9rem;">
+                        These variables are automatically managed by the pricing engine and update during calculations.
+                    </p>
+                </div>
+                <table class="data-table" style="margin-bottom: 2rem;">
+                    <thead>
+                        <tr>
+                            <th>Variable Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Behavior</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .Variables}}
+                        {{if .IsUnique}}
+                        <tr style="background: #fefefe;">
+                            <td style="font-family: monospace; font-weight: 600; color: #667eea;">{{.VariableName}}</td>
+                            <td>
+                                <span class="type-badge type-{{.ValueType}}" style="background: #e0e7ff; color: #4c51bf;">{{.ValueType}}</span>
+                            </td>
+                            <td>{{if .Description}}{{.Description}}{{else}}<span style="color: #999;">-</span>{{end}}</td>
+                            <td style="font-size: 0.85rem; color: #666;">
+                                {{if .UniqueBehavior}}{{.UniqueBehavior}}{{else}}<span style="color: #999;">System managed</span>{{end}}
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            {{end}}
+            
+            <!-- Regular Variables Section -->
+            <h2 style="font-size: 1.25rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="box" style="width: 24px; height: 24px;"></i>
+                User Variables
+            </h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Variable Name</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Display Name</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Variables}}
+                    {{if not .IsUnique}}
+                    <tr>
+                        <td style="font-family: monospace; font-weight: 500;">{{.VariableName}}</td>
+                        <td>
+                            <span class="type-badge type-{{.ValueType}}">{{.ValueType}}</span>
+                        </td>
+                        <td>{{if .Description}}{{.Description}}{{else}}<span style="color: #999;">-</span>{{end}}</td>
+                        <td style="font-family: monospace;">
+                            {{.DisplayName}}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-secondary btn-sm" onclick="editVariable('{{.ID}}')">
+                                    <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteVariable('{{.ID}}', '{{.VariableName}}')">
+                                    <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {{end}}
+                    {{end}}
+                </tbody>
+            </table>
+            {{else}}
+            <div class="empty-state">
+                <i data-lucide="variable" class="empty-state-icon"></i>
+                <h3>No Variables Yet</h3>
+                <p>Create your first variable to get started with formula pricing.</p>
+                <button class="btn btn-primary" onclick="createVariable()">
+                    <i data-lucide="plus" style="width: 20px; height: 20px;"></i>
+                    Create Variable
+                </button>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+
+<!-- Variable Modal -->
+<div id="variableModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">New Variable</h2>
+            <button class="close-btn" onclick="closeModal()">
+                <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+            </button>
+        </div>
+        <form id="variableForm">
+            <input type="hidden" id="variableId" />
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Name <span>*</span>
+                </label>
+                <input type="text" id="variableName" class="form-input" placeholder="e.g., base_price" required />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">
+                    Type <span>*</span>
+                </label>
+                <select id="variableType" class="form-select" required onchange="updateConstraintsSection()">
+                    <option value="text">Text</option>
+                    <option value="number">Number</option>
+                    <option value="boolean">Boolean</option>
+                    <option value="date">Date (ISO 8601)</option>
+                    <option value="datetime">DateTime (ISO 8601)</option>
+                    <option value="enum">Enum</option>
+                    <option value="char">Character</option>
+                    <option value="array">Array</option>
+                    <option value="point">Point</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="variableDescription" class="form-textarea" placeholder="Optional description"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Display Name <span>*</span></label>
+                <input type="text" id="variableDisplayName" class="form-input" placeholder="Friendly display name" required />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Default Value</label>
+                <input type="text" id="variableDefaultValue" class="form-input" placeholder="Optional default value" />
+            </div>
+            
+            <!-- Constraints Section -->
+            <div id="constraintsSection" class="form-group">
+                <label class="form-label">Constraints</label>
+                
+                <!-- Number constraints -->
+                <div id="numberConstraints" style="display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Min</label>
+                            <input type="number" id="constraint_min" class="form-input" step="any" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Max</label>
+                            <input type="number" id="constraint_max" class="form-input" step="any" />
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Step</label>
+                            <input type="number" id="constraint_step" class="form-input" step="any" min="0" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Precision</label>
+                            <input type="number" id="constraint_precision" class="form-input" min="0" max="10" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Text constraints -->
+                <div id="textConstraints" style="display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Min Length</label>
+                            <input type="number" id="constraint_minLength" class="form-input" min="0" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Max Length</label>
+                            <input type="number" id="constraint_maxLength" class="form-input" min="0" />
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: #666;">Pattern (Regex)</label>
+                        <input type="text" id="constraint_pattern" class="form-input" placeholder="e.g., ^[A-Z]+" />
+                    </div>
+                </div>
+                
+                <!-- Enum constraints -->
+                <div id="enumConstraints" style="display: none;">
+                    <label style="font-size: 0.85rem; color: #666;">Enum Values (one per line) <span style="color: #dc3545;">*</span></label>
+                    <textarea id="constraint_values" class="form-textarea" placeholder="option1&#10;option2&#10;option3" required></textarea>
+                </div>
+                
+                <!-- Char constraints -->
+                <div id="charConstraints" style="display: none;">
+                    <label style="font-size: 0.85rem; color: #666;">Allowed Characters</label>
+                    <input type="text" id="constraint_allowedChars" class="form-input" placeholder="e.g., A-Z0-9" />
+                </div>
+                
+                <!-- Array constraints -->
+                <div id="arrayConstraints" style="display: none;">
+                    <div style="margin-bottom: 0.5rem;">
+                        <label style="font-size: 0.85rem; color: #666;">Item Type</label>
+                        <select id="constraint_itemType" class="form-select">
+                            <option value="text">Text</option>
+                            <option value="number">Number</option>
+                            <option value="boolean">Boolean</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Min Items</label>
+                            <input type="number" id="constraint_minItems" class="form-input" min="0" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Max Items</label>
+                            <input type="number" id="constraint_maxItems" class="form-input" min="0" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Point constraints -->
+                <div id="pointConstraints" style="display: none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Min X</label>
+                            <input type="number" id="constraint_minX" class="form-input" step="any" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Max X</label>
+                            <input type="number" id="constraint_maxX" class="form-input" step="any" />
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Min Y</label>
+                            <input type="number" id="constraint_minY" class="form-input" step="any" />
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #666;">Max Y</label>
+                            <input type="number" id="constraint_maxY" class="form-input" step="any" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Variable</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+    lucide.createIcons();
+    
+    let currentEditId = null;
+    
+    function createVariable() {
+        currentEditId = null;
+        document.getElementById('modalTitle').textContent = 'New Variable';
+        document.getElementById('variableForm').reset();
+        document.getElementById('variableModal').classList.add('show');
+    }
+    
+    async function editVariable(id) {
+        currentEditId = id;
+        document.getElementById('modalTitle').textContent = 'Edit Variable';
+        
+        try {
+            const response = await fetch(`/api/variables/${id}`);
+            if (response.ok) {
+                const variable = await response.json();
+                document.getElementById('variableName').value = variable.variable_name || '';
+                document.getElementById('variableType').value = variable.value_type || 'text';
+                document.getElementById('variableDescription').value = variable.description || '';
+                document.getElementById('variableDisplayName').value = variable.display_name || '';
+                document.getElementById('variableDefaultValue').value = variable.default_value || '';
+                
+                // Load constraints
+                loadConstraints(variable.value_type, variable.constraints || {});
+                
+                document.getElementById('variableModal').classList.add('show');
+            }
+        } catch (error) {
+            alert('Error loading variable: ' + error.message);
+        }
+    }
+    
+    function closeModal() {
+        document.getElementById('variableModal').classList.remove('show');
+        currentEditId = null;
+    }
+    
+    document.getElementById('variableForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const valueType = document.getElementById('variableType').value;
+        const constraints = getConstraints(valueType);
+        
+        const data = {
+            variable_name: document.getElementById('variableName').value,
+            value_type: valueType,
+            description: document.getElementById('variableDescription').value || null,
+            display_name: document.getElementById('variableDisplayName').value || document.getElementById('variableName').value,
+            default_value: document.getElementById('variableDefaultValue').value || null,
+            constraints: constraints
+        };
+        
+        try {
+            const url = currentEditId ? `/api/variables/${currentEditId}` : '/api/variables';
+            const method = currentEditId ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.error || 'Failed to save variable'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+    
+    async function deleteVariable(id, name) {
+        if (confirm(`Are you sure you want to delete variable "${name}"?`)) {
+            try {
+                const response = await fetch(`/api/variables/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete variable');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('variableModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    
+    // Constraints management functions
+    function updateConstraintsSection() {
+        const type = document.getElementById('variableType').value;
+        
+        // Hide all constraint sections
+        document.getElementById('numberConstraints').style.display = 'none';
+        document.getElementById('textConstraints').style.display = 'none';
+        document.getElementById('enumConstraints').style.display = 'none';
+        document.getElementById('charConstraints').style.display = 'none';
+        document.getElementById('arrayConstraints').style.display = 'none';
+        document.getElementById('pointConstraints').style.display = 'none';
+        
+        // Clear enum required attribute
+        document.getElementById('constraint_values').removeAttribute('required');
+        
+        // Show relevant constraint section
+        switch(type) {
+            case 'number':
+                document.getElementById('numberConstraints').style.display = 'block';
+                break;
+            case 'text':
+                document.getElementById('textConstraints').style.display = 'block';
+                break;
+            case 'enum':
+                document.getElementById('enumConstraints').style.display = 'block';
+                document.getElementById('constraint_values').setAttribute('required', 'required');
+                break;
+            case 'char':
+                document.getElementById('charConstraints').style.display = 'block';
+                break;
+            case 'array':
+                document.getElementById('arrayConstraints').style.display = 'block';
+                break;
+            case 'point':
+                document.getElementById('pointConstraints').style.display = 'block';
+                break;
+        }
+    }
+    
+    function getConstraints(type) {
+        const constraints = {};
+        
+        switch(type) {
+            case 'number':
+                const min = document.getElementById('constraint_min').value;
+                const max = document.getElementById('constraint_max').value;
+                const step = document.getElementById('constraint_step').value;
+                const precision = document.getElementById('constraint_precision').value;
+                
+                if (min) constraints.min = parseFloat(min);
+                if (max) constraints.max = parseFloat(max);
+                if (step) constraints.step = parseFloat(step);
+                if (precision) constraints.precision = parseInt(precision);
+                break;
+                
+            case 'text':
+                const minLength = document.getElementById('constraint_minLength').value;
+                const maxLength = document.getElementById('constraint_maxLength').value;
+                const pattern = document.getElementById('constraint_pattern').value;
+                
+                if (minLength) constraints.minLength = parseInt(minLength);
+                if (maxLength) constraints.maxLength = parseInt(maxLength);
+                if (pattern) constraints.pattern = pattern;
+                break;
+                
+            case 'enum':
+                const values = document.getElementById('constraint_values').value;
+                if (values) {
+                    constraints.values = values.split('\n').filter(v => v.trim());
+                }
+                break;
+                
+            case 'char':
+                const allowedChars = document.getElementById('constraint_allowedChars').value;
+                if (allowedChars) constraints.allowedChars = allowedChars;
+                break;
+                
+            case 'array':
+                const itemType = document.getElementById('constraint_itemType').value;
+                const minItems = document.getElementById('constraint_minItems').value;
+                const maxItems = document.getElementById('constraint_maxItems').value;
+                
+                if (itemType) constraints.itemType = itemType;
+                if (minItems) constraints.minItems = parseInt(minItems);
+                if (maxItems) constraints.maxItems = parseInt(maxItems);
+                break;
+                
+            case 'point':
+                const minX = document.getElementById('constraint_minX').value;
+                const maxX = document.getElementById('constraint_maxX').value;
+                const minY = document.getElementById('constraint_minY').value;
+                const maxY = document.getElementById('constraint_maxY').value;
+                
+                if (minX) constraints.minX = parseFloat(minX);
+                if (maxX) constraints.maxX = parseFloat(maxX);
+                if (minY) constraints.minY = parseFloat(minY);
+                if (maxY) constraints.maxY = parseFloat(maxY);
+                break;
+        }
+        
+        return constraints;
+    }
+    
+    function loadConstraints(type, constraints) {
+        // First update the constraints section visibility
+        updateConstraintsSection();
+        
+        // Then load the constraint values
+        switch(type) {
+            case 'number':
+                if (constraints.min !== undefined) document.getElementById('constraint_min').value = constraints.min;
+                if (constraints.max !== undefined) document.getElementById('constraint_max').value = constraints.max;
+                if (constraints.step !== undefined) document.getElementById('constraint_step').value = constraints.step;
+                if (constraints.precision !== undefined) document.getElementById('constraint_precision').value = constraints.precision;
+                break;
+                
+            case 'text':
+                if (constraints.minLength !== undefined) document.getElementById('constraint_minLength').value = constraints.minLength;
+                if (constraints.maxLength !== undefined) document.getElementById('constraint_maxLength').value = constraints.maxLength;
+                if (constraints.pattern) document.getElementById('constraint_pattern').value = constraints.pattern;
+                break;
+                
+            case 'enum':
+                if (constraints.values && Array.isArray(constraints.values)) {
+                    document.getElementById('constraint_values').value = constraints.values.join('\n');
+                }
+                break;
+                
+            case 'char':
+                if (constraints.allowedChars) document.getElementById('constraint_allowedChars').value = constraints.allowedChars;
+                break;
+                
+            case 'array':
+                if (constraints.itemType) document.getElementById('constraint_itemType').value = constraints.itemType;
+                if (constraints.minItems !== undefined) document.getElementById('constraint_minItems').value = constraints.minItems;
+                if (constraints.maxItems !== undefined) document.getElementById('constraint_maxItems').value = constraints.maxItems;
+                break;
+                
+            case 'point':
+                if (constraints.minX !== undefined) document.getElementById('constraint_minX').value = constraints.minX;
+                if (constraints.maxX !== undefined) document.getElementById('constraint_maxX').value = constraints.maxX;
+                if (constraints.minY !== undefined) document.getElementById('constraint_minY').value = constraints.minY;
+                if (constraints.maxY !== undefined) document.getElementById('constraint_maxY').value = constraints.maxY;
+                break;
+        }
+    }
+    
+    // Initialize constraints section on page load
+    updateConstraintsSection();
+</script>
+</div>
+{{end}}

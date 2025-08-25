@@ -4,6 +4,31 @@
 
 /* Custom styles for sorted-storage application */
 
+/* Light theme base */
+body {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 /* Layout and Grid Styles */
 .storage-grid {
   display: grid;
@@ -148,6 +173,16 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--bc) / 0.5);
+}
+
+/* Hide scrollbar for specific elements */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 /* High Contrast Mode Support */

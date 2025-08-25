@@ -52,7 +52,7 @@ export default function App({ Component, state }: PageProps) {
           id="site-favicon"
           rel="icon"
           type="image/x-icon"
-          href={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/favicons/favicon_light.ico`}
+          href="/static/favicons/favicon_light.ico"
         />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -75,7 +75,7 @@ export default function App({ Component, state }: PageProps) {
         {/* Set CSS variable for profile base URL */}
         <style
           dangerouslySetInnerHTML={{
-            __html: `:root { --hero-gradient-bg: url("${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/backgrounds/hero-gradient.webp"); }`,
+            __html: `:root { --hero-gradient-bg: url("/static/backgrounds/hero-gradient.webp"); }`,
           }}
         />
       </head>

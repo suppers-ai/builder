@@ -1,0 +1,418 @@
+{{template "base.html" .}}
+
+{{define "styles"}}
+<link rel="stylesheet" href="https://unpkg.com/lucide@latest/font/lucide.min.css">
+<style>
+    .main-card {
+        padding: 2rem;
+    }
+    .content-area {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        min-height: 500px;
+    }
+    .search-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .search-input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .btn-primary {
+        background: #333;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #555;
+    }
+    .collections-grid {
+        display: grid;
+        gap: 1rem;
+    }
+    .collection-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .collection-item:hover {
+        background: #f8f9fa;
+        border-color: #667eea;
+    }
+    .collection-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .collection-icon {
+        width: 40px;
+        height: 40px;
+        background: #f0f0f0;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .collection-details h3 {
+        margin-bottom: 0.25rem;
+        color: #333;
+    }
+    .collection-details p {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .collection-count {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #666;
+    }
+    .empty-state h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    .sidebar {
+        width: 250px;
+        background: #f8f9fa;
+        border-right: 1px solid #e0e0e0;
+        padding: 1rem;
+    }
+    .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    .sidebar-item:hover {
+        background: #e9ecef;
+    }
+    .sidebar-item.active {
+        background: #e9ecef;
+        font-weight: 500;
+    }
+    .main-layout {
+        display: flex;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        min-height: 600px;
+    }
+    .main-content {
+        flex: 1;
+        padding: 2rem;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-card {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+<div class="main-wrapper">
+    <div class="header">
+    <div class="logo">
+        <span>Formulapricing</span>
+    </div>
+    <div>
+        <span style="margin-right: 1rem; color: #666;">{{.UserEmail}}</span>
+        <a href="/logout" class="logout-btn">Logout</a>
+    </div>
+</div>
+
+<div class="tabs">
+    <a href="/dashboard" class="tab {{if eq .Tab "dashboard"}}active{{end}}">Dashboard</a>
+    <a href="/variables" class="tab">Variables</a>
+    <a href="/calculations" class="tab">Calculations</a>
+    <a href="/conditions" class="tab">Conditions</a>
+    <a href="/pricing" class="tab">Pricing</a>
+    <a href="/calculate" class="tab">Calculate</a>
+    {{if eq .UserRole "admin"}}<a href="/users" class="tab">Users</a>{{end}}
+    <a href="/dashboard/logs" class="tab {{if eq .Tab "logs"}}active{{end}}">Logs</a>
+    <a href="/dashboard/settings" class="tab {{if eq .Tab "settings"}}active{{end}}">Settings</a>
+</div>
+
+<div class="container">
+    {{if eq .Tab "dashboard"}}
+    <div class="main-card">
+        <div class="content-area">
+        <h2 style="margin-bottom: 2rem;">Formula Pricing System</h2>
+        
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i data-lucide="variable" style="width: 24px; height: 24px; color: #667eea;"></i>
+                    <div>
+                        <div class="stat-value">{{(index .Collections 0).Count}}</div>
+                        <div class="stat-label">Variables</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i data-lucide="calculator" style="width: 24px; height: 24px; color: #f59e0b;"></i>
+                    <div>
+                        <div class="stat-value">{{(index .Collections 1).Count}}</div>
+                        <div class="stat-label">Calculations</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i data-lucide="git-branch" style="width: 24px; height: 24px; color: #10b981;"></i>
+                    <div>
+                        <div class="stat-value">{{(index .Collections 2).Count}}</div>
+                        <div class="stat-label">Conditions</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <i data-lucide="dollar-sign" style="width: 24px; height: 24px; color: #ef4444;"></i>
+                    <div>
+                        <div class="stat-value">{{(index .Collections 3).Count}}</div>
+                        <div class="stat-label">Pricing Rules</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 3rem;">
+            <h3 style="margin-bottom: 1.5rem;">Quick Actions</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div class="collection-item" onclick="window.location.href='/variables'" style="cursor: pointer;">
+                    <div class="collection-info">
+                        <div class="collection-icon" style="background: #667eea20;">
+                            <i data-lucide="variable" style="width: 24px; height: 24px; color: #667eea;"></i>
+                        </div>
+                        <div class="collection-details">
+                            <h3>Manage Variables</h3>
+                            <p>Define input parameters</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" style="width: 20px; height: 20px; color: #999;"></i>
+                </div>
+                
+                <div class="collection-item" onclick="window.location.href='/calculations'" style="cursor: pointer;">
+                    <div class="collection-info">
+                        <div class="collection-icon" style="background: #f59e0b20;">
+                            <i data-lucide="calculator" style="width: 24px; height: 24px; color: #f59e0b;"></i>
+                        </div>
+                        <div class="collection-details">
+                            <h3>Manage Calculations</h3>
+                            <p>Create formulas</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" style="width: 20px; height: 20px; color: #999;"></i>
+                </div>
+                
+                <div class="collection-item" onclick="window.location.href='/conditions'" style="cursor: pointer;">
+                    <div class="collection-info">
+                        <div class="collection-icon" style="background: #10b98120;">
+                            <i data-lucide="git-branch" style="width: 24px; height: 24px; color: #10b981;"></i>
+                        </div>
+                        <div class="collection-details">
+                            <h3>Manage Conditions</h3>
+                            <p>Set business rules</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" style="width: 20px; height: 20px; color: #999;"></i>
+                </div>
+                
+                <div class="collection-item" onclick="window.location.href='/pricing'" style="cursor: pointer;">
+                    <div class="collection-info">
+                        <div class="collection-icon" style="background: #ef444420;">
+                            <i data-lucide="dollar-sign" style="width: 24px; height: 24px; color: #ef4444;"></i>
+                        </div>
+                        <div class="collection-details">
+                            <h3>Manage Pricing</h3>
+                            <p>Configure pricing rules</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" style="width: 20px; height: 20px; color: #999;"></i>
+                </div>
+                
+                <div class="collection-item" onclick="window.location.href='/calculate'" style="cursor: pointer; background: #f0f9ff;">
+                    <div class="collection-info">
+                        <div class="collection-icon" style="background: #3b82f620;">
+                            <i data-lucide="play-circle" style="width: 24px; height: 24px; color: #3b82f6;"></i>
+                        </div>
+                        <div class="collection-details">
+                            <h3>Test Calculations</h3>
+                            <p>Run pricing simulations</p>
+                        </div>
+                    </div>
+                    <i data-lucide="arrow-right" style="width: 20px; height: 20px; color: #3b82f6;"></i>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    {{else if eq .Tab "logs"}}
+    <div class="main-card">
+        <div class="content-area">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{.LogStats.total}}</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{.LogStats.errors}}</div>
+                <div class="stat-label">Errors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{.LogStats.today}}</div>
+                <div class="stat-label">Today</div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 1rem;">Recent Logs</h2>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #e0e0e0;">
+                        <th style="text-align: left; padding: 0.75rem;">Level</th>
+                        <th style="text-align: left; padding: 0.75rem;">Method</th>
+                        <th style="text-align: left; padding: 0.75rem;">Path</th>
+                        <th style="text-align: left; padding: 0.75rem;">Status</th>
+                        <th style="text-align: left; padding: 0.75rem;">Time</th>
+                        <th style="text-align: left; padding: 0.75rem;">Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Logs}}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 0.75rem;">
+                            <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;
+                                {{if eq .Level "ERROR"}}background: #f8d7da; color: #721c24;
+                                {{else if eq .Level "WARN"}}background: #fff3cd; color: #856404;
+                                {{else}}background: #d1ecf1; color: #0c5460;{{end}}">
+                                {{.Level}}
+                            </span>
+                        </td>
+                        <td style="padding: 0.75rem;">{{.Method}}</td>
+                        <td style="padding: 0.75rem; font-family: monospace; font-size: 0.9rem;">{{.Path}}</td>
+                        <td style="padding: 0.75rem;">
+                            {{if .StatusCode}}
+                                <span style="{{if lt .StatusCode 300}}color: #28a745;{{else if lt .StatusCode 400}}color: #ffc107;{{else}}color: #dc3545;{{end}}">
+                                    {{.StatusCode}}
+                                </span>
+                            {{else}}-{{end}}
+                        </td>
+                        <td style="padding: 0.75rem;">
+                            {{if .ExecTimeMs}}{{.ExecTimeMs}}ms{{else}}-{{end}}
+                        </td>
+                        <td style="padding: 0.75rem; color: #666; font-size: 0.9rem;">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
+                    </tr>
+                    {{else}}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #666;">No logs found</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+    {{else if eq .Tab "settings"}}
+    <div class="main-card">
+        <div class="content-area">
+        <h2 style="margin-bottom: 2rem;">Settings</h2>
+        
+        <div style="max-width: 600px;">
+            <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                <h3 style="margin-bottom: 1rem;">Database Configuration</h3>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #666;">Database URL</label>
+                    <input type="text" value="{{.DatabaseURL}}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: white; font-family: monospace;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                <h3 style="margin-bottom: 1rem;">API Configuration</h3>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #666;">API Base URL</label>
+                    <input type="text" value="http://localhost:{{.Port}}/api" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: white; font-family: monospace;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #666;">Port</label>
+                    <input type="text" value="{{.Port}}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                <h3 style="margin-bottom: 1rem;">System Information</h3>
+                <div style="display: grid; gap: 1rem;">
+                    <div>
+                        <span style="color: #666;">Version:</span>
+                        <span style="margin-left: 1rem; font-weight: 500;">1.0.0</span>
+                    </div>
+                    <div>
+                        <span style="color: #666;">Go Version:</span>
+                        <span style="margin-left: 1rem; font-weight: 500;">1.21</span>
+                    </div>
+                    <div>
+                        <span style="color: #666;">Database:</span>
+                        <span style="margin-left: 1rem; font-weight: 500;">PostgreSQL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    {{end}}
+</div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+  lucide.createIcons();
+</script>
+{{end}}

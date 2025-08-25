@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { Loading } from "../feedback/loading/Loading.tsx";
-import { DirectAuthClient, OAuthAuthClient } from "@suppers/auth-client";
+import { OAuthAuthClient } from "@suppers/auth-client";
 import type { User } from "@suppers/shared/utils/type-mappers.ts";
 import { LogIn, LogOut, User as UserIcon } from "lucide-preact";
 import { Button } from "@suppers/ui-lib";
@@ -9,7 +9,7 @@ import { SessionExpiredModal } from "../action/session-expired-modal/SessionExpi
 import { useSessionExpiredHandler } from "../../hooks/useSessionExpiredHandler.ts";
 import config from "../../../../config.ts";
 
-type AnyAuthClient = DirectAuthClient | OAuthAuthClient;
+type AnyAuthClient = OAuthAuthClient;
 
 interface SimpleAuthButtonProps {
   position?: "top" | "bottom";
@@ -31,8 +31,8 @@ export default function SimpleAuthButton(
       // Direct client - redirect
       authClient.signIn({ email: "", password: "" });
     } else {
-      // Fallback - redirect to login page
-      globalThis.location.href = "/auth/login";
+      // Fallback - redirect to home page (login)
+      globalThis.location.href = "/";
     }
   };
 
@@ -98,6 +98,10 @@ export default function SimpleAuthButton(
         // Reset to system/default theme when logged out
         const defaultTheme = getCurrentTheme(null);
         applyTheme(defaultTheme);
+      } else if (event === "session_expired") {
+        console.log("🔒 Session expired event received");
+        // Show the session expired modal
+        sessionHandler.showSessionExpiredModal();
       }
     };
 
@@ -154,6 +158,7 @@ export default function SimpleAuthButton(
 
     authClient.addEventListener("login", handleAuthEvent);
     authClient.addEventListener("logout", handleAuthEvent);
+    authClient.addEventListener("session_expired", handleAuthEvent);
     // authClient.addEventListener("profile_change", handleAuthEvent);
 
     // Add postMessage listener for popup communication
@@ -162,6 +167,7 @@ export default function SimpleAuthButton(
     return () => {
       authClient.removeEventListener("login", handleAuthEvent);
       authClient.removeEventListener("logout", handleAuthEvent);
+      authClient.removeEventListener("session_expired", handleAuthEvent);
       // authClient.removeEventListener("profile_change", handleAuthEvent);
       globalThis.removeEventListener("message", handlePopupMessage);
     };

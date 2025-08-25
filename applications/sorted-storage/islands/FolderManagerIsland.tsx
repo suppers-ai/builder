@@ -267,8 +267,8 @@ export default function FolderManagerIsland({
 
   // Navigate to parent folder
   const handleNavigateUp = useCallback(() => {
-    if (state.currentFolder?.parent_id) {
-      onNavigate?.(state.currentFolder.parent_id);
+    if (state.currentFolder?.parent_folder_id) {
+      onNavigate?.(state.currentFolder.parent_folder_id);
     } else {
       onNavigate?.(null); // Navigate to root
     }

@@ -48,10 +48,10 @@ export default function ShareManagerIsland({
   });
 
   useEffect(() => {
-    if (isOpen && storageObject.share_token) {
+    if (isOpen && storageObject.id) {
       loadShareInfo();
     }
-  }, [isOpen, storageObject.share_token]);
+  }, [isOpen, storageObject.id]);
 
   const loadShareInfo = async () => {
     try {

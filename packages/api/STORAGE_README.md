@@ -59,7 +59,7 @@ Files are organized as: `userId/applicationSlug/filename`
 ## 💻 Usage
 
 ```typescript
-import { DirectAuthClient } from "../auth-client/src/direct-auth-client.ts";
+import { DirectAuthClient } from "../profile/lib/auth-client/index.ts";
 
 const authClient = new DirectAuthClient(supabaseUrl, supabaseAnonKey);
 

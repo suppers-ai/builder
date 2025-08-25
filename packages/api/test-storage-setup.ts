@@ -5,7 +5,7 @@
  * Run this after setting up the storage bucket and policies.
  */
 
-import { DirectAuthClient } from "../auth-client/src/direct-auth-client.ts";
+import { DirectAuthClient } from "../profile/lib/auth-client/index.ts";
 
 async function testStorageSetup() {
   console.log("🧪 Storage Setup Test");

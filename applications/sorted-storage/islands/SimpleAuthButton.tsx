@@ -3,5 +3,9 @@ import { getAuthClient } from "../lib/auth.ts";
 
 export default function SortedStorageAuthButton() {
   const authClient = getAuthClient();
-  return <SimpleAuthButton position="bottom" authClient={authClient} />;
+  
+  return <SimpleAuthButton 
+    position="top" 
+    authClient={authClient} 
+  />;
 }

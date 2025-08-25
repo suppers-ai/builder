@@ -5,7 +5,7 @@
  * with the DirectAuthClient.
  */
 
-import { DirectAuthClient } from "../auth-client/src/direct-auth-client.ts";
+import { DirectAuthClient } from "../profile/lib/auth-client/index.ts";
 
 // Example usage of the storage API
 export async function storageUsageExample() {

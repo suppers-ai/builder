@@ -56,6 +56,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.createPlatformTexture('platform-moving', 0x805ad5);
     this.createPlatformTexture('platform-crumbling', 0xef4444);
     this.createPlatformTexture('platform-bouncy', 0x10b981);
+    this.createPlatformTexture('platform-ice', 0x88ddff);
+    this.createPlatformTexture('platform-sticky', 0xffaa00);
     this.createPlatformTexture('spike', 0xdc2626);
 
     // Create collectible orb
@@ -93,7 +95,7 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   create() {
-    this.scene.start('MainScene', { level: 1 });
+    this.scene.start('MainSceneArcade', { level: 1 });
     this.scene.start('UIScene');
   }
 }

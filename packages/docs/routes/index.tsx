@@ -1,87 +1,54 @@
-import { BenefitsSection, Card, Hero } from "@suppers/ui-lib";
+import { type PageProps } from "fresh";
+import { Button } from "@suppers/ui-lib";
+import SimpleNavbar from "../islands/SimpleNavbar.tsx";
 
-export default function Home() {
+export default function Home(props: PageProps) {
   return (
     <>
-      <Hero
-        title="Build Beautiful Websites at scale and speed"
-        subtitle="A comprehensive UI component library built for Fresh applications. 90+ components, 30+ themes, and TypeScript-first design."
-        titleColor="white"
-        primaryCTA={{
-          text: "Browse Components",
-          href: "/components",
-        }}
-        secondaryCTA={{
-          text: "View on GitHub",
-          href: "https://github.com/suppers/ui-lib",
-        }}
-        variant="centered"
-        background="gradient"
-        size="lg"
-        className="hero-gradient-bg"
-      />
+      <SimpleNavbar currentPath={props.url.pathname} />
+      <div class="px-4">
+      <div
+        class="relative w-full h-[calc(100vh-80px)] overflow-hidden rounded-3xl"
+        id="hero-container"
+      >
+        {/* Background Image - Initial */}
+        <div
+          class="absolute inset-0 bg-cover bg-center transition-opacity duration-500 ease-in-out"
+          style="background-image: url('/static/backgrounds/hero-gradient.webp');"
+          id="hero-image"
+        >
+        </div>
 
-      {/* Technology Stack Section */}
-      <section class="py-16 bg-base-100">
-        <div class="container mx-auto px-6">
-          <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-base-content mb-4">
-              Built with Modern Technologies
-            </h2>
-            <p class="text-lg text-base-content/70">
-              Powered by the latest tools for optimal performance and developer experience
-            </p>
-          </div>
+        {/* Background Video - Loads after image */}
+        <video
+          class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 ease-in-out"
+          id="hero-video"
+          autoplay
+          muted
+          playsInline
+          onLoadedData="document.getElementById('hero-video').style.opacity = '1'; document.getElementById('hero-image').style.opacity = '0';"
+        >
+          <source src="/static/videos/hero-gradient.mp4" type="video/mp4" />
+        </video>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
-              <div class="flex justify-center mb-4">
-                <img src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/deno.svg`} alt="Deno" class="w-12 h-12" />
-              </div>
-              <h3 class="text-xl mb-2 font-semibold">Deno</h3>
-              <p class="text-base-content/70">
-                Modern TypeScript runtime with built-in security and performance
-              </p>
-            </Card>
-
-            <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
-              <div class="flex justify-center mb-4">
-                <img src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/fresh.svg`} alt="Fresh" class="w-12 h-12" />
-              </div>
-              <h3 class="text-xl mb-2 font-semibold">Fresh</h3>
-              <p class="text-base-content/70">
-                Zero-config web framework with islands architecture
-              </p>
-            </Card>
-
-            <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
-              <div class="flex justify-center mb-4">
-                <img src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/preact.svg`} alt="Preact" class="w-12 h-12" />
-              </div>
-              <h3 class="text-xl mb-2 font-semibold">Preact</h3>
-              <p class="text-base-content/70">
-                Fast, lightweight React alternative with the same API
-              </p>
-            </Card>
-
-            <Card class="bg-base-200 hover:shadow-xl transition-shadow text-center">
-              <div class="flex justify-center mb-4">
-                <img
-                  src={`${Deno.env.get("STATIC_ASSETS_URL") || "http://localhost:8001"}/static/logos/daisyui.svg`}
-                  alt="daisyUI"
-                  class="w-12 h-12"
-                />
-              </div>
-              <h3 class="text-xl mb-2 font-semibold">DaisyUI</h3>
-              <p class="text-base-content/70">
-                Beautiful Tailwind CSS components with semantic class names
-              </p>
-            </Card>
+        {/* Main Content - Centered */}
+        <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+          {/* Logo/Brand */}
+          <div class="mb-8">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white max-w-4xl leading-tight">
+              Build, Monetize, Scale. Faster.
+            </h1>
           </div>
         </div>
-      </section>
 
-      <BenefitsSection />
+        {/* Browse Applications Button - Bottom Left */}
+        <div class="absolute bottom-6 left-6 z-10">
+          <Button as="a" href="/applications?return=/" color="primary" class="rounded-full shadow-lg">
+            Browse Applications
+          </Button>
+        </div>
+      </div>
+    </div>
     </>
   );
 }

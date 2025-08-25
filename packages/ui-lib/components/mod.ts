@@ -140,6 +140,8 @@ export { Avatar } from "./display/avatar/Avatar.tsx";
 export type { AvatarProps } from "./display/avatar/Avatar.tsx";
 export { Logo } from "./display/logo/Logo.tsx";
 export type { LogoProps } from "./display/logo/Logo.tsx";
+export { default as LogoIsland } from "../islands/LogoIsland.tsx";
+export type { LogoIslandProps } from "../islands/LogoIsland.tsx";
 export { UserInfo } from "./display/user-info/UserInfo.tsx";
 export type { DropdownItem } from "./display/user-info/UserInfo.tsx";
 export { Menu } from "./navigation/menu/Menu.tsx";

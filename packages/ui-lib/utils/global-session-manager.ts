@@ -22,7 +22,7 @@ class GlobalSessionManager {
   public isSessionExpiredModalOpen = signal(false);
 
   private config: SessionManagerConfig = {
-    loginUrl: "/auth/login",
+    loginUrl: "/",
     homeUrl: "/",
   };
 
@@ -101,7 +101,7 @@ class GlobalSessionManager {
     } else {
       // Default behavior - redirect to login
       if (typeof window !== "undefined") {
-        globalThis.location.href = this.config.loginUrl || "/auth/login";
+        globalThis.location.href = this.config.loginUrl || "/";
       }
     }
   }

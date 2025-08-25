@@ -1,5 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
-import { UpdateUserData, type User } from "@suppers/auth-client";
+import type { UpdateUserData } from "../lib/auth-client/types.ts";
+import type { User } from "@suppers/shared/utils/type-mappers.ts";
 import { Button, ProfileCard } from "@suppers/ui-lib";
 import { applyTheme, getCurrentTheme } from "@suppers/shared/utils";
 import { getAuthClient } from "../lib/auth.ts";
@@ -249,7 +250,7 @@ export default function ProfilePageIsland() {
           <p class="text-base-content/70 mb-6">
             Please sign in to access your profile settings.
           </p>
-          <a href="/auth/login" class="btn btn-primary">
+          <a href="/" class="btn btn-primary">
             Sign In
           </a>
         </div>

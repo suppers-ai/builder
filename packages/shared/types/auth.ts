@@ -55,3 +55,15 @@ export interface AuthResponse<T> {
   data?: T;
   error?: AuthError;
 }
+
+export interface UpdateUserData {
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+  first_name?: string;
+  last_name?: string;
+  display_name?: string;
+  theme_id?: string;
+  stripe_customer_id?: string;
+  role?: string;
+}

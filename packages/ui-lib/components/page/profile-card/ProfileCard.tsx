@@ -10,8 +10,8 @@ import { GlobalThemeController } from "../../action/theme-controller/ThemeContro
 import { TypeMappers } from "@suppers/shared/utils/type-mappers.ts";
 import { applyTheme, type ThemeId } from "@suppers/shared/utils";
 import config from "../../../../../config.ts";
-import { ChevronDown, Crown, LogOut, Package, Palette } from "lucide-preact";
-import { UpdateUserData } from "@suppers/auth-client";
+import { ChevronDown, Crown, LogOut, Package, Palette, LayoutGrid } from "lucide-preact";
+import type { UpdateUserData } from "@suppers/shared/types";
 
 import type { User } from "@suppers/shared/utils/type-mappers.ts";
 
@@ -438,7 +438,7 @@ export function ProfileCard({
         >
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-full bg-base-200 flex items-center justify-center">
-              <Package class="w-4 h-4 text-base-content/60" />
+              <LayoutGrid class="w-4 h-4 text-base-content/60" />
             </div>
             <span class="text-base-content font-medium">View Applications</span>
           </div>

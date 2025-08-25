@@ -100,6 +100,175 @@ begin
 end;
 $$;
 
+-- Function to check if user has permission on storage object
+create or replace function public.check_storage_permission(
+  p_user_id uuid,
+  p_object_id uuid,
+  p_permission_level text default 'view'
+)
+returns boolean
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_has_permission boolean := false;
+begin
+  -- Check if user owns the object
+  select exists(
+    select 1 from public.storage_objects
+    where id = p_object_id and user_id = p_user_id
+  ) into v_has_permission;
+  
+  if v_has_permission then
+    return true;
+  end if;
+  
+  -- Check if user has shared access with required permission level
+  with recursive accessible_folders as (
+    -- Start with directly shared objects
+    select so.id, so.parent_folder_id, ss.inherit_to_children, ss.permission_level
+    from public.storage_objects so
+    join public.storage_shares ss on ss.object_id = so.id
+    where ss.shared_with_user_id = p_user_id
+      and (ss.expires_at is null or ss.expires_at > now())
+      and case 
+        when p_permission_level = 'view' then ss.permission_level in ('view', 'edit', 'admin')
+        when p_permission_level = 'edit' then ss.permission_level in ('edit', 'admin')
+        when p_permission_level = 'admin' then ss.permission_level = 'admin'
+        else false
+      end
+    
+    union all
+    
+    -- Include children of shared folders where inherit_to_children is true
+    select child.id, child.parent_folder_id, parent.inherit_to_children, parent.permission_level
+    from public.storage_objects child
+    join accessible_folders parent on child.parent_folder_id = parent.id
+    where parent.inherit_to_children = true
+  )
+  select exists(select 1 from accessible_folders where id = p_object_id)
+  into v_has_permission;
+  
+  return v_has_permission;
+end;
+$$;
+
+-- Function to get all accessible storage objects for a user
+create or replace function public.get_user_accessible_storage(p_user_id uuid)
+returns table(
+  id uuid,
+  name text,
+  parent_folder_id uuid,
+  object_type text,
+  file_size bigint,
+  mime_type text,
+  permission_level text,
+  is_owner boolean,
+  created_at timestamp with time zone
+)
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  return query
+  with recursive accessible_objects as (
+    -- User's own objects
+    select 
+      so.id,
+      so.name,
+      so.parent_folder_id,
+      so.object_type,
+      so.file_size,
+      so.mime_type,
+      'admin'::text as permission_level,
+      true as is_owner,
+      so.created_at
+    from public.storage_objects so
+    where so.user_id = p_user_id
+    
+    union
+    
+    -- Directly shared objects
+    select 
+      so.id,
+      so.name,
+      so.parent_folder_id,
+      so.object_type,
+      so.file_size,
+      so.mime_type,
+      ss.permission_level,
+      false as is_owner,
+      so.created_at
+    from public.storage_objects so
+    join public.storage_shares ss on ss.object_id = so.id
+    where ss.shared_with_user_id = p_user_id
+      and (ss.expires_at is null or ss.expires_at > now())
+    
+    union
+    
+    -- Children of shared folders (recursive)
+    select 
+      child.id,
+      child.name,
+      child.parent_folder_id,
+      child.object_type,
+      child.file_size,
+      child.mime_type,
+      parent_share.permission_level,
+      false as is_owner,
+      child.created_at
+    from public.storage_objects child
+    join public.storage_objects parent on child.parent_folder_id = parent.id
+    join public.storage_shares parent_share on parent_share.object_id = parent.id
+    where parent_share.shared_with_user_id = p_user_id
+      and parent_share.inherit_to_children = true
+      and (parent_share.expires_at is null or parent_share.expires_at > now())
+  )
+  select distinct on (ao.id)
+    ao.id,
+    ao.name,
+    ao.parent_folder_id,
+    ao.object_type,
+    ao.file_size,
+    ao.mime_type,
+    ao.permission_level,
+    ao.is_owner,
+    ao.created_at
+  from accessible_objects ao
+  order by ao.id, ao.is_owner desc, 
+    case ao.permission_level 
+      when 'admin' then 1 
+      when 'edit' then 2 
+      when 'view' then 3 
+    end;
+end;
+$$;
+
+-- Function to update path_segments when moving objects
+create or replace function public.update_path_segments()
+returns trigger
+language plpgsql
+as $$
+declare
+  v_parent_segments text[];
+begin
+  if new.parent_folder_id is null then
+    -- Root level object
+    new.path_segments := array[new.name];
+  else
+    -- Get parent's path segments
+    select path_segments into v_parent_segments
+    from public.storage_objects
+    where id = new.parent_folder_id;
+    
+    -- Append current object name to parent's path
+    new.path_segments := v_parent_segments || new.name;
+  end if;
+  
+  return new;
+end;
+$$;
+
 -- Function to reset all users' monthly bandwidth usage (for cronjob)
 create or replace function public.reset_monthly_bandwidth()
 returns void
@@ -188,19 +357,54 @@ create table if not exists public.storage_objects (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references auth.users(id) on delete cascade not null,
   name text not null,
-  shared_with_emails TEXT[], -- Emails that the file is shared with
+  parent_folder_id uuid references public.storage_objects(id) on delete cascade, -- Parent folder reference for hierarchy
+  object_type text not null default 'file' check (object_type in ('file', 'folder')), -- Distinguish files from folders
+  path_segments text[], -- Materialized path for fast ancestor queries (e.g., {'root', 'documents', 'projects'})
   file_path text not null,
-  file_size bigint not null, -- File size in bytes
-  mime_type text not null, -- MIME type of the file
+  file_size bigint not null, -- File size in bytes (0 for folders)
+  mime_type text not null, -- MIME type of the file (application/folder for folders)
   metadata jsonb default '{}'::jsonb not null, -- Flexible metadata (duration for videos, dimensions for images, drawing_data for paintings, etc.)
   thumbnail_url text, -- URL to thumbnail image (not base64)
-  is_public boolean default false not null, -- Public access without authentication
-  share_token text unique, -- Random token for private sharing
   application_id uuid references public.applications(id) on delete cascade, -- Optional application association
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Create trigger to automatically update path_segments
+create trigger update_storage_path_segments
+  before insert or update of parent_folder_id, name
+  on public.storage_objects
+  for each row
+  execute function public.update_path_segments();
+
+-- Storage shares table for fine-grained sharing permissions
+create table if not exists public.storage_shares (
+  id uuid default uuid_generate_v4() primary key,
+  object_id uuid references public.storage_objects(id) on delete cascade not null,
+  shared_with_user_id uuid references auth.users(id) on delete cascade,
+  shared_with_email text, -- For sharing with non-users via email
+  permission_level text not null check (permission_level in ('view', 'edit', 'admin')) default 'view',
+  inherit_to_children boolean default true not null, -- Whether subfolders/files inherit this permission
+  share_token text unique, -- Unique token for link-based sharing (public sharing)
+  is_public boolean default false not null, -- True for public link shares
+  expires_at timestamp with time zone, -- Optional expiration time
+  created_by uuid references auth.users(id) not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  -- Ensure share has a target (user, email, or public token)
+  constraint share_target_check check (
+    shared_with_user_id is not null or
+    shared_with_email is not null or
+    (share_token is not null and is_public = true)
+  )
+);
+
+-- Create indexes for storage_shares table
+create index if not exists idx_storage_shares_object_id on public.storage_shares(object_id);
+create index if not exists idx_storage_shares_shared_with_user on public.storage_shares(shared_with_user_id);
+create index if not exists idx_storage_shares_share_token on public.storage_shares(share_token) where share_token is not null;
+create index if not exists idx_storage_shares_created_by on public.storage_shares(created_by);
+create index if not exists idx_storage_shares_expires_at on public.storage_shares(expires_at) where expires_at is not null;
 
 -- Application reviews table for admin review process
 create table if not exists public.application_reviews (
@@ -315,13 +519,42 @@ create policy "Users can view their own storage objects"
   on public.storage_objects for select
   using (user_id = auth.uid());
 
-create policy "Anyone can view public storage objects"
+create policy "Users can view shared storage objects"
   on public.storage_objects for select
-  using (is_public = true);
+  using (
+    -- Check if user has direct or inherited access through sharing
+    exists (
+      with recursive accessible_folders as (
+        -- Start with directly shared objects
+        select so.id, so.parent_folder_id, ss.inherit_to_children
+        from public.storage_objects so
+        join public.storage_shares ss on ss.object_id = so.id
+        where ss.shared_with_user_id = auth.uid()
+          and (ss.expires_at is null or ss.expires_at > now())
+        
+        union all
+        
+        -- Include children of shared folders where inherit_to_children is true
+        select child.id, child.parent_folder_id, parent.inherit_to_children
+        from public.storage_objects child
+        join accessible_folders parent on child.parent_folder_id = parent.id
+        where parent.inherit_to_children = true
+      )
+      select 1 from accessible_folders where id = storage_objects.id
+    )
+  );
 
-create policy "Anyone can view shared storage objects with token"
+create policy "Users can view publicly shared objects via token"
   on public.storage_objects for select
-  using (share_token is not null);
+  using (
+    -- Check if object has a public share token
+    exists (
+      select 1 from public.storage_shares
+      where object_id = storage_objects.id
+        and share_token is not null
+        and (expires_at is null or expires_at > now())
+    )
+  );
 
 create policy "Users can insert their own storage objects"
   on public.storage_objects for insert
@@ -331,10 +564,108 @@ create policy "Users can update their own storage objects"
   on public.storage_objects for update
   using (user_id = auth.uid());
 
+create policy "Users can update shared storage objects with edit permission"
+  on public.storage_objects for update
+  using (
+    exists (
+      with recursive accessible_folders as (
+        -- Start with directly shared objects with edit/admin permission
+        select so.id, so.parent_folder_id, ss.inherit_to_children, ss.permission_level
+        from public.storage_objects so
+        join public.storage_shares ss on ss.object_id = so.id
+        where ss.shared_with_user_id = auth.uid()
+          and ss.permission_level in ('edit', 'admin')
+          and (ss.expires_at is null or ss.expires_at > now())
+        
+        union all
+        
+        -- Include children of shared folders where inherit_to_children is true
+        select child.id, child.parent_folder_id, parent.inherit_to_children, parent.permission_level
+        from public.storage_objects child
+        join accessible_folders parent on child.parent_folder_id = parent.id
+        where parent.inherit_to_children = true
+      )
+      select 1 from accessible_folders where id = storage_objects.id
+    )
+  );
+
 create policy "Users can delete their own storage objects"
   on public.storage_objects for delete
   using (user_id = auth.uid());
 
+create policy "Users can delete shared storage objects with admin permission"
+  on public.storage_objects for delete
+  using (
+    exists (
+      with recursive accessible_folders as (
+        -- Start with directly shared objects with admin permission
+        select so.id, so.parent_folder_id, ss.inherit_to_children, ss.permission_level
+        from public.storage_objects so
+        join public.storage_shares ss on ss.object_id = so.id
+        where ss.shared_with_user_id = auth.uid()
+          and ss.permission_level = 'admin'
+          and (ss.expires_at is null or ss.expires_at > now())
+        
+        union all
+        
+        -- Include children of shared folders where inherit_to_children is true
+        select child.id, child.parent_folder_id, parent.inherit_to_children, parent.permission_level
+        from public.storage_objects child
+        join accessible_folders parent on child.parent_folder_id = parent.id
+        where parent.inherit_to_children = true
+      )
+      select 1 from accessible_folders where id = storage_objects.id
+    )
+  );
+
+-- Storage shares policies
+create policy "Users can view shares they created"
+  on public.storage_shares for select
+  using (created_by = auth.uid());
+
+create policy "Users can view shares shared with them"
+  on public.storage_shares for select
+  using (shared_with_user_id = auth.uid());
+
+create policy "Users can create shares for their objects"
+  on public.storage_shares for insert
+  with check (
+    created_by = auth.uid()
+    and exists (
+      select 1 from public.storage_objects
+      where id = object_id and user_id = auth.uid()
+    )
+  );
+
+create policy "Users with admin permission can create shares"
+  on public.storage_shares for insert
+  with check (
+    created_by = auth.uid()
+    and exists (
+      select 1 from public.storage_shares ss
+      where ss.object_id = storage_shares.object_id
+        and ss.shared_with_user_id = auth.uid()
+        and ss.permission_level = 'admin'
+        and (ss.expires_at is null or ss.expires_at > now())
+    )
+  );
+
+create policy "Users can update shares they created"
+  on public.storage_shares for update
+  using (created_by = auth.uid());
+
+create policy "Users can delete shares they created"
+  on public.storage_shares for delete
+  using (created_by = auth.uid());
+
+create policy "Object owners can delete any shares on their objects"
+  on public.storage_shares for delete
+  using (
+    exists (
+      select 1 from public.storage_objects
+      where id = object_id and user_id = auth.uid()
+    )
+  );
 
 -- Application reviews policies
 create policy "Authenticated users can view application reviews"
@@ -425,9 +756,19 @@ create index if not exists idx_applications_created_at on public.applications(cr
 create index if not exists idx_storage_objects_user_id on public.storage_objects(user_id);
 create index if not exists idx_storage_objects_application_id on public.storage_objects(application_id);
 create index if not exists idx_storage_objects_user_created on public.storage_objects(user_id, created_at desc);
-create index if not exists idx_storage_objects_public_created on public.storage_objects(is_public, created_at desc) where is_public = true;
 create index if not exists idx_storage_objects_mime_type_user on public.storage_objects(mime_type, user_id);
+create index if not exists idx_storage_objects_parent_folder on public.storage_objects(parent_folder_id);
+create index if not exists idx_storage_objects_user_parent on public.storage_objects(user_id, parent_folder_id);
+create index if not exists idx_storage_objects_object_type on public.storage_objects(object_type);
+create index if not exists idx_storage_objects_path_segments on public.storage_objects using gin(path_segments);
 
+-- Storage shares indexes
+create index if not exists idx_storage_shares_object_id on public.storage_shares(object_id);
+create index if not exists idx_storage_shares_shared_with_user on public.storage_shares(shared_with_user_id);
+create index if not exists idx_storage_shares_share_token on public.storage_shares(share_token);
+create index if not exists idx_storage_shares_created_by on public.storage_shares(created_by);
+create index if not exists idx_storage_shares_expires_at on public.storage_shares(expires_at);
+create index if not exists idx_storage_shares_is_public on public.storage_shares(is_public) where is_public = true;
 
 -- Application reviews indexes
 create index if not exists idx_application_reviews_application_id on public.application_reviews(application_id);

@@ -28,15 +28,35 @@ export async function handleGetProductVariables(
       return createErrorResponse("Unauthorized", 403);
     }
 
-    // Get product variables with their definitions
-    const { data: variablesData, error: variablesError } = await supabase
+    // Get product variables with system variable definitions
+    const { data: productVars, error: productVarsError } = await supabase
       .from("variables")
-      .select(`
-        *,
-        global_variable_definitions!inner(*)
-      `)
+      .select("*")
       .eq("product_id", productId)
-      .order("global_variable_definitions.display_order");
+      .eq("is_system", false);
+
+    if (productVarsError) {
+      console.error("Error fetching product variables:", productVarsError);
+      return createErrorResponse("Failed to fetch product variables", 500);
+    }
+
+    // Get system variable definitions for these variables
+    const variableIds = (productVars || []).map(v => v.variable_id);
+    const { data: systemVars, error: systemVarsError } = await supabase
+      .from("variables")
+      .select("*")
+      .in("variable_id", variableIds)
+      .eq("is_system", true)
+      .order("display_order");
+
+    const variablesError = systemVarsError;
+    const variablesData = (productVars || []).map(pv => {
+      const sysDef = systemVars?.find(sv => sv.variable_id === pv.variable_id);
+      return {
+        ...pv,
+        system_definition: sysDef
+      };
+    });
 
     if (variablesError) {
       console.error("Error fetching product variables:", variablesError);
@@ -46,15 +66,15 @@ export async function handleGetProductVariables(
     // Transform to UserVariableInput format
     const variables: any[] = (variablesData || []).map((variable) => ({
       variable_id: variable.variable_id,
-      name: variable.global_variable_definitions.name,
-      description: variable.global_variable_definitions.description,
-      category: variable.global_variable_definitions.category,
-      value_type: variable.global_variable_definitions.value_type,
+      name: variable.system_definition?.name || variable.name,
+      description: variable.system_definition?.description || variable.description,
+      category: variable.system_definition?.category || variable.category,
+      value_type: variable.system_definition?.value_type || variable.value_type,
       current_value: variable.value,
-      default_value: variable.global_variable_definitions.default_value,
-      validation_rules: variable.global_variable_definitions.validation_rules,
-      display_order: variable.global_variable_definitions.display_order,
-      required: variable.global_variable_definitions.validation_rules?.required || false,
+      default_value: variable.system_definition?.default_value,
+      validation_rules: variable.system_definition?.validation_rules || variable.validation_rules,
+      display_order: variable.system_definition?.display_order || variable.display_order,
+      required: variable.system_definition?.validation_rules?.required || false,
     }));
 
     // Check if there's an applied template (stored in product metadata)
@@ -111,11 +131,12 @@ export async function handleSetProductVariable(
       return createErrorResponse("Unauthorized", 403);
     }
 
-    // Verify the variable definition exists
+    // Verify the system variable definition exists
     const { data: variableDefinition, error: defError } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
       .select("*")
       .eq("variable_id", variable_id)
+      .eq("is_system", true)
       .single();
 
     if (defError || !variableDefinition) {
@@ -130,13 +151,10 @@ export async function handleSetProductVariable(
 
     // Upsert the variable value
     const { error: upsertError } = await supabase
-      .from("variables")
+      .from("product_variables")
       .upsert({
         product_id: productId,
         variable_id: variable_id,
-        name: variableDefinition.name,
-        description: variableDefinition.description,
-        value_type: variableDefinition.value_type,
         value: value,
       }, {
         onConflict: "product_id,variable_id",
@@ -183,13 +201,10 @@ export async function handleApplyPricingTemplate(
       return createErrorResponse("Unauthorized", 403);
     }
 
-    // Get the template and its variables
+    // Get the template
     const { data: template, error: templateError } = await supabase
       .from("pricing_products")
-      .select(`
-        *,
-        global_variable_definitions!inner(*)
-      `)
+      .select("*")
       .eq("id", template_id)
       .single();
 
@@ -208,11 +223,12 @@ export async function handleApplyPricingTemplate(
       return createErrorResponse("Failed to clear existing variables", 500);
     }
 
-    // Get variable definitions for the template
+    // Get system variable definitions for the template
     const { data: variableDefinitions, error: defsError } = await supabase
-      .from("global_variable_definitions")
+      .from("variables")
       .select("*")
-      .in("variable_id", template.variable_ids || []);
+      .in("variable_id", template.variable_ids || [])
+      .eq("is_system", true);
 
     if (defsError) {
       console.error("Error fetching variable definitions:", defsError);
@@ -227,6 +243,9 @@ export async function handleApplyPricingTemplate(
       description: def.description,
       value_type: def.value_type,
       value: variable_values[def.variable_id] || def.default_value || "",
+      category: def.category,
+      validation_rules: def.validation_rules,
+      display_order: def.display_order,
     }));
 
     if (variablesToInsert.length > 0) {

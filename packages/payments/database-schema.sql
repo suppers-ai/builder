@@ -143,29 +143,16 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Unified variables table (for products, entities, and users)
+-- Variables table (generic variable definitions)
+-- Simple table for admin-defined variables that can be used dynamically throughout the system
 CREATE TABLE IF NOT EXISTS variables (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    product_id UUID REFERENCES products(id) ON DELETE CASCADE,
-    entity_id UUID REFERENCES entities(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    variable_id TEXT NOT NULL, -- e.g., 'basePrice', 'maxCapacity', 'storageLimit'
+    variable_id TEXT NOT NULL UNIQUE, -- e.g., 'basePrice', 'maxCapacity', 'storageLimit'
     name TEXT NOT NULL,
     description TEXT,
-    value_type TEXT NOT NULL CHECK (value_type IN ('number', 'percentage', 'boolean', 'string')),
-    value TEXT NOT NULL, -- Generic value storage, converted based on value_type
+    value_type TEXT NOT NULL CHECK (value_type IN ('number', 'percentage', 'boolean', 'string', 'time', 'date')),
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    -- Ensure exactly one of product_id, entity_id, or user_id is set
-    CONSTRAINT exactly_one_owner CHECK (
-        (product_id IS NOT NULL)::int +
-        (entity_id IS NOT NULL)::int +
-        (user_id IS NOT NULL)::int = 1
-    ),
-    -- Ensure unique variable_id per owner
-    UNIQUE(product_id, variable_id),
-    UNIQUE(entity_id, variable_id),
-    UNIQUE(user_id, variable_id)
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- Product restrictions (formula IDs)
@@ -291,22 +278,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Global Variable Definitions (for admin configuration)
--- These define what variables are available system-wide
-CREATE TABLE IF NOT EXISTS global_variable_definitions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    variable_id TEXT NOT NULL UNIQUE, -- e.g., 'basePrice', 'weekendSurcharge'
-    name TEXT NOT NULL, -- User-friendly name: "Base Price"
-    description TEXT NOT NULL, -- "The standard price before any adjustments"
-    category TEXT NOT NULL CHECK (category IN ('pricing', 'capacity', 'features', 'time', 'restrictions')),
-    value_type TEXT NOT NULL CHECK (value_type IN ('number', 'percentage', 'boolean', 'string', 'time', 'date')),
-    default_value TEXT, -- Default value for new instances
-    validation_rules JSONB, -- {"min": 0, "max": 1000, "required": true}
-    display_order INTEGER DEFAULT 0, -- Order in UI
-    is_system BOOLEAN DEFAULT false, -- System variables cannot be deleted
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+-- Note: All variable definitions and values are now stored in the unified variables table
 
 -- Entity views tracking
 CREATE TABLE IF NOT EXISTS entity_views (
@@ -363,9 +335,7 @@ CREATE INDEX IF NOT EXISTS idx_entity_types_name ON entity_types(name);
 CREATE INDEX IF NOT EXISTS idx_entity_sub_types_entity_type_id ON entity_sub_types(entity_type_id);
 CREATE INDEX IF NOT EXISTS idx_entity_sub_types_name ON entity_sub_types(entity_type_id, name);
 
-CREATE INDEX IF NOT EXISTS idx_variables_product_id ON variables(product_id);
-CREATE INDEX IF NOT EXISTS idx_variables_entity_id ON variables(entity_id);
-CREATE INDEX IF NOT EXISTS idx_variables_user_id ON variables(user_id);
+-- Index for variable_id lookup (primary lookup key)
 CREATE INDEX IF NOT EXISTS idx_variables_variable_id ON variables(variable_id);
 
 CREATE INDEX IF NOT EXISTS idx_products_seller_id ON products(seller_id);
@@ -394,10 +364,6 @@ CREATE INDEX IF NOT EXISTS idx_purchases_status ON purchases(status);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);
 
--- Global variable definitions indexes
-CREATE INDEX IF NOT EXISTS idx_global_variable_definitions_variable_id ON global_variable_definitions(variable_id);
-CREATE INDEX IF NOT EXISTS idx_global_variable_definitions_category ON global_variable_definitions(category);
-CREATE INDEX IF NOT EXISTS idx_global_variable_definitions_display_order ON global_variable_definitions(display_order);
 
 -- Views and likes tracking indexes
 CREATE INDEX IF NOT EXISTS idx_entity_views_entity_id ON entity_views(entity_id);
@@ -443,7 +409,6 @@ CREATE TRIGGER update_billing_configs_updated_at BEFORE UPDATE ON billing_config
 CREATE TRIGGER update_cancellation_policies_updated_at BEFORE UPDATE ON cancellation_policies FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_purchases_updated_at BEFORE UPDATE ON purchases FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_subscriptions_updated_at BEFORE UPDATE ON subscriptions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_global_variable_definitions_updated_at BEFORE UPDATE ON global_variable_definitions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Default Entity Types
 INSERT INTO entity_types (id, name, description, metadata_schema, filter_config, location_required) VALUES
@@ -650,44 +615,44 @@ INSERT INTO product_sub_types (product_type_id, name, description, metadata_sche
 -- =============================================
 
 -- Insert default variable definitions
-INSERT INTO global_variable_definitions (variable_id, name, description, category, value_type, default_value, validation_rules, display_order, is_system) VALUES
+INSERT INTO variables (variable_id, name, description, value_type) VALUES
 -- Pricing Variables
-('basePrice', 'Base Price', 'The standard price before any adjustments', 'pricing', 'number', '0', '{"min": 0, "required": true, "step": 0.01}', 1, true),
-('weekendSurcharge', 'Weekend Surcharge', 'Additional charge for weekend bookings (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 200}', 2, true),
-('holidaySurcharge', 'Holiday Surcharge', 'Additional charge for holiday bookings (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 300}', 3, true),
-('peakSeasonSurcharge', 'Peak Season Surcharge', 'Additional charge during peak season (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 500}', 4, true),
-('groupDiscount', 'Group Discount', 'Discount for group bookings (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 50}', 5, true),
-('earlyBirdDiscount', 'Early Bird Discount', 'Discount for advance bookings (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 30}', 6, true),
-('lastMinuteSurcharge', 'Last Minute Surcharge', 'Surcharge for last-minute bookings (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 100}', 7, true),
-('memberDiscount', 'Member Discount', 'Discount for members (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 30}', 8, true),
-('taxRate', 'Tax Rate', 'Tax rate applied to the total (percentage)', 'pricing', 'percentage', '0', '{"min": 0, "max": 50}', 9, true),
-('serviceFee', 'Service Fee', 'Fixed service fee added to booking', 'pricing', 'number', '0', '{"min": 0}', 10, true),
+('basePrice', 'Base Price', 'The standard price before any adjustments', 'number'),
+('weekendSurcharge', 'Weekend Surcharge', 'Additional charge for weekend bookings (percentage)', 'percentage'),
+('holidaySurcharge', 'Holiday Surcharge', 'Additional charge for holiday bookings (percentage)', 'percentage'),
+('peakSeasonSurcharge', 'Peak Season Surcharge', 'Additional charge during peak season (percentage)', 'percentage'),
+('groupDiscount', 'Group Discount', 'Discount for group bookings (percentage)', 'percentage'),
+('earlyBirdDiscount', 'Early Bird Discount', 'Discount for advance bookings (percentage)', 'percentage'),
+('lastMinuteSurcharge', 'Last Minute Surcharge', 'Surcharge for last-minute bookings (percentage)', 'percentage'),
+('memberDiscount', 'Member Discount', 'Discount for members (percentage)', 'percentage'),
+('taxRate', 'Tax Rate', 'Tax rate applied to the total (percentage)', 'percentage'),
+('serviceFee', 'Service Fee', 'Fixed service fee added to booking', 'number'),
 
 -- Capacity Variables  
-('maxCapacity', 'Maximum Capacity', 'Maximum number of people/units allowed', 'capacity', 'number', '1', '{"min": 1, "required": true}', 11, true),
-('minGroupSize', 'Minimum Group Size', 'Minimum number of people required', 'capacity', 'number', '1', '{"min": 1}', 12, true),
-('unitsAvailable', 'Units Available', 'Number of units/rooms/slots available', 'capacity', 'number', '1', '{"min": 0, "required": true}', 13, true),
-('maxUnitsPerBooking', 'Max Units Per Booking', 'Maximum units one person can book', 'capacity', 'number', '10', '{"min": 1}', 14, true),
-('advanceBookingDays', 'Advance Booking Days', 'How many days in advance booking is required', 'restrictions', 'number', '0', '{"min": 0}', 15, true),
-('cancellationDeadlineHours', 'Cancellation Deadline Hours', 'Hours before event when cancellation is no longer allowed', 'restrictions', 'number', '24', '{"min": 0}', 16, true),
+('maxCapacity', 'Maximum Capacity', 'Maximum number of people/units allowed', 'number'),
+('minGroupSize', 'Minimum Group Size', 'Minimum number of people required', 'number'),
+('unitsAvailable', 'Units Available', 'Number of units/rooms/slots available', 'number'),
+('maxUnitsPerBooking', 'Max Units Per Booking', 'Maximum units one person can book', 'number'),
+('advanceBookingDays', 'Advance Booking Days', 'How many days in advance booking is required', 'number'),
+('cancellationDeadlineHours', 'Cancellation Deadline Hours', 'Hours before event when cancellation is no longer allowed', 'number'),
 
 -- Feature Variables
-('includesBreakfast', 'Includes Breakfast', 'Whether breakfast is included', 'features', 'boolean', 'false', '{}', 17, true),
-('includesTowels', 'Includes Towels', 'Whether towels are provided', 'features', 'boolean', 'false', '{}', 18, true),
-('allowsPets', 'Allows Pets', 'Whether pets are allowed', 'features', 'boolean', 'false', '{}', 19, true),
-('hasWifi', 'Has WiFi', 'Whether WiFi is available', 'features', 'boolean', 'true', '{}', 20, true),
-('hasParking', 'Has Parking', 'Whether parking is available', 'features', 'boolean', 'false', '{}', 21, true),
-('airConditioned', 'Air Conditioned', 'Whether space is air conditioned', 'features', 'boolean', 'false', '{}', 22, true),
-('wheelchairAccessible', 'Wheelchair Accessible', 'Whether space is wheelchair accessible', 'features', 'boolean', 'false', '{}', 23, true),
+('includesBreakfast', 'Includes Breakfast', 'Whether breakfast is included', 'boolean'),
+('includesTowels', 'Includes Towels', 'Whether towels are provided', 'boolean'),
+('allowsPets', 'Allows Pets', 'Whether pets are allowed', 'boolean'),
+('hasWifi', 'Has WiFi', 'Whether WiFi is available', 'boolean'),
+('hasParking', 'Has Parking', 'Whether parking is available', 'boolean'),
+('airConditioned', 'Air Conditioned', 'Whether space is air conditioned', 'boolean'),
+('wheelchairAccessible', 'Wheelchair Accessible', 'Whether space is wheelchair accessible', 'boolean'),
 
 -- Time Variables
-('serviceDuration', 'Service Duration', 'Duration of service in minutes', 'time', 'number', '60', '{"min": 15, "required": true}', 24, true),
-('setupTime', 'Setup Time', 'Setup time required in minutes', 'time', 'number', '0', '{"min": 0}', 25, true),
-('cleanupTime', 'Cleanup Time', 'Cleanup time required in minutes', 'time', 'number', '0', '{"min": 0}', 26, true),
-('operatingHoursStart', 'Operating Hours Start', 'When operations start each day', 'time', 'time', '09:00', '{"required": true}', 27, true),
-('operatingHoursEnd', 'Operating Hours End', 'When operations end each day', 'time', 'time', '17:00', '{"required": true}', 28, true),
-('checkInTime', 'Check-in Time', 'Standard check-in time', 'time', 'time', '15:00', '{}', 29, true),
-('checkOutTime', 'Check-out Time', 'Standard check-out time', 'time', 'time', '11:00', '{}', 30, true);
+('serviceDuration', 'Service Duration', 'Duration of service in minutes', 'number'),
+('setupTime', 'Setup Time', 'Setup time required in minutes', 'number'),
+('cleanupTime', 'Cleanup Time', 'Cleanup time required in minutes', 'number'),
+('operatingHoursStart', 'Operating Hours Start', 'When operations start each day', 'time'),
+('operatingHoursEnd', 'Operating Hours End', 'When operations end each day', 'time'),
+('checkInTime', 'Check-in Time', 'Standard check-in time', 'time'),
+('checkOutTime', 'Check-out Time', 'Standard check-out time', 'time');
 
 -- Default Pricing Products (Templates)
 -- Note: These use a placeholder owner_id. In production, you should either:

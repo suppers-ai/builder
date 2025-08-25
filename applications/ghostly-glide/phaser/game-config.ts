@@ -1,6 +1,8 @@
-import MainScene from './scenes/MainScene.ts';
-import PreloadScene from './scenes/PreloadScene.ts';
-import UIScene from './scenes/UIScene.ts';
+import BootScene from './scenes/BootScene.ts';
+import PreloaderScene from './scenes/PreloaderScene.ts';
+import MenuScene from './scenes/MenuScene.ts';
+import GameScene from './scenes/GameScene.ts';
+import GameOverScene from './scenes/GameOverScene.ts';
 
 declare global {
   interface Window {
@@ -16,17 +18,13 @@ export default function createGame(parent: HTMLElement) {
     height: 600,
     backgroundColor: '#1a1a2e',
     physics: {
-      default: 'matter',
-      matter: {
-        gravity: { y: 1 },
-        debug: false,
-        enableSleeping: false,
-        positionIterations: 6,
-        velocityIterations: 4,
-        constraintIterations: 2
+      default: 'arcade',
+      arcade: {
+        gravity: { y: 800 },
+        debug: false
       }
     },
-    scene: [PreloadScene, MainScene, UIScene],
+    scene: [BootScene, PreloaderScene, MenuScene, GameScene, GameOverScene],
     scale: {
       mode: window.Phaser.Scale.FIT,
       autoCenter: window.Phaser.Scale.CENTER_BOTH
