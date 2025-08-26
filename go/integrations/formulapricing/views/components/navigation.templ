@@ -1,0 +1,20 @@
+package components
+
+type NavItem struct {
+    Label  string
+    Path   string
+    Active bool
+}
+
+templ Navigation(items []NavItem) {
+    <nav class="tabs">
+        for _, item := range items {
+            <a 
+                href={ templ.SafeURL(item.Path) } 
+                class={ "tab", templ.KV("active", item.Active) }
+            >
+                { item.Label }
+            </a>
+        }
+    </nav>
+}

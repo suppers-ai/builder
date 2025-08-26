@@ -1,0 +1,24 @@
+package components
+
+type HeaderProps struct {
+    UserEmail string
+    UserRole  string
+}
+
+templ Header(props HeaderProps) {
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">FP</div>
+            <span>FormulaPricing</span>
+        </div>
+        <div class="user-info">
+            if props.UserEmail != "" {
+                <span class="user-email">{ props.UserEmail }</span>
+                if props.UserRole == "admin" {
+                    <span class="user-role admin">Admin</span>
+                }
+                <a href="/logout" class="logout-btn">Logout</a>
+            }
+        </div>
+    </header>
+}

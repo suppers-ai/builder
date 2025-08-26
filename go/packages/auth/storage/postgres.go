@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/volatiletech/authboss/v3"
 	"github.com/suppers-ai/auth/models"
 	"github.com/suppers-ai/database"
@@ -21,8 +23,23 @@ func NewPostgresStorage(db database.Database) *PostgresStorage {
 
 func (s *PostgresStorage) Load(ctx context.Context, key string) (authboss.User, error) {
 	user := &models.User{}
-	query := `SELECT * FROM auth.users WHERE email = $1 OR id = $2 LIMIT 1`
-	err := s.db.Get(ctx, user, query, key, key)
+	
+	// Check if key is a valid UUID (for ID lookup) or email
+	var query string
+	var args []interface{}
+	
+	// Simple check - UUIDs have dashes, emails have @
+	if strings.Contains(key, "@") {
+		// It's an email
+		query = `SELECT * FROM auth.users WHERE email = $1 LIMIT 1`
+		args = []interface{}{key}
+	} else {
+		// Try as ID first, then email as fallback
+		query = `SELECT * FROM auth.users WHERE id = $1 OR email = $2 LIMIT 1`
+		args = []interface{}{key, key}
+	}
+	
+	err := s.db.Get(ctx, user, query, args...)
 	if err != nil {
 		if err == database.ErrNoRows {
 			return nil, authboss.ErrUserNotFound
@@ -41,6 +58,7 @@ func (s *PostgresStorage) Save(ctx context.Context, user authboss.User) error {
 			email = :email,
 			password = :password,
 			username = :username,
+			role = :role,
 			confirmed = :confirmed,
 			confirm_token = :confirm_token,
 			confirm_selector = :confirm_selector,
@@ -59,6 +77,7 @@ func (s *PostgresStorage) Save(ctx context.Context, user authboss.User) error {
 			locked = :locked,
 			attempt_count = :attempt_count,
 			last_attempt = :last_attempt,
+			metadata = :metadata,
 			updated_at = :updated_at
 		WHERE id = :id`
 	
@@ -76,20 +95,20 @@ func (s *PostgresStorage) Create(ctx context.Context, user authboss.User) error 
 	
 	query := `
 		INSERT INTO auth.users (
-			id, email, password, username, confirmed,
+			id, email, password, username, role, confirmed,
 			confirm_token, confirm_selector,
 			recover_token, recover_token_exp, recover_selector,
 			totp_secret, totp_secret_backup, sms_phone_number, recovery_codes,
 			oauth2_uid, oauth2_provider, oauth2_token, oauth2_refresh, oauth2_expiry,
-			locked, attempt_count, last_attempt,
+			locked, attempt_count, last_attempt, metadata,
 			created_at, updated_at
 		) VALUES (
-			:id, :email, :password, :username, :confirmed,
+			:id, :email, :password, :username, :role, :confirmed,
 			:confirm_token, :confirm_selector,
 			:recover_token, :recover_token_exp, :recover_selector,
 			:totp_secret, :totp_secret_backup, :sms_phone_number, :recovery_codes,
 			:oauth2_uid, :oauth2_provider, :oauth2_token, :oauth2_refresh, :oauth2_expiry,
-			:locked, :attempt_count, :last_attempt,
+			:locked, :attempt_count, :last_attempt, :metadata,
 			:created_at, :updated_at
 		)`
 	
@@ -201,5 +220,5 @@ func (s *PostgresStorage) SaveOAuth2(ctx context.Context, user authboss.OAuth2Us
 }
 
 func generateUUID() string {
-	return fmt.Sprintf("%d-%d", time.Now().UnixNano(), time.Now().Unix())
+	return uuid.New().String()
 }

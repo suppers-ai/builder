@@ -1,0 +1,52 @@
+package layouts
+
+import (
+    "formulapricing/views/components"
+)
+
+type BaseProps struct {
+    Title     string
+    UserEmail string
+    UserRole  string
+}
+
+templ Base(props BaseProps) {
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>{ props.Title } - FormulaPricing</title>
+        <link rel="stylesheet" href="/static/css/main.css"/>
+        { children... }
+    </head>
+    <body>
+        <div class="main-wrapper">
+            @components.Header(components.HeaderProps{
+                UserEmail: props.UserEmail,
+                UserRole: props.UserRole,
+            })
+            <main class="container">
+                { children... }
+            </main>
+        </div>
+    </body>
+    </html>
+}
+
+templ AuthLayout(title string) {
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>{ title } - FormulaPricing</title>
+        <link rel="stylesheet" href="/static/css/auth.css"/>
+    </head>
+    <body>
+        <div class="auth-container">
+            { children... }
+        </div>
+    </body>
+    </html>
+}

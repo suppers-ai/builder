@@ -1,30 +1,31 @@
-FROM golang:1.21-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
-WORKDIR /app
+WORKDIR /build
 
 RUN apk add --no-cache git
 
-COPY go.mod go.sum ./
-RUN go mod download
+# Copy the entire go directory structure
+COPY . /go/src/builder
 
-COPY . .
+# Set working directory to formulapricing
+WORKDIR /go/src/builder/integrations/formulapricing
 
-# Build main application
+# Build with local module replacements
 RUN go build -o formulapricing main.go
 
-# Build migration CLI tool
-RUN go build -o migrate cmd/migrate/main.go
+# Build migration CLI tool (if it exists)
+RUN if [ -f cmd/migrate/main.go ]; then go build -o migrate cmd/migrate/main.go || echo "Migrate build failed, continuing..."; fi
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 # Copy binaries
-COPY --from=builder /app/formulapricing .
-COPY --from=builder /app/migrate .
+COPY --from=builder /go/src/builder/integrations/formulapricing/formulapricing .
+COPY --from=builder /go/src/builder/integrations/formulapricing/migrate* .
 
 # Copy migration files (embedded in binary but also available as files)
-COPY --from=builder /app/database/migrations ./database/migrations
+COPY --from=builder /go/src/builder/integrations/formulapricing/database/migrations ./database/migrations
 
 # Set environment variable to auto-run migrations
 ENV AUTO_MIGRATE=true

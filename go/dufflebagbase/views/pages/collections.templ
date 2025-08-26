@@ -1,0 +1,133 @@
+package pages
+
+import (
+    "github.com/suppers-ai/dufflebagbase/views/layouts"
+    "github.com/suppers-ai/dufflebagbase/services"
+    "fmt"
+)
+
+type CollectionsPageData struct {
+    UserEmail   string
+    Collections []services.CollectionInfo
+}
+
+templ CollectionsPage(data CollectionsPageData) {
+    @layouts.Base(layouts.BaseProps{
+        Title:     "Collections",
+        UserEmail: data.UserEmail,
+    }) {
+        <div class="container">
+            <div class="page-header">
+                <h1>Collections</h1>
+                <button class="btn btn-primary" id="createCollectionBtn">
+                    Create Collection
+                </button>
+            </div>
+            
+            <div class="collections-list">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Schema</th>
+                            <th>Records</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        for _, collection := range data.Collections {
+                            <tr>
+                                <td class="collection-name">{ collection.Name }</td>
+                                <td>{ collection.Type }</td>
+                                <td>
+                                    <code class="schema-preview">{ collection.SchemaPreview }</code>
+                                </td>
+                                <td>{ fmt.Sprint(collection.RecordCount) }</td>
+                                <td>{ collection.CreatedAt }</td>
+                                <td>
+                                    <button 
+                                        class="btn btn-sm view-collection"
+                                        data-name={ collection.Name }
+                                    >
+                                        View
+                                    </button>
+                                    <button 
+                                        class="btn btn-sm btn-secondary edit-collection"
+                                        data-name={ collection.Name }
+                                    >
+                                        Edit
+                                    </button>
+                                    <button 
+                                        class="btn btn-sm btn-danger delete-collection"
+                                        data-name={ collection.Name }
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        @CollectionModal()
+        
+        <script src="/static/js/modules/collections.js" type="module"></script>
+    }
+}
+
+templ CollectionModal() {
+    <div id="collectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Create Collection</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            
+            <form id="collectionForm">
+                <div class="form-group">
+                    <label for="collectionName">Collection Name</label>
+                    <input 
+                        type="text" 
+                        id="collectionName" 
+                        name="name"
+                        required
+                        pattern="[a-z][a-z0-9_]*"
+                    />
+                    <small>Lowercase letters, numbers, and underscores only</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="collectionType">Type</label>
+                    <select id="collectionType" name="type">
+                        <option value="base">Base</option>
+                        <option value="auth">Auth</option>
+                        <option value="sorted">Sorted</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="collectionSchema">Schema (JSON)</label>
+                    <textarea 
+                        id="collectionSchema" 
+                        name="schema"
+                        rows="10"
+                        placeholder='{"fields": []}'
+                    ></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Create
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

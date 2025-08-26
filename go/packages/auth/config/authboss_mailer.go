@@ -52,19 +52,19 @@ func (a *AuthbossMailer) Send(ctx context.Context, email authboss.Email) error {
 		mailEmail.To = append(mailEmail.To, mailer.Address{Email: to})
 	}
 	
-	// Convert CC addresses
-	for _, cc := range email.CC {
+	// Convert Cc addresses (note the lowercase 'c')
+	for _, cc := range email.Cc {
 		mailEmail.CC = append(mailEmail.CC, mailer.Address{Email: cc})
 	}
 	
-	// Convert BCC addresses
-	for _, bcc := range email.BCC {
+	// Convert Bcc addresses (note the lowercase 'cc')
+	for _, bcc := range email.Bcc {
 		mailEmail.BCC = append(mailEmail.BCC, mailer.Address{Email: bcc})
 	}
 	
-	// Convert ReplyTo addresses
-	if len(email.ReplyTo) > 0 {
-		mailEmail.ReplyTo = &mailer.Address{Email: email.ReplyTo[0]}
+	// Convert ReplyTo address
+	if email.ReplyTo != "" {
+		mailEmail.ReplyTo = &mailer.Address{Email: email.ReplyTo}
 	}
 	
 	// Send email

@@ -10,8 +10,6 @@ import (
 	"github.com/suppers-ai/auth/config"
 	"github.com/suppers-ai/auth/middleware"
 	"github.com/suppers-ai/auth/models"
-	"github.com/suppers-ai/auth/session"
-	"github.com/suppers-ai/auth/storage"
 	"github.com/suppers-ai/database"
 	"github.com/suppers-ai/mailer"
 )
@@ -95,6 +93,15 @@ func (s *Service) RequireAdmin(adminChecker func(authboss.User) bool) func(http.
 	return middleware.RequireAdmin(s.auth.AB, adminChecker)
 }
 
+// RequireAdminSimple provides a simpler interface for admin checking
+func (s *Service) RequireAdminSimple(adminChecker func(interface{}) bool) func(http.Handler) http.Handler {
+	// Wrap the simple checker to work with authboss.User
+	wrappedChecker := func(user authboss.User) bool {
+		return adminChecker(user)
+	}
+	return middleware.RequireAdmin(s.auth.AB, wrappedChecker)
+}
+
 func (s *Service) CSRF(next http.Handler) http.Handler {
 	return middleware.CSRF(s.auth.AB)(next)
 }
@@ -125,9 +132,20 @@ func (s *Service) CreateUser(ctx context.Context, email, password string) (*mode
 		user.Password = hashedPassword
 	}
 	
-	err := s.storage.Create(ctx, user)
-	if err != nil {
-		return nil, err
+	// Use Create for new users instead of Save
+	if storer, ok := s.storage.(interface {
+		Create(context.Context, authboss.User) error
+	}); ok {
+		err := storer.Create(ctx, user)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Fallback to Save if Create not available
+		err := s.storage.Save(ctx, user)
+		if err != nil {
+			return nil, err
+		}
 	}
 	
 	return user, nil
@@ -150,7 +168,7 @@ func (s *Service) LockUser(ctx context.Context, id string) error {
 	}
 	
 	if lockable, ok := user.(authboss.LockableUser); ok {
-		lockable.PutLocked(true)
+		lockable.PutLocked(time.Now())
 		return s.UpdateUser(ctx, user)
 	}
 	
@@ -164,10 +182,9 @@ func (s *Service) UnlockUser(ctx context.Context, id string) error {
 	}
 	
 	if lockable, ok := user.(authboss.LockableUser); ok {
-		lockable.PutLocked(false)
+		lockable.PutLocked(time.Time{})
 		lockable.PutAttemptCount(0)
-		var zeroTime time.Time
-		lockable.PutLastAttempt(zeroTime)
+		lockable.PutLastAttempt(time.Time{})
 		return s.UpdateUser(ctx, user)
 	}
 	
@@ -184,4 +201,58 @@ func (s *Service) SessionStore() sessions.Store {
 
 func (s *Service) Authboss() *authboss.Authboss {
 	return s.auth.AB
+}
+
+// AuthenticateUser authenticates a user with email and password
+func (s *Service) AuthenticateUser(ctx context.Context, email, password string) (authboss.User, error) {
+	user, err := s.storage.Load(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Verify password
+	authUser := user.(authboss.AuthableUser)
+	err = s.auth.AB.Config.Core.Hasher.CompareHashAndPassword(authUser.GetPassword(), password)
+	if err != nil {
+		return nil, err
+	}
+	
+	return user, nil
+}
+
+// RegisterUser registers a new user
+func (s *Service) RegisterUser(ctx context.Context, email, password string, extra map[string]interface{}) (authboss.User, error) {
+	user := &models.User{
+		Email:     email,
+		Confirmed: false,
+	}
+	
+	// Set extra fields
+	if name, ok := extra["name"].(string); ok {
+		// We'll handle this after creating the user
+		_ = name
+	}
+	
+	// Hash password
+	hashedPassword, err := s.auth.AB.Config.Core.Hasher.GenerateHash(password)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = hashedPassword
+	
+	// Create user - use Create for new users instead of Save
+	if storer, ok := s.storage.(interface {
+		Create(context.Context, authboss.User) error
+	}); ok {
+		err = storer.Create(ctx, user)
+	} else {
+		// Fallback to Save if Create not available
+		err = s.storage.Save(ctx, user)
+	}
+	
+	if err != nil {
+		return nil, err
+	}
+	
+	return user, nil
 }

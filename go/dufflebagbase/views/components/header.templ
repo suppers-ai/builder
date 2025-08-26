@@ -1,0 +1,32 @@
+package components
+
+type HeaderProps struct {
+    UserEmail string
+}
+
+templ Header(props HeaderProps) {
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="/dashboard">DuffleBagBase</a>
+            </div>
+            
+            <nav class="nav">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/users">Users</a>
+                <a href="/database">Database</a>
+                <a href="/storage">Storage</a>
+                <a href="/collections">Collections</a>
+                <a href="/settings">Settings</a>
+                <a href="/api/docs">API</a>
+            </nav>
+            
+            <div class="user-menu">
+                <span class="user-email">{ props.UserEmail }</span>
+                <form action="/auth/logout" method="POST" style="display: inline;">
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+        </div>
+    </header>
+}

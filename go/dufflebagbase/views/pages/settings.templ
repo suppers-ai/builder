@@ -1,0 +1,188 @@
+package pages
+
+import (
+	"github.com/suppers-ai/dufflebagbase/views/layouts"
+	"fmt"
+)
+
+type SettingsData struct {
+	UserEmail        string
+	AppName          string
+	AppVersion       string
+	Environment      string
+	DatabaseHost     string
+	DatabaseName     string
+	S3Endpoint       string
+	S3Bucket         string
+	SMTPHost         string
+	SMTPPort         int
+	EnableSignup     bool
+	EnableAPI        bool
+	RateLimitEnabled bool
+	RateLimitRPM     int
+	LogLevel         string
+	MaintenanceMode  bool
+}
+
+templ SettingsPage(data SettingsData) {
+	@layouts.Base(layouts.BaseProps{
+		Title:     "Settings",
+		UserEmail: data.UserEmail,
+	}) {
+			<div class="container">
+				<div class="page-header">
+					<h1>Settings</h1>
+				</div>
+
+				<div class="settings-grid">
+					<!-- Application Settings -->
+					<div class="settings-section">
+						<h2>Application</h2>
+						<form id="appSettingsForm" onsubmit="saveAppSettings(event)">
+							<div class="form-group">
+								<label for="appName">Application Name</label>
+								<input type="text" id="appName" name="appName" value={ data.AppName }/>
+							</div>
+							<div class="form-group">
+								<label>Version</label>
+								<input type="text" value={ data.AppVersion } disabled/>
+							</div>
+							<div class="form-group">
+								<label>Environment</label>
+								<input type="text" value={ data.Environment } disabled/>
+							</div>
+							<div class="form-group">
+								<label for="maintenanceMode">
+									<input type="checkbox" id="maintenanceMode" name="maintenanceMode" checked?={ data.MaintenanceMode }/>
+									Maintenance Mode
+								</label>
+							</div>
+							<button type="submit" class="btn btn-primary">Save Application Settings</button>
+						</form>
+					</div>
+
+					<!-- Authentication Settings -->
+					<div class="settings-section">
+						<h2>Authentication</h2>
+						<form id="authSettingsForm" onsubmit="saveAuthSettings(event)">
+							<div class="form-group">
+								<label for="enableSignup">
+									<input type="checkbox" id="enableSignup" name="enableSignup" checked?={ data.EnableSignup }/>
+									Enable User Signup
+								</label>
+							</div>
+							<div class="form-group">
+								<label for="enableAPI">
+									<input type="checkbox" id="enableAPI" name="enableAPI" checked?={ data.EnableAPI }/>
+									Enable API Access
+								</label>
+							</div>
+							<button type="submit" class="btn btn-primary">Save Auth Settings</button>
+						</form>
+					</div>
+
+					<!-- Database Settings -->
+					<div class="settings-section">
+						<h2>Database</h2>
+						<form>
+							<div class="form-group">
+								<label>Host</label>
+								<input type="text" value={ data.DatabaseHost } disabled/>
+							</div>
+							<div class="form-group">
+								<label>Database Name</label>
+								<input type="text" value={ data.DatabaseName } disabled/>
+							</div>
+							<div class="form-actions">
+								<button type="button" class="btn btn-secondary" onclick="testDatabaseConnection()">Test Connection</button>
+								<button type="button" class="btn btn-danger" onclick="resetDatabase()">Reset Database</button>
+							</div>
+						</form>
+					</div>
+
+					<!-- Storage Settings -->
+					<div class="settings-section">
+						<h2>Storage</h2>
+						<form>
+							<div class="form-group">
+								<label>S3 Endpoint</label>
+								<input type="text" value={ data.S3Endpoint } disabled/>
+							</div>
+							<div class="form-group">
+								<label>Default Bucket</label>
+								<input type="text" value={ data.S3Bucket } disabled/>
+							</div>
+							<div class="form-actions">
+								<button type="button" class="btn btn-secondary" onclick="testStorageConnection()">Test Connection</button>
+							</div>
+						</form>
+					</div>
+
+					<!-- Email Settings -->
+					<div class="settings-section">
+						<h2>Email</h2>
+						<form id="emailSettingsForm" onsubmit="saveEmailSettings(event)">
+							<div class="form-group">
+								<label>SMTP Host</label>
+								<input type="text" value={ data.SMTPHost } disabled/>
+							</div>
+							<div class="form-group">
+								<label>SMTP Port</label>
+								<input type="number" value={ fmt.Sprintf("%d", data.SMTPPort) } disabled/>
+							</div>
+							<div class="form-actions">
+								<button type="button" class="btn btn-secondary" onclick="sendTestEmail()">Send Test Email</button>
+							</div>
+						</form>
+					</div>
+
+					<!-- Rate Limiting -->
+					<div class="settings-section">
+						<h2>Rate Limiting</h2>
+						<form id="rateLimitForm" onsubmit="saveRateLimitSettings(event)">
+							<div class="form-group">
+								<label for="rateLimitEnabled">
+									<input type="checkbox" id="rateLimitEnabled" name="rateLimitEnabled" checked?={ data.RateLimitEnabled }/>
+									Enable Rate Limiting
+								</label>
+							</div>
+							<div class="form-group">
+								<label for="rateLimitRPM">Requests Per Minute</label>
+								<input type="number" id="rateLimitRPM" name="rateLimitRPM" value={ fmt.Sprintf("%d", data.RateLimitRPM) } min="1" max="1000"/>
+							</div>
+							<button type="submit" class="btn btn-primary">Save Rate Limit Settings</button>
+						</form>
+					</div>
+
+					<!-- Logging -->
+					<div class="settings-section">
+						<h2>Logging</h2>
+						<form id="loggingForm" onsubmit="saveLoggingSettings(event)">
+							<div class="form-group">
+								<label for="logLevel">Log Level</label>
+								<select id="logLevel" name="logLevel">
+									<option value="DEBUG" selected?={ data.LogLevel == "DEBUG" }>DEBUG</option>
+									<option value="INFO" selected?={ data.LogLevel == "INFO" }>INFO</option>
+									<option value="WARN" selected?={ data.LogLevel == "WARN" }>WARN</option>
+									<option value="ERROR" selected?={ data.LogLevel == "ERROR" }>ERROR</option>
+								</select>
+							</div>
+							<button type="submit" class="btn btn-primary">Save Logging Settings</button>
+						</form>
+					</div>
+
+					<!-- Danger Zone -->
+					<div class="settings-section danger-zone">
+						<h2>Danger Zone</h2>
+						<div class="danger-actions">
+							<button class="btn btn-danger" onclick="clearAllCaches()">Clear All Caches</button>
+							<button class="btn btn-danger" onclick="exportAllData()">Export All Data</button>
+							<button class="btn btn-danger" onclick="deleteAllData()">Delete All Data</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		<script src="/static/js/settings.js" type="module"></script>
+	}
+}

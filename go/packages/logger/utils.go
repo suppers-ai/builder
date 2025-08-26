@@ -1,10 +1,10 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"runtime"
-	"strings"
 )
 
 // getCaller returns the caller information
@@ -17,40 +17,6 @@ func getCaller() string {
 	// Get just the filename
 	file = filepath.Base(file)
 	return fmt.Sprintf("%s:%d", file, line)
-}
-
-// getStackTrace returns the current stack trace
-func getStackTrace() string {
-	const depth = 32
-	var pcs [depth]uintptr
-	n := runtime.Callers(3, pcs[:])
-	
-	var builder strings.Builder
-	frames := runtime.CallersFrames(pcs[:n])
-	
-	for {
-		frame, more := frames.Next()
-		
-		// Skip runtime internal functions
-		if strings.Contains(frame.Function, "runtime.") {
-			if !more {
-				break
-			}
-			continue
-		}
-		
-		// Format: function(file:line)
-		fmt.Fprintf(&builder, "%s\n\t%s:%d\n", 
-			frame.Function,
-			frame.File,
-			frame.Line)
-		
-		if !more {
-			break
-		}
-	}
-	
-	return builder.String()
 }
 
 // contextKey is a type for context keys

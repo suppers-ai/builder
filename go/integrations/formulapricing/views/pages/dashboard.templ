@@ -1,0 +1,80 @@
+package pages
+
+import (
+    "formulapricing/views/layouts"
+    "formulapricing/views/components"
+    "fmt"
+)
+
+func getNavItems(activeTab string, userRole string) []components.NavItem {
+    items := []components.NavItem{
+        {Label: "Dashboard", Path: "/dashboard", Active: activeTab == "dashboard"},
+        {Label: "Variables", Path: "/variables", Active: activeTab == "variables"},
+        {Label: "Calculations", Path: "/calculations", Active: activeTab == "calculations"},
+        {Label: "Conditions", Path: "/conditions", Active: activeTab == "conditions"},
+        {Label: "Pricing", Path: "/pricing", Active: activeTab == "pricing"},
+        {Label: "Calculate", Path: "/calculate", Active: activeTab == "calculate"},
+        {Label: "Purchases", Path: "/purchases", Active: activeTab == "purchases"},
+    }
+    
+    if userRole == "admin" {
+        items = append(items, components.NavItem{Label: "Users", Path: "/users", Active: activeTab == "users"})
+    }
+    
+    return items
+}
+
+type CollectionInfo struct {
+    Name  string
+    Type  string
+    Count int
+}
+
+type DashboardData struct {
+    UserEmail   string
+    UserRole    string
+    Collections []CollectionInfo
+    ActiveTab   string
+}
+
+templ DashboardPage(data DashboardData) {
+    @layouts.Base(layouts.BaseProps{
+        Title:     "Dashboard",
+        UserEmail: data.UserEmail,
+        UserRole:  data.UserRole,
+    }) {
+        @components.Navigation(getNavItems(data.ActiveTab, data.UserRole))
+        
+        <div class="content">
+            <h1>Dashboard</h1>
+            
+            <div class="stats-grid">
+                for _, collection := range data.Collections {
+                    <div class="stat-card">
+                        <h3>{ collection.Name }</h3>
+                        <div class="stat-value">{ fmt.Sprint(collection.Count) }</div>
+                        <div class="stat-type">{ collection.Type }</div>
+                    </div>
+                }
+            </div>
+            
+            <div class="quick-actions">
+                <h2>Quick Actions</h2>
+                <div class="action-grid">
+                    <a href="/calculate" class="action-card">
+                        <span class="icon">📊</span>
+                        <span>Calculate Pricing</span>
+                    </a>
+                    <a href="/variables" class="action-card">
+                        <span class="icon">📝</span>
+                        <span>Manage Variables</span>
+                    </a>
+                    <a href="/pricing" class="action-card">
+                        <span class="icon">💰</span>
+                        <span>Configure Pricing</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+}

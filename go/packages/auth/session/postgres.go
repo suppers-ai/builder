@@ -1,29 +1,43 @@
 package session
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/gob"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/suppers-ai/database"
+	"github.com/volatiletech/authboss/v3"
 )
 
+// ClientStateData implements authboss.ClientState interface
+type ClientStateData map[string]string
+
+// Get retrieves a value from the client state
+func (c ClientStateData) Get(key string) (string, bool) {
+	val, ok := c[key]
+	return val, ok
+}
+
 type PostgresStore struct {
-	db         database.Database
-	Codecs     []sessions.Codec
-	Options    *sessions.Options
-	maxAge     int
-	serializer sessions.Serializer
+	db          database.Database
+	Codecs      []securecookie.Codec
+	Options     *sessions.Options
+	maxAge      int
+	request     *http.Request // Track the current request for WriteState
+	sessionName string        // The name of the session
 }
 
 func NewPostgresStore(db database.Database, keyPairs ...[]byte) *PostgresStore {
 	return &PostgresStore{
 		db:     db,
-		Codecs: sessions.CodecsFromPairs(keyPairs...),
+		Codecs: securecookie.CodecsFromPairs(keyPairs...),
 		Options: &sessions.Options{
 			Path:     "/",
 			MaxAge:   86400 * 30,
@@ -31,9 +45,14 @@ func NewPostgresStore(db database.Database, keyPairs ...[]byte) *PostgresStore {
 			Secure:   false,
 			SameSite: http.SameSiteLaxMode,
 		},
-		maxAge:     86400 * 30,
-		serializer: sessions.GobSerializer{},
+		maxAge:      86400 * 30,
+		sessionName: "auth", // Default session name
 	}
+}
+
+// SetSessionName sets the session name
+func (s *PostgresStore) SetSessionName(name string) {
+	s.sessionName = name
 }
 
 func (s *PostgresStore) Get(r *http.Request, name string) (*sessions.Session, error) {
@@ -47,7 +66,7 @@ func (s *PostgresStore) New(r *http.Request, name string) (*sessions.Session, er
 	session.IsNew = true
 	
 	if c, err := r.Cookie(name); err == nil {
-		err = sessions.DecodeMulti(name, c.Value, &session.ID, s.Codecs...)
+		err = securecookie.DecodeMulti(name, c.Value, &session.ID, s.Codecs...)
 		if err == nil {
 			session.IsNew = false
 			err = s.load(r.Context(), session)
@@ -62,7 +81,7 @@ func (s *PostgresStore) Save(r *http.Request, w http.ResponseWriter, session *se
 		session.ID = generateSessionID()
 	}
 	
-	encoded, err := sessions.EncodeMulti(session.Name(), session.ID, s.Codecs...)
+	encoded, err := securecookie.EncodeMulti(session.Name(), session.ID, s.Codecs...)
 	if err != nil {
 		return err
 	}
@@ -89,22 +108,41 @@ func (s *PostgresStore) load(ctx context.Context, session *sessions.Session) err
 	var data []byte
 	query := `SELECT data FROM auth.sessions WHERE id = $1 AND expires_at > NOW()`
 	
+	// Debug: Looking for session ID
+	
 	err := s.db.Get(ctx, &data, query, session.ID)
 	if err != nil {
 		if err == database.ErrNoRows {
+			// Session not found in database
 			return nil
 		}
+		// Error loading session
 		return err
 	}
 	
-	return s.serializer.Deserialize(data, session)
+	// Found session data
+	
+	// Deserialize session data
+	dec := gob.NewDecoder(bytes.NewReader(data))
+	err = dec.Decode(&session.Values)
+	if err != nil {
+		// Error decoding session
+		return err
+	}
+	
+	// Successfully decoded session values
+	
+	return nil
 }
 
 func (s *PostgresStore) save(ctx context.Context, session *sessions.Session) error {
-	data, err := s.serializer.Serialize(session)
-	if err != nil {
+	// Serialize session data
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(session.Values); err != nil {
 		return err
 	}
+	data := buf.Bytes()
 	
 	expiresAt := time.Now().Add(time.Duration(s.Options.MaxAge) * time.Second)
 	
@@ -116,7 +154,7 @@ func (s *PostgresStore) save(ctx context.Context, session *sessions.Session) err
 			updated_at = EXCLUDED.updated_at,
 			expires_at = EXCLUDED.expires_at`
 	
-	_, err = s.db.Exec(ctx, query, session.ID, data, time.Now(), time.Now(), expiresAt)
+	_, err := s.db.Exec(ctx, query, session.ID, data, time.Now(), time.Now(), expiresAt)
 	return err
 }
 
@@ -130,6 +168,82 @@ func (s *PostgresStore) CleanupSessions(ctx context.Context) error {
 	query := `DELETE FROM auth.sessions WHERE expires_at < NOW()`
 	_, err := s.db.Exec(ctx, query)
 	return err
+}
+
+// ReadState loads the client state from the request
+// This implements the authboss.ClientStateReadWriter interface
+func (s *PostgresStore) ReadState(r *http.Request) (authboss.ClientState, error) {
+	// Store the request for potential use in WriteState
+	s.request = r
+	
+	// Create a new client state data holder
+	state := make(ClientStateData)
+	
+	// Try to get the session using the configured session name
+	session, err := s.Get(r, s.sessionName)
+	if err != nil {
+		// Also try with dash-separated name
+		session, err = s.Get(r, strings.ReplaceAll(s.sessionName, "_", "-"))
+		if err != nil {
+			// Return empty state on error
+			return state, nil
+		}
+	}
+	
+	// Convert session values to client state
+	for key, value := range session.Values {
+		// Type assert key to string
+		if keyStr, ok := key.(string); ok {
+			if str, ok := value.(string); ok {
+				state[keyStr] = str
+			} else if fmt.Sprintf("%v", value) != "" {
+				// Try to convert other types to string
+				state[keyStr] = fmt.Sprintf("%v", value)
+			}
+		}
+	}
+	
+	// Session state loaded successfully
+	
+	return state, nil
+}
+
+// WriteState saves the client state to the response
+func (s *PostgresStore) WriteState(w http.ResponseWriter, state authboss.ClientState, evs []authboss.ClientStateEvent) error {
+	// Use the stored request from ReadState
+	if s.request == nil {
+		return fmt.Errorf("no request available for session")
+	}
+	
+	// Try getting session with configured name first
+	session, err := s.Get(s.request, s.sessionName)
+	if err != nil {
+		// Try with dash-separated name
+		dashName := strings.ReplaceAll(s.sessionName, "_", "-")
+		session, err = s.Get(s.request, dashName)
+		if err != nil {
+			// Create new session with dash name (gorilla sessions normalizes to dashes)
+			session, err = s.New(s.request, dashName)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	
+	// Apply events to session
+	for _, event := range evs {
+		switch event.Kind {
+		case authboss.ClientStateEventPut:
+			session.Values[event.Key] = event.Value
+		case authboss.ClientStateEventDel:
+			delete(session.Values, event.Key)
+		case authboss.ClientStateEventDelAll:
+			session.Values = make(map[interface{}]interface{})
+		}
+	}
+	
+	// Save the session
+	return s.Save(s.request, w, session)
 }
 
 func generateSessionID() string {

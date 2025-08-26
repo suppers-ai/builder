@@ -1,0 +1,79 @@
+package pages
+
+import (
+    "github.com/suppers-ai/dufflebagbase/views/layouts"
+    "github.com/suppers-ai/dufflebagbase/services"
+    "fmt"
+)
+
+type DashboardData struct {
+    UserEmail   string
+    Collections []services.CollectionInfo
+    Stats       DashboardStats
+}
+
+type DashboardStats struct {
+    TotalCollections int
+    TotalRecords     int
+    APIRequests      int
+}
+
+templ DashboardPage(data DashboardData) {
+    @layouts.Base(layouts.BaseProps{
+        Title:     "Dashboard",
+        UserEmail: data.UserEmail,
+    }) {
+        <div class="container">
+            <h1>Dashboard</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Collections</h3>
+                    <div class="stat-value">{ fmt.Sprint(data.Stats.TotalCollections) }</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Total Records</h3>
+                    <div class="stat-value">{ fmt.Sprint(data.Stats.TotalRecords) }</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>API Requests (24h)</h3>
+                    <div class="stat-value">{ fmt.Sprint(data.Stats.APIRequests) }</div>
+                </div>
+            </div>
+            
+            <div class="collections-section">
+                <div class="section-header">
+                    <h2>Collections</h2>
+                    <button class="btn btn-primary" onclick="showCreateCollectionModal()">
+                        Create Collection
+                    </button>
+                </div>
+                
+                if len(data.Collections) > 0 {
+                    <div class="collections-grid">
+                        for _, collection := range data.Collections {
+                            <div class="collection-card">
+                                <h3>{ collection.Name }</h3>
+                                <p class="collection-type">{ collection.Type }</p>
+                                <div class="collection-stats">
+                                    <span>{ fmt.Sprint(collection.RecordCount) } records</span>
+                                </div>
+                                <div class="collection-actions">
+                                    <a href={ templ.SafeURL(fmt.Sprintf("/collections/%s", collection.Name)) } class="btn btn-sm">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                } else {
+                    <div class="empty-state">
+                        <p>No collections yet. Create your first collection to get started.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}

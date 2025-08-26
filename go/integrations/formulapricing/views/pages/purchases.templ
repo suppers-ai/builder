@@ -1,0 +1,44 @@
+package pages
+
+import (
+    "formulapricing/views/layouts"
+    "formulapricing/views/components"
+)
+
+type PurchasesPageData struct {
+    UserEmail string
+    UserRole  string
+}
+
+templ PurchasesPage(data PurchasesPageData) {
+    @layouts.Base(layouts.BaseProps{
+        Title:     "Purchases",
+        UserEmail: data.UserEmail,
+        UserRole:  data.UserRole,
+    }) {
+        @components.Navigation(getPurchasesNavItems("purchases", data.UserRole))
+        
+        <div class="content">
+            <h1>Purchase History</h1>
+            <p>No purchases yet.</p>
+        </div>
+    }
+}
+
+func getPurchasesNavItems(active string, role string) []components.NavItem {
+    items := []components.NavItem{
+        {Label: "Dashboard", Path: "/dashboard", Active: active == "dashboard"},
+        {Label: "Variables", Path: "/variables", Active: active == "variables"},
+        {Label: "Calculations", Path: "/calculations", Active: active == "calculations"},
+        {Label: "Conditions", Path: "/conditions", Active: active == "conditions"},
+        {Label: "Pricing", Path: "/pricing", Active: active == "pricing"},
+        {Label: "Calculate", Path: "/calculate", Active: active == "calculate"},
+        {Label: "Purchases", Path: "/purchases", Active: active == "purchases"},
+    }
+    
+    if role == "admin" {
+        items = append(items, components.NavItem{Label: "Users", Path: "/users", Active: active == "users"})
+    }
+    
+    return items
+}

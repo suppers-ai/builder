@@ -34,8 +34,8 @@ func (m *SMTPMailer) Send(ctx context.Context, email authboss.Email) error {
 	
 	var to []string
 	to = append(to, email.To...)
-	to = append(to, email.CC...)
-	to = append(to, email.BCC...)
+	to = append(to, email.Cc...)
+	to = append(to, email.Bcc...)
 	
 	msg := m.buildMessage(email)
 	
@@ -56,12 +56,12 @@ func (m *SMTPMailer) buildMessage(email authboss.Email) string {
 		msg.WriteString(fmt.Sprintf("To: %s\r\n", strings.Join(email.To, ", ")))
 	}
 	
-	if len(email.CC) > 0 {
-		msg.WriteString(fmt.Sprintf("Cc: %s\r\n", strings.Join(email.CC, ", ")))
+	if len(email.Cc) > 0 {
+		msg.WriteString(fmt.Sprintf("Cc: %s\r\n", strings.Join(email.Cc, ", ")))
 	}
 	
-	if len(email.ReplyTo) > 0 {
-		msg.WriteString(fmt.Sprintf("Reply-To: %s\r\n", strings.Join(email.ReplyTo, ", ")))
+	if email.ReplyTo != "" {
+		msg.WriteString(fmt.Sprintf("Reply-To: %s\r\n", email.ReplyTo))
 	}
 	
 	msg.WriteString(fmt.Sprintf("Subject: %s\r\n", email.Subject))

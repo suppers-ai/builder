@@ -1,0 +1,89 @@
+package components
+
+import "fmt"
+
+type TableColumn struct {
+	Key   string
+	Label string
+	Width string // Optional: e.g., "200px", "20%"
+}
+
+type TableRow map[string]interface{}
+
+type TableData struct {
+	Columns []TableColumn
+	Rows    []TableRow
+	Empty   string // Empty state message
+}
+
+templ Table(data TableData) {
+	<div class="table-container">
+		if len(data.Rows) == 0 {
+			<div class="empty-state">
+				<p>{ data.Empty }</p>
+			</div>
+		} else {
+			<table class="data-table">
+				<thead>
+					<tr>
+						for _, col := range data.Columns {
+							<th style={ fmt.Sprintf("width: %s", col.Width) }>{ col.Label }</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					for _, row := range data.Rows {
+						<tr>
+							for _, col := range data.Columns {
+								<td>
+									if val, ok := row[col.Key]; ok {
+										{ fmt.Sprintf("%v", val) }
+									}
+								</td>
+							}
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	</div>
+}
+
+// Pagination component
+type PaginationData struct {
+	CurrentPage int
+	TotalPages  int
+	PageSize    int
+	TotalItems  int
+}
+
+templ Pagination(data PaginationData, baseURL string) {
+	<div class="pagination">
+		<div class="pagination-info">
+			Showing { fmt.Sprintf("%d", (data.CurrentPage-1)*data.PageSize + 1) } - 
+			{ fmt.Sprintf("%d", min(data.CurrentPage*data.PageSize, data.TotalItems)) } of { fmt.Sprintf("%d", data.TotalItems) }
+		</div>
+		<div class="pagination-controls">
+			if data.CurrentPage > 1 {
+				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, data.CurrentPage-1)) } class="btn btn-sm">Previous</a>
+			}
+			for i := 1; i <= data.TotalPages; i++ {
+				if i == data.CurrentPage {
+					<span class="page-number active">{ fmt.Sprintf("%d", i) }</span>
+				} else {
+					<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, i)) } class="page-number">{ fmt.Sprintf("%d", i) }</a>
+				}
+			}
+			if data.CurrentPage < data.TotalPages {
+				<a href={ templ.SafeURL(fmt.Sprintf("%s?page=%d", baseURL, data.CurrentPage+1)) } class="btn btn-sm">Next</a>
+			}
+		</div>
+	</div>
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

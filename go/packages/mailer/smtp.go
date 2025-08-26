@@ -262,7 +262,6 @@ func (m *SMTPMailer) createConnection() (*smtpConnection, error) {
 	addr := fmt.Sprintf("%s:%d", m.smtpConfig.Host, m.smtpConfig.Port)
 	
 	var client *smtp.Client
-	var err error
 	
 	if m.smtpConfig.TLS {
 		// Direct TLS connection

@@ -1,0 +1,211 @@
+package pages
+
+import (
+    "formulapricing/views/layouts"
+    "formulapricing/views/components"
+    "formulapricing/models"
+    "fmt"
+)
+
+type VariablesPageData struct {
+    UserEmail string
+    UserRole  string
+    Variables []models.Variable
+}
+
+templ VariablesPage(data VariablesPageData) {
+    @layouts.Base(layouts.BaseProps{
+        Title:     "Variables",
+        UserEmail: data.UserEmail,
+        UserRole:  data.UserRole,
+    }) {
+        @components.Navigation(getVariablesNavItems("variables", data.UserRole))
+        
+        <div class="content">
+            <div class="flex-between mb-3">
+                <h1>Variables</h1>
+                if data.UserRole == "admin" {
+                    <button class="btn btn-primary" onclick="showAddVariableModal()">
+                        Add Variable
+                    </button>
+                }
+            </div>
+            
+            @VariablesTable(data.Variables, data.UserRole == "admin")
+        </div>
+        
+        if data.UserRole == "admin" {
+            @VariableModal()
+        }
+        
+        <script src="/static/js/modules/variables.js"></script>
+    }
+}
+
+templ VariablesTable(variables []models.Variable, isAdmin bool) {
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Display Name</th>
+                    <th>Type</th>
+                    <th>Default Value</th>
+                    <th>Description</th>
+                    if isAdmin {
+                        <th>Actions</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                for _, v := range variables {
+                    <tr data-id={ v.ID.String() }>
+                        <td class="font-mono">{ v.VariableName }</td>
+                        <td>{ v.DisplayName }</td>
+                        <td>
+                            <span class="badge badge-type">{ v.ValueType }</span>
+                        </td>
+                        <td>
+                            if v.DefaultValue != nil {
+                                { fmt.Sprintf("%v", v.DefaultValue) }
+                            } else {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td class="description">
+                            if v.Description != nil {
+                                { *v.Description }
+                            } else {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        if isAdmin {
+                            <td>
+                                <button 
+                                    class="btn btn-sm btn-secondary edit-variable"
+                                    data-id={ v.ID.String() }
+                                >
+                                    Edit
+                                </button>
+                                <button 
+                                    class="btn btn-sm btn-danger delete-variable"
+                                    data-id={ v.ID.String() }
+                                    data-name={ v.VariableName }
+                                >
+                                    Delete
+                                </button>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+templ VariableModal() {
+    <div id="variableModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Variable</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="variableForm">
+                <input type="hidden" id="variableId" name="id"/>
+                
+                <div class="form-group">
+                    <label for="variableName">Variable Name</label>
+                    <input 
+                        type="text" 
+                        id="variableName" 
+                        name="variable_name" 
+                        required
+                        pattern="[a-zA-Z][a-zA-Z0-9_]*"
+                        placeholder="e.g., basePrice"
+                    />
+                    <small>Must start with letter, can contain letters, numbers, underscore</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="displayName">Display Name</label>
+                    <input 
+                        type="text" 
+                        id="displayName" 
+                        name="display_name" 
+                        required
+                        placeholder="e.g., Base Price"
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="valueType">Type</label>
+                    <select id="valueType" name="value_type" required>
+                        <option value="number">Number</option>
+                        <option value="string">String</option>
+                        <option value="boolean">Boolean</option>
+                        <option value="date">Date</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="defaultValue">Default Value (optional)</label>
+                    <input 
+                        type="text" 
+                        id="defaultValue" 
+                        name="default_value"
+                        placeholder="Leave empty for no default"
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="3"
+                        placeholder="Describe what this variable is used for"
+                    ></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isUnique" name="is_unique"/>
+                        Unique Variable
+                    </label>
+                    <small>Check if this variable should have special behavior</small>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Variable
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+func getVariablesNavItems(active string, role string) []components.NavItem {
+    items := []components.NavItem{
+        {Label: "Dashboard", Path: "/dashboard", Active: active == "dashboard"},
+        {Label: "Variables", Path: "/variables", Active: active == "variables"},
+        {Label: "Calculations", Path: "/calculations", Active: active == "calculations"},
+        {Label: "Conditions", Path: "/conditions", Active: active == "conditions"},
+        {Label: "Pricing", Path: "/pricing", Active: active == "pricing"},
+        {Label: "Calculate", Path: "/calculate", Active: active == "calculate"},
+        {Label: "Purchases", Path: "/purchases", Active: active == "purchases"},
+    }
+    
+    if role == "admin" {
+        items = append(items, components.NavItem{
+            Label: "Users", 
+            Path: "/users", 
+            Active: active == "users",
+        })
+    }
+    
+    return items
+}

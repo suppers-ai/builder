@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+// Common errors
+var (
+	ErrNoRows = sql.ErrNoRows
+)
+
 // Database defines the universal interface for database operations
 type Database interface {
 	// Connection management

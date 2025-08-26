@@ -1,0 +1,201 @@
+package pages
+
+import (
+	"github.com/suppers-ai/dufflebagbase/views/layouts"
+	"github.com/suppers-ai/dufflebagbase/views/components"
+	"github.com/suppers-ai/dufflebagbase/services"
+	"github.com/a-h/templ"
+	"fmt"
+)
+
+type DatabasePageData struct {
+	UserEmail        string
+	Collections      []services.CollectionInfo
+	SelectedTable    string
+	TableData        []map[string]interface{}
+	TableColumns     []string
+	TotalRecords     int
+	CurrentPage      int
+	PageSize         int
+}
+
+templ DatabasePage(data DatabasePageData) {
+	@layouts.Base(layouts.BaseProps{
+		Title:     "Database",
+		UserEmail: data.UserEmail,
+	}) {
+			<div class="container">
+				<div class="page-header">
+					<h1>Database</h1>
+					<div class="header-actions">
+						<select id="tableSelect" onchange="selectTable(this.value)" class="select">
+							<option value="">Select a collection...</option>
+							for _, col := range data.Collections {
+								<option value={ col.Name } selected?={ col.Name == data.SelectedTable }>
+									{ col.Name } ({ fmt.Sprintf("%d records", col.RecordCount) })
+								</option>
+							}
+						</select>
+						<button class="btn btn-primary" onclick="showCreateCollectionModal()">
+							Create Collection
+						</button>
+					</div>
+				</div>
+
+				<div class="stats-grid">
+					<div class="stat-card">
+						<h3>Total Collections</h3>
+						<div class="stat-value">{ fmt.Sprintf("%d", len(data.Collections)) }</div>
+					</div>
+					<div class="stat-card">
+						<h3>Total Records</h3>
+						<div class="stat-value">{ fmt.Sprintf("%d", getTotalRecords(data.Collections)) }</div>
+					</div>
+					<div class="stat-card">
+						<h3>Selected Collection</h3>
+						<div class="stat-value">
+							if data.SelectedTable != "" {
+								{ data.SelectedTable }
+							} else {
+								-
+							}
+						</div>
+					</div>
+				</div>
+
+				if data.SelectedTable != "" {
+					<div class="table-section">
+						<div class="section-header">
+							<h2>{ data.SelectedTable }</h2>
+							<button class="btn btn-sm" onclick="exportData()">Export CSV</button>
+							<button class="btn btn-sm btn-primary" onclick="showAddRecordModal()">Add Record</button>
+						</div>
+
+						@components.Table(components.TableData{
+							Columns: makeTableColumns(data.TableColumns),
+							Rows: dataToTableRows(data.TableData),
+							Empty: "No records found in this collection",
+						})
+
+						if data.TotalRecords > data.PageSize {
+							@components.Pagination(components.PaginationData{
+								CurrentPage: data.CurrentPage,
+								TotalPages:  (data.TotalRecords + data.PageSize - 1) / data.PageSize,
+								PageSize:    data.PageSize,
+								TotalItems:  data.TotalRecords,
+							}, fmt.Sprintf("/database?table=%s", data.SelectedTable))
+						}
+					</div>
+				} else {
+					<div class="empty-state">
+						<p>Select a collection to view its data</p>
+					</div>
+				}
+			</div>
+
+		<!-- Create Collection Modal -->
+		<div id="createCollectionModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Create Collection</h2>
+					<span class="close" onclick="hideCreateCollectionModal()">&times;</span>
+				</div>
+				<form id="createCollectionForm" onsubmit="createCollection(event)">
+					<div class="form-group">
+						<label for="collectionName">Collection Name</label>
+						<input type="text" id="collectionName" name="name" required pattern="[a-z0-9_]+"/>
+						<small>Lowercase letters, numbers, and underscores only</small>
+					</div>
+					<div class="form-group">
+						<label for="schema">Schema (JSON)</label>
+						<textarea id="schema" name="schema" rows="10" placeholder='{"fields": {"name": "string", "age": "integer"}}'></textarea>
+					</div>
+					<div class="form-actions">
+						<button type="button" class="btn btn-secondary" onclick="hideCreateCollectionModal()">Cancel</button>
+						<button type="submit" class="btn btn-primary">Create Collection</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Add Record Modal -->
+		<div id="addRecordModal" class="modal">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2>Add Record</h2>
+					<span class="close" onclick="hideAddRecordModal()">&times;</span>
+				</div>
+				<form id="addRecordForm" onsubmit="addRecord(event)">
+					<div id="recordFields"></div>
+					<div class="form-actions">
+						<button type="button" class="btn btn-secondary" onclick="hideAddRecordModal()">Cancel</button>
+						<button type="submit" class="btn btn-primary">Add Record</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<script src="/static/js/database.js" type="module"></script>
+	}
+}
+
+func makeTableColumns(columns []string) []components.TableColumn {
+	cols := make([]components.TableColumn, len(columns)+1)
+	for i, col := range columns {
+		cols[i] = components.TableColumn{
+			Key:   col,
+			Label: col,
+			Width: "",
+		}
+	}
+	// Add actions column
+	cols[len(columns)] = components.TableColumn{
+		Key:   "actions",
+		Label: "Actions",
+		Width: "150px",
+	}
+	return cols
+}
+
+func getTotalRecords(collections []services.CollectionInfo) int {
+	total := 0
+	for _, col := range collections {
+		total += col.RecordCount
+	}
+	return total
+}
+
+func dataToTableRows(data []map[string]interface{}) []components.TableRow {
+	rows := make([]components.TableRow, len(data))
+	for i, record := range data {
+		row := make(components.TableRow)
+		for key, value := range record {
+			// Convert value to string representation
+			switch v := value.(type) {
+			case nil:
+				row[key] = "-"
+			case string:
+				row[key] = v
+			case float64:
+				row[key] = fmt.Sprintf("%.2f", v)
+			case bool:
+				if v {
+					row[key] = "Yes"
+				} else {
+					row[key] = "No"
+				}
+			default:
+				row[key] = fmt.Sprintf("%v", v)
+			}
+		}
+		// Add actions
+		if id, ok := record["id"].(string); ok {
+			row["actions"] = templ.Raw(fmt.Sprintf(`
+				<button class="btn btn-sm" onclick="editRecord('%s')">Edit</button>
+				<button class="btn btn-sm btn-danger" onclick="deleteRecord('%s', '%s')">Delete</button>
+			`, id, data[0]["collection_name"], id))
+		}
+		rows[i] = row
+	}
+	return rows
+}

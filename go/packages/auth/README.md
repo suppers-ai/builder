@@ -181,7 +181,8 @@ public := authService.RequireNoAuth(handler)
 ```go
 adminOnly := authService.RequireAdmin(func(user authboss.User) bool {
     // Your admin check logic
-    return user.GetEmail() == "admin@example.com"
+    // In authboss, PID (Primary ID) is typically the email
+    return user.GetPID() == "admin@example.com"
 })(handler)
 ```
 

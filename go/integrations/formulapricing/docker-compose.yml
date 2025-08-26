@@ -17,7 +17,9 @@ services:
       retries: 5
 
   formulapricing:
-    build: .
+    build:
+      context: ../..
+      dockerfile: integrations/formulapricing/Dockerfile
     ports:
       - "8080:8080"
     environment:

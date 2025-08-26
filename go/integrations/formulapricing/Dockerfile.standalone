@@ -1,0 +1,41 @@
+# Standalone Dockerfile without external package dependencies
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /build
+
+RUN apk add --no-cache git
+
+# First, copy and vendor dependencies
+COPY go.mod go.sum ./
+
+# Copy packages directory for local replacements
+COPY ../../packages /go/packages
+
+# Update go.mod to use absolute paths for build
+RUN sed -i 's|../../packages/database|/go/packages/database|g' go.mod
+
+# Download dependencies
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build main application
+RUN go build -o formulapricing main.go
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+
+# Copy binary
+COPY --from=builder /build/formulapricing .
+
+# Copy migration files (embedded in binary but also available as files)
+COPY --from=builder /build/database/migrations ./database/migrations
+
+# Set environment variable to auto-run migrations
+ENV AUTO_MIGRATE=true
+
+EXPOSE 8080
+
+CMD ["./formulapricing"]

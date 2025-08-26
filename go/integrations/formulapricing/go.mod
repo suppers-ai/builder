@@ -14,12 +14,10 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/stripe/stripe-go/v75 v75.11.0
 	github.com/suppers-ai/builder/go/packages/database v0.0.0
-	github.com/suppers-ai/logger v0.0.0
 	golang.org/x/crypto v0.40.0
 )
 
 replace github.com/suppers-ai/builder/go/packages/database => ../../packages/database
-replace github.com/suppers-ai/logger => ../../packages/logger
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect

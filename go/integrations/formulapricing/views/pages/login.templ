@@ -1,0 +1,51 @@
+package pages
+
+import "formulapricing/views/layouts"
+
+type LoginPageData struct {
+    Error string
+}
+
+templ LoginPage(data LoginPageData) {
+    @layouts.AuthLayout("Login") {
+        <div class="login-form">
+            <h1>FormulaPricing</h1>
+            <p class="subtitle">Sign in to manage your pricing formulas</p>
+            
+            if data.Error != "" {
+                <div class="alert alert-error">
+                    { data.Error }
+                </div>
+            }
+            
+            <form method="POST" action="/login">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        placeholder="admin@example.com"
+                        autofocus
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        placeholder="••••••••"
+                    />
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    }
+}

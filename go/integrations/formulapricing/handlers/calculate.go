@@ -9,7 +9,7 @@ import (
 	"formulapricing/engine"
 	"formulapricing/models"
 	
-	"github.com/suppers-ai/logger"
+	// "github.com/suppers-ai/logger"
 )
 
 type CalculateRequest struct {
@@ -48,9 +48,6 @@ type CalculateResponse struct {
 }
 
 func Calculate(w http.ResponseWriter, r *http.Request) {
-	logger := getLogger()
-	ctx := r.Context()
-	
 	var req CalculateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
@@ -58,29 +55,17 @@ func Calculate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.PricingName == "" || req.Variables == nil {
-		logger.Warn(ctx, "Calculate request missing required fields",
-			logger.String("pricing_name", req.PricingName),
-			logger.Bool("has_variables", req.Variables != nil))
 		respondWithError(w, http.StatusBadRequest, "Missing required fields: pricing_name, variables")
 		return
 	}
 
-	logger.Info(ctx, "Processing calculation request",
-		logger.String("pricing_name", req.PricingName),
-		logger.Int("variable_count", len(req.Variables)))
-
 	// Get the pricing configuration
 	pricing, err := models.GetPricingByName(req.PricingName)
 	if err != nil {
-		logger.Error(ctx, "Failed to fetch pricing configuration",
-			logger.Err(err),
-			logger.String("pricing_name", req.PricingName))
 		respondWithError(w, http.StatusInternalServerError, "Failed to fetch pricing configuration")
 		return
 	}
 	if pricing == nil {
-		logger.Warn(ctx, "Pricing configuration not found",
-			logger.String("pricing_name", req.PricingName))
 		respondWithError(w, http.StatusNotFound, fmt.Sprintf("Pricing configuration '%s' not found", req.PricingName))
 		return
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/suppers-ai/auth"
 	"github.com/suppers-ai/database"
 	"github.com/suppers-ai/mailer"
+	"github.com/volatiletech/authboss/v3"
 )
 
 func main() {
@@ -20,29 +21,29 @@ func main() {
 	if dbURL == "" {
 		dbURL = "postgresql://postgres:password@localhost:5432/authdb?sslmode=disable"
 	}
-	
+
 	// Create database connection using the database package
 	dbConfig := database.Config{
 		Driver:   "postgres",
 		Host:     "localhost",
 		Port:     5432,
 		Database: "authdb",
-		Username: "postgres", 
+		Username: "postgres",
 		Password: "password",
 		SSLMode:  "disable",
 	}
-	
+
 	// You can also parse from DSN if needed
 	db, err := database.New("postgres")
 	if err != nil {
 		log.Fatal("Failed to create database instance:", err)
 	}
-	
+
 	if err := db.Connect(context.Background(), dbConfig); err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer db.Close()
-	
+
 	// Create mailer instance
 	var mailService mailer.Mailer
 	if os.Getenv("SMTP_HOST") != "" {
@@ -54,10 +55,10 @@ func main() {
 			},
 			Timeout: 10 * time.Second,
 			Extra: map[string]interface{}{
-				"smtp_host":     os.Getenv("SMTP_HOST"),
-				"smtp_port":     587,
-				"smtp_username": os.Getenv("SMTP_USERNAME"),
-				"smtp_password": os.Getenv("SMTP_PASSWORD"),
+				"smtp_host":      os.Getenv("SMTP_HOST"),
+				"smtp_port":      587,
+				"smtp_username":  os.Getenv("SMTP_USERNAME"),
+				"smtp_password":  os.Getenv("SMTP_PASSWORD"),
 				"smtp_start_tls": true,
 			},
 		})
@@ -70,16 +71,16 @@ func main() {
 		// Use mock mailer if SMTP is not configured
 		mailService = mailer.NewMock()
 	}
-	
+
 	authService, err := auth.New(auth.Config{
-		DB:           db,
-		Mailer:       mailService,
-		RootURL:      "http://localhost:8080",
-		BCryptCost:   12,
-		SessionName:  "auth_session",
-		SessionKey:   []byte(os.Getenv("SESSION_KEY")),
-		CookieKey:    []byte(os.Getenv("COOKIE_KEY")),
-		CSRFKey:      []byte(os.Getenv("CSRF_KEY")),
+		DB:          db,
+		Mailer:      mailService,
+		RootURL:     "http://localhost:8080",
+		BCryptCost:  12,
+		SessionName: "auth_session",
+		SessionKey:  []byte(os.Getenv("SESSION_KEY")),
+		CookieKey:   []byte(os.Getenv("COOKIE_KEY")),
+		CSRFKey:     []byte(os.Getenv("CSRF_KEY")),
 		OAuth2Providers: map[string]auth.OAuth2Provider{
 			"google": {
 				ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
@@ -96,11 +97,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to initialize auth service:", err)
 	}
-	
+
 	go func() {
 		ticker := time.NewTicker(1 * time.Hour)
 		defer ticker.Stop()
-		
+
 		for {
 			select {
 			case <-ticker.C:
@@ -110,39 +111,43 @@ func main() {
 			}
 		}
 	}()
-	
+
 	mux := http.NewServeMux()
-	
+
 	mux.Handle("/auth/", http.StripPrefix("/auth", authService.Router()))
-	
+
 	publicMux := authService.LoadClientStateMiddleware(mux)
-	
+
 	protectedHandler := authService.RequireAuth(http.HandlerFunc(protectedEndpoint))
 	mux.Handle("/api/protected", protectedHandler)
-	
+
 	mux.HandleFunc("/api/public", publicEndpoint)
-	
-	adminHandler := authService.RequireAdmin(func(user interface{}) bool {
+
+	adminHandler := authService.RequireAdmin(func(user authboss.User) bool {
 		return false
 	})(http.HandlerFunc(adminEndpoint))
 	mux.Handle("/api/admin", adminHandler)
-	
+
 	mux.HandleFunc("/api/user", func(w http.ResponseWriter, r *http.Request) {
 		user, err := authService.CurrentUser(r)
 		if err != nil {
 			http.Error(w, "Not authenticated", http.StatusUnauthorized)
 			return
 		}
+
+		// In authboss, the PID (Primary ID) is typically the email
+		// The authboss.User interface doesn't have GetEmail method
+		// You need to type assert to the concrete type or use GetPID
 		
 		response := map[string]interface{}{
 			"id":    user.GetPID(),
-			"email": user.GetEmail(),
+			"email": user.GetPID(), // PID is the email in authboss
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	})
-	
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		html := `
 <!DOCTYPE html>
@@ -175,7 +180,7 @@ func main() {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprint(w, html)
 	})
-	
+
 	fmt.Println("Server starting on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", publicMux))
 }

@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"formulapricing/auth"
 	"formulapricing/database"
@@ -17,7 +15,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"github.com/suppers-ai/logger"
 )
 
 func main() {
@@ -30,47 +27,13 @@ func main() {
 	}
 	defer database.CloseDB()
 
-	// Initialize logger with database support
-	logLevel := os.Getenv("LOG_LEVEL")
-	if logLevel == "" {
-		logLevel = "INFO"
-	}
-	
-	level, _ := logger.ParseLevel(logLevel)
-	appLogger, err := logger.NewWithDatabase(logger.Config{
-		Level:         level,
-		Output:        "multi",  // Console, file, and database
-		Format:        "json",
-		FilePath:      "formulapricing.log",
-		BufferSize:    1000,
-		FlushInterval: 5 * time.Second,
-		AsyncMode:     true,
-		EnableRotation: true,
-		MaxSize:       100, // 100 MB
-		MaxAge:        30,  // 30 days
-		MaxBackups:    10,
-	}, database.GetDB())
-	
-	if err != nil {
-		log.Printf("Failed to initialize logger: %v, falling back to console", err)
-		appLogger, _ = logger.New(logger.Config{
-			Level:  level,
-			Output: "console",
-			Format: "text",
-		})
-	}
-	defer appLogger.Close()
-	
-	// Set as default logger
-	logger.SetDefault(appLogger)
-	
-	ctx := context.Background()
-	appLogger.Info(ctx, "Formula Pricing application starting",
-		logger.String("log_level", logLevel))
+	// Logger temporarily disabled for Docker build
+	log.Println("Formula Pricing application starting")
 
 	// Run migrations
 	if err := database.AutoMigrate(); err != nil {
-		appLogger.Fatal(ctx, "Failed to run migrations", logger.Err(err))
+		log.Printf("WARNING: Failed to run migrations: %v", err)
+		log.Printf("Continuing anyway...")
 	}
 
 	// Initialize session store
@@ -79,10 +42,9 @@ func main() {
 		// Use a proper 64-character hex secret for development
 		// In production, set SESSION_SECRET environment variable
 		sessionSecret = "a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447"
-		appLogger.Warn(ctx, "Using default session secret. Set SESSION_SECRET in production!")
+		log.Println("WARNING: Using default session secret. Set SESSION_SECRET in production!")
 	} else {
-		appLogger.Info(ctx, "Using session secret from environment",
-			logger.Int("secret_length", len(sessionSecret)))
+		log.Printf("Using session secret from environment (length: %d)", len(sessionSecret))
 	}
 	auth.InitSessionStore(sessionSecret)
 
@@ -97,30 +59,16 @@ func main() {
 	}
 	
 	if err := models.GetOrCreateDefaultUser(defaultEmail, defaultPassword); err != nil {
-		appLogger.Warn(ctx, "Failed to create default user",
-			logger.Err(err),
-			logger.String("email", defaultEmail))
+		log.Printf("Warning: Failed to create default user: %v", err)
 	} else {
-		appLogger.Info(ctx, "Default user ensured",
-			logger.String("email", defaultEmail))
+		// Default user created
 	}
 
 	// Create router
 	router := mux.NewRouter()
 
-	// Add logging middleware using the new logger package
-	loggerMiddleware := logger.HTTPMiddleware(appLogger, &logger.MiddlewareConfig{
-		SkipPaths: []string{
-			"/health",
-			"/static/",
-			"/favicon.ico",
-		},
-		LogHeaders:      true,
-		LogRequestBody:  true,
-		LogResponseBody: true,
-		MaxBodySize:     4096,
-	})
-	router.Use(loggerMiddleware)
+	// Add logging middleware
+	router.Use(auth.LoggingMiddleware)
 	
 	// Add CORS middleware for API routes
 	router.Use(corsMiddleware)
@@ -223,14 +171,13 @@ func main() {
 	}
 
 	// Start server
-	appLogger.Info(ctx, "FormulaPricing server starting",
-		logger.String("port", port),
-		logger.String("web_interface", fmt.Sprintf("http://localhost:%s", port)),
-		logger.String("api_endpoint", fmt.Sprintf("http://localhost:%s/api", port)),
-		logger.String("default_user", defaultEmail))
+	log.Printf("FormulaPricing starting on port %s", port)
+	log.Printf("Web interface: http://localhost:%s", port)
+	log.Printf("API endpoint: http://localhost:%s/api", port)
+	log.Printf("Default login: %s / %s", defaultEmail, defaultPassword)
 	
 	if err := http.ListenAndServe(":"+port, router); err != nil {
-		appLogger.Fatal(ctx, "Failed to start server", logger.Err(err))
+		log.Fatal("Failed to start server:", err)
 	}
 }
 

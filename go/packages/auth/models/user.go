@@ -11,6 +11,7 @@ type User struct {
 	Email            string         `db:"email"`
 	Password         string         `db:"password"`
 	Username         sql.NullString `db:"username"`
+	Role             sql.NullString `db:"role"`
 	Confirmed        bool           `db:"confirmed"`
 	ConfirmToken     sql.NullString `db:"confirm_token"`
 	ConfirmSelector  sql.NullString `db:"confirm_selector"`
@@ -26,9 +27,10 @@ type User struct {
 	OAuth2Token      sql.NullString `db:"oauth2_token"`
 	OAuth2Refresh    sql.NullString `db:"oauth2_refresh"`
 	OAuth2Expiry     sql.NullTime   `db:"oauth2_expiry"`
-	Locked           bool           `db:"locked"`
+	Locked           sql.NullTime   `db:"locked"`
 	AttemptCount     int            `db:"attempt_count"`
 	LastAttempt      sql.NullTime   `db:"last_attempt"`
+	Metadata         sql.NullString `db:"metadata"`
 	CreatedAt        time.Time      `db:"created_at"`
 	UpdatedAt        time.Time      `db:"updated_at"`
 }
@@ -45,6 +47,15 @@ func (u *User) GetUsername() string {
 }
 func (u *User) PutUsername(username string) {
 	u.Username = sql.NullString{String: username, Valid: username != ""}
+}
+func (u *User) GetRole() string {
+	if u.Role.Valid {
+		return u.Role.String
+	}
+	return ""
+}
+func (u *User) PutRole(role string) {
+	u.Role = sql.NullString{String: role, Valid: role != ""}
 }
 func (u *User) GetPassword() string { return u.Password }
 func (u *User) PutPassword(password string) { u.Password = password }
@@ -181,8 +192,15 @@ func (u *User) GetLastAttempt() time.Time {
 func (u *User) PutLastAttempt(attempt time.Time) {
 	u.LastAttempt = sql.NullTime{Time: attempt, Valid: !attempt.IsZero()}
 }
-func (u *User) GetLocked() bool { return u.Locked }
-func (u *User) PutLocked(locked bool) { u.Locked = locked }
+func (u *User) GetLocked() time.Time {
+	if u.Locked.Valid {
+		return u.Locked.Time
+	}
+	return time.Time{}
+}
+func (u *User) PutLocked(locked time.Time) {
+	u.Locked = sql.NullTime{Time: locked, Valid: !locked.IsZero()}
+}
 func (u *User) GetArbitrary() map[string]string {
 	return map[string]string{
 		"created_at": u.CreatedAt.Format(time.RFC3339),

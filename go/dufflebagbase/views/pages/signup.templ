@@ -1,0 +1,63 @@
+package pages
+
+import "github.com/suppers-ai/dufflebagbase/views/layouts"
+
+type SignupPageData struct {
+    Error string
+}
+
+templ SignupPage(data SignupPageData) {
+    @layouts.AuthLayout("Sign Up") {
+        <div class="auth-box">
+            <h1>Create Account</h1>
+            
+            if data.Error != "" {
+                <div class="error-message">
+                    { data.Error }
+                </div>
+            }
+            
+            <form method="POST" action="/auth/signup">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        required
+                        autofocus
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required
+                        minlength="8"
+                    />
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    Sign Up
+                </button>
+            </form>
+            
+            <div class="auth-links">
+                <a href="/auth/login">Already have an account? Login</a>
+            </div>
+        </div>
+    }
+}

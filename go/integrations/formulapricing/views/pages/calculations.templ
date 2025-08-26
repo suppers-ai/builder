@@ -1,0 +1,64 @@
+package pages
+
+import (
+    "formulapricing/views/layouts"
+    "formulapricing/views/components"
+    "formulapricing/models"
+)
+
+type CalculationsPageData struct {
+    UserEmail    string
+    UserRole     string
+    Calculations []models.Calculation
+}
+
+templ CalculationsPage(data CalculationsPageData) {
+    @layouts.Base(layouts.BaseProps{
+        Title:     "Calculations",
+        UserEmail: data.UserEmail,
+        UserRole:  data.UserRole,
+    }) {
+        @components.Navigation(getCalcNavItems("calculations", data.UserRole))
+        
+        <div class="content">
+            <h1>Calculations</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Formula</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    for _, calc := range data.Calculations {
+                        <tr>
+                            <td>{ calc.Name }</td>
+                            <td>{ calc.Description }</td>
+                            <td>{ calc.Formula }</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <script src="/static/js/modules/calculations.js"></script>
+    }
+}
+
+func getCalcNavItems(active string, role string) []components.NavItem {
+    items := []components.NavItem{
+        {Label: "Dashboard", Path: "/dashboard", Active: active == "dashboard"},
+        {Label: "Variables", Path: "/variables", Active: active == "variables"},
+        {Label: "Calculations", Path: "/calculations", Active: active == "calculations"},
+        {Label: "Conditions", Path: "/conditions", Active: active == "conditions"},
+        {Label: "Pricing", Path: "/pricing", Active: active == "pricing"},
+        {Label: "Calculate", Path: "/calculate", Active: active == "calculate"},
+        {Label: "Purchases", Path: "/purchases", Active: active == "purchases"},
+    }
+    
+    if role == "admin" {
+        items = append(items, components.NavItem{Label: "Users", Path: "/users", Active: active == "users"})
+    }
+    
+    return items
+}
