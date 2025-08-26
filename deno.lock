@@ -3339,7 +3339,7 @@
       "npm:zod@3.25.1"
     ],
     "members": {
-      "applications/formula-pricing-docs": {
+      "applications/formulapricingdocs": {
         "dependencies": [
           "jsr:@fresh/core@2.0.0-alpha.52",
           "jsr:@std/dotenv@~0.225.5"

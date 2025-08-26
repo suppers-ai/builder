@@ -1,0 +1,14 @@
+{{define "navbar"}}
+<div class="tabs">
+    <a href="/dashboard" class="tab{{if eq .Tab "dashboard"}} active{{end}}">Dashboard</a>
+    <a href="/variables" class="tab{{if eq .Tab "variables"}} active{{end}}">Variables</a>
+    <a href="/calculations" class="tab{{if eq .Tab "calculations"}} active{{end}}">Calculations</a>
+    <a href="/conditions" class="tab{{if eq .Tab "conditions"}} active{{end}}">Conditions</a>
+    <a href="/pricing" class="tab{{if eq .Tab "pricing"}} active{{end}}">Pricing</a>
+    <a href="/calculate" class="tab{{if eq .Tab "calculate"}} active{{end}}">Calculate</a>
+    <a href="/purchases" class="tab{{if eq .Tab "purchases"}} active{{end}}">Purchases</a>
+    {{if eq .UserRole "admin"}}
+    <a href="/users" class="tab{{if eq .Tab "users"}} active{{end}}">Users</a>
+    {{end}}
+</div>
+{{end}}

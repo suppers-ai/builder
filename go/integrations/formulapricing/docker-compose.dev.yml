@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pricing_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./database/migrations:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  formulapricing-dev:
+    image: golang:1.21-alpine
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/pricing_db?sslmode=disable
+      PORT: 8080
+      SESSION_SECRET: development-secret-key
+      SUPERUSER_EMAIL: admin@example.com
+      SUPERUSER_PASSWORD: admin123
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: sh -c "go mod download && go run main.go"
+
+volumes:
+  postgres_data:

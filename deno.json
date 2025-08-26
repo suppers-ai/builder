@@ -13,7 +13,7 @@
     "applications/paint",
     "applications/sorted-storage",
     "applications/ghostly-glide",
-    "applications/formula-pricing-docs"
+    "applications/formulapricingdocs"
   ],
   "imports": {
     "daisyui": "npm:daisyui@^5.0.50",

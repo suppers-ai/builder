@@ -1,0 +1,24 @@
+package components
+
+templ Navbar(currentTab string, userRole string) {
+	<div class="tabs">
+		<a href="/dashboard" class={ "tab", templ.KV("active", currentTab == "dashboard") }>Dashboard</a>
+		<a href="/variables" class={ "tab", templ.KV("active", currentTab == "variables") }>Variables</a>
+		<a href="/calculations" class={ "tab", templ.KV("active", currentTab == "calculations") }>Calculations</a>
+		<a href="/conditions" class={ "tab", templ.KV("active", currentTab == "conditions") }>Conditions</a>
+		<a href="/pricing" class={ "tab", templ.KV("active", currentTab == "pricing") }>Pricing</a>
+		<a href="/calculate" class={ "tab", templ.KV("active", currentTab == "calculate") }>Calculate</a>
+		<a href="/purchases" class={ "tab", templ.KV("active", currentTab == "purchases") }>Purchases</a>
+		if userRole == "admin" {
+			<a href="/users" class={ "tab", templ.KV("active", currentTab == "users") }>Users</a>
+		}
+	</div>
+}
+
+templ DashboardSubTabs(currentTab string) {
+	<div class="sub-tabs">
+		<a href="/dashboard" class={ "sub-tab", templ.KV("active", currentTab == "dashboard") }>Overview</a>
+		<a href="/dashboard/logs" class={ "sub-tab", templ.KV("active", currentTab == "logs") }>Logs</a>
+		<a href="/dashboard/settings" class={ "sub-tab", templ.KV("active", currentTab == "settings") }>Settings</a>
+	</div>
+}
