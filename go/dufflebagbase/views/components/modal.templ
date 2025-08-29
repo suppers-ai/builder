@@ -1,0 +1,187 @@
+package components
+
+import "fmt"
+
+// Modal component
+type ModalOptions struct {
+	ID          string
+	Title       string
+	Size        string // "sm", "md", "lg", "xl", "full"
+	CloseButton bool
+	Footer      bool
+	Class       string
+}
+
+templ Modal(opts ModalOptions) {
+	<div 
+		id={ opts.ID }
+		class={ "modal", templ.KV("modal-" + opts.Size, opts.Size != ""), opts.Class }
+	>
+		<div class="modal-overlay" onclick="closeModal(this.parentElement.id)"></div>
+		<div class="modal-content">
+			<div class="modal-header">
+				<h2 class="modal-title">{ opts.Title }</h2>
+				if opts.CloseButton {
+					<button type="button" class="modal-close" onclick="closeModal(this.closest('.modal').id)">
+						<i data-lucide="x"></i>
+					</button>
+				}
+			</div>
+			<div class="modal-body">
+				{ children... }
+			</div>
+			if opts.Footer {
+				<div class="modal-footer">
+					{ children... }
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// Alert component
+type AlertOptions struct {
+	Type        string // "info", "success", "warning", "danger"
+	Title       string
+	Message     string
+	Icon        string
+	Dismissible bool
+	Class       string
+	ID          string
+}
+
+templ Alert(opts AlertOptions) {
+	<div 
+		class={ 
+			"alert",
+			templ.KV("alert-" + opts.Type, opts.Type != ""),
+			opts.Class,
+		}
+		if opts.ID != "" {
+			id={ opts.ID }
+		}
+		role="alert"
+	>
+		if opts.Icon != "" {
+			<div class="alert-icon">
+				<i data-lucide={ opts.Icon }></i>
+			</div>
+		}
+		<div class="alert-content">
+			if opts.Title != "" {
+				<h4 class="alert-title">{ opts.Title }</h4>
+			}
+			if opts.Message != "" {
+				<p class="alert-message">{ opts.Message }</p>
+			}
+			{ children... }
+		</div>
+		if opts.Dismissible {
+			<button type="button" class="alert-close" onclick="this.parentElement.remove()">
+				<i data-lucide="x"></i>
+			</button>
+		}
+	</div>
+}
+
+// Toast notification component
+type ToastOptions struct {
+	Type     string // "info", "success", "warning", "danger"
+	Title    string
+	Message  string
+	Icon     string
+	Duration int // Auto-dismiss after milliseconds (0 = manual dismiss)
+	Position string // "top-right", "top-left", "bottom-right", "bottom-left"
+	ID       string
+}
+
+templ Toast(opts ToastOptions) {
+	<div 
+		class={ 
+			"toast",
+			templ.KV("toast-" + opts.Type, opts.Type != ""),
+			templ.KV("toast-" + opts.Position, opts.Position != ""),
+		}
+		if opts.ID != "" {
+			id={ opts.ID }
+		}
+		if opts.Duration > 0 {
+			data-duration={ fmt.Sprintf("%d", opts.Duration) }
+		}
+	>
+		if opts.Icon != "" {
+			<div class="toast-icon">
+				<i data-lucide={ opts.Icon }></i>
+			</div>
+		}
+		<div class="toast-content">
+			if opts.Title != "" {
+				<h5 class="toast-title">{ opts.Title }</h5>
+			}
+			<p class="toast-message">{ opts.Message }</p>
+		</div>
+		<button type="button" class="toast-close" onclick="dismissToast(this.parentElement)">
+			<i data-lucide="x"></i>
+		</button>
+	</div>
+}
+
+// Progress bar component
+type ProgressOptions struct {
+	Value      int
+	Max        int
+	Label      string
+	ShowValue  bool
+	Type       string // "default", "success", "warning", "danger"
+	Striped    bool
+	Animated   bool
+	Class      string
+}
+
+templ Progress(opts ProgressOptions) {
+	<div class={ "progress-container", opts.Class }>
+		if opts.Label != "" {
+			<div class="progress-label">
+				<span>{ opts.Label }</span>
+				if opts.ShowValue {
+					<span class="progress-value">{ fmt.Sprintf("%d", opts.Value) }%</span>
+				}
+			</div>
+		}
+		<div class="progress">
+			<div 
+				class={ 
+					"progress-bar",
+					templ.KV("progress-" + opts.Type, opts.Type != ""),
+					templ.KV("progress-striped", opts.Striped),
+					templ.KV("progress-animated", opts.Animated),
+				}
+				style={ fmt.Sprintf("width: %d%%;", opts.Value) }
+				role="progressbar"
+				aria-valuenow={ fmt.Sprintf("%d", opts.Value) }
+				aria-valuemin="0"
+				aria-valuemax={ fmt.Sprintf("%d", opts.Max) }
+			></div>
+		</div>
+	</div>
+}
+
+// Badge component
+type BadgeOptions struct {
+	Type  string // "default", "primary", "success", "warning", "danger", "info"
+	Size  string // "sm", "md", "lg"
+	Pill  bool
+	Class string
+}
+
+templ Badge(text string, opts BadgeOptions) {
+	<span class={ 
+		"badge",
+		templ.KV("badge-" + opts.Type, opts.Type != ""),
+		templ.KV("badge-" + opts.Size, opts.Size != ""),
+		templ.KV("badge-pill", opts.Pill),
+		opts.Class,
+	}>
+		{ text }
+	</span>
+}

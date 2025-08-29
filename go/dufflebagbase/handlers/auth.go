@@ -33,16 +33,16 @@ func APILogin(svc *services.Service) http.HandlerFunc {
 		
 		// Validate credentials
 		ctx := r.Context()
-		var userID, hashedPassword, role string
-		
-		err := svc.DB().Get(ctx, &struct {
+		var user struct {
 			ID       string `db:"id"`
 			Password string `db:"password"`
 			Role     string `db:"role"`
-		}{}, `
+		}
+		
+		err := svc.Database().Get(ctx, &user, `
 			SELECT id, password, role 
-			FROM auth.users 
-			WHERE email = $1 AND email_verified = true
+			FROM auth_users 
+			WHERE email = $1 AND confirmed = true
 		`, req.Email)
 		
 		if err != nil {
@@ -51,13 +51,13 @@ func APILogin(svc *services.Service) http.HandlerFunc {
 		}
 		
 		// Check password
-		if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(req.Password)); err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 			respondWithError(w, http.StatusUnauthorized, "Invalid credentials")
 			return
 		}
 		
 		// Generate token
-		token, err := middleware.GenerateToken(svc.Config().JWTSecret, userID, req.Email, role)
+		token, err := middleware.GenerateToken(svc.Config().JWTSecret, user.ID, req.Email, user.Role)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Failed to generate token")
 			return
@@ -66,13 +66,13 @@ func APILogin(svc *services.Service) http.HandlerFunc {
 		// Log successful login
 		svc.Logger().Info(ctx, "User logged in via API",
 			logger.String("email", req.Email),
-			logger.String("user_id", userID))
+			logger.String("user_id", user.ID))
 		
 		respondWithJSON(w, http.StatusOK, LoginResponse{
 			Token:  token,
-			UserID: userID,
+			UserID: user.ID,
 			Email:  req.Email,
-			Role:   role,
+			Role:   user.Role,
 		})
 	}
 }

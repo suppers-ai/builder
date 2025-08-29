@@ -14,20 +14,56 @@ templ Base(props BaseProps) {
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>{ props.Title } - DuffleBagBase</title>
+        <link rel="icon" type="image/x-icon" href="/static/favicon.ico"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+        <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet"/>
+        <link rel="stylesheet" href="/static/css/variables.css"/>
         <link rel="stylesheet" href="/static/css/main.css"/>
+        <link rel="stylesheet" href="/static/css/components.css"/>
+        <link rel="stylesheet" href="/static/css/admin.css"/>
+        <link rel="stylesheet" href="/static/css/database.css"/>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/loading-states.js"></script>
     </head>
-    <body>
-        if props.UserEmail != "" {
-            @components.Header(components.HeaderProps{
+    <body hx-ext="loading-states">
+        <!-- Progress bar for HTMX requests -->
+        <div class="htmx-progress"></div>
+        
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="loading-popup">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading...</div>
+            </div>
+        </div>
+        
+        <div class="app-layout">
+            @components.Sidebar(components.SidebarProps{
                 UserEmail: props.UserEmail,
             })
-        }
-        
-        <main>
-            { children... }
-        </main>
-        
+            <div class="main-content">
+                <div class="content-card" id="main-content">
+                    <div class="content-header">
+                        <div class="breadcrumb">
+                            <a href="/dashboard" class="breadcrumb-item">Home</a>
+                            <span class="breadcrumb-separator">›</span>
+                            <span class="breadcrumb-current">{ props.Title }</span>
+                        </div>
+                    </div>
+                    <div class="content-body">
+                        { children... }
+                    </div>
+                    <!-- Loading spinner inside content area -->
+                    <div class="htmx-indicator">
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script src="/static/js/app.js" type="module"></script>
+        <script src="/static/js/components.js"></script>
     </body>
     </html>
 }
@@ -45,6 +81,59 @@ templ AuthLayout(title string) {
         <div class="auth-container">
             { children... }
         </div>
+        <style>
+            .password-input-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+            
+            .password-input-wrapper input {
+                padding-right: 40px;
+                width: 100%;
+            }
+            
+            .password-toggle {
+                position: absolute;
+                right: 10px;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #666;
+                transition: color 0.2s;
+            }
+            
+            .password-toggle:hover {
+                color: #333;
+            }
+            
+            .password-toggle:focus {
+                outline: 2px solid #4F46E5;
+                outline-offset: 2px;
+                border-radius: 4px;
+            }
+        </style>
+        <script>
+            function togglePassword(fieldId) {
+                const passwordField = document.getElementById(fieldId);
+                const eyeOpen = document.getElementById(fieldId + '-eye-open');
+                const eyeClosed = document.getElementById(fieldId + '-eye-closed');
+                
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    eyeOpen.style.display = 'none';
+                    eyeClosed.style.display = 'block';
+                } else {
+                    passwordField.type = 'password';
+                    eyeOpen.style.display = 'block';
+                    eyeClosed.style.display = 'none';
+                }
+            }
+        </script>
     </body>
     </html>
 }

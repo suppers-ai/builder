@@ -1,5 +1,48 @@
 // Settings page functionality
 
+// Tab switching functionality
+window.switchTab = function(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Update tab panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+    });
+    
+    const targetPane = document.getElementById(`${tabName}-tab`);
+    if (targetPane) {
+        targetPane.classList.add('active');
+        
+        // Re-initialize Lucide icons in the new tab
+        if (window.lucide) {
+            setTimeout(() => lucide.createIcons(), 100);
+        }
+    }
+    
+    // Save selected tab to localStorage
+    localStorage.setItem('selectedSettingsTab', tabName);
+}
+
+// Restore previously selected tab
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTab = localStorage.getItem('selectedSettingsTab');
+    if (savedTab) {
+        switchTab(savedTab);
+    } else {
+        // Initialize Lucide icons for the default tab
+        if (window.lucide) {
+            setTimeout(() => lucide.createIcons(), 100);
+        }
+    }
+});
+
 // Save application settings
 window.saveAppSettings = async function(event) {
     event.preventDefault();

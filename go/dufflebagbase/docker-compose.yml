@@ -85,8 +85,8 @@ services:
       LOG_LEVEL: "DEBUG"
       
       # Admin user
-      ADMIN_EMAIL: "admin@dufflebagbase.local"
-      ADMIN_PASSWORD: "admin123"
+      DEFAULt_ADMIN_EMAIL: "admin@example.com"
+      DEFAULT_ADMIN_PASSWORD: "solobaseadmin123"
     ports:
       - "8080:8080"
     volumes:

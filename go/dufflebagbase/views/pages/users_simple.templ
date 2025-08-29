@@ -1,0 +1,358 @@
+package pages
+
+import (
+	"github.com/suppers-ai/dufflebagbase/views/layouts"
+	"github.com/suppers-ai/dufflebagbase/views/components"
+	"fmt"
+	"time"
+)
+
+templ UsersContentSimple(data UsersPageData) {
+	<div class="container container-xl">
+		<!-- Page Header -->
+		<div class="page-header">
+			<div class="page-header-content">
+				<h1 class="page-title">User Management</h1>
+				<p class="page-subtitle">Manage user accounts, roles, and authentication settings</p>
+			</div>
+			<div class="page-header-actions">
+				@components.Button("Add User", components.ButtonOptions{
+					Icon:    "user-plus",
+					Variant: "primary",
+					OnClick: "openAddUserModal()",
+				})
+				@components.Button("Export", components.ButtonOptions{
+					Icon:    "download",
+					Variant: "ghost",
+					OnClick: "exportUsers()",
+				})
+			</div>
+		</div>
+
+		<!-- Stats Cards -->
+		<div class="grid grid-cols-4 gap-md grid-responsive">
+			@components.StatCard(components.StatCardData{
+				Icon:      "users",
+				IconColor: "--primary-color",
+				Value:     fmt.Sprintf("%d", data.TotalUsers),
+				Label:     "Total Users",
+			})
+			@components.StatCard(components.StatCardData{
+				Icon:      "user-check",
+				IconColor: "--success-color",
+				Value:     fmt.Sprintf("%d", countConfirmedUsers(data.Users)),
+				Label:     "Verified",
+			})
+			@components.StatCard(components.StatCardData{
+				Icon:      "shield",
+				IconColor: "--info-color",
+				Value:     fmt.Sprintf("%d", countAdminUsers(data.Users)),
+				Label:     "Administrators",
+			})
+			@components.StatCard(components.StatCardData{
+				Icon:      "lock",
+				IconColor: "--danger-color",
+				Value:     fmt.Sprintf("%d", countLockedUsers(data.Users)),
+				Label:     "Locked",
+			})
+		</div>
+
+		<!-- Users Table Section -->
+		<section class="section">
+			<div class="section-header">
+				<h2 class="section-title">User Accounts</h2>
+			</div>
+			<div class="section-content">
+				@components.Card(components.CardOptions{Shadow: true}) {
+					<div class="toolbar">
+						<div class="toolbar-search">
+							<input type="search" placeholder="Search users..." oninput="searchUsers(this.value)" class="form-input"/>
+						</div>
+						<div class="toolbar-actions">
+							@components.Button("Refresh", components.ButtonOptions{
+								Icon:    "refresh-cw",
+								Variant: "secondary",
+								Size:    "sm",
+								OnClick: "refreshUsers()",
+							})
+							@components.DropdownButton(components.DropdownButtonOptions{
+								Text:    "Actions",
+								Icon:    "more-vertical",
+								Variant: "ghost",
+								Size:    "sm",
+								Items: []components.DropdownItem{
+									{Label: "Export Selected", Icon: "download", OnClick: "exportSelected()"},
+									{Label: "Send Email", Icon: "mail", OnClick: "sendBulkEmail()"},
+									{Divider: true},
+									{Label: "Delete Selected", Icon: "trash", OnClick: "deleteSelected()"},
+								},
+							})
+						</div>
+					</div>
+
+					<div class="table-wrapper">
+						<table class="data-table">
+							<thead>
+								<tr>
+									<th class="cell-checkbox">
+										<input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"/>
+									</th>
+									<th>Email</th>
+									<th>Role</th>
+									<th>Status</th>
+									<th>Verified</th>
+									<th>2FA</th>
+									<th>Created</th>
+									<th>Last Login</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, user := range data.Users {
+									<tr>
+										<td class="cell-checkbox">
+											<input type="checkbox" name="user-select" value={ user.ID }/>
+										</td>
+										<td>
+											<div class="user-cell">
+												<div class="user-avatar-small">
+													{ string(user.Email[0]) }
+												</div>
+												<span>{ user.Email }</span>
+											</div>
+										</td>
+										<td>
+											@components.Badge(user.Role, components.BadgeOptions{
+												Type: getRoleBadgeType(user.Role),
+												Pill: true,
+											})
+										</td>
+										<td>
+											if user.Locked != nil {
+												@components.Badge("Locked", components.BadgeOptions{
+													Type: "danger",
+												})
+											} else {
+												@components.Badge("Active", components.BadgeOptions{
+													Type: "success",
+												})
+											}
+										</td>
+										<td>
+											if user.Confirmed {
+												<i data-lucide="check-circle" style="color: var(--success-color);"></i>
+											} else {
+												<i data-lucide="x-circle" style="color: var(--danger-color);"></i>
+											}
+										</td>
+										<td>
+											<i data-lucide="shield-off" style="color: var(--text-muted);"></i>
+										</td>
+										<td class="text-muted">
+											{ user.CreatedAt.Format("Jan 2, 2006") }
+										</td>
+										<td class="text-muted">
+											{ getLastLoginSimple(user) }
+										</td>
+										<td>
+											<div class="btn-group spacing-tight">
+												@components.IconButton("edit", components.ButtonOptions{
+													Size:    "sm",
+													OnClick: fmt.Sprintf("editUser('%s')", user.ID),
+												})
+												@components.IconButton("mail", components.ButtonOptions{
+													Size:    "sm",
+													OnClick: fmt.Sprintf("emailUser('%s')", user.ID),
+												})
+												@components.IconButton("trash-2", components.ButtonOptions{
+													Size:    "sm",
+													Variant: "ghost",
+													OnClick: fmt.Sprintf("deleteUser('%s')", user.ID),
+												})
+											</div>
+										</td>
+									</tr>
+								}
+								if len(data.Users) == 0 {
+									<tr>
+										<td colspan="9">
+											<div class="empty-state">
+												<div class="empty-state-icon">
+													<i data-lucide="users"></i>
+												</div>
+												<h3 class="empty-state-title">No users found</h3>
+												<p class="empty-state-description">Start by inviting users to your application</p>
+												<div class="empty-state-actions">
+													@components.Button("Invite Users", components.ButtonOptions{
+														Icon:    "user-plus",
+														Variant: "primary",
+														OnClick: "openInviteModal()",
+													})
+												</div>
+											</div>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+
+					<!-- Pagination -->
+					<div class="table-pagination">
+						<div class="pagination-info">
+							Showing { fmt.Sprintf("%d-%d of %d", 
+								(data.CurrentPage-1)*data.PageSize+1,
+								min(data.CurrentPage*data.PageSize, data.TotalUsers),
+								data.TotalUsers) } users
+						</div>
+						<div class="btn-group">
+							@components.Button("Previous", components.ButtonOptions{
+								Icon:     "chevron-left",
+								Variant:  "ghost",
+								Size:     "sm",
+								Disabled: data.CurrentPage <= 1,
+								OnClick:  "changePage('prev')",
+							})
+							for i := 1; i <= getTotalPages(data.TotalUsers, data.PageSize); i++ {
+								if i == data.CurrentPage {
+									@components.Button(fmt.Sprintf("%d", i), components.ButtonOptions{
+										Variant: "primary",
+										Size:    "sm",
+										OnClick: fmt.Sprintf("changePage(%d)", i),
+									})
+								} else {
+									@components.Button(fmt.Sprintf("%d", i), components.ButtonOptions{
+										Variant: "ghost",
+										Size:    "sm",
+										OnClick: fmt.Sprintf("changePage(%d)", i),
+									})
+								}
+							}
+							@components.Button("Next", components.ButtonOptions{
+								Icon:     "chevron-right",
+								IconPos:  "right",
+								Variant:  "ghost",
+								Size:     "sm",
+								Disabled: data.CurrentPage >= getTotalPages(data.TotalUsers, data.PageSize),
+								OnClick:  "changePage('next')",
+							})
+						</div>
+					</div>
+				}
+			</div>
+		</section>
+
+		<!-- Add User Modal -->
+		@components.Modal(components.ModalOptions{
+			ID:          "add-user-modal",
+			Title:       "Add New User",
+			Size:        "md",
+			CloseButton: true,
+		}) {
+			<form id="add-user-form">
+				<div class="form-group">
+					<label class="form-label">
+						Email Address
+						<span class="required">*</span>
+					</label>
+					@components.Input(components.InputOptions{
+						Type:        "email",
+						Name:        "email",
+						Placeholder: "user@example.com",
+						Required:    true,
+					})
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">
+						Role
+						<span class="required">*</span>
+					</label>
+					@components.Select(components.SelectOptions{
+						Name:     "role",
+						Required: true,
+						Options: []components.SelectOption{
+							{Value: "user", Label: "User"},
+							{Value: "manager", Label: "Manager"},
+							{Value: "admin", Label: "Administrator"},
+						},
+					})
+				</div>
+
+				<div class="form-group">
+					@components.Checkbox(components.CheckboxOptions{
+						Name:    "send_welcome",
+						Label:   "Send welcome email with login instructions",
+						Checked: true,
+					})
+				</div>
+
+				<div class="form-actions align-right">
+					@components.Button("Cancel", components.ButtonOptions{
+						Type:    "button",
+						Variant: "ghost",
+						OnClick: "closeModal('add-user-modal')",
+					})
+					@components.Button("Add User", components.ButtonOptions{
+						Type:    "submit",
+						Variant: "primary",
+						Icon:    "user-plus",
+					})
+				</div>
+			</form>
+		}
+	</div>
+}
+
+templ UsersPageSimple(data UsersPageData) {
+	@layouts.Base(layouts.BaseProps{
+		Title: "Users",
+		UserEmail: data.UserEmail,
+	}) {
+		@UsersContentSimple(data)
+	}
+}
+
+// Helper functions
+func getRoleBadgeType(role string) string {
+	switch role {
+	case "admin":
+		return "danger"
+	case "manager":
+		return "warning"
+	case "user":
+		return "primary"
+	default:
+		return "secondary"
+	}
+}
+
+func getTotalPages(totalItems, pageSize int) int {
+	if pageSize <= 0 {
+		return 1
+	}
+	pages := totalItems / pageSize
+	if totalItems%pageSize > 0 {
+		pages++
+	}
+	if pages == 0 {
+		return 1
+	}
+	return pages
+}
+
+func getLastLoginSimple(user User) string {
+	// Check metadata for last login information
+	if user.Metadata != nil {
+		if val, exists := user.Metadata["last_attempt"]; exists {
+			if lastLogin, ok := val.(time.Time); ok {
+				return lastLogin.Format("Jan 02, 2006 15:04")
+			}
+			// Handle *time.Time case
+			if lastLogin, ok := val.(*time.Time); ok && lastLogin != nil {
+				return lastLogin.Format("Jan 02, 2006 15:04")
+			}
+		}
+	}
+	return "Never"
+}

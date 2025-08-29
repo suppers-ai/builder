@@ -2,12 +2,14 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/suppers-ai/dufflebagbase/constants"
+	"github.com/suppers-ai/dufflebagbase/utils"
+	"github.com/volatiletech/authboss/v3"
 )
 
 type Claims struct {
@@ -24,14 +26,14 @@ func JWTAuth(secret string) func(http.Handler) http.Handler {
 			// Extract token from Authorization header
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				respondWithError(w, http.StatusUnauthorized, "Missing authorization header")
+				respondWithError(w, http.StatusUnauthorized, constants.ErrMissingAuthHeader)
 				return
 			}
 			
 			// Check Bearer prefix
 			parts := strings.Split(authHeader, " ")
 			if len(parts) != 2 || parts[0] != "Bearer" {
-				respondWithError(w, http.StatusUnauthorized, "Invalid authorization header format")
+				respondWithError(w, http.StatusUnauthorized, constants.ErrInvalidAuthFormat)
 				return
 			}
 			
@@ -43,16 +45,16 @@ func JWTAuth(secret string) func(http.Handler) http.Handler {
 			})
 			
 			if err != nil || !token.Valid {
-				respondWithError(w, http.StatusUnauthorized, "Invalid token")
+				respondWithError(w, http.StatusUnauthorized, constants.ErrInvalidToken)
 				return
 			}
 			
 			// Extract claims
 			if claims, ok := token.Claims.(*Claims); ok {
 				// Add user info to context
-				ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
-				ctx = context.WithValue(ctx, "user_email", claims.Email)
-				ctx = context.WithValue(ctx, "user_role", claims.Role)
+				ctx := context.WithValue(r.Context(), constants.ContextKeyUserID, claims.UserID)
+				ctx = context.WithValue(ctx, constants.ContextKeyUserEmail, claims.Email)
+				ctx = context.WithValue(ctx, constants.ContextKeyUserRole, claims.Role)
 				
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
@@ -62,20 +64,7 @@ func JWTAuth(secret string) func(http.Handler) http.Handler {
 	}
 }
 
-// RequireAdmin middleware to check if user is admin
-func RequireAdmin() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			role := r.Context().Value("user_role")
-			if role == nil || role != "admin" {
-				respondWithError(w, http.StatusForbidden, "Admin access required")
-				return
-			}
-			
-			next.ServeHTTP(w, r)
-		})
-	}
-}
+// RequireAdmin middleware is now in rbac.go with service parameter
 
 // GenerateToken generates a JWT token for a user
 func GenerateToken(secret string, userID, email, role string) (string, error) {
@@ -94,7 +83,27 @@ func GenerateToken(secret string, userID, email, role string) (string, error) {
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(map[string]string{"error": message})
+	utils.JSONError(w, code, message)
+}
+
+// AuthBossBridge extracts the user from authboss context and sets it for RBAC middleware
+func AuthBossBridge(authService interface{ CurrentUser(*http.Request) (authboss.User, error) }) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Get authboss user from context
+			user, err := authService.CurrentUser(r)
+			if err != nil || user == nil {
+				// No user in context, likely not authenticated
+				next.ServeHTTP(w, r)
+				return
+			}
+			
+			// Extract user ID and add it to context for RBAC middleware
+			userID := user.GetPID()
+			ctx := context.WithValue(r.Context(), "user_id", userID)
+			
+			// Continue with updated context
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }

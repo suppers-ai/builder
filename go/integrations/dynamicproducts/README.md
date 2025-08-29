@@ -67,8 +67,8 @@ PORT=8080
 SESSION_SECRET=your-secure-session-secret-here
 
 # Default Admin User
-DEFAULT_ADMIN_EMAIL=admin@dynamicproducts.local
-DEFAULT_ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_EMAIL=admin@example.com
+DEFAULT_ADMIN_PASSWORD=solobaseadmin123
 ```
 
 ### Installation and Setup

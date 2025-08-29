@@ -5,33 +5,6 @@
 
     // Get current page from URL path
     const path = window.location.pathname;
-    
-    // Module mapping
-    const moduleMap = {
-        '/collections': './modules/collections.js',
-        '/dashboard': './modules/dashboard.js'
-    };
-
-    // Check for collection detail pages
-    if (path.startsWith('/collections/') && path.split('/').length > 2) {
-        // Load collection detail module
-        import('./modules/collection-detail.js')
-            .then(module => {
-                console.log('Loaded collection detail module');
-            })
-            .catch(error => {
-                console.error('Failed to load collection detail module:', error);
-            });
-    } else if (moduleMap[path]) {
-        // Load page-specific module
-        import(moduleMap[path])
-            .then(module => {
-                console.log(`Loaded module for ${path}`);
-            })
-            .catch(error => {
-                console.error(`Failed to load module for ${path}:`, error);
-            });
-    }
 
     // Global functionality
 
@@ -119,16 +92,36 @@
         });
     });
 
-    // Handle API health check
-    if (window.location.pathname === '/dashboard') {
-        fetch('/api/health')
-            .then(response => response.json())
-            .then(data => {
-                console.log('API Health:', data);
-            })
-            .catch(error => {
-                console.error('API Health check failed:', error);
-            });
+    // Loading overlay for HTMX requests
+    const loadingOverlay = document.getElementById('loading-overlay');
+    
+    if (loadingOverlay) {
+        // Show loader when HTMX request starts
+        document.body.addEventListener('htmx:beforeRequest', (event) => {
+            // Only show for navigation requests (clicking menu items)
+            if (event.detail.elt.matches('.sidebar-nav-link, .breadcrumb-item, a[hx-get]')) {
+                loadingOverlay.style.display = 'flex';
+            }
+        });
+        
+        // Hide loader when HTMX request completes
+        document.body.addEventListener('htmx:afterRequest', () => {
+            loadingOverlay.style.display = 'none';
+        });
+        
+        // Also hide on swap completion for safety
+        document.body.addEventListener('htmx:afterSwap', () => {
+            loadingOverlay.style.display = 'none';
+        });
+        
+        // Hide loader on errors too
+        document.body.addEventListener('htmx:responseError', () => {
+            loadingOverlay.style.display = 'none';
+        });
+        
+        document.body.addEventListener('htmx:timeout', () => {
+            loadingOverlay.style.display = 'none';
+        });
     }
 
 })();

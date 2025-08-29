@@ -11,71 +11,81 @@ type CollectionsPageData struct {
     Collections []services.CollectionInfo
 }
 
+templ CollectionsContent(data CollectionsPageData) {
+    <div class="container">
+        <div class="page-header">
+            <h1>Collections</h1>
+            <button class="btn btn-primary" id="createCollectionBtn">
+                Create Collection
+            </button>
+        </div>
+        
+        <div class="collections-list">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Schema</th>
+                        <th>Records</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    for _, collection := range data.Collections {
+                        <tr>
+                            <td class="collection-name">{ collection.Name }</td>
+                            <td>{ collection.Type }</td>
+                            <td>
+                                <code class="schema-preview">{ collection.SchemaPreview }</code>
+                            </td>
+                            <td>{ fmt.Sprint(collection.RecordCount) }</td>
+                            <td>{ collection.CreatedAt }</td>
+                            <td>
+                                <button 
+                                    class="btn btn-sm view-collection"
+                                    data-name={ collection.Name }
+                                >
+                                    View
+                                </button>
+                                <button 
+                                    class="btn btn-sm btn-secondary edit-collection"
+                                    data-name={ collection.Name }
+                                >
+                                    Edit
+                                </button>
+                                <button 
+                                    class="btn btn-sm btn-danger delete-collection"
+                                    data-name={ collection.Name }
+                                >
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    @CollectionModal()
+    
+    <script src="/static/js/modules/collections.js" type="module"></script>
+}
+
 templ CollectionsPage(data CollectionsPageData) {
     @layouts.Base(layouts.BaseProps{
         Title:     "Collections",
         UserEmail: data.UserEmail,
     }) {
-        <div class="container">
-            <div class="page-header">
-                <h1>Collections</h1>
-                <button class="btn btn-primary" id="createCollectionBtn">
-                    Create Collection
-                </button>
-            </div>
-            
-            <div class="collections-list">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Schema</th>
-                            <th>Records</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        for _, collection := range data.Collections {
-                            <tr>
-                                <td class="collection-name">{ collection.Name }</td>
-                                <td>{ collection.Type }</td>
-                                <td>
-                                    <code class="schema-preview">{ collection.SchemaPreview }</code>
-                                </td>
-                                <td>{ fmt.Sprint(collection.RecordCount) }</td>
-                                <td>{ collection.CreatedAt }</td>
-                                <td>
-                                    <button 
-                                        class="btn btn-sm view-collection"
-                                        data-name={ collection.Name }
-                                    >
-                                        View
-                                    </button>
-                                    <button 
-                                        class="btn btn-sm btn-secondary edit-collection"
-                                        data-name={ collection.Name }
-                                    >
-                                        Edit
-                                    </button>
-                                    <button 
-                                        class="btn btn-sm btn-danger delete-collection"
-                                        data-name={ collection.Name }
-                                    >
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        @CollectionModal()
-        
-        <script src="/static/js/modules/collections.js" type="module"></script>
+        @CollectionsContent(data)
+    }
+}
+
+templ CollectionsPartial(data CollectionsPageData) {
+    @layouts.PartialContent("Collections") {
+        @CollectionsContent(data)
     }
 }
 

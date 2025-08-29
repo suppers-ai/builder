@@ -14,5 +14,6 @@ replace github.com/suppers-ai/builder/go/packages/database => ../../packages/dat
 
 require (
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/lib/pq v1.10.9 // indirect
 )

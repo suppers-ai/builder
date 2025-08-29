@@ -29,13 +29,19 @@ func CreateCollection(svc *services.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		
-		var collection services.Collection
-		if err := json.NewDecoder(r.Body).Decode(&collection); err != nil {
+		var req struct {
+			Name        string                 `json:"name"`
+			DisplayName string                 `json:"display_name"`
+			Description string                 `json:"description"`
+			Schema      map[string]interface{} `json:"schema"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			respondWithError(w, http.StatusBadRequest, "Invalid request body")
 			return
 		}
 		
-		if err := svc.Collections().CreateCollection(ctx, &collection); err != nil {
+		collection, err := svc.Collections().CreateCollection(ctx, req.Name, req.DisplayName, req.Description, req.Schema)
+		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -95,7 +101,7 @@ func ListRecords(svc *services.Service) http.HandlerFunc {
 			}
 		}
 		
-		records, total, err := svc.Collections().ListRecords(ctx, collectionName, limit, offset)
+		records, total, err := svc.Collections().ListRecords(ctx, collectionName, limit, offset, nil)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -122,7 +128,7 @@ func CreateRecord(svc *services.Service) http.HandlerFunc {
 			return
 		}
 		
-		id, err := svc.Collections().CreateRecord(ctx, collectionName, record)
+		id, err := svc.Collections().CreateRecord(ctx, collectionName, record, nil)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -194,7 +200,7 @@ func ListUsers(svc *services.Service) http.HandlerFunc {
 		ctx := r.Context()
 		
 		// Get users from auth schema
-		rows, err := svc.DB().Query(ctx, `
+		rows, err := svc.Database().Query(ctx, `
 			SELECT id, email, role, email_verified, created_at 
 			FROM auth.users 
 			ORDER BY created_at DESC
@@ -264,7 +270,7 @@ func GetLogs(svc *services.Service) http.HandlerFunc {
 		ctx := r.Context()
 		
 		// Get logs from logger schema
-		rows, err := svc.DB().Query(ctx, `
+		rows, err := svc.Database().Query(ctx, `
 			SELECT id, level, message, fields, user_id, trace_id, created_at 
 			FROM logger.logs 
 			ORDER BY created_at DESC 

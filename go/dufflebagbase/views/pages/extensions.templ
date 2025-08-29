@@ -1,0 +1,280 @@
+package pages
+
+import (
+    "fmt"
+    "github.com/suppers-ai/dufflebagbase/views/layouts"
+)
+
+type ExtensionInfo struct {
+    ID          string
+    Name        string
+    Description string
+    LongDescription string
+    Version     string
+    Author      string
+    Enabled     bool
+    Category    string
+    Icon        string
+    Features    []string
+    Endpoints   []string
+    Permissions []string
+}
+
+type ExtensionsPageData struct {
+    Extensions []ExtensionInfo
+}
+
+templ ExtensionsPage(data ExtensionsPageData) {
+    @layouts.PartialContent("Extensions") {
+        <div class="extensions-container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Extension Manager</h1>
+                    <p class="page-subtitle">Enhance your application with powerful extensions</p>
+                </div>
+                <button class="btn-primary" data-onclick="refreshExtensions()">
+                    <i data-lucide="refresh-cw"></i>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="extensions-stats">
+                <div class="extension-stat-card">
+                    <div class="stat-icon blue">
+                        <i data-lucide="package"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{ fmt.Sprintf("%d", len(data.Extensions)) }</div>
+                        <div class="stat-label">Total Extensions</div>
+                    </div>
+                </div>
+                <div class="extension-stat-card">
+                    <div class="stat-icon green">
+                        <i data-lucide="check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{ fmt.Sprintf("%d", countEnabled(data.Extensions)) }</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                </div>
+                <div class="extension-stat-card">
+                    <div class="stat-icon purple">
+                        <i data-lucide="shield-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{ fmt.Sprintf("%d", countByCategory(data.Extensions, "official")) }</div>
+                        <div class="stat-label">Official</div>
+                    </div>
+                </div>
+                <div class="extension-stat-card">
+                    <div class="stat-icon orange">
+                        <i data-lucide="users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{ fmt.Sprintf("%d", countByCategory(data.Extensions, "community")) }</div>
+                        <div class="stat-label">Community</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extensions Grid -->
+            <div class="extensions-content">
+                <h2 class="section-title">Available Extensions</h2>
+                <div class="extensions-grid">
+                    for _, ext := range data.Extensions {
+                        <div class={ "extension-card", templ.KV("enabled", ext.Enabled), templ.KV("disabled", !ext.Enabled) } 
+                             data-extension-id={ ext.ID }
+                             data-onclick={ fmt.Sprintf("showExtensionDetails('%s')", ext.ID) }>
+                            <div class="extension-status">
+                                if ext.Enabled {
+                                    <span class="status-badge active">Active</span>
+                                } else {
+                                    <span class="status-badge inactive">Inactive</span>
+                                }
+                            </div>
+                            
+                            <div class="extension-icon-wrapper">
+                                <div class={ "extension-icon", ext.Category }>
+                                    if ext.Icon != "" {
+                                        <i data-lucide={ ext.Icon }></i>
+                                    } else {
+                                        <i data-lucide="puzzle"></i>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="extension-details">
+                                <h3 class="extension-name">{ ext.Name }</h3>
+                                <p class="extension-description">{ ext.Description }</p>
+                                <div class="extension-meta">
+                                    <span class="meta-item">
+                                        <i data-lucide="tag"></i>
+                                        v{ ext.Version }
+                                    </span>
+                                    <span class="meta-item">
+                                        <i data-lucide="user"></i>
+                                        { ext.Author }
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="extension-footer">
+                                <span class={ "category-badge", ext.Category }>
+                                    { ext.Category }
+                                </span>
+                                <div class="extension-controls" data-onclick="event.stopPropagation()">
+                                    if ext.Enabled {
+                                        <button class="toggle-btn active"
+                                                data-ext-id={ ext.ID }
+                                                data-onclick={ fmt.Sprintf("toggleExtension('%s', %t)", ext.ID, !ext.Enabled) }
+                                                title="Disable Extension">
+                                            <i data-lucide="power-off"></i>
+                                        </button>
+                                    } else {
+                                        <button class="toggle-btn"
+                                                data-ext-id={ ext.ID }
+                                                data-onclick={ fmt.Sprintf("toggleExtension('%s', %t)", ext.ID, !ext.Enabled) }
+                                                title="Enable Extension">
+                                            <i data-lucide="power"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                if len(data.Extensions) == 0 {
+                    <div class="extensions-empty">
+                        <i data-lucide="package-x"></i>
+                        <h3>No Extensions Available</h3>
+                        <p>Extensions will appear here once they are installed</p>
+                        <button class="btn-primary" data-onclick="showExtensionMarketplace()">
+                            Browse Marketplace
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Extension Details Modal -->
+        <div id="extensionDetailsModal" class="modal" style="display: none;">
+            <div class="modal-overlay" data-onclick="closeExtensionDetails()"></div>
+            <div class="modal-container">
+                <div class="modal-header">
+                    <div id="modalExtensionHeader">
+                        <h2 id="modalExtensionName">Extension Name</h2>
+                        <span id="modalExtensionVersion" class="version-badge">v1.0.0</span>
+                    </div>
+                    <button class="modal-close-btn" data-onclick="closeExtensionDetails()">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="extension-modal-content">
+                        <!-- Status Section -->
+                        <div class="modal-section">
+                            <div class="section-header">
+                                <h3>Status</h3>
+                                <span id="modalExtensionStatus" class="status-badge">Active</span>
+                            </div>
+                            <div class="status-info">
+                                <div class="info-row">
+                                    <span class="info-label">Category:</span>
+                                    <span id="modalExtensionCategory" class="info-value">Official</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Author:</span>
+                                    <span id="modalExtensionAuthor" class="info-value">Author Name</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description Section -->
+                        <div class="modal-section">
+                            <h3>Description</h3>
+                            <p id="modalExtensionDescription" class="section-content">
+                                Extension description will appear here...
+                            </p>
+                        </div>
+                        
+                        <!-- Features Section -->
+                        <div class="modal-section">
+                            <h3>Features</h3>
+                            <ul id="modalExtensionFeatures" class="features-list">
+                                <li><i data-lucide="check"></i> Feature 1</li>
+                                <li><i data-lucide="check"></i> Feature 2</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- API Endpoints Section -->
+                        <div class="modal-section">
+                            <h3>API Endpoints</h3>
+                            <div id="modalExtensionEndpoints" class="endpoints-list">
+                                <div class="endpoint-item">
+                                    <code>/ext/example</code>
+                                    <span class="endpoint-desc">Main endpoint</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Permissions Section -->
+                        <div class="modal-section">
+                            <h3>Required Permissions</h3>
+                            <div id="modalExtensionPermissions" class="permissions-list">
+                                <span class="permission-badge">database.read</span>
+                                <span class="permission-badge">storage.write</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-secondary" data-onclick="closeExtensionDetails()">Close</button>
+                    <button id="modalToggleBtn" class="btn-primary" data-onclick="toggleExtensionFromModal()">
+                        <i data-lucide="power"></i>
+                        <span id="modalToggleText">Enable</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <script src="/static/js/extensions.js"></script>
+    <script>
+        (function() {
+            // Initialize extensions page
+            function tryInitializeExtensions() {
+                if (typeof window.initializeExtensionsPage === 'function') {
+                    window.initializeExtensionsPage();
+                } else {
+                    setTimeout(tryInitializeExtensions, 100);
+                }
+            }
+            setTimeout(tryInitializeExtensions, 100);
+        })();
+    </script>
+}
+
+func countEnabled(extensions []ExtensionInfo) int {
+    count := 0
+    for _, ext := range extensions {
+        if ext.Enabled {
+            count++
+        }
+    }
+    return count
+}
+
+func countByCategory(extensions []ExtensionInfo, category string) int {
+    count := 0
+    for _, ext := range extensions {
+        if ext.Category == category {
+            count++
+        }
+    }
+    return count
+}

@@ -1,0 +1,293 @@
+package components
+
+import "fmt"
+
+type InputOptions struct {
+	Type        string // text, email, password, number, etc.
+	Name        string
+	ID          string
+	Value       string
+	Placeholder string
+	Required    bool
+	Disabled    bool
+	ReadOnly    bool
+	Pattern     string
+	MinLength   int
+	MaxLength   int
+	Class       string
+	OnChange    string
+	OnInput     string
+}
+
+type FormGroupOptions struct {
+	Label       string
+	HelpText    string
+	Error       string
+	Required    bool
+	Class       string
+}
+
+// Form group wrapper with label and help text
+templ FormGroup(opts FormGroupOptions) {
+	<div class={ "form-group", opts.Class, templ.KV("has-error", opts.Error != "") }>
+		if opts.Label != "" {
+			<label class="form-label">
+				{ opts.Label }
+				if opts.Required {
+					<span class="required">*</span>
+				}
+			</label>
+		}
+		{ children... }
+		if opts.HelpText != "" {
+			<small class="form-help">{ opts.HelpText }</small>
+		}
+		if opts.Error != "" {
+			<small class="form-error">{ opts.Error }</small>
+		}
+	</div>
+}
+
+// Input field component
+templ Input(opts InputOptions) {
+	<input 
+		type={ opts.Type }
+		if opts.Name != "" {
+			name={ opts.Name }
+		}
+		if opts.ID != "" {
+			id={ opts.ID }
+		}
+		if opts.Value != "" {
+			value={ opts.Value }
+		}
+		if opts.Placeholder != "" {
+			placeholder={ opts.Placeholder }
+		}
+		if opts.Pattern != "" {
+			pattern={ opts.Pattern }
+		}
+		if opts.MinLength > 0 {
+			minlength={ fmt.Sprintf("%d", opts.MinLength) }
+		}
+		if opts.MaxLength > 0 {
+			maxlength={ fmt.Sprintf("%d", opts.MaxLength) }
+		}
+		class={ "form-input", opts.Class }
+		if opts.Required {
+			required
+		}
+		if opts.Disabled {
+			disabled
+		}
+		if opts.ReadOnly {
+			readonly
+		}
+		if opts.OnChange != "" {
+			data-onchange={ opts.OnChange }
+		}
+		if opts.OnInput != "" {
+			data-oninput={ opts.OnInput }
+		}
+	/>
+}
+
+// Select dropdown component
+type SelectOptions struct {
+	Name     string
+	ID       string
+	Value    string
+	Options  []SelectOption
+	Required bool
+	Disabled bool
+	Class    string
+	OnChange string
+}
+
+type SelectOption struct {
+	Value    string
+	Label    string
+	Selected bool
+	Disabled bool
+}
+
+templ Select(opts SelectOptions) {
+	<select 
+		if opts.Name != "" {
+			name={ opts.Name }
+		}
+		if opts.ID != "" {
+			id={ opts.ID }
+		}
+		class={ "form-select", opts.Class }
+		if opts.Required {
+			required
+		}
+		if opts.Disabled {
+			disabled
+		}
+		if opts.OnChange != "" {
+			data-onchange={ opts.OnChange }
+		}
+	>
+		for _, option := range opts.Options {
+			<option 
+				value={ option.Value }
+				if option.Selected || option.Value == opts.Value {
+					selected
+				}
+				if option.Disabled {
+					disabled
+				}
+			>
+				{ option.Label }
+			</option>
+		}
+	</select>
+}
+
+// Textarea component
+type TextareaOptions struct {
+	Name        string
+	ID          string
+	Value       string
+	Placeholder string
+	Rows        int
+	Cols        int
+	Required    bool
+	Disabled    bool
+	ReadOnly    bool
+	Class       string
+	OnChange    string
+	MaxLength   int
+}
+
+templ Textarea(opts TextareaOptions) {
+	<textarea
+		if opts.Name != "" {
+			name={ opts.Name }
+		}
+		if opts.ID != "" {
+			id={ opts.ID }
+		}
+		if opts.Placeholder != "" {
+			placeholder={ opts.Placeholder }
+		}
+		if opts.Rows > 0 {
+			rows={ fmt.Sprintf("%d", opts.Rows) }
+		}
+		if opts.Cols > 0 {
+			cols={ fmt.Sprintf("%d", opts.Cols) }
+		}
+		if opts.MaxLength > 0 {
+			maxlength={ fmt.Sprintf("%d", opts.MaxLength) }
+		}
+		class={ "form-textarea", opts.Class }
+		if opts.Required {
+			required
+		}
+		if opts.Disabled {
+			disabled
+		}
+		if opts.ReadOnly {
+			readonly
+		}
+		if opts.OnChange != "" {
+			data-onchange={ opts.OnChange }
+		}
+	>{ opts.Value }</textarea>
+}
+
+// Checkbox component
+type CheckboxOptions struct {
+	Name     string
+	ID       string
+	Value    string
+	Label    string
+	Checked  bool
+	Disabled bool
+	Class    string
+	OnChange string
+}
+
+templ Checkbox(opts CheckboxOptions) {
+	<label class={ "form-checkbox", opts.Class }>
+		<input 
+			type="checkbox"
+			if opts.Name != "" {
+				name={ opts.Name }
+			}
+			if opts.ID != "" {
+				id={ opts.ID }
+			}
+			if opts.Value != "" {
+				value={ opts.Value }
+			}
+			if opts.Checked {
+				checked
+			}
+			if opts.Disabled {
+				disabled
+			}
+			if opts.OnChange != "" {
+				data-onchange={ opts.OnChange }
+			}
+		/>
+		if opts.Label != "" {
+			<span class="checkbox-label">{ opts.Label }</span>
+		}
+	</label>
+}
+
+// Radio button component
+type RadioOptions struct {
+	Name     string
+	ID       string
+	Value    string
+	Label    string
+	Checked  bool
+	Disabled bool
+	Class    string
+	OnChange string
+}
+
+templ Radio(opts RadioOptions) {
+	<label class={ "form-radio", opts.Class }>
+		<input 
+			type="radio"
+			if opts.Name != "" {
+				name={ opts.Name }
+			}
+			if opts.ID != "" {
+				id={ opts.ID }
+			}
+			if opts.Value != "" {
+				value={ opts.Value }
+			}
+			if opts.Checked {
+				checked
+			}
+			if opts.Disabled {
+				disabled
+			}
+			if opts.OnChange != "" {
+				data-onchange={ opts.OnChange }
+			}
+		/>
+		if opts.Label != "" {
+			<span class="radio-label">{ opts.Label }</span>
+		}
+	</label>
+}
+
+// Form actions container
+type FormActionsOptions struct {
+	Align string // "left", "right", "center", "space-between"
+	Class string
+}
+
+templ FormActions(opts FormActionsOptions) {
+	<div class={ "form-actions", "align-" + opts.Align, opts.Class }>
+		{ children... }
+	</div>
+}

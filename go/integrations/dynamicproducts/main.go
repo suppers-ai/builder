@@ -9,7 +9,6 @@ import (
 	"dynamicproducts/handlers"
 	"dynamicproducts/middleware"
 	"dynamicproducts/models"
-	"dynamicproducts/templates"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -46,10 +45,10 @@ func main() {
 	defaultEmail := os.Getenv("DEFAULT_ADMIN_EMAIL")
 	defaultPassword := os.Getenv("DEFAULT_ADMIN_PASSWORD")
 	if defaultEmail == "" {
-		defaultEmail = "admin@dynamicproducts.local"
+		defaultEmail = "admin@example.com"
 	}
 	if defaultPassword == "" {
-		defaultPassword = "admin123"
+		defaultPassword = "solobaseadmin123"
 	}
 
 	if err := models.CreateDefaultUser(defaultEmail, defaultPassword); err != nil {
@@ -89,60 +88,60 @@ func main() {
 	// Admin routes
 	adminRouter := router.PathPrefix("/admin").Subrouter()
 	adminRouter.Use(middleware.RequireAdmin)
-	
+
 	adminRouter.HandleFunc("", handlers.AdminDashboard).Methods("GET")
 	adminRouter.HandleFunc("/", handlers.AdminDashboard).Methods("GET")
-	
+
 	// Entity types management
 	adminRouter.HandleFunc("/entity-types", handlers.EntityTypesHandler).Methods("GET", "POST")
 	adminRouter.HandleFunc("/entity-types/{id}", handlers.EntityTypeHandler).Methods("GET", "PUT", "DELETE")
-	
+
 	// Product types management
 	adminRouter.HandleFunc("/product-types", handlers.ProductTypesHandler).Methods("GET", "POST")
 	adminRouter.HandleFunc("/product-types/{id}", handlers.ProductTypeHandler).Methods("GET", "PUT", "DELETE")
-	
+
 	// User management
 	adminRouter.HandleFunc("/users", handlers.UsersHandler).Methods("GET")
 	adminRouter.HandleFunc("/users/{id}", handlers.UserHandler).Methods("GET", "PUT", "DELETE")
-	
+
 	// Purchases overview
 	adminRouter.HandleFunc("/purchases", handlers.PurchasesHandler).Methods("GET")
 
 	// Seller routes
 	sellerRouter := router.PathPrefix("/seller").Subrouter()
 	sellerRouter.Use(middleware.RequireSeller)
-	
+
 	// Entities management
 	sellerRouter.HandleFunc("/entities", handlers.EntitiesHandler).Methods("GET", "POST")
 	sellerRouter.HandleFunc("/entities/{id}", handlers.EntityHandler).Methods("GET", "PUT", "DELETE")
-	
+
 	// Products management
 	sellerRouter.HandleFunc("/products", handlers.ProductsHandler).Methods("GET", "POST")
 	sellerRouter.HandleFunc("/products/{id}", handlers.ProductHandler).Methods("GET", "PUT", "DELETE")
 
 	// API routes
 	apiRouter := router.PathPrefix("/api").Subrouter()
-	
+
 	// Public API endpoints (no authentication required)
 	apiRouter.HandleFunc("/health", handlers.HealthCheck).Methods("GET")
 	apiRouter.HandleFunc("/products", handlers.ListActiveProducts).Methods("GET")
 	apiRouter.HandleFunc("/products/{id}", handlers.GetPublicProduct).Methods("GET")
 	apiRouter.HandleFunc("/products/search", handlers.SearchProducts).Methods("GET")
-	
+
 	// Purchase endpoints
 	apiRouter.HandleFunc("/purchases", handlers.CreatePurchase).Methods("POST")
 	apiRouter.HandleFunc("/purchases/{id}", handlers.GetPurchase).Methods("GET")
 	apiRouter.HandleFunc("/purchases/{id}/status", handlers.UpdatePurchaseStatus).Methods("PUT")
 	apiRouter.HandleFunc("/purchases/by-payment/{payment_id}", handlers.GetPurchaseByPaymentID).Methods("GET")
 	apiRouter.HandleFunc("/purchases/by-buyer", handlers.GetPurchasesByBuyer).Methods("GET")
-	
+
 	// Webhook endpoint for payment providers
 	apiRouter.HandleFunc("/webhooks/payment", handlers.PaymentWebhook).Methods("POST")
 
 	// Authenticated API endpoints
 	authAPIRouter := apiRouter.PathPrefix("/auth").Subrouter()
 	authAPIRouter.Use(middleware.RequireAuth)
-	
+
 	authAPIRouter.HandleFunc("/login", handlers.APILoginHandler).Methods("POST")
 	authAPIRouter.HandleFunc("/me/purchases", handlers.GetMyPurchases).Methods("GET")
 	authAPIRouter.HandleFunc("/me/stats", handlers.GetMyStats).Methods("GET")
@@ -150,7 +149,7 @@ func main() {
 	// Admin API endpoints
 	adminAPIRouter := apiRouter.PathPrefix("/admin").Subrouter()
 	adminAPIRouter.Use(middleware.RequireAdminAPI)
-	
+
 	adminAPIRouter.HandleFunc("/entity-types", handlers.EntityTypesHandler).Methods("GET", "POST")
 	adminAPIRouter.HandleFunc("/entity-types/{id}", handlers.EntityTypeHandler).Methods("GET", "PUT", "DELETE")
 	adminAPIRouter.HandleFunc("/product-types", handlers.ProductTypesHandler).Methods("GET", "POST")
@@ -162,7 +161,7 @@ func main() {
 	// Seller API endpoints
 	sellerAPIRouter := apiRouter.PathPrefix("/seller").Subrouter()
 	sellerAPIRouter.Use(middleware.RequireSeller)
-	
+
 	sellerAPIRouter.HandleFunc("/entities", handlers.EntitiesHandler).Methods("GET", "POST")
 	sellerAPIRouter.HandleFunc("/entities/{id}", handlers.EntityHandler).Methods("GET", "PUT", "DELETE")
 	sellerAPIRouter.HandleFunc("/products", handlers.ProductsHandler).Methods("GET", "POST")
@@ -190,7 +189,7 @@ func main() {
 func serveStatic(w http.ResponseWriter, r *http.Request) {
 	// Remove /static/ prefix
 	path := r.URL.Path[8:]
-	
+
 	// Security check - prevent directory traversal
 	if path == "" || path[0] == '.' || filepath.Clean(path) != path {
 		http.Error(w, "Invalid path", http.StatusBadRequest)

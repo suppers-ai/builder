@@ -1,0 +1,637 @@
+package pages
+
+import (
+	"github.com/suppers-ai/dufflebagbase/views/layouts"
+	"fmt"
+	"time"
+)
+
+type ExtensionInfoAccordion struct {
+	Name        string
+	Version     string
+	Description string
+	Author      string
+	Status      string
+	Enabled     bool
+	Health      string
+	LastChecked time.Time
+	Routes      []string
+	ConfigSize  int
+	Permissions []string
+}
+
+type ExtensionsAccordionPageData struct {
+	UserEmail       string
+	Extensions      []ExtensionInfoAccordion
+	TotalExtensions int
+}
+
+templ ExtensionsAccordionContent(data ExtensionsAccordionPageData) {
+	<div class="container">
+		<div class="page-header">
+			<h1>Extensions</h1>
+			<p class="page-subtitle">Manage system extensions and plugins</p>
+		</div>
+
+		<!-- Stats Cards -->
+		<div class="stats-overview">
+			<div class="stat-card">
+				<div class="stat-icon">
+					<i data-lucide="puzzle" style="color: #3b82f6;"></i>
+				</div>
+				<div class="stat-content">
+					<div class="stat-value">{ fmt.Sprintf("%d", data.TotalExtensions) }</div>
+					<div class="stat-label">Total Extensions</div>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon">
+					<i data-lucide="check-circle" style="color: #10b981;"></i>
+				</div>
+				<div class="stat-content">
+					<div class="stat-value">{ fmt.Sprintf("%d", countEnabledExtensionsAccordion(data.Extensions)) }</div>
+					<div class="stat-label">Enabled</div>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon">
+					<i data-lucide="shield-check" style="color: #8b5cf6;"></i>
+				</div>
+				<div class="stat-content">
+					<div class="stat-value">{ fmt.Sprintf("%d", countHealthyExtensionsAccordion(data.Extensions)) }</div>
+					<div class="stat-label">Healthy</div>
+				</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon">
+					<i data-lucide="globe" style="color: #f59e0b;"></i>
+				</div>
+				<div class="stat-content">
+					<div class="stat-value">{ fmt.Sprintf("%d", countExtensionsWithRoutesAccordion(data.Extensions)) }</div>
+					<div class="stat-label">With Routes</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Extensions Accordion -->
+		<div class="extensions-container">
+			<div class="extensions-header">
+				<h2>Installed Extensions</h2>
+				<button class="btn-secondary" onclick="refreshExtensions()">
+					<i data-lucide="refresh-cw"></i>
+					Refresh
+				</button>
+			</div>
+			
+			<div class="extensions-accordion">
+				for _, ext := range data.Extensions {
+					<div class="extension-item" data-extension-id={ ext.Name }>
+						<div class="extension-header-accordion" onclick="toggleExtension(this)">
+							<div class="extension-header-left">
+								<i data-lucide="chevron-right" class="accordion-icon"></i>
+								<div class="extension-title-group">
+									<h3 class="extension-name">{ ext.Name }</h3>
+									<span class="extension-version">v{ ext.Version }</span>
+									if ext.Enabled {
+										<span class="badge badge-success">Enabled</span>
+									} else {
+										<span class="badge badge-secondary">Disabled</span>
+									}
+									if ext.Health == "healthy" {
+										<span class="badge badge-success">
+											<i data-lucide="check-circle"></i>
+											Healthy
+										</span>
+									} else if ext.Health == "warning" {
+										<span class="badge badge-warning">
+											<i data-lucide="alert-triangle"></i>
+											Warning
+										</span>
+									} else if ext.Health == "error" {
+										<span class="badge badge-danger">
+											<i data-lucide="x-circle"></i>
+											Error
+										</span>
+									}
+								</div>
+							</div>
+							<div class="extension-header-actions" onclick="event.stopPropagation()">
+								if ext.Enabled {
+									<button class="btn-icon" data-extension-id={ ext.Name } onclick="disableExtension(this.dataset.extensionId)" title="Disable">
+										<i data-lucide="power-off"></i>
+									</button>
+								} else {
+									<button class="btn-icon" data-extension-id={ ext.Name } onclick="enableExtension(this.dataset.extensionId)" title="Enable">
+										<i data-lucide="power"></i>
+									</button>
+								}
+								<button class="btn-icon" data-extension-id={ ext.Name } onclick="configureExtension(this.dataset.extensionId)" title="Configure">
+									<i data-lucide="settings"></i>
+								</button>
+							</div>
+						</div>
+						<div class="extension-content">
+							<div class="extension-description">
+								<p>{ ext.Description }</p>
+							</div>
+							
+							<div class="extension-details">
+								<div class="detail-row">
+									<label>Author:</label>
+									<span>{ ext.Author }</span>
+								</div>
+								
+								if ext.Enabled {
+									<div class="detail-row highlight-row">
+										<label>Access URL:</label>
+										<div class="url-container">
+											<a href={ templ.SafeURL(fmt.Sprintf("/ext/%s", ext.Name)) } target="_blank" class="extension-url">
+												<i data-lucide="external-link"></i>
+												{ fmt.Sprintf("%s/ext/%s", getBaseURL(), ext.Name) }
+											</a>
+											<button class="copy-btn" data-url={ fmt.Sprintf("%s/ext/%s", getBaseURL(), ext.Name) } onclick="copyToClipboard(this.dataset.url)" title="Copy URL">
+												<i data-lucide="copy"></i>
+											</button>
+										</div>
+									</div>
+								}
+								
+								if len(ext.Routes) > 0 {
+									<div class="detail-row">
+										<label>API Endpoints:</label>
+										<div class="endpoints-list">
+											for _, route := range ext.Routes {
+												<div class="endpoint-item">
+													<code>{ fmt.Sprintf("/ext/%s%s", ext.Name, route) }</code>
+													<span class="method-badge">GET</span>
+												</div>
+											}
+										</div>
+									</div>
+								}
+								
+								if len(ext.Permissions) > 0 {
+									<div class="detail-row">
+										<label>Required Permissions:</label>
+										<div class="permissions-list">
+											for _, perm := range ext.Permissions {
+												<span class="permission-item">{ perm }</span>
+											}
+										</div>
+									</div>
+								}
+								
+								<div class="detail-row">
+									<label>Last Health Check:</label>
+									<span>{ ext.LastChecked.Format("2006-01-02 15:04:05") }</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+
+	<!-- Accordion Styles -->
+	<style>
+		.stats-overview {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 1rem;
+			margin-bottom: 2rem;
+		}
+		.stat-card {
+			background: white;
+			border-radius: 0.5rem;
+			padding: 1rem;
+			box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+		}
+		.stat-icon {
+			width: 48px;
+			height: 48px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: #f3f4f6;
+			border-radius: 0.5rem;
+		}
+		.stat-icon svg {
+			width: 24px;
+			height: 24px;
+		}
+		.stat-content {
+			flex: 1;
+		}
+		.stat-value {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: #111827;
+		}
+		.stat-label {
+			font-size: 0.875rem;
+			color: #6b7280;
+			margin-top: 0.25rem;
+		}
+		
+		.extensions-container {
+			background: white;
+			border-radius: 0.5rem;
+			box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+			overflow: hidden;
+		}
+		
+		.extensions-header {
+			padding: 1.5rem;
+			border-bottom: 1px solid #e5e7eb;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		
+		.extensions-header h2 {
+			margin: 0;
+			font-size: 1.25rem;
+			font-weight: 600;
+		}
+		
+		.extensions-accordion {
+			padding: 0;
+		}
+		
+		.extension-item {
+			border-bottom: 1px solid #e5e7eb;
+		}
+		
+		.extension-item:last-child {
+			border-bottom: none;
+		}
+		
+		.extension-header-accordion {
+			padding: 1rem 1.5rem;
+			cursor: pointer;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			transition: background-color 0.2s;
+		}
+		
+		.extension-header-accordion:hover {
+			background-color: #f9fafb;
+		}
+		
+		.extension-header-left {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+		}
+		
+		.accordion-icon {
+			width: 20px;
+			height: 20px;
+			transition: transform 0.2s;
+		}
+		
+		.extension-item.expanded .accordion-icon {
+			transform: rotate(90deg);
+		}
+		
+		.extension-title-group {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+		}
+		
+		.extension-name {
+			margin: 0;
+			font-size: 1rem;
+			font-weight: 600;
+		}
+		
+		.extension-version {
+			background: #f3f4f6;
+			color: #374151;
+			padding: 0.125rem 0.375rem;
+			border-radius: 0.25rem;
+			font-size: 0.75rem;
+			font-family: monospace;
+		}
+		
+		.extension-header-actions {
+			display: flex;
+			gap: 0.5rem;
+		}
+		
+		.extension-content {
+			display: none;
+			padding: 0 1.5rem 1.5rem 3.5rem;
+			animation: slideDown 0.3s ease-out;
+		}
+		
+		.extension-item.expanded .extension-content {
+			display: block;
+		}
+		
+		@keyframes slideDown {
+			from {
+				opacity: 0;
+				transform: translateY(-10px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		.extension-description {
+			margin-bottom: 1.5rem;
+			padding: 1rem;
+			background: #f9fafb;
+			border-radius: 0.375rem;
+			border-left: 3px solid #3b82f6;
+		}
+		
+		.extension-description p {
+			margin: 0;
+			color: #4b5563;
+			line-height: 1.6;
+		}
+		
+		.extension-details {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+		}
+		
+		.detail-row {
+			display: flex;
+			align-items: flex-start;
+			gap: 1rem;
+			padding: 0.75rem 0;
+			border-bottom: 1px solid #f3f4f6;
+		}
+		
+		.detail-row:last-child {
+			border-bottom: none;
+		}
+		
+		.detail-row label {
+			min-width: 150px;
+			font-weight: 600;
+			color: #374151;
+		}
+		
+		.highlight-row {
+			background: #eff6ff;
+			padding: 1rem;
+			border-radius: 0.375rem;
+			border: 1px solid #dbeafe;
+			margin: 0.5rem 0;
+		}
+		
+		.url-container {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			flex: 1;
+		}
+		
+		.extension-url {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.25rem;
+			color: #2563eb;
+			text-decoration: none;
+			font-family: monospace;
+			font-size: 0.875rem;
+			padding: 0.375rem 0.75rem;
+			background: white;
+			border: 1px solid #dbeafe;
+			border-radius: 0.375rem;
+			flex: 1;
+			transition: all 0.2s;
+		}
+		
+		.extension-url:hover {
+			background: #f0f9ff;
+			border-color: #93c5fd;
+		}
+		
+		.copy-btn {
+			padding: 0.375rem;
+			background: white;
+			border: 1px solid #e5e7eb;
+			border-radius: 0.375rem;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.2s;
+		}
+		
+		.copy-btn:hover {
+			background: #f3f4f6;
+		}
+		
+		.endpoints-list {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+			flex: 1;
+		}
+		
+		.endpoint-item {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+		
+		.endpoint-item code {
+			background: #f9fafb;
+			padding: 0.375rem 0.75rem;
+			border-radius: 0.375rem;
+			font-size: 0.8125rem;
+			font-family: 'SF Mono', Monaco, monospace;
+			border: 1px solid #e5e7eb;
+			flex: 1;
+		}
+		
+		.method-badge {
+			background: #dbeafe;
+			color: #1e40af;
+			padding: 0.125rem 0.375rem;
+			border-radius: 0.25rem;
+			font-size: 0.75rem;
+			font-weight: 600;
+		}
+		
+		.permissions-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.5rem;
+			flex: 1;
+		}
+		
+		.permission-item {
+			background: #fef3c7;
+			color: #92400e;
+			padding: 0.25rem 0.5rem;
+			border-radius: 0.25rem;
+			font-size: 0.8125rem;
+			font-weight: 500;
+		}
+		
+		.badge {
+			padding: 0.25rem 0.5rem;
+			border-radius: 0.25rem;
+			font-size: 0.75rem;
+			font-weight: 500;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.25rem;
+		}
+		.badge-success {
+			background-color: #d1fae5;
+			color: #065f46;
+		}
+		.badge-warning {
+			background-color: #fef3c7;
+			color: #92400e;
+		}
+		.badge-danger {
+			background-color: #fee2e2;
+			color: #991b1b;
+		}
+		.badge-secondary {
+			background-color: #f3f4f6;
+			color: #4b5563;
+		}
+		
+		.btn-icon {
+			padding: 0.375rem;
+			border: 1px solid #e5e7eb;
+			background: white;
+			border-radius: 0.375rem;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: all 0.2s;
+		}
+		
+		.btn-icon:hover {
+			background: #f3f4f6;
+		}
+		
+		.btn-secondary {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.5rem 1rem;
+			background: #f3f4f6;
+			border: 1px solid #d1d5db;
+			border-radius: 0.375rem;
+			font-size: 0.875rem;
+			cursor: pointer;
+			transition: background-color 0.2s;
+		}
+		
+		.btn-secondary:hover {
+			background: #e5e7eb;
+		}
+	</style>
+
+	<script>
+		function toggleExtension(header) {
+			const item = header.closest('.extension-item');
+			item.classList.toggle('expanded');
+		}
+		
+		function copyToClipboard(text) {
+			const fullUrl = window.location.origin + text;
+			navigator.clipboard.writeText(fullUrl).then(() => {
+				showNotification('URL copied to clipboard!', 'success');
+			}).catch(() => {
+				// Fallback
+				const textArea = document.createElement('textarea');
+				textArea.value = fullUrl;
+				document.body.appendChild(textArea);
+				textArea.select();
+				document.execCommand('copy');
+				document.body.removeChild(textArea);
+				showNotification('URL copied to clipboard!', 'success');
+			});
+		}
+		
+		// Initialize Lucide icons when the DOM is ready
+		document.addEventListener('DOMContentLoaded', function() {
+			if (typeof lucide !== 'undefined') {
+				lucide.createIcons();
+			}
+		});
+		
+		// Re-initialize icons after HTMX updates
+		document.body.addEventListener('htmx:afterSwap', function() {
+			if (typeof lucide !== 'undefined') {
+				lucide.createIcons();
+			}
+		});
+	</script>
+
+	<script src="/static/js/extensions.js" type="module"></script>
+}
+
+templ ExtensionsAccordionPage(data ExtensionsAccordionPageData) {
+	@layouts.Base(layouts.BaseProps{
+		Title:     "Extensions",
+		UserEmail: data.UserEmail,
+	}) {
+		@ExtensionsAccordionContent(data)
+	}
+}
+
+templ ExtensionsAccordionPartial(data ExtensionsAccordionPageData) {
+	@layouts.PartialContent("Extensions") {
+		@ExtensionsAccordionContent(data)
+	}
+}
+
+// Helper functions
+func countEnabledExtensionsAccordion(extensions []ExtensionInfoAccordion) int {
+	count := 0
+	for _, ext := range extensions {
+		if ext.Enabled {
+			count++
+		}
+	}
+	return count
+}
+
+func countHealthyExtensionsAccordion(extensions []ExtensionInfoAccordion) int {
+	count := 0
+	for _, ext := range extensions {
+		if ext.Health == "healthy" {
+			count++
+		}
+	}
+	return count
+}
+
+func countExtensionsWithRoutesAccordion(extensions []ExtensionInfoAccordion) int {
+	count := 0
+	for _, ext := range extensions {
+		if len(ext.Routes) > 0 {
+			count++
+		}
+	}
+	return count
+}
+
+func getBaseURL() string {
+	// This would typically come from configuration
+	// For now, we'll return empty string and let JavaScript handle it
+	return ""
+}

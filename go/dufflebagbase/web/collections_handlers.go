@@ -1,7 +1,6 @@
 package web
 
 import (
-    "context"
     "net/http"
 
     "github.com/suppers-ai/dufflebagbase/services"
@@ -10,13 +9,10 @@ import (
 
 // CollectionsPage renders the collections page
 func CollectionsPage(svc *services.Service) http.HandlerFunc {
+    h := NewBaseHandler(svc)
     return func(w http.ResponseWriter, r *http.Request) {
-        // Get authboss session store
-        store := svc.Auth().SessionStore()
-        session, _ := store.Get(r, "dufflebag-session")
-        userEmail, _ := session.Values["user_email"].(string)
-        
-        ctx := context.Background()
+        userEmail, _ := h.GetUserEmail(r)
+        ctx := h.NewContext()
         
         // Get all collections
         collections, err := svc.Collections().ListCollectionInfo(ctx)
@@ -29,7 +25,6 @@ func CollectionsPage(svc *services.Service) http.HandlerFunc {
             Collections: collections,
         }
         
-        component := pages.CollectionsPage(data)
-        Render(w, r, component)
+        h.RenderWithHTMX(w, r, pages.CollectionsPage(data), pages.CollectionsPartial(data))
     }
 }

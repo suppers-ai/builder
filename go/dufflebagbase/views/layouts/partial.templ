@@ -1,0 +1,17 @@
+package layouts
+
+// PartialContent wraps content for HTMX requests (no full HTML structure)
+templ PartialContent(title string) {
+    <div class="content-card partial-content">
+        <div class="content-header">
+            <div class="breadcrumb">
+                <a href="/dashboard" class="breadcrumb-item">Home</a>
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-current">{ title }</span>
+            </div>
+        </div>
+        <div class="content-body">
+            { children... }
+        </div>
+    </div>
+}

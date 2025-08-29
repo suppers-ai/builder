@@ -2,7 +2,6 @@ package pages
 
 import (
 	"github.com/suppers-ai/dufflebagbase/views/layouts"
-	"github.com/suppers-ai/dufflebagbase/views/components"
 	"fmt"
 	"time"
 )
@@ -10,11 +9,12 @@ import (
 type User struct {
 	ID        string
 	Email     string
-	Username  string
-	Role      string
 	Confirmed bool
+	Role      string
+	Locked    *time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Metadata  map[string]interface{}
 }
 
 type UsersPageData struct {
@@ -25,119 +25,351 @@ type UsersPageData struct {
 	PageSize    int
 }
 
+templ UsersContent(data UsersPageData) {
+			<div class="container">
+				<div class="page-header">
+					<h1>User Management</h1>
+					<p class="page-subtitle">Manage user accounts, roles, and authentication settings</p>
+				</div>
+
+				<!-- Stats Cards in a Row with Icons -->
+				<div class="stats-overview">
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i data-lucide="users" style="color: #3b82f6;"></i>
+						</div>
+						<div class="stat-content">
+							<div class="stat-value">{ fmt.Sprintf("%d", data.TotalUsers) }</div>
+							<div class="stat-label">Total Users</div>
+						</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i data-lucide="user-check" style="color: #10b981;"></i>
+						</div>
+						<div class="stat-content">
+							<div class="stat-value">{ fmt.Sprintf("%d", countConfirmedUsers(data.Users)) }</div>
+							<div class="stat-label">Verified</div>
+						</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i data-lucide="shield" style="color: #8b5cf6;"></i>
+						</div>
+						<div class="stat-content">
+							<div class="stat-value">{ fmt.Sprintf("%d", countAdminUsers(data.Users)) }</div>
+							<div class="stat-label">Administrators</div>
+						</div>
+					</div>
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i data-lucide="lock" style="color: #ef4444;"></i>
+						</div>
+						<div class="stat-content">
+							<div class="stat-value">{ fmt.Sprintf("%d", countLockedUsers(data.Users)) }</div>
+							<div class="stat-label">Locked</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Users Table -->
+				<div class="db-content">
+					<div class="table-toolbar">
+						<h2>User Accounts</h2>
+						<div class="toolbar-actions">
+							<button class="btn-secondary" onclick="refreshUsers()">
+								<i data-lucide="refresh-cw"></i>
+								Refresh
+							</button>
+						</div>
+					</div>
+					
+					<div class="data-grid-container">
+						<table class="data-grid">
+							<thead>
+								<tr>
+									<th class="grid-checkbox">
+										<input type="checkbox" name="select-all"/>
+									</th>
+									<th>Email</th>
+									<th>Role</th>
+									<th>Status</th>
+									<th>Verified</th>
+									<th>2FA</th>
+									<th>Created</th>
+									<th>Last Login</th>
+									<th class="grid-actions">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, user := range data.Users {
+									<tr class="grid-row" data-user-id={ user.ID }>
+										<td class="grid-checkbox">
+											<input type="checkbox" name="row-select"/>
+										</td>
+										<td class="user-email">{ user.Email }</td>
+										<td class="user-role">
+											<select class="role-select" data-user-id={ user.ID } onchange="updateUserRole(this.dataset.userId, this.value)">
+												<option value="user" selected?={ user.Role == "user" }>User</option>
+												<option value="manager" selected?={ user.Role == "manager" }>Manager</option>
+												<option value="admin" selected?={ user.Role == "admin" }>Admin</option>
+												<option value="deleted" selected?={ user.Role == "deleted" }>Deleted</option>
+											</select>
+										</td>
+										<td class="user-status">
+											if user.Locked != nil {
+												<span class="badge badge-danger">Locked</span>
+											} else if !user.Confirmed {
+												<span class="badge badge-warning">Unconfirmed</span>
+											} else {
+												<span class="badge badge-success">Active</span>
+											}
+										</td>
+										<td class="user-verified">
+											if user.Confirmed {
+												<i data-lucide="check-circle" style="color: #10b981;"></i>
+											} else {
+												<i data-lucide="x-circle" style="color: #ef4444;"></i>
+											}
+										</td>
+										<td class="user-2fa">
+											if has2FA(user) {
+												<i data-lucide="shield-check" style="color: #10b981;"></i>
+											} else {
+												<i data-lucide="shield-off" style="color: #6b7280;"></i>
+											}
+										</td>
+										<td class="user-created">{ user.CreatedAt.Format("Jan 02, 2006") }</td>
+										<td class="user-last-login">
+											{ formatLastLogin(user) }
+										</td>
+										<td class="grid-actions">
+											if user.Locked != nil {
+												<button class="btn-icon-sm" data-user-id={ user.ID } onclick="unlockUser(this.dataset.userId)" title="Unlock">
+													<i data-lucide="unlock"></i>
+												</button>
+											} else {
+												<button class="btn-icon-sm" data-user-id={ user.ID } onclick="lockUser(this.dataset.userId)" title="Lock">
+													<i data-lucide="lock"></i>
+												</button>
+											}
+											<button class="btn-icon-sm" data-user-id={ user.ID } onclick="sendPasswordReset(this.dataset.userId)" title="Reset Password">
+												<i data-lucide="mail"></i>
+											</button>
+											<button class="btn-icon-sm" data-user-id={ user.ID } onclick="deleteUser(this.dataset.userId)" title="Delete">
+												<i data-lucide="trash-2"></i>
+											</button>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+					
+					<!-- Pagination -->
+					<div class="table-footer">
+						<div class="table-pagination">
+							<button class="pagination-btn" onclick="goToPage(this)" data-page={ fmt.Sprintf("%d", data.CurrentPage-1) } disabled?={ data.CurrentPage <= 1 }>
+								<i data-lucide="chevron-left"></i>
+							</button>
+							<span class="pagination-info">
+								Page { fmt.Sprintf("%d", data.CurrentPage) } of { fmt.Sprintf("%d", (data.TotalUsers + data.PageSize - 1) / data.PageSize) }
+							</span>
+							<button class="pagination-btn" onclick="goToPage(this)" data-page={ fmt.Sprintf("%d", data.CurrentPage+1) } disabled?={ data.CurrentPage * data.PageSize >= data.TotalUsers }>
+								<i data-lucide="chevron-right"></i>
+							</button>
+							<select class="page-size-select" onchange="changePageSize(this.value)">
+								<option value="20" selected?={ data.PageSize == 20 }>20 rows</option>
+								<option value="50" selected?={ data.PageSize == 50 }>50 rows</option>
+								<option value="100" selected?={ data.PageSize == 100 }>100 rows</option>
+							</select>
+						</div>
+						<div class="table-stats">
+							{ fmt.Sprintf("%d user%s", data.TotalUsers, pluralize(data.TotalUsers)) }
+						</div>
+					</div>
+				</div>
+			</div>
+
+		<!-- Add styles for the stats -->
+		<style>
+			.stats-overview {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 1rem;
+				margin-bottom: 2rem;
+			}
+			.stat-card {
+				background: white;
+				border-radius: 0.5rem;
+				padding: 1rem;
+				box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+			}
+			.stat-icon {
+				width: 48px;
+				height: 48px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #f3f4f6;
+				border-radius: 0.5rem;
+			}
+			.stat-icon svg {
+				width: 24px;
+				height: 24px;
+			}
+			.stat-content {
+				flex: 1;
+			}
+			.stat-value {
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: #111827;
+			}
+			.stat-label {
+				font-size: 0.875rem;
+				color: #6b7280;
+				margin-top: 0.25rem;
+			}
+			.badge {
+				padding: 0.25rem 0.5rem;
+				border-radius: 0.25rem;
+				font-size: 0.75rem;
+				font-weight: 500;
+			}
+			.badge-success {
+				background-color: #d1fae5;
+				color: #065f46;
+			}
+			.badge-warning {
+				background-color: #fed7aa;
+				color: #92400e;
+			}
+			.badge-danger {
+				background-color: #fee2e2;
+				color: #991b1b;
+			}
+			.role-select {
+				padding: 0.25rem 0.5rem;
+				border: 1px solid #d1d5db;
+				border-radius: 0.25rem;
+				background: white;
+				font-size: 0.875rem;
+				cursor: pointer;
+			}
+			.text-muted {
+				color: #9ca3af;
+			}
+			/* Table cell alignment and padding */
+			.data-grid th,
+			.data-grid td {
+				padding: 0.75rem;
+				text-align: left;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.data-grid th:first-child,
+			.data-grid td:first-child {
+				padding-left: 1rem;
+			}
+			.data-grid th:last-child,
+			.data-grid td:last-child {
+				padding-right: 1rem;
+			}
+			.grid-checkbox {
+				width: 48px;
+				padding-left: 1rem !important;
+			}
+			.user-email {
+				min-width: 200px;
+				max-width: 300px;
+			}
+			.user-role {
+				min-width: 120px;
+				max-width: 150px;
+			}
+			.user-status {
+				min-width: 100px;
+				max-width: 120px;
+			}
+			.user-verified,
+			.user-2fa {
+				width: 80px;
+			}
+			.user-created,
+			.user-last-login {
+				min-width: 120px;
+				max-width: 150px;
+			}
+			.btn-icon-sm {
+				padding: 0.25rem;
+				border: none;
+				background: transparent;
+				cursor: pointer;
+				border-radius: 0.25rem;
+				transition: background-color 0.2s;
+			}
+			.btn-icon-sm:hover {
+				background-color: #f3f4f6;
+			}
+			.table-toolbar {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 1rem;
+			}
+			.toolbar-actions {
+				display: flex;
+				gap: 0.5rem;
+			}
+			.grid-actions {
+				white-space: nowrap;
+			}
+			.grid-actions .btn-icon-sm {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				margin-right: 0.25rem;
+			}
+			.btn-secondary {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.5rem 1rem;
+				background: #f3f4f6;
+				border: 1px solid #d1d5db;
+				border-radius: 0.375rem;
+				font-size: 0.875rem;
+				cursor: pointer;
+				transition: background-color 0.2s;
+			}
+			.btn-secondary:hover {
+				background: #e5e7eb;
+			}
+		</style>
+
+		<script src="/static/js/users.js" type="module"></script>
+}
+
 templ UsersPage(data UsersPageData) {
 	@layouts.Base(layouts.BaseProps{
 		Title:     "Users",
 		UserEmail: data.UserEmail,
 	}) {
-			<div class="container">
-				<div class="page-header">
-					<h1>Users</h1>
-					<div class="header-actions">
-						<button class="btn btn-primary" onclick="showCreateUserModal()">
-							Add User
-						</button>
-					</div>
-				</div>
-
-				<div class="stats-grid">
-					<div class="stat-card">
-						<h3>Total Users</h3>
-						<div class="stat-value">{ fmt.Sprintf("%d", data.TotalUsers) }</div>
-					</div>
-					<div class="stat-card">
-						<h3>Confirmed Users</h3>
-						<div class="stat-value">
-							{ fmt.Sprintf("%d", countConfirmedUsers(data.Users)) }
-						</div>
-					</div>
-					<div class="stat-card">
-						<h3>Admin Users</h3>
-						<div class="stat-value">
-							{ fmt.Sprintf("%d", countAdminUsers(data.Users)) }
-						</div>
-					</div>
-				</div>
-
-				@components.Table(components.TableData{
-					Columns: []components.TableColumn{
-						{Key: "email", Label: "Email", Width: "25%"},
-						{Key: "username", Label: "Username", Width: "15%"},
-						{Key: "role", Label: "Role", Width: "10%"},
-						{Key: "confirmed", Label: "Confirmed", Width: "10%"},
-						{Key: "created", Label: "Created", Width: "20%"},
-						{Key: "actions", Label: "Actions", Width: "20%"},
-					},
-					Rows: usersToTableRows(data.Users),
-					Empty: "No users found",
-				})
-
-				if data.TotalUsers > data.PageSize {
-					@components.Pagination(components.PaginationData{
-						CurrentPage: data.CurrentPage,
-						TotalPages:  (data.TotalUsers + data.PageSize - 1) / data.PageSize,
-						PageSize:    data.PageSize,
-						TotalItems:  data.TotalUsers,
-					}, "/users")
-				}
-			</div>
-
-		<!-- Create User Modal -->
-		<div id="createUserModal" class="modal">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h2>Create User</h2>
-					<span class="close" onclick="hideCreateUserModal()">&times;</span>
-				</div>
-				<form id="createUserForm" onsubmit="createUser(event)">
-					<div class="form-group">
-						<label for="email">Email</label>
-						<input type="email" id="email" name="email" required/>
-					</div>
-					<div class="form-group">
-						<label for="password">Password</label>
-						<input type="password" id="password" name="password" required/>
-					</div>
-					<div class="form-group">
-						<label for="username">Username</label>
-						<input type="text" id="username" name="username"/>
-					</div>
-					<div class="form-group">
-						<label for="role">Role</label>
-						<select id="role" name="role">
-							<option value="user">User</option>
-							<option value="admin">Admin</option>
-						</select>
-					</div>
-					<div class="form-actions">
-						<button type="button" class="btn btn-secondary" onclick="hideCreateUserModal()">Cancel</button>
-						<button type="submit" class="btn btn-primary">Create User</button>
-					</div>
-				</form>
-			</div>
-		</div>
-
-		<script src="/static/js/users.js" type="module"></script>
+		@UsersContent(data)
 	}
 }
 
-func usersToTableRows(users []User) []components.TableRow {
-	rows := make([]components.TableRow, len(users))
-	for i, user := range users {
-		rows[i] = components.TableRow{
-			"email":     user.Email,
-			"username":  valueOrDash(user.Username),
-			"role":      valueOrDash(user.Role),
-			"confirmed": boolToYesNo(user.Confirmed),
-			"created":   user.CreatedAt.Format("2006-01-02 15:04"),
-			"actions": templ.Raw(fmt.Sprintf(`
-				<button class="btn btn-sm" onclick="editUser('%s')">Edit</button>
-				<button class="btn btn-sm btn-danger" onclick="deleteUser('%s')">Delete</button>
-			`, user.ID, user.ID)),
-		}
+templ UsersPartial(data UsersPageData) {
+	@layouts.PartialContent("Users") {
+		@UsersContent(data)
 	}
-	return rows
 }
+
 
 func countConfirmedUsers(users []User) int {
 	count := 0
@@ -159,16 +391,49 @@ func countAdminUsers(users []User) int {
 	return count
 }
 
-func valueOrDash(s string) string {
-	if s == "" {
-		return "-"
+func countLockedUsers(users []User) int {
+	count := 0
+	for _, user := range users {
+		if user.Locked != nil {
+			count++
+		}
 	}
-	return s
+	return count
 }
 
-func boolToYesNo(b bool) string {
-	if b {
-		return "Yes"
+func has2FA(user User) bool {
+	// Check if user has 2FA enabled from metadata
+	if user.Metadata != nil {
+		if val, exists := user.Metadata["has_2fa"]; exists {
+			if has2fa, ok := val.(bool); ok {
+				return has2fa
+			}
+		}
 	}
-	return "No"
+	return false
 }
+
+func getLastLogin(user User) *time.Time {
+	// Check metadata for last login information
+	if user.Metadata != nil {
+		if val, exists := user.Metadata["last_attempt"]; exists {
+			if lastLogin, ok := val.(time.Time); ok {
+				return &lastLogin
+			}
+			// Handle *time.Time case
+			if lastLogin, ok := val.(*time.Time); ok {
+				return lastLogin
+			}
+		}
+	}
+	return nil
+}
+
+func formatLastLogin(user User) string {
+	lastLogin := getLastLogin(user)
+	if lastLogin != nil {
+		return lastLogin.Format("Jan 02, 2006 15:04")
+	}
+	return "Never"
+}
+

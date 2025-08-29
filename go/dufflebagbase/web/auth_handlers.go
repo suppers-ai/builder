@@ -74,6 +74,11 @@ func LoginPage(svc *services.Service) http.HandlerFunc {
             return
         }
         
+        svc.Logger().Info(ctx, "User logged in successfully",
+            logger.String("user_id", user.GetPID()),
+            logger.String("email", email),
+            logger.String("ip", r.RemoteAddr))
+        
         http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
     }
 }
@@ -102,10 +107,18 @@ func SignupPage(svc *services.Service) http.HandlerFunc {
         
         // Register user
         ctx := context.Background()
+        
+        svc.Logger().Info(ctx, "User signup attempt",
+            logger.String("email", email),
+            logger.String("name", name))
+        
         user, err := svc.Auth().RegisterUser(ctx, email, password, map[string]interface{}{
             "name": name,
         })
         if err != nil {
+            svc.Logger().Warn(ctx, "User signup failed",
+                logger.String("email", email),
+                logger.Err(err))
             component := pages.SignupPage(pages.SignupPageData{
                 Error: err.Error(),
             })
@@ -131,6 +144,11 @@ func SignupPage(svc *services.Service) http.HandlerFunc {
             return
         }
         
+        svc.Logger().Info(ctx, "User logged in successfully",
+            logger.String("user_id", user.GetPID()),
+            logger.String("email", email),
+            logger.String("ip", r.RemoteAddr))
+        
         http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
     }
 }
@@ -138,15 +156,25 @@ func SignupPage(svc *services.Service) http.HandlerFunc {
 // Logout handles logout
 func Logout(svc *services.Service) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
+        ctx := context.Background()
         // Get authboss session store
         store := svc.Auth().SessionStore()
         
         // Clear session
         session, _ := store.Get(r, "dufflebag-session")
+        
+        // Log before clearing
+        if userEmail, ok := session.Values["user_email"].(string); ok {
+            svc.Logger().Info(ctx, "User logged out",
+                logger.String("email", userEmail),
+                logger.String("ip", r.RemoteAddr))
+        }
+        
         session.Values = make(map[interface{}]interface{})
         session.Options.MaxAge = -1
         err := session.Save(r, w)
         if err != nil {
+            svc.Logger().Error(ctx, "Failed to clear session", logger.Err(err))
             http.Error(w, "Failed to clear session", http.StatusInternalServerError)
             return
         }

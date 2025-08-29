@@ -2,200 +2,520 @@ package pages
 
 import (
 	"github.com/suppers-ai/dufflebagbase/views/layouts"
-	"github.com/suppers-ai/dufflebagbase/views/components"
-	"github.com/suppers-ai/dufflebagbase/services"
-	"github.com/a-h/templ"
 	"fmt"
 )
 
 type DatabasePageData struct {
-	UserEmail        string
-	Collections      []services.CollectionInfo
-	SelectedTable    string
-	TableData        []map[string]interface{}
-	TableColumns     []string
-	TotalRecords     int
-	CurrentPage      int
-	PageSize         int
+	UserEmail     string
+	Schemas       []SchemaInfo
+	Tables        []TableInfo
+	SelectedTable *TableDetail
+	SQLMode       bool
+}
+
+type SchemaInfo struct {
+	Name   string
+	Tables []string
+}
+
+type TableInfo struct {
+	Schema      string
+	Name        string
+	RowCount    int
+	Size        string
+}
+
+type TableDetail struct {
+	Schema   string
+	Name     string
+	Columns  []ColumnInfo
+	Rows     []map[string]interface{}
+	Total    int
+	Page     int
+	PageSize int
+}
+
+type ColumnInfo struct {
+	Name         string
+	Type         string
+	Nullable     bool
+	DefaultValue string
+	IsPrimary    bool
+}
+
+templ DatabaseContent(data DatabasePageData) {
+	<div class="database-editor">
+		<!-- Left sidebar with schemas and tables -->
+		<div class="db-sidebar">
+			<div class="db-sidebar-header">
+				<div class="db-sidebar-title">
+					<i data-lucide="database"></i>
+					<span>Table Editor</span>
+				</div>
+				<button class="btn-new-table" onclick="showNewTableModal()">
+					<i data-lucide="plus"></i>
+					New table
+				</button>
+			</div>
+			
+			<div class="db-search">
+				<input type="text" placeholder="Search tables..." class="db-search-input" onkeyup="filterTables(this.value)"/>
+				<i data-lucide="search" class="db-search-icon"></i>
+			</div>
+			
+			<div class="db-schemas">
+				for _, schema := range data.Schemas {
+					<div class="db-schema-group">
+						<div class="db-schema-header" onclick="toggleSchema(this)">
+							<i data-lucide="chevron-right" class="schema-toggle"></i>
+							<span class="schema-name">{ schema.Name }</span>
+						</div>
+						<div class="db-tables">
+							for _, table := range schema.Tables {
+								<div class="db-table-item" 
+								     onclick="selectTable(this.dataset.schema, this.dataset.table)"
+								     data-schema={ schema.Name }
+								     data-table={ table }>
+									<i data-lucide="table"></i>
+									<span>{ table }</span>
+								</div>
+							}
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+		
+		<!-- Main content area -->
+		<div class="db-main">
+			<!-- Top tabs -->
+			<div class="db-tabs">
+				<button class="db-tab active" onclick="switchTab('table')">
+					<i data-lucide="table"></i>
+					Table Editor
+				</button>
+				<button class="db-tab" onclick="switchTab('sql')">
+					<i data-lucide="terminal"></i>
+					SQL Editor
+				</button>
+			</div>
+			
+			<!-- Table View -->
+			<div id="tableView" class="db-content">
+				if data.SelectedTable != nil {
+					<!-- Table header with actions -->
+					<div class="table-header">
+						<div class="table-info">
+							<span class="table-path">
+								{ data.SelectedTable.Schema }.{ data.SelectedTable.Name }
+							</span>
+							<span class="table-count">
+								{ fmt.Sprintf("%d rows", data.SelectedTable.Total) }
+							</span>
+						</div>
+						<div class="table-actions">
+							<button class="btn-icon" onclick="refreshTable()" title="Refresh">
+								<i data-lucide="refresh-cw"></i>
+							</button>
+							<button class="btn-secondary" onclick="showFilterPanel()">
+								<i data-lucide="filter"></i>
+								Filter
+							</button>
+							<button class="btn-secondary" onclick="showSortPanel()">
+								<i data-lucide="arrow-up-down"></i>
+								Sort
+							</button>
+							<button class="btn-primary" onclick="showInsertRow()">
+								<i data-lucide="plus"></i>
+								Insert
+							</button>
+						</div>
+					</div>
+					
+					<!-- Data grid -->
+					<div class="data-grid-container">
+						<table class="data-grid">
+							<thead>
+								<tr>
+									<th class="grid-checkbox">
+										<input type="checkbox" onclick="toggleAllRows(this)"/>
+									</th>
+									for _, col := range data.SelectedTable.Columns {
+										<th class="grid-header" data-column={ col.Name } data-type={ col.Type }>
+											<div class="grid-header-content">
+												<span class="column-name">{ col.Name }</span>
+												<span class="column-type">{ col.Type }</span>
+												if col.IsPrimary {
+													<i data-lucide="key" class="column-key"></i>
+												}
+											</div>
+										</th>
+									}
+									<th class="grid-actions">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, row := range data.SelectedTable.Rows {
+									<tr class="grid-row" data-row-id={ formatCellValue(row["id"]) }>
+										<td class="grid-checkbox">
+											<input type="checkbox" name="row-select"/>
+										</td>
+										for _, col := range data.SelectedTable.Columns {
+											<td class="grid-cell" 
+											    data-column={ col.Name }
+											    onclick="editCell(this)"
+											    title={ formatCellValue(row[col.Name]) }>
+												{ formatCellValue(row[col.Name]) }
+											</td>
+										}
+										<td class="grid-actions">
+											<button class="btn-icon-sm" onclick="duplicateRow(this)" title="Duplicate">
+												<i data-lucide="copy"></i>
+											</button>
+											<button class="btn-icon-sm" onclick="deleteRow(this)" title="Delete">
+												<i data-lucide="trash-2"></i>
+											</button>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+					
+					<!-- Pagination -->
+					<div class="table-footer">
+						<div class="table-pagination">
+							<button class="pagination-btn" onclick="previousPage()" disabled?={ data.SelectedTable.Page <= 1 }>
+								<i data-lucide="chevron-left"></i>
+							</button>
+							<span class="pagination-info">
+								Page { fmt.Sprintf("%d", data.SelectedTable.Page) } of { fmt.Sprintf("%d", (data.SelectedTable.Total + data.SelectedTable.PageSize - 1) / data.SelectedTable.PageSize) }
+							</span>
+							<button class="pagination-btn" onclick="nextPage()" disabled?={ data.SelectedTable.Page * data.SelectedTable.PageSize >= data.SelectedTable.Total }>
+								<i data-lucide="chevron-right"></i>
+							</button>
+							<select class="page-size-select" onchange="changePageSize(this.value)">
+								<option value="50" selected?={ data.SelectedTable.PageSize == 50 }>50 rows</option>
+								<option value="100" selected?={ data.SelectedTable.PageSize == 100 }>100 rows</option>
+								<option value="500" selected?={ data.SelectedTable.PageSize == 500 }>500 rows</option>
+								<option value="1000" selected?={ data.SelectedTable.PageSize == 1000 }>1000 rows</option>
+							</select>
+						</div>
+						<div class="table-stats">
+							{ fmt.Sprintf("%d record%s", data.SelectedTable.Total, pluralize(data.SelectedTable.Total)) }
+						</div>
+					</div>
+				} else {
+					<div class="empty-table-state">
+						<i data-lucide="table" class="empty-icon"></i>
+						<h3>Select a table</h3>
+						<p>Choose a table from the sidebar to view and edit its data</p>
+					</div>
+				}
+			</div>
+			
+			<!-- SQL Editor View (hidden by default) -->
+			<div id="sqlView" class="db-content" style="display: none;">
+				<div class="sql-editor-container">
+					<div class="sql-toolbar">
+						<button class="btn-primary" onclick="executeQuery()">
+							<i data-lucide="play"></i>
+							Run
+						</button>
+						<button class="btn-secondary" onclick="formatSQL()">
+							<i data-lucide="code"></i>
+							Format
+						</button>
+						<button class="btn-secondary" onclick="clearSQL()">
+							<i data-lucide="trash"></i>
+							Clear
+						</button>
+						<div class="sql-history">
+							<select class="history-select" onchange="loadHistory(this.value)">
+								<option value="">Query history...</option>
+							</select>
+						</div>
+					</div>
+					<div class="sql-editor">
+						<textarea id="sqlEditor" 
+						          class="sql-textarea" 
+						          placeholder="Write your SQL query here..."
+						          rows="10"></textarea>
+					</div>
+					<div class="sql-results">
+						<div class="results-header">
+							<span class="results-title">Results</span>
+							<span class="results-time" id="queryTime"></span>
+						</div>
+						<div id="sqlResultsContainer" class="results-container">
+							<!-- Results will be inserted here -->
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Filter Panel (slides in from right) -->
+		<div id="filterPanel" class="side-panel">
+			<div class="panel-header">
+				<h3>Filter</h3>
+				<button class="btn-icon" onclick="closeFilterPanel()">
+					<i data-lucide="x"></i>
+				</button>
+			</div>
+			<div class="panel-body">
+				<!-- Filter options will be dynamically generated -->
+			</div>
+		</div>
+		
+		<!-- Insert Row Modal -->
+		if data.SelectedTable != nil {
+			<div id="insertModal" class="modal" style="display: none;" onclick="if(event.target === this) closeInsertModal()">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h2>New { data.SelectedTable.Name } record</h2>
+						<button class="btn-icon" onclick="closeInsertModal()">
+							<i data-lucide="x"></i>
+						</button>
+					</div>
+					<div class="modal-body">
+						<form id="insertForm" class="insert-form">
+							for _, col := range data.SelectedTable.Columns {
+								<div class="form-group">
+									<label for={ "insert_" + col.Name }>
+										<i data-lucide={ getColumnIcon(col) }></i>
+										{ col.Name }
+										if col.IsPrimary {
+											<span class="field-hint">Leave empty to auto-generate...</span>
+										}
+										if !col.Nullable && !col.IsPrimary {
+											<span class="required">*</span>
+										}
+									</label>
+									<input type={ getInputType(col) }
+									       id={ "insert_" + col.Name }
+									       name={ col.Name }
+									       class="form-input"
+									       placeholder={ getPlaceholder(col) }
+									       required?={ !col.Nullable && !col.IsPrimary }
+									       disabled?={ col.IsPrimary && col.Name == "id" }/>
+									if !col.Nullable && !col.IsPrimary {
+										<span class="field-info">Required</span>
+									}
+								</div>
+							}
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button class="btn-secondary" onclick="closeInsertModal()">Cancel</button>
+						<button class="btn-primary" onclick="submitInsertForm()">Create</button>
+					</div>
+				</div>
+			</div>
+		}
+		
+		<!-- Create Table Modal -->
+		<div id="createTableModal" class="modal" style="display: none;" onclick="if(event.target === this) closeCreateTableModal()">
+			<div class="modal-content" style="max-width: 600px;">
+				<div class="modal-header">
+					<h2>Create New Table</h2>
+					<button class="btn-icon" onclick="closeCreateTableModal()">
+						<i data-lucide="x"></i>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="createTableForm" class="create-table-form">
+						<div class="form-group">
+							<label for="table_name">
+								<i data-lucide="table"></i>
+								Table Name
+								<span class="required">*</span>
+							</label>
+							<input type="text" 
+							       id="table_name" 
+							       name="table_name" 
+							       class="form-input" 
+							       placeholder="e.g. products, customers" 
+							       required
+							       pattern="[a-z][a-z0-9_]*"
+							       title="Must start with a letter, lowercase and underscores only"/>
+							<span class="field-info">Lowercase letters, numbers, and underscores only</span>
+						</div>
+						
+						<div class="form-group">
+							<label for="schema_name">
+								<i data-lucide="database"></i>
+								Schema
+								<span class="required">*</span>
+							</label>
+							<select id="schema_name" name="schema_name" class="form-input" required>
+								<option value="public" selected>public</option>
+								<option value="collections">collections</option>
+							</select>
+						</div>
+						
+						<div class="table-columns-section">
+							<div class="columns-header">
+								<h3>Columns</h3>
+								<button type="button" class="btn-secondary btn-sm" onclick="addColumn()">
+									<i data-lucide="plus"></i>
+									Add Column
+								</button>
+							</div>
+							
+							<div id="columnsContainer" class="columns-container">
+								<!-- Default ID column -->
+								<div class="column-row" data-column-index="0">
+									<input type="text" 
+									       name="columns[0][name]" 
+									       value="id" 
+									       class="column-input" 
+									       placeholder="Column name" 
+									       readonly/>
+									<select name="columns[0][type]" class="column-input">
+										<option value="uuid" selected>UUID</option>
+										<option value="serial">Serial</option>
+										<option value="bigserial">Big Serial</option>
+									</select>
+									<label class="checkbox-label">
+										<input type="checkbox" 
+										       name="columns[0][primary]" 
+										       checked 
+										       disabled/>
+										Primary
+									</label>
+									<label class="checkbox-label">
+										<input type="checkbox" 
+										       name="columns[0][nullable]" 
+										       disabled/>
+										Nullable
+									</label>
+									<button type="button" class="btn-icon-sm" disabled>
+										<i data-lucide="trash-2"></i>
+									</button>
+								</div>
+								
+								<!-- Default created_at column -->
+								<div class="column-row" data-column-index="1">
+									<input type="text" 
+									       name="columns[1][name]" 
+									       value="created_at" 
+									       class="column-input" 
+									       placeholder="Column name"/>
+									<select name="columns[1][type]" class="column-input">
+										<option value="timestamp" selected>Timestamp</option>
+									</select>
+									<label class="checkbox-label">
+										<input type="checkbox" 
+										       name="columns[1][primary]"/>
+										Primary
+									</label>
+									<label class="checkbox-label">
+										<input type="checkbox" 
+										       name="columns[1][nullable]"/>
+										Nullable
+									</label>
+									<button type="button" class="btn-icon-sm" onclick="removeColumn(this)">
+										<i data-lucide="trash-2"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button class="btn-secondary" onclick="closeCreateTableModal()">Cancel</button>
+					<button class="btn-primary" onclick="submitCreateTable()">Create Table</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="/static/js/database-editor.js"></script>
 }
 
 templ DatabasePage(data DatabasePageData) {
-	@layouts.Base(layouts.BaseProps{
-		Title:     "Database",
-		UserEmail: data.UserEmail,
-	}) {
-			<div class="container">
-				<div class="page-header">
-					<h1>Database</h1>
-					<div class="header-actions">
-						<select id="tableSelect" onchange="selectTable(this.value)" class="select">
-							<option value="">Select a collection...</option>
-							for _, col := range data.Collections {
-								<option value={ col.Name } selected?={ col.Name == data.SelectedTable }>
-									{ col.Name } ({ fmt.Sprintf("%d records", col.RecordCount) })
-								</option>
-							}
-						</select>
-						<button class="btn btn-primary" onclick="showCreateCollectionModal()">
-							Create Collection
-						</button>
-					</div>
-				</div>
-
-				<div class="stats-grid">
-					<div class="stat-card">
-						<h3>Total Collections</h3>
-						<div class="stat-value">{ fmt.Sprintf("%d", len(data.Collections)) }</div>
-					</div>
-					<div class="stat-card">
-						<h3>Total Records</h3>
-						<div class="stat-value">{ fmt.Sprintf("%d", getTotalRecords(data.Collections)) }</div>
-					</div>
-					<div class="stat-card">
-						<h3>Selected Collection</h3>
-						<div class="stat-value">
-							if data.SelectedTable != "" {
-								{ data.SelectedTable }
-							} else {
-								-
-							}
-						</div>
-					</div>
-				</div>
-
-				if data.SelectedTable != "" {
-					<div class="table-section">
-						<div class="section-header">
-							<h2>{ data.SelectedTable }</h2>
-							<button class="btn btn-sm" onclick="exportData()">Export CSV</button>
-							<button class="btn btn-sm btn-primary" onclick="showAddRecordModal()">Add Record</button>
-						</div>
-
-						@components.Table(components.TableData{
-							Columns: makeTableColumns(data.TableColumns),
-							Rows: dataToTableRows(data.TableData),
-							Empty: "No records found in this collection",
-						})
-
-						if data.TotalRecords > data.PageSize {
-							@components.Pagination(components.PaginationData{
-								CurrentPage: data.CurrentPage,
-								TotalPages:  (data.TotalRecords + data.PageSize - 1) / data.PageSize,
-								PageSize:    data.PageSize,
-								TotalItems:  data.TotalRecords,
-							}, fmt.Sprintf("/database?table=%s", data.SelectedTable))
-						}
-					</div>
-				} else {
-					<div class="empty-state">
-						<p>Select a collection to view its data</p>
-					</div>
-				}
-			</div>
-
-		<!-- Create Collection Modal -->
-		<div id="createCollectionModal" class="modal">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h2>Create Collection</h2>
-					<span class="close" onclick="hideCreateCollectionModal()">&times;</span>
-				</div>
-				<form id="createCollectionForm" onsubmit="createCollection(event)">
-					<div class="form-group">
-						<label for="collectionName">Collection Name</label>
-						<input type="text" id="collectionName" name="name" required pattern="[a-z0-9_]+"/>
-						<small>Lowercase letters, numbers, and underscores only</small>
-					</div>
-					<div class="form-group">
-						<label for="schema">Schema (JSON)</label>
-						<textarea id="schema" name="schema" rows="10" placeholder='{"fields": {"name": "string", "age": "integer"}}'></textarea>
-					</div>
-					<div class="form-actions">
-						<button type="button" class="btn btn-secondary" onclick="hideCreateCollectionModal()">Cancel</button>
-						<button type="submit" class="btn btn-primary">Create Collection</button>
-					</div>
-				</form>
-			</div>
-		</div>
-
-		<!-- Add Record Modal -->
-		<div id="addRecordModal" class="modal">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h2>Add Record</h2>
-					<span class="close" onclick="hideAddRecordModal()">&times;</span>
-				</div>
-				<form id="addRecordForm" onsubmit="addRecord(event)">
-					<div id="recordFields"></div>
-					<div class="form-actions">
-						<button type="button" class="btn btn-secondary" onclick="hideAddRecordModal()">Cancel</button>
-						<button type="submit" class="btn btn-primary">Add Record</button>
-					</div>
-				</form>
-			</div>
-		</div>
-
-		<script src="/static/js/database.js" type="module"></script>
+	@layouts.PartialContent("Database") {
+		@DatabaseContent(data)
 	}
 }
 
-func makeTableColumns(columns []string) []components.TableColumn {
-	cols := make([]components.TableColumn, len(columns)+1)
-	for i, col := range columns {
-		cols[i] = components.TableColumn{
-			Key:   col,
-			Label: col,
-			Width: "",
-		}
+templ DatabasePartial(data DatabasePageData) {
+	@layouts.PartialContent("Database") {
+		@DatabaseContent(data)
 	}
-	// Add actions column
-	cols[len(columns)] = components.TableColumn{
-		Key:   "actions",
-		Label: "Actions",
-		Width: "150px",
-	}
-	return cols
 }
 
-func getTotalRecords(collections []services.CollectionInfo) int {
-	total := 0
-	for _, col := range collections {
-		total += col.RecordCount
+func formatCellValue(value interface{}) string {
+	if value == nil {
+		return "NULL"
 	}
-	return total
+	switch v := value.(type) {
+	case string:
+		if v == "" {
+			return "NULL"
+		}
+		return v
+	case float64:
+		return fmt.Sprintf("%.2f", v)
+	case bool:
+		return fmt.Sprintf("%v", v)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
 
-func dataToTableRows(data []map[string]interface{}) []components.TableRow {
-	rows := make([]components.TableRow, len(data))
-	for i, record := range data {
-		row := make(components.TableRow)
-		for key, value := range record {
-			// Convert value to string representation
-			switch v := value.(type) {
-			case nil:
-				row[key] = "-"
-			case string:
-				row[key] = v
-			case float64:
-				row[key] = fmt.Sprintf("%.2f", v)
-			case bool:
-				if v {
-					row[key] = "Yes"
-				} else {
-					row[key] = "No"
-				}
-			default:
-				row[key] = fmt.Sprintf("%v", v)
-			}
-		}
-		// Add actions
-		if id, ok := record["id"].(string); ok {
-			row["actions"] = templ.Raw(fmt.Sprintf(`
-				<button class="btn btn-sm" onclick="editRecord('%s')">Edit</button>
-				<button class="btn btn-sm btn-danger" onclick="deleteRecord('%s', '%s')">Delete</button>
-			`, id, data[0]["collection_name"], id))
-		}
-		rows[i] = row
+func getPlaceholder(col ColumnInfo) string {
+	if col.Nullable {
+		return fmt.Sprintf("%s (nullable)", col.Type)
 	}
-	return rows
+	return col.Type
+}
+
+func pluralize(count int) string {
+	if count == 1 {
+		return ""
+	}
+	return "s"
+}
+
+func getInputType(col ColumnInfo) string {
+	switch col.Type {
+	case "email", "varchar", "text":
+		if col.Name == "email" {
+			return "email"
+		}
+		if col.Name == "password" {
+			return "password"
+		}
+		return "text"
+	case "int", "integer", "bigint", "smallint":
+		return "number"
+	case "boolean", "bool":
+		return "checkbox"
+	case "date":
+		return "date"
+	case "timestamp", "timestamptz":
+		return "datetime-local"
+	default:
+		return "text"
+	}
+}
+
+func getColumnIcon(col ColumnInfo) string {
+	if col.IsPrimary {
+		return "key"
+	}
+	switch col.Name {
+	case "email":
+		return "mail"
+	case "password":
+		return "lock"
+	case "username", "name":
+		return "user"
+	case "created_at", "updated_at":
+		return "calendar"
+	default:
+		return "type"
+	}
 }

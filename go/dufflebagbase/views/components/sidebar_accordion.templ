@@ -1,0 +1,282 @@
+package components
+
+import (
+    "fmt"
+)
+
+type ExtensionItem struct {
+    ID       string
+    Name     string
+    Icon     string
+    Enabled  bool
+    Path     string
+}
+
+type SidebarAccordionProps struct {
+    Title      string
+    Icon       string
+    Extensions []ExtensionItem
+    ActivePath string
+}
+
+templ SidebarAccordion(props SidebarAccordionProps) {
+    <div class="sidebar-accordion">
+        <button 
+            class="sidebar-accordion-toggle sidebar-nav-link"
+            onclick="toggleExtensionAccordion(this)"
+            data-accordion="extensions"
+            title={ props.Title }>
+            <i data-lucide={ props.Icon } class="sidebar-nav-icon"></i>
+            <span class="sidebar-nav-text">{ props.Title }</span>
+            <i data-lucide="chevron-down" class="sidebar-accordion-arrow"></i>
+        </button>
+        
+        <div class="sidebar-accordion-content" id="extensions-accordion" style="display: none;">
+            if len(props.Extensions) > 0 {
+                for _, ext := range props.Extensions {
+                    <a href={ templ.SafeURL(fmt.Sprintf("/ext/%s/dashboard", ext.ID)) }
+                       class={ "sidebar-accordion-item", templ.KV("active", props.ActivePath == ext.Path) }
+                       data-extension-id={ ext.ID }
+                       title={ ext.Name }
+                       hx-get={ fmt.Sprintf("/ext/%s/dashboard", ext.ID) }
+                       hx-target="#main-content"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">
+                        <div class="accordion-item-content">
+                            <i data-lucide={ ext.Icon } class="accordion-item-icon"></i>
+                            <span class="accordion-item-text">{ ext.Name }</span>
+                            if ext.Enabled {
+                                <span class="extension-status-dot active" title="Active"></span>
+                            } else {
+                                <span class="extension-status-dot inactive" title="Inactive"></span>
+                            }
+                        </div>
+                    </a>
+                }
+            } else {
+                <div class="sidebar-accordion-empty">
+                    <span class="empty-text">No extensions installed</span>
+                </div>
+            }
+            
+            <a href="/extensions"
+               class="sidebar-accordion-manage"
+               title="Manage Extensions"
+               hx-get="/extensions"
+               hx-target="#main-content"
+               hx-swap="innerHTML"
+               hx-push-url="true">
+                <i data-lucide="settings-2" class="accordion-item-icon"></i>
+                <span class="accordion-item-text">Manage Extensions</span>
+            </a>
+        </div>
+    </div>
+    
+    <style>
+        .sidebar-accordion {
+            width: 100%;
+        }
+        
+        .sidebar-accordion-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            border-radius: 0.5rem;
+        }
+        
+        .sidebar-accordion-toggle:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .sidebar-accordion-toggle.expanded {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .sidebar-accordion-arrow {
+            margin-left: auto;
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .sidebar-accordion-toggle.expanded .sidebar-accordion-arrow {
+            transform: rotate(180deg);
+        }
+        
+        .sidebar-accordion-content {
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-accordion-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 0.5rem;
+            margin: 0.125rem 0.5rem;
+        }
+        
+        .sidebar-accordion-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .sidebar-accordion-item.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+        
+        .accordion-item-content {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 0.5rem;
+        }
+        
+        .accordion-item-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        
+        .accordion-item-text {
+            flex: 1;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .extension-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .extension-status-dot.active {
+            background: #10b981;
+            box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+        }
+        
+        .extension-status-dot.inactive {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .sidebar-accordion-empty {
+            padding: 1rem 2.5rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.875rem;
+            font-style: italic;
+        }
+        
+        .sidebar-accordion-manage {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0.5rem 0.25rem 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+        }
+        
+        .sidebar-accordion-manage:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* Collapsed sidebar styles */
+        .sidebar.collapsed .sidebar-accordion-toggle {
+            padding: 0.75rem;
+        }
+        
+        .sidebar.collapsed .sidebar-accordion-arrow,
+        .sidebar.collapsed .sidebar-nav-text,
+        .sidebar.collapsed .accordion-item-text,
+        .sidebar.collapsed .extension-status-dot {
+            display: none;
+        }
+        
+        .sidebar.collapsed .sidebar-accordion-content {
+            display: none !important;
+        }
+    </style>
+    
+    <script>
+        function toggleExtensionAccordion(button) {
+            const content = document.getElementById('extensions-accordion');
+            const isExpanded = button.classList.contains('expanded');
+            
+            if (isExpanded) {
+                button.classList.remove('expanded');
+                content.style.display = 'none';
+                localStorage.setItem('extensionAccordionExpanded', 'false');
+            } else {
+                button.classList.add('expanded');
+                content.style.display = 'block';
+                localStorage.setItem('extensionAccordionExpanded', 'true');
+                
+                // Re-initialize Lucide icons
+                if (window.lucide) {
+                    setTimeout(() => lucide.createIcons(), 50);
+                }
+            }
+        }
+        
+        // Restore accordion state on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const isExpanded = localStorage.getItem('extensionAccordionExpanded') === 'true';
+            if (isExpanded) {
+                const button = document.querySelector('[data-accordion="extensions"]');
+                const content = document.getElementById('extensions-accordion');
+                if (button && content) {
+                    button.classList.add('expanded');
+                    content.style.display = 'block';
+                }
+            }
+            
+            // Update active state based on current path
+            const path = window.location.pathname;
+            document.querySelectorAll('.sidebar-accordion-item').forEach(item => {
+                const itemPath = item.getAttribute('href');
+                if (itemPath === path) {
+                    item.classList.add('active');
+                    // Auto-expand accordion if an extension is active
+                    const button = document.querySelector('[data-accordion="extensions"]');
+                    const content = document.getElementById('extensions-accordion');
+                    if (button && content) {
+                        button.classList.add('expanded');
+                        content.style.display = 'block';
+                    }
+                }
+            });
+        });
+        
+        // Update active state on HTMX navigation
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-accordion-item').forEach(item => {
+                const itemPath = item.getAttribute('href');
+                if (itemPath === currentPath) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        });
+    </script>
+}

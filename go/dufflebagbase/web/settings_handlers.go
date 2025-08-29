@@ -5,7 +5,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/suppers-ai/dufflebagbase/services"
+	"github.com/suppers-ai/dufflebagbase/utils"
 	"github.com/suppers-ai/dufflebagbase/views/pages"
 )
 
@@ -67,7 +69,13 @@ func SettingsPage(svc *services.Service) http.HandlerFunc {
 			MaintenanceMode:  maintenanceMode,
 		}
 		
-		component := pages.SettingsPage(data)
+		// Check if this is an HTMX request
+		var component templ.Component
+		if utils.IsHTMXRequest(r) {
+			component = pages.SettingsPartial(data)
+		} else {
+			component = pages.SettingsPage(data)
+		}
 		Render(w, r, component)
 	}
 }

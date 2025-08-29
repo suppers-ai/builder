@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/volatiletech/authboss/v3"
@@ -151,7 +152,15 @@ func (a *Auth) RequireAuth(h http.Handler) http.Handler {
 		// Load current user - this modifies the request context
 		user, err := a.AB.LoadCurrentUser(&r)
 		if err != nil || user == nil {
-			// No user found, redirect to login
+			// Check if this is an API request
+			if strings.HasPrefix(r.URL.Path, "/api/") || 
+			   r.Header.Get("Accept") == "application/json" ||
+			   r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+				// Return 401 for API requests
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+			// Redirect for web pages
 			http.Redirect(w, r, "/auth/login?redir="+r.URL.Path, http.StatusFound)
 			return
 		}

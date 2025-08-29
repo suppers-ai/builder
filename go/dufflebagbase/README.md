@@ -87,8 +87,8 @@ go mod download
 ```bash
 export DATABASE_URL="postgresql://user:password@localhost:5432/dufflebagbase?sslmode=disable"
 export PORT=8080
-export ADMIN_EMAIL=admin@example.com
-export ADMIN_PASSWORD=secretpassword
+export DEFAULT_ADMIN_EMAIL=admin@example.com
+export DEFAULT_ADMIN_PASSWORD=solobaseadmin123
 ```
 
 3. Build and run:
@@ -115,8 +115,8 @@ DATABASE_PASSWORD=postgres
 DATABASE_SSL_MODE=disable
 
 # Admin
-ADMIN_EMAIL=admin@dufflebagbase.local
-ADMIN_PASSWORD=admin123
+DEFAULT_ADMIN_EMAIL=admin@example.com
+DEFAULT_ADMIN_PASSWORD=solobaseadmin123
 
 # Security
 JWT_SECRET=your-secret-key-change-in-production

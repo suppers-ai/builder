@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"database/sql"
-	"time"
 )
 
 // Common errors
@@ -12,9 +11,9 @@ var (
 )
 
 // Database defines the universal interface for database operations
+// This is a compatibility layer for packages that still use raw SQL
 type Database interface {
 	// Connection management
-	Connect(ctx context.Context, config Config) error
 	Close() error
 	Ping(ctx context.Context) error
 
@@ -67,6 +66,7 @@ type Rows interface {
 	Scan(dest ...interface{}) error
 	Close() error
 	Err() error
+	Columns() ([]string, error)
 }
 
 // Row represents a single row result
@@ -78,29 +78,4 @@ type Row interface {
 type Result interface {
 	LastInsertId() (int64, error)
 	RowsAffected() (int64, error)
-}
-
-// Config holds database configuration
-type Config struct {
-	Driver          string                 `json:"driver"`
-	Host            string                 `json:"host"`
-	Port            int                    `json:"port"`
-	Database        string                 `json:"database"`
-	Username        string                 `json:"username"`
-	Password        string                 `json:"password"`
-	SSLMode         string                 `json:"ssl_mode"`
-	MaxOpenConns    int                    `json:"max_open_conns"`
-	MaxIdleConns    int                    `json:"max_idle_conns"`
-	ConnMaxLifetime time.Duration          `json:"conn_max_lifetime"`
-	Extra           map[string]interface{} `json:"extra"`
-}
-
-// Factory creates a database instance based on the driver type
-func New(driver string) (Database, error) {
-	switch driver {
-	case "postgres", "postgresql":
-		return NewPostgres(), nil
-	default:
-		return nil, ErrUnsupportedDriver
-	}
 }

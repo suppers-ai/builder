@@ -1,46 +1,54 @@
 package web
 
 import (
-    "context"
     "net/http"
 
     "github.com/suppers-ai/dufflebagbase/services"
     "github.com/suppers-ai/dufflebagbase/views/pages"
+    "github.com/suppers-ai/logger"
 )
 
 // DashboardPage renders the dashboard
 func DashboardPage(svc *services.Service) http.HandlerFunc {
+    h := NewBaseHandler(svc)
     return func(w http.ResponseWriter, r *http.Request) {
-        // Get authboss session store
-        store := svc.Auth().SessionStore()
-        session, _ := store.Get(r, "dufflebag-session")
-        userEmail, _ := session.Values["user_email"].(string)
+        userEmail, _ := h.GetUserEmail(r)
+        ctx := h.NewContext()
         
-        ctx := context.Background()
-        
-        // Get collections
-        collections, err := svc.Collections().ListCollectionInfo(ctx)
+        // Get dashboard stats
+        stats, err := svc.Stats().GetDashboardStats(ctx)
         if err != nil {
-            collections = []services.CollectionInfo{}
-        }
-        
-        // Calculate stats
-        totalRecords := 0
-        for _, col := range collections {
-            totalRecords += col.RecordCount
+            // Log error but continue with partial data
+            svc.Logger().Error(ctx, "Failed to get dashboard stats", logger.Err(err))
+            stats = &services.DashboardStats{}
         }
         
         data := pages.DashboardData{
             UserEmail:   userEmail,
-            Collections: collections,
-            Stats: pages.DashboardStats{
-                TotalCollections: len(collections),
-                TotalRecords:     totalRecords,
-                APIRequests:      0, // TODO: Implement API request tracking
-            },
+            Stats:       *stats,
         }
         
-        component := pages.DashboardPage(data)
-        Render(w, r, component)
+        h.RenderWithHTMX(w, r, pages.DashboardPage(data), pages.DashboardPartial(data))
+    }
+}
+
+// GetCPUStats returns just the CPU stats as JSON (with accurate 1-second sampling)
+func GetCPUStats(svc *services.Service) http.HandlerFunc {
+    h := NewBaseHandler(svc)
+    return func(w http.ResponseWriter, r *http.Request) {
+        ctx := h.NewContext()
+        
+        // Get accurate CPU stats with 1-second sampling
+        stats, err := svc.Stats().GetSystemStats(ctx)
+        if err != nil {
+            h.LogError(ctx, "Failed to get CPU stats", err)
+            h.JSONError(w, http.StatusInternalServerError, "Failed to get CPU stats")
+            return
+        }
+        
+        // Return just the CPU usage as JSON
+        h.JSONResponse(w, http.StatusOK, map[string]float64{
+            "cpuUsage": stats.CPUUsage,
+        })
     }
 }

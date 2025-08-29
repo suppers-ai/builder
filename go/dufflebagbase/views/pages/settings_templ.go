@@ -32,7 +32,7 @@ type SettingsData struct {
 	MaintenanceMode  bool
 }
 
-func SettingsPage(data SettingsData) templ.Component {
+func SettingsContent(data SettingsData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -53,7 +53,246 @@ func SettingsPage(data SettingsData) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var2 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"settings-container\"><div class=\"settings-header\"><h1>Settings</h1><p class=\"settings-subtitle\">Configure your application preferences and system settings</p></div><!-- Tab Navigation --><div class=\"settings-tabs\"><button class=\"tab-btn active\" data-tab=\"general\" onclick=\"switchTab('general')\"><i data-lucide=\"settings\" class=\"tab-icon\"></i> <span>General</span></button> <button class=\"tab-btn\" data-tab=\"security\" onclick=\"switchTab('security')\"><i data-lucide=\"shield\" class=\"tab-icon\"></i> <span>Security</span></button> <button class=\"tab-btn\" data-tab=\"infrastructure\" onclick=\"switchTab('infrastructure')\"><i data-lucide=\"server\" class=\"tab-icon\"></i> <span>Infrastructure</span></button> <button class=\"tab-btn\" data-tab=\"advanced\" onclick=\"switchTab('advanced')\"><i data-lucide=\"sliders\" class=\"tab-icon\"></i> <span>Advanced</span></button></div><!-- Tab Content --><div class=\"tab-content\"><!-- General Tab --><div id=\"general-tab\" class=\"tab-pane active\"><div class=\"settings-card\"><div class=\"card-header\"><h3>Application Settings</h3><span class=\"badge\">v")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(data.AppVersion)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 61, Col: 44}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</span></div><form id=\"appSettingsForm\" onsubmit=\"saveAppSettings(event)\"><div class=\"form-row\"><div class=\"form-col\"><label for=\"appName\">Application Name</label> <input type=\"text\" id=\"appName\" name=\"appName\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.AppName)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 67, Col: 75}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"form-input\"></div><div class=\"form-col\"><label>Environment</label><div class=\"info-display\"><span class=\"info-value\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(data.Environment)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 72, Col: 52}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span> <i data-lucide=\"info\" class=\"info-icon\"></i></div></div></div><div class=\"toggle-group\"><label class=\"toggle-label\"><input type=\"checkbox\" id=\"maintenanceMode\" name=\"maintenanceMode\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.MaintenanceMode {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " class=\"toggle-switch\"> <span class=\"toggle-slider\"></span><div class=\"toggle-text\"><span class=\"toggle-title\">Maintenance Mode</span> <span class=\"toggle-desc\">Temporarily disable access for maintenance</span></div></label></div><div class=\"form-footer\"><button type=\"submit\" class=\"btn btn-primary\"><i data-lucide=\"save\" class=\"btn-icon\"></i> Save Changes</button></div></form></div><div class=\"settings-card\"><div class=\"card-header\"><h3>Email Configuration</h3><button class=\"btn btn-sm btn-outline\" onclick=\"sendTestEmail()\"><i data-lucide=\"send\" class=\"btn-icon\"></i> Test Email</button></div><div class=\"info-grid\"><div class=\"info-item\"><span class=\"info-label\">SMTP Host</span> <span class=\"info-value\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.SMTPHost)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 109, Col: 47}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span></div><div class=\"info-item\"><span class=\"info-label\">SMTP Port</span> <span class=\"info-value\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", data.SMTPPort))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 113, Col: 66}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div></div></div></div><!-- Security Tab --><div id=\"security-tab\" class=\"tab-pane\"><div class=\"settings-card\"><div class=\"card-header\"><h3>Authentication & Access</h3></div><form id=\"authSettingsForm\" onsubmit=\"saveAuthSettings(event)\"><div class=\"toggle-group\"><label class=\"toggle-label\"><input type=\"checkbox\" id=\"enableSignup\" name=\"enableSignup\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.EnableSignup {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " class=\"toggle-switch\"> <span class=\"toggle-slider\"></span><div class=\"toggle-text\"><span class=\"toggle-title\">Enable User Registration</span> <span class=\"toggle-desc\">Allow new users to create accounts</span></div></label> <label class=\"toggle-label\"><input type=\"checkbox\" id=\"enableAPI\" name=\"enableAPI\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.EnableAPI {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " class=\"toggle-switch\"> <span class=\"toggle-slider\"></span><div class=\"toggle-text\"><span class=\"toggle-title\">API Access</span> <span class=\"toggle-desc\">Enable programmatic access via REST API</span></div></label></div><div class=\"form-footer\"><button type=\"submit\" class=\"btn btn-primary\"><i data-lucide=\"shield-check\" class=\"btn-icon\"></i> Update Security Settings</button></div></form></div><div class=\"settings-card\"><div class=\"card-header\"><h3>Rate Limiting</h3></div><form id=\"rateLimitForm\" onsubmit=\"saveRateLimitSettings(event)\"><div class=\"toggle-group\"><label class=\"toggle-label\"><input type=\"checkbox\" id=\"rateLimitEnabled\" name=\"rateLimitEnabled\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.RateLimitEnabled {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " checked")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " class=\"toggle-switch\"> <span class=\"toggle-slider\"></span><div class=\"toggle-text\"><span class=\"toggle-title\">Enable Rate Limiting</span> <span class=\"toggle-desc\">Protect against abuse and DDoS attacks</span></div></label></div><div class=\"form-row\"><div class=\"form-col\"><label for=\"rateLimitRPM\">Requests Per Minute</label><div class=\"input-with-addon\"><input type=\"number\" id=\"rateLimitRPM\" name=\"rateLimitRPM\" value=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", data.RateLimitRPM))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 174, Col: 112}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" min=\"1\" max=\"1000\" class=\"form-input\"> <span class=\"input-addon\">RPM</span></div></div></div><div class=\"form-footer\"><button type=\"submit\" class=\"btn btn-primary\"><i data-lucide=\"save\" class=\"btn-icon\"></i> Save Rate Limits</button></div></form></div></div><!-- Infrastructure Tab --><div id=\"infrastructure-tab\" class=\"tab-pane\"><div class=\"settings-card\"><div class=\"card-header\"><h3>Database</h3><div class=\"btn-group\"><button class=\"btn btn-sm btn-outline\" onclick=\"testDatabaseConnection()\"><i data-lucide=\"activity\" class=\"btn-icon\"></i> Test</button></div></div><div class=\"info-grid\"><div class=\"info-item\"><span class=\"info-label\">Host</span> <span class=\"info-value mono\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var8 string
+		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.DatabaseHost)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 205, Col: 56}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</span></div><div class=\"info-item\"><span class=\"info-label\">Database</span> <span class=\"info-value mono\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.DatabaseName)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 209, Col: 56}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</span></div></div></div><div class=\"settings-card\"><div class=\"card-header\"><h3>Storage</h3><button class=\"btn btn-sm btn-outline\" onclick=\"testStorageConnection()\"><i data-lucide=\"activity\" class=\"btn-icon\"></i> Test</button></div><div class=\"info-grid\"><div class=\"info-item\"><span class=\"info-label\">S3 Endpoint</span> <span class=\"info-value mono\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.S3Endpoint)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 225, Col: 54}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</span></div><div class=\"info-item\"><span class=\"info-label\">Default Bucket</span> <span class=\"info-value mono\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(data.S3Bucket)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 229, Col: 52}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</span></div></div></div></div><!-- Advanced Tab --><div id=\"advanced-tab\" class=\"tab-pane\"><div class=\"settings-card\"><div class=\"card-header\"><h3>Logging</h3></div><form id=\"loggingForm\" onsubmit=\"saveLoggingSettings(event)\"><div class=\"form-row\"><div class=\"form-col\"><label for=\"logLevel\">Log Level</label> <select id=\"logLevel\" name=\"logLevel\" class=\"form-select\"><option value=\"DEBUG\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.LogLevel == "DEBUG" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " selected")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ">🔍 DEBUG - All events</option> <option value=\"INFO\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.LogLevel == "INFO" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " selected")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, ">ℹ️ INFO - General info</option> <option value=\"WARN\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.LogLevel == "WARN" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " selected")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, ">⚠️ WARN - Warnings only</option> <option value=\"ERROR\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if data.LogLevel == "ERROR" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " selected")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">❌ ERROR - Errors only</option></select></div></div><div class=\"form-footer\"><button type=\"submit\" class=\"btn btn-primary\"><i data-lucide=\"save\" class=\"btn-icon\"></i> Update Log Level</button></div></form></div><div class=\"settings-card danger\"><div class=\"card-header\"><h3>⚠️ Danger Zone</h3></div><p class=\"danger-warning\">These actions are irreversible. Please proceed with caution.</p><div class=\"danger-actions\"><button class=\"btn btn-outline-danger\" onclick=\"clearAllCaches()\"><i data-lucide=\"trash-2\" class=\"btn-icon\"></i> Clear All Caches</button> <button class=\"btn btn-outline-danger\" onclick=\"exportAllData()\"><i data-lucide=\"download\" class=\"btn-icon\"></i> Export All Data</button> <button class=\"btn btn-danger\" onclick=\"if(confirm('This will permanently delete all data. Are you sure?')) deleteAllData()\"><i data-lucide=\"alert-triangle\" class=\"btn-icon\"></i> Delete All Data</button></div></div></div></div></div><script src=\"/static/js/table.js\"></script><script src=\"/static/js/settings.js\" type=\"module\"></script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func SettingsPage(data SettingsData) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var12 == nil {
+			templ_7745c5c3_Var12 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var13 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -65,217 +304,7 @@ func SettingsPage(data SettingsData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><div class=\"page-header\"><h1>Settings</h1></div><div class=\"settings-grid\"><!-- Application Settings --><div class=\"settings-section\"><h2>Application</h2><form id=\"appSettingsForm\" onsubmit=\"saveAppSettings(event)\"><div class=\"form-group\"><label for=\"appName\">Application Name</label> <input type=\"text\" id=\"appName\" name=\"appName\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.AppName)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 44, Col: 75}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"></div><div class=\"form-group\"><label>Version</label> <input type=\"text\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(data.AppVersion)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 48, Col: 50}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" disabled></div><div class=\"form-group\"><label>Environment</label> <input type=\"text\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Environment)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 52, Col: 51}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" disabled></div><div class=\"form-group\"><label for=\"maintenanceMode\"><input type=\"checkbox\" id=\"maintenanceMode\" name=\"maintenanceMode\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.MaintenanceMode {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "> Maintenance Mode</label></div><button type=\"submit\" class=\"btn btn-primary\">Save Application Settings</button></form></div><!-- Authentication Settings --><div class=\"settings-section\"><h2>Authentication</h2><form id=\"authSettingsForm\" onsubmit=\"saveAuthSettings(event)\"><div class=\"form-group\"><label for=\"enableSignup\"><input type=\"checkbox\" id=\"enableSignup\" name=\"enableSignup\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.EnableSignup {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "> Enable User Signup</label></div><div class=\"form-group\"><label for=\"enableAPI\"><input type=\"checkbox\" id=\"enableAPI\" name=\"enableAPI\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.EnableAPI {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "> Enable API Access</label></div><button type=\"submit\" class=\"btn btn-primary\">Save Auth Settings</button></form></div><!-- Database Settings --><div class=\"settings-section\"><h2>Database</h2><form><div class=\"form-group\"><label>Host</label> <input type=\"text\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(data.DatabaseHost)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 90, Col: 52}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" disabled></div><div class=\"form-group\"><label>Database Name</label> <input type=\"text\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(data.DatabaseName)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 94, Col: 52}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" disabled></div><div class=\"form-actions\"><button type=\"button\" class=\"btn btn-secondary\" onclick=\"testDatabaseConnection()\">Test Connection</button> <button type=\"button\" class=\"btn btn-danger\" onclick=\"resetDatabase()\">Reset Database</button></div></form></div><!-- Storage Settings --><div class=\"settings-section\"><h2>Storage</h2><form><div class=\"form-group\"><label>S3 Endpoint</label> <input type=\"text\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.S3Endpoint)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 109, Col: 50}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" disabled></div><div class=\"form-group\"><label>Default Bucket</label> <input type=\"text\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.S3Bucket)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 113, Col: 48}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" disabled></div><div class=\"form-actions\"><button type=\"button\" class=\"btn btn-secondary\" onclick=\"testStorageConnection()\">Test Connection</button></div></form></div><!-- Email Settings --><div class=\"settings-section\"><h2>Email</h2><form id=\"emailSettingsForm\" onsubmit=\"saveEmailSettings(event)\"><div class=\"form-group\"><label>SMTP Host</label> <input type=\"text\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.SMTPHost)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 127, Col: 48}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" disabled></div><div class=\"form-group\"><label>SMTP Port</label> <input type=\"number\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", data.SMTPPort))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 131, Col: 69}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" disabled></div><div class=\"form-actions\"><button type=\"button\" class=\"btn btn-secondary\" onclick=\"sendTestEmail()\">Send Test Email</button></div></form></div><!-- Rate Limiting --><div class=\"settings-section\"><h2>Rate Limiting</h2><form id=\"rateLimitForm\" onsubmit=\"saveRateLimitSettings(event)\"><div class=\"form-group\"><label for=\"rateLimitEnabled\"><input type=\"checkbox\" id=\"rateLimitEnabled\" name=\"rateLimitEnabled\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.RateLimitEnabled {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, " checked")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "> Enable Rate Limiting</label></div><div class=\"form-group\"><label for=\"rateLimitRPM\">Requests Per Minute</label> <input type=\"number\" id=\"rateLimitRPM\" name=\"rateLimitRPM\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", data.RateLimitRPM))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/settings.templ`, Line: 151, Col: 111}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" min=\"1\" max=\"1000\"></div><button type=\"submit\" class=\"btn btn-primary\">Save Rate Limit Settings</button></form></div><!-- Logging --><div class=\"settings-section\"><h2>Logging</h2><form id=\"loggingForm\" onsubmit=\"saveLoggingSettings(event)\"><div class=\"form-group\"><label for=\"logLevel\">Log Level</label> <select id=\"logLevel\" name=\"logLevel\"><option value=\"DEBUG\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.LogLevel == "DEBUG" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, ">DEBUG</option> <option value=\"INFO\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.LogLevel == "INFO" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, ">INFO</option> <option value=\"WARN\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.LogLevel == "WARN" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, ">WARN</option> <option value=\"ERROR\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.LogLevel == "ERROR" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, ">ERROR</option></select></div><button type=\"submit\" class=\"btn btn-primary\">Save Logging Settings</button></form></div><!-- Danger Zone --><div class=\"settings-section danger-zone\"><h2>Danger Zone</h2><div class=\"danger-actions\"><button class=\"btn btn-danger\" onclick=\"clearAllCaches()\">Clear All Caches</button> <button class=\"btn btn-danger\" onclick=\"exportAllData()\">Export All Data</button> <button class=\"btn btn-danger\" onclick=\"deleteAllData()\">Delete All Data</button></div></div></div></div><script src=\"/static/js/settings.js\" type=\"module\"></script>")
+			templ_7745c5c3_Err = SettingsContent(data).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -284,7 +313,54 @@ func SettingsPage(data SettingsData) templ.Component {
 		templ_7745c5c3_Err = layouts.Base(layouts.BaseProps{
 			Title:     "Settings",
 			UserEmail: data.UserEmail,
-		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var13), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func SettingsPartial(data SettingsData) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var15 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = SettingsContent(data).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			return nil
+		})
+		templ_7745c5c3_Err = layouts.PartialContent("Settings").Render(templ.WithChildren(ctx, templ_7745c5c3_Var15), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

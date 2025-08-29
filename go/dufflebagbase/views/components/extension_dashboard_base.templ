@@ -1,0 +1,389 @@
+package components
+
+import "fmt"
+
+type ExtensionDashboardProps struct {
+    ExtensionName string
+    ExtensionIcon string
+    Version       string
+    Description   string
+    Stats         []ExtensionStatCard
+    TabContent    templ.Component
+    ActiveTab     string
+    Tabs          []DashboardTab
+}
+
+type ExtensionStatCard struct {
+    Label      string
+    Value      string
+    Icon       string
+    Color      string // "blue", "green", "purple", "orange", "red"
+    Change     string // e.g., "+12%"
+    Trend      string // "up", "down", "neutral"
+}
+
+type DashboardTab struct {
+    ID     string
+    Label  string
+    Icon   string
+    Active bool
+}
+
+templ ExtensionDashboard(props ExtensionDashboardProps) {
+    <div class="extension-dashboard">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-content">
+                <div class="header-icon">
+                    <i data-lucide={ props.ExtensionIcon }></i>
+                </div>
+                <div class="header-info">
+                    <h1 class="dashboard-title">{ props.ExtensionName }</h1>
+                    <p class="dashboard-description">{ props.Description }</p>
+                    <span class="version-badge">v{ props.Version }</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn-secondary" onclick="refreshDashboard()">
+                    <i data-lucide="refresh-cw"></i>
+                    Refresh
+                </button>
+                <button class="btn-secondary" onclick="openExtensionSettings()">
+                    <i data-lucide="settings"></i>
+                    Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        if len(props.Stats) > 0 {
+            <div class="stats-grid">
+                for _, stat := range props.Stats {
+                    <div class={ "stat-card", fmt.Sprintf("stat-%s", stat.Color) }>
+                        <div class="stat-icon">
+                            <i data-lucide={ stat.Icon }></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">{ stat.Value }</div>
+                            <div class="stat-label">{ stat.Label }</div>
+                            if stat.Change != "" {
+                                <div class={ "stat-change", fmt.Sprintf("trend-%s", stat.Trend) }>
+                                    if stat.Trend == "up" {
+                                        <i data-lucide="trending-up"></i>
+                                    } else if stat.Trend == "down" {
+                                        <i data-lucide="trending-down"></i>
+                                    } else {
+                                        <i data-lucide="minus"></i>
+                                    }
+                                    <span>{ stat.Change }</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Dashboard Tabs -->
+        if len(props.Tabs) > 0 {
+            <div class="dashboard-tabs">
+                <div class="tabs-header">
+                    for _, tab := range props.Tabs {
+                        <button 
+                            class={ "tab-button", templ.KV("active", tab.Active) }
+                            data-tab={ tab.ID }
+                            data-onclick={ fmt.Sprintf("switchDashboardTab('%s')", tab.ID) }>
+                            <i data-lucide={ tab.Icon }></i>
+                            <span>{ tab.Label }</span>
+                        </button>
+                    }
+                </div>
+                <div class="tabs-content">
+                    @props.TabContent
+                </div>
+            </div>
+        } else {
+            <!-- Simple content without tabs -->
+            <div class="dashboard-content">
+                @props.TabContent
+            </div>
+        }
+    </div>
+
+    <style>
+        .extension-dashboard {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .dashboard-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+        }
+
+        .dashboard-description {
+            color: #6b7280;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .version-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #e5e7eb;
+            color: #4b5563;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            color: #4b5563;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-blue .stat-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+
+        .stat-green .stat-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .stat-purple .stat-icon {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        .stat-orange .stat-icon {
+            background: rgba(251, 146, 60, 0.1);
+            color: #fb923c;
+        }
+
+        .stat-red .stat-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stat-change i {
+            width: 14px;
+            height: 14px;
+        }
+
+        .trend-up {
+            color: #10b981;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        .trend-neutral {
+            color: #6b7280;
+        }
+
+        .dashboard-tabs {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .tab-button:hover {
+            color: #4b5563;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            background: white;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #3b82f6;
+        }
+
+        .tab-button i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .tabs-content {
+            padding: 1.5rem;
+        }
+
+        .dashboard-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+    <script>
+        function switchDashboardTab(tabId) {
+            // Update active tab button
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                if (content.dataset.tabContent === tabId) {
+                    content.style.display = 'block';
+                } else {
+                    content.style.display = 'none';
+                }
+            });
+        }
+
+        function refreshDashboard() {
+            // Trigger dashboard refresh
+            if (window.htmx) {
+                htmx.trigger(document.querySelector('.extension-dashboard'), 'refresh');
+            }
+        }
+
+        function openExtensionSettings() {
+            // Open extension settings modal or navigate to settings page
+            const extensionName = document.querySelector('.dashboard-title').textContent;
+            window.location.href = `/extensions?settings=${encodeURIComponent(extensionName)}`;
+        }
+    </script>
+}

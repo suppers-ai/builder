@@ -1,86 +1,163 @@
 // Users page functionality
 
-// Show create user modal
-window.showCreateUserModal = function() {
-    document.getElementById('createUserModal').style.display = 'block';
-}
-
-// Hide create user modal  
-window.hideCreateUserModal = function() {
-    document.getElementById('createUserModal').style.display = 'none';
-    document.getElementById('createUserForm').reset();
-}
-
-// Create user
-window.createUser = async function(event) {
-    event.preventDefault();
-    
-    const form = event.target;
-    const formData = new FormData(form);
-    
+// Update user role
+window.updateUserRole = async function(userId, role) {
     try {
-        const response = await fetch('/api/v1/admin/users', {
-            method: 'POST',
+        const response = await fetch(`/admin/users/${userId}/role`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                email: formData.get('email'),
-                password: formData.get('password'),
-                username: formData.get('username'),
-                role: formData.get('role')
-            })
+            body: JSON.stringify({ role: role })
         });
         
         if (response.ok) {
-            window.location.reload();
+            // Show success message
+            showToast('Role updated successfully', 'success');
+            // Reload the page to reflect changes
+            setTimeout(() => window.location.reload(), 1000);
         } else {
             const error = await response.json();
-            alert('Error creating user: ' + error.message);
+            showToast('Error updating role: ' + error.error, 'error');
         }
     } catch (error) {
-        alert('Error creating user: ' + error.message);
+        showToast('Error updating role: ' + error.message, 'error');
     }
 }
 
-// Edit user
-window.editUser = async function(userId) {
-    // TODO: Implement edit user modal
-    console.log('Edit user:', userId);
-}
-
-// Delete user
-window.deleteUser = async function(userId) {
-    if (!confirm('Are you sure you want to delete this user?')) {
+// Lock user
+window.lockUser = async function(userId) {
+    if (!confirm('Are you sure you want to lock this user?')) {
         return;
     }
     
     try {
-        const response = await fetch(`/api/v1/admin/users/${userId}`, {
-            method: 'DELETE'
+        const response = await fetch(`/admin/users/${userId}/lock`, {
+            method: 'POST'
         });
         
         if (response.ok) {
-            window.location.reload();
+            showToast('User locked successfully', 'success');
+            setTimeout(() => window.location.reload(), 1000);
         } else {
             const error = await response.json();
-            alert('Error deleting user: ' + error.message);
+            showToast('Error locking user: ' + error.error, 'error');
         }
     } catch (error) {
-        alert('Error deleting user: ' + error.message);
+        showToast('Error locking user: ' + error.message, 'error');
     }
 }
 
-// Close modal on escape key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        hideCreateUserModal();
+// Unlock user
+window.unlockUser = async function(userId) {
+    try {
+        const response = await fetch(`/admin/users/${userId}/unlock`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            showToast('User unlocked successfully', 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            const error = await response.json();
+            showToast('Error unlocking user: ' + error.error, 'error');
+        }
+    } catch (error) {
+        showToast('Error unlocking user: ' + error.message, 'error');
     }
-});
+}
 
-// Close modal on outside click
-document.getElementById('createUserModal')?.addEventListener('click', function(event) {
-    if (event.target === this) {
-        hideCreateUserModal();
+// Send password reset
+window.sendPasswordReset = async function(userId) {
+    if (!confirm('Send password reset email to this user?')) {
+        return;
     }
+    
+    try {
+        const response = await fetch(`/admin/users/${userId}/password-reset`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            showToast('Password reset email sent successfully', 'success');
+        } else {
+            const error = await response.json();
+            showToast('Error sending password reset: ' + error.error, 'error');
+        }
+    } catch (error) {
+        showToast('Error sending password reset: ' + error.message, 'error');
+    }
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+    // Create toast element if it doesn't exist
+    let toast = document.getElementById('toast-notification');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast-notification';
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+            max-width: 400px;
+        `;
+        document.body.appendChild(toast);
+    }
+    
+    // Set background color based on type
+    const colors = {
+        success: '#10b981',
+        error: '#ef4444',
+        info: '#3b82f6',
+        warning: '#f59e0b'
+    };
+    toast.style.backgroundColor = colors[type] || colors.info;
+    
+    // Set message and show
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    toast.style.display = 'block';
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 300);
+    }, 3000);
+}
+
+// Initialize tooltips for action buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to action buttons
+    const buttons = document.querySelectorAll('.action-buttons button');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add change tracking to role selects
+    const roleSelects = document.querySelectorAll('.role-select');
+    roleSelects.forEach(select => {
+        const originalValue = select.value;
+        select.addEventListener('change', function() {
+            if (this.value === 'deleted') {
+                if (!confirm('Setting role to "deleted" will ban this user from making any API calls. Are you sure?')) {
+                    this.value = originalValue;
+                    return;
+                }
+            }
+        });
+    });
 });
