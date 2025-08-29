@@ -2,13 +2,13 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	
-	"github.com/suppers-ai/dufflebagbase/models"
 	"github.com/suppers-ai/logger"
 )
 
@@ -37,7 +37,7 @@ type LogEntry struct {
 
 // GetLogs retrieves logs with pagination and filtering
 func (s *LogsService) GetLogs(ctx context.Context, level string, limit, offset int) ([]LogEntry, int64, error) {
-	query := s.db.WithContext(ctx).Model(&models.Log{})
+	query := s.db.WithContext(ctx).Model(&logger.LogModel{})
 	
 	if level != "" && level != "all" {
 		query = query.Where("level = ?", level)
@@ -46,7 +46,7 @@ func (s *LogsService) GetLogs(ctx context.Context, level string, limit, offset i
 	var total int64
 	query.Count(&total)
 	
-	var logs []models.Log
+	var logs []logger.LogModel
 	err := query.Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
@@ -59,8 +59,10 @@ func (s *LogsService) GetLogs(ctx context.Context, level string, limit, offset i
 	entries := make([]LogEntry, len(logs))
 	for i, log := range logs {
 		contextMap := make(map[string]interface{})
-		if err := log.Fields.Unmarshal(&contextMap); err != nil {
-			s.logger.Error(ctx, "Failed to unmarshal log context", logger.Err(err))
+		if log.Fields != nil {
+			if err := json.Unmarshal(log.Fields, &contextMap); err != nil {
+				s.logger.Error(ctx, "Failed to unmarshal log context", logger.Err(err))
+			}
 		}
 		
 		entries[i] = LogEntry{
@@ -77,7 +79,7 @@ func (s *LogsService) GetLogs(ctx context.Context, level string, limit, offset i
 
 // GetLogByID retrieves a specific log by ID
 func (s *LogsService) GetLogByID(ctx context.Context, id uuid.UUID) (*LogEntry, error) {
-	var log models.Log
+	var log logger.LogModel
 	err := s.db.WithContext(ctx).Where("id = ?", id).First(&log).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -87,8 +89,10 @@ func (s *LogsService) GetLogByID(ctx context.Context, id uuid.UUID) (*LogEntry, 
 	}
 	
 	contextMap := make(map[string]interface{})
-	if err := log.Fields.Unmarshal(&contextMap); err != nil {
-		s.logger.Error(ctx, "Failed to unmarshal log context", logger.Err(err))
+	if log.Fields != nil {
+		if err := json.Unmarshal(log.Fields, &contextMap); err != nil {
+			s.logger.Error(ctx, "Failed to unmarshal log context", logger.Err(err))
+		}
 	}
 	
 	entry := &LogEntry{
@@ -108,7 +112,7 @@ func (s *LogsService) GetLogStats(ctx context.Context) (map[string]interface{}, 
 	
 	// Total logs
 	var total int64
-	s.db.WithContext(ctx).Model(&models.Log{}).Count(&total)
+	s.db.WithContext(ctx).Model(&logger.LogModel{}).Count(&total)
 	stats["total"] = total
 	
 	// Logs by level
@@ -117,7 +121,7 @@ func (s *LogsService) GetLogStats(ctx context.Context) (map[string]interface{}, 
 		Count int64
 	}
 	var levelCounts []LevelCount
-	s.db.WithContext(ctx).Model(&models.Log{}).
+	s.db.WithContext(ctx).Model(&logger.LogModel{}).
 		Select("level, COUNT(*) as count").
 		Group("level").
 		Scan(&levelCounts)
@@ -130,14 +134,14 @@ func (s *LogsService) GetLogStats(ctx context.Context) (map[string]interface{}, 
 	
 	// Recent logs (last 24 hours)
 	var recent int64
-	s.db.WithContext(ctx).Model(&models.Log{}).
+	s.db.WithContext(ctx).Model(&logger.LogModel{}).
 		Where("created_at > ?", time.Now().Add(-24*time.Hour)).
 		Count(&recent)
 	stats["recent_24h"] = recent
 	
 	// Error rate (errors / total)
 	var errors int64
-	s.db.WithContext(ctx).Model(&models.Log{}).
+	s.db.WithContext(ctx).Model(&logger.LogModel{}).
 		Where("level = ?", "error").
 		Count(&errors)
 	
@@ -156,7 +160,7 @@ func (s *LogsService) ClearLogs(ctx context.Context, olderThan time.Duration) (i
 	
 	result := s.db.WithContext(ctx).
 		Where("created_at < ?", cutoff).
-		Delete(&models.Log{})
+		Delete(&logger.LogModel{})
 	
 	if result.Error != nil {
 		return 0, fmt.Errorf("failed to clear logs: %w", result.Error)

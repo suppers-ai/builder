@@ -77,8 +77,20 @@ function selectTable(schema, table) {
 }
 
 function loadTableData(schema, table) {
-    // This would typically make an AJAX request to load the table data
-    window.location.href = `/database?schema=${schema}&table=${table}`;
+    // Use HTMX to load table data if available, otherwise fallback to full page reload
+    if (window.htmx) {
+        // Make an HTMX request to load just the content
+        htmx.ajax('GET', `/database?schema=${schema}&table=${table}`, {
+            target: '#main-content',
+            swap: 'outerHTML'
+        });
+        
+        // Update the URL without reloading
+        window.history.pushState({}, '', `/database?schema=${schema}&table=${table}`);
+    } else {
+        // Fallback to full page reload if HTMX is not available
+        window.location.href = `/database?schema=${schema}&table=${table}`;
+    }
 }
 
 // Tab Switching

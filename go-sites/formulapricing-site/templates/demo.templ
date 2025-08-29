@@ -1,0 +1,257 @@
+package templates
+
+templ DemoPage() {
+	@Layout("Live Demo - Formula Pricing", DemoContent())
+}
+
+templ DemoContent() {
+	<div class="min-h-screen">
+		<!-- Hero Section -->
+		<div class="hero-section">
+			<!-- Navigation -->
+			<nav class="px-6 py-4 flex justify-between items-center">
+				<div class="flex items-center space-x-2">
+					<a href="/" class="text-xl font-normal text-gray-800">Formula<span class="font-bold">Pricing</span></a>
+				</div>
+				<div class="flex items-center space-x-6">
+					<form action="/search" method="GET" class="flex">
+						<input 
+							type="text" 
+							name="q"
+							placeholder="Search..." 
+							class="px-4 py-2 rounded-lg bg-white/70 backdrop-blur border border-gray-200 focus:outline-none focus:border-purple-500"
+						/>
+					</form>
+					<a href="/faq" class="text-gray-700 hover:text-purple-600 font-medium">FAQ</a>
+					<a href="https://github.com" class="text-gray-700 hover:text-purple-600">
+						<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+						</svg>
+					</a>
+					<a href="/docs" class="button-documentation">Documentation</a>
+				</div>
+			</nav>
+
+			<div class="container mx-auto px-6 pt-8 pb-12 text-center">
+				<h1 class="text-5xl font-bold text-gray-800 mb-4">
+					Live Demo
+				</h1>
+				<p class="text-xl text-gray-600">
+					Try Formula Pricing in action
+				</p>
+			</div>
+		</div>
+
+		<!-- Demo Content -->
+		<div class="container mx-auto px-6 -mt-6">
+			<div class="main-card p-12">
+				<div class="max-w-6xl mx-auto">
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+						<!-- Formula Input -->
+						<div>
+							<h3 class="text-2xl font-semibold text-gray-800 mb-4">Formula</h3>
+							<div class="formula-display mb-6">
+								<textarea 
+									id="formula-input"
+									class="w-full h-32 p-4 text-sm font-mono border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+									placeholder="Enter your pricing formula..."
+								>base_price * (1 + margin_percentage/100) * quantity_factor</textarea>
+							</div>
+
+							<h3 class="text-2xl font-semibold text-gray-800 mb-4">Variables</h3>
+							<div class="space-y-4 mb-6">
+								<div class="flex items-center space-x-4">
+									<label class="w-32 text-sm font-medium text-gray-700">base_price:</label>
+									<input 
+										type="number" 
+										id="base_price"
+										value="100"
+										class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+									/>
+								</div>
+								<div class="flex items-center space-x-4">
+									<label class="w-32 text-sm font-medium text-gray-700">margin_percentage:</label>
+									<input 
+										type="number" 
+										id="margin_percentage"
+										value="20"
+										class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+									/>
+								</div>
+								<div class="flex items-center space-x-4">
+									<label class="w-32 text-sm font-medium text-gray-700">quantity_factor:</label>
+									<input 
+										type="number" 
+										id="quantity_factor"
+										value="0.95"
+										step="0.01"
+										class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+									/>
+								</div>
+							</div>
+
+							<button 
+								id="calculate-btn"
+								class="button-primary w-full"
+								onclick="calculateFormula()"
+							>
+								Calculate Price
+							</button>
+						</div>
+
+						<!-- Results -->
+						<div>
+							<h3 class="text-2xl font-semibold text-gray-800 mb-4">Result</h3>
+							<div class="formula-display mb-6">
+								<div id="result-display" class="text-2xl font-bold text-purple-600 p-8 text-center">
+									$114.00
+								</div>
+							</div>
+
+							<h3 class="text-2xl font-semibold text-gray-800 mb-4">Calculation Steps</h3>
+							<div class="formula-display">
+								<div id="steps-display" class="text-sm space-y-2">
+									<div>1. base_price = 100</div>
+									<div>2. margin_percentage = 20</div>
+									<div>3. quantity_factor = 0.95</div>
+									<div>4. 100 * (1 + 20/100) * 0.95</div>
+									<div>5. 100 * 1.2 * 0.95</div>
+									<div class="font-bold text-purple-600">6. Result: 114.00</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Example Formulas -->
+					<div class="mt-12">
+						<h3 class="text-2xl font-semibold text-gray-800 mb-6">Example Formulas</h3>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<div class="p-6 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">Volume Discount</h4>
+								<div class="formula-display mb-3">
+									<code class="text-sm">base_price * (quantity > 10 ? 0.9 : 1.0)</code>
+								</div>
+								<p class="text-sm text-gray-600">Apply 10% discount for quantities over 10</p>
+								<button class="mt-3 text-purple-600 hover:text-purple-700 text-sm font-medium" onclick="loadExample('volume')">
+									Try this formula →
+								</button>
+							</div>
+
+							<div class="p-6 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">Tiered Pricing</h4>
+								<div class="formula-display mb-3">
+									<code class="text-sm">base_price + (tier === 'premium' ? 50 : 0)</code>
+								</div>
+								<p class="text-sm text-gray-600">Add premium tier pricing</p>
+								<button class="mt-3 text-purple-600 hover:text-purple-700 text-sm font-medium" onclick="loadExample('tiered')">
+									Try this formula →
+								</button>
+							</div>
+
+							<div class="p-6 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">Seasonal Adjustment</h4>
+								<div class="formula-display mb-3">
+									<code class="text-sm">base_price * seasonal_multiplier * demand_factor</code>
+								</div>
+								<p class="text-sm text-gray-600">Adjust pricing based on season and demand</p>
+								<button class="mt-3 text-purple-600 hover:text-purple-700 text-sm font-medium" onclick="loadExample('seasonal')">
+									Try this formula →
+								</button>
+							</div>
+
+							<div class="p-6 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">Complex Calculation</h4>
+								<div class="formula-display mb-3">
+									<code class="text-sm">max(min_price, base_price * (1 + margin/100) - discount)</code>
+								</div>
+								<p class="text-sm text-gray-600">Ensure price doesn't go below minimum</p>
+								<button class="mt-3 text-purple-600 hover:text-purple-700 text-sm font-medium" onclick="loadExample('complex')">
+									Try this formula →
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="mt-12 text-center">
+						<p class="text-gray-600 mb-4">Ready to integrate Formula Pricing?</p>
+						<div class="flex justify-center space-x-4">
+							<a href="/docs" class="button-primary">Read Documentation</a>
+							<a href="/examples" class="button-secondary">View More Examples</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<footer class="mt-20 py-8 border-t border-gray-200" style="background: white">
+			<div class="container mx-auto px-6 text-center text-gray-600">
+				<p>© 2025 Formula Pricing. Built with Go and PostgreSQL.</p>
+				<div class="mt-4 flex justify-center space-x-6">
+					<a href="https://github.com" class="hover:text-purple-600">GitHub</a>
+					<a href="/docs" class="hover:text-purple-600">Documentation</a>
+					<a href="/api-reference" class="hover:text-purple-600">API Reference</a>
+					<a href="/examples" class="hover:text-purple-600">Examples</a>
+				</div>
+			</div>
+		</footer>
+	</div>
+
+	<script>
+		function calculateFormula() {
+			// This is a basic demo implementation
+			const basePrice = parseFloat(document.getElementById('base_price').value) || 0;
+			const marginPercentage = parseFloat(document.getElementById('margin_percentage').value) || 0;
+			const quantityFactor = parseFloat(document.getElementById('quantity_factor').value) || 1;
+			
+			const result = basePrice * (1 + marginPercentage/100) * quantityFactor;
+			
+			document.getElementById('result-display').textContent = '$' + result.toFixed(2);
+			
+			// Update calculation steps
+			const steps = [
+				`1. base_price = ${basePrice}`,
+				`2. margin_percentage = ${marginPercentage}`,
+				`3. quantity_factor = ${quantityFactor}`,
+				`4. ${basePrice} * (1 + ${marginPercentage}/100) * ${quantityFactor}`,
+				`5. ${basePrice} * ${(1 + marginPercentage/100).toFixed(2)} * ${quantityFactor}`,
+				`6. Result: ${result.toFixed(2)}`
+			];
+			
+			document.getElementById('steps-display').innerHTML = steps.map(step => 
+				`<div${step.includes('Result:') ? ' class="font-bold text-purple-600"' : ''}>${step}</div>`
+			).join('');
+		}
+
+		function loadExample(type) {
+			const examples = {
+				volume: {
+					formula: 'base_price * (quantity > 10 ? 0.9 : 1.0)',
+					variables: { base_price: 100, quantity: 15 }
+				},
+				tiered: {
+					formula: 'base_price + (tier === "premium" ? 50 : 0)',
+					variables: { base_price: 100, tier: 'premium' }
+				},
+				seasonal: {
+					formula: 'base_price * seasonal_multiplier * demand_factor',
+					variables: { base_price: 100, seasonal_multiplier: 1.2, demand_factor: 1.1 }
+				},
+				complex: {
+					formula: 'max(min_price, base_price * (1 + margin/100) - discount)',
+					variables: { min_price: 50, base_price: 100, margin: 20, discount: 10 }
+				}
+			};
+
+			const example = examples[type];
+			if (example) {
+				document.getElementById('formula-input').value = example.formula;
+				// Note: This is a simplified demo - in a real implementation,
+				// you would dynamically update the variable inputs
+			}
+		}
+
+		// Calculate on page load
+		document.addEventListener('DOMContentLoaded', calculateFormula);
+	</script>
+}

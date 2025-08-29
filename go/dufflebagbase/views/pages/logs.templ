@@ -283,18 +283,9 @@ templ LogsPage(data LogsPageData) {
 }
 
 templ LogsPartial(data LogsPageData) {
-	<div class="content-card logs-content">
-		<div class="content-header">
-			<div class="breadcrumb">
-				<a href="/dashboard" class="breadcrumb-item">Home</a>
-				<span class="breadcrumb-separator">›</span>
-				<span class="breadcrumb-current">Logs</span>
-			</div>
-		</div>
-		<div class="content-body">
-			@LogsContent(data)
-		</div>
-	</div>
+	@layouts.PartialContent("Logs") {
+		@LogsContent(data)
+	}
 }
 
 // Helper functions

@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+DEPLOYMENT.md
+ERROR_HANDLING.md
+PERFORMANCE_OPTIMIZATIONS.md
+TEST_SUMMARY.md
+
+# Development files
+.env
+dev.sh
+deploy.sh
+run-tests.sh
+verify-eye-tracking.js
+
+# Test files and coverage
+tests/
+coverage-*.out
+
+# Build artifacts
+formulapricing-site
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

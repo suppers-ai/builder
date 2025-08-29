@@ -30,7 +30,7 @@ func PartialContent(title string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"content-card partial-content\"><div class=\"content-header\"><div class=\"breadcrumb\"><a href=\"/dashboard\" class=\"breadcrumb-item\">Home</a> <span class=\"breadcrumb-separator\">›</span> <span class=\"breadcrumb-current\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"content-card\" id=\"main-content\"><div class=\"content-header\"><div class=\"breadcrumb\"><a href=\"/dashboard\" class=\"breadcrumb-item\">Home</a> <span class=\"breadcrumb-separator\">›</span> <span class=\"breadcrumb-current\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

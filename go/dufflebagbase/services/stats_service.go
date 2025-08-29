@@ -9,7 +9,10 @@ import (
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/mem"
 
+	"github.com/suppers-ai/auth"
 	"github.com/suppers-ai/dufflebagbase/models"
+	"github.com/suppers-ai/logger"
+	"github.com/suppers-ai/storage"
 )
 
 // SystemStats represents system statistics
@@ -89,7 +92,7 @@ func (s *StatsService) GetDatabaseStats(ctx context.Context) (*DatabaseStats, er
 	stats := &DatabaseStats{}
 
 	// Count users
-	s.service.db.WithContext(ctx).Model(&models.User{}).Count(&stats.TotalUsers)
+	s.service.db.WithContext(ctx).Model(&auth.User{}).Count(&stats.TotalUsers)
 
 	// Count collections
 	s.service.db.WithContext(ctx).Model(&models.Collection{}).Count(&stats.TotalCollections)
@@ -100,7 +103,7 @@ func (s *StatsService) GetDatabaseStats(ctx context.Context) (*DatabaseStats, er
 	// Calculate total storage used
 	var totalSize int64
 	s.service.db.WithContext(ctx).
-		Model(&models.Object{}).
+		Model(&storage.StorageObject{}).
 		Select("COALESCE(SUM(size), 0)").
 		Scan(&totalSize)
 	stats.TotalStorage = totalSize
@@ -115,7 +118,7 @@ func (s *StatsService) GetDatabaseStats(ctx context.Context) (*DatabaseStats, er
 func (s *StatsService) GetStorageStats(ctx context.Context) (map[string]int64, error) {
 	bucketSizes := make(map[string]int64)
 
-	var buckets []models.Bucket
+	var buckets []storage.Bucket
 	if err := s.service.db.WithContext(ctx).Find(&buckets).Error; err != nil {
 		return nil, err
 	}
@@ -123,7 +126,7 @@ func (s *StatsService) GetStorageStats(ctx context.Context) (map[string]int64, e
 	for _, bucket := range buckets {
 		var size int64
 		s.service.db.WithContext(ctx).
-			Model(&models.Object{}).
+			Model(&storage.StorageObject{}).
 			Where("bucket_id = ?", bucket.ID).
 			Select("COALESCE(SUM(size), 0)").
 			Scan(&size)
@@ -141,7 +144,7 @@ func (s *StatsService) GetUserActivity(ctx context.Context, days int) (map[strin
 	// Active users (logged in recently)
 	var activeUsers int64
 	s.service.db.WithContext(ctx).
-		Model(&models.Session{}).
+		Model(&auth.Session{}).
 		Where("created_at > ?", since).
 		Distinct("user_id").
 		Count(&activeUsers)
@@ -150,7 +153,7 @@ func (s *StatsService) GetUserActivity(ctx context.Context, days int) (map[strin
 	// New users
 	var newUsers int64
 	s.service.db.WithContext(ctx).
-		Model(&models.User{}).
+		Model(&auth.User{}).
 		Where("created_at > ?", since).
 		Count(&newUsers)
 	activity["new_users"] = newUsers
@@ -166,7 +169,7 @@ func (s *StatsService) GetUserActivity(ctx context.Context, days int) (map[strin
 	// Files uploaded
 	var filesUploaded int64
 	s.service.db.WithContext(ctx).
-		Model(&models.Object{}).
+		Model(&storage.StorageObject{}).
 		Where("created_at > ?", since).
 		Count(&filesUploaded)
 	activity["files_uploaded"] = filesUploaded
@@ -198,13 +201,13 @@ func (s *StatsService) GetDashboardStats(ctx context.Context) (*DashboardStats, 
 	}
 
 	// Get basic counts
-	s.service.db.DB.Model(&models.User{}).Count(&stats.TotalUsers)
+	s.service.db.DB.Model(&auth.User{}).Count(&stats.TotalUsers)
 	s.service.db.DB.Model(&models.Collection{}).Count(&stats.TotalCollections)
 	s.service.db.DB.Model(&models.CollectionRecord{}).Count(&stats.TotalRecords)
 
 	// Get storage statistics
 	var totalSize int64
-	s.service.db.DB.Model(&models.Object{}).
+	s.service.db.DB.Model(&storage.StorageObject{}).
 		Select("COALESCE(SUM(size), 0)").
 		Scan(&totalSize)
 	stats.TotalStorage = totalSize
@@ -215,19 +218,19 @@ func (s *StatsService) GetDashboardStats(ctx context.Context) (*DashboardStats, 
 	
 	// Count files
 	var totalFiles int64
-	s.service.db.DB.Model(&models.Object{}).Count(&totalFiles)
+	s.service.db.DB.Model(&storage.StorageObject{}).Count(&totalFiles)
 	stats.StorageStats["total_files"] = totalFiles
 	
 	// Count images
 	var totalImages int64
-	s.service.db.DB.Model(&models.Object{}).
-		Where("content_type LIKE 'image/%'").
+	s.service.db.DB.Model(&storage.StorageObject{}).
+		Where("mime_type LIKE 'image/%'").
 		Count(&totalImages)
 	stats.StorageStats["total_images"] = totalImages
 	
 	// Recent files (last 7 days)
 	var recentFiles int64
-	s.service.db.DB.Model(&models.Object{}).
+	s.service.db.DB.Model(&storage.StorageObject{}).
 		Where("created_at > ?", time.Now().AddDate(0, 0, -7)).
 		Count(&recentFiles)
 	stats.StorageStats["recent_files"] = recentFiles
@@ -243,12 +246,12 @@ func (s *StatsService) GetDashboardStats(ctx context.Context) (*DashboardStats, 
 	}
 
 	// Active users (last 24 hours)
-	s.service.db.DB.Model(&models.User{}).
+	s.service.db.DB.Model(&auth.User{}).
 		Where("updated_at > ?", time.Now().Add(-24*time.Hour)).
 		Count(&stats.ActiveUsers)
 
 	// API requests (simplified - count logs)
-	s.service.db.DB.Model(&models.Log{}).
+	s.service.db.DB.Model(&logger.LogModel{}).
 		Where("created_at > ?", time.Now().Add(-24*time.Hour)).
 		Count(&stats.APIRequests)
 
@@ -264,7 +267,7 @@ func (s *StatsService) GetDashboardStats(ctx context.Context) (*DashboardStats, 
 		
 		// User growth
 		var userCount int64
-		s.service.db.DB.Model(&models.User{}).
+		s.service.db.DB.Model(&auth.User{}).
 			Where("DATE(created_at) = DATE(?)", date).
 			Count(&userCount)
 		stats.UserGrowth = append(stats.UserGrowth, ChartDataPoint{
@@ -274,7 +277,7 @@ func (s *StatsService) GetDashboardStats(ctx context.Context) (*DashboardStats, 
 		
 		// API activity
 		var apiCount int64
-		s.service.db.DB.Model(&models.Log{}).
+		s.service.db.DB.Model(&logger.LogModel{}).
 			Where("DATE(created_at) = DATE(?)", date).
 			Count(&apiCount)
 		stats.APIActivity = append(stats.APIActivity, ChartDataPoint{

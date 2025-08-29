@@ -19,7 +19,7 @@ type ExtensionMigration struct {
 
 // TableName specifies the table name
 func (ExtensionMigration) TableName() string {
-	return "extension_migrations"
+	return getTableName("public", "extension_migrations")
 }
 
 // BeforeCreate hook

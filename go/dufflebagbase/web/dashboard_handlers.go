@@ -52,3 +52,37 @@ func GetCPUStats(svc *services.Service) http.HandlerFunc {
         })
     }
 }
+
+// GetDashboardMetrics returns system metrics as JSON for the dashboard
+func GetDashboardMetrics(svc *services.Service) http.HandlerFunc {
+    h := NewBaseHandler(svc)
+    return func(w http.ResponseWriter, r *http.Request) {
+        ctx := h.NewContext()
+        
+        // Get system stats
+        stats, err := svc.Stats().GetSystemStats(ctx)
+        if err != nil {
+            h.LogError(ctx, "Failed to get system stats", err)
+            h.JSONError(w, http.StatusInternalServerError, "Failed to get system stats")
+            return
+        }
+        
+        // Format the response to match what dashboard.js expects
+        response := map[string]interface{}{
+            "system": map[string]interface{}{
+                "cpu_usage_percent": stats.CPUUsage,
+                "memory_used_bytes": stats.MemoryUsed,
+                "memory_total_bytes": stats.MemoryTotal,
+                "memory_used_percent": stats.MemoryUsage,
+                "disk_used_bytes": stats.DiskUsed,
+                "disk_total_bytes": stats.DiskTotal,
+                "disk_used_percent": stats.DiskUsage,
+                "goroutines": stats.Goroutines,
+                "uptime": stats.Uptime,
+                "timestamp": stats.Timestamp,
+            },
+        }
+        
+        h.JSONResponse(w, http.StatusOK, response)
+    }
+}

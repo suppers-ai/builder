@@ -25,7 +25,7 @@ type Collection struct {
 
 // TableName specifies the table name
 func (Collection) TableName() string {
-	return "collections_metadata"
+	return getTableName("collections", "metadata")
 }
 
 // BeforeCreate hook
@@ -47,12 +47,11 @@ type CollectionRecord struct {
 
 	// Relationships
 	Collection Collection `gorm:"foreignKey:CollectionID" json:"-"`
-	User       *User      `gorm:"foreignKey:UserID" json:"-"`
 }
 
 // TableName specifies the table name
 func (CollectionRecord) TableName() string {
-	return "collections_records"
+	return getTableName("collections", "records")
 }
 
 // BeforeCreate hook

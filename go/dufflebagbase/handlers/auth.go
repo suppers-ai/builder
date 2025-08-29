@@ -98,7 +98,7 @@ func APISignup(svc *services.Service) http.HandlerFunc {
 		
 		// Create user
 		ctx := r.Context()
-		user, err := svc.Auth().CreateUser(ctx, req.Email, req.Password)
+		user, err := svc.Auth().CreateUser(ctx, req.Email, req.Password, "user")
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "Failed to create user")
 			return

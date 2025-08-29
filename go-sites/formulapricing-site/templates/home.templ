@@ -1,0 +1,191 @@
+package templates
+
+templ HomePage() {
+	@Layout("Formula Pricing - Open Source Formula Pricing in 1 file", HomeContent())
+}
+
+templ HomeContent() {
+	<div class="min-h-screen">
+		<!-- Hero Section - Top Part with Background -->
+		<div class="hero-section">
+			<!-- Navigation -->
+			<nav class="px-6 py-4 flex justify-between items-center">
+				<div class="flex items-center space-x-2">
+					<span class="text-xl font-normal text-gray-800">Formula<span class="font-bold">Pricing</span></span>
+				</div>
+				<div class="flex items-center space-x-6">
+					<form action="/search" method="GET" class="flex">
+						<input 
+							type="text" 
+							name="q"
+							placeholder="Search..." 
+							class="px-4 py-2 rounded-lg bg-white/70 backdrop-blur border border-gray-200 focus:outline-none focus:border-purple-500"
+						/>
+					</form>
+					<a href="/faq" class="text-gray-700 hover:text-purple-600 font-medium">FAQ</a>
+					<a href="https://github.com" class="text-gray-700 hover:text-purple-600">
+						<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+						</svg>
+					</a>
+					<a href="/docs" class="button-documentation">Documentation</a>
+				</div>
+			</nav>
+
+			<div class="container mx-auto px-6 pt-8 pb-12 text-center">
+				<h1 class="text-5xl font-bold text-gray-800 mb-4">
+					Open Source Formula Pricing
+				</h1>
+				<h2 class="text-2xl text-gray-700 mb-8">
+					<span class="font-bold">in 1 file</span>
+				</h2>
+				<!-- Professor Gopher with Interactive Eyes -->
+				<div class="flex justify-center mb-12">
+					@ProfessorGopher()
+				</div>
+				
+				<!-- Features -->
+				<div class="flex flex-wrap justify-center gap-4 mb-8">
+					<div class="feature-card py-3 px-4 w-52">
+						<div class="flex items-center justify-center">
+							<svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+							</svg>
+							<span class="font-medium text-sm">Real-time calculations</span>
+						</div>
+					</div>
+					<div class="feature-card py-3 px-4 w-52">
+						<div class="flex items-center justify-center">
+							<svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+							</svg>
+							<span class="font-medium text-sm">Variable management</span>
+						</div>
+					</div>
+					<div class="feature-card py-3 px-4 w-52">
+						<div class="flex items-center justify-center">
+							<svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+							</svg>
+							<span class="font-medium text-sm">Conditional logic</span>
+						</div>
+					</div>
+					<div class="feature-card py-3 px-4 w-52">
+						<div class="flex items-center justify-center">
+							<svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+							</svg>
+							<span class="font-medium text-sm">API integration</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main Content Card -->
+		<div class="container mx-auto px-6 -mt-6">
+			<div class="main-card p-12">
+
+				<!-- CTA Buttons -->
+				<div class="flex justify-center space-x-4 mb-12">
+					<a href="/demo" class="button-primary">Live Demo</a>
+					<a href="/docs" class="button-secondary">Read the documentation</a>
+				</div>
+
+				<!-- Code Example -->
+				<div class="max-w-3xl mx-auto">
+					<h3 class="text-xl font-semibold text-gray-700 mb-4">Quick Example</h3>
+					<div class="formula-display text-left">
+						<pre class="text-sm">{ `// Define your pricing formula
+const formula = "base_price * (1 + margin_percentage/100) * quantity_factor";
+
+// Set variables
+const variables = {
+  base_price: 100,
+  margin_percentage: 20,
+  quantity_factor: 0.95
+};
+
+// Calculate result
+const result = calculatePrice(formula, variables);
+// Result: 114.00` }</pre>
+					</div>
+				</div>
+
+				<!-- Features Grid -->
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+					<div class="text-center">
+						<div class="mb-4 flex justify-center">
+							<svg class="w-12 h-12 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+							</svg>
+						</div>
+						<h3 class="text-xl font-semibold mb-2">Mathematical Operations</h3>
+						<p class="text-gray-600">Support for complex mathematical expressions including functions like min, max, round, and more.</p>
+					</div>
+					<div class="text-center">
+						<div class="mb-4 flex justify-center">
+							<svg class="w-12 h-12 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+							</svg>
+						</div>
+						<h3 class="text-xl font-semibold mb-2">Dynamic Variables</h3>
+						<p class="text-gray-600">Define and manage variables that can be updated in real-time based on your business logic.</p>
+					</div>
+					<div class="text-center">
+						<div class="mb-4 flex justify-center">
+							<svg class="w-12 h-12 text-gray-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+							</svg>
+						</div>
+						<h3 class="text-xl font-semibold mb-2">Analytics Ready</h3>
+						<p class="text-gray-600">Track calculation history, analyze pricing trends, and optimize your formulas over time.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<footer class="mt-20 py-8 border-t border-gray-200" style="background: white">
+			<div class="container mx-auto px-6 text-center text-gray-600">
+				<p>© 2025 Formula Pricing. Built with Go and PostgreSQL.</p>
+				<div class="mt-4 flex justify-center space-x-6">
+					<a href="https://github.com" class="hover:text-purple-600">GitHub</a>
+					<a href="/docs" class="hover:text-purple-600">Documentation</a>
+					<a href="/api-reference" class="hover:text-purple-600">API Reference</a>
+					<a href="/examples" class="hover:text-purple-600">Examples</a>
+				</div>
+			</div>
+		</footer>
+	</div>
+}
+
+templ ProfessorGopher() {
+	<div id="gopher-container" class="gopher-container relative inline-block">
+		<img 
+			src="/static/images/professor-gopher.png" 
+			alt="Professor Gopher" 
+			class="w-64 h-64 object-contain"
+		/>
+		
+		<!-- Left eye socket -->
+		<div class="eye-socket absolute w-7 h-7 rounded-full flex items-center justify-center" 
+			 style="top: 34%; left: 24%; background: #ffeedf">
+			<div id="left-eye" class="eye relative w-full h-full">
+				<div class="pupil absolute bg-black rounded-full w-3 h-3" 
+					 style="top: 50%; left: 70%; transform: translate(-50%, -50%);">
+				</div>
+			</div>
+		</div>
+		
+		<!-- Right eye socket -->
+		<div class="eye-socket absolute w-7 h-7 rounded-full flex items-center justify-center" 
+			 style="top: 33%; left: 44%; background: #ffeedf">
+			<div id="right-eye" class="eye relative w-full h-full">
+				<div class="pupil absolute bg-black rounded-full w-3 h-3" 
+					 style="top: 50%; left: 70%; transform: translate(-50%, -50%);">
+				</div>
+			</div>
+		</div>
+	</div>
+}

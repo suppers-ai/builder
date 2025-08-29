@@ -26,6 +26,7 @@ import (
 	"github.com/suppers-ai/auth"
 	"github.com/suppers-ai/logger"
 	"github.com/suppers-ai/mailer"
+	"github.com/suppers-ai/storage"
 )
 
 func main() {
@@ -77,13 +78,39 @@ func main() {
 	}
 	defer db.Close()
 
-	// Run GORM auto-migrations for our models
+	// Create schemas if using PostgreSQL
+	if cfg.DatabaseType == "postgres" || cfg.DatabaseType == "postgresql" {
+		schemas := []string{
+			"CREATE SCHEMA IF NOT EXISTS auth",
+			"CREATE SCHEMA IF NOT EXISTS storage",
+			"CREATE SCHEMA IF NOT EXISTS logger",
+			"CREATE SCHEMA IF NOT EXISTS collections",
+		}
+		for _, schema := range schemas {
+			if err := db.GetGORM().Exec(schema).Error; err != nil {
+				bootstrapLogger.Warn(ctx, "Failed to create schema", 
+					logger.String("schema", schema),
+					logger.Err(err))
+			}
+		}
+	}
+
+	// Initialize models with database type
+	models.InitModels(cfg.DatabaseType)
+	logger.InitModels(cfg.DatabaseType)
+	storage.InitModels(cfg.DatabaseType)
+	
+	// Auth models will be migrated by the auth package
+	// Logger and storage models will be migrated by their packages
+	// Only migrate local models here
 	if err := db.GetGORM().AutoMigrate(
-		&models.User{},
-		&models.Session{},
-		&models.Token{},
-		&models.Bucket{},
-		&models.Object{},
+		&storage.Bucket{},
+		&storage.StorageObject{},
+		&models.Collection{},
+		&models.CollectionRecord{},
+		&logger.LogModel{},
+		&logger.RequestLogModel{},
+		&models.ExtensionMigration{},
 	); err != nil {
 		bootstrapLogger.Fatal(ctx, "Failed to migrate database models", logger.Err(err))
 	}
@@ -124,11 +151,11 @@ func main() {
 
 	// Initialize services
 	svc := services.New(services.Config{
-		DB:     db,
-		Auth:   authService,
-		Mailer: mailService,
-		Logger: appLogger,
-		Config: cfg,
+		DB:      db,
+		Auth:    authService,
+		Mailer:  mailService,
+		Logger:  appLogger,
+		Config:  cfg,
 	})
 
 	// Initialize extension system
@@ -307,265 +334,18 @@ func initAuth(cfg *config.Config, db database.Database, mailService mailer.Maile
 	}
 
 	return auth.New(auth.Config{
-		DB:          db,
-		Mailer:      mailService,
-		RootURL:     fmt.Sprintf("http://localhost:%s", cfg.Port),
-		BCryptCost:  12,
-		SessionName: "dufflebag-session",
-		SessionKey:  sessionKey,
-		CookieKey:   sessionKey,
-		CSRFKey:     sessionKey,
+		DB:           db,
+		Mailer:       mailService,
+		RootURL:      fmt.Sprintf("http://localhost:%s", cfg.Port),
+		BCryptCost:   12,
+		SessionName:  "dufflebag-session",
+		SessionKey:   sessionKey,
+		CookieKey:    sessionKey,
+		CSRFKey:      sessionKey,
+		DatabaseType: cfg.DatabaseType,
 	})
 }
 
-// runMigrations is no longer needed - GORM handles migrations automatically
-// Keeping function stub for reference of old PostgreSQL-specific migrations
-func runMigrationsOld(ctx context.Context, db database.Database, log logger.Logger) error {
-	// Create schemas
-	schemas := []string{
-		"CREATE SCHEMA IF NOT EXISTS auth",
-		"CREATE SCHEMA IF NOT EXISTS storage",
-		"CREATE SCHEMA IF NOT EXISTS logger",
-		"CREATE SCHEMA IF NOT EXISTS collections",
-	}
-
-	log.Info(ctx, "Creating database schemas...", logger.Int("count", len(schemas)))
-	for _, schema := range schemas {
-		if _, err := db.Exec(ctx, schema); err != nil {
-			return fmt.Errorf("failed to create schema: %w", err)
-		}
-	}
-
-	// Create auth tables
-	authSQL := `
-	-- Create role enum type if it doesn't exist
-	DO $$ BEGIN
-		CREATE TYPE auth.user_role AS ENUM ('user', 'manager', 'admin', 'deleted');
-	EXCEPTION
-		WHEN duplicate_object THEN null;
-	END $$;
-
-	-- Users table (compatible with authboss)
-	CREATE TABLE IF NOT EXISTS auth.users (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		email VARCHAR(255) UNIQUE NOT NULL,
-		password TEXT NOT NULL,  -- authboss expects 'password' field
-		username VARCHAR(255),
-		confirmed BOOLEAN DEFAULT false,
-		confirm_token VARCHAR(255),
-		confirm_selector VARCHAR(255),
-		recover_token VARCHAR(255),
-		recover_token_exp TIMESTAMP WITH TIME ZONE,
-		recover_selector VARCHAR(255),
-		totp_secret VARCHAR(255),
-		totp_secret_backup VARCHAR(255),
-		sms_phone_number VARCHAR(50),
-		recovery_codes TEXT,
-		oauth2_uid VARCHAR(255),
-		oauth2_provider VARCHAR(50),
-		oauth2_token TEXT,
-		oauth2_refresh TEXT,
-		oauth2_expiry TIMESTAMP WITH TIME ZONE,
-		locked TIMESTAMP WITH TIME ZONE,
-		attempt_count INT DEFAULT 0,
-		last_attempt TIMESTAMP WITH TIME ZONE,
-		role VARCHAR(50) DEFAULT 'user',
-		metadata JSONB,
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-		updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-	);
-	CREATE INDEX IF NOT EXISTS idx_users_email ON auth.users(email);
-	CREATE INDEX IF NOT EXISTS idx_users_confirm_selector ON auth.users(confirm_selector);
-	CREATE INDEX IF NOT EXISTS idx_users_recover_selector ON auth.users(recover_selector);
-	
-	-- Migrate existing role column to use enum type
-	DO $$ BEGIN
-		-- Check if role column is already using enum type
-		IF NOT EXISTS (
-			SELECT 1 FROM information_schema.columns 
-			WHERE table_schema = 'auth' 
-			AND table_name = 'users' 
-			AND column_name = 'role'
-			AND udt_name = 'user_role'
-		) THEN
-			-- First remove the default
-			ALTER TABLE auth.users ALTER COLUMN role DROP DEFAULT;
-			-- Update any invalid role values to 'user'
-			UPDATE auth.users SET role = 'user' WHERE role IS NULL OR role NOT IN ('user', 'manager', 'admin', 'deleted');
-			-- Alter column to use enum type
-			ALTER TABLE auth.users ALTER COLUMN role TYPE auth.user_role USING role::auth.user_role;
-			-- Set the new default with proper enum type
-			ALTER TABLE auth.users ALTER COLUMN role SET DEFAULT 'user'::auth.user_role;
-		END IF;
-	END $$;
-
-	-- Sessions table
-	CREATE TABLE IF NOT EXISTS auth.sessions (
-		id VARCHAR(255) PRIMARY KEY,
-		user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-		data BYTEA,
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-		updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-		expires_at TIMESTAMP WITH TIME ZONE
-	);
-	CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON auth.sessions(user_id);
-	CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON auth.sessions(expires_at);
-
-	-- Tokens table (for password reset, email verification, etc.)
-	CREATE TABLE IF NOT EXISTS auth.tokens (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-		token VARCHAR(255) UNIQUE NOT NULL,
-		type VARCHAR(50) NOT NULL,
-		expires_at TIMESTAMP WITH TIME ZONE,
-		used_at TIMESTAMP WITH TIME ZONE,
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-	);
-	CREATE INDEX IF NOT EXISTS idx_tokens_token ON auth.tokens(token);
-	CREATE INDEX IF NOT EXISTS idx_tokens_user_id ON auth.tokens(user_id);
-	CREATE INDEX IF NOT EXISTS idx_tokens_type ON auth.tokens(type);
-	`
-
-	log.Info(ctx, "Creating auth tables...")
-	if _, err := db.Exec(ctx, authSQL); err != nil {
-		return fmt.Errorf("failed to create auth tables: %w", err)
-	}
-	log.Info(ctx, "Auth tables created successfully")
-
-	// Create storage tables
-	storageSQL := `
-	-- Buckets table
-	CREATE TABLE IF NOT EXISTS storage.buckets (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		name VARCHAR(255) UNIQUE NOT NULL,
-		public BOOLEAN DEFAULT false,
-		file_size_limit BIGINT,
-		allowed_mime_types TEXT[],
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-		updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-	);
-	CREATE INDEX IF NOT EXISTS idx_buckets_name ON storage.buckets(name);
-
-	-- Objects table
-	CREATE TABLE IF NOT EXISTS storage.objects (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		bucket_id UUID REFERENCES storage.buckets(id) ON DELETE CASCADE,
-		name VARCHAR(255) NOT NULL,
-		path TEXT NOT NULL,
-		mime_type VARCHAR(255),
-		size BIGINT,
-		content BYTEA,
-		metadata JSONB,
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-		updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-		UNIQUE(bucket_id, path, name)
-	);
-	CREATE INDEX IF NOT EXISTS idx_objects_bucket_id ON storage.objects(bucket_id);
-	CREATE INDEX IF NOT EXISTS idx_objects_path ON storage.objects(path);
-	
-	-- Add content column if it doesn't exist (for existing databases)
-	DO $$ 
-	BEGIN
-		IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-			WHERE table_schema = 'storage' 
-			AND table_name = 'objects' 
-			AND column_name = 'content') 
-		THEN
-			ALTER TABLE storage.objects ADD COLUMN content BYTEA;
-		END IF;
-		
-		-- Update unique constraint if needed
-		IF EXISTS (SELECT 1 FROM pg_constraint 
-			WHERE conname = 'objects_bucket_id_path_key') 
-		THEN
-			ALTER TABLE storage.objects DROP CONSTRAINT objects_bucket_id_path_key;
-			ALTER TABLE storage.objects ADD CONSTRAINT objects_bucket_id_path_name_key UNIQUE(bucket_id, path, name);
-		END IF;
-	END $$;
-	`
-
-	log.Info(ctx, "Creating storage tables...")
-	if _, err := db.Exec(ctx, storageSQL); err != nil {
-		return fmt.Errorf("failed to create storage tables: %w", err)
-	}
-	log.Info(ctx, "Storage tables created successfully")
-
-	// Create logger tables - matching the exact schema expected by the logger package
-	loggerSQL := `
-	-- Drop and recreate logs table with correct schema
-	DROP TABLE IF EXISTS logger.logs CASCADE;
-	CREATE TABLE logger.logs (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		level TEXT NOT NULL,
-		message TEXT NOT NULL,
-		fields JSONB,
-		user_id TEXT,
-		trace_id TEXT,
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-	);
-	CREATE INDEX IF NOT EXISTS idx_logs_level ON logger.logs(level);
-	CREATE INDEX IF NOT EXISTS idx_logs_created_at ON logger.logs(created_at);
-	CREATE INDEX IF NOT EXISTS idx_logs_user_id ON logger.logs(user_id);
-	CREATE INDEX IF NOT EXISTS idx_logs_trace_id ON logger.logs(trace_id);
-
-	-- Request logs table - matching the exact schema expected by the logger package
-	DROP TABLE IF EXISTS logger.request_logs CASCADE;
-	CREATE TABLE logger.request_logs (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		level TEXT NOT NULL,
-		method TEXT NOT NULL,
-		path TEXT NOT NULL,
-		query TEXT,
-		status_code INT NOT NULL,
-		exec_time_ms BIGINT NOT NULL,
-		user_ip TEXT NOT NULL,
-		user_agent TEXT,
-		user_id TEXT,
-		trace_id TEXT,
-		error TEXT,
-		request_body TEXT,
-		response_body TEXT,
-		headers TEXT,
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-	);
-	CREATE INDEX IF NOT EXISTS idx_request_logs_created_at ON logger.request_logs(created_at);
-	CREATE INDEX IF NOT EXISTS idx_request_logs_user_id ON logger.request_logs(user_id);
-	CREATE INDEX IF NOT EXISTS idx_request_logs_method ON logger.request_logs(method);
-	CREATE INDEX IF NOT EXISTS idx_request_logs_path ON logger.request_logs(path);
-	CREATE INDEX IF NOT EXISTS idx_request_logs_status_code ON logger.request_logs(status_code);
-	`
-
-	log.Info(ctx, "Creating logger tables...")
-	if _, err := db.Exec(ctx, loggerSQL); err != nil {
-		return fmt.Errorf("failed to create logger tables: %w", err)
-	}
-	log.Info(ctx, "Logger tables created successfully")
-
-	// Create collections metadata table
-	collectionsSQL := `
-	CREATE TABLE IF NOT EXISTS collections.collections (
-		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-		name VARCHAR(255) NOT NULL UNIQUE,
-		display_name VARCHAR(255),
-		description TEXT,
-		schema JSONB NOT NULL,
-		indexes JSONB,
-		auth_rules JSONB,
-		created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-		updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-	);
-
-	CREATE INDEX IF NOT EXISTS idx_collections_name ON collections.collections(name);
-	`
-
-	log.Info(ctx, "Creating collections tables...")
-	if _, err := db.Exec(ctx, collectionsSQL); err != nil {
-		return fmt.Errorf("failed to create collections table: %w", err)
-	}
-	log.Info(ctx, "Collections tables created successfully")
-
-	return nil
-}
 
 func createDefaultAdmin(ctx context.Context, svc *services.Service, cfg *config.Config) error {
 	// Check if admin exists
@@ -622,6 +402,9 @@ func setupRoutes(svc *services.Service, authService *auth.Service, logger logger
 	router.Handle("/api/dashboard/cpu-stats",
 		middleware.SessionAuth(svc)(
 			middleware.RequireManagerOrAdmin(svc)(web.GetCPUStats(svc)))).Methods("GET")
+	router.Handle("/api/dashboard/metrics",
+		middleware.SessionAuth(svc)(
+			middleware.RequireManagerOrAdmin(svc)(web.GetDashboardMetrics(svc)))).Methods("GET")
 
 	// Collections pages (protected with role-based access)
 	router.Handle("/collections",

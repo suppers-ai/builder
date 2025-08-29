@@ -81,22 +81,37 @@ templ SidebarAccordion(props SidebarAccordionProps) {
             width: 100%;
             display: flex;
             align-items: center;
-            padding: 0.75rem 1rem;
+            padding: 12px 16px;  /* Match .sidebar-nav-link padding */
             background: transparent;
             border: none;
-            color: inherit;
+            color: var(--text-secondary);  /* Use standard text-secondary color */
             cursor: pointer;
             transition: all 0.2s;
             text-align: left;
-            border-radius: 0.5rem;
+            border-radius: 8px;
+            text-decoration: none;
         }
         
         .sidebar-accordion-toggle:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg-hover);
+            color: var(--text-primary);
         }
         
         .sidebar-accordion-toggle.expanded {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .sidebar-accordion-toggle .sidebar-nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-accordion-toggle .sidebar-nav-text {
+            flex: 1;
+            font-size: 14px;
         }
         
         .sidebar-accordion-arrow {
@@ -104,6 +119,7 @@ templ SidebarAccordion(props SidebarAccordionProps) {
             width: 16px;
             height: 16px;
             transition: transform 0.2s;
+            flex-shrink: 0;
         }
         
         .sidebar-accordion-toggle.expanded .sidebar-accordion-arrow {
@@ -118,29 +134,34 @@ templ SidebarAccordion(props SidebarAccordionProps) {
         .sidebar-accordion-item {
             display: flex;
             align-items: center;
-            padding: 0.5rem 1rem 0.5rem 2.5rem;
-            color: rgba(255, 255, 255, 0.7);
+            padding: 10px 16px 10px 44px;  /* Indent from left edge */
+            color: var(--text-secondary);  /* Use standard text-secondary */
             text-decoration: none;
             transition: all 0.2s;
-            border-radius: 0.5rem;
-            margin: 0.125rem 0.5rem;
+            border-radius: 8px;
+            margin: 2px 8px;
         }
         
         .sidebar-accordion-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.95);
+            background: var(--bg-hover);
+            color: var(--text-primary);
         }
         
         .sidebar-accordion-item.active {
-            background: rgba(59, 130, 246, 0.15);
-            color: #3b82f6;
+            background: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .sidebar-accordion-item.active .accordion-item-icon {
+            color: white;
         }
         
         .accordion-item-content {
             display: flex;
             align-items: center;
             width: 100%;
-            gap: 0.5rem;
+            gap: 8px;
         }
         
         .accordion-item-icon {
@@ -151,7 +172,7 @@ templ SidebarAccordion(props SidebarAccordionProps) {
         
         .accordion-item-text {
             flex: 1;
-            font-size: 0.875rem;
+            font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -170,38 +191,47 @@ templ SidebarAccordion(props SidebarAccordionProps) {
         }
         
         .extension-status-dot.inactive {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--text-muted);
         }
         
         .sidebar-accordion-empty {
-            padding: 1rem 2.5rem;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.875rem;
+            padding: 12px 44px;
+            color: var(--text-muted);
+            font-size: 13px;
             font-style: italic;
         }
         
         .sidebar-accordion-manage {
             display: flex;
             align-items: center;
-            padding: 0.5rem 1rem 0.5rem 2.5rem;
-            color: rgba(255, 255, 255, 0.6);
+            padding: 10px 16px 10px 44px;
+            color: var(--text-secondary);
             text-decoration: none;
             transition: all 0.2s;
-            border-radius: 0.5rem;
-            margin: 0.5rem 0.5rem 0.25rem 0.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 0.5rem;
-            padding-top: 0.75rem;
+            border-radius: 8px;
+            margin: 8px 8px 4px 8px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
         }
         
         .sidebar-accordion-manage:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.95);
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .sidebar-accordion-manage .accordion-item-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+        
+        .sidebar-accordion-manage .accordion-item-text {
+            font-size: 14px;
         }
         
         /* Collapsed sidebar styles */
         .sidebar.collapsed .sidebar-accordion-toggle {
-            padding: 0.75rem;
+            padding: 12px 16px;  /* Keep same padding as nav items */
         }
         
         .sidebar.collapsed .sidebar-accordion-arrow,

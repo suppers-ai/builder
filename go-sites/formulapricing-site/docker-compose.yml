@@ -1,0 +1,32 @@
+services:
+  formulapricing-site:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: formulapricing_site
+    environment:
+      PORT: "8080"
+      ENVIRONMENT: "production"
+      LOG_LEVEL: "INFO"
+      STATIC_PATH: "./static"
+      READ_TIMEOUT: "15"
+      WRITE_TIMEOUT: "15"
+      IDLE_TIMEOUT: "60"
+      MAX_HEADER_BYTES: "1048576"
+      REQUEST_TIMEOUT: "30"
+      ENABLE_METRICS: "true"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - formulapricing_network
+
+networks:
+  formulapricing_network:
+    driver: bridge

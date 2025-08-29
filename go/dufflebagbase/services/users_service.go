@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
-	"github.com/suppers-ai/dufflebagbase/models"
+	"github.com/suppers-ai/auth"
 	"github.com/suppers-ai/logger"
 )
 
@@ -31,8 +31,8 @@ func NewUsersService(db *gorm.DB, logger logger.Logger) *UsersService {
 }
 
 // CreateUser creates a new user
-func (s *UsersService) CreateUser(ctx context.Context, email, password string, role models.UserRole) (*models.User, error) {
-	user := &models.User{
+func (s *UsersService) CreateUser(ctx context.Context, email, password string, role UserRole) (*auth.User, error) {
+	user := &auth.User{
 		Email:     email,
 		Password:  password, // Will be hashed in BeforeCreate hook
 		Role:      string(role),
@@ -50,8 +50,8 @@ func (s *UsersService) CreateUser(ctx context.Context, email, password string, r
 }
 
 // GetUserByID retrieves a user by ID
-func (s *UsersService) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
-	var user models.User
+func (s *UsersService) GetUserByID(ctx context.Context, id uuid.UUID) (*auth.User, error) {
+	var user auth.User
 	err := s.db.WithContext(ctx).Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -63,8 +63,8 @@ func (s *UsersService) GetUserByID(ctx context.Context, id uuid.UUID) (*models.U
 }
 
 // GetUserByEmail retrieves a user by email
-func (s *UsersService) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	var user models.User
+func (s *UsersService) GetUserByEmail(ctx context.Context, email string) (*auth.User, error) {
+	var user auth.User
 	err := s.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -93,7 +93,7 @@ func (s *UsersService) UpdateUser(ctx context.Context, id uuid.UUID, updates map
 		updates["password"] = string(hashed)
 	}
 
-	result := s.db.WithContext(ctx).Model(&models.User{}).Where("id = ?", id).Updates(updates)
+	result := s.db.WithContext(ctx).Model(&auth.User{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
 		return fmt.Errorf("failed to update user: %w", result.Error)
 	}
@@ -106,7 +106,7 @@ func (s *UsersService) UpdateUser(ctx context.Context, id uuid.UUID, updates map
 
 // DeleteUser soft deletes a user
 func (s *UsersService) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	result := s.db.WithContext(ctx).Delete(&models.User{}, "id = ?", id)
+	result := s.db.WithContext(ctx).Delete(&auth.User{}, "id = ?", id)
 	if result.Error != nil {
 		return fmt.Errorf("failed to delete user: %w", result.Error)
 	}
@@ -117,12 +117,12 @@ func (s *UsersService) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 // ListUsers lists users with pagination
-func (s *UsersService) ListUsers(ctx context.Context, offset, limit int) ([]models.User, int64, error) {
-	var users []models.User
+func (s *UsersService) ListUsers(ctx context.Context, offset, limit int) ([]auth.User, int64, error) {
+	var users []auth.User
 	var total int64
 
 	// Get total count
-	if err := s.db.WithContext(ctx).Model(&models.User{}).Count(&total).Error; err != nil {
+	if err := s.db.WithContext(ctx).Model(&auth.User{}).Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count users: %w", err)
 	}
 
@@ -141,7 +141,7 @@ func (s *UsersService) ListUsers(ctx context.Context, offset, limit int) ([]mode
 }
 
 // AuthenticateUser verifies user credentials
-func (s *UsersService) AuthenticateUser(ctx context.Context, email, password string) (*models.User, error) {
+func (s *UsersService) AuthenticateUser(ctx context.Context, email, password string) (*auth.User, error) {
 	user, err := s.GetUserByEmail(ctx, email)
 	if err != nil {
 		return nil, fmt.Errorf("invalid credentials")
@@ -201,7 +201,7 @@ func (s *UsersService) ConfirmEmail(ctx context.Context, id uuid.UUID) error {
 }
 
 // CreatePasswordResetToken creates a password reset token
-func (s *UsersService) CreatePasswordResetToken(ctx context.Context, email string) (*models.Token, error) {
+func (s *UsersService) CreatePasswordResetToken(ctx context.Context, email string) (*auth.Token, error) {
 	user, err := s.GetUserByEmail(ctx, email)
 	if err != nil {
 		// Don't reveal whether user exists
@@ -211,7 +211,7 @@ func (s *UsersService) CreatePasswordResetToken(ctx context.Context, email strin
 	// Generate secure random token
 	tokenValue := generateSecureToken(32)
 
-	token := &models.Token{
+	token := &auth.Token{
 		UserID:    user.ID,
 		Token:     tokenValue,
 		Type:      "password_reset",
@@ -227,7 +227,7 @@ func (s *UsersService) CreatePasswordResetToken(ctx context.Context, email strin
 
 // ResetPassword resets a user's password using a token
 func (s *UsersService) ResetPassword(ctx context.Context, token, newPassword string) error {
-	var tokenRecord models.Token
+	var tokenRecord auth.Token
 	err := s.db.WithContext(ctx).
 		Where("token = ? AND type = ? AND expires_at > ? AND used_at IS NULL", 
 			token, "password_reset", time.Now()).
@@ -254,11 +254,11 @@ func (s *UsersService) ResetPassword(ctx context.Context, token, newPassword str
 
 // Helper functions
 func isValidRole(role string) bool {
-	validRoles := []models.UserRole{
-		models.RoleUser,
-		models.RoleManager,
-		models.RoleAdmin,
-		models.RoleDeleted,
+	validRoles := []UserRole{
+		UserRoleUser,
+		UserRoleManager,
+		UserRoleAdmin,
+		UserRoleDeleted,
 	}
 	for _, r := range validRoles {
 		if string(r) == role {

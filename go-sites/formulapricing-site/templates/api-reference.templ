@@ -1,0 +1,263 @@
+package templates
+
+templ APIReferencePage() {
+	@Layout("API Reference - Formula Pricing", APIReferenceContent())
+}
+
+templ APIReferenceContent() {
+	<div class="min-h-screen">
+		<!-- Hero Section -->
+		<div class="hero-section">
+			<!-- Navigation -->
+			<nav class="px-6 py-4 flex justify-between items-center">
+				<div class="flex items-center space-x-2">
+					<a href="/" class="text-xl font-normal text-gray-800">Formula<span class="font-bold">Pricing</span></a>
+				</div>
+				<div class="flex items-center space-x-6">
+					<form action="/search" method="GET" class="flex">
+						<input 
+							type="text" 
+							name="q"
+							placeholder="Search..." 
+							class="px-4 py-2 rounded-lg bg-white/70 backdrop-blur border border-gray-200 focus:outline-none focus:border-purple-500"
+						/>
+					</form>
+					<a href="/faq" class="text-gray-700 hover:text-purple-600 font-medium">FAQ</a>
+					<a href="https://github.com" class="text-gray-700 hover:text-purple-600">
+						<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+						</svg>
+					</a>
+					<a href="/docs" class="button-documentation">Documentation</a>
+				</div>
+			</nav>
+
+			<div class="container mx-auto px-6 pt-8 pb-12 text-center">
+				<h1 class="text-5xl font-bold text-gray-800 mb-4">
+					API Reference
+				</h1>
+				<p class="text-xl text-gray-600">
+					Complete API documentation for Formula Pricing
+				</p>
+			</div>
+		</div>
+
+		<!-- API Reference Content -->
+		<div class="container mx-auto px-6 -mt-6">
+			<div class="main-card p-12">
+				<div class="max-w-4xl mx-auto">
+					<!-- Core Functions -->
+					<section class="mb-12">
+						<h2 class="text-3xl font-bold text-gray-800 mb-6">Core Functions</h2>
+						
+						<div class="api-method mb-8">
+							<h3 class="text-2xl font-semibold text-gray-800 mb-4">calculatePrice(formula, variables)</h3>
+							<p class="text-gray-600 mb-4">Calculates the result of a pricing formula with given variables.</p>
+							
+							<h4 class="text-lg font-semibold text-gray-800 mb-2">Parameters</h4>
+							<div class="formula-display mb-4">
+								<pre class="text-sm">{ `formula: string    // The pricing formula expression
+variables: object  // Object containing variable values` }</pre>
+							</div>
+
+							<h4 class="text-lg font-semibold text-gray-800 mb-2">Returns</h4>
+							<div class="formula-display mb-4">
+								<pre class="text-sm">number // The calculated price result</pre>
+							</div>
+
+							<h4 class="text-lg font-semibold text-gray-800 mb-2">Example</h4>
+							<div class="formula-display mb-4">
+								<pre class="text-sm">{ `const result = calculatePrice(
+  "base_price * (1 + margin/100)",
+  { base_price: 100, margin: 20 }
+);
+// Returns: 120` }</pre>
+							</div>
+						</div>
+
+						<div class="api-method mb-8">
+							<h3 class="text-2xl font-semibold text-gray-800 mb-4">validateFormula(formula)</h3>
+							<p class="text-gray-600 mb-4">Validates a pricing formula for syntax errors.</p>
+							
+							<h4 class="text-lg font-semibold text-gray-800 mb-2">Parameters</h4>
+							<div class="formula-display mb-4">
+								<pre class="text-sm">formula: string // The formula to validate</pre>
+							</div>
+
+							<h4 class="text-lg font-semibold text-gray-800 mb-2">Returns</h4>
+							<div class="formula-display mb-4">
+								<pre class="text-sm">{ `{
+  valid: boolean,
+  errors: string[]
+}` }</pre>
+							</div>
+
+							<h4 class="text-lg font-semibold text-gray-800 mb-2">Example</h4>
+							<div class="formula-display mb-4">
+								<pre class="text-sm">{ `const validation = validateFormula("base_price * margin");
+// Returns: { valid: true, errors: [] }` }</pre>
+							</div>
+						</div>
+					</section>
+
+					<!-- Mathematical Functions -->
+					<section class="mb-12">
+						<h2 class="text-3xl font-bold text-gray-800 mb-6">Mathematical Functions</h2>
+						
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<div class="p-4 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">min(a, b, ...)</h4>
+								<p class="text-sm text-gray-600 mb-2">Returns the minimum value</p>
+								<div class="formula-display">
+									<code class="text-xs">min(10, 20, 5) // Returns: 5</code>
+								</div>
+							</div>
+
+							<div class="p-4 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">max(a, b, ...)</h4>
+								<p class="text-sm text-gray-600 mb-2">Returns the maximum value</p>
+								<div class="formula-display">
+									<code class="text-xs">max(10, 20, 5) // Returns: 20</code>
+								</div>
+							</div>
+
+							<div class="p-4 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">round(value, decimals)</h4>
+								<p class="text-sm text-gray-600 mb-2">Rounds to specified decimals</p>
+								<div class="formula-display">
+									<code class="text-xs">round(3.14159, 2) // Returns: 3.14</code>
+								</div>
+							</div>
+
+							<div class="p-4 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">abs(value)</h4>
+								<p class="text-sm text-gray-600 mb-2">Returns absolute value</p>
+								<div class="formula-display">
+									<code class="text-xs">abs(-10) // Returns: 10</code>
+								</div>
+							</div>
+
+							<div class="p-4 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">ceil(value)</h4>
+								<p class="text-sm text-gray-600 mb-2">Rounds up to nearest integer</p>
+								<div class="formula-display">
+									<code class="text-xs">ceil(3.1) // Returns: 4</code>
+								</div>
+							</div>
+
+							<div class="p-4 border border-gray-200 rounded-lg">
+								<h4 class="font-semibold text-gray-800 mb-2">floor(value)</h4>
+								<p class="text-sm text-gray-600 mb-2">Rounds down to nearest integer</p>
+								<div class="formula-display">
+									<code class="text-xs">floor(3.9) // Returns: 3</code>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<!-- Operators -->
+					<section class="mb-12">
+						<h2 class="text-3xl font-bold text-gray-800 mb-6">Operators</h2>
+						
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+							<div>
+								<h4 class="text-lg font-semibold text-gray-800 mb-3">Arithmetic</h4>
+								<ul class="space-y-2 text-sm text-gray-600">
+									<li><code class="bg-gray-100 px-2 py-1 rounded">+</code> Addition</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">-</code> Subtraction</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">*</code> Multiplication</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">/</code> Division</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">%</code> Modulo</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">**</code> Exponentiation</li>
+								</ul>
+							</div>
+
+							<div>
+								<h4 class="text-lg font-semibold text-gray-800 mb-3">Comparison</h4>
+								<ul class="space-y-2 text-sm text-gray-600">
+									<li><code class="bg-gray-100 px-2 py-1 rounded">&gt;</code> Greater than</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">&lt;</code> Less than</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">&gt;=</code> Greater than or equal</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">&lt;=</code> Less than or equal</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">===</code> Equal</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">!==</code> Not equal</li>
+								</ul>
+							</div>
+
+							<div>
+								<h4 class="text-lg font-semibold text-gray-800 mb-3">Logical</h4>
+								<ul class="space-y-2 text-sm text-gray-600">
+									<li><code class="bg-gray-100 px-2 py-1 rounded">&&</code> Logical AND</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">||</code> Logical OR</li>
+									<li><code class="bg-gray-100 px-2 py-1 rounded">!</code> Logical NOT</li>
+								</ul>
+							</div>
+
+							<div>
+								<h4 class="text-lg font-semibold text-gray-800 mb-3">Conditional</h4>
+								<ul class="space-y-2 text-sm text-gray-600">
+									<li><code class="bg-gray-100 px-2 py-1 rounded">? :</code> Ternary operator</li>
+								</ul>
+								<div class="formula-display mt-2">
+									<code class="text-xs">quantity > 10 ? 0.9 : 1.0</code>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<!-- Error Handling -->
+					<section class="mb-12">
+						<h2 class="text-3xl font-bold text-gray-800 mb-6">Error Handling</h2>
+						
+						<div class="space-y-6">
+							<div>
+								<h4 class="text-lg font-semibold text-gray-800 mb-2">Common Errors</h4>
+								<ul class="list-disc list-inside text-gray-600 space-y-2">
+									<li><strong>Syntax Error:</strong> Invalid formula syntax</li>
+									<li><strong>Variable Error:</strong> Undefined variable in formula</li>
+									<li><strong>Type Error:</strong> Invalid operation on data types</li>
+									<li><strong>Division by Zero:</strong> Attempting to divide by zero</li>
+								</ul>
+							</div>
+
+							<div>
+								<h4 class="text-lg font-semibold text-gray-800 mb-2">Error Response Format</h4>
+								<div class="formula-display">
+									<pre class="text-sm">{ `{
+  error: true,
+  message: "Error description",
+  code: "ERROR_CODE",
+  details: {
+    // Additional error details
+  }
+}` }</pre>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<div class="text-center">
+						<p class="text-gray-600 mb-4">Need more help?</p>
+						<div class="flex justify-center space-x-4">
+							<a href="/docs" class="button-primary">Documentation</a>
+							<a href="/examples" class="button-secondary">Examples</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<footer class="mt-20 py-8 border-t border-gray-200" style="background: white">
+			<div class="container mx-auto px-6 text-center text-gray-600">
+				<p>© 2025 Formula Pricing. Built with Go and PostgreSQL.</p>
+				<div class="mt-4 flex justify-center space-x-6">
+					<a href="https://github.com" class="hover:text-purple-600">GitHub</a>
+					<a href="/docs" class="hover:text-purple-600">Documentation</a>
+					<a href="/api-reference" class="hover:text-purple-600">API Reference</a>
+					<a href="/examples" class="hover:text-purple-600">Examples</a>
+				</div>
+			</div>
+		</footer>
+	</div>
+}

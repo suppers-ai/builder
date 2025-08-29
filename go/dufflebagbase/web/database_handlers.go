@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
 	"github.com/suppers-ai/dufflebagbase/services"
 	"github.com/suppers-ai/dufflebagbase/utils"
@@ -32,13 +31,10 @@ func convertToColumnInfo(columns []string) []pages.ColumnInfo {
 
 // DatabasePage renders the database management page
 func DatabasePage(svc *services.Service) http.HandlerFunc {
+	h := NewBaseHandler(svc)
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get authboss session store
-		store := svc.Auth().SessionStore()
-		session, _ := store.Get(r, "dufflebag-session")
-		userEmail, _ := session.Values["user_email"].(string)
-		
-		ctx := context.Background()
+		userEmail, _ := h.GetUserEmail(r)
+		ctx := h.NewContext()
 		
 		// Get selected table from query params
 		selectedSchema := r.URL.Query().Get("schema")
@@ -197,14 +193,8 @@ func DatabasePage(svc *services.Service) http.HandlerFunc {
 			SelectedTable: tableDetail,
 		}
 		
-		// Check if this is an HTMX request
-		var component templ.Component
-		if utils.IsHTMXRequest(r) {
-			component = pages.DatabasePartial(data)
-		} else {
-			component = pages.DatabasePage(data)
-		}
-		Render(w, r, component)
+		// Render with HTMX support
+		h.RenderWithHTMX(w, r, pages.DatabasePage(data), pages.DatabasePartial(data))
 	}
 }
 

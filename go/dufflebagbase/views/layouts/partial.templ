@@ -2,7 +2,7 @@ package layouts
 
 // PartialContent wraps content for HTMX requests (no full HTML structure)
 templ PartialContent(title string) {
-    <div class="content-card partial-content">
+    <div class="content-card" id="main-content">
         <div class="content-header">
             <div class="breadcrumb">
                 <a href="/dashboard" class="breadcrumb-item">Home</a>

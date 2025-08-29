@@ -374,6 +374,11 @@ function formatBytes(bytes) {
 
 // Initialize gauge charts
 function initializeGaugeCharts() {
+    // Check if gauge elements exist (only on dashboard page)
+    if (!document.getElementById('cpuGauge')) {
+        return; // Not on dashboard page, skip gauge initialization
+    }
+    
     const systemStats = window.dashboardData?.systemStats;
     if (!systemStats) return;
 
@@ -394,6 +399,11 @@ function initializeGaugeCharts() {
 
 // Fetch CPU stats separately (with 1-second sampling)
 function fetchCPUStats() {
+    // Check if we're on the dashboard page
+    if (!document.getElementById('cpuGauge')) {
+        return; // Not on dashboard, skip CPU stats fetch
+    }
+    
     fetch('/api/dashboard/cpu-stats')
         .then(response => response.json())
         .then(data => {
@@ -402,9 +412,12 @@ function fetchCPUStats() {
                 createGaugeChart('cpuGauge', data.cpuUsage, '#ef4444', '#f87171');
                 
                 // Update the CPU value display if it exists
-                const cpuValueElement = document.querySelector('#cpuGauge').parentElement.querySelector('.gauge-value');
-                if (cpuValueElement) {
-                    cpuValueElement.textContent = `${Math.round(data.cpuUsage)}%`;
+                const cpuGaugeElement = document.querySelector('#cpuGauge');
+                if (cpuGaugeElement && cpuGaugeElement.parentElement) {
+                    const cpuValueElement = cpuGaugeElement.parentElement.querySelector('.gauge-value');
+                    if (cpuValueElement) {
+                        cpuValueElement.textContent = `${Math.round(data.cpuUsage)}%`;
+                    }
                 }
             }
         })
@@ -462,3 +475,97 @@ window.dashboardHelpers = {
     createGaugeChart,
     initializeGaugeCharts
 };
+
+// Fetch and update system metrics
+function fetchSystemMetrics() {
+    fetch("/api/dashboard/metrics")
+        .then(response => response.json())
+        .then(data => {
+            if (data.system) {
+                updateMetricsDisplay(data.system);
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching metrics:", error);
+        });
+}
+
+// Update metrics display
+function updateMetricsDisplay(metrics) {
+    // CPU Usage
+    const cpuElement = document.getElementById("metric-cpu");
+    if (cpuElement && metrics.cpu_usage_percent !== undefined) {
+        cpuElement.textContent = metrics.cpu_usage_percent.toFixed(1) + "%";
+    }
+    
+    // Memory Usage
+    const memElement = document.getElementById("metric-memory");
+    if (memElement && metrics.memory_used_bytes !== undefined) {
+        const memGB = (metrics.memory_used_bytes / 1024 / 1024 / 1024).toFixed(1);
+        const memPercent = metrics.memory_used_percent ? metrics.memory_used_percent.toFixed(1) : 0;
+        memElement.textContent = memGB + "GB (" + memPercent + "%)";
+    }
+    
+    // Disk Usage
+    const diskElement = document.getElementById("metric-disk");
+    if (diskElement && metrics.disk_used_percent !== undefined) {
+        const diskGB = (metrics.disk_used_bytes / 1024 / 1024 / 1024).toFixed(1);
+        diskElement.textContent = diskGB + "GB (" + metrics.disk_used_percent.toFixed(1) + "%)";
+    }
+    
+    // Network I/O
+    const netElement = document.getElementById("metric-network");
+    if (netElement) {
+        const netMB = ((metrics.network_bytes_received + metrics.network_bytes_sent) / 1024 / 1024).toFixed(1);
+        netElement.textContent = netMB + "MB";
+    }
+    
+    // Requests per second
+    const rpsElement = document.getElementById("metric-rps");
+    if (rpsElement && metrics.requests_per_second !== undefined) {
+        rpsElement.textContent = metrics.requests_per_second.toFixed(2);
+    }
+    
+    // Goroutines
+    const gorElement = document.getElementById("metric-goroutines");
+    if (gorElement && metrics.goroutines !== undefined) {
+        gorElement.textContent = metrics.goroutines.toString();
+    }
+    
+    // Load Average
+    const loadElement = document.getElementById("metric-load");
+    if (loadElement && metrics.load_avg_1 !== undefined) {
+        loadElement.textContent = metrics.load_avg_1.toFixed(2);
+    }
+    
+    // Uptime
+    const uptimeElement = document.getElementById("metric-uptime");
+    if (uptimeElement && metrics.uptime !== undefined) {
+        uptimeElement.textContent = formatUptime(metrics.uptime);
+    }
+}
+
+// Format uptime from nanoseconds
+function formatUptime(nanoseconds) {
+    const seconds = Math.floor(nanoseconds / 1000000000);
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (days > 0) {
+        return days + "d " + hours + "h";
+    } else if (hours > 0) {
+        return hours + "h " + minutes + "m";
+    }
+    return minutes + "m";
+}
+
+// Start fetching metrics on page load
+document.addEventListener("DOMContentLoaded", function() {
+    // Fetch metrics immediately
+    fetchSystemMetrics();
+    
+    // Refresh metrics every 30 seconds
+    setInterval(fetchSystemMetrics, 30000);
+});
+

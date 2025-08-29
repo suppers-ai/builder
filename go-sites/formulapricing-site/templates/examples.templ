@@ -1,0 +1,324 @@
+package templates
+
+templ ExamplesPage() {
+	@Layout("Examples - Formula Pricing", ExamplesContent())
+}
+
+templ ExamplesContent() {
+	<div class="min-h-screen">
+		<!-- Hero Section -->
+		<div class="hero-section">
+			<!-- Navigation -->
+			<nav class="px-6 py-4 flex justify-between items-center">
+				<div class="flex items-center space-x-2">
+					<a href="/" class="text-xl font-normal text-gray-800">Formula<span class="font-bold">Pricing</span></a>
+				</div>
+				<div class="flex items-center space-x-6">
+					<form action="/search" method="GET" class="flex">
+						<input 
+							type="text" 
+							name="q"
+							placeholder="Search..." 
+							class="px-4 py-2 rounded-lg bg-white/70 backdrop-blur border border-gray-200 focus:outline-none focus:border-purple-500"
+						/>
+					</form>
+					<a href="/faq" class="text-gray-700 hover:text-purple-600 font-medium">FAQ</a>
+					<a href="https://github.com" class="text-gray-700 hover:text-purple-600">
+						<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+						</svg>
+					</a>
+					<a href="/docs" class="button-documentation">Documentation</a>
+				</div>
+			</nav>
+
+			<div class="container mx-auto px-6 pt-8 pb-12 text-center">
+				<h1 class="text-5xl font-bold text-gray-800 mb-4">
+					Examples
+				</h1>
+				<p class="text-xl text-gray-600">
+					Real-world examples and use cases
+				</p>
+			</div>
+		</div>
+
+		<!-- Examples Content -->
+		<div class="container mx-auto px-6 -mt-6">
+			<div class="main-card p-12">
+				<div class="max-w-6xl mx-auto">
+					<!-- Basic Examples -->
+					<section class="mb-12">
+						<h2 class="text-3xl font-bold text-gray-800 mb-6">Basic Examples</h2>
+						
+						<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Simple Markup</h3>
+								<p class="text-gray-600 mb-4">Add a percentage markup to a base price.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+base_price * (1 + markup_percentage / 100)
+
+// Variables
+{
+  base_price: 100,
+  markup_percentage: 25
+}
+
+// Result: 125.00` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> Retail pricing with standard markup
+								</div>
+							</div>
+
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Volume Discount</h3>
+								<p class="text-gray-600 mb-4">Apply discounts based on quantity purchased.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+base_price * quantity * (quantity >= 10 ? 0.9 : 1.0)
+
+// Variables
+{
+  base_price: 50,
+  quantity: 12
+}
+
+// Result: 540.00 (10% discount applied)` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> Bulk pricing for wholesale customers
+								</div>
+							</div>
+
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Tiered Pricing</h3>
+								<p class="text-gray-600 mb-4">Different pricing based on customer tier.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+base_price + (tier === 'premium' ? 20 : tier === 'gold' ? 10 : 0)
+
+// Variables
+{
+  base_price: 100,
+  tier: 'premium'
+}
+
+// Result: 120.00` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> SaaS subscription pricing tiers
+								</div>
+							</div>
+
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Tax Calculation</h3>
+								<p class="text-gray-600 mb-4">Add tax to the final price calculation.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+(base_price + shipping) * (1 + tax_rate / 100)
+
+// Variables
+{
+  base_price: 100,
+  shipping: 15,
+  tax_rate: 8.5
+}
+
+// Result: 124.78` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> E-commerce checkout calculations
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<!-- Advanced Examples -->
+					<section class="mb-12">
+						<h2 class="text-3xl font-bold text-gray-800 mb-6">Advanced Examples</h2>
+						
+						<div class="space-y-8">
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Dynamic Pricing with Multiple Factors</h3>
+								<p class="text-gray-600 mb-4">Complex pricing that considers demand, seasonality, and inventory levels.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+base_price * demand_multiplier * seasonal_factor * 
+(inventory_level < 10 ? 1.2 : inventory_level < 50 ? 1.1 : 1.0)
+
+// Variables
+{
+  base_price: 100,
+  demand_multiplier: 1.3,
+  seasonal_factor: 1.15,
+  inventory_level: 8
+}
+
+// Result: 179.40` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> Hotel room pricing, airline tickets, or ride-sharing
+								</div>
+							</div>
+
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Subscription Pricing with Proration</h3>
+								<p class="text-gray-600 mb-4">Calculate prorated pricing for mid-cycle subscription changes.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+monthly_price * (days_remaining / days_in_month) + 
+(upgrade_price * (days_remaining / days_in_month))
+
+// Variables
+{
+  monthly_price: 99,
+  days_remaining: 15,
+  days_in_month: 30,
+  upgrade_price: 50
+}
+
+// Result: 74.50` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> SaaS billing systems with mid-cycle upgrades
+								</div>
+							</div>
+
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Commission Structure</h3>
+								<p class="text-gray-600 mb-4">Calculate sales commissions with progressive rates.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+sales_amount * (
+  sales_amount <= 10000 ? 0.05 :
+  sales_amount <= 25000 ? 0.07 :
+  sales_amount <= 50000 ? 0.10 : 0.12
+)
+
+// Variables
+{
+  sales_amount: 35000
+}
+
+// Result: 3500.00 (10% commission)` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> Sales team compensation calculations
+								</div>
+							</div>
+
+							<div class="example-card p-6 border border-gray-200 rounded-lg">
+								<h3 class="text-xl font-semibold text-gray-800 mb-3">Insurance Premium Calculation</h3>
+								<p class="text-gray-600 mb-4">Calculate insurance premiums based on risk factors.</p>
+								
+								<div class="formula-display mb-4">
+									<pre class="text-sm">{ `// Formula
+base_premium * age_factor * risk_multiplier * 
+(has_claims ? 1.3 : 1.0) * (credit_score < 650 ? 1.2 : 1.0)
+
+// Variables
+{
+  base_premium: 1200,
+  age_factor: 0.8,
+  risk_multiplier: 1.1,
+  has_claims: false,
+  credit_score: 720
+}
+
+// Result: 1056.00` }</pre>
+								</div>
+								
+								<div class="text-sm text-gray-600">
+									<strong>Use case:</strong> Auto or health insurance premium calculations
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<!-- Industry-Specific Examples -->
+					<section class="mb-12">
+						<h2 class="text-3xl font-bold text-gray-800 mb-6">Industry-Specific Examples</h2>
+						
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+							<div class="industry-example p-6 bg-purple-50 rounded-lg">
+								<h3 class="text-xl font-semibold text-purple-800 mb-3">E-commerce</h3>
+								<ul class="text-sm text-purple-700 space-y-2">
+									<li>• Dynamic pricing based on competitor analysis</li>
+									<li>• Shipping cost calculations</li>
+									<li>• Loyalty program discounts</li>
+									<li>• Bundle pricing optimization</li>
+								</ul>
+							</div>
+
+							<div class="industry-example p-6 bg-blue-50 rounded-lg">
+								<h3 class="text-xl font-semibold text-blue-800 mb-3">SaaS</h3>
+								<ul class="text-sm text-blue-700 space-y-2">
+									<li>• Usage-based billing calculations</li>
+									<li>• Seat-based pricing with volume discounts</li>
+									<li>• Feature-based pricing tiers</li>
+									<li>• Proration for plan changes</li>
+								</ul>
+							</div>
+
+							<div class="industry-example p-6 bg-green-50 rounded-lg">
+								<h3 class="text-xl font-semibold text-green-800 mb-3">Financial Services</h3>
+								<ul class="text-sm text-green-700 space-y-2">
+									<li>• Loan interest calculations</li>
+									<li>• Investment fee structures</li>
+									<li>• Risk-based pricing models</li>
+									<li>• Currency conversion with fees</li>
+								</ul>
+							</div>
+
+							<div class="industry-example p-6 bg-orange-50 rounded-lg">
+								<h3 class="text-xl font-semibold text-orange-800 mb-3">Manufacturing</h3>
+								<ul class="text-sm text-orange-700 space-y-2">
+									<li>• Cost-plus pricing models</li>
+									<li>• Material cost fluctuation adjustments</li>
+									<li>• Volume-based manufacturing discounts</li>
+									<li>• Custom product pricing</li>
+								</ul>
+							</div>
+						</div>
+					</section>
+
+					<div class="text-center">
+						<p class="text-gray-600 mb-4">Ready to implement your own pricing formulas?</p>
+						<div class="flex justify-center space-x-4">
+							<a href="/demo" class="button-primary">Try Live Demo</a>
+							<a href="/docs" class="button-secondary">Read Documentation</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Footer -->
+		<footer class="mt-20 py-8 border-t border-gray-200" style="background: white">
+			<div class="container mx-auto px-6 text-center text-gray-600">
+				<p>© 2025 Formula Pricing. Built with Go and PostgreSQL.</p>
+				<div class="mt-4 flex justify-center space-x-6">
+					<a href="https://github.com" class="hover:text-purple-600">GitHub</a>
+					<a href="/docs" class="hover:text-purple-600">Documentation</a>
+					<a href="/api-reference" class="hover:text-purple-600">API Reference</a>
+					<a href="/examples" class="hover:text-purple-600">Examples</a>
+				</div>
+			</div>
+		</footer>
+	</div>
+}

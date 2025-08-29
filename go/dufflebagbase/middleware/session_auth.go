@@ -14,37 +14,44 @@ import (
 func SessionAuth(svc *services.Service) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Get session
-			store := svc.Auth().SessionStore()
-			session, err := store.Get(r, "dufflebag-session")
+			ctx := r.Context()
+			
+			// Get session cookie
+			cookie, err := r.Cookie("session_id")
+			if err != nil || cookie.Value == "" {
+				svc.Logger().Debug(ctx, "No session cookie",
+					logger.String("path", r.URL.Path))
+				handleUnauthorized(w, r)
+				return
+			}
+			
+			// Verify session in database
+			session, err := svc.Sessions().GetSession(ctx, cookie.Value)
 			if err != nil {
-				svc.Logger().Debug(r.Context(), "Failed to get session",
+				svc.Logger().Debug(ctx, "Invalid or expired session",
 					logger.Err(err),
 					logger.String("path", r.URL.Path))
 				handleUnauthorized(w, r)
 				return
 			}
 			
-			// Check if user ID exists in session
-			userID, ok := session.Values["user_id"].(string)
-			if !ok || userID == "" {
-				svc.Logger().Debug(r.Context(), "No user_id in session",
-					logger.String("path", r.URL.Path))
+			// Get user info
+			user, err := svc.Users().GetUserByID(ctx, session.UserID)
+			if err != nil {
+				svc.Logger().Debug(ctx, "Failed to get user",
+					logger.Err(err),
+					logger.String("user_id", session.UserID.String()))
 				handleUnauthorized(w, r)
 				return
 			}
 			
-			// Add user ID to context for downstream handlers using the constant
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, constants.ContextKeyUserID, userID)
-			
-			// Also add email if present
-			if email, ok := session.Values["user_email"].(string); ok {
-				ctx = context.WithValue(ctx, constants.ContextKeyUserEmail, email)
-			}
+			// Add user info to context
+			ctx = context.WithValue(ctx, constants.ContextKeyUserID, user.ID.String())
+			ctx = context.WithValue(ctx, constants.ContextKeyUserEmail, user.Email)
 			
 			svc.Logger().Debug(ctx, "Session auth successful",
-				logger.String("user_id", userID),
+				logger.String("user_id", user.ID.String()),
+				logger.String("email", user.Email),
 				logger.String("path", r.URL.Path))
 			
 			// Continue with the request

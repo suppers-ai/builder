@@ -82,7 +82,7 @@ func Load() *Config {
 		S3Bucket:         getEnv("S3_BUCKET", "dufflebagbase"),
 		S3Region:         getEnv("S3_REGION", "us-east-1"),
 		S3UseSSL:         getEnvBool("S3_USE_SSL", false),
-		LocalStoragePath: getEnv("LOCAL_STORAGE_PATH", "./storage"),
+		LocalStoragePath: getEnv("LOCAL_STORAGE_PATH", "./.data/storage"),
 
 		// Mail
 		SMTPHost:     getEnv("SMTP_HOST", "localhost"),

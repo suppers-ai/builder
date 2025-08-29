@@ -21,7 +21,7 @@ func NewMockExtensionServices(db database.Database, logger logger.Logger) *Exten
 		db:     db,
 		auth:   &auth.Service{},
 		logger: logger,
-		storage: &services.StorageService{},
+		storage: &services.EnhancedStorageService{},
 		config:  &config.Config{},
 		collections: &services.CollectionsService{},
 		stats:   &services.StatsService{},

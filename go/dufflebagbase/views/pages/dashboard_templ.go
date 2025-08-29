@@ -236,13 +236,13 @@ func DashboardContent(data DashboardData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div class=\"stat-label\">Last 7 days</div></div></div></div></div><!-- Charts Section --><div class=\"charts-section\"><div class=\"chart-card\"><div class=\"chart-header\"><h3>User Growth</h3><span class=\"chart-subtitle\">Last 7 days</span></div><div class=\"chart-container\"><canvas id=\"userGrowthChart\"></canvas></div></div><div class=\"chart-card\"><div class=\"chart-header\"><h3>API Activity</h3><span class=\"chart-subtitle\">Last 24 hours</span></div><div class=\"chart-container\"><canvas id=\"apiActivityChart\"></canvas></div></div></div></div><!-- Chart.js for graphs --><script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script><script src=\"/static/js/dashboard.js\"></script><!-- Pass data to JavaScript and initialize --><script>\n        (function() {\n            // Set dashboard data\n            window.dashboardData = {\n                userGrowth: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div class=\"stat-label\">Last 7 days</div></div></div></div></div><!-- Charts Section --><div class=\"charts-section\"><div class=\"chart-card\"><div class=\"chart-header\"><h3>User Growth</h3><span class=\"chart-subtitle\">Last 7 days</span></div><div class=\"chart-container\"><canvas id=\"userGrowthChart\"></canvas></div></div><div class=\"chart-card\"><div class=\"chart-header\"><h3>API Activity</h3><span class=\"chart-subtitle\">Last 24 hours</span></div><div class=\"chart-container\"><canvas id=\"apiActivityChart\"></canvas></div></div></div><!-- System Metrics Section --><div class=\"metrics-section\"><h2 class=\"section-title\">System Metrics</h2><div class=\"stats-grid\" id=\"system-metrics-grid\"><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"cpu\"></i></div><div class=\"stat-content\"><h3>CPU Usage</h3><div class=\"stat-value\" id=\"metric-cpu\">--</div><div class=\"stat-label\">Percent</div></div></div><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"hard-drive\"></i></div><div class=\"stat-content\"><h3>Memory</h3><div class=\"stat-value\" id=\"metric-memory\">--</div><div class=\"stat-label\">Used</div></div></div><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"database\"></i></div><div class=\"stat-content\"><h3>Disk Usage</h3><div class=\"stat-value\" id=\"metric-disk\">--</div><div class=\"stat-label\">Used</div></div></div><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"network\"></i></div><div class=\"stat-content\"><h3>Network I/O</h3><div class=\"stat-value\" id=\"metric-network\">--</div><div class=\"stat-label\">Total</div></div></div><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"activity\"></i></div><div class=\"stat-content\"><h3>Requests/sec</h3><div class=\"stat-value\" id=\"metric-rps\">--</div><div class=\"stat-label\">RPS</div></div></div><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"zap\"></i></div><div class=\"stat-content\"><h3>Goroutines</h3><div class=\"stat-value\" id=\"metric-goroutines\">--</div><div class=\"stat-label\">Active</div></div></div><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"thermometer\"></i></div><div class=\"stat-content\"><h3>Load Average</h3><div class=\"stat-value\" id=\"metric-load\">--</div><div class=\"stat-label\">1m average</div></div></div><div class=\"stat-card\"><div class=\"stat-icon\"><i data-lucide=\"clock\"></i></div><div class=\"stat-content\"><h3>Uptime</h3><div class=\"stat-value\" id=\"metric-uptime\">--</div><div class=\"stat-label\">Duration</div></div></div></div></div></div><!-- Chart.js for graphs --><script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script><script src=\"/static/js/dashboard.js\"></script><!-- Pass data to JavaScript and initialize --><script>\n        (function() {\n            // Set dashboard data\n            window.dashboardData = {\n                userGrowth: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Var17, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(marshalJSON(data.Stats.UserGrowth))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 309, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 403, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 		if templ_7745c5c3_Err != nil {
@@ -254,7 +254,7 @@ func DashboardContent(data DashboardData) templ.Component {
 		}
 		templ_7745c5c3_Var18, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(marshalJSON(data.Stats.APIActivity))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 310, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 404, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 		if templ_7745c5c3_Err != nil {
@@ -266,7 +266,7 @@ func DashboardContent(data DashboardData) templ.Component {
 		}
 		templ_7745c5c3_Var19, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(marshalJSON(data.Stats.LogStats))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 311, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 405, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 		if templ_7745c5c3_Err != nil {
@@ -278,7 +278,7 @@ func DashboardContent(data DashboardData) templ.Component {
 		}
 		templ_7745c5c3_Var20, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(fmt.Sprintf("%.1f", data.Stats.SystemStats.CPUUsage))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 313, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 407, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 		if templ_7745c5c3_Err != nil {
@@ -290,7 +290,7 @@ func DashboardContent(data DashboardData) templ.Component {
 		}
 		templ_7745c5c3_Var21, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(fmt.Sprintf("%.1f", data.Stats.SystemStats.MemoryUsage))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 314, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 408, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 		if templ_7745c5c3_Err != nil {
@@ -302,7 +302,7 @@ func DashboardContent(data DashboardData) templ.Component {
 		}
 		templ_7745c5c3_Var22, templ_7745c5c3_Err := templruntime.ScriptContentOutsideStringLiteral(fmt.Sprintf("%.1f", data.Stats.SystemStats.DiskUsage))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 315, Col: 87}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages/dashboard.templ`, Line: 409, Col: 87}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 		if templ_7745c5c3_Err != nil {

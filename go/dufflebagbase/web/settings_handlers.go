@@ -5,19 +5,15 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/a-h/templ"
 	"github.com/suppers-ai/dufflebagbase/services"
-	"github.com/suppers-ai/dufflebagbase/utils"
 	"github.com/suppers-ai/dufflebagbase/views/pages"
 )
 
 // SettingsPage renders the settings page
 func SettingsPage(svc *services.Service) http.HandlerFunc {
+	h := NewBaseHandler(svc)
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get authboss session store
-		store := svc.Auth().SessionStore()
-		session, _ := store.Get(r, "dufflebag-session")
-		userEmail, _ := session.Values["user_email"].(string)
+		userEmail, _ := h.GetUserEmail(r)
 		
 		// Get environment settings
 		appName := getEnv("APP_NAME", "DuffleBagBase")
@@ -69,14 +65,8 @@ func SettingsPage(svc *services.Service) http.HandlerFunc {
 			MaintenanceMode:  maintenanceMode,
 		}
 		
-		// Check if this is an HTMX request
-		var component templ.Component
-		if utils.IsHTMXRequest(r) {
-			component = pages.SettingsPartial(data)
-		} else {
-			component = pages.SettingsPage(data)
-		}
-		Render(w, r, component)
+		// Render with HTMX support
+		h.RenderWithHTMX(w, r, pages.SettingsPage(data), pages.SettingsPartial(data))
 	}
 }
 

@@ -11,22 +11,17 @@ import (
 	
 	"github.com/google/uuid"
 
-	"github.com/a-h/templ"
 	"github.com/suppers-ai/dufflebagbase/services"
-	"github.com/suppers-ai/dufflebagbase/utils"
 	"github.com/suppers-ai/dufflebagbase/views/pages"
 	"github.com/suppers-ai/logger"
 )
 
 // LogsPage renders the logs management page
 func LogsPage(svc *services.Service) http.HandlerFunc {
+	h := NewBaseHandler(svc)
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get authboss session store
-		store := svc.Auth().SessionStore()
-		session, _ := store.Get(r, "dufflebag-session")
-		userEmail, _ := session.Values["user_email"].(string)
-		
-		ctx := context.Background()
+		userEmail, _ := h.GetUserEmail(r)
+		ctx := h.NewContext()
 		
 		// Get query params
 		searchQuery := r.URL.Query().Get("search")
@@ -142,14 +137,8 @@ func LogsPage(svc *services.Service) http.HandlerFunc {
 			TimeRange:     timeRange,
 		}
 		
-		// Check if this is an HTMX request
-		var component templ.Component
-		if utils.IsHTMXRequest(r) {
-			component = pages.LogsPartial(data)
-		} else {
-			component = pages.LogsPage(data)
-		}
-		Render(w, r, component)
+		// Render with HTMX support
+		h.RenderWithHTMX(w, r, pages.LogsPage(data), pages.LogsPartial(data))
 	}
 }
 

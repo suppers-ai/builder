@@ -33,7 +33,12 @@ func RequireRole(svc *services.Service, allowedRoles ...string) func(http.Handle
 			var user struct {
 				Role string
 			}
-			err := svc.DB().Table("auth_users").
+			// Get table name based on database type
+			tableName := "auth.users"
+			if dbType := svc.Config().DatabaseType; dbType == "sqlite" || dbType == "sqlite3" {
+				tableName = "users"
+			}
+			err := svc.DB().Table(tableName).
 				Select("COALESCE(role, 'user') as role").
 				Where("id = ?", userID).
 				First(&user).Error
@@ -107,7 +112,12 @@ func CheckReadOnly(svc *services.Service) func(http.Handler) http.Handler {
 				var user struct {
 					Role string
 				}
-				err := svc.DB().Table("auth_users").
+				// Get table name based on database type
+				tableName := "auth.users"
+				if dbType := svc.Config().DatabaseType; dbType == "sqlite" || dbType == "sqlite3" {
+					tableName = "users"
+				}
+				err := svc.DB().Table(tableName).
 					Select("COALESCE(role, 'user') as role").
 					Where("id = ?", userID).
 					First(&user).Error

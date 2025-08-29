@@ -17,7 +17,7 @@ type ExtensionServices struct {
 	db          database.Database
 	auth        *auth.Service
 	logger      logger.Logger
-	storage     *services.StorageService
+	storage     *services.EnhancedStorageService
 	config      *config.Config
 	collections *services.CollectionsService
 	stats       *services.StatsService
@@ -32,7 +32,7 @@ func NewExtensionServices(
 	db database.Database,
 	auth *auth.Service,
 	logger logger.Logger,
-	storage *services.StorageService,
+	storage *services.EnhancedStorageService,
 	config *config.Config,
 	collections *services.CollectionsService,
 	stats *services.StatsService,
@@ -262,7 +262,7 @@ type ExtensionStorage interface {
 
 // extensionStorage implements ExtensionStorage
 type extensionStorage struct {
-	storage   *services.StorageService
+	storage   *services.EnhancedStorageService
 	extension string
 }
 

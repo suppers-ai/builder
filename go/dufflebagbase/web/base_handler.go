@@ -3,7 +3,7 @@ package web
 import (
 	"context"
 	"net/http"
-	
+
 	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
 	"github.com/suppers-ai/dufflebagbase/constants"
@@ -21,7 +21,7 @@ type BaseHandler struct {
 func NewBaseHandler(svc *services.Service) *BaseHandler {
 	return &BaseHandler{
 		Service: svc,
-		Session: utils.NewSessionHelper(svc.Auth().SessionStore(), constants.SessionName),
+		Session: utils.NewSessionHelper(svc.SessionStore(), constants.SessionName),
 	}
 }
 

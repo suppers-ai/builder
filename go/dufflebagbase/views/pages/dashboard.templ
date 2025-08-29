@@ -295,6 +295,100 @@ templ DashboardContent(data DashboardData) {
             </div>
         </div>
 
+        <!-- System Metrics Section -->
+        <div class="metrics-section">
+            <h2 class="section-title">System Metrics</h2>
+            <div class="stats-grid" id="system-metrics-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="cpu"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>CPU Usage</h3>
+                        <div class="stat-value" id="metric-cpu">--</div>
+                        <div class="stat-label">Percent</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="hard-drive"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Memory</h3>
+                        <div class="stat-value" id="metric-memory">--</div>
+                        <div class="stat-label">Used</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="database"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Disk Usage</h3>
+                        <div class="stat-value" id="metric-disk">--</div>
+                        <div class="stat-label">Used</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="network"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Network I/O</h3>
+                        <div class="stat-value" id="metric-network">--</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="activity"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Requests/sec</h3>
+                        <div class="stat-value" id="metric-rps">--</div>
+                        <div class="stat-label">RPS</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="zap"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Goroutines</h3>
+                        <div class="stat-value" id="metric-goroutines">--</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="thermometer"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Load Average</h3>
+                        <div class="stat-value" id="metric-load">--</div>
+                        <div class="stat-label">1m average</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i data-lucide="clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Uptime</h3>
+                        <div class="stat-value" id="metric-uptime">--</div>
+                        <div class="stat-label">Duration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
     
     <!-- Chart.js for graphs -->

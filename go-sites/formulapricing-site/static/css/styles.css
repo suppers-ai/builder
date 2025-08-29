@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #6dbaa8;
+  --secondary-color: #4a5568;
+  --accent-color: #ed8936;
+  --bg-gradient-start: #b3d9d3;
+  --bg-gradient-end: #a8d5cf;
+}
+
+body {
+  background: #a8d5cf url('/static/images/wave-background-tile-512-thinner-seamless.svg') repeat;
+  background-size: 512px 512px;
+  min-height: 100vh;
+}
+
+.hero-section {
+  background: transparent;
+}
+
+.main-card {
+  background: white;
+  border: 2px solid #000;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+}
+
+.feature-card {
+  background: white;
+  border-radius: 18px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px 0 rgba(31, 38, 135, 0.15);
+}
+
+.check-icon {
+  color: #48bb78;
+}
+
+.button-documentation {
+  background: white;
+  color: #1a1a1a;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+  border: 2px solid #1a1a1a;
+}
+
+.button-documentation:hover {
+  background: #f5f5f5;
+}
+
+.button-primary {
+  background: #1a1a1a;
+  color: white;
+  padding: 14px 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+  border: none;
+}
+
+.button-primary:hover {
+  background: #333;
+}
+
+.button-secondary {
+  background: white;
+  color: #1a1a1a;
+  padding: 14px 40px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+  border: 2px solid #1a1a1a;
+}
+
+.button-secondary:hover {
+  background: #f5f5f5;
+}
+
+.code-block {
+  background: #2d3748;
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 10px;
+  font-family: 'Courier New', monospace;
+  overflow-x: auto;
+}
+
+.formula-display {
+  font-family: 'Courier New', monospace;
+  background: #edecec;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Professor Gopher Eye Tracking Styles */
+.gopher-container {
+  position: relative;
+  display: inline-block;
+}
+
+.eye-socket {
+  position: absolute;
+  width: 1.75rem; /* w-7 */
+  height: 1.75rem; /* h-7 */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffeedf;
+  /* Ensure eye sockets scale properly on different screen sizes */
+  box-sizing: border-box;
+}
+
+.eye {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.1s ease-out;
+  transform-origin: center center;
+  /* Ensure smooth rotation on all devices */
+  will-change: transform;
+}
+
+.pupil {
+  position: absolute;
+  background: black;
+  border-radius: 50%;
+  width: 0.75rem; /* w-3 */
+  height: 0.75rem; /* h-3 */
+  top: 50%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 640px) {
+  .gopher-container img {
+    width: 12rem; /* w-48 instead of w-64 on mobile */
+    height: 12rem;
+  }
+  
+  .eye-socket {
+    width: 1.25rem; /* Slightly smaller on mobile */
+    height: 1.25rem;
+  }
+  
+  .pupil {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+}
