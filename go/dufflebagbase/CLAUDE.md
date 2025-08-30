@@ -32,6 +32,22 @@ This is a development project where we prioritize clean, modern implementations 
 - Follow Go best practices
 - No unnecessary comments or documentation unless specifically requested
 
+### CSS Guidelines
+**IMPORTANT**: When working with CSS in this project:
+- ALWAYS use the common CSS files when possible:
+  - `/static/css/variables.css` - For all CSS variables
+  - `/static/css/common/base.css` - For typography and resets
+  - `/static/css/common/buttons.css` - For all button styles
+  - `/static/css/common/cards.css` - For card and panel components
+  - `/static/css/common/forms.css` - For form elements and inputs
+  - `/static/css/common/utilities.css` - For utility classes
+  - `/static/css/tables.css` - For table styles
+- Import common styles via `/static/css/common.css` in templates
+- Avoid creating duplicate styles - check common files first
+- Keep page-specific styles minimal and focused
+- Use CSS variables from `variables.css` for consistency
+- Maintain the glass morphism design pattern (transparent backgrounds with blur)
+
 ### Testing
 - Focus on functionality over test coverage
 - Test real implementations, not mocks

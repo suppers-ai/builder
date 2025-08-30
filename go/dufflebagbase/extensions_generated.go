@@ -3,11 +3,22 @@
 package main
 
 import (
+	"fmt"
 	"github.com/suppers-ai/dufflebagbase/extensions/core"
+	"github.com/suppers-ai/dufflebagbase/extensions/official/webhooks"
+	"github.com/suppers-ai/dufflebagbase/extensions/community/analytics"
 )
 
 // RegisterExtensions registers all discovered extensions
 func RegisterExtensions(registry *core.ExtensionRegistry) error {
+	// Register webhooks
+	if err := registry.Register(webhooks.NewWebhooksExtension()); err != nil {
+		return fmt.Errorf("failed to register webhooks extension: %w", err)
+	}
+	// Register analytics
+	if err := registry.Register(analytics.NewAnalyticsExtension()); err != nil {
+		return fmt.Errorf("failed to register analytics extension: %w", err)
+	}
 
 	return nil
 }
@@ -15,5 +26,7 @@ func RegisterExtensions(registry *core.ExtensionRegistry) error {
 // GetExtensionList returns a list of all available extensions
 func GetExtensionList() []string {
 	return []string{
+		"webhooks",
+		"analytics",
 	}
 }

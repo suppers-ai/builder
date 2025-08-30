@@ -110,8 +110,29 @@
         });
         
         // Also hide on swap completion for safety
-        document.body.addEventListener('htmx:afterSwap', () => {
+        document.body.addEventListener('htmx:afterSwap', (event) => {
             loadingOverlay.style.display = 'none';
+            
+            // Cleanup dashboard if navigating away from it
+            const currentPath = window.location.pathname;
+            if (currentPath === '/dashboard' && window.cleanupDashboard) {
+                // Check if we're still on dashboard after swap
+                setTimeout(() => {
+                    if (window.location.pathname !== '/dashboard') {
+                        window.cleanupDashboard();
+                    }
+                }, 100);
+            }
+            
+            // Initialize dashboard if navigating to it
+            if (currentPath === '/dashboard' && window.initializeDashboard) {
+                // Small delay to ensure DOM is ready
+                setTimeout(() => {
+                    if (window.location.pathname === '/dashboard') {
+                        window.initializeDashboard();
+                    }
+                }, 100);
+            }
         });
         
         // Hide loader on errors too
@@ -123,5 +144,12 @@
             loadingOverlay.style.display = 'none';
         });
     }
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (window.cleanupDashboard) {
+            window.cleanupDashboard();
+        }
+    });
 
 })();

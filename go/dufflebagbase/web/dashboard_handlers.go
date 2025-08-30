@@ -23,9 +23,13 @@ func DashboardPage(svc *services.Service) http.HandlerFunc {
             stats = &services.DashboardStats{}
         }
         
+        // Get extensions for sidebar
+        extensions := GetExtensionsForSidebar(r.Context())
+        
         data := pages.DashboardData{
             UserEmail:   userEmail,
             Stats:       *stats,
+            Extensions:  extensions,
         }
         
         h.RenderWithHTMX(w, r, pages.DashboardPage(data), pages.DashboardPartial(data))

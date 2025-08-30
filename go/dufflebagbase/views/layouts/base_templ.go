@@ -11,8 +11,10 @@ import templruntime "github.com/a-h/templ/runtime"
 import "github.com/suppers-ai/dufflebagbase/views/components"
 
 type BaseProps struct {
-	Title     string
-	UserEmail string
+	Title       string
+	UserEmail   string
+	Extensions  []components.ExtensionItem
+	ExtraStyles []string
 }
 
 func Base(props BaseProps) templ.Component {
@@ -43,36 +45,60 @@ func Base(props BaseProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 16, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 18, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - DuffleBagBase</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/favicon.ico\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Itim&display=swap\" rel=\"stylesheet\"><link rel=\"stylesheet\" href=\"/static/css/variables.css\"><link rel=\"stylesheet\" href=\"/static/css/main.css\"><link rel=\"stylesheet\" href=\"/static/css/components.css\"><link rel=\"stylesheet\" href=\"/static/css/admin.css\"><link rel=\"stylesheet\" href=\"/static/css/database.css\"><script src=\"https://unpkg.com/lucide@latest\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10/dist/ext/loading-states.js\"></script></head><body hx-ext=\"loading-states\"><!-- Progress bar for HTMX requests --><div class=\"htmx-progress\"></div><!-- Loading overlay --><div id=\"loading-overlay\" class=\"loading-overlay\" style=\"display: none;\"><div class=\"loading-popup\"><div class=\"loading-spinner\"></div><div class=\"loading-text\">Loading...</div></div></div><div class=\"app-layout\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - DuffleBagBase</title><link rel=\"icon\" type=\"image/x-icon\" href=\"/static/favicon.ico\"><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link href=\"https://fonts.googleapis.com/css2?family=Itim&display=swap\" rel=\"stylesheet\"><!-- Common styles (includes variables, base, buttons, cards, forms, utilities, tables) --><link rel=\"stylesheet\" href=\"/static/css/common.css\"><!-- Page-specific styles --><link rel=\"stylesheet\" href=\"/static/css/main.css\"><link rel=\"stylesheet\" href=\"/static/css/admin.css\"><link rel=\"stylesheet\" href=\"/static/css/database.css\"><link rel=\"stylesheet\" href=\"/static/css/extensions.css\"><link rel=\"stylesheet\" href=\"/static/css/logs.css\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, style := range props.ExtraStyles {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<link rel=\"stylesheet\" href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 templ.SafeURL
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(style)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 32, Col: 47}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<script src=\"https://unpkg.com/lucide@latest\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10/dist/ext/loading-states.js\"></script></head><body hx-ext=\"loading-states\"><!-- Progress bar for HTMX requests --><div class=\"htmx-progress\"></div><!-- Loading overlay --><div id=\"loading-overlay\" class=\"loading-overlay\" style=\"display: none;\"><div class=\"loading-popup\"><div class=\"loading-spinner\"></div><div class=\"loading-text\">Loading...</div></div></div><div class=\"app-layout\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.Sidebar(components.SidebarProps{
-			UserEmail: props.UserEmail,
+			UserEmail:  props.UserEmail,
+			Extensions: props.Extensions,
 		}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"main-content\"><div class=\"content-card\" id=\"main-content\"><div class=\"content-header\"><div class=\"breadcrumb\"><a href=\"/dashboard\" class=\"breadcrumb-item\">Home</a> <span class=\"breadcrumb-separator\">›</span> <span class=\"breadcrumb-current\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"main-content\"><div class=\"content-card\" id=\"main-content\"><div class=\"content-header\"><div class=\"breadcrumb\"><a href=\"/dashboard\" class=\"breadcrumb-item\">Home</a> <span class=\"breadcrumb-separator\">›</span> <span class=\"breadcrumb-current\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 52, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 61, Col: 74}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></div></div><div class=\"content-body\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span></div></div><div class=\"content-body\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -80,7 +106,7 @@ func Base(props BaseProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><!-- Loading spinner inside content area --><div class=\"htmx-indicator\"><div class=\"loading-spinner\"></div></div></div></div></div><script src=\"/static/js/app.js\" type=\"module\"></script><script src=\"/static/js/components.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><!-- Loading spinner inside content area --><div class=\"htmx-indicator\"><div class=\"loading-spinner\"></div></div></div></div></div><script src=\"/static/js/app.js\" type=\"module\"></script><script src=\"/static/js/components.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -104,33 +130,33 @@ func AuthLayout(title string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var4 == nil {
-			templ_7745c5c3_Var4 = templ.NopComponent
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		var templ_7745c5c3_Var6 string
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 77, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layouts/base.templ`, Line: 86, Col: 22}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " - DuffleBagBase</title><link rel=\"stylesheet\" href=\"/static/css/auth.css\"></head><body><div class=\"auth-container\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ_7745c5c3_Var4.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " - DuffleBagBase</title><link rel=\"stylesheet\" href=\"/static/css/auth.css\"></head><body><div class=\"auth-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div><style>\n            .password-input-wrapper {\n                position: relative;\n                display: flex;\n                align-items: center;\n            }\n            \n            .password-input-wrapper input {\n                padding-right: 40px;\n                width: 100%;\n            }\n            \n            .password-toggle {\n                position: absolute;\n                right: 10px;\n                background: none;\n                border: none;\n                cursor: pointer;\n                padding: 5px;\n                display: flex;\n                align-items: center;\n                justify-content: center;\n                color: #666;\n                transition: color 0.2s;\n            }\n            \n            .password-toggle:hover {\n                color: #333;\n            }\n            \n            .password-toggle:focus {\n                outline: 2px solid #4F46E5;\n                outline-offset: 2px;\n                border-radius: 4px;\n            }\n        </style><script>\n            function togglePassword(fieldId) {\n                const passwordField = document.getElementById(fieldId);\n                const eyeOpen = document.getElementById(fieldId + '-eye-open');\n                const eyeClosed = document.getElementById(fieldId + '-eye-closed');\n                \n                if (passwordField.type === 'password') {\n                    passwordField.type = 'text';\n                    eyeOpen.style.display = 'none';\n                    eyeClosed.style.display = 'block';\n                } else {\n                    passwordField.type = 'password';\n                    eyeOpen.style.display = 'block';\n                    eyeClosed.style.display = 'none';\n                }\n            }\n        </script></body></html>")
+		templ_7745c5c3_Err = templ_7745c5c3_Var5.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><style>\n            .password-input-wrapper {\n                position: relative;\n                display: flex;\n                align-items: center;\n            }\n            \n            .password-input-wrapper input {\n                padding-right: 40px;\n                width: 100%;\n            }\n            \n            .password-toggle {\n                position: absolute;\n                right: 10px;\n                background: none;\n                border: none;\n                cursor: pointer;\n                padding: 5px;\n                display: flex;\n                align-items: center;\n                justify-content: center;\n                color: #666;\n                transition: color 0.2s;\n            }\n            \n            .password-toggle:hover {\n                color: #333;\n            }\n            \n            .password-toggle:focus {\n                outline: 2px solid #4F46E5;\n                outline-offset: 2px;\n                border-radius: 4px;\n            }\n        </style><script>\n            function togglePassword(fieldId) {\n                const passwordField = document.getElementById(fieldId);\n                const eyeOpen = document.getElementById(fieldId + '-eye-open');\n                const eyeClosed = document.getElementById(fieldId + '-eye-closed');\n                \n                if (passwordField.type === 'password') {\n                    passwordField.type = 'text';\n                    eyeOpen.style.display = 'none';\n                    eyeClosed.style.display = 'block';\n                } else {\n                    passwordField.type = 'password';\n                    eyeOpen.style.display = 'block';\n                    eyeClosed.style.display = 'none';\n                }\n            }\n        </script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

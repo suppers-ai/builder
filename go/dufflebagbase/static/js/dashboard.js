@@ -2,16 +2,27 @@
 let userGrowthChart = null;
 let apiActivityChart = null;
 let logStatsChart = null;
+let dashboardRefreshInterval = null;
+let metricsRefreshInterval = null;
+let isDashboardInitialized = false;
 
 // Make the function globally available
 window.initializeDashboard = function() {
     console.log('Initializing dashboard...');
+    
+    // Prevent multiple initializations
+    if (isDashboardInitialized) {
+        console.log('Dashboard already initialized, skipping...');
+        return;
+    }
     
     // Check if we have the required data
     if (!window.dashboardData) {
         console.log('Dashboard data not yet available, waiting...');
         return;
     }
+    
+    isDashboardInitialized = true;
     
     // Initialize Lucide icons
     if (typeof lucide !== 'undefined') {
@@ -313,8 +324,13 @@ window.initializeDashboard = function() {
         });
     }
 
+    // Clear any existing refresh intervals
+    if (dashboardRefreshInterval) {
+        clearInterval(dashboardRefreshInterval);
+    }
+    
     // Auto-refresh dashboard stats every 30 seconds
-    setInterval(() => {
+    dashboardRefreshInterval = setInterval(() => {
         if (window.location.pathname === '/dashboard') {
             // If using HTMX, trigger a refresh
             if (typeof htmx !== 'undefined') {
@@ -323,6 +339,10 @@ window.initializeDashboard = function() {
                     swap: 'innerHTML'
                 });
             }
+        } else {
+            // Clear interval if we're not on dashboard anymore
+            clearInterval(dashboardRefreshInterval);
+            dashboardRefreshInterval = null;
         }
     }, 30000);
 
@@ -354,12 +374,55 @@ window.initializeDashboard = function() {
     });
 };
 
+// Cleanup function for dashboard
+window.cleanupDashboard = function() {
+    console.log('Cleaning up dashboard...');
+    
+    // Destroy charts
+    if (userGrowthChart) {
+        userGrowthChart.destroy();
+        userGrowthChart = null;
+    }
+    if (apiActivityChart) {
+        apiActivityChart.destroy();
+        apiActivityChart = null;
+    }
+    if (logStatsChart) {
+        logStatsChart.destroy();
+        logStatsChart = null;
+    }
+    
+    // Clear intervals
+    if (dashboardRefreshInterval) {
+        clearInterval(dashboardRefreshInterval);
+        dashboardRefreshInterval = null;
+    }
+    if (metricsRefreshInterval) {
+        clearInterval(metricsRefreshInterval);
+        metricsRefreshInterval = null;
+    }
+    
+    // Reset initialization flag
+    isDashboardInitialized = false;
+};
+
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname === '/dashboard') {
         window.initializeDashboard();
     }
 });
+
+// Cleanup on HTMX navigation away from dashboard
+if (typeof htmx !== 'undefined') {
+    document.body.addEventListener('htmx:beforeSwap', function(event) {
+        // If we're navigating away from dashboard, cleanup
+        if (window.location.pathname === '/dashboard' && 
+            !event.detail.pathInfo.path.includes('/dashboard')) {
+            window.cleanupDashboard();
+        }
+    });
+}
 
 // Initialize after HTMX navigation - removed because we now initialize from inline script
 
@@ -561,11 +624,38 @@ function formatUptime(nanoseconds) {
 }
 
 // Start fetching metrics on page load
-document.addEventListener("DOMContentLoaded", function() {
+function startMetricsRefresh() {
+    // Only start if on dashboard page
+    if (window.location.pathname !== '/dashboard') {
+        return;
+    }
+    
+    // Clear any existing interval
+    if (metricsRefreshInterval) {
+        clearInterval(metricsRefreshInterval);
+    }
+    
     // Fetch metrics immediately
     fetchSystemMetrics();
     
     // Refresh metrics every 30 seconds
-    setInterval(fetchSystemMetrics, 30000);
-});
+    metricsRefreshInterval = setInterval(() => {
+        if (window.location.pathname === '/dashboard') {
+            fetchSystemMetrics();
+        } else {
+            // Clear interval if we're not on dashboard anymore
+            clearInterval(metricsRefreshInterval);
+            metricsRefreshInterval = null;
+        }
+    }, 30000);
+}
+
+// Start metrics refresh when dashboard loads
+if (window.location.pathname === '/dashboard') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startMetricsRefresh);
+    } else {
+        startMetricsRefresh();
+    }
+}
 

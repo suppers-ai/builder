@@ -13,8 +13,9 @@ import (
 
 // BaseHandler provides common functionality for all handlers
 type BaseHandler struct {
-	Service *services.Service
-	Session *utils.SessionHelper
+	Service          *services.Service
+	Session          *utils.SessionHelper
+	ExtensionRegistry interface{} // Will be set to *core.ExtensionRegistry when needed
 }
 
 // NewBaseHandler creates a new base handler
@@ -22,6 +23,15 @@ func NewBaseHandler(svc *services.Service) *BaseHandler {
 	return &BaseHandler{
 		Service: svc,
 		Session: utils.NewSessionHelper(svc.SessionStore(), constants.SessionName),
+	}
+}
+
+// NewBaseHandlerWithExtensions creates a new base handler with extension registry
+func NewBaseHandlerWithExtensions(svc *services.Service, registry interface{}) *BaseHandler {
+	return &BaseHandler{
+		Service:          svc,
+		Session:          utils.NewSessionHelper(svc.SessionStore(), constants.SessionName),
+		ExtensionRegistry: registry,
 	}
 }
 

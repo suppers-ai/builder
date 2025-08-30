@@ -2,6 +2,7 @@ package pages
 
 import (
     "github.com/suppers-ai/dufflebagbase/views/layouts"
+    "github.com/suppers-ai/dufflebagbase/views/components"
     "github.com/suppers-ai/dufflebagbase/services"
     "fmt"
     "encoding/json"
@@ -10,6 +11,7 @@ import (
 type DashboardData struct {
     UserEmail   string
     Stats       services.DashboardStats
+    Extensions  []components.ExtensionItem
 }
 
 templ DashboardContent(data DashboardData) {
@@ -410,14 +412,20 @@ templ DashboardContent(data DashboardData) {
                 }
             };
             
-            // Function to try initialization
+            // Function to try initialization with retry limit
+            let retryCount = 0;
+            const maxRetries = 50; // 5 seconds max wait time
+            
             function tryInitialize() {
                 if (typeof window.initializeDashboard === 'function') {
                     console.log('Initializing dashboard from inline script');
                     window.initializeDashboard();
-                } else {
-                    console.log('Dashboard function not ready, retrying...');
+                } else if (retryCount < maxRetries) {
+                    retryCount++;
+                    console.log(`Dashboard function not ready, retry ${retryCount}/${maxRetries}...`);
                     setTimeout(tryInitialize, 100);
+                } else {
+                    console.error('Failed to initialize dashboard after maximum retries');
                 }
             }
             
@@ -429,8 +437,9 @@ templ DashboardContent(data DashboardData) {
 
 templ DashboardPage(data DashboardData) {
     @layouts.Base(layouts.BaseProps{
-        Title:     "Dashboard",
-        UserEmail: data.UserEmail,
+        Title:      "Dashboard",
+        UserEmail:  data.UserEmail,
+        Extensions: data.Extensions,
     }) {
         @DashboardContent(data)
     }

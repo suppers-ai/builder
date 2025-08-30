@@ -428,6 +428,7 @@ templ StoragePage(data StoragePageData) {
 	@layouts.Base(layouts.BaseProps{
 		Title:     "Storage",
 		UserEmail: data.UserEmail,
+		ExtraStyles: []string{"/static/css/storage.css"},
 	}) {
 		@StorageContent(data)
 	}

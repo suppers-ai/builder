@@ -200,7 +200,11 @@ func main() {
 	// Enable extensions based on config (for now, enable all)
 	for _, ext := range extensionRegistry.List() {
 		// Validate extension safety
-		extObj, _ := extensionRegistry.Get(ext.Name)
+		extObj, exists := extensionRegistry.Get(ext.Name)
+		if !exists || extObj == nil {
+			appLogger.Warn(ctx, "Extension not found or is nil: "+ext.Name)
+			continue
+		}
 		if err := securityManager.ValidateExtensionSafety(extObj); err != nil {
 			appLogger.Warn(ctx, "Extension failed safety validation: "+ext.Name)
 			continue
@@ -368,6 +372,7 @@ func setupRoutes(svc *services.Service, authService *auth.Service, logger logger
 	// Middleware
 	router.Use(middleware.CORS(cfg))
 	router.Use(middleware.Logger(logger))
+	router.Use(middleware.WithExtensions(extensionRegistry))
 	router.Use(authService.LoadClientStateMiddleware)
 
 	// Rate limiting

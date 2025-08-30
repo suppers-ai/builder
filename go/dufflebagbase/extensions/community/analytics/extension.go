@@ -692,5 +692,5 @@ func (e *AnalyticsExtension) renderDashboardHTML() string {
     </script>
 </body>
 </html>
-` + "`" + `
+`
 }

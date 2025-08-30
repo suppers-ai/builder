@@ -44,45 +44,44 @@ type ColumnInfo struct {
 }
 
 templ DatabaseContent(data DatabasePageData) {
-	<div class="database-editor">
-		<!-- Left sidebar with schemas and tables -->
-		<div class="db-sidebar">
-			<div class="db-sidebar-header">
-				<div class="db-sidebar-title">
+	<div class="database-container">
+		<!-- Header with table selector and actions -->
+		<div class="db-header">
+			<div class="db-header-left">
+				<div class="db-title">
 					<i data-lucide="database"></i>
-					<span>Table Editor</span>
+					<span>Database Editor</span>
 				</div>
+				
+				<!-- Table selector dropdown -->
+				<div class="table-selector">
+					<select class="table-select" onchange="selectTableFromDropdown(this.value)">
+						<option value="">Select a table...</option>
+						for _, schema := range data.Schemas {
+							<optgroup label={ schema.Name }>
+								for _, table := range schema.Tables {
+									<option value={ fmt.Sprintf("%s.%s", schema.Name, table) }
+									        selected?={ data.SelectedTable != nil && data.SelectedTable.Schema == schema.Name && data.SelectedTable.Name == table }>
+										{ table }
+									</option>
+								}
+							</optgroup>
+						}
+					</select>
+				</div>
+				
+				<!-- Search -->
+				<div class="db-search-inline">
+					<i data-lucide="search" class="search-icon"></i>
+					<input type="text" placeholder="Search tables..." class="search-input" onkeyup="filterTablesInDropdown(this.value)"/>
+				</div>
+			</div>
+			
+			<div class="db-header-right">
 				<button class="btn-new-table" onclick="showNewTableModal()">
 					<i data-lucide="plus"></i>
-					New table
+					New Table
 				</button>
-			</div>
-			
-			<div class="db-search">
-				<input type="text" placeholder="Search tables..." class="db-search-input" onkeyup="filterTables(this.value)"/>
-				<i data-lucide="search" class="db-search-icon"></i>
-			</div>
-			
-			<div class="db-schemas">
-				for _, schema := range data.Schemas {
-					<div class="db-schema-group">
-						<div class="db-schema-header" onclick="toggleSchema(this)">
-							<i data-lucide="chevron-right" class="schema-toggle"></i>
-							<span class="schema-name">{ schema.Name }</span>
-						</div>
-						<div class="db-tables">
-							for _, table := range schema.Tables {
-								<div class="db-table-item" 
-								     onclick="selectTable(this.dataset.schema, this.dataset.table)"
-								     data-schema={ schema.Name }
-								     data-table={ table }>
-									<i data-lucide="table"></i>
-									<span>{ table }</span>
-								</div>
-							}
-						</div>
-					</div>
-				}
 			</div>
 		</div>
 		

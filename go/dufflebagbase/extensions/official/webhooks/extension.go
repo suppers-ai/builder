@@ -697,17 +697,17 @@ func (e *WebhooksExtension) renderDashboardHTML(total, active, deliveries int, s
             .then(data => {
                 const container = document.getElementById('webhooks-container');
                 if (data.webhooks && data.webhooks.length > 0) {
-                    container.innerHTML = data.webhooks.map(webhook => `
-                        <div class="webhook-item ${webhook.active ? 'webhook-active' : 'webhook-inactive'}">
-                            <div>
-                                <div class="webhook-name">${webhook.name || 'Unnamed Webhook'}</div>
-                                <div class="webhook-url">${webhook.url}</div>
-                            </div>
-                            <span class="status-badge ${webhook.active ? 'status-active' : 'status-inactive'}">
-                                ${webhook.active ? 'Active' : 'Inactive'}
-                            </span>
-                        </div>
-                    `).join('');
+                    container.innerHTML = data.webhooks.map(webhook => 
+                        '<div class="webhook-item ' + (webhook.active ? 'webhook-active' : 'webhook-inactive') + '">' +
+                            '<div>' +
+                                '<div class="webhook-name">' + (webhook.name || 'Unnamed Webhook') + '</div>' +
+                                '<div class="webhook-url">' + webhook.url + '</div>' +
+                            '</div>' +
+                            '<span class="status-badge ' + (webhook.active ? 'status-active' : 'status-inactive') + '">' +
+                                (webhook.active ? 'Active' : 'Inactive') +
+                            '</span>' +
+                        '</div>'
+                    ).join('');
                 } else {
                     container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 2rem;">No webhooks configured yet. Click "New Webhook" to get started.</p>';
                 }

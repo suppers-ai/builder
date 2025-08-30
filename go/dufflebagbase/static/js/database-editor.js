@@ -7,9 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
     
-    // Initialize schema groups
-    initializeSchemas();
-    
     // Initialize keyboard shortcuts
     initKeyboardShortcuts();
     
@@ -17,37 +14,32 @@ document.addEventListener('DOMContentLoaded', () => {
     updateHistoryDropdown();
 });
 
-// Schema & Table Management
-function initializeSchemas() {
-    // Auto-expand first schema
-    const firstSchema = document.querySelector('.db-schema-group');
-    if (firstSchema) {
-        firstSchema.classList.add('expanded');
-    }
-}
-
-function toggleSchema(element) {
-    const schemaGroup = element.closest('.db-schema-group');
-    schemaGroup.classList.toggle('expanded');
+// Table Selection from Dropdown
+function selectTableFromDropdown(value) {
+    if (!value) return;
     
-    // Re-initialize Lucide icons
-    if (window.lucide) {
-        lucide.createIcons();
+    const [schema, table] = value.split('.');
+    if (schema && table) {
+        selectTable(schema, table);
     }
 }
 
-function filterTables(searchTerm) {
-    const tables = document.querySelectorAll('.db-table-item');
-    const schemas = document.querySelectorAll('.db-schema-group');
+// Filter tables in dropdown
+function filterTablesInDropdown(searchTerm) {
+    const select = document.querySelector('.table-select');
+    if (!select) return;
     
     searchTerm = searchTerm.toLowerCase();
+    const options = select.querySelectorAll('option');
     
-    tables.forEach(table => {
-        const tableName = table.querySelector('span').textContent.toLowerCase();
-        if (tableName.includes(searchTerm)) {
-            table.style.display = 'flex';
+    options.forEach(option => {
+        if (option.value === '') return; // Skip the placeholder
+        
+        const text = option.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            option.style.display = '';
         } else {
-            table.style.display = 'none';
+            option.style.display = 'none';
         }
     });
     
@@ -573,11 +565,14 @@ function resetCreateTableForm() {
     }
 }
 
-let columnCounter = 0;
+// Use window.columnCounter to avoid redeclaration errors
+if (typeof window.columnCounter === 'undefined') {
+    window.columnCounter = 0;
+}
 
 function addColumn() {
     const container = document.getElementById('columnsContainer');
-    const columnId = `column_${++columnCounter}`;
+    const columnId = `column_${++window.columnCounter}`;
     
     const columnRow = document.createElement('div');
     columnRow.className = 'column-row';
