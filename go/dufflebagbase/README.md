@@ -1,421 +1,295 @@
-# DuffleBagBase
+# Dufflebag Admin Dashboard
 
-A Supabase/PocketBase alternative built in Go that compiles to a single binary. DuffleBagBase provides a complete Backend-as-a-Service (BaaS) solution with authentication, database management, storage, and real-time capabilities.
+A modern, full-featured admin dashboard built with **Svelte** (frontend) and **Go** (backend), compiled into a single binary for easy deployment.
 
 ## Features
 
-- **🔐 Authentication & Authorization**
-  - Built-in user management with email/password authentication
-  - OAuth providers support (Google, GitHub, etc.)
-  - JWT-based API authentication
-  - Row Level Security (RLS) policies
-  - Session management for web UI
+- 🚀 **Single Binary Deployment** - Frontend and backend in one executable
+- 🎨 **Modern UI** - Built with SvelteKit, Skeleton UI, and Tailwind CSS
+- 🔐 **JWT Authentication** - Secure token-based authentication
+- 📊 **Full Admin Dashboard** - Users, database browser, storage, collections, settings
+- 🗄️ **Multi-Database Support** - PostgreSQL and SQLite
+- 📦 **Storage Providers** - Local filesystem and S3 support
+- 🔄 **Real-time Updates** - Reactive UI with Svelte stores
+- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
 
-- **🗄️ Dynamic Database Management**
-  - Create collections (tables) dynamically through UI or API
-  - Schema definition with field types and constraints
-  - Automatic index management
-  - PostgreSQL with schema isolation
-  - CRUD operations via REST API
+## Tech Stack
 
-- **📁 File Storage**
-  - S3-compatible storage (MinIO for local development)
-  - Bucket management
-  - File upload/download with permissions
-  - Storage metadata tracking
+### Frontend
+- **SvelteKit** - Modern web framework
+- **Skeleton UI** - Beautiful UI component library
+- **Tailwind CSS** - Utility-first CSS framework
+- **TypeScript** - Type-safe JavaScript
+- **Lucide Icons** - Clean, consistent icons
 
-- **📊 Admin Dashboard**
-  - Web-based admin interface
-  - Collection management UI
-  - User management
-  - Logs viewer
-  - System settings
-
-- **🔌 Real-time Subscriptions**
-  - WebSocket support for real-time updates
-  - Subscribe to database changes
-  - Live queries
-
-- **📝 Comprehensive Logging**
-  - Request/response logging
-  - Error tracking
-  - Database query logging
-  - Structured logging with multiple outputs
+### Backend
+- **Go** - Fast, compiled backend
+- **Gorilla Mux** - HTTP router
+- **JWT** - JSON Web Tokens for auth
+- **GORM** - ORM for database operations
+- **Embedded Files** - Frontend embedded in binary
 
 ## Quick Start
 
-### Using Docker Compose (Recommended)
+### Prerequisites
 
-1. Clone the repository:
+- Go 1.20+
+- Node.js 20+
+- Docker (optional, for PostgreSQL)
+
+### Development Setup
+
+1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/dufflebagbase.git
+git clone <repository-url>
 cd dufflebagbase
 ```
 
-2. Start the development environment:
+2. **Install frontend dependencies**
 ```bash
-docker-compose up -d
+cd admin
+npm install
+cd ..
 ```
 
-This will start:
-- PostgreSQL database on port 5432
-- MinIO (S3-compatible storage) on port 9000
-- MailHog (email testing) on port 8025
-- DuffleBagBase on port 8080
+3. **Run development servers**
 
-3. Access the dashboard:
-```
-http://localhost:8080
-```
-
-Default admin credentials:
-- Email: `admin@dufflebagbase.local`
-- Password: `admin123`
-
-### Building from Source
-
-Requirements:
-- Go 1.21+
-- PostgreSQL 14+
-
-1. Install dependencies:
+With PostgreSQL (requires Docker):
 ```bash
-go mod download
+./run-dev.sh postgres
 ```
 
-2. Set environment variables:
+With SQLite (no Docker required):
 ```bash
-export DATABASE_URL="postgresql://user:password@localhost:5432/dufflebagbase?sslmode=disable"
-export PORT=8080
-export DEFAULT_ADMIN_EMAIL=admin@example.com
-export DEFAULT_ADMIN_PASSWORD=solobaseadmin123
+./run-dev.sh sqlite
 ```
 
-3. Build and run:
+The script will:
+- Start the database (PostgreSQL container or SQLite file)
+- Run the Go API server on http://localhost:8080
+- Run the Svelte dev server on http://localhost:5173
+- Create a default admin user
+
+4. **Access the application**
+- Frontend: http://localhost:5173
+- API: http://localhost:8080/api
+
+**Default Admin Credentials:**
+- Email: `admin@example.com`
+- Password: `AdminSecurePass2024!`
+
+## Production Build
+
+### Build Single Binary
+
 ```bash
-go build -o dufflebag
+# Using Makefile
+make build
+
+# Or manually:
+cd admin && npm run build && cd ..
+go build -o dufflebag .
+```
+
+### Run Production Binary
+
+```bash
+# With PostgreSQL
+DATABASE_URL="postgresql://user:pass@localhost/dbname" \
+./dufflebag
+
+# With SQLite
+DATABASE_TYPE=sqlite \
+DATABASE_URL="file:./data.db" \
 ./dufflebag
 ```
 
-## Configuration
+The production server runs on port 8080 by default (configurable via `PORT` env var).
 
-DuffleBagBase can be configured through environment variables or a `.env` file:
-
-```env
-# Server
-PORT=8080
-ENVIRONMENT=development
-
-# Database
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_NAME=dufflebagbase
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_SSL_MODE=disable
-
-# Admin
-DEFAULT_ADMIN_EMAIL=admin@example.com
-DEFAULT_ADMIN_PASSWORD=solobaseadmin123
-
-# Security
-JWT_SECRET=your-secret-key-change-in-production
-SESSION_SECRET=your-session-secret-change-in-production
-
-# Features
-ENABLE_API=true
-ENABLE_SIGNUP=true
-ENABLE_STORAGE=true
-
-# Storage (S3-compatible)
-S3_ENDPOINT=localhost:9000
-S3_ACCESS_KEY=minioadmin
-S3_SECRET_KEY=minioadmin
-S3_USE_SSL=false
-LOCAL_STORAGE_PATH=./storage
-
-# Email
-SMTP_HOST=localhost
-SMTP_PORT=1025
-SMTP_USER=
-SMTP_PASSWORD=
-SMTP_FROM=noreply@dufflebagbase.local
-
-# Rate Limiting
-RATE_LIMIT_ENABLED=true
-RATE_LIMIT_REQUESTS_PER_MINUTE=60
-```
-
-## API Documentation
-
-### Authentication
-
-#### Login
-```http
-POST /api/v1/auth/login
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-#### Signup
-```http
-POST /api/v1/auth/signup
-Content-Type: application/json
-
-{
-  "email": "user@example.com",
-  "password": "password123",
-  "name": "John Doe"
-}
-```
-
-### Collections
-
-#### List Collections
-```http
-GET /api/v1/collections
-Authorization: Bearer <token>
-```
-
-#### Create Collection
-```http
-POST /api/v1/collections
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "name": "posts",
-  "display_name": "Blog Posts",
-  "description": "Blog posts collection",
-  "schema": {
-    "fields": [
-      {
-        "name": "title",
-        "type": "text",
-        "required": true,
-        "max_length": 200
-      },
-      {
-        "name": "content",
-        "type": "text",
-        "required": true
-      },
-      {
-        "name": "author_id",
-        "type": "uuid",
-        "reference": "users",
-        "required": true
-      },
-      {
-        "name": "published",
-        "type": "boolean",
-        "default": false
-      }
-    ]
-  },
-  "indexes": [
-    {
-      "name": "idx_posts_author",
-      "fields": ["author_id"]
-    }
-  ],
-  "auth_rules": {
-    "list_rule": "@authenticated",
-    "view_rule": "@authenticated",
-    "create_rule": "@authenticated",
-    "update_rule": "created_by = auth.uid()",
-    "delete_rule": "@admin"
-  }
-}
-```
-
-### Records
-
-#### List Records
-```http
-GET /api/v1/collections/{collection}/records?limit=100&offset=0
-Authorization: Bearer <token>
-```
-
-#### Create Record
-```http
-POST /api/v1/collections/{collection}/records
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "title": "My First Post",
-  "content": "Hello, world!",
-  "author_id": "uuid-here",
-  "published": true
-}
-```
-
-#### Get Record
-```http
-GET /api/v1/collections/{collection}/records/{id}
-Authorization: Bearer <token>
-```
-
-#### Update Record
-```http
-PUT /api/v1/collections/{collection}/records/{id}
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "title": "Updated Title"
-}
-```
-
-#### Delete Record
-```http
-DELETE /api/v1/collections/{collection}/records/{id}
-Authorization: Bearer <token>
-```
-
-### Storage
-
-#### List Buckets
-```http
-GET /api/v1/storage/buckets
-Authorization: Bearer <token>
-```
-
-#### Upload File
-```http
-POST /api/v1/storage/{bucket}/upload
-Authorization: Bearer <token>
-Content-Type: multipart/form-data
-
-file=@/path/to/file.jpg
-```
-
-#### Get File
-```http
-GET /api/v1/storage/{bucket}/{path}
-Authorization: Bearer <token>
-```
-
-## Architecture
-
-DuffleBagBase is built with a modular architecture:
+## Project Structure
 
 ```
 dufflebagbase/
-├── main.go              # Application entry point
-├── config/              # Configuration management
-├── handlers/            # HTTP request handlers
-├── middleware/          # HTTP middleware
-├── services/            # Business logic
-├── web/                 # Web UI templates
-└── static/              # Static assets
+├── admin/                 # Svelte frontend application
+│   ├── src/
+│   │   ├── routes/       # Page components
+│   │   │   ├── +page.svelte        # Dashboard
+│   │   │   ├── login/              # Login page
+│   │   │   ├── users/              # User management
+│   │   │   ├── database/           # Database browser
+│   │   │   ├── storage/            # File storage
+│   │   │   ├── collections/        # Collections manager
+│   │   │   └── settings/           # App settings
+│   │   ├── lib/
+│   │   │   ├── api.ts             # API client
+│   │   │   ├── types.ts           # TypeScript types
+│   │   │   ├── stores/            # Svelte stores
+│   │   │   └── components/        # Reusable components
+│   │   └── app.css               # Global styles
+│   └── build/                    # Production build (embedded)
+│
+├── api/                          # Go API handlers
+│   ├── auth.go                  # Authentication endpoints
+│   ├── users.go                 # User management
+│   ├── database.go              # Database operations
+│   ├── storage.go               # File storage
+│   ├── collections.go           # Collections CRUD
+│   ├── settings.go              # Settings management
+│   ├── dashboard.go             # Dashboard stats
+│   ├── middleware.go            # Auth & CORS middleware
+│   └── router.go                # API route definitions
+│
+├── services/                     # Business logic layer
+├── models/                       # Data models
+├── config/                       # Configuration
+├── embed.go                      # Embed frontend build
+├── main.go                       # Application entry point
+└── Makefile                      # Build commands
 ```
 
-### Package Dependencies
+## Environment Variables
 
-- **auth**: Authentication and authorization
-- **database**: Database abstraction layer
-- **logger**: Structured logging
-- **mailer**: Email service
-- **storageadapter**: File storage abstraction
+### Database Configuration
 
-## Development
-
-### Running Tests
 ```bash
+# Database type: postgres or sqlite
+DATABASE_TYPE=postgres
+
+# PostgreSQL
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname?sslmode=disable
+
+# SQLite
+DATABASE_URL=file:./database.db
+```
+
+### Application Settings
+
+```bash
+# Server port (default: 8080)
+PORT=8080
+
+# Default admin user (created on first run)
+DEFAULT_ADMIN_EMAIL=admin@example.com
+DEFAULT_ADMIN_PASSWORD=SecurePassword123!
+
+# Storage configuration
+STORAGE_TYPE=local  # or 's3'
+STORAGE_PATH=/var/lib/dufflebag/storage
+
+# S3 Configuration (if using S3)
+AWS_ACCESS_KEY_ID=your-key
+AWS_SECRET_ACCESS_KEY=your-secret
+S3_BUCKET=your-bucket
+S3_REGION=us-east-1
+```
+
+## API Endpoints
+
+All API endpoints are prefixed with `/api`:
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/signup` - User registration
+- `POST /api/auth/logout` - Logout
+- `GET /api/auth/me` - Get current user
+
+### Users
+- `GET /api/users` - List users (paginated)
+- `GET /api/users/:id` - Get user details
+- `PATCH /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Delete user
+
+### Database
+- `GET /api/database/tables` - List tables
+- `GET /api/database/tables/:table/columns` - Get table columns
+- `POST /api/database/query` - Execute query (admin only)
+
+### Storage
+- `GET /api/storage/buckets` - List buckets
+- `GET /api/storage/buckets/:bucket/objects` - List objects
+- `POST /api/storage/buckets/:bucket/upload` - Upload file
+- `DELETE /api/storage/buckets/:bucket/objects/:id` - Delete object
+
+### Collections
+- `GET /api/collections` - List collections
+- `POST /api/collections` - Create collection
+- `GET /api/collections/:id` - Get collection
+- `PATCH /api/collections/:id` - Update collection
+- `DELETE /api/collections/:id` - Delete collection
+
+### Settings
+- `GET /api/settings` - Get app settings
+- `PATCH /api/settings` - Update settings (admin only)
+
+### Dashboard
+- `GET /api/dashboard/stats` - Get dashboard statistics
+
+## Development Commands
+
+```bash
+# Install dependencies
+cd admin && npm install
+
+# Run development servers
+./run-dev.sh postgres  # or sqlite
+
+# Build for production
+make build
+
+# Run tests
 go test ./...
+
+# Format code
+cd admin && npm run format
+go fmt ./...
+
+# Type checking
+cd admin && npm run check
 ```
 
-### Database Migrations
-The application automatically runs migrations on startup. Custom migrations can be added to the `migrations/` directory.
-
-### Adding a New Collection Type
-Collections can be created dynamically through the UI or API. Each collection automatically gets:
-- UUID primary key
-- Created/updated timestamps
-- Created/updated by tracking
-- Row Level Security policies
-
-## Production Deployment
-
-### Single Binary Deployment
-
-1. Build for production:
-```bash
-CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o dufflebag .
-```
-
-2. Create a systemd service:
-```ini
-[Unit]
-Description=DuffleBagBase
-After=network.target
-
-[Service]
-Type=simple
-User=dufflebag
-WorkingDirectory=/opt/dufflebagbase
-ExecStart=/opt/dufflebagbase/dufflebag
-Restart=always
-EnvironmentFile=/opt/dufflebagbase/.env
-
-[Install]
-WantedBy=multi-user.target
-```
-
-### Docker Deployment
+## Docker Deployment
 
 ```dockerfile
-FROM golang:1.21-alpine AS builder
+FROM golang:1.20-alpine AS builder
 WORKDIR /app
 COPY . .
-RUN go build -o dufflebag
+RUN apk add --no-cache nodejs npm
+RUN cd admin && npm install && npm run build
+RUN go build -o dufflebag .
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 COPY --from=builder /app/dufflebag .
+EXPOSE 8080
 CMD ["./dufflebag"]
 ```
 
 ## Security Considerations
 
-- Always use HTTPS in production
-- Change default admin credentials immediately
-- Use strong JWT and session secrets
-- Enable rate limiting
-- Configure CORS appropriately
-- Use Row Level Security for multi-tenant applications
-- Regular security updates
+- JWT tokens expire after 24 hours
+- Passwords are hashed using bcrypt
+- CORS is configured for API endpoints
+- SQL injection protection via parameterized queries
+- XSS protection in frontend
+- CSRF protection for state-changing operations
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests
+5. Submit a pull request
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details
+MIT License - see LICENSE file for details
 
 ## Support
 
-- Documentation: [docs.dufflebagbase.com](https://docs.dufflebagbase.com)
-- Issues: [GitHub Issues](https://github.com/yourusername/dufflebagbase/issues)
-- Discord: [Join our community](https://discord.gg/dufflebagbase)
+For issues and questions, please open a GitHub issue.
 
-## Acknowledgments
+---
 
-Inspired by:
-- [Supabase](https://supabase.com)
-- [PocketBase](https://pocketbase.io)
-- [Firebase](https://firebase.google.com)
-
-Built with:
-- [Go](https://golang.org)
-- [PostgreSQL](https://www.postgresql.org)
-- [Authboss](https://github.com/volatiletech/authboss)
-- [Gorilla Mux](https://github.com/gorilla/mux)
+Built with ❤️ using Svelte and Go

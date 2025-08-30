@@ -6,26 +6,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/suppers-ai/dufflebagbase/database"
 	"github.com/suppers-ai/dufflebagbase/utils"
 )
 
-type Config struct {
-	// Server
-	Port        string
-	Environment string
-
-	// Database
-	DatabaseType     string // "postgres" or "sqlite"
-	DatabaseURL      string
-	DatabaseHost     string
-	DatabasePort     int
-	DatabaseName     string
-	DatabaseUser     string
-	DatabasePassword string
-	DatabaseSSLMode  string
-
-	// Storage
-	StorageType      string
+type StorageConfig struct {
+	Type             string
 	S3Endpoint       string
 	S3AccessKey      string
 	S3SecretKey      string
@@ -33,6 +19,18 @@ type Config struct {
 	S3Region         string
 	S3UseSSL         bool
 	LocalStoragePath string
+}
+
+type Config struct {
+	// Server
+	Port        string
+	Environment string
+
+	// Database
+	Database database.Config
+	
+	// Storage
+	Storage StorageConfig
 
 	// Mail
 	SMTPHost     string
@@ -66,23 +64,34 @@ type Config struct {
 }
 
 func Load() *Config {
+	dbType := getEnv("DATABASE_TYPE", "sqlite")
+	
 	cfg := &Config{
 		Port:        getEnv("PORT", "8080"),
 		Environment: getEnv("ENVIRONMENT", "development"),
 
 		// Database
-		DatabaseType: getEnv("DATABASE_TYPE", "sqlite"), // Default to SQLite for development
-		DatabaseURL: getEnv("DATABASE_URL", ""),
+		Database: database.Config{
+			Type:     dbType,
+			Host:     getEnv("DATABASE_HOST", "localhost"),
+			Port:     getEnvInt("DATABASE_PORT", 5432),
+			Database: getEnv("DATABASE_NAME", "dufflebagbase"),
+			Username: getEnv("DATABASE_USER", "postgres"),
+			Password: getEnv("DATABASE_PASSWORD", "postgres"),
+			SSLMode:  getEnv("DATABASE_SSL_MODE", "disable"),
+		},
 
 		// Storage
-		StorageType:      getEnv("STORAGE_TYPE", "local"),
-		S3Endpoint:       getEnv("S3_ENDPOINT", ""),
-		S3AccessKey:      getEnv("S3_ACCESS_KEY", ""),
-		S3SecretKey:      getEnv("S3_SECRET_KEY", ""),
-		S3Bucket:         getEnv("S3_BUCKET", "dufflebagbase"),
-		S3Region:         getEnv("S3_REGION", "us-east-1"),
-		S3UseSSL:         getEnvBool("S3_USE_SSL", false),
-		LocalStoragePath: getEnv("LOCAL_STORAGE_PATH", "./.data/storage"),
+		Storage: StorageConfig{
+			Type:             getEnv("STORAGE_TYPE", "local"),
+			S3Endpoint:       getEnv("S3_ENDPOINT", ""),
+			S3AccessKey:      getEnv("S3_ACCESS_KEY", ""),
+			S3SecretKey:      getEnv("S3_SECRET_KEY", ""),
+			S3Bucket:         getEnv("S3_BUCKET", "dufflebagbase"),
+			S3Region:         getEnv("S3_REGION", "us-east-1"),
+			S3UseSSL:         getEnvBool("S3_USE_SSL", false),
+			LocalStoragePath: getEnv("LOCAL_STORAGE_PATH", "./.data/storage"),
+		},
 
 		// Mail
 		SMTPHost:     getEnv("SMTP_HOST", "localhost"),
@@ -115,32 +124,26 @@ func Load() *Config {
 		RateLimitRequestsPerMinute: getEnvInt("RATE_LIMIT_REQUESTS_PER_MINUTE", 60),
 	}
 
-	// Parse database configuration based on type
-	if cfg.DatabaseType == "sqlite" {
-		// For SQLite, DATABASE_URL is the file path
-		if cfg.DatabaseURL == "" {
-			cfg.DatabaseURL = getEnv("SQLITE_PATH", "./.data/dufflebag.db")
-		}
-	} else if cfg.DatabaseType == "postgres" || cfg.DatabaseType == "postgresql" {
-		// Parse PostgreSQL DATABASE_URL if provided
-		if cfg.DatabaseURL != "" {
-			parseDatabaseURL(cfg)
+	// Handle DATABASE_URL if provided
+	dbURL := getEnv("DATABASE_URL", "")
+	if dbURL != "" {
+		if dbType == "sqlite" {
+			// For SQLite, DATABASE_URL is the file path
+			cfg.Database.Database = dbURL
 		} else {
-			cfg.DatabaseHost = getEnv("DATABASE_HOST", "localhost")
-			cfg.DatabasePort = getEnvInt("DATABASE_PORT", 5432)
-			cfg.DatabaseName = getEnv("DATABASE_NAME", "dufflebagbase")
-			cfg.DatabaseUser = getEnv("DATABASE_USER", "dufflebag")
-			cfg.DatabasePassword = getEnv("DATABASE_PASSWORD", "dufflebag123")
-			cfg.DatabaseSSLMode = getEnv("DATABASE_SSLMODE", "disable")
+			// For PostgreSQL, parse the URL
+			parseDatabaseURL(cfg, dbURL)
 		}
+	} else if dbType == "sqlite" {
+		// Default SQLite path
+		cfg.Database.Database = getEnv("SQLITE_PATH", "./.data/dufflebag.db")
 	}
 
 	return cfg
 }
 
-func parseDatabaseURL(cfg *Config) {
+func parseDatabaseURL(cfg *Config, url string) {
 	// Simple parsing of postgres://user:pass@host:port/db?sslmode=disable
-	url := cfg.DatabaseURL
 
 	// Remove postgres:// prefix
 	url = strings.TrimPrefix(url, "postgres://")
@@ -155,8 +158,8 @@ func parseDatabaseURL(cfg *Config) {
 	// Parse user:pass
 	userPass := strings.Split(parts[0], ":")
 	if len(userPass) == 2 {
-		cfg.DatabaseUser = userPass[0]
-		cfg.DatabasePassword = userPass[1]
+		cfg.Database.Username = userPass[0]
+		cfg.Database.Password = userPass[1]
 	}
 
 	// Parse host:port/db?params
@@ -171,30 +174,30 @@ func parseDatabaseURL(cfg *Config) {
 		for _, param := range strings.Split(params, "&") {
 			kv := strings.Split(param, "=")
 			if len(kv) == 2 && kv[0] == "sslmode" {
-				cfg.DatabaseSSLMode = kv[1]
+				cfg.Database.SSLMode = kv[1]
 			}
 		}
 	}
 
 	// Parse host:port/db
 	if idx := strings.LastIndex(hostPart, "/"); idx != -1 {
-		cfg.DatabaseName = hostPart[idx+1:]
+		cfg.Database.Database = hostPart[idx+1:]
 		hostPart = hostPart[:idx]
 	}
 
 	// Parse host:port
 	if idx := strings.LastIndex(hostPart, ":"); idx != -1 {
-		cfg.DatabaseHost = hostPart[:idx]
+		cfg.Database.Host = hostPart[:idx]
 		if port, err := strconv.Atoi(hostPart[idx+1:]); err == nil {
-			cfg.DatabasePort = port
+			cfg.Database.Port = port
 		}
 	} else {
-		cfg.DatabaseHost = hostPart
-		cfg.DatabasePort = 5432
+		cfg.Database.Host = hostPart
+		cfg.Database.Port = 5432
 	}
 
-	if cfg.DatabaseSSLMode == "" {
-		cfg.DatabaseSSLMode = "disable"
+	if cfg.Database.SSLMode == "" {
+		cfg.Database.SSLMode = "disable"
 	}
 }
 
