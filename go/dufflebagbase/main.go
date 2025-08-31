@@ -18,10 +18,12 @@ func main() {
 	cfg := config.Load()
 
 	// Initialize database
+	log.Printf("Initializing database with type: %s", cfg.Database.Type)
 	db, err := database.New(cfg.Database)
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
+	log.Printf("Successfully connected to %s database", cfg.Database.Type)
 	defer db.Close()
 
 	// Run migrations
@@ -30,7 +32,13 @@ func main() {
 	}
 
 	// Run migrations
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(
+		&models.User{},
+		&models.Setting{},
+		&models.Collection{},
+		&models.CollectionRecord{},
+		&models.ExtensionMigration{},
+	)
 
 	// Initialize services
 	authService := services.NewAuthService(db)
@@ -62,6 +70,9 @@ func main() {
 
 	// Setup main router
 	router := mux.NewRouter()
+	
+	// Apply Prometheus metrics middleware
+	router.Use(api.PrometheusMiddleware)
 
 	// API routes
 	router.PathPrefix("/api").Handler(apiRouter)

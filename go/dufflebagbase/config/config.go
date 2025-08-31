@@ -66,6 +66,14 @@ type Config struct {
 func Load() *Config {
 	dbType := getEnv("DATABASE_TYPE", "sqlite")
 	
+	// Normalize database type to lowercase
+	dbType = strings.ToLower(dbType)
+	if dbType == "postgresql" {
+		dbType = "postgres" // Normalize postgresql to postgres
+	} else if dbType == "sqlite3" {
+		dbType = "sqlite" // Normalize sqlite3 to sqlite
+	}
+	
 	cfg := &Config{
 		Port:        getEnv("PORT", "8080"),
 		Environment: getEnv("ENVIRONMENT", "development"),

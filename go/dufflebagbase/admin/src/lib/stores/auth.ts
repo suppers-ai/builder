@@ -9,19 +9,9 @@ interface AuthState {
 }
 
 function createAuthStore() {
-	// Temporary mock user for testing
-	const mockUser: User = {
-		id: '1',
-		email: 'admin@example.com',
-		role: 'admin',
-		confirmed: true,
-		created_at: new Date().toISOString(),
-		updated_at: new Date().toISOString()
-	};
-	
 	const { subscribe, set, update } = writable<AuthState>({
-		user: mockUser, // Temporarily set mock user
-		loading: false,
+		user: null,
+		loading: true,
 		error: null
 	});
 

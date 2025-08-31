@@ -63,11 +63,11 @@ func (e *WebhooksExtension) Metadata() core.ExtensionMetadata {
 	return core.ExtensionMetadata{
 		Name:        "webhooks",
 		Version:     "1.0.0",
-		Description: "Webhook management and delivery system",
+		Description: "Robust webhook management and delivery system for real-time event notifications and third-party integrations. Features secure HMAC signatures, automatic retries, delivery monitoring, and a comprehensive management dashboard.",
 		Author:      "DuffleBagBase Official",
 		License:     "MIT",
 		Homepage:    "https://github.com/suppers-ai/dufflebagbase",
-		Tags:        []string{"webhooks", "integration", "automation"},
+		Tags:        []string{"webhooks", "integration", "automation", "notifications", "api"},
 		MinVersion:  "1.0.0",
 		MaxVersion:  "2.0.0",
 	}
@@ -302,7 +302,7 @@ func (e *WebhooksExtension) DashboardHandler() http.HandlerFunc {
 		// Get webhook statistics
 		activeCount := 0
 		totalDeliveries := 0
-		successRate := float64(95) // Mock data for now
+		successRate := float64(0) // Calculate from actual deliveries
 		
 		for _, hook := range e.hooks {
 			if hook.Active {

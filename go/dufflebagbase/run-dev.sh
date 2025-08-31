@@ -73,6 +73,9 @@ echo -e "${YELLOW}Default Admin:${NC}"
 echo "  Email:    admin@example.com"
 echo "  Password: AdminSecurePass2024!"
 echo ""
+echo -e "${YELLOW}Database Type:${NC} $DATABASE_TYPE"
+echo -e "${YELLOW}Database URL:${NC} $DATABASE_URL"
+echo ""
 echo -e "${GREEN}Press Ctrl+C to stop all servers${NC}"
 
 # Function to cleanup on exit

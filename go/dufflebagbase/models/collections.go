@@ -24,8 +24,9 @@ type Collection struct {
 }
 
 // TableName specifies the table name
+// Using simple table names that work with both SQLite and PostgreSQL
 func (Collection) TableName() string {
-	return getTableName("collections", "metadata")
+	return "collections"
 }
 
 // BeforeCreate hook
@@ -51,7 +52,7 @@ type CollectionRecord struct {
 
 // TableName specifies the table name
 func (CollectionRecord) TableName() string {
-	return getTableName("collections", "records")
+	return "records"
 }
 
 // BeforeCreate hook

@@ -50,45 +50,23 @@ func HandleGetDashboardStats(
 			totalStorage = 0
 		}
 
-		// Calculate growth (mock data for now)
-		usersGrowth := 12.5  // 12.5% growth
-		storageGrowth := 8.3  // 8.3% growth
+		// Calculate growth - set to 0 for now until we implement historical tracking
+		usersGrowth := 0.0
+		storageGrowth := 0.0
 
-		// Get recent activities (mock data for now)
-		activities := []Activity{
-			{
-				ID:          "1",
-				Type:        "user_signup",
-				Description: "New user signed up",
-				UserEmail:   "john@example.com",
-				CreatedAt:   time.Now().Add(-1 * time.Hour),
-			},
-			{
-				ID:          "2",
-				Type:        "file_uploaded",
-				Description: "File uploaded to storage",
-				UserEmail:   "admin@example.com",
-				CreatedAt:   time.Now().Add(-2 * time.Hour),
-			},
-			{
-				ID:          "3",
-				Type:        "collection_created",
-				Description: "New collection created",
-				UserEmail:   "admin@example.com",
-				CreatedAt:   time.Now().Add(-3 * time.Hour),
-			},
-		}
+		// Get recent activities - empty for now until we implement activity logging
+		activities := []Activity{}
 
 		stats := DashboardStats{
 			TotalUsers:       totalUsers,
 			TotalCollections: totalCollections,
 			TotalStorageUsed: totalStorage,
-			TotalAPICalls:    1000, // Mock value
+			TotalAPICalls:    0, // Set to 0 until we implement API call tracking
 			UsersGrowth:      usersGrowth,
 			StorageGrowth:    storageGrowth,
 			RecentActivities: activities,
 		}
 
-		respondWithJSON(w, http.StatusOK, stats)
+		RespondWithJSON(w, http.StatusOK, stats)
 	}
 }

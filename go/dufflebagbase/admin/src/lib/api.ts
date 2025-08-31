@@ -15,7 +15,7 @@ class ApiClient {
 	constructor() {
 		// Try to restore token from localStorage
 		if (typeof window !== 'undefined') {
-			this.token = localStorage.getItem('auth_token') || 'mock-token-for-testing';
+			this.token = localStorage.getItem('auth_token');
 		}
 	}
 
@@ -35,6 +35,7 @@ class ApiClient {
 			...options.headers
 		};
 
+		// Only add Authorization header if we have a valid token
 		if (this.token) {
 			headers['Authorization'] = `Bearer ${this.token}`;
 		}
@@ -220,6 +221,95 @@ class ApiClient {
 	// Dashboard methods
 	async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
 		return this.request<DashboardStats>('/dashboard/stats');
+	}
+
+	// Extensions methods
+	async getExtensions(): Promise<ApiResponse<any[]>> {
+		return this.request<any[]>('/extensions');
+	}
+
+	async toggleExtension(name: string, enabled: boolean): Promise<ApiResponse<any>> {
+		return this.request<any>(`/extensions/${name}/toggle`, {
+			method: 'POST',
+			body: JSON.stringify({ enabled })
+		});
+	}
+
+	async getExtensionStatus(): Promise<ApiResponse<any[]>> {
+		return this.request<any[]>('/extensions/status');
+	}
+
+	// Analytics extension methods
+	async getAnalyticsStats(): Promise<ApiResponse<any>> {
+		return this.request<any>('/ext/analytics/api/stats');
+	}
+
+	async getAnalyticsPageviews(): Promise<ApiResponse<any>> {
+		return this.request<any>('/ext/analytics/api/pageviews');
+	}
+
+	async trackAnalyticsEvent(event: any): Promise<ApiResponse<void>> {
+		return this.request<void>('/ext/analytics/api/track', {
+			method: 'POST',
+			body: JSON.stringify(event)
+		});
+	}
+
+	// Webhooks extension methods
+	async getWebhooks(): Promise<ApiResponse<any>> {
+		return this.request<any>('/ext/webhooks/api/webhooks');
+	}
+
+	async createWebhook(webhook: any): Promise<ApiResponse<any>> {
+		return this.request<any>('/ext/webhooks/api/webhooks/create', {
+			method: 'POST',
+			body: JSON.stringify(webhook)
+		});
+	}
+
+	async toggleWebhook(id: string, active: boolean): Promise<ApiResponse<any>> {
+		return this.request<any>(`/ext/webhooks/api/webhooks/${id}/toggle`, {
+			method: 'POST',
+			body: JSON.stringify({ active })
+		});
+	}
+
+	// Generic HTTP methods for direct API calls
+	async get(path: string): Promise<any> {
+		const response = await this.request<any>(path);
+		// Return data directly if it exists, otherwise return the whole response
+		return response.data !== undefined ? response.data : response;
+	}
+
+	async post(path: string, body?: any): Promise<any> {
+		const response = await this.request<any>(path, {
+			method: 'POST',
+			body: body ? JSON.stringify(body) : undefined
+		});
+		return response.data !== undefined ? response.data : response;
+	}
+
+	async put(path: string, body?: any): Promise<any> {
+		const response = await this.request<any>(path, {
+			method: 'PUT',
+			body: body ? JSON.stringify(body) : undefined
+		});
+		return response.data !== undefined ? response.data : response;
+	}
+
+	async patch(path: string, body?: any): Promise<any> {
+		const response = await this.request<any>(path, {
+			method: 'PATCH',
+			body: body ? JSON.stringify(body) : undefined
+		});
+		return response.data !== undefined ? response.data : response;
+	}
+
+	async delete(path: string): Promise<any> {
+		const response = await this.request<any>(path, {
+			method: 'DELETE'
+		});
+		return response.data !== undefined ? response.data : response;
 	}
 }
 

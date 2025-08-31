@@ -109,6 +109,14 @@ export interface AppSettings {
 	storage_provider: 'local' | 's3';
 	s3_bucket?: string;
 	s3_region?: string;
+	max_upload_size: number;
+	allowed_file_types: string;
+	session_timeout: number;
+	password_min_length: number;
+	enable_api_logs: boolean;
+	enable_debug_mode: boolean;
+	maintenance_mode: boolean;
+	maintenance_message?: string;
 }
 
 // Dashboard types

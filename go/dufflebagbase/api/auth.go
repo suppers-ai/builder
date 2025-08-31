@@ -40,7 +40,7 @@ func HandleLogin(authService *services.AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req LoginRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			respondWithError(w, http.StatusBadRequest, "Invalid request body")
+			respondWithError(w, http.StatusBadRequest, "Invalid request body: " + err.Error())
 			return
 		}
 

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"io"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -56,6 +56,53 @@ func HandleGetBucketObjects(storageService *services.StorageService) http.Handle
 	}
 }
 
+func HandleCreateBucket(storageService *services.StorageService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var request struct {
+			Name   string `json:"name"`
+			Public bool   `json:"public"`
+		}
+		
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid request body")
+			return
+		}
+		
+		if request.Name == "" {
+			respondWithError(w, http.StatusBadRequest, "Bucket name is required")
+			return
+		}
+		
+		err := storageService.CreateBucket(request.Name, request.Public)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		
+		respondWithJSON(w, http.StatusCreated, map[string]interface{}{
+			"message": "Bucket created successfully",
+			"name":    request.Name,
+		})
+	}
+}
+
+func HandleDeleteBucket(storageService *services.StorageService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		bucket := vars["bucket"]
+		
+		err := storageService.DeleteBucket(bucket)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		
+		respondWithJSON(w, http.StatusOK, map[string]string{
+			"message": "Bucket deleted successfully",
+		})
+	}
+}
+
 func HandleUploadFile(storageService *services.StorageService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -75,15 +122,14 @@ func HandleUploadFile(storageService *services.StorageService) http.HandlerFunc 
 		}
 		defer file.Close()
 
-		// Read file content
-		content, err := io.ReadAll(file)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "Failed to read file")
-			return
+		// Get content type
+		contentType := header.Header.Get("Content-Type")
+		if contentType == "" {
+			contentType = "application/octet-stream"
 		}
 
-		// Upload file
-		object, err := storageService.UploadFile(bucket, header.Filename, content, header.Header.Get("Content-Type"))
+		// Upload file directly using the reader
+		object, err := storageService.UploadFile(bucket, header.Filename, file, header.Size, contentType)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Failed to upload file")
 			return

@@ -77,17 +77,24 @@ func (a *API) setupRoutes() {
 		a.StorageService, 
 		a.CollectionService,
 	)).Methods("GET", "OPTIONS")
+	
+	// System metrics (temporarily public for development)
+	apiRouter.HandleFunc("/system/metrics", HandleGetSystemMetrics()).Methods("GET", "OPTIONS")
+	apiRouter.Handle("/metrics", HandlePrometheusMetrics()).Methods("GET", "OPTIONS")
 
-	// Database routes
-	protected.HandleFunc("/database/tables", HandleGetDatabaseTables(a.DatabaseService)).Methods("GET", "OPTIONS")
-	protected.HandleFunc("/database/tables/{table}/columns", HandleGetTableColumns(a.DatabaseService)).Methods("GET", "OPTIONS")
-	protected.HandleFunc("/database/query", HandleExecuteQuery(a.DatabaseService)).Methods("POST", "OPTIONS")
+	// Database routes (temporarily public for development)
+	apiRouter.HandleFunc("/database/info", HandleGetDatabaseInfo(a.DatabaseService)).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/database/tables", HandleGetDatabaseTables(a.DatabaseService)).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/database/tables/{table}/columns", HandleGetTableColumns(a.DatabaseService)).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/database/query", HandleExecuteQuery(a.DatabaseService)).Methods("POST", "OPTIONS")
 
-	// Storage routes
-	protected.HandleFunc("/storage/buckets", HandleGetStorageBuckets(a.StorageService)).Methods("GET", "OPTIONS")
-	protected.HandleFunc("/storage/buckets/{bucket}/objects", HandleGetBucketObjects(a.StorageService)).Methods("GET", "OPTIONS")
-	protected.HandleFunc("/storage/buckets/{bucket}/upload", HandleUploadFile(a.StorageService)).Methods("POST", "OPTIONS")
-	protected.HandleFunc("/storage/buckets/{bucket}/objects/{id}", HandleDeleteObject(a.StorageService)).Methods("DELETE", "OPTIONS")
+	// Storage routes (temporarily public for development)
+	apiRouter.HandleFunc("/storage/buckets", HandleGetStorageBuckets(a.StorageService)).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets", HandleCreateBucket(a.StorageService)).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}", HandleDeleteBucket(a.StorageService)).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects", HandleGetBucketObjects(a.StorageService)).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/upload", HandleUploadFile(a.StorageService)).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}", HandleDeleteObject(a.StorageService)).Methods("DELETE", "OPTIONS")
 
 	// Collection routes
 	protected.HandleFunc("/collections", HandleGetCollections(a.CollectionService)).Methods("GET", "OPTIONS")
@@ -99,6 +106,26 @@ func (a *API) setupRoutes() {
 	// Settings routes
 	protected.HandleFunc("/settings", HandleGetSettings(a.SettingsService)).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/settings", HandleUpdateSettings(a.SettingsService)).Methods("PATCH", "OPTIONS")
+	protected.HandleFunc("/settings/reset", HandleResetSettings(a.SettingsService)).Methods("POST", "OPTIONS")
+	
+	// Extensions routes (temporarily public for development)
+	apiRouter.HandleFunc("/extensions", HandleGetExtensions()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/extensions/manage", HandleExtensionsManagement()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/extensions/{name}/toggle", HandleToggleExtension()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/extensions/status", HandleExtensionsStatus()).Methods("GET", "OPTIONS")
+	
+	// Extension dashboard routes (temporarily public for development)
+	// Analytics dashboard
+	apiRouter.HandleFunc("/ext/analytics/dashboard", HandleAnalyticsDashboard()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/analytics/api/stats", HandleAnalyticsStats()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/analytics/api/pageviews", HandleAnalyticsPageviews()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/analytics/api/track", HandleAnalyticsTrack()).Methods("POST", "OPTIONS")
+	
+	// Webhooks dashboard
+	apiRouter.HandleFunc("/ext/webhooks/dashboard", HandleWebhooksDashboard()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/webhooks/api/webhooks", HandleWebhooksList()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/webhooks/api/webhooks/create", HandleWebhooksCreate()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/webhooks/api/webhooks/{id}/toggle", HandleWebhooksToggle()).Methods("POST", "OPTIONS")
 }
 
 func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {

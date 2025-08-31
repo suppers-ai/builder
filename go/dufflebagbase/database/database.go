@@ -3,12 +3,30 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+const (
+	DatabaseTypePostgres = "postgres"
+	DatabaseTypeSQLite   = "sqlite"
+)
+
+// GetDatabaseType returns the normalized database type for display
+func GetDatabaseType(dbType string) string {
+	switch strings.ToLower(dbType) {
+	case "postgres", "postgresql":
+		return "PostgreSQL"
+	case "sqlite", "sqlite3":
+		return "SQLite"
+	default:
+		return "Unknown"
+	}
+}
 
 type Config struct {
 	Type     string
@@ -22,7 +40,8 @@ type Config struct {
 
 type DB struct {
 	*gorm.DB
-	sqlDB *sql.DB
+	sqlDB  *sql.DB
+	Config Config
 }
 
 func New(cfg Config) (*DB, error) {
@@ -39,7 +58,14 @@ func New(cfg Config) (*DB, error) {
 		return nil, fmt.Errorf("unsupported database type: %s", cfg.Type)
 	}
 
-	gormDB, err := gorm.Open(dialector, &gorm.Config{})
+	// Configure GORM based on database type
+	gormConfig := &gorm.Config{}
+	
+	// For PostgreSQL, we might want to use schemas in the future
+	// For now, we'll keep it simple and use default public schema
+	// If you need schema support later, you can add a custom naming strategy here
+	
+	gormDB, err := gorm.Open(dialector, gormConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +81,9 @@ func New(cfg Config) (*DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	return &DB{
-		DB:    gormDB,
-		sqlDB: sqlDB,
+		DB:     gormDB,
+		sqlDB:  sqlDB,
+		Config: cfg,
 	}, nil
 }
 

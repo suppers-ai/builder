@@ -237,6 +237,19 @@ func (r *ExtensionRegistry) GetStatus(name string) (*ExtensionStatus, error) {
 	return &statusCopy, nil
 }
 
+// GetAll returns all registered extensions
+func (r *ExtensionRegistry) GetAll() []Extension {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	
+	result := make([]Extension, 0, len(r.extensions))
+	for _, ext := range r.extensions {
+		result = append(result, ext)
+	}
+	
+	return result
+}
+
 // GetMetrics returns metrics for an extension
 func (r *ExtensionRegistry) GetMetrics(name string) (*ExtensionMetrics, error) {
 	r.mu.RLock()
