@@ -67,29 +67,29 @@ func NewService(config *Config) (*Service, error) {
 func (s *Service) initializeMetrics() {
 	// HTTP metrics
 	s.httpRequests = s.collector.Counter("http_requests_total",
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	s.httpErrors = s.collector.Counter("http_errors_total",
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	s.httpDuration = s.collector.Histogram("http_request_duration_seconds",
 		[]float64{0.001, 0.01, 0.1, 0.5, 1, 2.5, 5, 10},
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	
 	// Database metrics
 	s.dbQueries = s.collector.Counter("db_queries_total",
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	s.dbErrors = s.collector.Counter("db_errors_total",
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	s.dbDuration = s.collector.Histogram("db_query_duration_seconds",
 		[]float64{0.001, 0.01, 0.1, 0.5, 1, 2.5, 5},
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	s.dbConnections = s.collector.Gauge("db_connections_active",
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	
 	// Business metrics
 	s.userActions = s.collector.Counter("user_actions_total",
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 	s.events = s.collector.Counter("events_total",
-		Label{Name: "service", Value: "dufflebagbase"})
+		Label{Name: "service", Value: "solobase"})
 }
 
 // GetCollector returns the metrics collector

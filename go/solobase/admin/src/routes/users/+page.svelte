@@ -1,0 +1,1023 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { 
+		Users, Search, Plus, Edit2, Trash2, 
+		Lock, Unlock, Mail, MoreVertical,
+		ChevronLeft, ChevronRight, Filter,
+		UserPlus, Shield, Check, X, CheckCircle, AlertCircle, Info
+	} from 'lucide-svelte';
+	import { api } from '$lib/api';
+	import ExportButton from '$lib/components/ExportButton.svelte';
+	
+	let searchQuery = '';
+	let selectedRole = 'all';
+	let selectedStatus = 'all';
+	let showAddModal = false;
+	let showEditModal = false;
+	let showDeleteModal = false;
+	let selectedUser: any = null;
+	let userToDelete: any = null;  // Separate state for delete modal
+	let currentPage = 1;
+	let totalPages = 1;
+	let rowsPerPage = 10;
+	let totalUsers = 0;
+	let loading = false;
+	let resendingConfirmation = false;
+	
+	// Notification state
+	let notification: { message: string; type: 'success' | 'error' | 'info' } | null = null;
+	let notificationTimeout: NodeJS.Timeout;
+	
+	// Form data
+	let newUser = {
+		email: '',
+		password: '',
+		role: 'user',
+		confirmed: true
+	};
+	
+	// Users data
+	let users: any[] = [];
+	
+	onMount(() => {
+		fetchUsers();
+	});
+	
+	async function fetchUsers() {
+		loading = true;
+		try {
+			console.log('Fetching users, page:', currentPage, 'size:', rowsPerPage);
+			const response = await api.getUsers(currentPage, rowsPerPage);
+			console.log('Users API response:', response);
+			if (response.data) {
+				users = response.data.data || [];
+				totalUsers = response.data.total || 0;
+				totalPages = response.data.total_pages || Math.ceil(totalUsers / rowsPerPage);
+				console.log('Users loaded:', users.length, 'of', totalUsers, 'total');
+			} else {
+				users = [];
+				totalUsers = 0;
+				totalPages = 1;
+				console.error('No data in response:', response);
+			}
+			
+			// Format dates for display
+			users = users.map(user => ({
+				...user,
+				created_at: formatDate(user.created_at),
+				last_login: user.last_login ? formatDate(user.last_login) : 'Never',
+				// Removed locked field - no longer needed
+			}));
+		} catch (error) {
+			console.error('Failed to fetch users:', error);
+		} finally {
+			loading = false;
+		}
+	}
+	
+	function formatDate(dateString: string): string {
+		if (!dateString) return 'N/A';
+		const date = new Date(dateString);
+		return date.toLocaleString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	}
+	
+	// Stats (computed from users)
+	$: activeUsers = users.filter(u => u.confirmed && u.role !== 'deleted').length;
+	$: unconfirmedUsers = users.filter(u => !u.confirmed).length;
+	
+	function openAddModal() {
+		newUser = {
+			email: '',
+			password: '',
+			role: 'user',
+			confirmed: true
+		};
+		showAddModal = true;
+	}
+	
+	function closeAddModal() {
+		showAddModal = false;
+	}
+	
+	function openEditModal(user: any) {
+		selectedUser = { ...user };
+		showEditModal = true;
+	}
+	
+	function closeEditModal() {
+		showEditModal = false;
+		selectedUser = null;
+	}
+	
+	function openDeleteModal(user: any) {
+		userToDelete = user;
+		showDeleteModal = true;
+	}
+	
+	function closeDeleteModal() {
+		showDeleteModal = false;
+		userToDelete = null;
+	}
+	
+	async function saveUser() {
+		if (showAddModal) {
+			// Add new user
+			try {
+				await api.post('/auth/signup', newUser);
+				showNotification(`User ${newUser.email} created successfully`, 'success');
+				closeAddModal();
+				fetchUsers();
+			} catch (error) {
+				console.error('Failed to create user:', error);
+				showNotification('Failed to create user', 'error');
+			}
+		} else if (showEditModal) {
+			// Update existing user
+			try {
+				await api.patch(`/users/${selectedUser.id}`, {
+					email: selectedUser.email,
+					role: selectedUser.role,
+					confirmed: selectedUser.confirmed,
+				});
+				showNotification(`User ${selectedUser.email} updated successfully`, 'success');
+				closeEditModal();
+				fetchUsers();
+			} catch (error) {
+				console.error('Failed to update user:', error);
+				showNotification('Failed to update user', 'error');
+			}
+		}
+	}
+	
+	async function deleteUser() {
+		try {
+			// Change user's role to "deleted" instead of actually deleting
+			await api.patch(`/users/${userToDelete.id}`, {
+				role: 'deleted'
+			});
+			showNotification(`User ${userToDelete.email} deleted successfully`, 'success');
+			closeDeleteModal();
+			// If we're in the edit modal, close it too
+			if (showEditModal) {
+				closeEditModal();
+			}
+			fetchUsers();
+		} catch (error) {
+			console.error('Failed to delete user:', error);
+			showNotification('Failed to delete user', 'error');
+		}
+	}
+	
+	
+	async function resendConfirmation(user: any) {
+		resendingConfirmation = true;
+		try {
+			// Call API to resend confirmation email
+			await api.post(`/users/${user.id}/resend-confirmation`);
+			showNotification(`Confirmation email sent to ${user.email}`, 'success');
+		} catch (error) {
+			console.error('Failed to resend confirmation:', error);
+			showNotification('Failed to send confirmation email', 'error');
+		} finally {
+			resendingConfirmation = false;
+		}
+	}
+	
+	function showNotification(message: string, type: 'success' | 'error' | 'info' = 'info') {
+		notification = { message, type };
+		
+		// Clear any existing timeout
+		if (notificationTimeout) {
+			clearTimeout(notificationTimeout);
+		}
+		
+		// Auto-hide after 3 seconds
+		notificationTimeout = setTimeout(() => {
+			notification = null;
+		}, 3000);
+	}
+	
+	function closeNotification() {
+		notification = null;
+		if (notificationTimeout) {
+			clearTimeout(notificationTimeout);
+		}
+	}
+	
+	
+	function goToPage(page: number) {
+		if (page < 1 || page > totalPages) return;
+		currentPage = page;
+		fetchUsers();
+	}
+	
+	function resetPassword(user: any) {
+		console.log('Sending password reset to:', user.email);
+	}
+	
+	function getRoleBadgeClass(role: string) {
+		switch(role) {
+			case 'admin': return 'badge-danger';
+			case 'manager': return 'badge-warning';
+			case 'deleted': return 'badge-secondary';
+			default: return 'badge-primary';
+		}
+	}
+</script>
+
+<!-- Notification Toast -->
+{#if notification}
+	<div class="notification notification-{notification.type}">
+		<div class="notification-content">
+			{#if notification.type === 'success'}
+				<CheckCircle size={20} />
+			{:else if notification.type === 'error'}
+				<AlertCircle size={20} />
+			{:else}
+				<Info size={20} />
+			{/if}
+			<span>{notification.message}</span>
+		</div>
+		<button class="notification-close" on:click={closeNotification}>
+			<X size={16} />
+		</button>
+	</div>
+{/if}
+
+<div class="page-header">
+	<div class="breadcrumb">
+		<a href="/">Home</a>
+		<span class="breadcrumb-separator">›</span>
+		<span>Users</span>
+	</div>
+</div>
+
+<div class="page-content">
+	<!-- Stats Cards -->
+	<div class="stats-grid">
+		<div class="stat-card">
+			<div class="stat-header">
+				<Users size={20} style="color: var(--text-muted)" />
+			</div>
+			<div class="stat-label">TOTAL USERS</div>
+			<div class="stat-value">{totalUsers}</div>
+			<div class="stat-description">All registered users</div>
+		</div>
+		
+		<div class="stat-card">
+			<div class="stat-header">
+				<Check size={20} style="color: var(--success-color)" />
+			</div>
+			<div class="stat-label">ACTIVE USERS</div>
+			<div class="stat-value" style="color: var(--success-color)">{activeUsers}</div>
+			<div class="stat-description">Confirmed & active</div>
+		</div>
+		
+		<div class="stat-card">
+			<div class="stat-header">
+				<Trash2 size={20} style="color: var(--danger-color)" />
+			</div>
+			<div class="stat-label">DELETED USERS</div>
+			<div class="stat-value" style="color: var(--danger-color)">{users.filter(u => u.role === 'deleted').length}</div>
+			<div class="stat-description">Account deleted</div>
+		</div>
+		
+		<div class="stat-card">
+			<div class="stat-header">
+				<Mail size={20} style="color: var(--warning-color)" />
+			</div>
+			<div class="stat-label">UNCONFIRMED</div>
+			<div class="stat-value" style="color: var(--warning-color)">{unconfirmedUsers}</div>
+			<div class="stat-description">Pending email verification</div>
+		</div>
+	</div>
+	
+	<!-- Users Table -->
+	<div class="card">
+		<div class="users-header">
+			<div class="users-filters">
+				<div class="search-input" style="min-width: 300px;">
+					<Search size={16} class="search-input-icon" />
+					<input 
+						type="text" 
+						class="form-input" 
+						placeholder="Search users..."
+						bind:value={searchQuery}
+					/>
+				</div>
+				
+				<select class="form-select" bind:value={selectedRole}>
+					<option value="all">All Roles</option>
+					<option value="admin">Admin</option>
+					<option value="manager">Manager</option>
+					<option value="user">User</option>
+				</select>
+				
+				<select class="form-select" bind:value={selectedStatus}>
+					<option value="all">All Status</option>
+					<option value="active">Active</option>
+					<option value="unconfirmed">Unconfirmed</option>
+					<option value="deleted">Deleted</option>
+				</select>
+			</div>
+			
+			<div class="table-actions">
+				<ExportButton 
+					data={users}
+					filename="users"
+					disabled={users.length === 0}
+				/>
+				<button class="btn btn-primary" on:click={openAddModal}>
+					<UserPlus size={16} />
+					Add User
+				</button>
+			</div>
+		</div>
+		
+		<div class="table-container">
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Email</th>
+						<th>Role</th>
+						<th>Status</th>
+						<th>Created</th>
+						<th>Last Login</th>
+						<th style="width: 100px;">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each users as user}
+						<tr>
+							<td>
+								<div class="user-email">
+									{user.email}
+								</div>
+							</td>
+							<td>
+								<span class="badge {getRoleBadgeClass(user.role)}">
+									{#if user.role === 'admin'}
+										<Shield size={12} />
+									{/if}
+									{user.role}
+								</span>
+							</td>
+							<td>
+								<div class="user-status">
+									{#if !user.confirmed}
+										<span class="status-badge status-unconfirmed">
+											<Mail size={12} />
+											Unconfirmed
+										</span>
+									{:else}
+										<span class="status-badge status-active">
+											<Check size={12} />
+											Active
+										</span>
+									{/if}
+								</div>
+							</td>
+							<td class="text-muted">{user.created_at}</td>
+							<td class="text-muted">{user.last_login || 'Never'}</td>
+							<td>
+								<div class="action-buttons">
+									<button 
+										class="btn-icon-sm"
+										title="Edit user"
+										on:click={() => openEditModal(user)}
+									>
+										<Edit2 size={14} />
+									</button>
+								</div>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+		
+		<!-- Pagination -->
+		<div class="pagination">
+			<div class="pagination-info">
+				Showing {(currentPage - 1) * rowsPerPage + 1} to {Math.min(currentPage * rowsPerPage, totalUsers)} of {totalUsers} users
+			</div>
+			<div class="pagination-controls">
+				<button 
+					class="pagination-btn"
+					disabled={currentPage === 1}
+					on:click={() => goToPage(currentPage - 1)}
+				>
+					<ChevronLeft size={16} />
+				</button>
+				{#each Array(Math.min(5, totalPages)) as _, i}
+					<button 
+						class="pagination-btn {currentPage === i + 1 ? 'active' : ''}"
+						on:click={() => goToPage(i + 1)}
+					>
+						{i + 1}
+					</button>
+				{/each}
+				<button 
+					class="pagination-btn"
+					disabled={currentPage === totalPages}
+					on:click={() => goToPage(currentPage + 1)}
+				>
+					<ChevronRight size={16} />
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Add/Edit User Modal -->
+{#if showAddModal || showEditModal}
+	<div class="modal-overlay" on:click={showAddModal ? closeAddModal : closeEditModal}>
+		<div class="modal" on:click|stopPropagation>
+			<div class="modal-header">
+				<h3 class="modal-title">
+					{showAddModal ? 'Add New User' : 'Edit User'}
+				</h3>
+				<button class="modal-close" on:click={showAddModal ? closeAddModal : closeEditModal}>
+					<X size={20} />
+				</button>
+			</div>
+			
+			<div class="modal-body">
+				{#if showAddModal}
+					<div class="form-group">
+						<label class="form-label">Email</label>
+						<input 
+							type="email" 
+							class="form-input" 
+							bind:value={newUser.email}
+							placeholder="user@example.com"
+						/>
+					</div>
+					
+					<div class="form-group">
+						<label class="form-label">Password</label>
+						<input 
+							type="password" 
+							class="form-input" 
+							bind:value={newUser.password}
+							placeholder="Enter password"
+						/>
+					</div>
+					
+					<div class="form-group">
+						<label class="form-label">Role</label>
+						<select 
+							class="form-select" 
+							bind:value={newUser.role}
+						>
+							<option value="user">User</option>
+							<option value="manager">Manager</option>
+							<option value="admin">Admin</option>
+						</select>
+					</div>
+					
+					<div class="form-group">
+						<label class="checkbox-label">
+							<input 
+								type="checkbox" 
+								bind:checked={newUser.confirmed}
+							/>
+							Email Confirmed
+						</label>
+					</div>
+				{:else if showEditModal && selectedUser}
+					<div class="form-group">
+						<label class="form-label">Email</label>
+						<input 
+							type="email" 
+							class="form-input" 
+							bind:value={selectedUser.email}
+							placeholder="user@example.com"
+						/>
+					</div>
+					
+					<div class="form-group">
+						<label class="form-label">Role</label>
+						<select 
+							class="form-select" 
+							bind:value={selectedUser.role}
+						>
+							<option value="user">User</option>
+							<option value="manager">Manager</option>
+							<option value="admin">Admin</option>
+						</select>
+					</div>
+					
+					<div class="form-group">
+						<label class="form-label">Account Status</label>
+						<div class="status-controls">
+							<div class="status-row">
+								<div class="status-info">
+									{#if selectedUser.confirmed}
+										<span class="status-badge status-active">
+											<Check size={12} />
+											Email Confirmed
+										</span>
+									{:else}
+										<span class="status-badge status-unconfirmed">
+											<Mail size={12} />
+											Email Not Confirmed
+										</span>
+									{/if}
+								</div>
+								{#if !selectedUser.confirmed}
+									<button 
+										type="button"
+										class="btn btn-sm btn-secondary"
+										on:click={() => resendConfirmation(selectedUser)}
+										disabled={resendingConfirmation}
+									>
+										{resendingConfirmation ? 'Sending...' : 'Resend Confirmation'}
+									</button>
+								{/if}
+							</div>
+							
+							<div class="status-row">
+								<div class="status-info">
+									<span class="status-badge status-active">
+										<Check size={12} />
+										Account Active
+									</span>
+								</div>
+								<div class="status-actions">
+									<button 
+										type="button"
+										class="btn btn-sm btn-danger"
+										on:click={() => openDeleteModal(selectedUser)}
+									>
+										Delete User
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					{#if selectedUser.role === 'deleted'}
+						<div class="form-group">
+							<div class="alert alert-danger">
+								<Trash2 size={16} />
+								<span>This user is marked as deleted and cannot access the system.</span>
+							</div>
+						</div>
+					{/if}
+				{/if}
+			</div>
+			
+			<div class="modal-footer">
+				<button class="btn btn-secondary" on:click={showAddModal ? closeAddModal : closeEditModal}>
+					Cancel
+				</button>
+				<button class="btn btn-primary" on:click={saveUser}>
+					{showAddModal ? 'Add User' : 'Save Changes'}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Delete Confirmation Modal -->
+{#if showDeleteModal}
+	<div class="modal-overlay" on:click={closeDeleteModal}>
+		<div class="modal modal-sm" on:click|stopPropagation>
+			<div class="modal-header">
+				<h3 class="modal-title">Delete User</h3>
+				<button class="modal-close" on:click={closeDeleteModal}>
+					<X size={20} />
+				</button>
+			</div>
+			
+			<div class="modal-body">
+				<p>Are you sure you want to delete this user?</p>
+				<p class="text-muted">{userToDelete?.email}</p>
+				<p class="text-danger">The user's status will be changed to "deleted" and they will no longer be able to access the system.</p>
+			</div>
+			
+			<div class="modal-footer">
+				<button class="btn btn-secondary" on:click={closeDeleteModal}>
+					Cancel
+				</button>
+				<button class="btn btn-danger" on:click={deleteUser}>
+					Delete User
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<style>
+	.users-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--border-color);
+	}
+	
+	.users-filters {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	
+	.table-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	
+	.user-email {
+		font-weight: 500;
+		color: var(--text-primary);
+		max-width: 250px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	
+	.user-status {
+		display: flex;
+		align-items: center;
+	}
+	
+	.status-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 4px;
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+	
+	.status-active {
+		background: #10b98119;
+		color: var(--success-color);
+	}
+	
+	.status-unconfirmed {
+		background: #f59e0b19;
+		color: var(--warning-color);
+	}
+	
+	.action-buttons {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+	
+	/* Table cell formatting to prevent wrapping */
+	.table td {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 200px;
+	}
+	
+	.table td:first-child {
+		max-width: 250px; /* Email column can be a bit wider */
+	}
+	
+	.table td:last-child {
+		max-width: none; /* Actions column doesn't need ellipsis */
+		overflow: visible;
+	}
+	
+	.btn-icon-sm {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border: 1px solid var(--border-color);
+		border-radius: 4px;
+		background: white;
+		color: var(--text-secondary);
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	
+	.btn-icon-sm:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+	}
+	
+	.dropdown {
+		position: relative;
+	}
+	
+	.dropdown-menu {
+		display: none;
+		position: absolute;
+		right: 0;
+		top: 100%;
+		margin-top: 0.25rem;
+		background: white;
+		border: 1px solid var(--border-color);
+		border-radius: 6px;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		z-index: 1000;
+		min-width: 180px;
+	}
+	
+	.dropdown:hover .dropdown-menu {
+		display: block;
+	}
+	
+	.dropdown-menu button {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.5rem 0.75rem;
+		border: none;
+		background: none;
+		font-size: 0.875rem;
+		color: var(--text-primary);
+		text-align: left;
+		cursor: pointer;
+		transition: background 0.2s;
+	}
+	
+	.dropdown-menu button:hover {
+		background: var(--bg-hover);
+	}
+	
+	.dropdown-menu button.text-danger {
+		color: var(--danger-color);
+	}
+	
+	/* Modal Styles */
+	.modal-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2000;
+	}
+	
+	.modal {
+		background: white;
+		border-radius: 8px;
+		width: 90%;
+		max-width: 500px;
+		max-height: 90vh;
+		overflow: auto;
+	}
+	
+	.modal-sm {
+		max-width: 400px;
+	}
+	
+	.modal-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1.5rem;
+		border-bottom: 1px solid var(--border-color);
+	}
+	
+	.modal-title {
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--text-primary);
+	}
+	
+	.modal-close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: none;
+		background: none;
+		color: var(--text-muted);
+		cursor: pointer;
+		border-radius: 4px;
+		transition: all 0.2s;
+	}
+	
+	.modal-close:hover {
+		background: var(--bg-hover);
+		color: var(--text-primary);
+	}
+	
+	.modal-body {
+		padding: 1.5rem;
+	}
+	
+	.modal-footer {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.75rem;
+		padding: 1.5rem;
+		border-top: 1px solid var(--border-color);
+	}
+	
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--text-primary);
+		cursor: pointer;
+	}
+	
+	.checkbox-label input {
+		cursor: pointer;
+	}
+	
+	.text-danger {
+		color: var(--danger-color);
+	}
+	
+	.text-muted {
+		color: var(--text-muted);
+		font-size: 0.875rem;
+	}
+	
+	.status-controls {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding: 0.75rem;
+		background: var(--bg-secondary);
+		border-radius: 6px;
+	}
+	
+	.status-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	
+	.status-info {
+		flex: 1;
+	}
+	
+	.status-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+	
+	.alert {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		border-radius: 6px;
+		font-size: 0.875rem;
+	}
+	
+	.alert-warning {
+		background: #fef3c7;
+		color: #92400e;
+		border: 1px solid #fde68a;
+	}
+	
+	.alert-info {
+		background: #dbeafe;
+		color: #1e40af;
+		border: 1px solid #bfdbfe;
+	}
+	
+	.alert-danger {
+		background: #fee2e2;
+		color: #991b1b;
+		border: 1px solid #fecaca;
+	}
+	
+	.btn-sm {
+		padding: 0.375rem 0.75rem;
+		font-size: 0.813rem;
+	}
+	
+	.btn-success {
+		background: var(--success-color, #10b981);
+		color: white;
+	}
+	
+	.btn-success:hover {
+		background: #059669;
+	}
+	
+	.btn-danger {
+		background: var(--danger-color, #ef4444);
+		color: white;
+	}
+	
+	.btn-danger:hover {
+		background: #dc2626;
+	}
+	
+	.btn-warning {
+		background: var(--warning-color, #f59e0b);
+		color: white;
+	}
+	
+	.btn-warning:hover {
+		background: #d97706;
+	}
+	
+	.text-success {
+		color: var(--success-color, #10b981);
+	}
+	
+	/* Notification styles */
+	.notification {
+		position: fixed;
+		top: 20px;
+		right: 20px;
+		min-width: 300px;
+		max-width: 500px;
+		padding: 1rem;
+		border-radius: 8px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		z-index: 9999;
+		animation: slideIn 0.3s ease-out;
+		background: white;
+		border: 1px solid var(--border-color);
+	}
+	
+	@keyframes slideIn {
+		from {
+			transform: translateX(100%);
+			opacity: 0;
+		}
+		to {
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+	
+	.notification-content {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex: 1;
+	}
+	
+	.notification-close {
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.25rem;
+		color: var(--text-muted);
+		transition: color 0.2s;
+	}
+	
+	.notification-close:hover {
+		color: var(--text-primary);
+	}
+	
+	.notification-success {
+		background: #f0fdf4;
+		border-color: #86efac;
+		color: #166534;
+	}
+	
+	.notification-success .notification-content {
+		color: #166534;
+	}
+	
+	.notification-error {
+		background: #fef2f2;
+		border-color: #fca5a5;
+		color: #991b1b;
+	}
+	
+	.notification-error .notification-content {
+		color: #991b1b;
+	}
+	
+	.notification-info {
+		background: #eff6ff;
+		border-color: #93c5fd;
+		color: #1e40af;
+	}
+	
+	.notification-info .notification-content {
+		color: #1e40af;
+	}
+</style>

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,29 +18,6 @@ const (
 	RoleDeleted UserRole = "deleted"
 )
 
-// Global variable to store database type
-var dbType string
-
-// InitModels initializes the models with database type
-func InitModels(databaseType string) {
-	dbType = databaseType
-}
-
-// getTableName returns the appropriate table name based on database type
-func getTableName(schema, table string) string {
-	// Check environment variable if dbType not set
-	if dbType == "" {
-		dbType = os.Getenv("DATABASE_TYPE")
-	}
-	
-	// For SQLite, don't use schema prefix
-	if dbType == "sqlite" || dbType == "sqlite3" {
-		return table
-	}
-	
-	// For PostgreSQL, use schema.table format
-	return schema + "." + table
-}
 
 // User represents a user account
 type User struct {
@@ -56,7 +32,6 @@ type User struct {
 	RecoverToken     *string    `gorm:"size:255" json:"-"`
 	RecoverTokenExp  *time.Time `json:"-"`
 	RecoverSelector  *string    `gorm:"size:255;index" json:"-"`
-	Locked           *time.Time `json:"locked,omitempty"`
 	AttemptCount     int        `gorm:"default:0" json:"-"`
 	LastAttempt      *time.Time `json:"-"`
 	Metadata         string     `gorm:"type:text" json:"metadata,omitempty"`
@@ -84,7 +59,7 @@ type User struct {
 
 // TableName specifies the table name
 func (User) TableName() string {
-	return getTableName("auth", "users")
+	return "users"
 }
 
 // BeforeCreate hook
@@ -226,15 +201,6 @@ func (u *User) GetLastAttempt() time.Time {
 func (u *User) PutLastAttempt(attempt time.Time) {
 	u.LastAttempt = &attempt
 }
-func (u *User) GetLocked() time.Time {
-	if u.Locked != nil {
-		return *u.Locked
-	}
-	return time.Time{}
-}
-func (u *User) PutLocked(locked time.Time) {
-	u.Locked = &locked
-}
 
 // Authboss OAuth2 interface
 func (u *User) IsOAuth2User() bool {
@@ -345,7 +311,7 @@ type Session struct {
 
 // TableName specifies the table name
 func (Session) TableName() string {
-	return getTableName("auth", "sessions")
+	return "sessions"
 }
 
 // Token represents various auth tokens
@@ -364,7 +330,7 @@ type Token struct {
 
 // TableName specifies the table name
 func (Token) TableName() string {
-	return getTableName("auth", "tokens")
+	return "tokens"
 }
 
 // BeforeCreate hook

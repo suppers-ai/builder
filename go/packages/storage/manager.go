@@ -43,7 +43,7 @@ func (m *Manager) GetProvider() Provider {
 }
 
 // CreateBucket creates a new bucket in both storage and database
-func (m *Manager) CreateBucket(ctx context.Context, name string, public bool) (*Bucket, error) {
+func (m *Manager) CreateBucket(ctx context.Context, name string, public bool) (*StorageBucket, error) {
 	// Create in storage provider first
 	err := m.provider.CreateBucket(ctx, name, CreateBucketOptions{
 		Public: public,
@@ -54,7 +54,7 @@ func (m *Manager) CreateBucket(ctx context.Context, name string, public bool) (*
 	}
 	
 	// Create in database
-	bucket := &Bucket{
+	bucket := &StorageBucket{
 		Name:   name,
 		Public: public,
 	}
@@ -76,7 +76,7 @@ func (m *Manager) CreateBucket(ctx context.Context, name string, public bool) (*
 // DeleteBucket deletes a bucket from both storage and database
 func (m *Manager) DeleteBucket(ctx context.Context, name string) error {
 	// Get bucket from database
-	var bucket Bucket
+	var bucket StorageBucket
 	err := m.db.WithContext(ctx).Where("name = ?", name).First(&bucket).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -106,8 +106,8 @@ func (m *Manager) DeleteBucket(ctx context.Context, name string) error {
 }
 
 // GetBucket retrieves a bucket by name
-func (m *Manager) GetBucket(ctx context.Context, name string) (*Bucket, error) {
-	var bucket Bucket
+func (m *Manager) GetBucket(ctx context.Context, name string) (*StorageBucket, error) {
+	var bucket StorageBucket
 	err := m.db.WithContext(ctx).Where("name = ?", name).First(&bucket).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -130,11 +130,11 @@ func (m *Manager) ListBuckets(ctx context.Context) ([]BucketInfo, error) {
 	
 	// Sync with database
 	for _, pb := range providerBuckets {
-		var bucket Bucket
+		var bucket StorageBucket
 		err := m.db.WithContext(ctx).Where("name = ?", pb.Name).First(&bucket).Error
 		if err == gorm.ErrRecordNotFound {
 			// Create missing bucket in database
-			bucket = Bucket{
+			bucket = StorageBucket{
 				Name:   pb.Name,
 				Public: pb.Public,
 			}
@@ -147,7 +147,7 @@ func (m *Manager) ListBuckets(ctx context.Context) ([]BucketInfo, error) {
 
 // listBucketsFromDB lists buckets from database as fallback
 func (m *Manager) listBucketsFromDB(ctx context.Context) ([]BucketInfo, error) {
-	var buckets []Bucket
+	var buckets []StorageBucket
 	err := m.db.WithContext(ctx).Order("name").Find(&buckets).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to list buckets: %w", err)
@@ -160,11 +160,11 @@ func (m *Manager) listBucketsFromDB(ctx context.Context) ([]BucketInfo, error) {
 		var totalSize int64
 		
 		m.db.WithContext(ctx).Model(&StorageObject{}).
-			Where("bucket_id = ?", bucket.ID).
+			Where("bucket_name = ?", bucket.Name).
 			Count(&fileCount)
 		
 		m.db.WithContext(ctx).Model(&StorageObject{}).
-			Where("bucket_id = ?", bucket.ID).
+			Where("bucket_name = ?", bucket.Name).
 			Select("COALESCE(SUM(size), 0)").
 			Scan(&totalSize)
 		
@@ -210,14 +210,13 @@ func (m *Manager) UploadObject(ctx context.Context, bucketName, path, name strin
 	// Check if object already exists in database
 	var existing StorageObject
 	err = m.db.WithContext(ctx).
-		Where("bucket_id = ? AND path = ? AND name = ?", bucket.ID, path, name).
+		Where("bucket_name = ? AND path = ? AND name = ?", bucket.Name, path, name).
 		First(&existing).Error
 	
 	if err == nil {
 		// Update existing object
-		existing.Content = content
 		existing.Size = int64(len(content))
-		existing.MimeType = mimeType
+		existing.ContentType = mimeType
 		if err := m.db.WithContext(ctx).Save(&existing).Error; err != nil {
 			return nil, fmt.Errorf("failed to update object in database: %w", err)
 		}
@@ -230,15 +229,19 @@ func (m *Manager) UploadObject(ctx context.Context, bucketName, path, name strin
 		return &existing, nil
 	}
 	
+	// Convert userID to string if provided
+	var userIDStr string
+	if userID != nil {
+		userIDStr = userID.String()
+	}
+	
 	// Create new object in database
 	object := &StorageObject{
-		BucketID:    bucket.ID,
-		Name:        name,
-		Path:        path,
+		BucketName:  bucket.Name,
+		ObjectKey:   filepath.Join(path, name),
 		Size:        int64(len(content)),
-		Content:     content, // Store content for backup/cache
-		MimeType:    mimeType,
-		UserID:      userID,
+		ContentType: mimeType,
+		UserID:      userIDStr,
 	}
 	
 	if err := m.db.WithContext(ctx).Create(object).Error; err != nil {
@@ -269,7 +272,7 @@ func (m *Manager) GetObject(ctx context.Context, bucketName, path, name string) 
 	// Get object from database
 	var object StorageObject
 	err = m.db.WithContext(ctx).
-		Where("bucket_id = ? AND path = ? AND name = ?", bucket.ID, path, name).
+		Where("bucket_name = ? AND path = ? AND name = ?", bucket.Name, path, name).
 		First(&object).Error
 	
 	if err != nil {
@@ -279,34 +282,8 @@ func (m *Manager) GetObject(ctx context.Context, bucketName, path, name string) 
 		return nil, fmt.Errorf("failed to get object: %w", err)
 	}
 	
-	// If content is not stored in database, fetch from provider
-	if len(object.Content) == 0 {
-		key := filepath.Join(path, name)
-		if path == "" || path == "." {
-			key = name
-		}
-		
-		reader, err := m.provider.GetObject(ctx, bucketName, key)
-		if err != nil {
-			m.logger.Error(ctx, "Failed to get object from storage",
-				logger.String("bucket", bucketName),
-				logger.String("key", key),
-				logger.Err(err))
-			return nil, fmt.Errorf("failed to get object from storage: %w", err)
-		}
-		defer reader.Close()
-		
-		// Read content
-		content, err := io.ReadAll(reader)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read object content: %w", err)
-		}
-		
-		object.Content = content
-		
-		// Optionally update database with content for caching
-		// m.db.WithContext(ctx).Model(&object).Update("content", content)
-	}
+	// Object found in database
+	return &object, nil
 	
 	return &object, nil
 }
@@ -338,8 +315,12 @@ func (m *Manager) DeleteObject(ctx context.Context, bucketName, path, name strin
 	}
 	
 	// Delete from database
+	fullKey := filepath.Join(path, name)
+	if path == "" || path == "." {
+		fullKey = name
+	}
 	result := m.db.WithContext(ctx).
-		Where("bucket_id = ? AND path = ? AND name = ?", bucket.ID, path, name).
+		Where("bucket_name = ? AND object_key = ?", bucket.Name, fullKey).
 		Delete(&StorageObject{})
 	
 	if result.Error != nil {
@@ -367,7 +348,7 @@ func (m *Manager) ListObjects(ctx context.Context, bucketName, prefix string, li
 	}
 	
 	// List from database (could also list from provider and sync)
-	query := m.db.WithContext(ctx).Where("bucket_id = ?", bucket.ID)
+	query := m.db.WithContext(ctx).Where("bucket_name = ?", bucket.Name)
 	
 	if prefix != "" {
 		query = query.Where("path LIKE ?", prefix+"%")
@@ -393,12 +374,14 @@ func (m *Manager) ListFilesWithFolders(ctx context.Context, bucketName, prefix s
 		return nil, nil, err
 	}
 	
-	// Extract unique folders from paths
+	// Extract unique folders from object keys
 	folderMap := make(map[string]bool)
 	for _, obj := range objects {
-		if obj.Path != "" && obj.Path != "/" {
+		// Extract directory from object key
+		dir := filepath.Dir(obj.ObjectKey)
+		if dir != "" && dir != "." && dir != "/" {
 			// Get all parent folders
-			parts := strings.Split(obj.Path, "/")
+			parts := strings.Split(dir, "/")
 			for i := 1; i <= len(parts); i++ {
 				folder := strings.Join(parts[:i], "/")
 				if folder != "" {
@@ -419,12 +402,6 @@ func (m *Manager) ListFilesWithFolders(ctx context.Context, bucketName, prefix s
 
 // GenerateSignedURL generates a signed URL for temporary access
 func (m *Manager) GenerateSignedURL(ctx context.Context, bucketName, fullPath string, expiresIn time.Duration) (string, error) {
-	// Split full path into directory and filename
-	dir := filepath.Dir(fullPath)
-	filename := filepath.Base(fullPath)
-	if dir == "." {
-		dir = ""
-	}
 	
 	// Verify object exists in database
 	bucket, err := m.GetBucket(ctx, bucketName)
@@ -434,7 +411,7 @@ func (m *Manager) GenerateSignedURL(ctx context.Context, bucketName, fullPath st
 	
 	var object StorageObject
 	err = m.db.WithContext(ctx).
-		Where("bucket_id = ? AND path = ? AND name = ?", bucket.ID, dir, filename).
+		Where("bucket_name = ? AND object_key = ?", bucket.Name, fullPath).
 		First(&object).Error
 	
 	if err != nil {
@@ -459,7 +436,19 @@ func (m *Manager) GetFile(ctx context.Context, bucketName, fullPath string) ([]b
 		return nil, "", err
 	}
 	
-	return obj.Content, obj.MimeType, nil
+	// Fetch content from provider
+	reader, err := m.provider.GetObject(ctx, bucketName, fullPath)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to get object from storage: %w", err)
+	}
+	defer reader.Close()
+	
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to read object content: %w", err)
+	}
+	
+	return content, obj.ContentType, nil
 }
 
 // UpdateFile updates a file's content
@@ -481,14 +470,13 @@ func (m *Manager) UpdateFile(ctx context.Context, bucketName, fullPath string, c
 	key := fullPath
 	reader := bytes.NewReader(content)
 	err = m.provider.PutObject(ctx, bucketName, key, reader, int64(len(content)), PutObjectOptions{
-		ContentType: obj.MimeType,
+		ContentType: obj.ContentType,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update object in storage: %w", err)
 	}
 	
 	// Update database
-	obj.Content = content
 	obj.Size = int64(len(content))
 	
 	return m.db.WithContext(ctx).Save(obj).Error
@@ -516,27 +504,19 @@ func (m *Manager) SyncWithProvider(ctx context.Context, bucketName string) error
 			continue
 		}
 		
-		// Split key into path and name
-		dir := filepath.Dir(pObj.Key)
-		filename := filepath.Base(pObj.Key)
-		if dir == "." {
-			dir = ""
-		}
-		
 		// Check if object exists in database
 		var dbObj StorageObject
 		err := m.db.WithContext(ctx).
-			Where("bucket_id = ? AND path = ? AND name = ?", bucket.ID, dir, filename).
+			Where("bucket_name = ? AND object_key = ?", bucket.Name, pObj.Key).
 			First(&dbObj).Error
 		
 		if err == gorm.ErrRecordNotFound {
 			// Create missing object in database
 			dbObj = StorageObject{
-				BucketID: bucket.ID,
-				Name:     filename,
-				Path:     dir,
-				Size:     pObj.Size,
-				MimeType: pObj.ContentType,
+				BucketName:  bucket.Name,
+				ObjectKey:   pObj.Key,
+				Size:        pObj.Size,
+				ContentType: pObj.ContentType,
 			}
 			m.db.WithContext(ctx).Create(&dbObj)
 			m.logger.Info(ctx, "Synced object from provider",

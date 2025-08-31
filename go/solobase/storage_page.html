@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage - Solobase</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/admin.css">
+    <link rel="stylesheet" href="/static/css/database.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/loading-states.js"></script>
+</head>
+
+<body hx-ext="loading-states"><!-- Progress bar for HTMX requests -->
+    <div class="htmx-progress"></div><!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-popup">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading...</div>
+        </div>
+    </div>
+    <div class="app-layout">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-logo-section"><a href="/dashboard" class="sidebar-logo-link"><img
+                        src="/static/img/logo_long.png" alt="Solobase" class="sidebar-logo sidebar-logo-expanded">
+                    <img src="/static/img/logo.png" alt="Solobase" class="sidebar-logo sidebar-logo-collapsed"
+                        style="display: none;"></a></div>
+            <div class="sidebar-menu-card">
+                <nav class="sidebar-nav"><a href="/dashboard" class="sidebar-nav-link" data-page="dashboard"
+                        title="Home" hx-get="/dashboard" hx-target="#main-content" hx-swap="outerHTML"
+                        hx-push-url="true"><i data-lucide="home" class="sidebar-nav-icon"></i> <span
+                            class="sidebar-nav-text">Home</span></a> <a href="/users" class="sidebar-nav-link"
+                        data-page="users" title="Users" hx-get="/users" hx-target="#main-content" hx-swap="outerHTML"
+                        hx-push-url="true"><i data-lucide="users" class="sidebar-nav-icon"></i> <span
+                            class="sidebar-nav-text">Users</span></a> <a href="/database" class="sidebar-nav-link"
+                        data-page="database" title="Database" hx-get="/database" hx-target="#main-content"
+                        hx-swap="outerHTML" hx-push-url="true"><i data-lucide="database" class="sidebar-nav-icon"></i>
+                        <span class="sidebar-nav-text">Database</span></a> <a href="/storage" class="sidebar-nav-link"
+                        data-page="storage" title="Storage" hx-get="/storage" hx-target="#main-content"
+                        hx-swap="outerHTML" hx-push-url="true"><i data-lucide="hard-drive" class="sidebar-nav-icon"></i>
+                        <span class="sidebar-nav-text">Storage</span></a> <a href="/logs" class="sidebar-nav-link"
+                        data-page="logs" title="Logs" hx-get="/logs" hx-target="#main-content" hx-swap="outerHTML"
+                        hx-push-url="true"><i data-lucide="file-text" class="sidebar-nav-icon"></i> <span
+                            class="sidebar-nav-text">Logs</span></a>
+                    <div class="sidebar-accordion"><button class="sidebar-accordion-toggle sidebar-nav-link"
+                            onclick="toggleExtensionAccordion(this)" data-accordion="extensions" title="Extensions"><i
+                                data-lucide="puzzle" class="sidebar-nav-icon"></i> <span
+                                class="sidebar-nav-text">Extensions</span> <i data-lucide="chevron-down"
+                                class="sidebar-accordion-arrow"></i></button>
+                        <div class="sidebar-accordion-content" id="extensions-accordion" style="display: none;">
+                            <div class="sidebar-accordion-empty"><span class="empty-text">No extensions installed</span>
+                            </div><a href="/extensions" class="sidebar-accordion-manage" title="Manage Extensions"
+                                hx-get="/extensions" hx-target="#main-content" hx-swap="innerHTML" hx-push-url="true"><i
+                                    data-lucide="settings-2" class="accordion-item-icon"></i> <span
+                                    class="accordion-item-text">Manage Extensions</span></a>
+                        </div>
+                    </div>
+                    <style>
+                        .sidebar-accordion {
+                            width: 100%;
+                        }
+
+                        .sidebar-accordion-toggle {
+                            width: 100%;
+                            display: flex;
+                            align-items: center;
+                            padding: 0.75rem 1rem;
+                            background: transparent;
+                            border: none;
+                            color: inherit;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            text-align: left;
+                            border-radius: 0.5rem;
+                        }
+
+                        .sidebar-accordion-toggle:hover {
+                            background: rgba(255, 255, 255, 0.05);
+                        }
+
+                        .sidebar-accordion-toggle.expanded {
+                            background: rgba(255, 255, 255, 0.05);
+                        }
+
+                        .sidebar-accordion-arrow {
+                            margin-left: auto;
+                            width: 16px;
+                            height: 16px;
+                            transition: transform 0.2s;
+                        }
+
+                        .sidebar-accordion-toggle.expanded .sidebar-accordion-arrow {
+                            transform: rotate(180deg);
+                        }
+
+                        .sidebar-accordion-content {
+                            overflow: hidden;
+                            transition: all 0.3s ease;
+                        }
+
+                        .sidebar-accordion-item {
+                            display: flex;
+                            align-items: center;
+                            padding: 0.5rem 1rem 0.5rem 2.5rem;
+                            color: rgba(255, 255, 255, 0.7);
+                            text-decoration: none;
+                            transition: all 0.2s;
+                            border-radius: 0.5rem;
+                            margin: 0.125rem 0.5rem;
+                        }
+
+                        .sidebar-accordion-item:hover {
+                            background: rgba(255, 255, 255, 0.05);
+                            color: rgba(255, 255, 255, 0.95);
+                        }
+
+                        .sidebar-accordion-item.active {
+                            background: rgba(59, 130, 246, 0.15);
+                            color: #3b82f6;
+                        }
+
+                        .accordion-item-content {
+                            display: flex;
+                            align-items: center;
+                            width: 100%;
+                            gap: 0.5rem;
+                        }
+
+                        .accordion-item-icon {
+                            width: 16px;
+                            height: 16px;
+                            flex-shrink: 0;
+                        }
+
+                        .accordion-item-text {
+                            flex: 1;
+                            font-size: 0.875rem;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+
+                        .extension-status-dot {
+                            width: 6px;
+                            height: 6px;
+                            border-radius: 50%;
+                            flex-shrink: 0;
+                        }
+
+                        .extension-status-dot.active {
+                            background: #10b981;
+                            box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
+                        }
+
+                        .extension-status-dot.inactive {
+                            background: rgba(255, 255, 255, 0.3);
+                        }
+
+                        .sidebar-accordion-empty {
+                            padding: 1rem 2.5rem;
+                            color: rgba(255, 255, 255, 0.4);
+                            font-size: 0.875rem;
+                            font-style: italic;
+                        }
+
+                        .sidebar-accordion-manage {
+                            display: flex;
+                            align-items: center;
+                            padding: 0.5rem 1rem 0.5rem 2.5rem;
+                            color: rgba(255, 255, 255, 0.6);
+                            text-decoration: none;
+                            transition: all 0.2s;
+                            border-radius: 0.5rem;
+                            margin: 0.5rem 0.5rem 0.25rem 0.5rem;
+                            border-top: 1px solid rgba(255, 255, 255, 0.1);
+                            margin-top: 0.5rem;
+                            padding-top: 0.75rem;
+                        }
+
+                        .sidebar-accordion-manage:hover {
+                            background: rgba(255, 255, 255, 0.05);
+                            color: rgba(255, 255, 255, 0.95);
+                        }
+
+                        /* Collapsed sidebar styles */
+                        .sidebar.collapsed .sidebar-accordion-toggle {
+                            padding: 0.75rem;
+                        }
+
+                        .sidebar.collapsed .sidebar-accordion-arrow,
+                        .sidebar.collapsed .sidebar-nav-text,
+                        .sidebar.collapsed .accordion-item-text,
+                        .sidebar.collapsed .extension-status-dot {
+                            display: none;
+                        }
+
+                        .sidebar.collapsed .sidebar-accordion-content {
+                            display: none !important;
+                        }
+                    </style>
+                    <script>
+                        function toggleExtensionAccordion(button) {
+                            const content = document.getElementById('extensions-accordion');
+                            const isExpanded = button.classList.contains('expanded');
+
+                            if (isExpanded) {
+                                button.classList.remove('expanded');
+                                content.style.display = 'none';
+                                localStorage.setItem('extensionAccordionExpanded', 'false');
+                            } else {
+                                button.classList.add('expanded');
+                                content.style.display = 'block';
+                                localStorage.setItem('extensionAccordionExpanded', 'true');
+
+                                // Re-initialize Lucide icons
+                                if (window.lucide) {
+                                    setTimeout(() => lucide.createIcons(), 50);
+                                }
+                            }
+                        }
+
+                        // Restore accordion state on page load
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const isExpanded = localStorage.getItem('extensionAccordionExpanded') === 'true';
+                            if (isExpanded) {
+                                const button = document.querySelector('[data-accordion="extensions"]');
+                                const content = document.getElementById('extensions-accordion');
+                                if (button && content) {
+                                    button.classList.add('expanded');
+                                    content.style.display = 'block';
+                                }
+                            }
+
+                            // Update active state based on current path
+                            const path = window.location.pathname;
+                            document.querySelectorAll('.sidebar-accordion-item').forEach(item => {
+                                const itemPath = item.getAttribute('href');
+                                if (itemPath === path) {
+                                    item.classList.add('active');
+                                    // Auto-expand accordion if an extension is active
+                                    const button = document.querySelector('[data-accordion="extensions"]');
+                                    const content = document.getElementById('extensions-accordion');
+                                    if (button && content) {
+                                        button.classList.add('expanded');
+                                        content.style.display = 'block';
+                                    }
+                                }
+                            });
+                        });
+
+                        // Update active state on HTMX navigation
+                        document.body.addEventListener('htmx:afterSwap', function (event) {
+                            const currentPath = window.location.pathname;
+                            document.querySelectorAll('.sidebar-accordion-item').forEach(item => {
+                                const itemPath = item.getAttribute('href');
+                                if (itemPath === currentPath) {
+                                    item.classList.add('active');
+                                } else {
+                                    item.classList.remove('active');
+                                }
+                            });
+                        });
+                    </script><a href="/settings" class="sidebar-nav-link" data-page="settings" title="Settings" hx-get="/settings"
+                        hx-target="#main-content" hx-swap="outerHTML" hx-push-url="true"><i data-lucide="settings"
+                            class="sidebar-nav-icon"></i> <span class="sidebar-nav-text">Settings</span></a>
+                </nav><button class="sidebar-collapse-btn" onclick="toggleSidebar()" title="Collapse Sidebar"><i
+                        data-lucide="chevron-left" class="collapse-icon"></i></button>
+            </div>
+            <div class="sidebar-user-section" onclick="toggleProfileMenu(event)">
+                <div class="user-avatar"><i data-lucide="user" class="user-avatar-icon"></i></div><span
+                    class="user-email"></span> <i data-lucide="chevron-up" class="user-menu-arrow"></i>
+            </div><!-- Profile Popup Menu -->
+            <div id="profile-popup" class="profile-popup">
+                <div class="profile-popup-item" onclick="window.location.href='/settings'"><i data-lucide="settings"
+                        class="popup-icon"></i> <span>Settings</span></div>
+                <div class="profile-popup-divider"></div>
+                <form action="/auth/logout" method="POST" class="profile-popup-item" onclick="this.submit()"><i
+                        data-lucide="log-out" class="popup-icon"></i> <span>Sign Out</span></form>
+            </div>
+        </div>
+        <script>
+            // Initialize Lucide icons
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+
+                // Set active nav item based on current path
+                const path = window.location.pathname;
+                const navLinks = document.querySelectorAll('.sidebar-nav-link');
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === path) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // Update active state on HTMX navigation
+                document.body.addEventListener('htmx:afterSwap', function (event) {
+                    const currentPath = window.location.pathname;
+                    navLinks.forEach(link => {
+                        if (link.getAttribute('href') === currentPath) {
+                            link.classList.add('active');
+                        } else {
+                            link.classList.remove('active');
+                        }
+                    });
+                    // Re-initialize Lucide icons after swap
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                });
+
+                // Check for saved sidebar state
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    document.getElementById('sidebar').classList.add('collapsed');
+                    document.querySelector('.main-content').classList.add('sidebar-collapsed');
+                    updateCollapseIcon(true);
+                }
+            });
+
+            // Toggle sidebar collapse/expand
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.querySelector('.main-content');
+                const isCollapsed = sidebar.classList.toggle('collapsed');
+
+                if (mainContent) {
+                    mainContent.classList.toggle('sidebar-collapsed');
+                }
+
+                // Save state to localStorage
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+
+                // Update collapse icon
+                updateCollapseIcon(isCollapsed);
+
+                // Re-initialize Lucide icons
+                if (window.lucide) {
+                    setTimeout(() => lucide.createIcons(), 100);
+                }
+            }
+
+            function updateCollapseIcon(isCollapsed) {
+                const icon = document.querySelector('.collapse-icon');
+                if (icon) {
+                    icon.setAttribute('data-lucide', isCollapsed ? 'chevron-right' : 'chevron-left');
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }
+            }
+
+            // Toggle profile popup menu
+            function toggleProfileMenu(event) {
+                event.stopPropagation();
+                const popup = document.getElementById('profile-popup');
+                const arrow = document.querySelector('.user-menu-arrow');
+
+                if (popup.classList.contains('show')) {
+                    popup.classList.remove('show');
+                    if (arrow) arrow.style.transform = 'rotate(0deg)';
+                } else {
+                    popup.classList.add('show');
+                    if (arrow) arrow.style.transform = 'rotate(180deg)';
+
+                    // Re-initialize Lucide icons in popup
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }
+            }
+
+            // Close popup when clicking outside
+            document.addEventListener('click', (event) => {
+                const popup = document.getElementById('profile-popup');
+                const userSection = document.querySelector('.sidebar-user-section');
+
+                if (popup && !popup.contains(event.target) && !userSection.contains(event.target)) {
+                    popup.classList.remove('show');
+                    const arrow = document.querySelector('.user-menu-arrow');
+                    if (arrow) {
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+        </script>
+        <div class="main-content">
+            <div class="content-card" id="main-content">
+                <div class="content-header">
+                    <div class="breadcrumb"><a href="/dashboard" class="breadcrumb-item">Home</a> <span
+                            class="breadcrumb-separator">›</span> <span class="breadcrumb-current">Storage</span></div>
+                </div>
+                <div class="content-body">
+                    <div class="storage-container"><!-- Sidebar with buckets -->
+                        <div class="storage-sidebar">
+                            <div class="sidebar-header">
+                                <h2>Storage</h2><button class="btn btn-sm btn-primary"
+                                    onclick="showCreateBucketModal()">New bucket</button>
+                            </div>
+                            <div class="bucket-search"><input type="text" placeholder="Search buckets..."
+                                    onkeyup="filterBuckets(this.value)" class="search-input"></div>
+                            <div class="bucket-list">
+                                <h3>ALL BUCKETS</h3>
+                            </div>
+                        </div><!-- Main content area -->
+                        <div class="storage-main">
+                            <div class="no-bucket-selected">
+                                <h2>Select a bucket</h2>
+                                <p>Select a bucket from the sidebar to view its contents</p>
+                            </div>
+                        </div><!-- File preview panel (hidden by default) -->
+                        <div id="filePreview" class="file-preview" style="display:none;">
+                            <div class="preview-header">
+                                <h3 id="previewFileName">File Name</h3><button class="close-btn"
+                                    onclick="closeFilePreview()">×</button>
+                            </div>
+                            <div class="preview-content"><img id="previewImage" style="display:none;max-width:100%;">
+                                <pre id="previewText" style="display:none;"></pre>
+                                <div id="previewInfo">
+                                    <p><strong>Type:</strong> <span id="previewType"></span></p>
+                                    <p><strong>Size:</strong> <span id="previewSize"></span></p>
+                                    <p><strong>Modified:</strong> <span id="previewModified"></span></p>
+                                </div>
+                            </div>
+                            <div class="preview-actions"><button class="btn btn-primary"
+                                    id="downloadBtn">Download</button> <button class="btn" id="deleteBtn">Delete
+                                    file</button></div>
+                        </div>
+                    </div><!-- Modals -->
+                    <div id="createBucketModal" class="modal" style="display:none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>Create New Bucket</h2><span class="close"
+                                    onclick="hideCreateBucketModal()">&times;</span>
+                            </div>
+                            <form id="createBucketForm" onsubmit="createBucket(event)">
+                                <div class="form-group"><label for="bucketName">Bucket Name</label> <input type="text"
+                                        id="bucketName" name="name" required pattern="[a-z0-9\-]+"
+                                        placeholder="my-bucket-name"> <small>Only lowercase letters, numbers, and
+                                        hyphens allowed</small></div>
+                                <div class="form-group"><label><input type="checkbox" name="public"> Make bucket
+                                        public</label></div>
+                                <div class="form-actions"><button type="button" class="btn btn-secondary"
+                                        onclick="hideCreateBucketModal()">Cancel</button> <button type="submit"
+                                        class="btn btn-primary">Create Bucket</button></div>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="uploadModal" class="modal" style="display:none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>Upload Files</h2><span class="close" onclick="hideUploadModal()">&times;</span>
+                            </div>
+                            <form id="uploadForm" onsubmit="uploadFiles(event)">
+                                <div class="form-group"><label for="uploadBucket">Bucket</label> <select
+                                        id="uploadBucket" name="bucket" required></select></div>
+                                <div class="form-group"><label for="uploadPath">Path</label> <input type="text"
+                                        id="uploadPath" name="path" value="" placeholder="/folder/subfolder/"></div>
+                                <div class="form-group"><label for="files">Files</label> <input type="file" id="files"
+                                        name="files" multiple required></div>
+                                <div class="upload-progress" style="display:none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="progressFill"></div>
+                                    </div><span id="progressText">0%</span>
+                                </div>
+                                <div class="form-actions"><button type="button" class="btn btn-secondary"
+                                        onclick="hideUploadModal()">Cancel</button> <button type="submit"
+                                        class="btn btn-primary">Upload</button></div>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="createFolderModal" class="modal" style="display:none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2>Create Folder</h2><span class="close"
+                                    onclick="hideCreateFolderModal()">&times;</span>
+                            </div>
+                            <form id="createFolderForm" onsubmit="createFolder(event)"><input type="hidden"
+                                    name="bucket" value=""> <input type="hidden" name="path" value="">
+                                <div class="form-group"><label for="folderName">Folder Name</label> <input type="text"
+                                        id="folderName" name="name" required placeholder="New Folder"></div>
+                                <div class="form-actions"><button type="button" class="btn btn-secondary"
+                                        onclick="hideCreateFolderModal()">Cancel</button> <button type="submit"
+                                        class="btn btn-primary">Create Folder</button></div>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="signedURLModal" class="modal" style="display:none;">
+                        <div class="modal-content" style="width: 500px;">
+                            <div class="modal-header">
+                                <h2>Get Signed URL</h2><span class="close" onclick="hideSignedURLModal()">&times;</span>
+                            </div>
+                            <form id="signedURLForm"><input type="hidden" id="signedBucket" name="bucket"> <input
+                                    type="hidden" id="signedPath" name="path">
+                                <div class="form-group"><label>File: <span id="signedFileName"
+                                            style="font-weight: normal;"></span></label></div>
+                                <div class="form-group"><label for="expirySelect">Expires after</label> <select
+                                        id="expirySelect" name="expiry" class="form-select"
+                                        onchange="handleExpiryChange(this)">
+                                        <option value="604800">1 week</option>
+                                        <option value="2592000" selected>1 month</option>
+                                        <option value="31536000">1 year</option>
+                                        <option value="custom">Custom</option>
+                                    </select></div>
+                                <div class="form-group" id="customExpiryGroup" style="display:none;"><label
+                                        for="customExpiry">Custom expiry (seconds)</label> <input type="number"
+                                        id="customExpiry" name="customExpiry" min="60" max="31536000"
+                                        placeholder="Enter seconds (60 - 31536000)"></div>
+                                <div class="form-group" id="urlResultGroup" style="display:none;"><label
+                                        for="signedURLResult">Signed URL</label>
+                                    <div style="display: flex; gap: 10px;"><input type="text" id="signedURLResult"
+                                            readonly style="flex: 1;"> <button type="button" class="btn btn-sm"
+                                            onclick="copySignedURL()"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1">
+                                                </path>
+                                            </svg> Copy</button></div><small id="expiryNote"
+                                        style="color: #666; margin-top: 5px; display: block;"></small>
+                                </div>
+                                <div class="form-actions"><button type="button" class="btn btn-secondary"
+                                        onclick="hideSignedURLModal()">Close</button> <button type="button"
+                                        class="btn btn-primary" onclick="generateSignedURL()">Generate URL</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <script src="/static/js/storage.js"></script>
+                </div><!-- Loading spinner inside content area -->
+                <div class="htmx-indicator">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js" type="module"></script>
+    <script src="/static/js/components.js"></script>
+</body>
+
+</html>

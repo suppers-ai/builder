@@ -2,84 +2,48 @@ package storage
 
 import (
 	"time"
-
-	"github.com/google/uuid"
-	"gorm.io/gorm"
-	"gorm.io/datatypes"
 )
 
-var dbType = "postgres" // Default to postgres
-
-// InitModels initializes the models with the database type
-func InitModels(databaseType string) {
-	dbType = databaseType
-}
-
-// getTableName returns the table name based on database type
-func getTableName(schema, table string) string {
-	// SQLite doesn't support schemas
-	if dbType == "sqlite" || dbType == "sqlite3" {
-		return table
-	}
-	// PostgreSQL and MySQL support schemas
-	return schema + "." + table
-}
-
-// Bucket represents a storage bucket
-type Bucket struct {
-	ID               uuid.UUID      `gorm:"type:char(36);primary_key" json:"id"`
-	Name             string         `gorm:"uniqueIndex;not null;size:255" json:"name"`
-	Public           bool           `gorm:"default:false" json:"public"`
-	FileSizeLimit    *int64         `json:"file_size_limit,omitempty"`
-	AllowedMimeTypes datatypes.JSON `gorm:"type:text" json:"allowed_mime_types,omitempty"`
-	CreatedAt        time.Time      `json:"created_at"`
-	UpdatedAt        time.Time      `json:"updated_at"`
-
-	// Relationships
-	Objects []StorageObject `gorm:"foreignKey:BucketID;constraint:OnDelete:CASCADE" json:"-"`
+// StorageBucket represents a storage bucket in the database
+type StorageBucket struct {
+	ID        string    `gorm:"primaryKey" json:"id"`
+	Name      string    `gorm:"uniqueIndex;not null" json:"name"`
+	Public    bool      `gorm:"default:false" json:"public"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // TableName specifies the table name
-func (Bucket) TableName() string {
-	return getTableName("storage", "buckets")
-}
-
-// BeforeCreate hook
-func (b *Bucket) BeforeCreate(tx *gorm.DB) error {
-	if b.ID == uuid.Nil {
-		b.ID = uuid.New()
-	}
-	return nil
+func (StorageBucket) TableName() string {
+	return "storage_buckets"
 }
 
 // StorageObject represents a stored file/object in the database
-// Named StorageObject to avoid conflict with the Object struct used for provider operations
 type StorageObject struct {
-	ID        uuid.UUID      `gorm:"type:char(36);primary_key" json:"id"`
-	BucketID  uuid.UUID      `gorm:"type:char(36);not null;index" json:"bucket_id"`
-	Name      string         `gorm:"not null;size:255" json:"name"`
-	Path      string         `gorm:"not null;index" json:"path"`
-	MimeType  string         `gorm:"size:255" json:"mime_type,omitempty"`
-	Size      int64          `json:"size"`
-	Content   []byte         `json:"-"` // Store file content - GORM will use bytea for PostgreSQL
-	Metadata  datatypes.JSON `gorm:"type:text" json:"metadata,omitempty"`
-	UserID    *uuid.UUID     `gorm:"type:char(36);index" json:"user_id,omitempty"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-
-	// Relationships
-	Bucket Bucket `gorm:"foreignKey:BucketID" json:"-"`
+	ID             string    `gorm:"primaryKey" json:"id"`
+	BucketName     string    `gorm:"not null;index" json:"bucket_name"`
+	ObjectKey      string    `gorm:"not null;index" json:"object_key"` // Full path including filename
+	ParentFolderID *string   `gorm:"index" json:"parent_folder_id,omitempty"` // ID of parent folder, null for root items
+	Size           int64     `json:"size"`
+	ContentType    string    `json:"content_type"` // "application/x-directory" for folders
+	Checksum       string    `gorm:"index" json:"checksum,omitempty"` // MD5 or SHA256 hash
+	Metadata       string    `gorm:"type:text" json:"metadata,omitempty"` // JSON string
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	UserID         string    `gorm:"index" json:"user_id,omitempty"`
 }
 
 // TableName specifies the table name
 func (StorageObject) TableName() string {
-	return getTableName("storage", "objects")
+	return "storage_objects"
 }
 
-// BeforeCreate hook
-func (o *StorageObject) BeforeCreate(tx *gorm.DB) error {
-	if o.ID == uuid.Nil {
-		o.ID = uuid.New()
-	}
-	return nil
+// IsFolder returns true if this object is a folder
+func (s *StorageObject) IsFolder() bool {
+	return s.ContentType == "application/x-directory"
+}
+
+// IsFile returns true if this object is a file
+func (s *StorageObject) IsFile() bool {
+	return s.ContentType != "application/x-directory"
 }

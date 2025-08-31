@@ -62,9 +62,6 @@ func New(cfg Config) (*Service, error) {
 		return nil, fmt.Errorf("unsupported database type: %T", cfg.DB)
 	}
 	
-	// Initialize models with database type
-	InitModels(cfg.DatabaseType)
-	
 	// Create GORM storage
 	storage := NewGormStorage(gormDB)
 	

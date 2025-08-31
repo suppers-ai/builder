@@ -8,22 +8,6 @@ import (
 	"gorm.io/datatypes"
 )
 
-var dbType = "postgres" // Default to postgres
-
-// InitModels initializes the models with the database type
-func InitModels(databaseType string) {
-	dbType = databaseType
-}
-
-// getTableName returns the table name based on database type
-func getTableName(schema, table string) string {
-	// SQLite doesn't support schemas
-	if dbType == "sqlite" || dbType == "sqlite3" {
-		return table
-	}
-	// PostgreSQL and MySQL support schemas
-	return schema + "." + table
-}
 
 // LogModel represents an application log entry for database storage
 type LogModel struct {
@@ -38,7 +22,7 @@ type LogModel struct {
 
 // TableName specifies the table name
 func (LogModel) TableName() string {
-	return getTableName("logger", "logs")
+	return "logs"
 }
 
 // BeforeCreate hook
@@ -71,7 +55,7 @@ type RequestLogModel struct {
 
 // TableName specifies the table name
 func (RequestLogModel) TableName() string {
-	return getTableName("logger", "request_logs")
+	return "request_logs"
 }
 
 // BeforeCreate hook
