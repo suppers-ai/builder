@@ -10,6 +10,7 @@
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import ExportButton from '$lib/components/ExportButton.svelte';
+	import { requireAdmin } from '$lib/utils/auth';
 	
 	let viewMode = 'grid'; // 'grid' or 'list'
 	let selectedBucket: any = null;
@@ -712,6 +713,9 @@
 	}
 	
 	onMount(async () => {
+		// Check admin access
+		if (!requireAdmin()) return;
+		
 		// Load initial data
 		await fetchBuckets();
 		
@@ -728,15 +732,34 @@
 	});
 </script>
 
-<div class="page-header">
-	<div class="breadcrumb">
-		<a href="/">Home</a>
-		<span class="breadcrumb-separator">›</span>
-		<span>Storage</span>
+<div class="storage-page">
+	<!-- Header -->
+	<div class="page-header">
+		<div class="header-content">
+			<div class="header-left">
+				<div class="header-title">
+					<HardDrive size={24} />
+					<h1>Storage Manager</h1>
+				</div>
+				<div class="header-meta">
+					<span class="meta-item">{buckets.length} buckets</span>
+					<span class="meta-separator">•</span>
+					<span class="meta-item">{totalFiles} files</span>
+					<span class="meta-separator">•</span>
+					<span class="meta-item">{usedStorage} used</span>
+				</div>
+			</div>
+			<div class="header-info">
+				<span class="info-item">
+					<HardDrive size={14} />
+					Connected
+				</span>
+			</div>
+		</div>
 	</div>
-</div>
 
-<div class="page-content">
+	<!-- Content Area -->
+	<div class="content-area">
 	<!-- Files Area -->
 	<div class="files-container">
 		<div class="card">
@@ -1351,11 +1374,102 @@
 		</div>
 	</div>
 {/if}
+</div>
 
 <style>
+	/* Page Layout */
+	.storage-page {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		background: #f8fafc;
+	}
+
+	/* Header */
+	.page-header {
+		background: white;
+		border-bottom: 1px solid #e2e8f0;
+		padding: 1.5rem 2rem;
+	}
+
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.header-left {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.header-title {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.header-title h1 {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #0f172a;
+		margin: 0;
+	}
+
+	.header-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-left: 2.25rem;
+	}
+
+	.meta-item {
+		font-size: 0.8125rem;
+		color: #64748b;
+	}
+
+	.meta-separator {
+		color: #cbd5e1;
+		margin: 0 0.25rem;
+	}
+
+	.header-info {
+		display: flex;
+		gap: 1.5rem;
+	}
+
+	.info-item {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-size: 0.875rem;
+		color: #22c55e;
+		font-weight: 500;
+	}
+
+	/* Content Area */
+	.content-area {
+		flex: 1;
+		padding: 0.75rem 1.5rem 1.5rem;
+		overflow: auto;
+	}
+
 	/* Files Container */
 	.files-container {
-		/* No top margin needed since stat cards are removed */
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.card {
+		background: white;
+		border-radius: 0.75rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		height: 100%;
+		display: flex;
+		flex-direction: column;
 	}
 	
 	/* Files Toolbar */
@@ -1363,8 +1477,9 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		padding: 1rem;
-		border-bottom: 1px solid var(--border-color);
+		padding: 0.75rem 1.25rem;
+		border-bottom: 1px solid #e2e8f0;
+		background: #fafbfc;
 		flex-wrap: wrap;
 	}
 	
@@ -1377,23 +1492,31 @@
 	.bucket-select {
 		height: 36px;
 		padding: 0 0.75rem;
-		border: 1px solid var(--border-color);
-		border-radius: 6px;
+		padding-right: 2rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.375rem;
 		background: white;
-		font-size: 0.875rem;
-		color: var(--text-primary);
+		font-size: 0.8125rem;
+		color: #475569;
 		cursor: pointer;
 		min-width: 150px;
+		appearance: none;
+		transition: all 0.15s;
+		background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+		background-size: 1rem;
 	}
 	
 	.bucket-select:hover {
-		border-color: var(--primary-color);
+		border-color: #cbd5e1;
+		background-color: #f8fafc;
 	}
 	
 	.bucket-select:focus {
 		outline: none;
-		border-color: var(--primary-color);
-		box-shadow: 0 0 0 3px rgba(24, 154, 180, 0.1);
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
 	}
 	
 	.bucket-select:disabled {
@@ -1468,14 +1591,14 @@
 	}
 	
 	.toolbar-btn-primary {
-		background: var(--primary-color);
+		background: #3b82f6;
 		color: white;
-		border-color: var(--primary-color);
+		border-color: #3b82f6;
 	}
 	
 	.toolbar-btn-primary:hover:not(:disabled) {
-		background: #0284c7;
-		border-color: #0284c7;
+		background: #2563eb;
+		border-color: #2563eb;
 	}
 	
 	/* Files Breadcrumb */

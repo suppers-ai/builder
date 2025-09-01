@@ -27,6 +27,11 @@ type User struct {
 	Username         string     `gorm:"size:255" json:"username,omitempty"`
 	Role             string     `gorm:"not null;default:'user';size:50" json:"role"`
 	Confirmed        bool       `gorm:"default:false" json:"confirmed"`
+	FirstName        string     `gorm:"size:100" json:"first_name,omitempty"`
+	LastName         string     `gorm:"size:100" json:"last_name,omitempty"`
+	DisplayName      string     `gorm:"size:100" json:"display_name,omitempty"`
+	Phone            string     `gorm:"size:50" json:"phone,omitempty"`
+	Location         string     `gorm:"size:255" json:"location,omitempty"`
 	ConfirmToken     *string    `gorm:"size:255" json:"-"`
 	ConfirmSelector  *string    `gorm:"size:255;index" json:"-"`
 	RecoverToken     *string    `gorm:"size:255" json:"-"`

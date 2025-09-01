@@ -216,9 +216,9 @@
 					</div>
 				</div>
 				<div class="profile-menu-divider"></div>
-				<button class="profile-menu-item" on:click={() => goto('/profile')}>
+				<button class="profile-menu-item" on:click={() => { showProfileMenu = false; goto('/profile'); }}>
 					<User size={16} />
-					<span>Profile Settings</span>
+					<span>My Profile</span>
 				</button>
 				<button class="profile-menu-item profile-menu-item-danger" on:click={handleLogout}>
 					<LogOut size={16} />

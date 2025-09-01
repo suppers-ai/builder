@@ -89,6 +89,7 @@ func (a *API) setupRoutes() {
 	// Auth routes
 	protected.HandleFunc("/auth/logout", HandleLogout()).Methods("POST", "OPTIONS")
 	protected.HandleFunc("/auth/me", HandleGetCurrentUser()).Methods("GET", "OPTIONS")
+	protected.HandleFunc("/auth/change-password", HandleChangePassword(a.AuthService)).Methods("POST", "OPTIONS")
 
 	// User routes
 	protected.HandleFunc("/users", HandleGetUsers(a.UserService)).Methods("GET", "OPTIONS")

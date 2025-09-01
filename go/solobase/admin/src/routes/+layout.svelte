@@ -14,15 +14,32 @@
 	// Subscribe to the currentUser store
 	$: user = $currentUser;
 	
+	// Define pages that don't require admin role
+	const publicPages = ['/login', '/signup', '/logout', '/profile'];
+	
+	// Reactive role-based routing - handles navigation after auth state changes
+	$: if (user && typeof window !== 'undefined') {
+		const currentPath = $page.url.pathname;
+		const isAdminPage = !publicPages.includes(currentPath);
+		
+		// Redirect non-admin users away from admin pages
+		if (user.role !== 'admin' && isAdminPage) {
+			goto('/profile');
+		}
+	}
+	
 	onMount(async () => {
 		// Check if user is authenticated on mount
 		const isAuth = await auth.checkAuth();
 		
-		// Redirect to login if not authenticated
-		if (!isAuth && $page.url.pathname !== '/login' && $page.url.pathname !== '/signup') {
+		// Redirect to login if not authenticated (exclude public pages)
+		if (!isAuth && !publicPages.includes($page.url.pathname)) {
 			goto('/login');
 			return;
 		}
+		
+		// Note: Role-based checks are handled by the reactive statement above
+		// and by individual page components using requireAdmin()
 		
 		// Set initial window width
 		windowWidth = window.innerWidth;
@@ -50,7 +67,7 @@
 	}
 </script>
 
-{#if $page.url.pathname === '/login' || $page.url.pathname === '/signup' || $page.url.pathname === '/logout'}
+{#if $page.url.pathname === '/login' || $page.url.pathname === '/signup' || $page.url.pathname === '/logout' || $page.url.pathname === '/profile'}
 	<slot />
 {:else}
 	<div class="app-layout {mobileMenuOpen ? 'mobile-menu-open' : ''}">

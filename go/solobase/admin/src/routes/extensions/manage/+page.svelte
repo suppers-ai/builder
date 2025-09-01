@@ -1,12 +1,16 @@
 <script>
 	import { onMount } from 'svelte';
 	import { api } from '$lib/api';
+	import { requireAdmin } from '$lib/utils/auth';
 	
 	let extensions = [];
 	let loading = true;
 	let error = null;
 
 	onMount(async () => {
+		// Check admin access
+		if (!requireAdmin()) return;
+		
 		await loadExtensions();
 	});
 

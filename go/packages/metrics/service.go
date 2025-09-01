@@ -153,6 +153,11 @@ func (s *Service) RecordDBQuery(query string, duration time.Duration, err error)
 	if err != nil {
 		s.dbErrors.Inc()
 	}
+	
+	// Update system collector
+	if sc, ok := s.systemCollector.(*SystemMetricsCollector); ok {
+		sc.IncrementDBQueries()
+	}
 }
 
 // RecordDBConnection records database connection state
@@ -278,4 +283,36 @@ func (s *Service) runCollectionLoop(ctx context.Context) {
 // GetHandler returns the HTTP handler for metrics endpoint
 func (s *Service) GetHandler() interface{} {
 	return s.collector.Handler()
+}
+
+// MetricsHistoryPoint represents a point in metrics history
+type MetricsHistoryPoint struct {
+	Timestamp    time.Time
+	RequestRate  float64
+	ResponseTime float64
+	CPUUsage     float64
+	MemoryUsage  float64
+	ErrorRate    float64
+	DBQueries    int64
+}
+
+// GetMetricsHistory returns historical metrics data
+func (s *Service) GetMetricsHistory(points int) []MetricsHistoryPoint {
+	// Get system metrics history
+	systemHistory := s.systemCollector.(*SystemMetricsCollector).GetHistory(points)
+	
+	result := make([]MetricsHistoryPoint, len(systemHistory))
+	for i, m := range systemHistory {
+		result[i] = MetricsHistoryPoint{
+			Timestamp:    m.Timestamp,
+			RequestRate:  m.RequestsPerSecond * 60, // Convert to per minute
+			ResponseTime: float64(m.ResponseTime) / float64(time.Millisecond), // Convert to ms
+			CPUUsage:     m.CPUUsage,
+			MemoryUsage:  float64(m.HeapAlloc) / float64(m.MemTotal) * 100,
+			ErrorRate:    m.ErrorRate,
+			DBQueries:    m.DBQueries,
+		}
+	}
+	
+	return result
 }

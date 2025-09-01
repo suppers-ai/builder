@@ -4,6 +4,11 @@ export interface User {
 	email: string;
 	confirmed: boolean;
 	role: 'user' | 'manager' | 'admin' | 'deleted';
+	first_name?: string;
+	last_name?: string;
+	display_name?: string;
+	phone?: string;
+	location?: string;
 	created_at: Date;
 	updated_at: Date;
 	metadata?: Record<string, any>;

@@ -55,6 +55,9 @@ func main() {
 		logger.String("database", cfg.Database.Type),
 	)
 
+	// Setup database metrics tracking
+	database.RecordDBQueryFunc = api.RecordDBQuery
+
 	// Initialize services
 	authService := services.NewAuthService(db)
 	userService := services.NewUserService(db)

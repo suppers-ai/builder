@@ -119,6 +119,56 @@ func HandleGetCurrentUser() http.HandlerFunc {
 	}
 }
 
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+}
+
+func HandleChangePassword(authService *services.AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get user from context (set by auth middleware)
+		user, ok := r.Context().Value("user").(*auth.User)
+		if !ok {
+			respondWithError(w, http.StatusUnauthorized, "User not authenticated")
+			return
+		}
+
+		var req ChangePasswordRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid request body")
+			return
+		}
+
+		// Verify current password
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword)); err != nil {
+			respondWithError(w, http.StatusUnauthorized, "Current password is incorrect")
+			return
+		}
+
+		// Validate new password
+		if len(req.NewPassword) < 8 {
+			respondWithError(w, http.StatusBadRequest, "Password must be at least 8 characters")
+			return
+		}
+
+		// Hash new password
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Failed to process password")
+			return
+		}
+
+		// Update password in database
+		if err := authService.UpdateUserPassword(user.ID.String(), string(hashedPassword)); err != nil {
+			log.Printf("Failed to update password for user %s: %v", user.Email, err)
+			respondWithError(w, http.StatusInternalServerError, "Failed to update password")
+			return
+		}
+
+		respondWithJSON(w, http.StatusOK, map[string]string{"message": "Password updated successfully"})
+	}
+}
+
 func generateToken(user *auth.User) (string, error) {
 	claims := &Claims{
 		UserID: user.ID.String(),

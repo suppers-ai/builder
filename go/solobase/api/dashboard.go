@@ -26,6 +26,17 @@ type Activity struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+// TODO: Re-enable when metrics service is properly integrated
+// type MetricsHistory struct {
+// 	Timestamps      []string  `json:"timestamps"`
+// 	RequestsPerMin  []float64 `json:"requests_per_min"`
+// 	ResponseTimeMs  []float64 `json:"response_time_ms"`
+// 	CPUUsage        []float64 `json:"cpu_usage"`
+// 	MemoryUsage     []float64 `json:"memory_usage"`
+// 	ErrorRate       []float64 `json:"error_rate"`
+// 	DBQueries       []int64   `json:"db_queries"`
+// }
+
 func HandleGetDashboardStats(
 	userService *services.UserService,
 	storageService *services.StorageService,
@@ -78,3 +89,42 @@ func HandleGetDashboardStats(
 		RespondWithJSON(w, http.StatusOK, stats)
 	}
 }
+
+// TODO: Re-enable when metrics service is properly integrated
+// func HandleGetMetricsHistory(metricsService *services.MetricsService) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		// Get last 20 data points (10 minutes at 30 second intervals)
+// 		history := metricsService.GetMetricsHistory(20)
+// 		
+// 		// Format timestamps for display
+// 		timestamps := make([]string, len(history))
+// 		requestsPerMin := make([]float64, len(history))
+// 		responseTimeMs := make([]float64, len(history))
+// 		cpuUsage := make([]float64, len(history))
+// 		memoryUsage := make([]float64, len(history))
+// 		errorRate := make([]float64, len(history))
+// 		dbQueries := make([]int64, len(history))
+// 		
+// 		for i, point := range history {
+// 			timestamps[i] = point.Timestamp.Format("15:04:05")
+// 			requestsPerMin[i] = point.RequestRate
+// 			responseTimeMs[i] = point.ResponseTime
+// 			cpuUsage[i] = point.CPUUsage
+// 			memoryUsage[i] = point.MemoryUsage
+// 			errorRate[i] = point.ErrorRate
+// 			dbQueries[i] = point.DBQueries
+// 		}
+// 		
+// 		response := MetricsHistory{
+// 			Timestamps:      timestamps,
+// 			RequestsPerMin:  requestsPerMin,
+// 			ResponseTimeMs:  responseTimeMs,
+// 			CPUUsage:        cpuUsage,
+// 			MemoryUsage:     memoryUsage,
+// 			ErrorRate:       errorRate,
+// 			DBQueries:       dbQueries,
+// 		}
+// 		
+// 		RespondWithJSON(w, http.StatusOK, response)
+// 	}
+// }

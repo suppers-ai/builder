@@ -8,6 +8,7 @@
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import ExportButton from '$lib/components/ExportButton.svelte';
+	import { requireAdmin } from '$lib/utils/auth';
 	
 	let searchQuery = '';
 	let selectedRole = 'all';
@@ -40,6 +41,9 @@
 	let users: any[] = [];
 	
 	onMount(() => {
+		// Check admin access
+		if (!requireAdmin()) return;
+		
 		fetchUsers();
 	});
 	
@@ -250,76 +254,56 @@
 	</div>
 {/if}
 
-<div class="page-header">
-	<div class="breadcrumb">
-		<a href="/">Home</a>
-		<span class="breadcrumb-separator">›</span>
-		<span>Users</span>
+<div class="users-page">
+	<!-- Header -->
+	<div class="page-header">
+		<div class="header-content">
+			<div class="header-left">
+				<div class="header-title">
+					<Users size={24} />
+					<h1>User Management</h1>
+				</div>
+				<div class="header-meta">
+					<span class="meta-item">{totalUsers} total</span>
+					<span class="meta-separator">•</span>
+					<span class="meta-item">{activeUsers} active</span>
+					<span class="meta-separator">•</span>
+					<span class="meta-item">{unconfirmedUsers} unconfirmed</span>
+				</div>
+			</div>
+			<div class="header-info">
+				<span class="info-item success">
+					<CheckCircle size={14} />
+					Operational
+				</span>
+			</div>
+		</div>
 	</div>
-</div>
 
-<div class="page-content">
-	<!-- Stats Cards -->
-	<div class="stats-grid">
-		<div class="stat-card">
-			<div class="stat-header">
-				<Users size={20} style="color: var(--text-muted)" />
-			</div>
-			<div class="stat-label">TOTAL USERS</div>
-			<div class="stat-value">{totalUsers}</div>
-			<div class="stat-description">All registered users</div>
-		</div>
-		
-		<div class="stat-card">
-			<div class="stat-header">
-				<Check size={20} style="color: var(--success-color)" />
-			</div>
-			<div class="stat-label">ACTIVE USERS</div>
-			<div class="stat-value" style="color: var(--success-color)">{activeUsers}</div>
-			<div class="stat-description">Confirmed & active</div>
-		</div>
-		
-		<div class="stat-card">
-			<div class="stat-header">
-				<Trash2 size={20} style="color: var(--danger-color)" />
-			</div>
-			<div class="stat-label">DELETED USERS</div>
-			<div class="stat-value" style="color: var(--danger-color)">{users.filter(u => u.role === 'deleted').length}</div>
-			<div class="stat-description">Account deleted</div>
-		</div>
-		
-		<div class="stat-card">
-			<div class="stat-header">
-				<Mail size={20} style="color: var(--warning-color)" />
-			</div>
-			<div class="stat-label">UNCONFIRMED</div>
-			<div class="stat-value" style="color: var(--warning-color)">{unconfirmedUsers}</div>
-			<div class="stat-description">Pending email verification</div>
-		</div>
-	</div>
+	<!-- Content Area -->
+	<div class="content-area">
 	
 	<!-- Users Table -->
 	<div class="card">
 		<div class="users-header">
 			<div class="users-filters">
-				<div class="search-input" style="min-width: 300px;">
-					<Search size={16} class="search-input-icon" />
+				<div class="search-box">
+					<Search size={16} />
 					<input 
 						type="text" 
-						class="form-input" 
 						placeholder="Search users..."
 						bind:value={searchQuery}
 					/>
 				</div>
 				
-				<select class="form-select" bind:value={selectedRole}>
+				<select class="filter-select" bind:value={selectedRole}>
 					<option value="all">All Roles</option>
 					<option value="admin">Admin</option>
 					<option value="manager">Manager</option>
 					<option value="user">User</option>
 				</select>
 				
-				<select class="form-select" bind:value={selectedStatus}>
+				<select class="filter-select" bind:value={selectedStatus}>
 					<option value="all">All Status</option>
 					<option value="active">Active</option>
 					<option value="unconfirmed">Unconfirmed</option>
@@ -433,6 +417,7 @@
 			</div>
 		</div>
 	</div>
+</div>
 </div>
 
 <!-- Add/Edit User Modal -->
@@ -616,6 +601,94 @@
 {/if}
 
 <style>
+	/* Page Layout */
+	.users-page {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		background: #f8fafc;
+	}
+
+	/* Header */
+	.page-header {
+		background: white;
+		border-bottom: 1px solid #e2e8f0;
+		padding: 1.5rem 2rem;
+	}
+
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.header-left {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.header-title {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.header-title h1 {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #0f172a;
+		margin: 0;
+	}
+
+	.header-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-left: 2.25rem;
+	}
+
+	.meta-item {
+		font-size: 0.8125rem;
+		color: #64748b;
+	}
+
+	.meta-separator {
+		color: #cbd5e1;
+		margin: 0 0.25rem;
+	}
+
+	.header-info {
+		display: flex;
+		gap: 1.5rem;
+	}
+
+	.info-item {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.info-item.success {
+		color: #22c55e;
+	}
+
+	/* Content Area */
+	.content-area {
+		flex: 1;
+		padding: 0.75rem 1.5rem 1.5rem;
+		overflow: auto;
+	}
+
+	.card {
+		background: white;
+		border-radius: 0.75rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		padding: 1.5rem;
+	}
+
 	.users-header {
 		display: flex;
 		align-items: center;
@@ -629,6 +702,72 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
+	}
+
+	.search-box {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		max-width: 280px;
+		height: 36px;
+		padding: 0 0.75rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 6px;
+		background: white;
+		transition: all 0.15s;
+	}
+	
+	.search-box:focus-within {
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
+
+	.search-box svg {
+		color: #94a3b8;
+		flex-shrink: 0;
+	}
+	
+	.search-box input {
+		border: none;
+		background: none;
+		outline: none;
+		flex: 1;
+		font-size: 0.875rem;
+		color: #475569;
+		padding: 0;
+	}
+	
+	.search-box input::placeholder {
+		color: #94a3b8;
+	}
+
+	.filter-select {
+		height: 36px;
+		padding: 0 0.75rem;
+		padding-right: 2rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.375rem;
+		background: white;
+		font-size: 0.8125rem;
+		color: #475569;
+		cursor: pointer;
+		appearance: none;
+		transition: all 0.15s;
+		background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+		background-size: 1rem;
+	}
+	
+	.filter-select:hover {
+		border-color: #cbd5e1;
+		background-color: #f8fafc;
+	}
+	
+	.filter-select:focus {
+		outline: none;
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.08);
 	}
 	
 	.table-actions {

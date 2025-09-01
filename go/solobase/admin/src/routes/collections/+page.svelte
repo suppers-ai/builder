@@ -3,11 +3,15 @@
 	import { api } from '$lib/api';
 	import type { Collection } from '$lib/types';
 	import { Layers, Plus, Edit, Trash2 } from 'lucide-svelte';
+	import { requireAdmin } from '$lib/utils/auth';
 	
 	let collections: Collection[] = [];
 	let loading = true;
 	
 	onMount(async () => {
+		// Check admin access
+		if (!requireAdmin()) return;
+		
 		const response = await api.getCollections();
 		if (response.data) {
 			collections = response.data;

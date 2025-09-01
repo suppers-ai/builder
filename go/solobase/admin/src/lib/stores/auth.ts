@@ -69,10 +69,14 @@ function createAuthStore() {
 		},
 		setUser(user: User | null) {
 			update(state => ({ ...state, user }));
+		},
+		updateUser(user: User) {
+			update(state => ({ ...state, user }));
 		}
 	};
 }
 
-export const auth = createAuthStore();
-export const isAuthenticated = derived(auth, $auth => !!$auth.user);
-export const currentUser = derived(auth, $auth => $auth.user);
+export const authStore = createAuthStore();
+export const auth = authStore; // Keep for backwards compatibility
+export const isAuthenticated = derived(authStore, $auth => !!$auth.user);
+export const currentUser = derived(authStore, $auth => $auth.user);

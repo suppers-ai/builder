@@ -528,7 +528,7 @@ func (s *StorageService) RenameObject(bucket, objectID, newName string) error {
 		}
 		
 		// Upload with new name
-		if err := s.storage.PutObject(bucket, newKey, bytes.NewReader(content), object.ContentType); err != nil {
+		if err := s.storage.PutObject(bucket, newKey, bytes.NewReader(content), int64(len(content)), object.ContentType); err != nil {
 			return fmt.Errorf("failed to put renamed object: %v", err)
 		}
 		
@@ -550,7 +550,7 @@ func (s *StorageService) RenameObject(bucket, objectID, newName string) error {
 			if reader != nil {
 				defer reader.Close()
 				content, _ := io.ReadAll(reader)
-				s.storage.PutObject(bucket, oldKey, bytes.NewReader(content), object.ContentType)
+				s.storage.PutObject(bucket, oldKey, bytes.NewReader(content), int64(len(content)), object.ContentType)
 				s.storage.DeleteObject(bucket, newKey)
 			}
 		}

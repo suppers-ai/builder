@@ -118,6 +118,7 @@ type SystemMetrics struct {
 	ResponseTime      float64       `json:"response_time_ms"`
 	ErrorRate         float64       `json:"error_rate"`
 	ActiveConnections int           `json:"active_connections"`
+	DBQueries         int64         `json:"db_queries_total"`
 }
 
 // SystemCollector collects system metrics

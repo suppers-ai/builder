@@ -37,10 +37,13 @@ import (
 // RegisterExtensions registers all discovered extensions
 func RegisterExtensions(registry *core.ExtensionRegistry) error {
 {{range .}}	// Register {{.Name}}
-	if err := registry.Register({{.Package}}.{{.InitFunc}}()); err != nil {
+{{if eq .Name "cloudstorage"}}	if err := registry.Register({{.Package}}.{{.InitFunc}}(nil)); err != nil {
 		return fmt.Errorf("failed to register {{.Name}} extension: %w", err)
 	}
-{{end}}
+{{else}}	if err := registry.Register({{.Package}}.{{.InitFunc}}()); err != nil {
+		return fmt.Errorf("failed to register {{.Name}} extension: %w", err)
+	}
+{{end}}{{end}}
 	return nil
 }
 

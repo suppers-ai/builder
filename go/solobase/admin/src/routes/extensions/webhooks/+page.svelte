@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { api } from '$lib/api';
+	import { requireAdmin } from '$lib/utils/auth';
 	
 	let webhooks = [];
 	let loading = true;
@@ -14,6 +15,9 @@
 	};
 
 	onMount(async () => {
+		// Check admin access
+		if (!requireAdmin()) return;
+		
 		await loadWebhooks();
 	});
 

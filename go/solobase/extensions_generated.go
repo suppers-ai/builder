@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/extensions/official/analytics"
+	"github.com/suppers-ai/solobase/extensions/official/cloudstorage"
 	"github.com/suppers-ai/solobase/extensions/official/webhooks"
 )
 
@@ -14,6 +15,10 @@ func RegisterExtensions(registry *core.ExtensionRegistry) error {
 	// Register analytics
 	if err := registry.Register(analytics.NewAnalyticsExtension()); err != nil {
 		return fmt.Errorf("failed to register analytics extension: %w", err)
+	}
+	// Register cloudstorage
+	if err := registry.Register(cloudstorage.NewCloudStorageExtension(nil)); err != nil {
+		return fmt.Errorf("failed to register cloudstorage extension: %w", err)
 	}
 	// Register webhooks
 	if err := registry.Register(webhooks.NewWebhooksExtension()); err != nil {
@@ -27,6 +32,7 @@ func RegisterExtensions(registry *core.ExtensionRegistry) error {
 func GetExtensionList() []string {
 	return []string{
 		"analytics",
+		"cloudstorage",
 		"webhooks",
 	}
 }

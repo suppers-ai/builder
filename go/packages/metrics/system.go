@@ -29,6 +29,7 @@ type SystemMetricsCollector struct {
 	// Counters for application metrics
 	requestsTotal     int64
 	errorCount        int64
+	dbQueriesTotal    int64
 	activeConnections int32
 	
 	// For calculating rates
@@ -320,6 +321,7 @@ func (s *SystemMetricsCollector) collectProcess(m *SystemMetrics) error {
 func (s *SystemMetricsCollector) collectApplicationMetrics(m *SystemMetrics) {
 	s.mu.RLock()
 	m.RequestsTotal = s.requestsTotal
+	m.DBQueries = s.dbQueriesTotal
 	m.ActiveConnections = int(s.activeConnections)
 	
 	// Calculate requests per second
@@ -356,6 +358,13 @@ func (s *SystemMetricsCollector) IncrementErrors() {
 	s.mu.Unlock()
 }
 
+// IncrementDBQueries increments database query counter
+func (s *SystemMetricsCollector) IncrementDBQueries() {
+	s.mu.Lock()
+	s.dbQueriesTotal++
+	s.mu.Unlock()
+}
+
 // SetActiveConnections sets active connection count
 func (s *SystemMetricsCollector) SetActiveConnections(count int32) {
 	s.mu.Lock()
@@ -366,4 +375,24 @@ func (s *SystemMetricsCollector) SetActiveConnections(count int32) {
 // GetUptime returns the uptime duration
 func (s *SystemMetricsCollector) GetUptime() time.Duration {
 	return time.Since(s.startTime)
+}
+
+// GetHistory returns the last n metrics points
+func (s *SystemMetricsCollector) GetHistory(n int) []*SystemMetrics {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	
+	historyLen := len(s.history)
+	if n > historyLen {
+		n = historyLen
+	}
+	
+	if n <= 0 {
+		return []*SystemMetrics{}
+	}
+	
+	// Return last n points
+	result := make([]*SystemMetrics, n)
+	copy(result, s.history[historyLen-n:])
+	return result
 }

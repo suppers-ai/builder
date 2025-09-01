@@ -93,3 +93,7 @@ func (s *AuthService) CreateDefaultAdmin(email, password string) error {
 	log.Printf("Successfully created default admin user: %s", email)
 	return nil
 }
+
+func (s *AuthService) UpdateUserPassword(userID, hashedPassword string) error {
+	return s.db.Model(&auth.User{}).Where("id = ?", userID).Update("password", hashedPassword).Error
+}

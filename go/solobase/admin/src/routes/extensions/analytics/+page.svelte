@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { api } from '$lib/api';
+	import { requireAdmin } from '$lib/utils/auth';
 	
 	let stats = {
 		totalViews: 0,
@@ -14,6 +15,9 @@
 	let error = null;
 
 	onMount(async () => {
+		// Check admin access
+		if (!requireAdmin()) return;
+		
 		await loadData();
 		// Auto-refresh every 30 seconds
 		const interval = setInterval(loadData, 30000);

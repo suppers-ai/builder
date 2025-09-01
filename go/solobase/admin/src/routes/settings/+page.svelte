@@ -3,6 +3,7 @@
 	import { api } from '$lib/api';
 	import type { AppSettings } from '$lib/types';
 	import { Save, RefreshCw, AlertCircle, Check } from 'lucide-svelte';
+	import { requireAdmin } from '$lib/utils/auth';
 	
 	let settings: AppSettings | null = null;
 	let loading = true;
@@ -11,6 +12,9 @@
 	let error = '';
 	
 	onMount(async () => {
+		// Check admin access
+		if (!requireAdmin()) return;
+		
 		await loadSettings();
 	});
 	
@@ -142,7 +146,7 @@
 			<div class="card bg-base-100 shadow-sm">
 				<div class="card-body">
 					<h2 class="card-title text-xl mb-4">General Settings</h2>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="settings-fields">
 						<div class="form-control">
 							<label class="label">
 								<span class="label-text font-medium">Application Name</span>
@@ -190,13 +194,12 @@
 						</div>
 					</div>
 				</div>
-			</div>
 			
 			<!-- Security Settings -->
 			<div class="card bg-base-100 shadow-sm">
 				<div class="card-body">
 					<h2 class="card-title text-xl mb-4">Security</h2>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="settings-fields">
 						<div class="form-control">
 							<label class="label">
 								<span class="label-text font-medium">Session Timeout</span>
@@ -226,7 +229,6 @@
 						</div>
 					</div>
 				</div>
-			</div>
 			
 			<!-- Email Configuration -->
 			<div class="card bg-base-100 shadow-sm">
@@ -291,7 +293,7 @@
 				<div class="card-body">
 					<h2 class="card-title text-xl mb-4">Storage Configuration</h2>
 					
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="settings-fields">
 						<div class="form-control">
 							<label class="label">
 								<span class="label-text font-medium">Storage Provider</span>
@@ -388,7 +390,6 @@
 						</div>
 					</div>
 				</div>
-			</div>
 			
 			<!-- Maintenance Mode -->
 			<div class="card bg-base-100 shadow-sm border-2 border-warning/20">
