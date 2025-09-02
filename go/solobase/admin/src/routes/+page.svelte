@@ -5,7 +5,8 @@
 	import { 
 		Users, Database, HardDrive, Activity,
 		TrendingUp, TrendingDown, Clock, Server,
-		Zap, AlertCircle, CheckCircle, RefreshCw
+		Zap, AlertCircle, CheckCircle, RefreshCw,
+		LayoutDashboard
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { currentUser } from '$lib/stores/auth';
@@ -578,32 +579,38 @@
 	$: healthStatus = getHealthStatus(cpuUsage, memoryUsage, diskUsage);
 </script>
 
-<div class="dashboard">
-	{#if error}
-		<div class="error">
-			<AlertCircle size={16} />
-			{error}
-		</div>
-	{/if}
-
-	<!-- Compact Header -->
-	<div class="dashboard-header">
-		<div class="header-left">
-			<h1>Dashboard Overview</h1>
-			<p>System uptime: {uptime}</p>
-		</div>
-		<div class="header-right">
-			<button class="refresh-btn" on:click={refreshData} disabled={loading}>
-				<span class:spinning={loading}>
-					<RefreshCw size={14} />
-				</span>
-				{loading ? 'Refreshing...' : 'Refresh'}
-			</button>
+<div class="dashboard-container">
+	<!-- Header -->
+	<div class="page-header">
+		<div class="header-content">
+			<div class="header-left">
+				<div class="header-title">
+					<LayoutDashboard size={24} />
+					<h1>Dashboard</h1>
+				</div>
+				<div class="header-meta">
+					<span class="meta-item">Uptime: {uptime}</span>
+				</div>
+			</div>
+			<div class="header-actions">
+				<button class="refresh-button" on:click={refreshData} disabled={loading}>
+					<RefreshCw size={16} class={loading ? 'spinning' : ''} />
+					{loading ? 'Refreshing...' : 'Refresh'}
+				</button>
+			</div>
 		</div>
 	</div>
+	
+	<div class="dashboard-content">
+		{#if error}
+			<div class="error-banner">
+				<AlertCircle size={18} />
+				{error}
+			</div>
+		{/if}
 
-	<!-- Compact Metrics Grid -->
-	<div class="metrics-grid">
+		<!-- Compact Metrics Grid -->
+		<div class="metrics-grid">
 		<div class="metric-card users">
 			<div class="metric-content">
 				<div class="metric-info">
@@ -675,10 +682,10 @@
 				</div>
 			</div>
 		</div>
-	</div>
+		</div>
 
-	<!-- System & Performance Row -->
-	<div class="monitoring-row">
+		<!-- System & Performance Row -->
+		<div class="monitoring-row">
 		<!-- Performance Chart -->
 		<div class="chart-card">
 			<div class="card-header">
@@ -694,16 +701,16 @@
 						{/each}
 					</select>
 					<div class="header-stats">
-					<span class="stat-badge good">
-						<CheckCircle size={10} />
-						{avgResponseTime}ms avg
-					</span>
-					{#if errorRate > 0}
-						<span class="stat-badge {errorRate > 5 ? 'bad' : 'warn'}">
-							<AlertCircle size={10} />
-							{errorRate}% errors
+						<span class="stat-badge good">
+							<CheckCircle size={10} />
+							{avgResponseTime}ms avg
 						</span>
-					{/if}
+						{#if errorRate > 0}
+							<span class="stat-badge {errorRate > 5 ? 'bad' : 'warn'}">
+								<AlertCircle size={10} />
+								{errorRate}% errors
+							</span>
+						{/if}
 					</div>
 				</div>
 			</div>
@@ -789,10 +796,10 @@
 				</div>
 			</div>
 		</div>
-	</div>
+		</div>
 
-	<!-- Quick Actions / Status Bar -->
-	<div class="status-bar">
+		<!-- Quick Actions / Status Bar -->
+		<div class="status-bar">
 		<div class="status-left">
 			<span class="status-item">
 				<Server size={12} />
@@ -808,65 +815,122 @@
 			<a href="/users" class="status-link">Manage Users</a>
 			<a href="/settings" class="status-link">Settings</a>
 		</div>
+		</div>
 	</div>
 </div>
 
 <style>
-	.dashboard {
-		padding: 1rem;
+	.dashboard-container {
+		min-height: 100vh;
+		background: #f3f4f6;
+	}
+	
+	.page-header {
+		background: white;
+		border-bottom: 1px solid #e5e7eb;
+		padding: 1.5rem 2rem;
+	}
+	
+	.header-content {
 		max-width: 1400px;
 		margin: 0 auto;
-	}
-
-	/* Header */
-	.dashboard-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 1rem;
-		padding-bottom: 0.75rem;
-		border-bottom: 1px solid #e5e7eb;
 	}
-
-	.header-left h1 {
-		font-size: 1.25rem;
-		font-weight: 600;
+	
+	.header-left {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+	
+	:global(.header-icon) {
+		color: #374151;
+	}
+	
+	.header-title {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	
+	.header-title h1 {
+		font-size: 1.5rem;
+		font-weight: 700;
 		color: #111827;
 		margin: 0;
 	}
-
-	.header-left p {
-		font-size: 0.75rem;
-		color: #6b7280;
-		margin: 0.125rem 0 0 0;
-	}
-
-	.refresh-btn {
+	
+	.header-meta {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
-		padding: 0.375rem 0.75rem;
+		gap: 0.5rem;
+		color: #6b7280;
+		font-size: 0.875rem;
+		margin-left: 2.25rem;
+	}
+	
+	.meta-item {
+		color: #6b7280;
+	}
+	
+	.meta-separator {
+		color: #d1d5db;
+	}
+	
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	
+	.refresh-button {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
 		background: white;
-		border: 1px solid #d1d5db;
-		border-radius: 0.375rem;
-		font-size: 0.75rem;
 		color: #374151;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.2s;
 	}
-
-	.refresh-btn:hover:not(:disabled) {
+	
+	.refresh-button:hover:not(:disabled) {
 		background: #f9fafb;
 		border-color: #9ca3af;
 	}
-
-	.refresh-btn:disabled {
+	
+	.refresh-button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
-
-	:global(.spinning) {
+	
+	:global(.refresh-button .spinning) {
 		animation: spin 1s linear infinite;
+	}
+	
+	.dashboard-content {
+		padding: 1.5rem;
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+	
+	.error-banner {
+		background: #fee2e2;
+		color: #dc2626;
+		padding: 1rem;
+		border-radius: 8px;
+		margin-bottom: 1.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 0.875rem;
 	}
 
 	@keyframes spin {
@@ -1221,17 +1285,24 @@
 		}
 	}
 
-	@media (max-width: 640px) {
-		.dashboard {
-			padding: 0.75rem;
-		}
-
-		.dashboard-header {
+	@media (max-width: 768px) {
+		.header-content {
 			flex-direction: column;
-			align-items: start;
-			gap: 0.5rem;
+			align-items: flex-start;
+			gap: 1rem;
 		}
-
+		
+		.header-actions {
+			width: 100%;
+			justify-content: flex-start;
+		}
+		
+		.dashboard-content {
+			padding: 1rem;
+		}
+	}
+	
+	@media (max-width: 640px) {
 		.metrics-grid {
 			grid-template-columns: 1fr;
 		}

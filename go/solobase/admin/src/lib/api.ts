@@ -67,6 +67,14 @@ class ApiClient {
 			}
 
 			if (!response.ok) {
+				// If we get a 401, clear the invalid token
+				if (response.status === 401 && this.token) {
+					console.log('Token invalid, clearing from storage');
+					this.token = null;
+					if (typeof window !== 'undefined') {
+						localStorage.removeItem('auth_token');
+					}
+				}
 				throw new Error(data.error || `HTTP ${response.status}`);
 			}
 

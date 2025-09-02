@@ -7,6 +7,8 @@ import (
 	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/extensions/official/analytics"
 	"github.com/suppers-ai/solobase/extensions/official/cloudstorage"
+	"github.com/suppers-ai/solobase/extensions/official/hugo"
+	"github.com/suppers-ai/solobase/extensions/official/products"
 	"github.com/suppers-ai/solobase/extensions/official/webhooks"
 )
 
@@ -19,6 +21,14 @@ func RegisterExtensions(registry *core.ExtensionRegistry) error {
 	// Register cloudstorage
 	if err := registry.Register(cloudstorage.NewCloudStorageExtension(nil)); err != nil {
 		return fmt.Errorf("failed to register cloudstorage extension: %w", err)
+	}
+	// Register hugo
+	if err := registry.Register(hugo.NewHugoExtension()); err != nil {
+		return fmt.Errorf("failed to register hugo extension: %w", err)
+	}
+	// Register products
+	if err := registry.Register(products.NewProductsExtension()); err != nil {
+		return fmt.Errorf("failed to register products extension: %w", err)
 	}
 	// Register webhooks
 	if err := registry.Register(webhooks.NewWebhooksExtension()); err != nil {
@@ -33,6 +43,8 @@ func GetExtensionList() []string {
 	return []string{
 		"analytics",
 		"cloudstorage",
+		"hugo",
+		"products",
 		"webhooks",
 	}
 }

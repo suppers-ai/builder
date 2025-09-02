@@ -5,7 +5,7 @@
 		Home, Users, Database, HardDrive, 
 		FileText, Puzzle, Settings, ChevronRight,
 		Webhook, BarChart3, Grid3x3, ChevronDown,
-		ChevronLeft, LogOut, User, ChevronUp
+		ChevronLeft, LogOut, User, ChevronUp, Plus
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	
@@ -49,20 +49,29 @@
 			expandable: true,
 			children: [
 				{ 
-					title: 'Webhooks', 
-					href: '/extensions/webhooks',
-					badge: '•',
-					badgeColor: 'success'
+					title: 'Products & Pricing', 
+					href: '/extensions/products'
+				},
+				{ 
+					title: 'Hugo Sites', 
+					href: '/extensions/hugo'
 				},
 				{ 
 					title: 'Analytics', 
-					href: '/extensions/analytics',
-					badge: '•',
-					badgeColor: 'success'
+					href: '/extensions/analytics'
+				},
+				{ 
+					title: 'Cloud Storage', 
+					href: '/extensions/cloudstorage'
+				},
+				{ 
+					title: 'Webhooks', 
+					href: '/extensions/webhooks'
 				},
 				{ 
 					title: 'Manage Extensions', 
-					href: '/extensions/manage'
+					href: '/extensions/manage',
+					icon: Plus
 				}
 			]
 		},
@@ -99,6 +108,11 @@
 	}
 	
 	$: currentPath = $page.url.pathname;
+	
+	// Automatically expand Extensions menu when on an extensions page
+	$: if (currentPath.startsWith('/extensions')) {
+		expandedItems['Extensions'] = true;
+	}
 	
 	// Add click outside listener
 	import { onMount, onDestroy } from 'svelte';
@@ -145,6 +159,9 @@
 									href={child.href}
 									class="nav-link nav-subitem {currentPath === child.href ? 'active' : ''}"
 								>
+									{#if child.icon}
+										<svelte:component this={child.icon} size={10} class="nav-subitem-icon" />
+									{/if}
 									{#if !collapsed}
 										<span class="nav-text">{child.title}</span>
 									{:else}
@@ -243,6 +260,15 @@
 		flex-shrink: 0;
 	}
 	
+	.nav-subitem-icon {
+		width: 10px;
+		height: 10px;
+		stroke-width: 2;
+		flex-shrink: 0;
+		margin-right: 0.35rem;
+		color: #9ca3af;
+	}
+	
 	.nav-expand-icon {
 		width: 16px;
 		height: 16px;
@@ -259,6 +285,10 @@
 		padding: 0;
 		border-radius: 50%;
 		font-size: 0;
+	}
+
+	.nav-link {
+		gap: 0.4rem;
 	}
 	
 	.nav-tooltip {

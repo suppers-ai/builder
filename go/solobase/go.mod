@@ -20,6 +20,7 @@ require (
 	github.com/volatiletech/authboss/v3 v3.5.0
 	golang.org/x/crypto v0.41.0
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/datatypes v1.2.6
 	gorm.io/gorm v1.30.2
 )
 
@@ -62,6 +63,9 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.65.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/suppers-ai/dynamicfields v0.0.0-00010101000000-000000000000 // indirect
+	github.com/suppers-ai/formulaengine v0.0.0-00010101000000-000000000000 // indirect
 	github.com/suppers-ai/mailer v0.0.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
@@ -69,7 +73,6 @@ require (
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
-	gorm.io/datatypes v1.2.6 // indirect
 	gorm.io/driver/mysql v1.5.6 // indirect
 	gorm.io/driver/postgres v1.6.0 // indirect
 	gorm.io/driver/sqlite v1.5.6 // indirect
@@ -86,3 +89,7 @@ replace github.com/suppers-ai/mailer => ../packages/mailer
 replace github.com/suppers-ai/storage => ../packages/storage
 
 replace github.com/suppers-ai/storageadapter => ../integrations/storageadapter
+
+replace github.com/suppers-ai/formulaengine => ../packages/formulaengine
+
+replace github.com/suppers-ai/dynamicfields => ../packages/dynamicfields

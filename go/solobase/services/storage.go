@@ -31,6 +31,12 @@ func NewStorageService(db *database.DB, cfg config.StorageConfig) *StorageServic
 	var provider storage.Provider
 	var err error
 	
+	// Update path to use new structure
+	localPath := cfg.LocalStoragePath
+	if localPath == "" || localPath == "./data/storage" || localPath == "./.data/storage" {
+		localPath = "./.data/storage/int" // Internal storage path
+	}
+	
 	switch cfg.Type {
 	case "s3":
 		provider, err = storage.NewS3Provider(
@@ -42,10 +48,10 @@ func NewStorageService(db *database.DB, cfg config.StorageConfig) *StorageServic
 		)
 		if err != nil {
 			log.Printf("Failed to initialize S3 storage: %v, falling back to local", err)
-			provider, _ = storage.NewLocalProvider(cfg.LocalStoragePath)
+			provider, _ = storage.NewLocalProvider(localPath)
 		}
 	default:
-		provider, err = storage.NewLocalProvider(cfg.LocalStoragePath)
+		provider, err = storage.NewLocalProvider(localPath)
 		if err != nil {
 			log.Printf("Failed to initialize local storage: %v", err)
 		}

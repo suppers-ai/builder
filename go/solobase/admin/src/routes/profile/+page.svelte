@@ -5,7 +5,7 @@
 	import { 
 		User, Lock, LogOut, Shield, ChevronRight,
 		Mail, Phone, Calendar, MapPin, Save, X, Settings,
-		Edit, Home
+		Edit, Home, Package
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { authStore } from '$lib/stores/auth';
@@ -245,6 +245,15 @@
 					>
 						<Lock size={24} />
 						<span>Change Password</span>
+					</button>
+					
+					<!-- Products -->
+					<button 
+						class="action-card"
+						on:click={() => goto('/profile/products')}
+					>
+						<Package size={24} />
+						<span>Products</span>
 					</button>
 					
 					<!-- Admin Dashboard (only for admins) -->

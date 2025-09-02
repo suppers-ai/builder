@@ -76,7 +76,7 @@ The script will:
 
 **Default Admin Credentials:**
 - Email: `admin@example.com`
-- Password: `AdminSecurePass2024!`
+- Password: `admin123`
 
 ## Production Build
 

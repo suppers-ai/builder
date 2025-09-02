@@ -4,11 +4,13 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/suppers-ai/solobase/database"
 	"github.com/suppers-ai/solobase/services"
 )
 
 type API struct {
 	Router            *mux.Router
+	DB                *database.DB
 	AuthService       *services.AuthService
 	UserService       *services.UserService
 	StorageService    *services.StorageService
@@ -19,6 +21,7 @@ type API struct {
 }
 
 func NewAPI(
+	db *database.DB,
 	authService *services.AuthService,
 	userService *services.UserService,
 	storageService *services.StorageService,
@@ -29,6 +32,7 @@ func NewAPI(
 ) *API {
 	api := &API{
 		Router:            mux.NewRouter(),
+		DB:                db,
 		AuthService:       authService,
 		UserService:       userService,
 		StorageService:    storageService,
@@ -163,6 +167,71 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/ext/webhooks/api/webhooks", HandleWebhooksList()).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/ext/webhooks/api/webhooks/create", HandleWebhooksCreate()).Methods("POST", "OPTIONS")
 	apiRouter.HandleFunc("/ext/webhooks/api/webhooks/{id}/toggle", HandleWebhooksToggle()).Methods("POST", "OPTIONS")
+	
+	// Products extension routes
+	productHandlers := NewProductsExtensionHandlersWithDB(a.DB.DB)
+	
+	// Products basic CRUD (for compatibility)
+	apiRouter.HandleFunc("/ext/products/api/products", productHandlers.HandleProductsList()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/products/api/products", productHandlers.HandleProductsCreate()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/products/api/products/{id}", HandleProductsUpdate()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/ext/products/api/products/{id}", HandleProductsDelete()).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/ext/products/api/stats", productHandlers.HandleProductsStats()).Methods("GET", "OPTIONS")
+	
+	// Products extension - Variables management
+	apiRouter.HandleFunc("/products/variables", productHandlers.HandleListVariables()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/variables", productHandlers.HandleCreateVariable()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/variables/{id}", productHandlers.HandleUpdateVariable()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/variables/{id}", productHandlers.HandleDeleteVariable()).Methods("DELETE", "OPTIONS")
+	
+	// Products extension - Entity Types
+	apiRouter.HandleFunc("/products/entity-types", productHandlers.HandleListEntityTypes()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/entity-types", productHandlers.HandleCreateEntityType()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/entity-types/{id}", productHandlers.HandleUpdateEntityType()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/entity-types/{id}", productHandlers.HandleDeleteEntityType()).Methods("DELETE", "OPTIONS")
+	
+	// Products extension - Entities (user's entities)
+	apiRouter.HandleFunc("/products/entities", productHandlers.HandleListEntities()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/entities", productHandlers.HandleCreateEntity()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/entities/{id}", productHandlers.HandleUpdateEntity()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/entities/{id}", productHandlers.HandleDeleteEntity()).Methods("DELETE", "OPTIONS")
+	
+	// User entity and product endpoints (for user profile pages)
+	apiRouter.HandleFunc("/user/entities/{id}", productHandlers.HandleGetEntity()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/user/entities/{id}/products", productHandlers.HandleEntityProducts()).Methods("GET", "OPTIONS")
+	
+	// Price calculation endpoint
+	apiRouter.HandleFunc("/products/calculate-price", productHandlers.HandleCalculatePrice()).Methods("POST", "OPTIONS")
+	
+	// Products extension - Product Types
+	apiRouter.HandleFunc("/products/product-types", productHandlers.HandleListProductTypes()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/product-types", productHandlers.HandleCreateProductType()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/product-types/{id}", productHandlers.HandleUpdateProductType()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/product-types/{id}", productHandlers.HandleDeleteProductType()).Methods("DELETE", "OPTIONS")
+	
+	// Products extension - Pricing Templates
+	apiRouter.HandleFunc("/products/pricing-templates", productHandlers.HandleListPricingTemplates()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/pricing-templates", productHandlers.HandleCreatePricingTemplate()).Methods("POST", "OPTIONS")
+	
+	// Hugo extension routes
+	apiRouter.HandleFunc("/ext/hugo/api/sites", HandleHugoSitesList()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/sites", HandleHugoSitesCreate()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/sites/{id}/build", HandleHugoSitesBuild()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/sites/{id}", HandleHugoSitesDelete()).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/stats", HandleHugoStats()).Methods("GET", "OPTIONS")
+	
+	// Hugo file management routes
+	apiRouter.HandleFunc("/ext/hugo/api/sites/{id}/files", HandleHugoSiteFiles()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/sites/{id}/files/read", HandleHugoFileRead()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/sites/{id}/files/save", HandleHugoFileSave()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/sites/{id}/files/create", HandleHugoFileCreate()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/hugo/api/sites/{id}/files/delete", HandleHugoFileDelete()).Methods("POST", "OPTIONS")
+	
+	// Cloud Storage extension routes
+	apiRouter.HandleFunc("/ext/cloudstorage/api/providers", HandleCloudStorageProviders()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/cloudstorage/api/providers", HandleCloudStorageAddProvider()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/cloudstorage/api/activity", HandleCloudStorageActivity()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/cloudstorage/api/stats", HandleCloudStorageStats()).Methods("GET", "OPTIONS")
 }
 
 func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -60,9 +60,15 @@ if [ "$DATABASE_TYPE" = "postgres" ]; then
 else
     # For SQLite, optionally clean the database
     if [ "$2" = "clean" ]; then
-        echo -e "${YELLOW}Cleaning SQLite database...${NC}"
-        rm -rf ./.data
-        rm -f ./solobase.db  # Also remove the old location just in case
+        echo -e "${YELLOW}Cleaning SQLite database and internal storage...${NC}"
+        # Remove database
+        rm -f ./.data/solobase.db
+        # Remove internal storage but preserve extension storage
+        rm -rf ./.data/storage/int
+        # Remove old locations just in case
+        rm -f ./solobase.db
+        rm -rf ./data
+        echo -e "${GREEN}Preserved extension storage in ./.data/storage/ext/${NC}"
     fi
     # Use the proper database location in .data directory
     DATABASE_URL="file:./.data/solobase.db"
@@ -70,10 +76,12 @@ fi
 
 # Start API server
 echo -e "${YELLOW}Starting API server on port $API_PORT...${NC}"
+# ENVIRONMENT=development ensures consistent JWT secret across restarts
+ENVIRONMENT=development \
 DATABASE_TYPE=$DATABASE_TYPE \
 DATABASE_URL=$DATABASE_URL \
 DEFAULT_ADMIN_EMAIL=admin@example.com \
-DEFAULT_ADMIN_PASSWORD=AdminSecurePass2024! \
+DEFAULT_ADMIN_PASSWORD=admin123 \
 PORT=$API_PORT \
 go run . &
 API_PID=$!
@@ -107,7 +115,7 @@ echo -e "${YELLOW}API:${NC}      http://localhost:$API_PORT/api"
 echo ""
 echo -e "${YELLOW}Default Admin:${NC}"
 echo "  Email:    admin@example.com"
-echo "  Password: AdminSecurePass2024!"
+echo "  Password: admin123"
 echo ""
 echo -e "${YELLOW}Database Type:${NC} $DATABASE_TYPE"
 if [ "$DATABASE_TYPE" = "sqlite" ]; then

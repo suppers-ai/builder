@@ -88,13 +88,17 @@ func (e *WebhooksExtension) Initialize(ctx context.Context, services *core.Exten
 
 // Start starts the extension
 func (e *WebhooksExtension) Start(ctx context.Context) error {
-	e.services.Logger().Info(ctx, "Webhooks extension started")
+	if e.services != nil && e.services.Logger() != nil {
+		e.services.Logger().Info(ctx, "Webhooks extension started")
+	}
 	return nil
 }
 
 // Stop stops the extension
 func (e *WebhooksExtension) Stop(ctx context.Context) error {
-	e.services.Logger().Info(ctx, "Webhooks extension stopped")
+	if e.services != nil && e.services.Logger() != nil {
+		e.services.Logger().Info(ctx, "Webhooks extension stopped")
+	}
 	e.enabled = false
 	return nil
 }

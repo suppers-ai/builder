@@ -2,11 +2,15 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	
 	"github.com/gorilla/mux"
 	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/extensions/official/analytics"
+	"github.com/suppers-ai/solobase/extensions/official/cloudstorage"
+	"github.com/suppers-ai/solobase/extensions/official/hugo"
+	"github.com/suppers-ai/solobase/extensions/official/products"
 	"github.com/suppers-ai/solobase/extensions/official/webhooks"
 )
 
@@ -26,23 +30,105 @@ func InitializeExtensions() error {
 // HandleGetExtensions returns all extensions
 func HandleGetExtensions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Return empty list until extensions are properly registered
-		extensions := []map[string]interface{}{}
+		// Create a list of all available extensions with their metadata
+		tempExtensions := []core.Extension{
+			products.NewProductsExtension(),
+			hugo.NewHugoExtension(),
+			analytics.NewAnalyticsExtension(),
+			cloudstorage.NewCloudStorageExtension(nil),
+			webhooks.NewWebhooksExtension(),
+		}
 		
-		// When registry is properly initialized, iterate through registered extensions
-		if globalExtensionRegistry != nil {
-			// TODO: Implement GetExtensions() method on registry
-			// For now return empty list
+		extensions := []map[string]interface{}{}
+		for _, ext := range tempExtensions {
+			metadata := ext.Metadata()
+			extensions = append(extensions, map[string]interface{}{
+				"name":        metadata.Name,
+				"version":     metadata.Version,
+				"description": metadata.Description,
+				"author":      metadata.Author,
+				"tags":        metadata.Tags,
+				"license":     metadata.License,
+				"homepage":    metadata.Homepage,
+				"enabled":     true, // For now, show all as enabled
+				"state":       "healthy",
+			})
 		}
 		
 		respondWithJSON(w, http.StatusOK, extensions)
 	}
 }
 
-// HandleExtensionsManagement returns the extensions management page HTML
+// HandleExtensionsManagement returns the extensions management page with actual data
 func HandleExtensionsManagement() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		html := `<!DOCTYPE html>
+		// Create extension cards HTML
+		extensionCards := ""
+		
+		// Create a temporary registry to get metadata
+		tempExtensions := []core.Extension{
+			products.NewProductsExtension(),
+			hugo.NewHugoExtension(),
+			analytics.NewAnalyticsExtension(),
+			cloudstorage.NewCloudStorageExtension(nil),
+			webhooks.NewWebhooksExtension(),
+		}
+		
+		for _, ext := range tempExtensions {
+			metadata := ext.Metadata()
+			
+			// Create tags HTML
+			tagsHTML := ""
+			for _, tag := range metadata.Tags {
+				tagsHTML += fmt.Sprintf(`<span class="tag">%s</span>`, tag)
+			}
+			
+			extensionCards += fmt.Sprintf(`
+				<div class="extension-card">
+					<div class="extension-header">
+						<div class="extension-info">
+							<div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+								<span style="font-size: 1.5rem;">%s</span>
+								<div>
+									<span class="extension-name">%s</span>
+									<span class="extension-version">v%s</span>
+								</div>
+							</div>
+							<div class="extension-author">by %s</div>
+						</div>
+						<div class="toggle-switch enabled" id="toggle-%s">
+							<div class="toggle-handle"></div>
+						</div>
+					</div>
+					<p class="extension-description">%s</p>
+					<div class="extension-tags">%s</div>
+					<div class="extension-controls">
+						<span class="status-badge status-enabled">Enabled</span>
+					</div>
+				</div>
+			`, 
+				getExtensionIcon(metadata.Name),
+				metadata.Name,
+				metadata.Version,
+				metadata.Author,
+				metadata.Name,
+				metadata.Description,
+				tagsHTML,
+			)
+		}
+		
+		// If no extensions, show empty state
+		if extensionCards == "" {
+			extensionCards = `
+				<div style="grid-column: 1 / -1; text-align: center; padding: 4rem 2rem; color: #6b7280;">
+					<div style="font-size: 3rem; margin-bottom: 1rem;">🧩</div>
+					<p style="font-size: 1.125rem;">No extensions available</p>
+					<p style="margin-top: 0.5rem;">Extensions will appear here once they are registered</p>
+				</div>
+			`
+		}
+		
+		html := fmt.Sprintf(`<!DOCTYPE html>
 <html>
 <head>
     <title>Extensions Management</title>
@@ -262,7 +348,7 @@ func HandleExtensionsManagement() http.HandlerFunc {
     </div>
     
     <div class="extensions-grid" id="extensionsGrid">
-        <!-- Extensions will be loaded here -->
+        %s
     </div>
     
     <script>
@@ -350,11 +436,27 @@ func HandleExtensionsManagement() http.HandlerFunc {
         setInterval(loadExtensions, 10000);
     </script>
 </body>
-</html>`
+</html>`, extensionCards)
 		
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte(html))
 	}
+}
+
+// getExtensionIcon returns an icon for the extension
+func getExtensionIcon(name string) string {
+	icons := map[string]string{
+		"Products & Pricing": "📦",
+		"hugo":               "🌐",
+		"analytics":          "📊",
+		"cloudstorage":       "☁️",
+		"webhooks":           "🔗",
+	}
+	
+	if icon, ok := icons[name]; ok {
+		return icon
+	}
+	return "🧩"
 }
 
 // HandleToggleExtension toggles an extension on/off

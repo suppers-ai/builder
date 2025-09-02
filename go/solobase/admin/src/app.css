@@ -229,9 +229,24 @@ html, body {
 }
 
 .nav-subitem {
-    padding-left: 2.25rem;
-    margin: 0.15rem 0.25rem;
-    border-radius: 8px;
+    padding: 0.4rem 0.5rem 0.4rem 2rem;
+    margin: 0.1rem 0.25rem;
+    border-radius: 6px;
+    font-size: 0.813rem;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nav-subitem:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.nav-subitem.active {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--primary-color);
 }
 
 .sidebar.collapsed .nav-subitem {
@@ -504,7 +519,6 @@ html, body {
 
 /* Charts */
 .chart-container {
-    height: 300px;
     margin-top: 1rem;
 }
 

@@ -1,99 +1,114 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { 
-		Database, Search, ChevronDown, 
-		RefreshCw, Download, Upload,
-		Table, Code, ChevronLeft, ChevronRight,
-		Server, AlertCircle, CheckCircle, FileText
-	} from 'lucide-svelte';
-	import { api } from '$lib/api';
-	import ExportButton from '$lib/components/ExportButton.svelte';
-	import { requireAdmin } from '$lib/utils/auth';
-	
-	let selectedTable = '';
-	let activeTab = 'table';
-	let searchQuery = '';
+	import { onMount } from "svelte";
+	import {
+		Database,
+		Search,
+		ChevronDown,
+		RefreshCw,
+		Download,
+		Upload,
+		Table,
+		Code,
+		ChevronLeft,
+		ChevronRight,
+		Server,
+		AlertCircle,
+		CheckCircle,
+		FileText,
+	} from "lucide-svelte";
+	import { api } from "$lib/api";
+	import ExportButton from "$lib/components/ExportButton.svelte";
+	import { requireAdmin } from "$lib/utils/auth";
+
+	let selectedTable = "";
+	let activeTab = "table";
+	let searchQuery = "";
 	let currentPage = 1;
 	let totalPages = 1;
 	let totalRows = 0;
 	let rowsPerPage = 25;
 	let loading = false;
-	let dbType = 'SQLite';
-	let dbVersion = '';
-	let dbSize = '';
-	
+	let dbType = "SQLite";
+	let dbVersion = "";
+	let dbSize = "";
+
 	// Real data from API
 	let tableData: any[] = [];
 	let tables: any[] = [];
 	let tableColumns: any[] = [];
-	
+
 	let sqlQuery = `SELECT * FROM users ORDER BY created_at DESC LIMIT 10;`;
 	let sqlResults: any[] = [];
-	let sqlError = '';
+	let sqlError = "";
 	let sqlExecuting = false;
 	let queryExecutionTime = 0;
 	let affectedRows = 0;
-	
+
 	async function handleTableChange(e: Event) {
 		selectedTable = (e.target as HTMLSelectElement).value;
 		currentPage = 1;
 		totalRows = 0;
 		await loadTableData();
 	}
-	
+
 	async function loadTables() {
 		loading = true;
 		try {
-			const response = await api.get('/database/tables');
+			const response = await api.get("/database/tables");
 			// Ensure tables is always an array
 			if (Array.isArray(response)) {
 				tables = response;
-			} else if (response && typeof response === 'object') {
+			} else if (response && typeof response === "object") {
 				tables = response.data || response.tables || [];
 			} else {
 				tables = [];
 			}
-			
+
 			// Select users table by default if available
 			if (tables.length > 0 && !selectedTable) {
-				const usersTable = tables.find(t => 
-					t.name === 'users' || 
-					t.name === 'auth_users' || 
-					t.value === 'users' || 
-					t.value === 'auth_users'
+				const usersTable = tables.find(
+					(t) =>
+						t.name === "users" ||
+						t.name === "auth_users" ||
+						t.value === "users" ||
+						t.value === "auth_users",
 				);
-				
+
 				if (usersTable) {
 					selectedTable = usersTable.name || usersTable.value;
 				} else {
 					selectedTable = tables[0].name || tables[0].value;
 				}
-				
+
 				await loadTableData();
 			}
 		} catch (error) {
-			console.error('Failed to load tables:', error);
+			console.error("Failed to load tables:", error);
 			tables = [];
 		} finally {
 			loading = false;
 		}
 	}
-	
+
 	async function loadTableData() {
 		if (!selectedTable) return;
-		
+
 		loading = true;
 		tableData = [];
 		tableColumns = [];
-		
+
 		try {
 			// Get table columns
-			const columns = await api.get(`/database/tables/${selectedTable}/columns`);
+			const columns = await api.get(
+				`/database/tables/${selectedTable}/columns`,
+			);
 			tableColumns = columns || [];
-			
+
 			// Get total count of rows
 			const countQuery = `SELECT COUNT(*) as count FROM ${selectedTable}`;
-			const countResult = await api.post('/database/query', { query: countQuery });
+			const countResult = await api.post("/database/query", {
+				query: countQuery,
+			});
 			if (countResult.rows && countResult.rows[0]) {
 				totalRows = countResult.rows[0][0] || 0;
 				totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
@@ -101,11 +116,11 @@
 				totalRows = 0;
 				totalPages = 1;
 			}
-			
+
 			// Execute a SELECT query to get data
 			const query = `SELECT * FROM ${selectedTable} LIMIT ${rowsPerPage} OFFSET ${(currentPage - 1) * rowsPerPage}`;
-			const result = await api.post('/database/query', { query });
-			
+			const result = await api.post("/database/query", { query });
+
 			if (result.rows && result.columns) {
 				// Transform rows array to objects
 				tableData = result.rows.map((row: any[]) => {
@@ -119,32 +134,40 @@
 				tableData = [];
 			}
 		} catch (error) {
-			console.error('Failed to load table data:', error);
+			console.error("Failed to load table data:", error);
 			tableData = [];
 			tableColumns = [];
 		} finally {
 			loading = false;
 		}
 	}
-	
+
 	async function runQuery() {
-		sqlError = '';
+		sqlError = "";
 		sqlResults = [];
 		affectedRows = 0;
 		sqlExecuting = true;
-		
+
 		try {
 			const startTime = Date.now();
-			const result = await api.post('/database/query', { query: sqlQuery });
+			const result = await api.post("/database/query", {
+				query: sqlQuery,
+			});
 			queryExecutionTime = Date.now() - startTime;
-			
+
 			if (!result) {
-				sqlError = 'No response from server';
+				sqlError = "No response from server";
 			} else if (result.error) {
 				sqlError = result.error;
-			} else if (result.rows !== undefined && result.columns !== undefined) {
+			} else if (
+				result.rows !== undefined &&
+				result.columns !== undefined
+			) {
 				// Transform rows array to objects for display
-				if (Array.isArray(result.rows) && Array.isArray(result.columns)) {
+				if (
+					Array.isArray(result.rows) &&
+					Array.isArray(result.columns)
+				) {
 					sqlResults = result.rows.map((row: any[]) => {
 						const obj: any = {};
 						result.columns.forEach((col: string, index: number) => {
@@ -161,20 +184,22 @@
 				// Check if it's already formatted data
 				if (Array.isArray(result)) {
 					sqlResults = result;
-				} else if (typeof result === 'object') {
-					const possibleArrays = Object.values(result).filter(v => Array.isArray(v));
+				} else if (typeof result === "object") {
+					const possibleArrays = Object.values(result).filter((v) =>
+						Array.isArray(v),
+					);
 					if (possibleArrays.length > 0) {
 						sqlResults = possibleArrays[0] as any[];
 					}
 				}
 			}
 		} catch (error: any) {
-			sqlError = error.message || 'Query execution failed';
+			sqlError = error.message || "Query execution failed";
 		} finally {
 			sqlExecuting = false;
 		}
 	}
-	
+
 	async function refreshData() {
 		if (selectedTable) {
 			await loadTableData();
@@ -182,28 +207,28 @@
 			await loadTables();
 		}
 	}
-	
+
 	async function goToPage(page: number) {
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
 			await loadTableData();
 		}
 	}
-	
+
 	async function getDatabaseInfo() {
 		try {
-			const info = await api.get('/database/info');
+			const info = await api.get("/database/info");
 			if (info) {
-				dbType = info.type || 'SQLite';
-				dbVersion = info.version || '3.x';
+				dbType = info.type || "SQLite";
+				dbVersion = info.version || "3.x";
 			}
 		} catch (error) {
-			console.error('Failed to get database info:', error);
-			dbType = 'SQLite';
-			dbVersion = '3.x';
+			console.error("Failed to get database info:", error);
+			dbType = "SQLite";
+			dbVersion = "3.x";
 		}
 	}
-	
+
 	onMount(async () => {
 		if (!requireAdmin()) return;
 		await loadTables();
@@ -237,284 +262,358 @@
 		</div>
 	</div>
 
-	<!-- Tabs -->
-	<div class="tabs-container">
-		<div class="tabs">
-			<button 
-				class="tab {activeTab === 'table' ? 'active' : ''}"
-				on:click={() => activeTab = 'table'}
-			>
-				<Table size={18} />
-				<span>Table Browser</span>
-			</button>
-			<button 
-				class="tab {activeTab === 'sql' ? 'active' : ''}"
-				on:click={() => activeTab = 'sql'}
-			>
-				<Code size={18} />
-				<span>SQL Console</span>
-			</button>
-		</div>
-	</div>
-
-	<!-- Content -->
 	<div class="content-area">
-		{#if activeTab === 'table'}
-			<!-- Table View -->
-			<div class="table-view">
-				<!-- Controls Bar -->
-				<div class="controls-bar">
-					<div class="controls-left">
-						<div class="table-select-wrapper">
-							<select 
-								class="table-select"
-								value={selectedTable}
-								on:change={handleTableChange}
-								disabled={loading || tables.length === 0}
-							>
-								{#if tables.length === 0}
-									<option value="">No tables available</option>
-								{:else if !selectedTable}
-									<option value="">Select a table</option>
-								{/if}
-								{#each tables as table}
-									<option value={table.name}>
-										{table.name} • {table.rows_count || 0} rows
-									</option>
-								{/each}
-							</select>
+
+	<div class="card">
+		<!-- Tabs -->
+		<div class="tabs-container">
+			<div class="tabs">
+				<button
+					class="tab {activeTab === 'table' ? 'active' : ''}"
+					on:click={() => (activeTab = "table")}
+				>
+					<Table size={18} />
+					<span>Table Browser</span>
+				</button>
+				<button
+					class="tab {activeTab === 'sql' ? 'active' : ''}"
+					on:click={() => (activeTab = "sql")}
+				>
+					<Code size={18} />
+					<span>SQL Console</span>
+				</button>
+			</div>
+		</div>
+
+		<!-- Content -->
+		<div class="inner-content-area">
+			{#if activeTab === "table"}
+				<!-- Table View -->
+				<div class="table-view">
+					<!-- Controls Bar -->
+					<div class="controls-bar">
+						<div class="controls-left">
+							<div class="table-select-wrapper">
+								<select
+									class="table-select"
+									value={selectedTable}
+									on:change={handleTableChange}
+									disabled={loading || tables.length === 0}
+								>
+									{#if tables.length === 0}
+										<option value=""
+											>No tables available</option
+										>
+									{:else if !selectedTable}
+										<option value="">Select a table</option>
+									{/if}
+									{#each tables as table}
+										<option value={table.name}>
+											{table.name} • {table.rows_count ||
+												0} rows
+										</option>
+									{/each}
+								</select>
+							</div>
+
+							<div class="search-box">
+								<Search size={16} />
+								<input
+									type="text"
+									placeholder="Search files..."
+									bind:value={searchQuery}
+									class="search-input"
+								/>
+							</div>
 						</div>
 
-						<div class="search-box">
-							<Search size={16} />
-							<input 
-								type="text" 
-								placeholder="Search files..."
-								bind:value={searchQuery}
-								class="search-input"
+						<div class="controls-right">
+							<button
+								class="btn-icon"
+								on:click={refreshData}
+								disabled={loading}
+								title="Refresh"
+							>
+								<RefreshCw
+									size={18}
+									class={loading ? "spinning" : ""}
+								/>
+							</button>
+
+							<ExportButton
+								data={tableData}
+								filename={selectedTable || "table_data"}
+								disabled={tableData.length === 0}
 							/>
 						</div>
 					</div>
 
-					<div class="controls-right">
-						<button 
-							class="btn-icon"
-							on:click={refreshData}
-							disabled={loading}
-							title="Refresh"
-						>
-							<RefreshCw size={18} class={loading ? 'spinning' : ''} />
-						</button>
-						
-						<ExportButton 
-							data={tableData}
-							filename={selectedTable || 'table_data'}
-							disabled={tableData.length === 0}
-						/>
-					</div>
-				</div>
-
-				<!-- Table Container -->
-				<div class="table-wrapper">
-					{#if loading}
-						<div class="loading-state">
-							<RefreshCw size={32} class="spinning" />
-							<p>Loading table data...</p>
-						</div>
-					{:else if tableData.length > 0}
-						<div class="table-scroll">
-							<table class="data-table">
-								<thead>
-									<tr>
-										{#each Object.keys(tableData[0]) as column}
-											<th>{column}</th>
-										{/each}
-									</tr>
-								</thead>
-								<tbody>
-									{#each tableData as row}
+					<!-- Table Container -->
+					<div class="table-wrapper">
+						{#if loading}
+							<div class="loading-state">
+								<RefreshCw size={32} class="spinning" />
+								<p>Loading table data...</p>
+							</div>
+						{:else if tableData.length > 0}
+							<div class="table-scroll">
+								<table class="data-table">
+									<thead>
 										<tr>
-											{#each Object.entries(row) as [key, value]}
-												<td title={value === null ? 'NULL' : typeof value === 'object' ? JSON.stringify(value) : String(value)}>
-													{#if value === null}
-														<span class="null">NULL</span>
-													{:else if typeof value === 'boolean'}
-														<span class="boolean {value ? 'true' : 'false'}">
-															{value}
-														</span>
-													{:else if typeof value === 'object'}
-														<span class="json">{JSON.stringify(value)}</span>
-													{:else}
-														<span class="value">{value}</span>
-													{/if}
-												</td>
+											{#each Object.keys(tableData[0]) as column}
+												<th>{column}</th>
 											{/each}
 										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
+									</thead>
+									<tbody>
+										{#each tableData as row}
+											<tr>
+												{#each Object.entries(row) as [key, value]}
+													<td
+														title={value === null
+															? "NULL"
+															: typeof value ===
+																  "object"
+																? JSON.stringify(
+																		value,
+																	)
+																: String(value)}
+													>
+														{#if value === null}
+															<span class="null"
+																>NULL</span
+															>
+														{:else if typeof value === "boolean"}
+															<span
+																class="boolean {value
+																	? 'true'
+																	: 'false'}"
+															>
+																{value}
+															</span>
+														{:else if typeof value === "object"}
+															<span class="json"
+																>{JSON.stringify(
+																	value,
+																)}</span
+															>
+														{:else}
+															<span class="value"
+																>{value}</span
+															>
+														{/if}
+													</td>
+												{/each}
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
 
-						<!-- Pagination -->
-						<div class="pagination-bar">
-							<div class="pagination-info">
-								{#if totalRows > 0}
-									Showing {Math.min((currentPage - 1) * rowsPerPage + 1, totalRows)} - {Math.min(currentPage * rowsPerPage, totalRows)} of {totalRows} rows
-								{:else}
-									No rows to display
-								{/if}
+							<!-- Pagination -->
+							<div class="pagination-bar">
+								<div class="pagination-info">
+									{#if totalRows > 0}
+										Showing {Math.min(
+											(currentPage - 1) * rowsPerPage + 1,
+											totalRows,
+										)} - {Math.min(
+											currentPage * rowsPerPage,
+											totalRows,
+										)} of {totalRows} rows
+									{:else}
+										No rows to display
+									{/if}
+								</div>
+
+								<div class="pagination-controls">
+									<button
+										class="page-btn"
+										disabled={currentPage === 1}
+										on:click={() =>
+											goToPage(currentPage - 1)}
+									>
+										<ChevronLeft size={16} />
+									</button>
+
+									<span class="page-numbers">
+										Page {currentPage} of {totalPages}
+									</span>
+
+									<button
+										class="page-btn"
+										disabled={currentPage === totalPages}
+										on:click={() =>
+											goToPage(currentPage + 1)}
+									>
+										<ChevronRight size={16} />
+									</button>
+								</div>
 							</div>
-							
-							<div class="pagination-controls">
-								<button 
-									class="page-btn"
-									disabled={currentPage === 1}
-									on:click={() => goToPage(currentPage - 1)}
-								>
-									<ChevronLeft size={16} />
-								</button>
-								
-								<span class="page-numbers">
-									Page {currentPage} of {totalPages}
-								</span>
-								
-								<button 
-									class="page-btn"
-									disabled={currentPage === totalPages}
-									on:click={() => goToPage(currentPage + 1)}
-								>
-									<ChevronRight size={16} />
-								</button>
+						{:else}
+							<div class="empty-state">
+								<Database size={48} />
+								<h3>No data available</h3>
+								<p>
+									This table is empty or no table is selected
+								</p>
 							</div>
+						{/if}
+					</div>
+				</div>
+			{:else}
+				<!-- SQL Editor -->
+				<div class="sql-view">
+					<div class="sql-header">
+						<div class="sql-title">
+							<h2>SQL Console</h2>
+							<p>Execute queries directly on your database</p>
 						</div>
-					{:else}
-						<div class="empty-state">
-							<Database size={48} />
-							<h3>No data available</h3>
-							<p>This table is empty or no table is selected</p>
+						<button
+							class="run-button {sqlExecuting ? 'executing' : ''}"
+							on:click={runQuery}
+							disabled={sqlExecuting || !sqlQuery.trim()}
+						>
+							{#if sqlExecuting}
+								<RefreshCw size={18} class="spinning" />
+								<span>Executing...</span>
+							{:else}
+								<span>Run Query</span>
+								<span class="shortcut">Ctrl+Enter</span>
+							{/if}
+						</button>
+					</div>
+
+					<div class="sql-editor-wrapper">
+						<textarea
+							class="sql-editor"
+							bind:value={sqlQuery}
+							placeholder="Enter your SQL query here..."
+							disabled={sqlExecuting}
+							spellcheck="false"
+							on:keydown={(e) => {
+								if (
+									(e.ctrlKey || e.metaKey) &&
+									e.key === "Enter"
+								) {
+									e.preventDefault();
+									if (!sqlExecuting && sqlQuery.trim()) {
+										runQuery();
+									}
+								}
+								if (e.key === "Tab") {
+									e.preventDefault();
+									const start =
+										e.currentTarget.selectionStart;
+									const end = e.currentTarget.selectionEnd;
+									const newValue =
+										sqlQuery.substring(0, start) +
+										"  " +
+										sqlQuery.substring(end);
+									sqlQuery = newValue;
+									setTimeout(() => {
+										e.currentTarget.selectionStart =
+											e.currentTarget.selectionEnd =
+												start + 2;
+									}, 0);
+								}
+							}}
+						/>
+					</div>
+
+					{#if queryExecutionTime > 0 && !sqlError}
+						<div class="result-message success">
+							<CheckCircle size={18} />
+							{#if affectedRows > 0}
+								Query executed successfully • {affectedRows} rows
+								affected • {queryExecutionTime}ms
+							{:else if sqlResults.length > 0}
+								Query executed successfully • {sqlResults.length}
+								rows returned • {queryExecutionTime}ms
+							{:else}
+								Query executed successfully • {queryExecutionTime}ms
+							{/if}
+						</div>
+					{/if}
+
+					{#if sqlError}
+						<div class="result-message error">
+							<AlertCircle size={18} />
+							{sqlError}
+						</div>
+					{/if}
+
+					{#if sqlResults.length > 0}
+						<div class="results-section">
+							<div class="results-header">
+								<h3>Results ({sqlResults.length} rows)</h3>
+								<ExportButton
+									data={sqlResults}
+									filename="query_results"
+									disabled={sqlResults.length === 0}
+								/>
+							</div>
+
+							<div class="table-scroll">
+								<table class="data-table">
+									<thead>
+										<tr>
+											{#each Object.keys(sqlResults[0]) as column}
+												<th>{column}</th>
+											{/each}
+										</tr>
+									</thead>
+									<tbody>
+										{#each sqlResults as row}
+											<tr>
+												{#each Object.values(row) as value}
+													<td
+														title={value === null
+															? "NULL"
+															: typeof value ===
+																  "object"
+																? JSON.stringify(
+																		value,
+																	)
+																: String(value)}
+													>
+														{#if value === null}
+															<span class="null"
+																>NULL</span
+															>
+														{:else if typeof value === "boolean"}
+															<span
+																class="boolean {value
+																	? 'true'
+																	: 'false'}"
+															>
+																{value}
+															</span>
+														{:else if typeof value === "object"}
+															<span class="json"
+																>{JSON.stringify(
+																	value,
+																)}</span
+															>
+														{:else}
+															<span class="value"
+																>{value}</span
+															>
+														{/if}
+													</td>
+												{/each}
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
 						</div>
 					{/if}
 				</div>
-			</div>
-		{:else}
-			<!-- SQL Editor -->
-			<div class="sql-view">
-				<div class="sql-header">
-					<div class="sql-title">
-						<h2>SQL Console</h2>
-						<p>Execute queries directly on your database</p>
-					</div>
-					<button 
-						class="run-button {sqlExecuting ? 'executing' : ''}"
-						on:click={runQuery}
-						disabled={sqlExecuting || !sqlQuery.trim()}
-					>
-						{#if sqlExecuting}
-							<RefreshCw size={18} class="spinning" />
-							<span>Executing...</span>
-						{:else}
-							<span>Run Query</span>
-							<span class="shortcut">Ctrl+Enter</span>
-						{/if}
-					</button>
-				</div>
-
-				<div class="sql-editor-wrapper">
-					<textarea 
-						class="sql-editor"
-						bind:value={sqlQuery}
-						placeholder="Enter your SQL query here..."
-						disabled={sqlExecuting}
-						spellcheck="false"
-						on:keydown={(e) => {
-							if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-								e.preventDefault();
-								if (!sqlExecuting && sqlQuery.trim()) {
-									runQuery();
-								}
-							}
-							if (e.key === 'Tab') {
-								e.preventDefault();
-								const start = e.currentTarget.selectionStart;
-								const end = e.currentTarget.selectionEnd;
-								const newValue = sqlQuery.substring(0, start) + '  ' + sqlQuery.substring(end);
-								sqlQuery = newValue;
-								setTimeout(() => {
-									e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
-								}, 0);
-							}
-						}}
-					/>
-				</div>
-
-				{#if queryExecutionTime > 0 && !sqlError}
-					<div class="result-message success">
-						<CheckCircle size={18} />
-						{#if affectedRows > 0}
-							Query executed successfully • {affectedRows} rows affected • {queryExecutionTime}ms
-						{:else if sqlResults.length > 0}
-							Query executed successfully • {sqlResults.length} rows returned • {queryExecutionTime}ms
-						{:else}
-							Query executed successfully • {queryExecutionTime}ms
-						{/if}
-					</div>
-				{/if}
-				
-				{#if sqlError}
-					<div class="result-message error">
-						<AlertCircle size={18} />
-						{sqlError}
-					</div>
-				{/if}
-				
-				{#if sqlResults.length > 0}
-					<div class="results-section">
-						<div class="results-header">
-							<h3>Results ({sqlResults.length} rows)</h3>
-							<ExportButton 
-								data={sqlResults}
-								filename="query_results"
-								disabled={sqlResults.length === 0}
-							/>
-						</div>
-						
-						<div class="table-scroll">
-							<table class="data-table">
-								<thead>
-									<tr>
-										{#each Object.keys(sqlResults[0]) as column}
-											<th>{column}</th>
-										{/each}
-									</tr>
-								</thead>
-								<tbody>
-									{#each sqlResults as row}
-										<tr>
-											{#each Object.values(row) as value}
-												<td title={value === null ? 'NULL' : typeof value === 'object' ? JSON.stringify(value) : String(value)}>
-													{#if value === null}
-														<span class="null">NULL</span>
-													{:else if typeof value === 'boolean'}
-														<span class="boolean {value ? 'true' : 'false'}">
-															{value}
-														</span>
-													{:else if typeof value === 'object'}
-														<span class="json">{JSON.stringify(value)}</span>
-													{:else}
-														<span class="value">{value}</span>
-													{/if}
-												</td>
-											{/each}
-										</tr>
-									{/each}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				{/if}
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
+</div>
 </div>
 
 <style>
@@ -626,18 +725,20 @@
 	/* Content Area */
 	.content-area {
 		flex: 1;
-		padding: 0rem 1.5rem 1.5rem;
+		padding: 0.75rem 1.5rem 1.5rem;
 		overflow: auto;
+	}
+	.inner-content-area {
+		padding: 0 0.5rem;
 	}
 
 	/* Table View */
 	.table-view {
 		background: white;
-		border-radius: 0.75rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+		padding: 1.5rem;
 	}
 
 	/* Controls Bar */
@@ -645,9 +746,8 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1rem 0.5rem;
-		border-bottom: 1px solid #e2e8f0;
-		background: #fafbfc;
+		padding: 0 0 1rem 0;
+		background: white;
 	}
 
 	.controls-left {
@@ -789,12 +889,12 @@
 		color: #475569;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		border-bottom: 1px solid #e2e8f0;
+		border-bottom: none;
 	}
 
 	.data-table td {
 		padding: 1rem 1.5rem;
-		border-bottom: 1px solid #f1f5f9;
+		border-bottom: none;
 		font-size: 0.875rem;
 		max-width: 300px;
 		white-space: nowrap;
@@ -831,7 +931,7 @@
 	}
 
 	.data-table .json {
-		font-family: 'SF Mono', Monaco, monospace;
+		font-family: "SF Mono", Monaco, monospace;
 		font-size: 0.8125rem;
 		color: #6366f1;
 		display: inline-block;
@@ -855,9 +955,9 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1rem 1.5rem;
-		border-top: 1px solid #e2e8f0;
-		background: #f8fafc;
+		padding: 1rem 0;
+		border-top: none;
+		background: white;
 	}
 
 	.pagination-info {
@@ -904,8 +1004,6 @@
 	/* SQL View */
 	.sql-view {
 		background: white;
-		border-radius: 0.75rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 		padding: 1.5rem;
 	}
 
@@ -974,7 +1072,7 @@
 		padding: 1.25rem;
 		border: 1px solid #cbd5e1;
 		border-radius: 0.5rem;
-		font-family: 'SF Mono', Monaco, monospace;
+		font-family: "SF Mono", Monaco, monospace;
 		font-size: 0.875rem;
 		line-height: 1.6;
 		resize: vertical;
@@ -1034,7 +1132,8 @@
 	}
 
 	/* States */
-	.loading-state, .empty-state {
+	.loading-state,
+	.empty-state {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -1062,8 +1161,12 @@
 	}
 
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	/* Responsive */
@@ -1083,7 +1186,8 @@
 			width: 100%;
 		}
 
-		.table-select, .search-input {
+		.table-select,
+		.search-input {
 			width: 100%;
 		}
 
@@ -1101,7 +1205,8 @@
 			font-size: 0.8125rem;
 		}
 
-		.data-table th, .data-table td {
+		.data-table th,
+		.data-table td {
 			padding: 0.75rem 1rem;
 		}
 	}

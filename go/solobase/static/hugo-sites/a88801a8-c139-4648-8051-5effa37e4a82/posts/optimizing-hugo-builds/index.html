@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Example Blog</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; background: #f9fafb; }
+        header { background: #06b6d4; color: white; padding: 2rem; }
+        nav { background: #0891b2; padding: 1rem 2rem; }
+        nav a { color: white; text-decoration: none; margin-right: 1rem; }
+        main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        article { background: white; padding: 2rem; margin-bottom: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        footer { background: #374151; color: white; padding: 2rem; text-align: center; margin-top: 4rem; }
+        h1 { margin: 0; }
+        .meta { color: #6b7280; font-size: 0.875rem; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <header>
+    <h1>Example Blog</h1>
+    <p>Example Blog</p>
+</header>
+<nav>
+    <a href="/">Home</a>
+    <a href="/posts/">Posts</a>
+    <a href="/pages/">Pages</a>
+</nav>
+    <main>
+        
+    <article>
+        <h1>Optimizing Your Hugo Build Performance</h1>
+        <div class="meta">August 31, 2025</div>
+        <p>As your Hugo site grows, build times can increase. Here are tips to keep your builds fast.</p>
+<h2 id="1-use-hugos-cache">1. Use Hugo&rsquo;s Cache</h2>
+<p>Hugo caches processed images and data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-toml" data-lang="toml"><span style="display:flex;"><span>[<span style="color:#a6e22e">caches</span>]
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">caches</span>.<span style="color:#a6e22e">images</span>]
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">dir</span> = <span style="color:#e6db74">&#34;:resourceDir/_gen&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">maxAge</span> = <span style="color:#e6db74">&#34;720h&#34;</span>
+</span></span></code></pre></div><h2 id="2-optimize-images">2. Optimize Images</h2>
+<ul>
+<li>Use Hugo&rsquo;s image processing</li>
+<li>Implement lazy loading</li>
+<li>Choose appropriate formats (WebP, AVIF)</li>
+</ul>
+<h2 id="3-minimize-template-complexity">3. Minimize Template Complexity</h2>
+<ul>
+<li>Avoid nested loops when possible</li>
+<li>Use partialCached for static components</li>
+<li>Leverage Hugo&rsquo;s built-in functions</li>
+</ul>
+<h2 id="4-content-organization">4. Content Organization</h2>
+<ul>
+<li>Use page bundles for better organization</li>
+<li>Implement proper taxonomies</li>
+<li>Avoid excessive front matter</li>
+</ul>
+<h2 id="5-build-configuration">5. Build Configuration</h2>
+<p>Enable fast render mode during development:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo server --fastRender
+</span></span></code></pre></div><h2 id="measuring-performance">Measuring Performance</h2>
+<p>Use Hugo&rsquo;s built-in metrics:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo --templateMetrics --templateMetricsHints
+</span></span></code></pre></div><p>With these optimizations, even large sites can build in seconds!</p>
+
+    </article>
+
+    </main>
+    <footer>
+    <p>&copy; 2025 Example Blog. Built with Hugo and Solobase.</p>
+</footer>
+</body>
+</html>

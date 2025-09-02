@@ -825,14 +825,14 @@
 						flatten={true}
 					/>
 					
-					<button class="toolbar-btn" on:click={openCreateFolderModal} disabled={!selectedBucket}>
+					<button class="toolbar-btn" on:click={openCreateFolderModal} disabled={!selectedBucket} title="New Folder">
 						<FolderPlus size={16} />
-						<span>New Folder</span>
+						<span class="btn-text-label">New Folder</span>
 					</button>
 					
-					<button class="toolbar-btn toolbar-btn-primary" on:click={openUploadModal} disabled={!selectedBucket}>
+					<button class="toolbar-btn toolbar-btn-primary" on:click={openUploadModal} disabled={!selectedBucket} title="Upload Files">
 						<Upload size={16} />
-						<span>Upload Files</span>
+						<span class="btn-text-label">Upload Files</span>
 					</button>
 					
 					<!-- View Mode Toggles -->
@@ -1104,6 +1104,11 @@
 				<div class="no-bucket-selected">
 					<Folder size={48} style="color: var(--text-muted)" />
 					<p>Select a bucket to view files</p>
+					<p class="text-muted" style="margin-top: 0.5rem;">or</p>
+					<button class="btn btn-primary" on:click={openCreateBucketModal} style="margin-top: 0.75rem;">
+						<FolderPlus size={16} />
+						Create a bucket
+					</button>
 				</div>
 			{/if}
 		</div>
@@ -1216,20 +1221,22 @@
 						<h4 class="selected-files-title">Selected Files ({selectedFiles.length})</h4>
 						<div class="files-list-container">
 							{#each selectedFiles as file, index}
-								{@const fileKey = file.name + '_' + file.lastModified}
-								{@const progress = fileUploadProgress.get(fileKey) || 0}
 								<div class="selected-file-item">
 									<File size={16} style="color: var(--text-muted)" />
 									<div class="file-upload-info">
 										<span class="selected-file-name">{file.name}</span>
 										<span class="selected-file-size">{formatBytes(file.size)}</span>
-										{#if uploadingFiles && progress >= 0}
-											<div class="file-progress-bar">
-												<div class="file-progress-fill" style="width: {progress}%"></div>
-											</div>
-											<span class="file-progress-text">{progress}%</span>
-										{:else if uploadingFiles && progress < 0}
-											<span class="file-upload-error">Failed</span>
+										{#if uploadingFiles}
+											{@const fileKey = file.name + '_' + file.lastModified}
+											{@const progress = fileUploadProgress.get(fileKey) || 0}
+											{#if progress >= 0}
+												<div class="file-progress-bar">
+													<div class="file-progress-fill" style="width: {progress}%"></div>
+												</div>
+												<span class="file-progress-text">{progress}%</span>
+											{:else}
+												<span class="file-upload-error">Failed</span>
+											{/if}
 										{/if}
 									</div>
 								</div>
@@ -1461,12 +1468,11 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+		background: white;
 	}
 
 	.card {
 		background: white;
-		border-radius: 0.75rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 		height: 100%;
 		display: flex;
 		flex-direction: column;
@@ -1478,7 +1484,6 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.75rem 1.25rem;
-		border-bottom: 1px solid #e2e8f0;
 		background: #fafbfc;
 		flex-wrap: wrap;
 	}
@@ -1607,7 +1612,6 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1rem;
-		background: var(--bg-secondary);
 		border-bottom: 1px solid var(--border-color);
 	}
 	
@@ -1710,9 +1714,9 @@
 	/* Grid View */
 	.files-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-		gap: 1rem;
-		padding: 1rem;
+		grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+		gap: 0.75rem;
+		padding: 0.75rem;
 		min-height: 120px;
 	}
 	
@@ -1721,12 +1725,12 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 1rem 0.5rem;
+		padding: 0.75rem 0.5rem;
 		border: 1px solid transparent;
 		border-radius: 6px;
 		cursor: pointer;
 		transition: all 0.2s;
-		height: 120px;
+		height: 100px;
 	}
 	
 	.file-card:hover {
@@ -1837,7 +1841,6 @@
 		align-items: center;
 		gap: 2rem;
 		padding: 0.75rem 1rem;
-		background: var(--bg-secondary);
 		border-top: 1px solid var(--border-color);
 		font-size: 0.875rem;
 		color: var(--text-muted);
@@ -2306,14 +2309,41 @@
 		overflow: hidden;
 	}
 	
+	/* Button text labels */
+	.btn-text-label {
+		display: inline;
+	}
+	
 	/* Mobile Responsive */
+	@media (max-width: 1024px) {
+		.files-toolbar {
+			gap: 0.5rem;
+		}
+		
+		.btn-text-label {
+			display: none;
+		}
+		
+		.toolbar-btn {
+			padding: 0 0.75rem;
+			min-width: 36px;
+		}
+		
+		.search-box {
+			max-width: 200px;
+		}
+	}
+	
 	@media (max-width: 768px) {
 		.files-toolbar {
 			padding: 0.75rem;
+			flex-direction: column;
+			align-items: stretch;
 		}
 		
 		.bucket-selector {
 			width: 100%;
+			order: 1;
 		}
 		
 		.bucket-select {
@@ -2323,16 +2353,74 @@
 		.search-box {
 			max-width: none;
 			width: 100%;
+			order: 2;
+			margin-top: 0.5rem;
 		}
 		
 		.toolbar-right {
 			width: 100%;
 			justify-content: space-between;
+			order: 3;
+			margin-top: 0.5rem;
+			margin-left: 0;
+		}
+		
+		.toolbar-btn {
+			flex: 1;
+			justify-content: center;
 		}
 		
 		.bucket-info-bar {
 			flex-wrap: wrap;
 			gap: 1rem;
+		}
+		
+		.files-grid {
+			grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+			gap: 0.5rem;
+			padding: 0.5rem;
+		}
+		
+		.file-card {
+			height: 90px;
+			padding: 0.5rem 0.25rem;
+		}
+		
+		.file-card-name {
+			font-size: 0.75rem;
+		}
+	}
+	
+	@media (max-width: 480px) {
+		.header-title h1 {
+			font-size: 1.25rem;
+		}
+		
+		.header-meta {
+			margin-left: 0;
+			font-size: 0.75rem;
+		}
+		
+		.meta-separator {
+			margin: 0 0.125rem;
+		}
+		
+		.toolbar-btn {
+			height: 34px;
+			font-size: 0.813rem;
+		}
+		
+		.view-toggles {
+			height: 34px;
+		}
+		
+		.view-toggle-btn {
+			width: 30px;
+			height: 30px;
+		}
+		
+		.files-grid {
+			grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
 		}
 	}
 	

@@ -10,17 +10,21 @@
 	let user: any = null;
 	let mobileMenuOpen = false;
 	let windowWidth = 0;
+	let authChecked = false;
 	
 	// Subscribe to the currentUser store
 	$: user = $currentUser;
 	
 	// Define pages that don't require admin role
-	const publicPages = ['/login', '/signup', '/logout', '/profile'];
+	const publicPages = ['/login', '/signup', '/logout'];
+	const profilePages = ['/profile'];
 	
 	// Reactive role-based routing - handles navigation after auth state changes
 	$: if (user && typeof window !== 'undefined') {
 		const currentPath = $page.url.pathname;
-		const isAdminPage = !publicPages.includes(currentPath);
+		const isPublicPage = publicPages.includes(currentPath);
+		const isProfilePage = currentPath.startsWith('/profile');
+		const isAdminPage = !isPublicPage && !isProfilePage;
 		
 		// Redirect non-admin users away from admin pages
 		if (user.role !== 'admin' && isAdminPage) {
@@ -29,13 +33,38 @@
 	}
 	
 	onMount(async () => {
-		// Check if user is authenticated on mount
-		const isAuth = await auth.checkAuth();
+		// First check if we have a stored token before doing auth check
+		const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('auth_token');
 		
-		// Redirect to login if not authenticated (exclude public pages)
-		if (!isAuth && !publicPages.includes($page.url.pathname)) {
-			goto('/login');
-			return;
+		// If we have a stored token, attempt to validate it
+		if (hasStoredToken) {
+			// Check if user is authenticated on mount
+			const isAuth = await auth.checkAuth();
+			authChecked = true;
+			
+			// Only redirect if auth check definitively failed (not just loading)
+			if (!isAuth) {
+				const currentPath = $page.url.pathname;
+				const isPublicPage = publicPages.includes(currentPath);
+				const isProfilePage = currentPath.startsWith('/profile');
+				
+				if (!isPublicPage && !isProfilePage) {
+					goto('/login');
+					return;
+				}
+			}
+		} else {
+			// No stored token, check if we need to redirect
+			const currentPath = $page.url.pathname;
+			const isPublicPage = publicPages.includes(currentPath);
+			const isProfilePage = currentPath.startsWith('/profile');
+			
+			authChecked = true;
+			
+			if (!isPublicPage && !isProfilePage) {
+				goto('/login');
+				return;
+			}
 		}
 		
 		// Note: Role-based checks are handled by the reactive statement above
@@ -67,7 +96,15 @@
 	}
 </script>
 
-{#if $page.url.pathname === '/login' || $page.url.pathname === '/signup' || $page.url.pathname === '/logout' || $page.url.pathname === '/profile'}
+{#if $page.url.pathname === '/login' || $page.url.pathname === '/signup' || $page.url.pathname === '/logout'}
+	<slot />
+{:else if !authChecked && !publicPages.includes($page.url.pathname)}
+	<!-- Show loading state while checking auth for protected pages -->
+	<div class="auth-loading">
+		<div class="spinner"></div>
+		<p>Loading...</p>
+	</div>
+{:else if $page.url.pathname.startsWith('/profile')}
 	<slot />
 {:else}
 	<div class="app-layout {mobileMenuOpen ? 'mobile-menu-open' : ''}">
@@ -102,6 +139,35 @@
 {/if}
 
 <style>
+	.auth-loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		background: #f0f0f0;
+	}
+	
+	.spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid #e2e8f0;
+		border-top-color: #3b82f6;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+	
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+	
+	.auth-loading p {
+		margin-top: 1rem;
+		color: #666;
+		font-size: 14px;
+	}
+	
 	.app-layout {
 		display: flex;
 		height: 100vh;

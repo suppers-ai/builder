@@ -50,13 +50,17 @@ func (e *AnalyticsExtension) Initialize(ctx context.Context, services *core.Exte
 
 // Start starts the extension
 func (e *AnalyticsExtension) Start(ctx context.Context) error {
-	e.services.Logger().Info(ctx, "Analytics extension started")
+	if e.services != nil && e.services.Logger() != nil {
+		e.services.Logger().Info(ctx, "Analytics extension started")
+	}
 	return nil
 }
 
 // Stop stops the extension
 func (e *AnalyticsExtension) Stop(ctx context.Context) error {
-	e.services.Logger().Info(ctx, "Analytics extension stopped")
+	if e.services != nil && e.services.Logger() != nil {
+		e.services.Logger().Info(ctx, "Analytics extension stopped")
+	}
 	e.enabled = false
 	return nil
 }

@@ -12,7 +12,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtSecret = []byte("your-secret-key") // TODO: Move to config
+var jwtSecret []byte // Will be set from config
+
+// SetJWTSecret sets the JWT secret from config
+func SetJWTSecret(secret string) {
+	jwtSecret = []byte(secret)
+}
 
 type LoginRequest struct {
 	Email    string `json:"email"`

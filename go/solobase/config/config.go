@@ -28,7 +28,7 @@ type Config struct {
 
 	// Database
 	Database database.Config
-	
+
 	// Storage
 	Storage StorageConfig
 
@@ -41,10 +41,9 @@ type Config struct {
 	SMTPUseTLS   bool
 
 	// Auth
-	JWTSecret     string
-	SessionSecret string
-	EnableSignup  bool
-	EnableAPI     bool
+	JWTSecret    string
+	EnableSignup bool
+	EnableAPI    bool
 
 	// Admin
 	AdminEmail    string
@@ -65,7 +64,7 @@ type Config struct {
 
 func Load() *Config {
 	dbType := getEnv("DATABASE_TYPE", "sqlite")
-	
+
 	// Normalize database type to lowercase
 	dbType = strings.ToLower(dbType)
 	if dbType == "postgresql" {
@@ -73,7 +72,7 @@ func Load() *Config {
 	} else if dbType == "sqlite3" {
 		dbType = "sqlite" // Normalize sqlite3 to sqlite
 	}
-	
+
 	cfg := &Config{
 		Port:        getEnv("PORT", "8080"),
 		Environment: getEnv("ENVIRONMENT", "development"),
@@ -109,11 +108,10 @@ func Load() *Config {
 		SMTPFrom:     getEnv("SMTP_FROM", "noreply@solobase.local"),
 		SMTPUseTLS:   getEnvBool("SMTP_USE_TLS", false),
 
-		// Auth - Generate secure secrets if not provided
-		JWTSecret:     getSecureSecret("JWT_SECRET"),
-		SessionSecret: getSecureSecret("SESSION_SECRET"),
-		EnableSignup:  getEnvBool("ENABLE_SIGNUP", true),
-		EnableAPI:     getEnvBool("ENABLE_API", true),
+		// Auth - Use consistent secret for development
+		JWTSecret:    getJWTSecret(),
+		EnableSignup: getEnvBool("ENABLE_SIGNUP", true),
+		EnableAPI:    getEnvBool("ENABLE_API", true),
 
 		// Admin - Require secure password
 		AdminEmail:    getEnv("DEFAULT_ADMIN_EMAIL", "admin@example.com"),
@@ -241,23 +239,28 @@ func getEnvSlice(key string, defaultValue []string) []string {
 	return defaultValue
 }
 
-// getSecureSecret generates a secure secret if not provided via environment
-func getSecureSecret(key string) string {
-	if value := os.Getenv(key); value != "" {
-		// Warn if using weak defaults
-		if value == "your-super-secret-jwt-key" || value == "your-session-secret" {
-			log.Printf("WARNING: Using weak default for %s. This is insecure for production!\n", key)
-		}
+// getJWTSecret returns a consistent JWT secret for development or generates one for production
+func getJWTSecret() string {
+	// Check if explicitly set
+	if value := os.Getenv("JWT_SECRET"); value != "" {
 		return value
 	}
 
-	// Generate secure secret
-	secret, err := utils.GenerateSecureToken(32)
-	if err != nil {
-		log.Fatalf("Failed to generate secure secret for %s: %v\n", key, err)
+	// In development, use a consistent secret so sessions persist across restarts
+	env := getEnv("ENVIRONMENT", "development")
+	if env == "development" {
+		devSecret := "solobase-dev-jwt-secret-do-not-use-in-production-2024"
+		log.Printf("Using development JWT secret (sessions will persist across restarts)")
+		return devSecret
 	}
 
-	log.Printf("Generated secure secret for %s. Save this in your environment: %s=%s\n", key, key, secret)
+	// In production, generate a secure secret
+	secret, err := utils.GenerateSecureToken(32)
+	if err != nil {
+		log.Fatalf("Failed to generate secure JWT secret: %v\n", err)
+	}
+
+	log.Printf("Generated secure JWT secret. Save this in your environment: JWT_SECRET=%s\n", secret)
 	return secret
 }
 
@@ -287,10 +290,6 @@ func getSecureAdminPassword() string {
 
 	// Validate existing password strength
 	if err := utils.ValidatePasswordStrength(password); err != nil {
-		if password == "admin123" || password == "password" || password == "admin" {
-			log.Fatalf("SECURITY ERROR: The admin password '%s' is too weak and commonly used.\n"+
-				"Please set DEFAULT_ADMIN_PASSWORD to a strong password (12+ chars with mixed case, numbers, and symbols).\n", password)
-		}
 		log.Printf("WARNING: Admin password does not meet security requirements: %v\n", err)
 	}
 

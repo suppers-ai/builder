@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Example Blog</title>
+    <link>https://example-blog.local/tags/</link>
+    <description>Recent content in Tags on Example Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 02 Sep 2025 17:44:05 +1200</lastBuildDate>
+    <atom:link href="https://example-blog.local/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Beginner</title>
+      <link>https://example-blog.local/tags/beginner/</link>
+      <pubDate>Tue, 02 Sep 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/beginner/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Hugo</title>
+      <link>https://example-blog.local/tags/hugo/</link>
+      <pubDate>Tue, 02 Sep 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/hugo/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Tutorial</title>
+      <link>https://example-blog.local/tags/tutorial/</link>
+      <pubDate>Tue, 02 Sep 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/tutorial/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Architecture</title>
+      <link>https://example-blog.local/tags/architecture/</link>
+      <pubDate>Mon, 01 Sep 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/architecture/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Performance</title>
+      <link>https://example-blog.local/tags/performance/</link>
+      <pubDate>Mon, 01 Sep 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/performance/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Web-Development</title>
+      <link>https://example-blog.local/tags/web-development/</link>
+      <pubDate>Mon, 01 Sep 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/web-development/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Optimization</title>
+      <link>https://example-blog.local/tags/optimization/</link>
+      <pubDate>Sun, 31 Aug 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/optimization/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Design</title>
+      <link>https://example-blog.local/tags/design/</link>
+      <pubDate>Sat, 30 Aug 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/design/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Themes</title>
+      <link>https://example-blog.local/tags/themes/</link>
+      <pubDate>Sat, 30 Aug 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/themes/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Content</title>
+      <link>https://example-blog.local/tags/content/</link>
+      <pubDate>Fri, 29 Aug 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/content/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Markdown</title>
+      <link>https://example-blog.local/tags/markdown/</link>
+      <pubDate>Fri, 29 Aug 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/markdown/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Writing</title>
+      <link>https://example-blog.local/tags/writing/</link>
+      <pubDate>Fri, 29 Aug 2025 17:44:05 +1200</pubDate>
+      <guid>https://example-blog.local/tags/writing/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

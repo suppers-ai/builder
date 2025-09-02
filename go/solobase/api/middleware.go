@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+	auth "github.com/suppers-ai/auth"
 	"github.com/suppers-ai/solobase/services"
 )
 
@@ -50,11 +52,25 @@ func AuthMiddleware(authService *services.AuthService) func(http.Handler) http.H
 				return
 			}
 
-			// Get user from database
-			user, err := authService.GetUserByID(claims.UserID)
-			if err != nil {
-				respondWithError(w, http.StatusUnauthorized, "User not found")
-				return
+			// For /auth/me endpoint, we need full user data from DB
+			// For other endpoints, we can use token claims to avoid DB lookup
+			var user interface{}
+			if r.URL.Path == "/api/auth/me" {
+				// Get full user from database for profile endpoint
+				fullUser, err := authService.GetUserByID(claims.UserID)
+				if err != nil {
+					respondWithError(w, http.StatusUnauthorized, "User not found")
+					return
+				}
+				user = fullUser
+			} else {
+				// For other endpoints, create lightweight user from token claims
+				// This avoids database lookup on every request
+				user = &auth.User{
+					ID:    uuid.MustParse(claims.UserID),
+					Email: claims.Email,
+					Role:  claims.Role,
+				}
 			}
 
 			// Add user to context

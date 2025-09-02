@@ -14,12 +14,90 @@ import (
 
 // DBLogger implements the logger.Logger interface and writes to database
 type DBLogger struct {
-	db *database.DB
+	db       *database.DB
+	logChan  chan *logger.LogModel
+	reqChan  chan *logger.RequestLogModel
+	shutdown chan bool
 }
 
-// NewDBLogger creates a new database logger
+// NewDBLogger creates a new database logger with buffered async writing
 func NewDBLogger(db *database.DB) *DBLogger {
-	return &DBLogger{db: db}
+	l := &DBLogger{
+		db:       db,
+		logChan:  make(chan *logger.LogModel, 100),      // Buffer up to 100 logs
+		reqChan:  make(chan *logger.RequestLogModel, 100), // Buffer up to 100 request logs
+		shutdown: make(chan bool),
+	}
+	
+	// Start background workers for batch writing
+	go l.logWriter()
+	go l.requestLogWriter()
+	
+	return l
+}
+
+// logWriter processes logs in batches for better performance
+func (l *DBLogger) logWriter() {
+	ticker := time.NewTicker(1 * time.Second) // Batch write every second
+	batch := make([]*logger.LogModel, 0, 10)
+	
+	for {
+		select {
+		case log := <-l.logChan:
+			batch = append(batch, log)
+			// Write immediately if batch is full
+			if len(batch) >= 10 {
+				if len(batch) > 0 {
+					l.db.CreateInBatches(batch, len(batch))
+					batch = batch[:0] // Clear batch
+				}
+			}
+		case <-ticker.C:
+			// Write any pending logs
+			if len(batch) > 0 {
+				l.db.CreateInBatches(batch, len(batch))
+				batch = batch[:0] // Clear batch
+			}
+		case <-l.shutdown:
+			// Write any remaining logs before shutdown
+			if len(batch) > 0 {
+				l.db.CreateInBatches(batch, len(batch))
+			}
+			return
+		}
+	}
+}
+
+// requestLogWriter processes request logs in batches
+func (l *DBLogger) requestLogWriter() {
+	ticker := time.NewTicker(1 * time.Second) // Batch write every second
+	batch := make([]*logger.RequestLogModel, 0, 10)
+	
+	for {
+		select {
+		case log := <-l.reqChan:
+			batch = append(batch, log)
+			// Write immediately if batch is full
+			if len(batch) >= 10 {
+				if len(batch) > 0 {
+					l.db.CreateInBatches(batch, len(batch))
+					batch = batch[:0] // Clear batch
+				}
+			}
+		case <-ticker.C:
+			// Write any pending logs
+			if len(batch) > 0 {
+				l.db.CreateInBatches(batch, len(batch))
+				batch = batch[:0] // Clear batch
+			}
+		case <-l.shutdown:
+			// Write any remaining logs before shutdown
+			if len(batch) > 0 {
+				l.db.CreateInBatches(batch, len(batch))
+			}
+			return
+		}
+	}
 }
 
 // Log implements the generic log method
@@ -67,10 +145,14 @@ func (l *DBLogger) Log(ctx context.Context, level logger.Level, msg string, fiel
 		CreatedAt: time.Now(),
 	}
 
-	// Save to database (async to avoid blocking)
-	go func() {
-		l.db.Create(logEntry)
-	}()
+	// Send to channel for async batch processing (non-blocking)
+	select {
+	case l.logChan <- logEntry:
+		// Successfully sent
+	default:
+		// Channel is full, drop the log to avoid blocking
+		// In production, you might want to handle this differently
+	}
 }
 
 // Debug logs a debug message
@@ -105,8 +187,14 @@ func (l *DBLogger) With(fields ...logger.Field) logger.Logger {
 	return l
 }
 
-// Close closes the logger (no-op for database logger)
+// Close closes the logger and flushes any pending logs
 func (l *DBLogger) Close() error {
+	// Signal shutdown to both workers
+	close(l.shutdown)
+	
+	// Give workers time to flush pending logs
+	time.Sleep(100 * time.Millisecond)
+	
 	return nil
 }
 
@@ -181,10 +269,13 @@ func (l *DBLogger) LogHTTPRequest(ctx context.Context, method, path string, stat
 		CreatedAt:  time.Now(),
 	}
 
-	// Save to database (async)
-	go func() {
-		l.db.Create(requestLog)
-	}()
+	// Send to channel for async batch processing (non-blocking)
+	select {
+	case l.reqChan <- requestLog:
+		// Successfully sent
+	default:
+		// Channel is full, drop the log to avoid blocking
+	}
 }
 
 // HTTPLoggingMiddleware creates a middleware that logs HTTP requests to database
