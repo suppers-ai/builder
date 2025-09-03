@@ -3,10 +3,11 @@
 	import { 
 		Calculator, Plus, Edit2, Trash2, Search, Filter,
 		DollarSign, TrendingUp, BarChart3, Zap, Code2,
-		Variable, FileText, CheckCircle, XCircle, Play, AlertCircle
+		Variable, FileText, CheckCircle, XCircle, Play, AlertCircle, Settings, ArrowLeft
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { requireAdmin } from '$lib/utils/auth';
+	import FormulaEditor from '$lib/components/FormulaEditor.svelte';
 
 	interface PricingTemplate {
 		id: string;
@@ -14,12 +15,10 @@
 		display_name: string;
 		description: string;
 		category: string;
-		formula: string;
-		variables_used: string[];
-		conditions?: any[];
-		is_default: boolean;
+		price_formula: string;
+		condition_formula?: string;
+		variables?: any;
 		is_active: boolean;
-		test_results?: any;
 		created_at: string;
 		updated_at: string;
 	}
@@ -54,10 +53,10 @@
 		name: '',
 		display_name: '',
 		description: '',
-		category: 'ecommerce',
-		formula: '',
-		variables_used: [],
-		is_default: false,
+		category: 'discount',
+		price_formula: '',
+		condition_formula: '',
+		variables: {},
 		is_active: true
 	};
 
@@ -74,12 +73,15 @@
 	let testVariables: any = {};
 	let testResult: any = null;
 	let testError: string = '';
+	let showFormulaEditor = false;
+	let editingFormulaType: 'price' | 'condition' | null = null;
+	let tempFormula = '';
 
 	// Categories for templates
 	const templateCategories = [
-		{ value: 'ecommerce', label: 'E-commerce' },
-		{ value: 'subscription', label: 'Subscription' },
-		{ value: 'service', label: 'Service' },
+		{ value: 'discount', label: 'Discount' },
+		{ value: 'membership', label: 'Membership' },
+		{ value: 'complex', label: 'Complex' },
 		{ value: 'custom', label: 'Custom' }
 	];
 
@@ -162,14 +164,17 @@
 	}
 
 	function applyFormulaTemplate(template: any) {
-		newTemplate.formula = template.formula;
-		newTemplate.variables_used = template.variables;
+		newTemplate.price_formula = template.formula;
+		newTemplate.variables = { required: template.variables };
 	}
 	
 	async function createTemplate() {
 		try {
 			// Extract variables from formula
-			newTemplate.variables_used = extractVariables(newTemplate.formula || '');
+			const priceVars = extractVariables(newTemplate.price_formula || '');
+			const conditionVars = extractVariables(newTemplate.condition_formula || '');
+			const allVars = [...new Set([...priceVars, ...conditionVars])];
+			newTemplate.variables = { required: allVars };
 			
 			const result = await api.post('/products/pricing-templates', newTemplate);
 			if (result) {
@@ -178,10 +183,11 @@
 					name: '',
 					display_name: '',
 					description: '',
-					category: 'ecommerce',
-					formula: '',
-					variables_used: [],
-					is_default: false,
+					category: 'discount',
+					price_formula: '',
+					condition_formula: '',
+					variables: {},
+					priority: 0,
 					is_active: true
 				};
 				showCreateModal = false;
@@ -203,8 +209,11 @@
 		if (!selectedTemplate) return;
 		
 		try {
-			// Extract variables from formula
-			selectedTemplate.variables_used = extractVariables(selectedTemplate.formula);
+			// Extract variables from formulas
+			const priceVars = extractVariables(selectedTemplate.price_formula || '');
+			const conditionVars = extractVariables(selectedTemplate.condition_formula || '');
+			const allVars = [...new Set([...priceVars, ...conditionVars])];
+			selectedTemplate.variables = { required: allVars };
 			
 			const result = await api.put(`/products/pricing-templates/${selectedTemplate.id}`, selectedTemplate);
 			if (result) {
@@ -288,6 +297,9 @@
 <div class="page-container">
 	<!-- Header -->
 	<div class="page-header">
+		<a href="/extensions/products" class="back-button">
+			<ArrowLeft size={20} />
+		</a>
 		<div class="header-content">
 			<div class="header-left">
 				<div class="header-title">
@@ -295,12 +307,6 @@
 					<h1>Pricing & Formulas</h1>
 				</div>
 				<p class="header-subtitle">Configure dynamic pricing rules and formulas for your products</p>
-			</div>
-			<div class="header-actions">
-				<button class="btn btn-primary" on:click={() => showCreateModal = true}>
-					<Plus size={16} />
-					New Template
-				</button>
 			</div>
 		</div>
 	</div>
@@ -369,27 +375,20 @@
 			{:else}
 				<div class="template-grid">
 					{#each filteredTemplates as template}
-						<div class="template-card">
+						<div class="template-card" on:click={() => editTemplate(template)} role="button" tabindex="0" on:keypress={(e) => e.key === 'Enter' && editTemplate(template)}>
 							<div class="template-header">
-								<div class="template-badges">
-									<span class="category-badge {getCategoryColor(template.category)}">
-										{template.category}
-									</span>
-									{#if template.is_default}
-										<span class="default-badge">Default</span>
+								<div class="template-icon">
+									<Calculator size={24} />
+								</div>
+								<span class="status-badge {template.is_active ? 'status-active' : 'status-inactive'}">
+									{#if template.is_active}
+										<CheckCircle size={12} />
+										Active
+									{:else}
+										<XCircle size={12} />
+										Inactive
 									{/if}
-								</div>
-								<div class="template-actions">
-									<button class="btn-icon" on:click={() => openTestModal(template)} title="Test">
-										<Play size={16} />
-									</button>
-									<button class="btn-icon" on:click={() => editTemplate(template)} title="Edit">
-										<Edit2 size={16} />
-									</button>
-									<button class="btn-icon btn-icon-danger" on:click={() => deleteTemplate(template.id)} title="Delete">
-										<Trash2 size={16} />
-									</button>
-								</div>
+								</span>
 							</div>
 							<div class="template-content">
 								<h3 class="template-name">{template.display_name}</h3>
@@ -401,14 +400,24 @@
 										<Code2 size={14} />
 										Formula
 									</div>
-									<code class="formula-text">{template.formula}</code>
+									<code class="formula-text">{template.price_formula || 'No formula defined'}</code>
 								</div>
 								
-								{#if template.variables_used && template.variables_used.length > 0}
+								{#if template.condition_formula}
+									<div class="formula-box condition-box">
+										<div class="formula-label">
+											<AlertCircle size={14} />
+											CONDITION
+										</div>
+										<code class="formula-text">{template.condition_formula}</code>
+									</div>
+								{/if}
+								
+								{#if template.variables && template.variables.required && Array.isArray(template.variables.required)}
 									<div class="variables-section">
-										<p class="variables-label">Variables Used:</p>
+										<p class="variables-label">Required Variables:</p>
 										<div class="variables-list">
-											{#each template.variables_used as variable}
+											{#each template.variables.required as variable}
 												<span class="variable-badge">{variable}</span>
 											{/each}
 										</div>
@@ -416,19 +425,9 @@
 								{/if}
 								
 								<div class="template-footer">
-									<span class="status-badge {template.is_active ? 'status-active' : 'status-inactive'}">
-										{#if template.is_active}
-											<CheckCircle size={12} />
-											Active
-										{:else}
-											<XCircle size={12} />
-											Inactive
-										{/if}
+									<span class="category-badge {getCategoryColor(template.category)}">
+										{template.category}
 									</span>
-									<button class="btn-link" on:click={() => openTestModal(template)}>
-										<BarChart3 size={14} />
-										Test Formula
-									</button>
 								</div>
 							</div>
 						</div>
@@ -515,12 +514,36 @@
 		padding: 1.5rem;
 		margin-bottom: 1.5rem;
 		border: 1px solid #e5e7eb;
+		position: relative;
+	}
+	
+	.back-button {
+		position: absolute;
+		top: 1.5rem;
+		left: 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		background: white;
+		color: #6b7280;
+		text-decoration: none;
+		transition: all 0.2s;
+	}
+	
+	.back-button:hover {
+		background: #f9fafb;
+		color: #111827;
 	}
 
 	.header-content {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
+		margin-left: 48px;
 	}
 
 	.header-title {
@@ -666,6 +689,15 @@
 		color: #374151;
 		border: 1px solid #e5e7eb;
 	}
+	
+	.btn-danger {
+		background: #ef4444;
+		color: white;
+	}
+	
+	.btn-danger:hover {
+		background: #dc2626;
+	}
 
 	.btn-secondary:hover {
 		background: #f9fafb;
@@ -725,10 +757,12 @@
 		border-radius: 0.5rem;
 		overflow: hidden;
 		transition: all 0.2s;
+		cursor: pointer;
 	}
 
 	.template-card:hover {
 		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		transform: translateY(-2px);
 	}
 
 	.template-header {
@@ -738,6 +772,18 @@
 		padding: 1rem;
 		background: #f9fafb;
 		border-bottom: 1px solid #e5e7eb;
+	}
+	
+	.template-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		color: #06b6d4;
 	}
 
 	.template-badges {
@@ -807,6 +853,86 @@
 		border-radius: 0.25rem;
 		word-break: break-all;
 	}
+	
+	.condition-box {
+		background: #fef3c7;
+		border-color: #fbbf24;
+		margin-top: 0.5rem;
+	}
+	
+	.condition-box .formula-label {
+		color: #92400e;
+	}
+	
+	.condition-box .formula-text {
+		color: #92400e;
+		background: #fffbeb;
+	}
+	
+	.formula-display {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: 1rem;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+	}
+	
+	.formula-code {
+		display: block;
+		padding: 0.75rem;
+		background: white;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		font-family: 'Courier New', monospace;
+		font-size: 0.875rem;
+		color: #0891b2;
+		line-height: 1.5;
+		word-break: break-all;
+	}
+	
+	.formula-code.condition {
+		background: #fffbeb;
+		border-color: #fbbf24;
+		color: #92400e;
+	}
+	
+	.formula-placeholder {
+		display: block;
+		padding: 0.75rem;
+		color: #9ca3af;
+		font-style: italic;
+		font-size: 0.875rem;
+	}
+	
+	.btn-edit-formula {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: white;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		cursor: pointer;
+		transition: all 0.2s;
+		align-self: flex-start;
+	}
+	
+	.btn-edit-formula:hover {
+		background: #f3f4f6;
+		border-color: #9ca3af;
+		color: #111827;
+	}
+	
+	.help-text {
+		font-size: 0.75rem;
+		color: #6b7280;
+		margin-top: 0.25rem;
+	}
 
 	.category-badge {
 		display: inline-block;
@@ -871,6 +997,7 @@
 		border-radius: 9999px;
 		font-size: 0.75rem;
 		font-weight: 500;
+		text-transform: uppercase;
 	}
 
 	.status-active {
@@ -918,18 +1045,6 @@
 		background: white;
 		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
-	}
-
-	.rule-priority {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 40px;
-		height: 40px;
-		background: #f3f4f6;
-		border-radius: 0.375rem;
-		font-weight: 600;
-		color: #374151;
 	}
 
 	.rule-content {
@@ -1134,10 +1249,20 @@
 
 	.modal-footer {
 		display: flex;
-		justify-content: flex-end;
-		gap: 0.75rem;
+		justify-content: space-between;
+		align-items: center;
 		padding: 1.5rem;
 		border-top: 1px solid #e5e7eb;
+	}
+	
+	.modal-footer-left {
+		display: flex;
+		gap: 0.75rem;
+	}
+	
+	.modal-footer-right {
+		display: flex;
+		gap: 0.75rem;
 	}
 
 	.formula-templates {
@@ -1351,25 +1476,50 @@
 					<label for="edit-description">Description</label>
 					<textarea id="edit-description" bind:value={selectedTemplate.description} rows="2"></textarea>
 				</div>
-				<div class="form-row">
-					<div class="form-group">
-						<label for="edit-category">Category</label>
-						<select id="edit-category" bind:value={selectedTemplate.category}>
-							{#each templateCategories as cat}
-								<option value={cat.value}>{cat.label}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="form-group">
-						<label>
-							<input type="checkbox" bind:checked={selectedTemplate.is_default} />
-							Set as default template
-						</label>
+				<div class="form-group">
+					<label for="edit-category">Category</label>
+					<select id="edit-category" bind:value={selectedTemplate.category}>
+						{#each templateCategories as cat}
+							<option value={cat.value}>{cat.label}</option>
+						{/each}
+					</select>
+				</div>
+				<div class="form-group">
+					<label>Pricing Formula</label>
+					<div class="formula-display">
+						{#if selectedTemplate.price_formula}
+							<code class="formula-code">{selectedTemplate.price_formula}</code>
+						{:else}
+							<span class="formula-placeholder">No formula defined</span>
+						{/if}
+						<button type="button" class="btn-edit-formula" on:click={() => {
+							editingFormulaType = 'price';
+							tempFormula = selectedTemplate.price_formula || '';
+							showFormulaEditor = true;
+						}}>
+							<Settings size={16} />
+							Edit Formula
+						</button>
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="edit-formula">Pricing Formula</label>
-					<textarea id="edit-formula" bind:value={selectedTemplate.formula} rows="4"></textarea>
+					<label>Condition Formula (Optional)</label>
+					<div class="formula-display">
+						{#if selectedTemplate.condition_formula}
+							<code class="formula-code condition">{selectedTemplate.condition_formula}</code>
+						{:else}
+							<span class="formula-placeholder">No condition defined</span>
+						{/if}
+						<button type="button" class="btn-edit-formula" on:click={() => {
+							editingFormulaType = 'condition';
+							tempFormula = selectedTemplate.condition_formula || '';
+							showFormulaEditor = true;
+						}}>
+							<Settings size={16} />
+							Edit Condition
+						</button>
+					</div>
+					<p class="help-text">When should this pricing template apply?</p>
 				</div>
 				<div class="form-group">
 					<label for="edit-is_active">Status</label>
@@ -1380,8 +1530,21 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-secondary" on:click={() => showEditModal = false}>Cancel</button>
-				<button class="btn btn-primary" on:click={updateTemplate}>Update Template</button>
+				<div class="modal-footer-left">
+					<button class="btn btn-danger" on:click={() => {
+						if (confirm('Are you sure you want to delete this pricing template? Products using this template will need to be updated.')) {
+							deleteTemplate(selectedTemplate.id);
+							showEditModal = false;
+						}
+					}}>
+						<Trash2 size={16} />
+						Delete
+					</button>
+				</div>
+				<div class="modal-footer-right">
+					<button class="btn btn-secondary" on:click={() => showEditModal = false}>Cancel</button>
+					<button class="btn btn-primary" on:click={updateTemplate}>Save</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -1403,20 +1566,22 @@
 						<Code2 size={14} />
 						Formula
 					</div>
-					<code class="formula-text">{selectedTemplate.formula}</code>
+					<code class="formula-text">{selectedTemplate.price_formula}</code>
 				</div>
 				
 				<div class="test-section">
 					<h3>Test Variables</h3>
 					<div class="test-variables">
-						{#each selectedTemplate.variables_used as varName}
-							<div class="test-variable">
-								<label for="test-{varName}">{varName}</label>
-								<input type="number" id="test-{varName}" 
-									bind:value={testVariables[varName]} 
-									placeholder="Enter value" />
-							</div>
-						{/each}
+						{#if selectedTemplate.variables?.required && Array.isArray(selectedTemplate.variables.required)}
+							{#each selectedTemplate.variables.required as varName}
+								<div class="test-variable">
+									<label for="test-{varName}">{varName}</label>
+									<input type="number" id="test-{varName}" 
+										bind:value={testVariables[varName]} 
+										placeholder="Enter value" />
+								</div>
+							{/each}
+						{/if}
 					</div>
 					
 					<button class="btn btn-primary" on:click={testFormula}>
@@ -1448,3 +1613,23 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Formula Editor Modal -->
+<FormulaEditor
+	bind:show={showFormulaEditor}
+	title={editingFormulaType === 'price' ? 'Edit Pricing Formula' : 'Edit Condition Formula'}
+	formula={tempFormula}
+	variables={availableVariables}
+	isConditionFormula={editingFormulaType === 'condition'}
+	on:save={(e) => {
+		if (selectedTemplate) {
+			if (editingFormulaType === 'price') {
+				selectedTemplate.price_formula = e.detail;
+			} else if (editingFormulaType === 'condition') {
+				selectedTemplate.condition_formula = e.detail;
+			}
+		}
+		showFormulaEditor = false;
+		editingFormulaType = null;
+	}}
+/>

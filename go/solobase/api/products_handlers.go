@@ -20,6 +20,7 @@ func NewProductsExtensionHandlers() *ProductsExtensionHandlers {
 // NewProductsExtensionHandlersWithDB creates handlers with database
 func NewProductsExtensionHandlersWithDB(db *gorm.DB) *ProductsExtensionHandlers {
 	ext := products.NewProductsExtensionWithDB(db)
+	// SetDatabase will run migrations and seed data
 	ext.SetDatabase(db)
 	return &ProductsExtensionHandlers{ext: ext}
 }
@@ -241,6 +242,26 @@ func (h *ProductsExtensionHandlers) HandleCreatePricingTemplate() http.HandlerFu
 			return
 		}
 		h.ext.GetAdminAPI().CreatePricingTemplate(w, r)
+	}
+}
+
+func (h *ProductsExtensionHandlers) HandleUpdatePricingTemplate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if h.ext == nil || h.ext.GetAdminAPI() == nil {
+			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
+			return
+		}
+		h.ext.GetAdminAPI().UpdatePricingTemplate(w, r)
+	}
+}
+
+func (h *ProductsExtensionHandlers) HandleDeletePricingTemplate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if h.ext == nil || h.ext.GetAdminAPI() == nil {
+			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
+			return
+		}
+		h.ext.GetAdminAPI().DeletePricingTemplate(w, r)
 	}
 }
 

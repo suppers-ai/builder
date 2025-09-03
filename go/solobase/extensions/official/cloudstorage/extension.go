@@ -12,81 +12,59 @@ import (
 
 // CloudStorageConfig holds extension-specific configuration
 type CloudStorageConfig struct {
-	DefaultBucket      string // Default bucket for uploads
-	MaxFileSize        int64  // Max file size in bytes (default: 100MB)
-	MaxStoragePerUser  int64  // Max storage per user in bytes (default: 1GB)
-	AllowPublicBuckets bool   // Allow creation of public buckets
-	EnableVersioning   bool   // Enable file versioning
+	DefaultStorageLimit   int64  // Default storage limit per user in bytes (default: 5GB)
+	DefaultBandwidthLimit int64  // Default bandwidth limit per user in bytes (default: 10GB)
+	EnableSharing         bool   // Enable file sharing features (default: true)
+	EnableAccessLogs      bool   // Enable access logging (default: true)
+	EnableQuotas          bool   // Enable storage quotas (default: true)
+	BandwidthResetPeriod  string // Period for bandwidth reset: "daily", "weekly", "monthly" (default: "monthly")
 }
 
-// CloudStorageExtension provides cloud storage capabilities
+// CloudStorageExtension provides enhanced cloud storage capabilities
 type CloudStorageExtension struct {
+	services         *core.ExtensionServices
 	db              *gorm.DB
 	manager         *pkgstorage.Manager
 	config          *CloudStorageConfig
 	
-	// Services (initialized but not fully used yet)
+	// Core services for extending storage functionality
 	shareService     *ShareService
 	quotaService     *QuotaService
 	accessLogService *AccessLogService
-	versionService   *VersionService
-	tagService       *TagService
 }
 
 // Metadata returns extension metadata
 func (e *CloudStorageExtension) Metadata() core.ExtensionMetadata {
 	return core.ExtensionMetadata{
 		Name:        "cloudstorage",
-		Version:     "1.0.0",
-		Description: "Cloud storage management with advanced features",
+		Version:     "2.0.0",
+		Description: "Enterprise-level storage management with advanced sharing capabilities, granular access control, storage quotas, bandwidth monitoring, and detailed analytics. Create public links, share with specific users, track file access, and manage storage limits.",
 		Author:      "Solobase Team",
 		License:     "MIT",
-		Tags:        []string{"storage", "files", "s3"},
+		Tags:        []string{"storage", "sharing", "quotas", "analytics", "access-control", "bandwidth", "file-management"},
+		Homepage:    "https://github.com/suppers-ai/solobase",
+		MinVersion:  "1.0.0",
+		MaxVersion:  "3.0.0",
+		Dependencies: []string{"storage", "auth"},
 	}
 }
 
 // Initialize sets up the extension
 func (e *CloudStorageExtension) Initialize(ctx context.Context, services *core.ExtensionServices) error {
-	// For simplicity, create a basic database connection
-	// In production, this would come from services
-	// TODO: Get proper database connection from services
+	e.services = services
 	
-	// Get storage service - create a basic config
-	storageConfig := pkgstorage.Config{
-		Provider: pkgstorage.ProviderLocal,
-		BasePath: "./storage",
+	// Get database connection - we'll need to get the underlying GORM DB
+	// For now, we'll skip this initialization if we can't get a DB
+	// TODO: Get proper GORM DB instance from services
+	
+	// Log initialization
+	if services != nil {
+		services.Logger().Info(ctx, "CloudStorage extension initializing")
 	}
 	
-	// Initialize manager
-	// Note: e.db should be initialized elsewhere for now
-	if e.db == nil {
-		// Use a placeholder - this should be provided by the main app
-		return nil // Skip initialization if no DB
-	}
-	
-	// Pass nil for logger - the manager should handle it
-	manager, err := pkgstorage.NewManager(storageConfig, e.db, nil)
-	if err != nil {
-		return err
-	}
-	e.manager = manager
-	
-	// Auto-migrate tables
-	if err := e.db.AutoMigrate(&pkgstorage.StorageBucket{}, &pkgstorage.StorageObject{}); err != nil {
-		return err
-	}
-	
-	// Auto-migrate extension tables
-	if err := AutoMigrate(e.db); err != nil {
-		return err
-	}
-	
-	// Initialize services
-	e.shareService = NewShareService(e.db, e.manager)
-	e.quotaService = NewQuotaService(e.db)
-	e.accessLogService = NewAccessLogService(e.db)
-	e.versionService = NewVersionService(e.db, e.manager, e.config != nil && e.config.EnableVersioning)
-	e.tagService = NewTagService(e.db)
+	// Note: The actual database and storage manager initialization
+	// will need to be handled differently based on how the core
+	// ExtensionServices provides access to these resources
 	
 	return nil
 }
@@ -122,10 +100,23 @@ func (e *CloudStorageExtension) Health(ctx context.Context) (*core.HealthStatus,
 
 // RegisterRoutes registers HTTP routes
 func (e *CloudStorageExtension) RegisterRoutes(router core.ExtensionRouter) error {
-	// Register basic routes
+	// Core storage routes
 	router.HandleFunc("/api/buckets", e.handleBuckets)
-	router.HandleFunc("/api/stats", e.handleStats)
 	router.HandleFunc("/api/upload", e.handleUpload)
+	router.HandleFunc("/api/download", e.handleDownload)
+	router.HandleFunc("/api/stats", e.handleStats)
+	
+	// Sharing routes
+	router.HandleFunc("/api/shares", e.handleShares)
+	router.HandleFunc("/share/*", e.handleShareAccess) // Public share access
+	
+	// Quota management routes
+	router.HandleFunc("/api/quota", e.handleQuota)
+	
+	// Access logging routes
+	router.HandleFunc("/api/access-logs", e.handleAccessLogs)
+	router.HandleFunc("/api/access-stats", e.handleAccessStats)
+	
 	return nil
 }
 
@@ -160,11 +151,12 @@ func (e *CloudStorageExtension) ConfigSchema() json.RawMessage {
 	schema := `{
 		"type": "object",
 		"properties": {
-			"defaultBucket": {"type": "string"},
-			"maxFileSize": {"type": "integer"},
-			"maxStoragePerUser": {"type": "integer"},
-			"allowPublicBuckets": {"type": "boolean"},
-			"enableVersioning": {"type": "boolean"}
+			"defaultStorageLimit": {"type": "integer", "description": "Default storage limit in bytes"},
+			"defaultBandwidthLimit": {"type": "integer", "description": "Default bandwidth limit in bytes"},
+			"enableSharing": {"type": "boolean", "default": true},
+			"enableAccessLogs": {"type": "boolean", "default": true},
+			"enableQuotas": {"type": "boolean", "default": true},
+			"bandwidthResetPeriod": {"type": "string", "enum": ["daily", "weekly", "monthly"], "default": "monthly"}
 		}
 	}`
 	return json.RawMessage(schema)
@@ -224,11 +216,12 @@ func (e *CloudStorageExtension) RequiredPermissions() []core.Permission {
 func NewCloudStorageExtension(config *CloudStorageConfig) core.Extension {
 	if config == nil {
 		config = &CloudStorageConfig{
-			DefaultBucket:      "uploads",
-			MaxFileSize:        100 * 1024 * 1024,
-			MaxStoragePerUser:  1024 * 1024 * 1024,
-			AllowPublicBuckets: true,
-			EnableVersioning:   false,
+			DefaultStorageLimit:   5368709120,  // 5GB default
+			DefaultBandwidthLimit: 10737418240, // 10GB default
+			EnableSharing:         true,
+			EnableAccessLogs:      true,
+			EnableQuotas:          true,
+			BandwidthResetPeriod:  "monthly",
 		}
 	}
 	

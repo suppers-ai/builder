@@ -111,32 +111,44 @@
 		},
 		cloudstorage: {
 			features: [
-				"Multi-provider storage support",
-				"File versioning and history",
-				"Access control and sharing",
-				"Automatic backups",
-				"CDN integration",
-				"Storage quota management",
+				"Advanced file sharing with public links and user-specific access",
+				"Granular permission control (view, edit, admin)",
+				"Storage quota management per user/organization",
+				"Bandwidth monitoring and usage limits",
+				"Comprehensive access logging and audit trails",
+				"Real-time analytics on file access patterns",
+				"Automatic expiration for shared links",
+				"Inheritance of permissions to child objects",
 			],
 			configuration: {
-				"Default Bucket": "uploads",
-				"Max File Size": "100 MB",
-				"Max Storage Per User": "1 GB",
-				"Enable Versioning": "No",
-				"Public Buckets Allowed": "Yes",
+				"Default Storage Limit": "5 GB per user",
+				"Default Bandwidth Limit": "10 GB per month",
+				"Enable Sharing": "Yes",
+				"Enable Access Logs": "Yes",
+				"Enable Quotas": "Yes",
+				"Bandwidth Reset Period": "Monthly",
+				"Max Share Expiration": "30 days",
+				"Public Sharing Allowed": "Yes",
 			},
 			usage: `
-				1. Configure storage provider (S3, GCS, etc.)
-				2. Create buckets for organization
-				3. Upload files through API or UI
-				4. Set access permissions
-				5. Share files with secure links
+				1. Navigate to CloudStorage extension page
+				2. Create shares with specific permissions (view/edit/admin)
+				3. Set expiration dates for temporary access
+				4. Monitor storage and bandwidth usage
+				5. Track file access through detailed logs
+				6. Set per-user or per-organization quotas
+				7. View analytics on popular files and access patterns
+				8. Generate public links for external sharing
 			`,
 			apiEndpoints: [
-				"POST /api/storage/upload - Upload file",
-				"GET /api/storage/files - List files",
-				"DELETE /api/storage/files/{id} - Delete file",
-				"POST /api/storage/share - Create share link",
+				"POST /ext/cloudstorage/api/shares - Create share link",
+				"GET /ext/cloudstorage/api/shares - List active shares",
+				"DELETE /ext/cloudstorage/api/shares/{id} - Revoke share",
+				"GET /ext/cloudstorage/api/quota - Get quota information",
+				"PUT /ext/cloudstorage/api/quota - Update user quotas",
+				"GET /ext/cloudstorage/api/access-logs - View access logs",
+				"GET /ext/cloudstorage/api/stats - Get usage statistics",
+				"GET /share/{token} - Access shared content",
 			],
 		},
 		webhooks: {

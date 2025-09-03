@@ -2,36 +2,68 @@
 	import { onMount } from 'svelte';
 	import { 
 		Package2, Plus, Edit2, Trash2, Search, Filter,
-		CheckCircle, XCircle, DollarSign, FileText
+		CheckCircle, XCircle, Settings
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { requireAdmin } from '$lib/utils/auth';
 	import IconPicker from '$lib/components/IconPicker.svelte';
+	import FieldEditor from '$lib/components/FieldEditor.svelte';
+	import ReorderableList from '$lib/components/ReorderableList.svelte';
 	import { getIconComponent } from '$lib/utils/icons';
+
+	interface FieldConstraints {
+		required?: boolean;
+		min?: number;
+		max?: number;
+		min_length?: number;
+		max_length?: number;
+		pattern?: string;
+		options?: string[];
+		default?: any;
+		placeholder?: string;
+	}
+
+	interface FieldDefinition {
+		id: string;  // e.g., "filter_text_1", "filter_numeric_1"
+		name: string;
+		type: string;  // numeric, text, boolean, enum, location
+		required?: boolean;
+		description?: string;
+		constraints: FieldConstraints;
+	}
 
 	interface ProductType {
 		id: string;
 		name: string;
 		display_name: string;
 		description: string;
-		category?: string;
 		icon?: string;
-		schema?: any;
-		pricing_model?: string;
-		default_variables?: any;
-		settings?: any;
-		is_active: boolean;
+		fields?: FieldDefinition[];
+		pricing_templates?: string[];
+		billing_mode: 'instant' | 'approval';
+		billing_type: 'one-time' | 'recurring';
+		billing_recurring_interval?: 'day' | 'week' | 'month' | 'year';
+		billing_recurring_interval_count?: number;
+		status: 'active' | 'pending' | 'deleted';
 		created_at: string;
 		updated_at: string;
 	}
+	
+	interface PricingTemplate {
+		id: string;
+		name: string;
+		display_name: string;
+		description: string;
+		category: string;
+		is_active: boolean;
+	}
 
 	let productTypes: ProductType[] = [];
+	let pricingTemplates: PricingTemplate[] = [];
 	let loading = true;
 	let searchQuery = '';
-	let selectedCategory = 'all';
 	let showCreateModal = false;
 	let showEditModal = false;
-	let showPricingModal = false;
 	let selectedProductType: ProductType | null = null;
 	
 	// Form data for new product type
@@ -39,45 +71,25 @@
 		name: '',
 		display_name: '',
 		description: '',
-		// category: 'physical', // Commented out until backend support
 		icon: 'package',
-		// pricing_model: 'fixed', // Commented out until backend support
-		is_active: true,
-		schema: {},
-		default_variables: {}
+		billing_mode: 'instant',
+		billing_type: 'one-time',
+		status: 'active',
+		fields: [],
+		pricing_templates: []
 	};
-
-	// Available categories
-	const categories = [
-		{ value: 'physical', label: 'Physical Product' },
-		{ value: 'digital', label: 'Digital Product' },
-		{ value: 'subscription', label: 'Subscription' },
-		{ value: 'service', label: 'Service' },
-		{ value: 'license', label: 'License' }
-	];
-
-	// Using IconPicker component for icon selection
-
-	// Pricing models
-	const pricingModels = [
-		{ value: 'fixed', label: 'Fixed Price' },
-		{ value: 'dynamic', label: 'Dynamic Pricing' },
-		{ value: 'tiered', label: 'Tiered Pricing' },
-		{ value: 'usage', label: 'Usage-Based' },
-		{ value: 'formula', label: 'Formula-Based' }
-	];
 
 	$: filteredProductTypes = productTypes.filter(productType => {
 		const matchesSearch = productType.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			productType.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
 			productType.description?.toLowerCase().includes(searchQuery.toLowerCase());
-		// Category filtering disabled for now as it's not in the data model
 		return matchesSearch;
 	});
 
 	onMount(async () => {
 		if (!requireAdmin()) return;
 		await loadProductTypes();
+		await loadPricingTemplates();
 	});
 
 	async function loadProductTypes() {
@@ -92,51 +104,26 @@
 			loading = false;
 		}
 	}
-
-
-	function getCategoryLabel(category: string) {
-		const cat = categories.find(c => c.value === category);
-		return cat?.label || category;
-	}
-
-	function getCategoryColor(category: string) {
-		switch (category) {
-			case 'physical': return 'bg-blue-100 text-blue-700';
-			case 'digital': return 'bg-purple-100 text-purple-700';
-			case 'subscription': return 'bg-green-100 text-green-700';
-			case 'service': return 'bg-orange-100 text-orange-700';
-			case 'license': return 'bg-pink-100 text-pink-700';
-			default: return 'bg-gray-100 text-gray-700';
-		}
-	}
-
-	function getPricingModelColor(model: string) {
-		switch (model) {
-			case 'fixed': return 'bg-gray-100 text-gray-700';
-			case 'dynamic': return 'bg-cyan-100 text-cyan-700';
-			case 'tiered': return 'bg-indigo-100 text-indigo-700';
-			case 'usage': return 'bg-amber-100 text-amber-700';
-			case 'formula': return 'bg-emerald-100 text-emerald-700';
-			default: return 'bg-gray-100 text-gray-700';
+	
+	async function loadPricingTemplates() {
+		try {
+			const response = await api.get('/products/pricing-templates');
+			pricingTemplates = response || [];
+		} catch (error) {
+			console.error('Failed to load pricing templates:', error);
+			pricingTemplates = [];
 		}
 	}
 	
 	async function createProductType() {
 		try {
-			// Ensure schemas are valid objects
-			if (typeof newProductType.schema === 'string') {
-				try {
-					newProductType.schema = JSON.parse(newProductType.schema);
-				} catch {
-					newProductType.schema = {};
-				}
+			// Ensure fields is a valid array
+			if (!Array.isArray(newProductType.fields)) {
+				newProductType.fields = [];
 			}
-			if (typeof newProductType.default_variables === 'string') {
-				try {
-					newProductType.default_variables = JSON.parse(newProductType.default_variables);
-				} catch {
-					newProductType.default_variables = {};
-				}
+			// Ensure pricing_templates is a valid array
+			if (!Array.isArray(newProductType.pricing_templates)) {
+				newProductType.pricing_templates = [];
 			}
 
 			const result = await api.post('/products/product-types', newProductType);
@@ -146,12 +133,14 @@
 					name: '',
 					display_name: '',
 					description: '',
-					// category: 'physical', // Commented out until backend support
 					icon: 'package',
-					// pricing_model: 'fixed', // Commented out until backend support
-					is_active: true,
-					schema: {},
-					default_variables: {}
+					billing_mode: 'instant',
+					billing_type: 'one-time',
+					billing_recurring_interval: 'month',
+					billing_recurring_interval_count: 1,
+					status: 'active',
+					fields: [],
+					pricing_templates: []
 				};
 				showCreateModal = false;
 				// Reload product types
@@ -163,41 +152,31 @@
 		}
 	}
 	
-	async function editProductType(productType: ProductType) {
-		selectedProductType = { ...productType };
-		showEditModal = true;
-	}
-	
-	async function updateProductType() {
+	async function saveProductType() {
 		if (!selectedProductType) return;
 		
+		// Update fields from schema editor
+		selectedProductType.fields = schemaFields.filter(field => field.name).map(field => ({
+			id: field.id,
+			name: field.name,
+			type: field.type,
+			required: field.required || false,
+			description: field.description || '',
+			constraints: field.constraints || {}
+		}));
+		
 		try {
-			// Ensure schemas are valid objects
-			if (typeof selectedProductType.schema === 'string') {
-				try {
-					selectedProductType.schema = JSON.parse(selectedProductType.schema);
-				} catch {
-					selectedProductType.schema = {};
-				}
-			}
-			if (typeof selectedProductType.default_variables === 'string') {
-				try {
-					selectedProductType.default_variables = JSON.parse(selectedProductType.default_variables);
-				} catch {
-					selectedProductType.default_variables = {};
-				}
-			}
-
 			const result = await api.put(`/products/product-types/${selectedProductType.id}`, selectedProductType);
 			if (result) {
 				showEditModal = false;
 				selectedProductType = null;
+				schemaFields = [];
 				// Reload product types
 				await loadProductTypes();
 			}
 		} catch (error) {
-			console.error('Failed to update product type:', error);
-			alert('Failed to update product type');
+			console.error('Failed to save product type:', error);
+			alert('Failed to save product type');
 		}
 	}
 	
@@ -215,105 +194,146 @@
 	}
 
 	// Schema editor state
-	let schemaFields: any[] = [];
-	let editingSchema = false;
-	let defaultVariables: any[] = [];
-	let editingVariables = false;
+	let schemaFields: FieldDefinition[] = [];
+	let showFieldTypeSelector = false;
+	
+	// Track used filter IDs
+	function getUsedFilterIds(fields: FieldDefinition[]): Map<string, number> {
+		const usage = new Map<string, number>();
+		usage.set('numeric', 0);
+		usage.set('text', 0);
+		usage.set('boolean', 0);
+		usage.set('enum', 0);
+		usage.set('location', 0);
+		
+		fields.forEach(field => {
+			if (field.id) {
+				const parts = field.id.split('_');
+				if (parts.length === 3 && parts[0] === 'filter') {
+					const type = parts[1];
+					const num = parseInt(parts[2]);
+					if (usage.has(type)) {
+						usage.set(type, Math.max(usage.get(type) || 0, num));
+					}
+				}
+			}
+		});
+		
+		return usage;
+	}
+	
+	// Get next available filter ID for a type
+	function getNextFilterId(type: string, fields: FieldDefinition[]): string | null {
+		const usage = getUsedFilterIds(fields);
+		const count = usage.get(type) || 0;
+		
+		// Check if we've reached the limit of 5
+		if (count >= 5) {
+			return null;
+		}
+		
+		// Find the next available number (might not be count+1 if some were deleted)
+		for (let i = 1; i <= 5; i++) {
+			const id = `filter_${type}_${i}`;
+			if (!fields.some(f => f.id === id)) {
+				return id;
+			}
+		}
+		
+		return null;
+	}
+	
+	// Check if a field type is available
+	function isTypeAvailable(type: string, fields: FieldDefinition[]): boolean {
+		return getNextFilterId(type, fields) !== null;
+	}
+	
+	// Count fields by type
+	function countFieldsByType(type: string, fields: FieldDefinition[]): number {
+		return fields.filter(f => {
+			if (f.id) {
+				const parts = f.id.split('_');
+				return parts[0] === 'filter' && parts[1] === type;
+			}
+			return false;
+		}).length;
+	}
 
-	function startSchemaEdit(productType: any) {
-		editingSchema = true;
-		if (productType.schema && typeof productType.schema === 'object') {
-			schemaFields = Object.entries(productType.schema).map(([key, value]: [string, any]) => ({
-				name: key,
-				type: value.type || 'text',
-				label: value.label || key,
-				required: value.required || false,
-				description: value.description || ''
+	function openEditModal(productType: ProductType) {
+		selectedProductType = { ...productType };
+		if (Array.isArray(productType.fields)) {
+			schemaFields = productType.fields.map((field: any) => ({
+				id: field.id || '',
+				name: field.name || '',
+				type: field.type || 'text',
+				required: field.required || false,
+				description: field.description || '',
+				constraints: field.constraints || {}
 			}));
 		} else {
 			schemaFields = [];
 		}
-	}
-
-	function startVariableEdit(productType: any) {
-		editingVariables = true;
-		if (productType.default_variables && typeof productType.default_variables === 'object') {
-			defaultVariables = Object.entries(productType.default_variables).map(([key, value]) => ({
-				name: key,
-				value: value
-			}));
-		} else {
-			defaultVariables = [];
+		// Ensure pricing_templates is an array
+		if (!Array.isArray(selectedProductType.pricing_templates)) {
+			selectedProductType.pricing_templates = [];
 		}
+		// Set default billing values if not present
+		if (!selectedProductType.billing_mode) {
+			selectedProductType.billing_mode = 'instant';
+		}
+		if (!selectedProductType.billing_type) {
+			selectedProductType.billing_type = 'one-time';
+		}
+		if (selectedProductType.billing_type === 'recurring') {
+			if (!selectedProductType.billing_recurring_interval) {
+				selectedProductType.billing_recurring_interval = 'month';
+			}
+			if (!selectedProductType.billing_recurring_interval_count) {
+				selectedProductType.billing_recurring_interval_count = 1;
+			}
+		}
+		showFieldTypeSelector = false;
+		showEditModal = true;
 	}
 
-	function addSchemaField() {
+	function addSchemaField(type: string) {
+		const id = getNextFilterId(type, schemaFields);
+		if (!id) {
+			alert(`Maximum of 5 ${type} fields reached`);
+			return;
+		}
+		
 		schemaFields = [...schemaFields, {
+			id: id,
 			name: '',
-			type: 'text',
-			label: '',
+			type: type,
 			required: false,
-			description: ''
+			description: '',
+			constraints: {}
 		}];
+		showFieldTypeSelector = false;
 	}
 
 	function removeSchemaField(index: number) {
 		schemaFields = schemaFields.filter((_, i) => i !== index);
-	}
-
-	function saveSchema(productType: any) {
-		const schema: any = {};
-		schemaFields.forEach(field => {
-			if (field.name) {
-				schema[field.name] = {
-					type: field.type,
-					label: field.label || field.name,
-					required: field.required,
-					description: field.description
-				};
-			}
-		});
-		productType.schema = schema;
-		editingSchema = false;
-		schemaFields = [];
-	}
-
-	function addVariable() {
-		defaultVariables = [...defaultVariables, { name: '', value: '' }];
-	}
-
-	function removeVariable(index: number) {
-		defaultVariables = defaultVariables.filter((_, i) => i !== index);
-	}
-
-	function saveVariables(productType: any) {
-		const vars: any = {};
-		defaultVariables.forEach(variable => {
-			if (variable.name) {
-				vars[variable.name] = variable.value;
-			}
-		});
-		productType.default_variables = vars;
-		editingVariables = false;
-		defaultVariables = [];
 	}
 </script>
 
 <div class="page-container">
 	<!-- Header -->
 	<div class="page-header">
+		<a href="/extensions/products" class="back-button">
+			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polyline points="15 18 9 12 15 6"></polyline>
+			</svg>
+		</a>
 		<div class="header-content">
 			<div class="header-left">
 				<div class="header-title">
-					<a href="/extensions/products" class="back-button">
-						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<polyline points="15 18 9 12 15 6"></polyline>
-						</svg>
-					</a>
 					<Package2 size={24} />
 					<h1>Product Types</h1>
 				</div>
-				<p class="header-subtitle">Define different types of products with their own fields and pricing models</p>
+				<p class="header-subtitle">Define types of entities that can own products (e.g., Store, Company, Team)</p>
 			</div>
 			<div class="header-actions">
 				<button class="btn btn-primary" on:click={() => showCreateModal = true}>
@@ -337,12 +357,6 @@
 						bind:value={searchQuery}
 					/>
 				</div>
-				<select class="filter-select" bind:value={selectedCategory}>
-					<option value="all">All Categories</option>
-					{#each categories as cat}
-						<option value={cat.value}>{cat.label}</option>
-					{/each}
-				</select>
 			</div>
 			<div class="toolbar-right">
 				<button class="btn-icon">
@@ -360,89 +374,78 @@
 			<div class="empty-state">
 				<Package2 size={48} class="text-gray-400" />
 				<h3>No product types found</h3>
-				<p>Create your first product type to start building your catalog</p>
+				<p>Create your first product type to organize your business structure</p>
 				<button class="btn btn-primary mt-4" on:click={() => showCreateModal = true}>
 					<Plus size={16} />
 					Create Product Type
 				</button>
 			</div>
 		{:else}
-			<div class="product-grid">
+			<div class="entity-grid">
 				{#each filteredProductTypes as productType}
-					<div class="product-card">
-						<div class="product-header">
-							<div class="product-icon">
+					<div class="entity-card" on:click={() => openEditModal(productType)} role="button" tabindex="0" on:keypress={(e) => e.key === 'Enter' && openEditModal(productType)}>
+						<div class="entity-header">
+							<div class="entity-icon">
 								<svelte:component this={getIconComponent(productType.icon)} size={24} />
 							</div>
-							<div class="product-actions">
-								<button class="btn-icon" on:click={() => editProductType(productType)} title="Edit">
-									<Edit2 size={16} />
-								</button>
-								<button class="btn-icon btn-icon-danger" on:click={() => deleteProductType(productType.id)} title="Delete">
-									<Trash2 size={16} />
-								</button>
-							</div>
+							<span class="status-badge status-{productType.status}">
+								{#if productType.status === 'active'}
+									<CheckCircle size={12} />
+									Active
+								{:else if productType.status === 'pending'}
+									<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<circle cx="12" cy="12" r="10"></circle>
+										<polyline points="12 6 12 12 16 14"></polyline>
+									</svg>
+									Pending
+								{:else}
+									<XCircle size={12} />
+									Deleted
+								{/if}
+							</span>
 						</div>
-						<div class="product-content">
-							<h3 class="product-name">{productType.display_name}</h3>
-							<code class="product-code">{productType.name}</code>
-							<p class="product-description">{productType.description}</p>
+						<div class="entity-content">
+							<h3 class="entity-name">{productType.display_name}</h3>
+							<code class="entity-code">{productType.name}</code>
+							<p class="entity-description">{productType.description}</p>
 							
-							<!-- Category and pricing model disabled for now as they're not in the data model -->
-							<!--
-							<div class="product-meta">
-								<span class="category-badge {getCategoryColor(productType.category)}">
-									{getCategoryLabel(productType.category)}
-								</span>
-								<span class="pricing-badge {getPricingModelColor(productType.pricing_model)}">
-									<DollarSign size={12} />
-									{productType.pricing_model}
-								</span>
-							</div>
-							-->
-							
-							{#if productType.schema && Object.keys(productType.schema).length > 0}
-								<div class="product-fields">
+							{#if productType.fields && productType.fields.length > 0}
+								<div class="entity-fields">
 									<p class="fields-label">Custom Fields:</p>
 									<div class="fields-list">
-										{#each Object.keys(productType.schema) as field}
-											<span class="field-badge">{field}</span>
-										{/each}
-									</div>
-								</div>
-							{/if}
-
-							{#if productType.settings && productType.settings.default_variables && Object.keys(productType.settings.default_variables).length > 0}
-								<div class="product-fields">
-									<p class="fields-label">Default Variables:</p>
-									<div class="fields-list">
-										{#each Object.entries(productType.settings.default_variables) as [key, value]}
-											<span class="variable-badge">{key}: {value}</span>
+										{#each productType.fields as field}
+											<span class="field-badge" title="{field.type}{field.constraints?.required ? ' (required)' : ''}">{field.label || field.name}</span>
 										{/each}
 									</div>
 								</div>
 							{/if}
 							
-							<div class="product-footer">
-								<span class="status-badge {productType.is_active ? 'status-active' : 'status-inactive'}">
-									{#if productType.is_active}
-										<CheckCircle size={12} />
-										Active
+							{#if productType.pricing_templates && productType.pricing_templates.length > 0}
+								<div class="entity-fields">
+									<p class="fields-label">Pricing Templates:</p>
+									<div class="fields-list">
+										{#each productType.pricing_templates as templateId}
+											{@const template = pricingTemplates.find(t => t.id === templateId)}
+											{#if template}
+												<span class="pricing-badge">{template.display_name}</span>
+											{/if}
+										{/each}
+									</div>
+								</div>
+							{/if}
+							
+							<div class="billing-info">
+								<span class="billing-badge billing-{productType.billing_mode}">
+									{productType.billing_mode === 'instant' ? '⚡' : '✓'} {productType.billing_mode}
+								</span>
+								<span class="billing-badge billing-{productType.billing_type}">
+									{#if productType.billing_type === 'recurring'}
+										🔄 {productType.billing_recurring_interval_count || 1}
+										{productType.billing_recurring_interval || 'month'}
 									{:else}
-										<XCircle size={12} />
-										Inactive
+										💳 One-time
 									{/if}
 								</span>
-								<div class="footer-actions">
-									<button class="btn-link" on:click={() => { selectedProductType = productType; startSchemaEdit(productType); showEditModal = true; }}>
-										<FileText size={14} />
-										Fields
-									</button>
-									<button class="btn-link" on:click={() => { selectedProductType = productType; showPricingModal = true; }}>
-										<DollarSign size={14} />
-										Pricing
-									</button>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -465,12 +468,36 @@
 		padding: 1.5rem;
 		margin-bottom: 1.5rem;
 		border: 1px solid #e5e7eb;
+		position: relative;
+	}
+
+	.back-button {
+		position: absolute;
+		top: 1.5rem;
+		left: 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		background: white;
+		color: #6b7280;
+		text-decoration: none;
+		transition: all 0.2s;
+	}
+
+	.back-button:hover {
+		background: #f9fafb;
+		color: #111827;
 	}
 
 	.header-content {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
+		margin-left: 48px;
 	}
 
 	.header-title {
@@ -546,14 +573,6 @@
 		font-size: 0.875rem;
 	}
 
-	.filter-select {
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
-		font-size: 0.875rem;
-		background: white;
-	}
-
 	.btn {
 		display: inline-flex;
 		align-items: center;
@@ -584,6 +603,15 @@
 
 	.btn-secondary:hover {
 		background: #f9fafb;
+	}
+	
+	.btn-danger {
+		background: #ef4444;
+		color: white;
+	}
+	
+	.btn-danger:hover {
+		background: #dc2626;
 	}
 
 	.btn-icon {
@@ -628,25 +656,35 @@
 		color: #0891b2;
 	}
 
-	.product-grid {
+	.entity-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 		gap: 1.5rem;
 		padding: 1.5rem;
 	}
 
-	.product-card {
+	.entity-card {
 		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
 		overflow: hidden;
 		transition: all 0.2s;
+		cursor: pointer;
+		background: white;
 	}
 
-	.product-card:hover {
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	.entity-card:hover {
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		border-color: #06b6d4;
+		transform: translateY(-2px);
+	}
+	
+	.entity-card:focus {
+		outline: none;
+		border-color: #06b6d4;
+		box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 	}
 
-	.product-header {
+	.entity-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -655,7 +693,7 @@
 		border-bottom: 1px solid #e5e7eb;
 	}
 
-	.product-icon {
+	.entity-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -667,23 +705,23 @@
 		color: #06b6d4;
 	}
 
-	.product-actions {
+	.entity-actions {
 		display: flex;
 		gap: 0.5rem;
 	}
 
-	.product-content {
+	.entity-content {
 		padding: 1rem;
 	}
 
-	.product-name {
+	.entity-name {
 		font-size: 1.125rem;
 		font-weight: 600;
 		color: #111827;
 		margin: 0 0 0.25rem 0;
 	}
 
-	.product-code {
+	.entity-code {
 		display: inline-block;
 		font-family: 'Courier New', monospace;
 		font-size: 0.75rem;
@@ -694,29 +732,13 @@
 		margin-bottom: 0.75rem;
 	}
 
-	.product-description {
+	.entity-description {
 		font-size: 0.875rem;
 		color: #6b7280;
 		margin: 0 0 1rem 0;
 	}
 
-	.product-meta {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-
-	.category-badge, .pricing-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 500;
-	}
-
-	.product-fields {
+	.entity-fields {
 		margin-bottom: 1rem;
 	}
 
@@ -744,27 +766,12 @@
 		border-radius: 0.25rem;
 	}
 
-	.variable-badge {
-		display: inline-block;
-		padding: 0.25rem 0.5rem;
-		background: #fef3c7;
-		color: #92400e;
-		font-size: 0.75rem;
-		font-family: 'Courier New', monospace;
-		border-radius: 0.25rem;
-	}
-
-	.product-footer {
+	.entity-footer {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		padding-top: 1rem;
 		border-top: 1px solid #f3f4f6;
-	}
-
-	.footer-actions {
-		display: flex;
-		gap: 0.75rem;
 	}
 
 	.status-badge {
@@ -782,7 +789,12 @@
 		color: #065f46;
 	}
 
-	.status-inactive {
+	.status-pending {
+		background: #fed7aa;
+		color: #9a3412;
+	}
+
+	.status-deleted {
 		background: #fee2e2;
 		color: #991b1b;
 	}
@@ -892,10 +904,15 @@
 
 	.modal-footer {
 		display: flex;
-		justify-content: flex-end;
-		gap: 0.75rem;
+		justify-content: space-between;
+		align-items: center;
 		padding: 1.5rem;
 		border-top: 1px solid #e5e7eb;
+	}
+	
+	.modal-footer-right {
+		display: flex;
+		gap: 0.75rem;
 	}
 
 	.schema-editor {
@@ -929,32 +946,6 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
-		font-size: 0.75rem;
-	}
-
-	.variable-editor {
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
-		padding: 1rem;
-		background: #f9fafb;
-	}
-
-	.variable-field {
-		display: grid;
-		grid-template-columns: 1fr 1fr auto;
-		gap: 0.5rem;
-		align-items: center;
-		margin-bottom: 0.5rem;
-		padding: 0.5rem;
-		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.25rem;
-	}
-
-	.variable-field input {
-		padding: 0.375rem 0.5rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.25rem;
 		font-size: 0.75rem;
 	}
 
@@ -993,6 +984,308 @@
 	.btn-remove:hover {
 		background: #fca5a5;
 	}
+
+	/* Improved Field Editor Styles */
+	.field-editor-card {
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		padding: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.field-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid #f3f4f6;
+	}
+
+	.field-header h4 {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.field-editor-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+
+	.field-col {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.field-col.full-width {
+		grid-column: span 2;
+	}
+
+	.field-col label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #6b7280;
+		margin-bottom: 0.25rem;
+	}
+
+	.field-col input,
+	.field-col select {
+		padding: 0.375rem 0.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.25rem;
+		font-size: 0.813rem;
+	}
+
+	.constraints-section {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #f3f4f6;
+	}
+
+	.constraints-section h5 {
+		margin: 0 0 0.75rem 0;
+		font-size: 0.813rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.constraints-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+
+	.constraint-row {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.constraint-row.full-width {
+		grid-column: span 2;
+	}
+
+	.constraint-row label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #6b7280;
+		margin-bottom: 0.25rem;
+	}
+
+	.constraint-row input,
+	.constraint-row select {
+		padding: 0.375rem 0.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.25rem;
+		font-size: 0.813rem;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.813rem;
+		color: #374151;
+		grid-column: span 2;
+	}
+
+	.checkbox-label input[type="checkbox"] {
+		margin: 0;
+	}
+
+	.full-width {
+		grid-column: span 2;
+	}
+	
+	/* Pricing Templates Selector */
+	.pricing-templates-selector {
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		background: #fafbfc;
+		overflow: hidden;
+	}
+	
+	.no-templates {
+		margin: 0;
+		color: #6b7280;
+		font-size: 0.875rem;
+		text-align: center;
+		padding: 2rem;
+	}
+	
+	.templates-list {
+		max-height: 240px;
+		overflow-y: auto;
+	}
+	
+	.template-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.875rem 1rem;
+		background: white;
+		border-bottom: 1px solid #f3f4f6;
+		cursor: pointer;
+		transition: all 0.2s;
+		position: relative;
+	}
+	
+	.template-item:last-child {
+		border-bottom: none;
+	}
+	
+	.template-item:hover {
+		background: #f9fafb;
+	}
+	
+	.template-item.selected {
+		background: linear-gradient(to right, #ecfeff 0%, #f0fdfa 100%);
+		border-left: 3px solid #06b6d4;
+		padding-left: calc(1rem - 3px);
+	}
+	
+	.template-item:focus {
+		outline: none;
+		box-shadow: inset 0 0 0 2px #06b6d4;
+	}
+	
+	.template-check {
+		width: 20px;
+		height: 20px;
+		border: 2px solid #d1d5db;
+		border-radius: 0.375rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s;
+		flex-shrink: 0;
+		background: white;
+	}
+	
+	.template-item.selected .template-check {
+		background: #06b6d4;
+		border-color: #06b6d4;
+		color: white;
+	}
+	
+	.template-content {
+		flex: 1;
+		min-width: 0;
+	}
+	
+	.template-name {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #111827;
+		margin-bottom: 0.125rem;
+	}
+	
+	.template-item.selected .template-name {
+		color: #0891b2;
+	}
+	
+	.template-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.75rem;
+		color: #6b7280;
+	}
+	
+	.template-category {
+		padding: 0.125rem 0.375rem;
+		background: #f3f4f6;
+		border-radius: 0.25rem;
+		font-weight: 500;
+		text-transform: lowercase;
+	}
+	
+	.template-item.selected .template-category {
+		background: #e0f2fe;
+		color: #0369a1;
+	}
+	
+	.template-separator {
+		color: #d1d5db;
+	}
+	
+	.template-description {
+		color: #9ca3af;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	
+	.pricing-badge {
+		display: inline-block;
+		padding: 0.25rem 0.5rem;
+		background: #fef3c7;
+		color: #92400e;
+		font-size: 0.75rem;
+		font-weight: 500;
+		border-radius: 0.25rem;
+	}
+	
+	.billing-info {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+		padding-top: 0.75rem;
+		border-top: 1px solid #f3f4f6;
+	}
+	
+	.billing-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		border-radius: 0.25rem;
+		text-transform: capitalize;
+	}
+	
+	.billing-instant {
+		background: #ecfdf5;
+		color: #065f46;
+	}
+	
+	.billing-approval {
+		background: #fef3c7;
+		color: #92400e;
+	}
+	
+	.billing-one-time {
+		background: #ede9fe;
+		color: #5b21b6;
+	}
+	
+	.billing-recurring {
+		background: #dbeafe;
+		color: #1e40af;
+	}
+	
+	/* Custom scrollbar for templates list */
+	.templates-list::-webkit-scrollbar {
+		width: 6px;
+	}
+	
+	.templates-list::-webkit-scrollbar-track {
+		background: #f3f4f6;
+		border-radius: 3px;
+	}
+	
+	.templates-list::-webkit-scrollbar-thumb {
+		background: #d1d5db;
+		border-radius: 3px;
+	}
+	
+	.templates-list::-webkit-scrollbar-thumb:hover {
+		background: #9ca3af;
+	}
 </style>
 
 <!-- Create Product Type Modal -->
@@ -1010,12 +1303,12 @@
 					<div class="form-group">
 						<label for="name">Product Type Name</label>
 						<input type="text" id="name" bind:value={newProductType.name} 
-							placeholder="e.g., standard_product, subscription_service" />
+							placeholder="e.g., store, company, team" />
 					</div>
 					<div class="form-group">
 						<label for="display_name">Display Name</label>
 						<input type="text" id="display_name" bind:value={newProductType.display_name} 
-							placeholder="e.g., Standard Product, Subscription Service" />
+							placeholder="e.g., Store, Company, Team" />
 					</div>
 				</div>
 				<div class="form-group">
@@ -1023,36 +1316,49 @@
 					<textarea id="description" bind:value={newProductType.description} rows="2" 
 						placeholder="Describe what this product type represents"></textarea>
 				</div>
-				<!-- Category and Pricing Model fields commented out until backend support is added -->
-				<!--
-				<div class="form-row">
-					<div class="form-group">
-						<label for="category">Category</label>
-						<select id="category" bind:value={newProductType.category}>
-							{#each categories as cat}
-								<option value={cat.value}>{cat.label}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="form-group">
-						<label for="pricing_model">Pricing Model</label>
-						<select id="pricing_model" bind:value={newProductType.pricing_model}>
-							{#each pricingModels as model}
-								<option value={model.value}>{model.label}</option>
-							{/each}
-						</select>
-					</div>
-				</div>
-				-->
 				<div class="form-group">
 					<label for="icon">Icon</label>
 					<IconPicker bind:value={newProductType.icon} placeholder="Choose an icon" />
 				</div>
+				<div class="form-row">
+					<div class="form-group">
+						<label for="billing_mode">Billing Mode</label>
+						<select id="billing_mode" bind:value={newProductType.billing_mode}>
+							<option value="instant">Instant</option>
+							<option value="approval">Requires Approval</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="billing_type">Billing Type</label>
+						<select id="billing_type" bind:value={newProductType.billing_type}>
+							<option value="one-time">One-time</option>
+							<option value="recurring">Recurring</option>
+						</select>
+					</div>
+				</div>
+				{#if newProductType.billing_type === 'recurring'}
+					<div class="form-row">
+						<div class="form-group">
+							<label for="billing_interval">Recurring Interval</label>
+							<select id="billing_interval" bind:value={newProductType.billing_recurring_interval}>
+								<option value="day">Daily</option>
+								<option value="week">Weekly</option>
+								<option value="month">Monthly</option>
+								<option value="year">Yearly</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="billing_interval_count">Interval Count</label>
+							<input type="number" id="billing_interval_count" min="1" bind:value={newProductType.billing_recurring_interval_count} placeholder="e.g., 2 for bi-weekly" />
+						</div>
+					</div>
+				{/if}
 				<div class="form-group">
-					<label for="is_active">Status</label>
-					<select id="is_active" bind:value={newProductType.is_active}>
-						<option value={true}>Active</option>
-						<option value={false}>Inactive</option>
+					<label for="status">Status</label>
+					<select id="status" bind:value={newProductType.status}>
+						<option value="active">Active</option>
+						<option value="pending">Pending</option>
+						<option value="deleted">Deleted</option>
 					</select>
 				</div>
 			</div>
@@ -1089,155 +1395,95 @@
 					<label for="edit-description">Description</label>
 					<textarea id="edit-description" bind:value={selectedProductType.description} rows="2"></textarea>
 				</div>
-				<!-- Category and Pricing Model fields commented out until backend support is added -->
-				<!--
-				<div class="form-row">
-					<div class="form-group">
-						<label for="edit-category">Category</label>
-						<select id="edit-category" bind:value={selectedProductType.category}>
-							{#each categories as cat}
-								<option value={cat.value}>{cat.label}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="form-group">
-						<label for="edit-pricing_model">Pricing Model</label>
-						<select id="edit-pricing_model" bind:value={selectedProductType.pricing_model}>
-							{#each pricingModels as model}
-								<option value={model.value}>{model.label}</option>
-							{/each}
-						</select>
-					</div>
-				</div>
-				-->
 				<div class="form-group">
 					<label for="edit-icon">Icon</label>
 					<IconPicker bind:value={selectedProductType.icon} placeholder="Choose an icon" />
 				</div>
 				
-				{#if editingSchema}
+				<div class="form-row">
 					<div class="form-group">
-						<label>Custom Fields Schema</label>
-						<div class="schema-editor">
-							{#each schemaFields as field, index}
-								<div class="schema-field">
-									<input type="text" placeholder="Field name" bind:value={field.name} />
-									<input type="text" placeholder="Label" bind:value={field.label} />
-									<select bind:value={field.type}>
-										<option value="text">Text</option>
-										<option value="number">Number</option>
-										<option value="date">Date</option>
-										<option value="boolean">Boolean</option>
-										<option value="select">Select</option>
-									</select>
-									<label>
-										<input type="checkbox" bind:checked={field.required} />
-										Required
-									</label>
-									<button class="btn-remove" on:click={() => removeSchemaField(index)}>
-										×
-									</button>
-								</div>
-							{/each}
-							<button class="btn-add-field" on:click={addSchemaField}>
-								<Plus size={14} />
-								Add Field
-							</button>
-						</div>
+						<label for="edit-billing_mode">Billing Mode</label>
+						<select id="edit-billing_mode" bind:value={selectedProductType.billing_mode}>
+							<option value="instant">Instant</option>
+							<option value="approval">Requires Approval</option>
+						</select>
 					</div>
-				{/if}
-
-				{#if editingVariables}
 					<div class="form-group">
-						<label>Default Variables</label>
-						<div class="variable-editor">
-							{#each defaultVariables as variable, index}
-								<div class="variable-field">
-									<input type="text" placeholder="Variable name" bind:value={variable.name} />
-									<input type="text" placeholder="Default value" bind:value={variable.value} />
-									<button class="btn-remove" on:click={() => removeVariable(index)}>
-										×
-									</button>
-								</div>
-							{/each}
-							<button class="btn-add-field" on:click={addVariable}>
-								<Plus size={14} />
-								Add Variable
-							</button>
+						<label for="edit-billing_type">Billing Type</label>
+						<select id="edit-billing_type" bind:value={selectedProductType.billing_type}>
+							<option value="one-time">One-time</option>
+							<option value="recurring">Recurring</option>
+						</select>
+					</div>
+				</div>
+				
+				{#if selectedProductType.billing_type === 'recurring'}
+					<div class="form-row">
+						<div class="form-group">
+							<label for="edit-billing_interval">Recurring Interval</label>
+							<select id="edit-billing_interval" bind:value={selectedProductType.billing_recurring_interval}>
+								<option value="day">Daily</option>
+								<option value="week">Weekly</option>
+								<option value="month">Monthly</option>
+								<option value="year">Yearly</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="edit-billing_interval_count">Interval Count</label>
+							<input type="number" id="edit-billing_interval_count" min="1" bind:value={selectedProductType.billing_recurring_interval_count} placeholder="e.g., 2 for bi-weekly" />
 						</div>
 					</div>
 				{/if}
 				
 				<div class="form-group">
-					<label for="edit-is_active">Status</label>
-					<select id="edit-is_active" bind:value={selectedProductType.is_active}>
-						<option value={true}>Active</option>
-						<option value={false}>Inactive</option>
+					<label>Custom Fields Definition</label>
+					<FieldEditor 
+						fields={schemaFields} 
+						onFieldsChange={(newFields) => schemaFields = newFields} 
+					/>
+				</div>
+				
+				
+				<div class="form-group">
+					<ReorderableList
+						bind:selectedIds={selectedProductType.pricing_templates}
+						availableItems={pricingTemplates.map(t => ({
+							id: t.id,
+							name: t.name,
+							displayName: t.display_name,
+							description: t.description,
+							category: t.category
+						}))}
+						title="Pricing Templates"
+						helpText="Templates will be applied in the order shown. Drag to reorder."
+						emptyMessage="No pricing templates selected"
+						noItemsMessage="No pricing templates available."
+						addButtonText="Add Pricing Template"
+						createLink="/extensions/products/pricing"
+						createLinkText="Create templates first"
+					/>
+				</div>
+				
+				<div class="form-group">
+					<label for="edit-status">Status</label>
+					<select id="edit-status" bind:value={selectedProductType.status}>
+						<option value="active">Active</option>
+						<option value="pending">Pending</option>
+						<option value="deleted">Deleted</option>
 					</select>
 				</div>
 			</div>
 			<div class="modal-footer">
-				{#if !editingSchema && !editingVariables}
-					<button class="btn btn-secondary" on:click={() => startSchemaEdit(selectedProductType)}>Edit Fields</button>
-					<button class="btn btn-secondary" on:click={() => startVariableEdit(selectedProductType)}>Edit Variables</button>
-				{/if}
-				<button class="btn btn-secondary" on:click={() => { showEditModal = false; editingSchema = false; editingVariables = false; }}>Cancel</button>
-				{#if editingSchema}
-					<button class="btn btn-primary" on:click={() => saveSchema(selectedProductType)}>Save Schema</button>
-				{:else if editingVariables}
-					<button class="btn btn-primary" on:click={() => saveVariables(selectedProductType)}>Save Variables</button>
-				{:else}
-					<button class="btn btn-primary" on:click={updateProductType}>Update Product Type</button>
-				{/if}
-			</div>
-		</div>
-	</div>
-{/if}
-
-<!-- Pricing Configuration Modal -->
-{#if showPricingModal && selectedProductType}
-	<div class="modal-overlay" on:click={() => showPricingModal = false}>
-		<div class="modal" on:click|stopPropagation>
-			<div class="modal-header">
-				<h2>Configure Pricing - {selectedProductType.display_name}</h2>
-				<button class="btn-icon" on:click={() => showPricingModal = false}>
-					×
-				</button>
-			</div>
-			<div class="modal-body">
-				<!-- Pricing model configuration commented out until backend support is added -->
-				<!--
-				<div class="form-group">
-					<label>Pricing Model</label>
-					<select bind:value={selectedProductType.pricing_model}>
-						{#each pricingModels as model}
-							<option value={model.value}>{model.label}</option>
-						{/each}
-					</select>
+				<button class="btn btn-danger" on:click={() => { 
+					if (confirm('Are you sure you want to delete this product type? This will affect all products of this type.')) {
+						deleteProductType(selectedProductType.id);
+						showEditModal = false;
+					}
+				}}>Delete</button>
+				<div class="modal-footer-right">
+					<button class="btn btn-secondary" on:click={() => { showEditModal = false; schemaFields = []; }}>Cancel</button>
+					<button class="btn btn-primary" on:click={saveProductType}>Save</button>
 				</div>
-				
-				{#if selectedProductType.pricing_model === 'formula'}
-					<div class="form-group">
-						<label>Pricing Formula</label>
-						<textarea rows="4" placeholder="e.g., base_price * quantity * (1 - discount_rate/100)"></textarea>
-					</div>
-				{/if}
-				-->
-				
-				<div class="form-group">
-					<label>Available Variables for Pricing</label>
-					<div class="fields-list">
-						<span class="field-badge">base_price</span>
-						<span class="field-badge">quantity</span>
-						<span class="field-badge">discount_rate</span>
-						<span class="field-badge">tax_rate</span>
-						<span class="field-badge">shipping_cost</span>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-secondary" on:click={() => showPricingModal = false}>Cancel</button>
-				<button class="btn btn-primary" on:click={() => { updateProductType(); showPricingModal = false; }}>Save Pricing</button>
 			</div>
 		</div>
 	</div>

@@ -1,127 +1,404 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { 
-		Cloud, Upload, FolderPlus, Settings, Download,
-		HardDrive, Shield, Share2, Trash2, MoreVertical,
-		FileText, Image, Film, Music, Archive, File
+		Cloud, Upload, Share2, Download, Users, Activity,
+		HardDrive, Shield, Trash2, Eye, Link, UserPlus,
+		Clock, AlertCircle, BarChart3, FileText, Settings,
+		CheckCircle, XCircle, Info, TrendingUp, Database, Folder, BarChart
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { requireAdmin } from '$lib/utils/auth';
+	import FileExplorer from '$lib/components/FileExplorer.svelte';
 
-	let providers: any[] = [];
 	let loading = true;
-	let selectedProvider: any = null;
-	let showConfigModal = false;
 	let activeTab = 'overview';
 	
-	// Form data for new provider
-	let newProvider = {
-		name: '',
-		type: 's3',
-		endpoint: '',
-		region: '',
-		accessKey: '',
-		secretKey: ''
+	// Type definitions
+	interface User {
+		id: string;
+		email: string;
+		name?: string;
+	}
+	
+	interface StorageObject {
+		id: string;
+		name: string;
+		path: string;
+		type: 'file' | 'directory';
+		size?: number;
+		children?: StorageObject[];
+	}
+	
+	interface Share {
+		id: string;
+		object_id: string;
+		shared_with_email?: string;
+		shared_with_user_id?: string;
+		permission_level: 'view' | 'edit' | 'admin';
+		is_public: boolean;
+		share_token?: string;
+		expires_at?: string;
+	}
+	
+	// Data states
+	let stats: any = {};
+	let shares: Share[] = [];
+	let quotas: any[] = [];
+	let accessLogs: any[] = [];
+	let storageObjects: StorageObject[] = [];
+	
+	// Modals
+	let showShareModal = false;
+	let showQuotaModal = false;
+	let showFileExplorer = false;
+	let showDefaultQuotaModal = false;
+	let selectedObject: any = null;
+	let selectedUser: any = null;
+	
+	// User search
+	let userSearchQuery = '';
+	let searchResults: User[] = [];
+	let searchingUsers = false;
+	let searchDebounceTimer: NodeJS.Timeout;
+	
+	// Default quota settings
+	let defaultQuotas = {
+		storage: 5, // GB
+		bandwidth: 10, // GB
+		applyToExisting: false
 	};
-
-	// Stats
-	let stats = {
-		totalProviders: 0,
-		activeSyncs: 0,
-		totalStorage: '0 GB',
-		lastActivity: 'No activity'
+	
+	// Forms
+	let shareForm = {
+		objectId: '',
+		sharedWithEmail: '',
+		permissionLevel: 'view',
+		inheritToChildren: true,
+		generateToken: false,
+		isPublic: false,
+		expiresIn: 24 // hours
 	};
-
-	// Recent activities
-	let recentActivities: any[] = [];
+	
+	let quotaForm = {
+		userId: '',
+		maxStorageGB: 5,
+		maxBandwidthGB: 10
+	};
+	
+	// Filters
+	let logFilters = {
+		objectId: '',
+		userId: '',
+		action: '',
+		startDate: '',
+		endDate: '',
+		limit: 100
+	};
 
 	onMount(async () => {
 		if (!requireAdmin()) return;
-		await loadProviders();
+		await loadData();
 	});
 
-	async function loadProviders() {
+	async function loadData() {
 		try {
 			loading = true;
 			
-			// Fetch providers and activity from API
-			const [providersRes, activityRes, statsRes] = await Promise.all([
-				api.get('/ext/cloudstorage/api/providers'),
-				api.get('/ext/cloudstorage/api/activity'),
-				api.get('/ext/cloudstorage/api/stats')
-			]);
+			// Load CloudStorage extension data
+			try {
+				const [statsRes, sharesRes, quotasRes, logsRes] = await Promise.all([
+					api.get('/ext/cloudstorage/api/stats'),
+					api.get('/ext/cloudstorage/api/shares'),
+					api.get('/ext/cloudstorage/api/quota'),
+					api.get('/ext/cloudstorage/api/access-logs?limit=50')
+				]);
+				
+				stats = statsRes || {};
+				shares = sharesRes || [];
+				quotas = quotasRes || [];
+				accessLogs = logsRes || [];
+			} catch (err) {
+				// CloudStorage extension API might not be fully implemented yet
+				// Continue with empty data
+			}
 			
-			providers = providersRes || [];
-			recentActivities = activityRes || [];
-			stats = statsRes || {
-				totalProviders: 0,
-				activeSyncs: 0,
-				totalStorage: '0 GB',
-				lastActivity: 'No activity'
-			};
+			// Load storage buckets and files from main storage API
+			try {
+				const bucketsRes = await api.get('/storage/buckets');
+				
+				if (bucketsRes && Array.isArray(bucketsRes) && bucketsRes.length > 0) {
+					// Load files for each bucket in parallel for better performance
+					const bucketPromises = bucketsRes.map(async (bucket) => {
+						try {
+							const filesRes = await api.get(`/storage/buckets/${bucket.name}/objects`);
+							return {
+								...bucket,
+								objects: filesRes || []
+							};
+						} catch (err) {
+							// Continue with empty objects if one bucket fails
+							return { ...bucket, objects: [] };
+						}
+					});
+					
+					const bucketsWithFiles = await Promise.all(bucketPromises);
+					storageObjects = processStorageObjects(bucketsWithFiles);
+				} else {
+					storageObjects = [];
+				}
+			} catch (err) {
+				// Silently fail - storage might not be configured
+				storageObjects = [];
+			}
+			
 		} catch (error) {
-			console.error('Failed to load providers:', error);
-			providers = [];
-			recentActivities = [];
+			// Handle any unexpected errors gracefully
 		} finally {
 			loading = false;
 		}
 	}
-
-	function getStatusColor(status: string) {
-		switch (status) {
-			case 'connected': return 'bg-green-100 text-green-700';
-			case 'disconnected': return 'bg-red-100 text-red-700';
-			case 'pending': return 'bg-yellow-100 text-yellow-700';
-			default: return 'bg-gray-100 text-gray-700';
+	
+	function processStorageObjects(buckets: any[]): any[] {
+		// Convert bucket and object data to file tree format
+		const tree: any[] = [];
+		
+		buckets.forEach(bucket => {
+			const bucketNode = {
+				id: bucket.id || bucket.name,
+				name: bucket.name,
+				path: bucket.name,
+				type: 'directory',
+				children: []
+			};
+			
+			// Add objects to bucket
+			if (bucket.objects && Array.isArray(bucket.objects)) {
+				bucket.objects.forEach((obj: any) => {
+					// Skip if no object_key
+					if (!obj.object_key) return;
+					
+					const parts = obj.object_key.split('/').filter(p => p); // Remove empty parts
+					if (parts.length === 0) return;
+					
+					let currentLevel = bucketNode.children;
+					let currentPath = bucket.name;
+					
+					parts.forEach((part: string, index: number) => {
+						currentPath += '/' + part;
+						const isFile = index === parts.length - 1 && obj.content_type !== 'application/x-directory';
+						
+						let node = currentLevel.find((n: any) => n.name === part);
+						if (!node) {
+							node = {
+								id: isFile ? (obj.id || currentPath) : `dir-${currentPath}`,
+								name: part,
+								path: currentPath,
+								type: isFile ? 'file' : 'directory',
+								size: isFile ? obj.size : undefined,
+								children: isFile ? undefined : []
+							};
+							currentLevel.push(node);
+						}
+						
+						if (!isFile && node.children) {
+							currentLevel = node.children;
+						}
+					});
+				});
+			}
+			
+			// Only add bucket if it has content or is not empty
+			if (bucketNode.children.length > 0 || !bucket.objects || bucket.objects.length === 0) {
+				tree.push(bucketNode);
+			}
+		});
+		
+		return tree;
+	}
+	
+	function handleFileSelect(event: CustomEvent) {
+		const selected = event.detail;
+		shareForm.objectId = selected.id;
+		selectedObject = selected;
+		showFileExplorer = false;
+	}
+	
+	async function createShare() {
+		try {
+			const expiresAt = shareForm.expiresIn ? 
+				new Date(Date.now() + shareForm.expiresIn * 3600000).toISOString() : 
+				null;
+			
+			const response = await api.post('/ext/cloudstorage/api/shares', {
+				object_id: shareForm.objectId,
+				shared_with_email: shareForm.sharedWithEmail || undefined,
+				permission_level: shareForm.permissionLevel,
+				inherit_to_children: shareForm.inheritToChildren,
+				generate_token: shareForm.generateToken,
+				is_public: shareForm.isPublic,
+				expires_at: expiresAt
+			});
+			
+			if (response) {
+				showShareModal = false;
+				await loadData();
+				
+				// Show share link if token was generated
+				if (response.share_token) {
+					alert(`Share link created: ${window.location.origin}/share/${response.share_token}`);
+				}
+			}
+		} catch (error) {
+			alert('Failed to create share. Please try again.');
 		}
 	}
-
+	
+	async function updateQuota() {
+		try {
+			const response = await api.put('/ext/cloudstorage/api/quota', {
+				user_id: quotaForm.userId,
+				max_storage_bytes: quotaForm.maxStorageGB * 1024 * 1024 * 1024,
+				max_bandwidth_bytes: quotaForm.maxBandwidthGB * 1024 * 1024 * 1024
+			});
+			
+			if (response) {
+				showQuotaModal = false;
+				quotaForm = {
+					userId: '',
+					maxStorageGB: 5,
+					maxBandwidthGB: 10
+				};
+				searchResults = [];
+				userSearchQuery = '';
+				await loadData();
+			}
+		} catch (error) {
+			alert('Failed to update quota. Please try again.');
+		}
+	}
+	
+	function searchUsers() {
+		// Clear previous timer
+		if (searchDebounceTimer) {
+			clearTimeout(searchDebounceTimer);
+		}
+		
+		// Reset if query is too short
+		if (!userSearchQuery || userSearchQuery.length < 2) {
+			searchResults = [];
+			searchingUsers = false;
+			return;
+		}
+		
+		// Show loading state
+		searchingUsers = true;
+		
+		// Debounce the actual search
+		searchDebounceTimer = setTimeout(async () => {
+			try {
+				// Get all users and filter client-side
+				const response = await api.get('/users');
+				const allUsers = response || [];
+				
+				// Filter users by email or ID matching the search query
+				const query = userSearchQuery.toLowerCase();
+				searchResults = allUsers.filter((user: any) => {
+					const email = (user.email || '').toLowerCase();
+					const id = (user.id || '').toLowerCase();
+					const name = (user.name || '').toLowerCase();
+					return email.includes(query) || id.includes(query) || name.includes(query);
+				}).slice(0, 5); // Limit to 5 results
+			} catch (error) {
+				// If users API fails, show no results
+				searchResults = [];
+			} finally {
+				searchingUsers = false;
+			}
+		}, 300); // 300ms debounce
+	}
+	
+	function selectUser(user: User) {
+		quotaForm.userId = user.id;
+		userSearchQuery = user.email || user.id;
+		searchResults = [];
+	}
+	
+	async function updateDefaultQuotas() {
+		try {
+			const response = await api.put('/ext/cloudstorage/api/default-quotas', {
+				default_storage: defaultQuotas.storage * 1024 * 1024 * 1024,
+				default_bandwidth: defaultQuotas.bandwidth * 1024 * 1024 * 1024,
+				apply_to_existing: defaultQuotas.applyToExisting
+			});
+			
+			if (response) {
+				alert('Default quotas updated successfully');
+				showDefaultQuotaModal = false;
+				await loadData();
+			}
+		} catch (error) {
+			// API might not be implemented yet
+			alert('Failed to update default quotas. The API endpoint may not be available.');
+		}
+	}
+	
+	async function loadAccessLogs() {
+		try {
+			const params = new URLSearchParams();
+			Object.entries(logFilters).forEach(([key, value]) => {
+				if (value) params.append(key, value.toString());
+			});
+			
+			const response = await api.get(`/ext/cloudstorage/api/access-logs?${params}`);
+			accessLogs = response || [];
+		} catch (error) {
+			// Silently handle error - logs might not be available
+		}
+	}
+	
+	function formatBytes(bytes: number): string {
+		if (bytes === 0) return '0 B';
+		const k = 1024;
+		const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	}
+	
+	function formatPercentage(value: number): string {
+		return `${Math.round(value)}%`;
+	}
+	
 	function getActionIcon(action: string) {
 		switch (action) {
+			case 'view': return Eye;
+			case 'download': return Download;
 			case 'upload': return Upload;
 			case 'delete': return Trash2;
 			case 'share': return Share2;
-			case 'download': return Download;
-			default: return File;
+			case 'edit': return FileText;
+			default: return Activity;
 		}
 	}
-
+	
 	function getActionColor(action: string) {
 		switch (action) {
+			case 'view': return 'text-blue-600';
+			case 'download': return 'text-purple-600';
 			case 'upload': return 'text-green-600';
 			case 'delete': return 'text-red-600';
-			case 'share': return 'text-blue-600';
-			case 'download': return 'text-purple-600';
+			case 'share': return 'text-cyan-600';
+			case 'edit': return 'text-orange-600';
 			default: return 'text-gray-600';
 		}
 	}
 	
-	async function addProvider() {
-		try {
-			const result = await api.post('/ext/cloudstorage/api/providers', newProvider);
-			if (result) {
-				// Reset form
-				newProvider = {
-					name: '',
-					type: 's3',
-					endpoint: '',
-					region: '',
-					accessKey: '',
-					secretKey: ''
-				};
-				showConfigModal = false;
-				// Reload providers
-				await loadProviders();
-			}
-		} catch (error) {
-			console.error('Failed to add provider:', error);
-			alert('Failed to add storage provider');
+	function getPermissionColor(level: string) {
+		switch (level) {
+			case 'view': return 'bg-blue-100 text-blue-700';
+			case 'edit': return 'bg-orange-100 text-orange-700';
+			case 'admin': return 'bg-red-100 text-red-700';
+			default: return 'bg-gray-100 text-gray-700';
 		}
-	}
-	
-	function openConfigModal() {
-		showConfigModal = true;
 	}
 </script>
 
@@ -132,19 +409,9 @@
 			<div class="header-left">
 				<div class="header-title">
 					<Cloud size={24} />
-					<h1>Cloud Storage</h1>
+					<h1>CloudStorage Extension</h1>
 				</div>
-				<p class="header-subtitle">Multi-provider storage management and optimization</p>
-			</div>
-			<div class="header-actions">
-				<button class="btn btn-secondary" on:click={openConfigModal}>
-					<Settings size={16} />
-					Add Provider
-				</button>
-				<button class="btn btn-primary">
-					<Upload size={16} />
-					Upload Files
-				</button>
+				<p class="header-subtitle">Extend your storage with advanced sharing, access tracking, bandwidth quotas, and detailed analytics</p>
 			</div>
 		</div>
 	</div>
@@ -158,182 +425,721 @@
 			Overview
 		</button>
 		<button 
-			class="tab {activeTab === 'providers' ? 'active' : ''}"
-			on:click={() => activeTab = 'providers'}
+			class="tab {activeTab === 'shares' ? 'active' : ''}"
+			on:click={() => activeTab = 'shares'}
 		>
-			Providers
+			Shares
 		</button>
 		<button 
-			class="tab {activeTab === 'activity' ? 'active' : ''}"
-			on:click={() => activeTab = 'activity'}
+			class="tab {activeTab === 'quotas' ? 'active' : ''}"
+			on:click={() => activeTab = 'quotas'}
 		>
-			Activity
+			Quotas & Limits
 		</button>
 		<button 
-			class="tab {activeTab === 'settings' ? 'active' : ''}"
-			on:click={() => activeTab = 'settings'}
+			class="tab {activeTab === 'logs' ? 'active' : ''}"
+			on:click={() => activeTab = 'logs'}
 		>
-			Settings
+			Access Logs
+		</button>
+		<button 
+			class="tab {activeTab === 'analytics' ? 'active' : ''}"
+			on:click={() => activeTab = 'analytics'}
+		>
+			Analytics
 		</button>
 	</div>
 
-	{#if activeTab === 'overview'}
-		<!-- Stats Overview -->
-		<div class="stats-grid">
-			<div class="stat-card">
-				<div class="stat-icon bg-cyan-100">
-					<Cloud size={20} class="text-cyan-600" />
-				</div>
-				<div class="stat-content">
-					<p class="stat-label">Total Providers</p>
-					<p class="stat-value">{stats.totalProviders}</p>
-				</div>
-			</div>
-			
-			<div class="stat-card">
-				<div class="stat-icon bg-green-100">
-					<Shield size={20} class="text-green-600" />
-				</div>
-				<div class="stat-content">
-					<p class="stat-label">Active Syncs</p>
-					<p class="stat-value">{stats.activeSyncs}</p>
-				</div>
-			</div>
-			
-			<div class="stat-card">
-				<div class="stat-icon bg-purple-100">
-					<HardDrive size={20} class="text-purple-600" />
-				</div>
-				<div class="stat-content">
-					<p class="stat-label">Total Storage</p>
-					<p class="stat-value">{stats.totalStorage}</p>
-				</div>
-			</div>
-			
-			<div class="stat-card">
-				<div class="stat-icon bg-orange-100">
-					<FileText size={20} class="text-orange-600" />
-				</div>
-				<div class="stat-content">
-					<p class="stat-label">Last Activity</p>
-					<p class="stat-value">{stats.lastActivity}</p>
+	{#if loading}
+		<div class="loading">Loading...</div>
+	{:else}
+		{#if activeTab === 'overview'}
+			<!-- Extension Description -->
+			<div class="description-card">
+				<h3>About CloudStorage Extension</h3>
+				<p>CloudStorage extends your existing storage system with advanced features for enterprise-level file management and sharing.</p>
+				
+				<div class="features-grid">
+					<div class="feature-item">
+						<Share2 size={20} />
+						<div>
+							<h4>Advanced Sharing</h4>
+							<p>Create public links, share with specific users, set expiration dates, and control permissions at a granular level.</p>
+						</div>
+					</div>
+					<div class="feature-item">
+						<Shield size={20} />
+						<div>
+							<h4>Access Control</h4>
+							<p>Define view, edit, and admin permissions. Track who accesses your files and when, with detailed audit logs.</p>
+						</div>
+					</div>
+					<div class="feature-item">
+						<Database size={20} />
+						<div>
+							<h4>Storage Quotas</h4>
+							<p>Set storage and bandwidth limits per user or organization. Monitor usage and prevent quota overruns.</p>
+						</div>
+					</div>
+					<div class="feature-item">
+						<BarChart size={20} />
+						<div>
+							<h4>Analytics & Insights</h4>
+							<p>Get detailed analytics on file access patterns, popular content, and bandwidth consumption trends.</p>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
 
-		<!-- Quick Actions -->
-		<div class="quick-actions">
-			<h3>Quick Actions</h3>
-			<div class="actions-grid">
-				<button class="action-card">
-					<Upload size={24} class="text-cyan-600" />
-					<span>Upload Files</span>
-				</button>
-				<button class="action-card">
-					<FolderPlus size={24} class="text-purple-600" />
-					<span>Create Bucket</span>
-				</button>
-				<button class="action-card">
-					<Shield size={24} class="text-green-600" />
-					<span>Security Scan</span>
-				</button>
-				<button class="action-card">
-					<Settings size={24} class="text-gray-600" />
-					<span>Settings</span>
-				</button>
+			<!-- Overview Stats -->
+			<div class="stats-grid">
+				{#if stats.storage}
+					<div class="stat-card">
+						<div class="stat-icon bg-blue-100">
+							<HardDrive size={20} class="text-blue-600" />
+						</div>
+						<div class="stat-content">
+							<p class="stat-label">Total Storage</p>
+							<p class="stat-value">{formatBytes(stats.storage?.total_size || 0)}</p>
+							<p class="stat-detail">{stats.storage?.total_objects || 0} objects</p>
+						</div>
+					</div>
+				{/if}
+				
+				{#if stats.quota}
+					<div class="stat-card">
+						<div class="stat-icon bg-green-100">
+							<Database size={20} class="text-green-600" />
+						</div>
+						<div class="stat-content">
+							<p class="stat-label">Storage Usage</p>
+							<p class="stat-value">{formatPercentage(stats.quota?.storage_percentage || 0)}</p>
+							<div class="progress-bar">
+								<div class="progress-fill" style="width: {stats.quota?.storage_percentage || 0}%"></div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="stat-card">
+						<div class="stat-icon bg-purple-100">
+							<TrendingUp size={20} class="text-purple-600" />
+						</div>
+						<div class="stat-content">
+							<p class="stat-label">Bandwidth Usage</p>
+							<p class="stat-value">{formatPercentage(stats.quota?.bandwidth_percentage || 0)}</p>
+							<div class="progress-bar">
+								<div class="progress-fill bandwidth" style="width: {stats.quota?.bandwidth_percentage || 0}%"></div>
+							</div>
+						</div>
+					</div>
+				{/if}
+				
+				{#if stats.shares}
+					<div class="stat-card">
+						<div class="stat-icon bg-cyan-100">
+							<Share2 size={20} class="text-cyan-600" />
+						</div>
+						<div class="stat-content">
+							<p class="stat-label">Active Shares</p>
+							<p class="stat-value">{stats.shares?.total_shares || 0}</p>
+							<p class="stat-detail">Files shared</p>
+						</div>
+					</div>
+				{/if}
+				
+				{#if stats.access}
+					<div class="stat-card">
+						<div class="stat-icon bg-orange-100">
+							<Activity size={20} class="text-orange-600" />
+						</div>
+						<div class="stat-content">
+							<p class="stat-label">Total Access</p>
+							<p class="stat-value">{stats.access?.total_access || 0}</p>
+							<p class="stat-detail">{stats.access?.unique_users || 0} unique users</p>
+						</div>
+					</div>
+				{/if}
 			</div>
-		</div>
-	{/if}
 
-	{#if activeTab === 'providers'}
-		<!-- Providers List -->
-		<div class="providers-grid">
-			{#each providers as provider}
-				<div class="provider-card">
-					<div class="provider-header">
-						<div class="provider-icon">{provider.icon}</div>
-						<button class="btn-icon-sm">
-							<MoreVertical size={16} />
+			<!-- Recent Activity -->
+			{#if accessLogs.length > 0}
+				<div class="activity-card">
+					<h3>Recent Activity</h3>
+					<div class="activity-list">
+						{#each accessLogs.slice(0, 5) as log}
+							<div class="activity-item">
+								<div class="activity-icon {getActionColor(log.action)}">
+									<svelte:component this={getActionIcon(log.action)} size={16} />
+								</div>
+								<div class="activity-details">
+									<p class="activity-description">
+										<strong>{log.user_id || 'Anonymous'}</strong> 
+										{log.action} 
+										<span class="file-name">Object {log.object_id.slice(0, 8)}...</span>
+									</p>
+									<div class="activity-meta">
+										{#if log.metadata?.bytes_size}
+											<span>{formatBytes(log.metadata.bytes_size)}</span>
+											<span>•</span>
+										{/if}
+										<span>{new Date(log.created_at).toLocaleString()}</span>
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+		{/if}
+
+		{#if activeTab === 'shares'}
+			<!-- Shares Management -->
+			<div class="section-card">
+				<div class="section-header">
+					<h3>Active Shares</h3>
+					<button class="btn btn-sm btn-primary" on:click={() => showShareModal = true}>
+						<Share2 size={14} />
+						New Share
+					</button>
+				</div>
+				
+				{#if shares.length > 0}
+					<div class="table-container">
+						<table class="data-table">
+							<thead>
+								<tr>
+									<th>Object</th>
+									<th>Shared With</th>
+									<th>Permission</th>
+									<th>Type</th>
+									<th>Expires</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each shares as share}
+									<tr>
+										<td class="truncate">{share.object_id.slice(0, 8)}...</td>
+										<td>
+											{#if share.shared_with_email}
+												{share.shared_with_email}
+											{:else if share.shared_with_user_id}
+												User: {share.shared_with_user_id.slice(0, 8)}...
+											{:else if share.share_token}
+												<span class="text-cyan-600">Public Link</span>
+											{:else}
+												-
+											{/if}
+										</td>
+										<td>
+											<span class="badge {getPermissionColor(share.permission_level)}">
+												{share.permission_level}
+											</span>
+										</td>
+										<td>
+											{#if share.is_public}
+												<span class="badge bg-green-100 text-green-700">Public</span>
+											{:else}
+												<span class="badge bg-gray-100 text-gray-700">Private</span>
+											{/if}
+										</td>
+										<td>
+											{#if share.expires_at}
+												{new Date(share.expires_at).toLocaleDateString()}
+											{:else}
+												Never
+											{/if}
+										</td>
+										<td>
+											{#if share.share_token}
+												<button class="btn btn-xs" on:click={() => {
+													navigator.clipboard.writeText(`${window.location.origin}/share/${share.share_token}`);
+													alert('Share link copied!');
+												}}>
+													<Link size={12} />
+													Copy Link
+												</button>
+											{/if}
+											<button class="btn btn-xs btn-danger">
+												<Trash2 size={12} />
+												Revoke
+											</button>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				{:else}
+					<div class="empty-state">
+						<Share2 size={48} class="text-gray-400" />
+						<p>No active shares</p>
+						<button class="btn btn-primary" on:click={() => showShareModal = true}>
+							Create First Share
 						</button>
 					</div>
-					
-					<div class="provider-body">
-						<h3 class="provider-name">{provider.name}</h3>
-						<span class="status-badge {getStatusColor(provider.status)}">
-							{provider.status}
-						</span>
-						
-						<div class="provider-stats">
-							<div class="stat">
-								<span class="label">Region</span>
-								<span class="value">{provider.region}</span>
-							</div>
-							<div class="stat">
-								<span class="label">Buckets</span>
-								<span class="value">{provider.buckets}</span>
-							</div>
-							<div class="stat">
-								<span class="label">Storage</span>
-								<span class="value">{provider.storage}</span>
-							</div>
-							<div class="stat">
-								<span class="label">Files</span>
-								<span class="value">{provider.files.toLocaleString()}</span>
-							</div>
-						</div>
-						
-						<div class="provider-cost">
-							<span class="cost-label">Monthly Cost</span>
-							<span class="cost-value">{provider.cost}</span>
-						</div>
-					</div>
-					
-					<div class="provider-footer">
-						<button class="btn btn-sm">Manage</button>
-						<button class="btn btn-sm btn-secondary">Configure</button>
+				{/if}
+			</div>
+		{/if}
+
+		{#if activeTab === 'quotas'}
+			<!-- Quotas Management -->
+			<div class="section-card">
+				<div class="section-header">
+					<h3>Quota Management</h3>
+					<div class="header-actions">
+						<button class="btn btn-sm btn-secondary" on:click={() => showDefaultQuotaModal = true}>
+							<Settings size={14} />
+							Default Settings
+						</button>
+						<button class="btn btn-sm btn-primary" on:click={() => showQuotaModal = true}>
+							<UserPlus size={14} />
+							Set User Quota
+						</button>
 					</div>
 				</div>
-			{/each}
-			
-			<div class="provider-card add-provider">
-				<Cloud size={48} class="text-gray-400" />
-				<h3>Add Provider</h3>
-				<p>Connect a new storage provider</p>
-				<button class="btn btn-primary">
-					<Plus size={16} />
-					Add Provider
+				
+				<!-- Default Quotas Display -->
+				<div class="default-quotas-info">
+					<h4>Default Quotas for New Users</h4>
+					<div class="quota-defaults">
+						<div class="default-item">
+							<span class="label">Storage:</span>
+							<span class="value">{defaultQuotas.storage} GB</span>
+						</div>
+						<div class="default-item">
+							<span class="label">Bandwidth:</span>
+							<span class="value">{defaultQuotas.bandwidth} GB/month</span>
+						</div>
+					</div>
+				</div>
+				
+				<div class="quotas-grid">
+					{#if stats.quota}
+						<div class="quota-card current-user">
+							<div class="quota-header">
+								<h4>Current User</h4>
+								<span class="badge bg-green-100 text-green-700">Active</span>
+							</div>
+							<div class="quota-stats">
+								<div class="quota-item">
+									<span class="label">Storage</span>
+									<div class="quota-bar">
+										<div class="quota-used" style="width: {stats.quota.storage_percentage}%"></div>
+									</div>
+									<span class="value">
+										{formatBytes(stats.quota.storage_used)} / {formatBytes(stats.quota.storage_limit)}
+									</span>
+								</div>
+								<div class="quota-item">
+									<span class="label">Bandwidth</span>
+									<div class="quota-bar">
+										<div class="quota-used bandwidth" style="width: {stats.quota.bandwidth_percentage}%"></div>
+									</div>
+									<span class="value">
+										{formatBytes(stats.quota.bandwidth_used)} / {formatBytes(stats.quota.bandwidth_limit)}
+									</span>
+								</div>
+								{#if stats.quota.reset_date}
+									<div class="reset-info">
+										<Clock size={14} />
+										Bandwidth resets: {new Date(stats.quota.reset_date).toLocaleDateString()}
+									</div>
+								{/if}
+							</div>
+						</div>
+					{/if}
+					
+					<!-- Add more user quotas here when available -->
+				</div>
+			</div>
+		{/if}
+
+		{#if activeTab === 'logs'}
+			<!-- Access Logs -->
+			<div class="section-card">
+				<div class="section-header">
+					<h3>Access Logs</h3>
+					<div class="filters">
+						<select bind:value={logFilters.action} on:change={loadAccessLogs}>
+							<option value="">All Actions</option>
+							<option value="view">View</option>
+							<option value="download">Download</option>
+							<option value="upload">Upload</option>
+							<option value="delete">Delete</option>
+							<option value="share">Share</option>
+							<option value="edit">Edit</option>
+						</select>
+						<input 
+							type="number" 
+							bind:value={logFilters.limit} 
+							on:change={loadAccessLogs}
+							placeholder="Limit"
+							min="10"
+							max="1000"
+						/>
+						<button class="btn btn-sm" on:click={loadAccessLogs}>
+							<Activity size={14} />
+							Refresh
+						</button>
+					</div>
+				</div>
+				
+				{#if accessLogs.length > 0}
+					<div class="logs-list">
+						{#each accessLogs as log}
+							<div class="log-item">
+								<div class="log-icon {getActionColor(log.action)}">
+									<svelte:component this={getActionIcon(log.action)} size={14} />
+								</div>
+								<div class="log-details">
+									<div class="log-main">
+										<span class="log-action">{log.action}</span>
+										<span class="log-object">Object: {log.object_id.slice(0, 12)}...</span>
+										{#if log.user_id}
+											<span class="log-user">User: {log.user_id.slice(0, 8)}...</span>
+										{/if}
+									</div>
+									<div class="log-meta">
+										{#if log.ip_address}
+											<span>IP: {log.ip_address}</span>
+										{/if}
+										{#if log.metadata?.success !== undefined}
+											{#if log.metadata.success}
+												<CheckCircle size={14} class="text-green-600" />
+											{:else}
+												<XCircle size={14} class="text-red-600" />
+											{/if}
+										{/if}
+										{#if log.metadata?.bytes_size}
+											<span>{formatBytes(log.metadata.bytes_size)}</span>
+										{/if}
+										{#if log.metadata?.duration_ms}
+											<span>{log.metadata.duration_ms}ms</span>
+										{/if}
+										<span class="log-time">{new Date(log.created_at).toLocaleString()}</span>
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<div class="empty-state">
+						<Activity size={48} class="text-gray-400" />
+						<p>No access logs found</p>
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+		{#if activeTab === 'analytics'}
+			<!-- Analytics Dashboard -->
+			<div class="analytics-grid">
+				{#if stats.access?.action_breakdown}
+					<div class="analytics-card">
+						<h3>Actions Breakdown</h3>
+						<div class="breakdown-list">
+							{#each Object.entries(stats.access.action_breakdown) as [action, count]}
+								<div class="breakdown-item">
+									<div class="breakdown-label">
+										<svelte:component this={getActionIcon(action)} size={14} class={getActionColor(action)} />
+										<span>{action}</span>
+									</div>
+									<span class="breakdown-value">{count}</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+				
+				<div class="analytics-card">
+					<h3>Storage Trends</h3>
+					<div class="trend-info">
+						<BarChart3 size={48} class="text-cyan-600" />
+						<p>Storage analytics coming soon</p>
+					</div>
+				</div>
+			</div>
+		{/if}
+	{/if}
+</div>
+
+<!-- Share Modal -->
+{#if showShareModal}
+	<div class="modal-overlay" on:click={() => showShareModal = false}>
+		<div class="modal" on:click|stopPropagation>
+			<div class="modal-header">
+				<h2>Create Share</h2>
+				<button class="modal-close" on:click={() => showShareModal = false}>
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+						<path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					</svg>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label class="form-label">File or Folder</label>
+					<div class="file-picker">
+						<input 
+							type="text" 
+							class="form-input" 
+							value={selectedObject ? selectedObject.name : ''} 
+							placeholder="No file selected" 
+							readonly
+						/>
+						<button 
+							class="btn btn-secondary"
+							on:click={() => showFileExplorer = true}
+						>
+							<Folder size={16} />
+							Pick File/Folder
+						</button>
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="form-label">Share Type</label>
+					<div class="toggle-switch">
+						<button 
+							class="toggle-option {shareForm.generateToken ? 'active' : ''}"
+							on:click={() => shareForm.generateToken = true}
+						>
+							Generate Share Link
+						</button>
+						<button 
+							class="toggle-option {!shareForm.generateToken ? 'active' : ''}"
+							on:click={() => shareForm.generateToken = false}
+						>
+							Share with Email
+						</button>
+					</div>
+				</div>
+				
+				{#if !shareForm.generateToken}
+					<div class="form-group">
+						<label class="form-label">Email Address</label>
+						<input 
+							type="email" 
+							class="form-input" 
+							bind:value={shareForm.sharedWithEmail} 
+							placeholder="user@example.com" 
+						/>
+					</div>
+				{/if}
+				
+				<div class="form-group">
+					<label class="form-label">Permission Level</label>
+					<select class="form-select" bind:value={shareForm.permissionLevel}>
+						<option value="view">View Only</option>
+						<option value="edit">Edit</option>
+						<option value="admin">Admin</option>
+					</select>
+				</div>
+				
+				<div class="checkbox-group">
+					<label class="checkbox-label">
+						<input 
+							type="checkbox" 
+							class="form-checkbox" 
+							bind:checked={shareForm.isPublic} 
+						/>
+						<span>Make Public</span>
+					</label>
+					
+					<label class="checkbox-label">
+						<input 
+							type="checkbox" 
+							class="form-checkbox" 
+							bind:checked={shareForm.inheritToChildren} 
+						/>
+						<span>Apply to Child Objects</span>
+					</label>
+				</div>
+				
+				<div class="form-group">
+					<label class="form-label">Expires In (hours)</label>
+					<input 
+						type="number" 
+						class="form-input" 
+						bind:value={shareForm.expiresIn} 
+						min="0" 
+						placeholder="24" 
+					/>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" on:click={() => showShareModal = false}>Cancel</button>
+				<button class="btn btn-primary" on:click={createShare}>Create Share</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Quota Modal -->
+{#if showQuotaModal}
+	<div class="modal-overlay" on:click={() => showQuotaModal = false}>
+		<div class="modal" on:click|stopPropagation>
+			<div class="modal-header">
+				<h2>Set User Quota</h2>
+				<button class="modal-close" on:click={() => showQuotaModal = false}>
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+						<path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					</svg>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label class="form-label">Search User</label>
+					<div class="user-search">
+						<input 
+							type="text" 
+							class="form-input" 
+							bind:value={userSearchQuery}
+							on:input={searchUsers}
+							placeholder="Search by email or ID..." 
+						/>
+						{#if searchingUsers}
+							<div class="search-loading">Searching...</div>
+						{/if}
+						{#if searchResults.length > 0}
+							<div class="search-results">
+								{#each searchResults as user}
+									<button 
+										class="search-result-item"
+										on:click={() => selectUser(user)}
+									>
+										<div class="user-info">
+											<span class="user-email">{user.email}</span>
+											{#if user.name}
+												<span class="user-name">{user.name}</span>
+											{/if}
+										</div>
+										<span class="user-id">ID: {user.id}</span>
+									</button>
+								{/each}
+							</div>
+						{/if}
+					</div>
+					{#if quotaForm.userId}
+						<div class="selected-user">
+							Selected: <strong>{userSearchQuery}</strong> (ID: {quotaForm.userId})
+						</div>
+					{/if}
+				</div>
+				
+				<div class="form-group">
+					<label class="form-label">Max Storage (GB)</label>
+					<input 
+						type="number" 
+						class="form-input" 
+						bind:value={quotaForm.maxStorageGB} 
+						min="0.1" 
+						step="0.1" 
+					/>
+					<div class="form-help">Current: {formatBytes(quotaForm.maxStorageGB * 1024 * 1024 * 1024)}</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="form-label">Max Bandwidth (GB)</label>
+					<input 
+						type="number" 
+						class="form-input" 
+						bind:value={quotaForm.maxBandwidthGB} 
+						min="0.1" 
+						step="0.1" 
+					/>
+					<div class="form-help">Current: {formatBytes(quotaForm.maxBandwidthGB * 1024 * 1024 * 1024)}</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" on:click={() => showQuotaModal = false}>Cancel</button>
+				<button class="btn btn-primary" on:click={updateQuota}>Update Quota</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Default Quota Modal -->
+{#if showDefaultQuotaModal}
+	<div class="modal-overlay" on:click={() => showDefaultQuotaModal = false}>
+		<div class="modal" on:click|stopPropagation>
+			<div class="modal-header">
+				<h2>Default Quota Settings</h2>
+				<button class="modal-close" on:click={() => showDefaultQuotaModal = false}>
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+						<path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+					</svg>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p class="modal-description">
+					Configure default storage and bandwidth quotas for new users. 
+					These settings will be applied automatically when new users are created.
+				</p>
+				
+				<div class="form-group">
+					<label class="form-label">Default Storage Quota (GB)</label>
+					<input 
+						type="number" 
+						class="form-input" 
+						bind:value={defaultQuotas.storage} 
+						min="0.1" 
+						step="0.1" 
+					/>
+					<div class="form-help">Amount of storage allocated to each new user</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="form-label">Default Bandwidth Quota (GB/month)</label>
+					<input 
+						type="number" 
+						class="form-input" 
+						bind:value={defaultQuotas.bandwidth} 
+						min="0.1" 
+						step="0.1" 
+					/>
+					<div class="form-help">Monthly bandwidth limit for each new user</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="checkbox-label">
+						<input 
+							type="checkbox" 
+							class="form-checkbox" 
+							bind:checked={defaultQuotas.applyToExisting} 
+						/>
+						<span>Apply to existing users</span>
+					</label>
+					<div class="form-help">
+						{#if defaultQuotas.applyToExisting}
+							⚠️ This will update quotas for ALL existing users
+						{:else}
+							Only new users will receive these quotas
+						{/if}
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" on:click={() => showDefaultQuotaModal = false}>Cancel</button>
+				<button class="btn btn-primary" on:click={updateDefaultQuotas}>
+					{defaultQuotas.applyToExisting ? 'Update All Quotas' : 'Save Defaults'}
 				</button>
 			</div>
 		</div>
-	{/if}
+	</div>
+{/if}
 
-	{#if activeTab === 'activity'}
-		<!-- Recent Activity -->
-		<div class="activity-card">
-			<h3>Recent Activity</h3>
-			<div class="activity-list">
-				{#each recentActivities as activity}
-					<div class="activity-item">
-						<div class="activity-icon {getActionColor(activity.action)}">
-							<svelte:component this={getActionIcon(activity.action)} size={16} />
-						</div>
-						<div class="activity-details">
-							<p class="activity-description">
-								<strong>{activity.user}</strong> {activity.action}d 
-								<span class="file-name">{activity.file}</span>
-							</p>
-							<div class="activity-meta">
-								<span>{activity.size}</span>
-								<span>•</span>
-								<span>{activity.time}</span>
-							</div>
-						</div>
-					</div>
-				{/each}
-			</div>
-		</div>
-	{/if}
-</div>
+<!-- File Explorer Modal -->
+{#if showFileExplorer}
+	<FileExplorer 
+		files={storageObjects}
+		showModal={true}
+		mode="both"
+		title="Select File or Folder to Share"
+		on:confirm={handleFileSelect}
+		on:cancel={() => showFileExplorer = false}
+	/>
+{/if}
 
 <style>
 	.page-container {
@@ -426,12 +1232,8 @@
 		padding: 1.25rem;
 		border: 1px solid #e5e7eb;
 		display: flex;
-		align-items: center;
+		align-items: flex-start;
 		gap: 1rem;
-	}
-
-	.stat-card.large {
-		grid-column: span 2;
 	}
 
 	.stat-icon {
@@ -461,35 +1263,32 @@
 		margin: 0;
 	}
 
-	.storage-bar {
-		height: 8px;
+	.stat-detail {
+		font-size: 0.75rem;
+		color: #9ca3af;
+		margin: 0.25rem 0 0 0;
+	}
+
+	.progress-bar {
+		height: 6px;
 		background: #e5e7eb;
-		border-radius: 4px;
-		margin: 1rem 0 0.5rem 0;
+		border-radius: 3px;
+		margin-top: 0.5rem;
 		overflow: hidden;
 	}
 
-	.storage-used {
+	.progress-fill {
 		height: 100%;
 		background: linear-gradient(to right, #06b6d4, #0891b2);
-		border-radius: 4px;
+		border-radius: 3px;
+		transition: width 0.3s ease;
 	}
 
-	.storage-info {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.75rem;
+	.progress-fill.bandwidth {
+		background: linear-gradient(to right, #8b5cf6, #7c3aed);
 	}
 
-	.storage-info .used {
-		color: #06b6d4;
-	}
-
-	.storage-info .available {
-		color: #6b7280;
-	}
-
-	.quick-actions {
+	.activity-card, .section-card {
 		background: white;
 		border-radius: 0.5rem;
 		padding: 1.5rem;
@@ -497,163 +1296,16 @@
 		margin-bottom: 1.5rem;
 	}
 
-	.quick-actions h3 {
-		margin: 0 0 1rem 0;
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: #111827;
-	}
-
-	.actions-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-		gap: 1rem;
-	}
-
-	.action-card {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		padding: 1.5rem 1rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.5rem;
-		background: white;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-
-	.action-card:hover {
-		background: #f9fafb;
-		border-color: #06b6d4;
-	}
-
-	.action-card span {
-		font-size: 0.875rem;
-		color: #374151;
-	}
-
-	.providers-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.provider-card {
-		background: white;
-		border-radius: 0.5rem;
-		border: 1px solid #e5e7eb;
-		overflow: hidden;
-	}
-
-	.provider-card.add-provider {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 2rem;
-		text-align: center;
-		border-style: dashed;
-	}
-
-	.add-provider h3 {
-		margin: 1rem 0 0.5rem 0;
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: #111827;
-	}
-
-	.add-provider p {
-		margin: 0 0 1rem 0;
-		color: #6b7280;
-		font-size: 0.875rem;
-	}
-
-	.provider-header {
+	.section-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1rem 1.25rem;
-		border-bottom: 1px solid #f3f4f6;
+		margin-bottom: 1.5rem;
 	}
 
-	.provider-icon {
-		font-size: 2rem;
-	}
-
-	.provider-body {
-		padding: 1.25rem;
-	}
-
-	.provider-name {
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: #111827;
-		margin: 0 0 0.5rem 0;
-	}
-
-	.provider-stats {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.75rem;
-		margin: 1rem 0;
-	}
-
-	.provider-stats .stat {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.provider-stats .label {
-		font-size: 0.75rem;
-		color: #6b7280;
-	}
-
-	.provider-stats .value {
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #111827;
-	}
-
-	.provider-cost {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.75rem;
-		background: #f9fafb;
-		border-radius: 0.375rem;
-		margin-top: 1rem;
-	}
-
-	.cost-label {
-		font-size: 0.875rem;
-		color: #6b7280;
-	}
-
-	.cost-value {
-		font-size: 1.125rem;
-		font-weight: 600;
-		color: #059669;
-	}
-
-	.provider-footer {
-		display: flex;
-		gap: 0.5rem;
-		padding: 1rem 1.25rem;
-		border-top: 1px solid #f3f4f6;
-		background: #f9fafb;
-	}
-
-	.activity-card {
-		background: white;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		border: 1px solid #e5e7eb;
-	}
-
+	.section-header h3,
 	.activity-card h3 {
-		margin: 0 0 1rem 0;
+		margin: 0;
 		font-size: 1.125rem;
 		font-weight: 600;
 		color: #111827;
@@ -662,7 +1314,7 @@
 	.activity-list {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: 0.75rem;
 	}
 
 	.activity-item {
@@ -709,13 +1361,275 @@
 		color: #6b7280;
 	}
 
-	.status-badge {
+	.table-container {
+		overflow-x: auto;
+	}
+
+	.data-table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	.data-table th {
+		text-align: left;
+		padding: 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: #6b7280;
+		text-transform: uppercase;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.data-table td {
+		padding: 0.75rem;
+		font-size: 0.875rem;
+		color: #374151;
+		border-bottom: 1px solid #f3f4f6;
+	}
+
+	.data-table tr:hover {
+		background: #f9fafb;
+	}
+
+	.badge {
 		display: inline-block;
 		padding: 0.25rem 0.75rem;
 		border-radius: 9999px;
 		font-size: 0.75rem;
 		font-weight: 500;
+	}
+
+	.quotas-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.quota-card {
+		background: white;
+		border-radius: 0.5rem;
+		padding: 1.5rem;
+		border: 1px solid #e5e7eb;
+	}
+
+	.quota-card.current-user {
+		border-color: #06b6d4;
+		box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+	}
+
+	.quota-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.5rem;
+	}
+
+	.quota-header h4 {
+		margin: 0;
+		font-size: 1rem;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.quota-stats {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.quota-item .label {
+		display: block;
+		font-size: 0.75rem;
+		color: #6b7280;
+		margin-bottom: 0.25rem;
+	}
+
+	.quota-bar {
+		height: 8px;
+		background: #e5e7eb;
+		border-radius: 4px;
+		margin: 0.5rem 0;
+		overflow: hidden;
+	}
+
+	.quota-used {
+		height: 100%;
+		background: linear-gradient(to right, #06b6d4, #0891b2);
+		border-radius: 4px;
+		transition: width 0.3s ease;
+	}
+
+	.quota-used.bandwidth {
+		background: linear-gradient(to right, #8b5cf6, #7c3aed);
+	}
+
+	.quota-item .value {
+		font-size: 0.813rem;
+		color: #374151;
+	}
+
+	.reset-info {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: #f9fafb;
+		border-radius: 0.375rem;
+		font-size: 0.813rem;
+		color: #6b7280;
+		margin-top: 0.5rem;
+	}
+
+	.logs-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.log-item {
+		display: flex;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		border: 1px solid #f3f4f6;
+		border-radius: 0.375rem;
+		transition: all 0.2s;
+	}
+
+	.log-item:hover {
+		background: #f9fafb;
+		border-color: #e5e7eb;
+	}
+
+	.log-icon {
+		width: 28px;
+		height: 28px;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #f9fafb;
+	}
+
+	.log-details {
+		flex: 1;
+	}
+
+	.log-main {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+		margin-bottom: 0.25rem;
+	}
+
+	.log-action {
+		font-weight: 600;
 		text-transform: uppercase;
+		font-size: 0.75rem;
+		color: #111827;
+	}
+
+	.log-object, .log-user {
+		font-size: 0.813rem;
+		color: #6b7280;
+	}
+
+	.log-meta {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+		font-size: 0.75rem;
+		color: #9ca3af;
+	}
+
+	.log-time {
+		margin-left: auto;
+	}
+
+	.filters {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.filters select,
+	.filters input {
+		padding: 0.375rem 0.75rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		font-size: 0.813rem;
+		background: white;
+	}
+
+	.analytics-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.analytics-card {
+		background: white;
+		border-radius: 0.5rem;
+		padding: 1.5rem;
+		border: 1px solid #e5e7eb;
+	}
+
+	.analytics-card h3 {
+		margin: 0 0 1rem 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.breakdown-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.breakdown-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+		border-radius: 0.375rem;
+		background: #f9fafb;
+	}
+
+	.breakdown-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: #374151;
+	}
+
+	.breakdown-value {
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.trend-info {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 3rem;
+		text-align: center;
+		color: #6b7280;
+	}
+
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 3rem;
+		text-align: center;
+		color: #6b7280;
+	}
+
+	.empty-state p {
+		margin: 1rem 0;
 	}
 
 	.btn {
@@ -750,37 +1664,52 @@
 		background: #f9fafb;
 	}
 
+	.btn-danger {
+		background: #ef4444;
+		color: white;
+	}
+
+	.btn-danger:hover {
+		background: #dc2626;
+	}
+
 	.btn-sm {
 		padding: 0.375rem 0.75rem;
 		font-size: 0.813rem;
 	}
 
-	.btn-icon-sm {
+	.btn-xs {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem;
+	}
+
+	.btn-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 28px;
-		height: 28px;
+		width: 32px;
+		height: 32px;
 		border: none;
 		background: transparent;
 		cursor: pointer;
 		border-radius: 0.375rem;
 		color: #6b7280;
+		font-size: 1.5rem;
+		line-height: 1;
 	}
 
-	.btn-icon-sm:hover {
+	.btn-icon:hover {
 		background: #f3f4f6;
 		color: #111827;
 	}
 
-	@media (max-width: 768px) {
-		.stat-card.large {
-			grid-column: span 1;
-		}
-		
-		.providers-grid {
-			grid-template-columns: 1fr;
-		}
+	.loading {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 4rem;
+		color: #6b7280;
+		font-size: 1rem;
 	}
 
 	.modal-overlay {
@@ -795,37 +1724,57 @@
 
 	.modal {
 		background: white;
-		border-radius: 0.5rem;
+		border-radius: 0.75rem;
 		width: 90%;
-		max-width: 500px;
+		max-width: 480px;
 		max-height: 90vh;
 		overflow-y: auto;
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 	}
 
 	.modal-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1.5rem;
-		border-bottom: 1px solid #e5e7eb;
+		padding: 1.5rem 1.5rem 1rem;
+		border-bottom: none;
 	}
 
 	.modal-header h2 {
 		margin: 0;
-		font-size: 1.25rem;
+		font-size: 1.375rem;
 		font-weight: 600;
 		color: #111827;
 	}
 
+	.modal-close {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		border-radius: 0.375rem;
+		color: #6b7280;
+		transition: all 0.2s;
+	}
+
+	.modal-close:hover {
+		background: #f3f4f6;
+		color: #111827;
+	}
+
 	.modal-body {
-		padding: 1.5rem;
+		padding: 0.5rem 1.5rem 1.5rem;
 	}
 
 	.form-group {
-		margin-bottom: 1rem;
+		margin-bottom: 1.25rem;
 	}
 
-	.form-group label {
+	.form-label {
 		display: block;
 		margin-bottom: 0.5rem;
 		font-size: 0.875rem;
@@ -833,20 +1782,111 @@
 		color: #374151;
 	}
 
-	.form-group input,
-	.form-group select {
+	.form-input,
+	.form-select {
 		width: 100%;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
+		padding: 0.625rem 0.875rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.5rem;
 		font-size: 0.875rem;
+		color: #111827;
+		background: white;
+		transition: all 0.2s;
 	}
 
-	.form-group input:focus,
-	.form-group select:focus {
+	.form-input:focus,
+	.form-select:focus {
 		outline: none;
 		border-color: #06b6d4;
 		box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+	}
+
+	.form-input::placeholder {
+		color: #9ca3af;
+	}
+
+	.toggle-switch {
+		display: flex;
+		background: #f3f4f6;
+		border-radius: 0.5rem;
+		padding: 0.125rem;
+		gap: 0.125rem;
+	}
+
+	.toggle-option {
+		flex: 1;
+		padding: 0.625rem 1rem;
+		border: none;
+		background: transparent;
+		color: #6b7280;
+		font-size: 0.875rem;
+		font-weight: 500;
+		border-radius: 0.375rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		white-space: nowrap;
+	}
+
+	.toggle-option.active {
+		background: #06b6d4;
+		color: white;
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+	}
+
+	.toggle-option:not(.active):hover {
+		color: #374151;
+	}
+
+	.checkbox-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		cursor: pointer;
+		font-size: 0.875rem;
+		color: #374151;
+		user-select: none;
+	}
+
+	.form-checkbox {
+		width: 18px;
+		height: 18px;
+		margin-right: 0.625rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		cursor: pointer;
+		accent-color: #06b6d4;
+	}
+
+	.form-checkbox:checked {
+		background-color: #06b6d4;
+		border-color: #06b6d4;
+	}
+	
+	.file-picker {
+		display: flex;
+		gap: 0.5rem;
+	}
+	
+	.file-picker .form-input {
+		flex: 1;
+		background: var(--bg-secondary);
+	}
+	
+	.file-picker .btn {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		white-space: nowrap;
+	}
+
+	.checkbox-label span {
+		flex: 1;
 	}
 
 	.form-help {
@@ -859,59 +1899,218 @@
 		display: flex;
 		justify-content: flex-end;
 		gap: 0.75rem;
+		padding: 1rem 1.5rem 1.5rem;
+		border-top: none;
+	}
+
+	.truncate {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		max-width: 150px;
+	}
+
+	@media (max-width: 768px) {
+		.stats-grid {
+			grid-template-columns: 1fr;
+		}
+		
+		.quotas-grid,
+		.analytics-grid {
+			grid-template-columns: 1fr;
+		}
+		
+		.filters {
+			flex-wrap: wrap;
+		}
+		
+		.table-container {
+			font-size: 0.75rem;
+		}
+	}
+
+	/* Description Card Styles */
+	.description-card {
+		background: white;
+		border-radius: 0.75rem;
 		padding: 1.5rem;
-		border-top: 1px solid #e5e7eb;
+		margin-bottom: 1.5rem;
+		border: 1px solid #e5e7eb;
+	}
+
+	.description-card h3 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.description-card > p {
+		color: #6b7280;
+		margin: 0 0 1.5rem 0;
+		line-height: 1.6;
+	}
+
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 1.5rem;
+	}
+
+	.feature-item {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.feature-item > :global(svg) {
+		flex-shrink: 0;
+		color: #06b6d4;
+		margin-top: 0.125rem;
+	}
+
+	.feature-item h4 {
+		margin: 0 0 0.25rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.feature-item p {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: #6b7280;
+		line-height: 1.5;
+	}
+
+	/* User Search Styles */
+	.user-search {
+		position: relative;
+	}
+
+	.search-loading {
+		position: absolute;
+		right: 12px;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 0.75rem;
+		color: #06b6d4;
+	}
+
+	.search-results {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		margin-top: 0.25rem;
+		max-height: 200px;
+		overflow-y: auto;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		z-index: 10;
+	}
+
+	.search-result-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem;
+		border: none;
+		background: none;
+		width: 100%;
+		text-align: left;
+		cursor: pointer;
+		transition: background-color 0.15s;
+		border-bottom: 1px solid #f3f4f6;
+	}
+
+	.search-result-item:last-child {
+		border-bottom: none;
+	}
+
+	.search-result-item:hover {
+		background-color: #f9fafb;
+	}
+
+	.user-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+	}
+
+	.user-email {
+		font-size: 0.875rem;
+		color: #111827;
+		font-weight: 500;
+	}
+
+	.user-name {
+		font-size: 0.75rem;
+		color: #6b7280;
+	}
+
+	.user-id {
+		font-size: 0.75rem;
+		color: #9ca3af;
+	}
+
+	.selected-user {
+		margin-top: 0.5rem;
+		padding: 0.5rem;
+		background: #f0fdf4;
+		border: 1px solid #86efac;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		color: #166534;
+	}
+
+	/* Default Quotas Styles */
+	.default-quotas-info {
+		background: #f9fafb;
+		padding: 1rem;
+		border-radius: 0.375rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.default-quotas-info h4 {
+		margin: 0 0 0.75rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.quota-defaults {
+		display: flex;
+		gap: 2rem;
+	}
+
+	.default-item {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.default-item .label {
+		font-size: 0.8125rem;
+		color: #6b7280;
+	}
+
+	.default-item .value {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.modal-description {
+		margin: 0 0 1.5rem 0;
+		color: #6b7280;
+		font-size: 0.875rem;
+		line-height: 1.5;
+	}
+
+	.header-actions {
+		display: flex;
+		gap: 0.5rem;
 	}
 </style>
-
-<!-- Add Provider Modal -->
-{#if showConfigModal}
-	<div class="modal-overlay" on:click={() => showConfigModal = false}>
-		<div class="modal" on:click|stopPropagation>
-			<div class="modal-header">
-				<h2>Add Storage Provider</h2>
-				<button class="btn-icon-sm" on:click={() => showConfigModal = false}>
-					<MoreVertical size={20} />
-				</button>
-			</div>
-			<div class="modal-body">
-				<div class="form-group">
-					<label for="provider-name">Provider Name</label>
-					<input type="text" id="provider-name" bind:value={newProvider.name} placeholder="My S3 Bucket" />
-				</div>
-				<div class="form-group">
-					<label for="provider-type">Provider Type</label>
-					<select id="provider-type" bind:value={newProvider.type}>
-						<option value="s3">Amazon S3</option>
-						<option value="gcs">Google Cloud Storage</option>
-						<option value="azure">Azure Blob Storage</option>
-						<option value="local">Local Storage</option>
-					</select>
-				</div>
-				{#if newProvider.type !== 'local'}
-					<div class="form-group">
-						<label for="endpoint">Endpoint</label>
-						<input type="text" id="endpoint" bind:value={newProvider.endpoint} placeholder="s3.amazonaws.com" />
-						<div class="form-help">Leave empty for default provider endpoint</div>
-					</div>
-					<div class="form-group">
-						<label for="region">Region</label>
-						<input type="text" id="region" bind:value={newProvider.region} placeholder="us-east-1" />
-					</div>
-					<div class="form-group">
-						<label for="access-key">Access Key</label>
-						<input type="text" id="access-key" bind:value={newProvider.accessKey} placeholder="AKIA..." />
-					</div>
-					<div class="form-group">
-						<label for="secret-key">Secret Key</label>
-						<input type="password" id="secret-key" bind:value={newProvider.secretKey} placeholder="Enter secret key" />
-					</div>
-				{/if}
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-secondary" on:click={() => showConfigModal = false}>Cancel</button>
-				<button class="btn btn-primary" on:click={addProvider}>Add Provider</button>
-			</div>
-		</div>
-	</div>
-{/if}

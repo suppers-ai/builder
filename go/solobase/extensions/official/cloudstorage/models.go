@@ -1,144 +1,118 @@
 package cloudstorage
 
 import (
+	"database/sql/driver"
 	"time"
 	"gorm.io/gorm"
+	"gorm.io/datatypes"
 )
 
-// StorageShare represents a shared link for a file or folder
+// PermissionLevel represents the level of permission for a share
+type PermissionLevel string
+
+const (
+	PermissionView  PermissionLevel = "view"
+	PermissionEdit  PermissionLevel = "edit"
+	PermissionAdmin PermissionLevel = "admin"
+)
+
+func (p *PermissionLevel) Scan(value interface{}) error {
+	*p = PermissionLevel(value.(string))
+	return nil
+}
+
+func (p PermissionLevel) Value() (driver.Value, error) {
+	return string(p), nil
+}
+
+// StorageAction represents the type of action taken on a storage object
+type StorageAction string
+
+const (
+	ActionView     StorageAction = "view"
+	ActionDownload StorageAction = "download"
+	ActionUpload   StorageAction = "upload"
+	ActionDelete   StorageAction = "delete"
+	ActionShare    StorageAction = "share"
+	ActionEdit     StorageAction = "edit"
+)
+
+func (a *StorageAction) Scan(value interface{}) error {
+	*a = StorageAction(value.(string))
+	return nil
+}
+
+func (a StorageAction) Value() (driver.Value, error) {
+	return string(a), nil
+}
+
+// StorageShare represents a shared storage object with granular permissions
 type StorageShare struct {
-	ID             string    `gorm:"primaryKey" json:"id"`
-	ObjectID       string    `gorm:"not null;index" json:"object_id"`
-	BucketName     string    `gorm:"not null;index" json:"bucket_name"`
-	ShareToken     string    `gorm:"uniqueIndex;not null" json:"share_token"`
-	CreatedBy      string    `gorm:"not null;index" json:"created_by"`
-	ExpiresAt      *time.Time `json:"expires_at,omitempty"`
-	AccessCount    int       `gorm:"default:0" json:"access_count"`
-	MaxAccessCount *int      `json:"max_access_count,omitempty"`
-	Password       string    `json:"-"` // Hashed password for protected shares
-	AllowDownload  bool      `gorm:"default:true" json:"allow_download"`
-	AllowUpload    bool      `gorm:"default:false" json:"allow_upload"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	ID                string          `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	ObjectID          string          `gorm:"type:uuid;not null;index" json:"object_id"`
+	SharedWithUserID  *string         `gorm:"type:uuid;index" json:"shared_with_user_id,omitempty"`
+	SharedWithEmail   *string         `gorm:"type:text" json:"shared_with_email,omitempty"`
+	PermissionLevel   PermissionLevel `gorm:"type:text;not null;default:'view'" json:"permission_level"`
+	InheritToChildren bool            `gorm:"default:true;not null" json:"inherit_to_children"`
+	ShareToken        *string         `gorm:"type:text;uniqueIndex" json:"share_token,omitempty"`
+	IsPublic          bool            `gorm:"default:false;not null" json:"is_public"`
+	ExpiresAt         *time.Time      `gorm:"type:timestamptz" json:"expires_at,omitempty"`
+	CreatedBy         string          `gorm:"type:uuid;not null" json:"created_by"`
+	CreatedAt         time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP;not null" json:"created_at"`
+	UpdatedAt         time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP;not null" json:"updated_at"`
 }
 
 // TableName specifies the table name
 func (StorageShare) TableName() string {
-	return "ext_cloudstorage_shares"
+	return "storage_shares"
 }
 
-// StorageAccessLog tracks access to storage objects
+// BeforeCreate hook to validate share constraints
+func (s *StorageShare) BeforeCreate(tx *gorm.DB) error {
+	// Ensure at least one sharing method is specified
+	if s.SharedWithUserID == nil && s.SharedWithEmail == nil && s.ShareToken == nil {
+		return gorm.ErrInvalidData
+	}
+	// Ensure not both user_id and email are set
+	if s.SharedWithUserID != nil && s.SharedWithEmail != nil {
+		return gorm.ErrInvalidData
+	}
+	return nil
+}
+
+// StorageAccessLog tracks all access to storage objects
 type StorageAccessLog struct {
-	ID          string    `gorm:"primaryKey" json:"id"`
-	ObjectID    string    `gorm:"index" json:"object_id"`
-	BucketName  string    `gorm:"index" json:"bucket_name"`
-	UserID      string    `gorm:"index" json:"user_id,omitempty"`
-	ShareID     string    `gorm:"index" json:"share_id,omitempty"`
-	Action      string    `gorm:"not null" json:"action"` // upload, download, delete, view
-	IPAddress   string    `json:"ip_address"`
-	UserAgent   string    `json:"user_agent"`
-	Success     bool      `json:"success"`
-	ErrorMsg    string    `json:"error_msg,omitempty"`
-	BytesSize   int64     `json:"bytes_size,omitempty"`
-	Duration    int64     `json:"duration_ms,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID        string          `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	ObjectID  string          `gorm:"type:uuid;not null;index" json:"object_id"`
+	UserID    *string         `gorm:"type:uuid;index" json:"user_id,omitempty"`
+	IPAddress *string         `gorm:"type:inet" json:"ip_address,omitempty"`
+	Action    StorageAction   `gorm:"type:text;not null" json:"action"`
+	UserAgent *string         `gorm:"type:text" json:"user_agent,omitempty"`
+	Metadata  datatypes.JSON  `gorm:"type:jsonb;default:'{}'" json:"metadata"`
+	CreatedAt time.Time       `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP;not null" json:"created_at"`
 }
 
 // TableName specifies the table name
 func (StorageAccessLog) TableName() string {
-	return "ext_cloudstorage_access_logs"
+	return "storage_access_logs"
 }
 
-// StorageQuota defines storage limits for users
+// StorageQuota defines storage and bandwidth limits for users
 type StorageQuota struct {
-	ID              string    `gorm:"primaryKey" json:"id"`
-	UserID          string    `gorm:"uniqueIndex;not null" json:"user_id"`
-	MaxStorage      int64     `gorm:"not null" json:"max_storage"` // Max storage in bytes
-	UsedStorage     int64     `gorm:"default:0" json:"used_storage"` // Current usage in bytes
-	MaxFileSize     int64     `json:"max_file_size,omitempty"` // Max size per file
-	MaxFileCount    *int64    `json:"max_file_count,omitempty"` // Max number of files
-	CurrentFileCount int64    `gorm:"default:0" json:"current_file_count"`
-	AllowPublic     bool      `gorm:"default:false" json:"allow_public"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ID                string     `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	UserID            string     `gorm:"type:uuid;not null;uniqueIndex" json:"user_id"`
+	MaxStorageBytes   int64      `gorm:"type:bigint;not null;default:5368709120" json:"max_storage_bytes"`    // 5GB default
+	MaxBandwidthBytes int64      `gorm:"type:bigint;not null;default:10737418240" json:"max_bandwidth_bytes"` // 10GB default
+	StorageUsed       int64      `gorm:"type:bigint;not null;default:0" json:"storage_used"`
+	BandwidthUsed     int64      `gorm:"type:bigint;not null;default:0" json:"bandwidth_used"`
+	ResetBandwidthAt  *time.Time `gorm:"type:timestamptz" json:"reset_bandwidth_at,omitempty"`
+	CreatedAt         time.Time  `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP;not null" json:"created_at"`
+	UpdatedAt         time.Time  `gorm:"type:timestamptz;default:CURRENT_TIMESTAMP;not null" json:"updated_at"`
 }
 
 // TableName specifies the table name
 func (StorageQuota) TableName() string {
-	return "ext_cloudstorage_quotas"
-}
-
-// StorageVersion tracks file versions
-type StorageVersion struct {
-	ID          string    `gorm:"primaryKey" json:"id"`
-	ObjectID    string    `gorm:"index" json:"object_id"`
-	BucketName  string    `gorm:"index" json:"bucket_name"`
-	VersionNum  int       `gorm:"not null" json:"version_num"`
-	ObjectKey   string    `gorm:"not null" json:"object_key"`
-	Size        int64     `json:"size"`
-	ContentType string    `json:"content_type"`
-	Checksum    string    `json:"checksum"`
-	CreatedBy   string    `json:"created_by"`
-	Comment     string    `json:"comment,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-}
-
-// TableName specifies the table name
-func (StorageVersion) TableName() string {
-	return "ext_cloudstorage_versions"
-}
-
-// StorageTag represents tags for objects
-type StorageTag struct {
-	ID         string    `gorm:"primaryKey" json:"id"`
-	ObjectID   string    `gorm:"index" json:"object_id"`
-	BucketName string    `gorm:"index" json:"bucket_name"`
-	Key        string    `gorm:"not null;index" json:"key"`
-	Value      string    `gorm:"not null" json:"value"`
-	CreatedAt  time.Time `json:"created_at"`
-}
-
-// TableName specifies the table name
-func (StorageTag) TableName() string {
-	return "ext_cloudstorage_tags"
-}
-
-// StoragePolicy defines access policies for buckets
-type StoragePolicy struct {
-	ID          string    `gorm:"primaryKey" json:"id"`
-	BucketName  string    `gorm:"index;not null" json:"bucket_name"`
-	Name        string    `gorm:"not null" json:"name"`
-	Description string    `json:"description"`
-	Rules       string    `gorm:"type:text" json:"rules"` // JSON policy rules
-	Priority    int       `gorm:"default:0" json:"priority"`
-	Enabled     bool      `gorm:"default:true" json:"enabled"`
-	CreatedBy   string    `json:"created_by"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-}
-
-// TableName specifies the table name
-func (StoragePolicy) TableName() string {
-	return "ext_cloudstorage_policies"
-}
-
-// StorageWebhook defines webhooks for storage events
-type StorageWebhook struct {
-	ID         string    `gorm:"primaryKey" json:"id"`
-	BucketName string    `gorm:"index" json:"bucket_name,omitempty"`
-	Name       string    `gorm:"not null" json:"name"`
-	URL        string    `gorm:"not null" json:"url"`
-	Events     string    `gorm:"type:text" json:"events"` // JSON array of events
-	Headers    string    `gorm:"type:text" json:"headers,omitempty"` // JSON object of headers
-	Active     bool      `gorm:"default:true" json:"active"`
-	CreatedBy  string    `json:"created_by"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-}
-
-// TableName specifies the table name
-func (StorageWebhook) TableName() string {
-	return "ext_cloudstorage_webhooks"
+	return "storage_quotas"
 }
 
 // AutoMigrate runs GORM auto-migration for all CloudStorage models
@@ -147,9 +121,5 @@ func AutoMigrate(db *gorm.DB) error {
 		&StorageShare{},
 		&StorageAccessLog{},
 		&StorageQuota{},
-		&StorageVersion{},
-		&StorageTag{},
-		&StoragePolicy{},
-		&StorageWebhook{},
 	)
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -18,6 +19,8 @@ type API struct {
 	DatabaseService   *services.DatabaseService
 	SettingsService   *services.SettingsService
 	LogsService       *services.LogsService
+	productHandlers   *ProductsExtensionHandlers
+	analyticsHandlers *AnalyticsHandlers
 }
 
 func NewAPI(
@@ -157,10 +160,16 @@ func (a *API) setupRoutes() {
 	
 	// Extension dashboard routes (temporarily public for development)
 	// Analytics dashboard
+	a.analyticsHandlers = NewAnalyticsHandlers(a.DB)
+	// Initialize analytics schema
+	if err := a.analyticsHandlers.InitializeSchema(); err != nil {
+		// Log error but don't fail startup
+		fmt.Printf("Failed to initialize analytics schema: %v\n", err)
+	}
 	apiRouter.HandleFunc("/ext/analytics/dashboard", HandleAnalyticsDashboard()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/ext/analytics/api/stats", HandleAnalyticsStats()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/ext/analytics/api/pageviews", HandleAnalyticsPageviews()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/ext/analytics/api/track", HandleAnalyticsTrack()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/analytics/api/stats", a.analyticsHandlers.HandleStats()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/analytics/api/pageviews", a.analyticsHandlers.HandlePageViews()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/analytics/api/track", a.analyticsHandlers.HandleTrack()).Methods("POST", "OPTIONS")
 	
 	// Webhooks dashboard
 	apiRouter.HandleFunc("/ext/webhooks/dashboard", HandleWebhooksDashboard()).Methods("GET", "OPTIONS")
@@ -169,49 +178,52 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/ext/webhooks/api/webhooks/{id}/toggle", HandleWebhooksToggle()).Methods("POST", "OPTIONS")
 	
 	// Products extension routes
-	productHandlers := NewProductsExtensionHandlersWithDB(a.DB.DB)
+	// Initialize products handlers lazily to ensure migrations have run
+	a.productHandlers = NewProductsExtensionHandlersWithDB(a.DB.DB)
 	
 	// Products basic CRUD (for compatibility)
-	apiRouter.HandleFunc("/ext/products/api/products", productHandlers.HandleProductsList()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/ext/products/api/products", productHandlers.HandleProductsCreate()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/ext/products/api/products", a.productHandlers.HandleProductsList()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/products/api/products", a.productHandlers.HandleProductsCreate()).Methods("POST", "OPTIONS")
 	apiRouter.HandleFunc("/ext/products/api/products/{id}", HandleProductsUpdate()).Methods("PUT", "OPTIONS")
 	apiRouter.HandleFunc("/ext/products/api/products/{id}", HandleProductsDelete()).Methods("DELETE", "OPTIONS")
-	apiRouter.HandleFunc("/ext/products/api/stats", productHandlers.HandleProductsStats()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/products/api/stats", a.productHandlers.HandleProductsStats()).Methods("GET", "OPTIONS")
 	
 	// Products extension - Variables management
-	apiRouter.HandleFunc("/products/variables", productHandlers.HandleListVariables()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/products/variables", productHandlers.HandleCreateVariable()).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/products/variables/{id}", productHandlers.HandleUpdateVariable()).Methods("PUT", "OPTIONS")
-	apiRouter.HandleFunc("/products/variables/{id}", productHandlers.HandleDeleteVariable()).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/products/variables", a.productHandlers.HandleListVariables()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/variables", a.productHandlers.HandleCreateVariable()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/variables/{id}", a.productHandlers.HandleUpdateVariable()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/variables/{id}", a.productHandlers.HandleDeleteVariable()).Methods("DELETE", "OPTIONS")
 	
 	// Products extension - Entity Types
-	apiRouter.HandleFunc("/products/entity-types", productHandlers.HandleListEntityTypes()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/products/entity-types", productHandlers.HandleCreateEntityType()).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/products/entity-types/{id}", productHandlers.HandleUpdateEntityType()).Methods("PUT", "OPTIONS")
-	apiRouter.HandleFunc("/products/entity-types/{id}", productHandlers.HandleDeleteEntityType()).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/products/entity-types", a.productHandlers.HandleListEntityTypes()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/entity-types", a.productHandlers.HandleCreateEntityType()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/entity-types/{id}", a.productHandlers.HandleUpdateEntityType()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/entity-types/{id}", a.productHandlers.HandleDeleteEntityType()).Methods("DELETE", "OPTIONS")
 	
 	// Products extension - Entities (user's entities)
-	apiRouter.HandleFunc("/products/entities", productHandlers.HandleListEntities()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/products/entities", productHandlers.HandleCreateEntity()).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/products/entities/{id}", productHandlers.HandleUpdateEntity()).Methods("PUT", "OPTIONS")
-	apiRouter.HandleFunc("/products/entities/{id}", productHandlers.HandleDeleteEntity()).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/products/entities", a.productHandlers.HandleListEntities()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/entities", a.productHandlers.HandleCreateEntity()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/entities/{id}", a.productHandlers.HandleUpdateEntity()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/entities/{id}", a.productHandlers.HandleDeleteEntity()).Methods("DELETE", "OPTIONS")
 	
 	// User entity and product endpoints (for user profile pages)
-	apiRouter.HandleFunc("/user/entities/{id}", productHandlers.HandleGetEntity()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/user/entities/{id}/products", productHandlers.HandleEntityProducts()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/user/entities/{id}", a.productHandlers.HandleGetEntity()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/user/entities/{id}/products", a.productHandlers.HandleEntityProducts()).Methods("GET", "OPTIONS")
 	
 	// Price calculation endpoint
-	apiRouter.HandleFunc("/products/calculate-price", productHandlers.HandleCalculatePrice()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/calculate-price", a.productHandlers.HandleCalculatePrice()).Methods("POST", "OPTIONS")
 	
 	// Products extension - Product Types
-	apiRouter.HandleFunc("/products/product-types", productHandlers.HandleListProductTypes()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/products/product-types", productHandlers.HandleCreateProductType()).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/products/product-types/{id}", productHandlers.HandleUpdateProductType()).Methods("PUT", "OPTIONS")
-	apiRouter.HandleFunc("/products/product-types/{id}", productHandlers.HandleDeleteProductType()).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/products/product-types", a.productHandlers.HandleListProductTypes()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/product-types", a.productHandlers.HandleCreateProductType()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/product-types/{id}", a.productHandlers.HandleUpdateProductType()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/product-types/{id}", a.productHandlers.HandleDeleteProductType()).Methods("DELETE", "OPTIONS")
 	
 	// Products extension - Pricing Templates
-	apiRouter.HandleFunc("/products/pricing-templates", productHandlers.HandleListPricingTemplates()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/products/pricing-templates", productHandlers.HandleCreatePricingTemplate()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/pricing-templates", a.productHandlers.HandleListPricingTemplates()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/pricing-templates", a.productHandlers.HandleCreatePricingTemplate()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/pricing-templates/{id}", a.productHandlers.HandleUpdatePricingTemplate()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/pricing-templates/{id}", a.productHandlers.HandleDeletePricingTemplate()).Methods("DELETE", "OPTIONS")
 	
 	// Hugo extension routes
 	apiRouter.HandleFunc("/ext/hugo/api/sites", HandleHugoSitesList()).Methods("GET", "OPTIONS")

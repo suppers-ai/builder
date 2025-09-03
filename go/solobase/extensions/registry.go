@@ -2,57 +2,43 @@ package extensions
 
 import (
 	"fmt"
-
 	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/extensions/official/analytics"
 	"github.com/suppers-ai/solobase/extensions/official/cloudstorage"
 	"github.com/suppers-ai/solobase/extensions/official/hugo"
 	"github.com/suppers-ai/solobase/extensions/official/products"
 	"github.com/suppers-ai/solobase/extensions/official/webhooks"
+	"gorm.io/gorm"
 )
 
 // RegisterAllExtensions registers all discovered extensions with the registry
-func RegisterAllExtensions(registry *core.ExtensionRegistry) error {
-	fmt.Println("DEBUG: RegisterAllExtensions called")
-	
-	// Register Products extension
-	fmt.Println("DEBUG: Registering Products extension")
-	if err := registry.Register(products.NewProductsExtension()); err != nil {
+func RegisterAllExtensions(registry *core.ExtensionRegistry, db *gorm.DB) error {
+	// Register Products extension with database
+	productsExt := products.NewProductsExtensionWithDB(db)
+	if err := registry.Register(productsExt); err != nil {
 		return fmt.Errorf("failed to register products extension: %w", err)
 	}
-	fmt.Println("DEBUG: Products extension registered successfully")
+	// Set the database to trigger migrations
+	productsExt.SetDatabase(db)
 
-	// Register Hugo extension (now fixed and working)
-	fmt.Println("DEBUG: Registering Hugo extension")
+	// Register Hugo extension
 	if err := registry.Register(hugo.NewHugoExtension()); err != nil {
 		return fmt.Errorf("failed to register hugo extension: %w", err)
 	}
-	fmt.Println("DEBUG: Hugo extension registered successfully")
 
 	// Register Analytics extension
-	fmt.Println("DEBUG: Registering Analytics extension")
 	if err := registry.Register(analytics.NewAnalyticsExtension()); err != nil {
 		return fmt.Errorf("failed to register analytics extension: %w", err)
 	}
-	fmt.Println("DEBUG: Analytics extension registered successfully")
 
 	// Register Cloud Storage extension
-	fmt.Println("DEBUG: Registering CloudStorage extension")
 	if err := registry.Register(cloudstorage.NewCloudStorageExtension(nil)); err != nil {
 		return fmt.Errorf("failed to register cloud storage extension: %w", err)
 	}
-	fmt.Println("DEBUG: CloudStorage extension registered successfully")
 
 	// Register Webhooks extension
-	fmt.Println("DEBUG: Registering Webhooks extension")
 	if err := registry.Register(webhooks.NewWebhooksExtension()); err != nil {
 		return fmt.Errorf("failed to register webhooks extension: %w", err)
-	}
-	fmt.Println("DEBUG: Webhooks extension registered successfully")
-	
-	fmt.Printf("DEBUG: Total extensions registered: %d\n", len(registry.GetAll()))
-	for _, ext := range registry.GetAll() {
-		fmt.Printf("DEBUG: Extension registered: %s\n", ext.Metadata().Name)
 	}
 
 	return nil

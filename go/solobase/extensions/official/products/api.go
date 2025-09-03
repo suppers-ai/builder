@@ -97,33 +97,33 @@ func (a *AdminAPI) DeleteVariable(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// Entity Type management
+// Entity Template management
 func (a *AdminAPI) ListEntityTypes(w http.ResponseWriter, r *http.Request) {
-	var entityTypes []models.EntityType
-	if err := a.db.Find(&entityTypes).Error; err != nil {
+	var entityTemplates []models.EntityTemplate
+	if err := a.db.Find(&entityTemplates).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entityTypes)
+	json.NewEncoder(w).Encode(entityTemplates)
 }
 
 func (a *AdminAPI) CreateEntityType(w http.ResponseWriter, r *http.Request) {
-	var entityType models.EntityType
-	if err := json.NewDecoder(r.Body).Decode(&entityType); err != nil {
+	var entityTemplate models.EntityTemplate
+	if err := json.NewDecoder(r.Body).Decode(&entityTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	if err := a.db.Create(&entityType).Error; err != nil {
+	if err := a.db.Create(&entityTemplate).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(entityType)
+	json.NewEncoder(w).Encode(entityTemplate)
 }
 
 func (a *AdminAPI) UpdateEntityType(w http.ResponseWriter, r *http.Request) {
@@ -134,19 +134,19 @@ func (a *AdminAPI) UpdateEntityType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	var entityType models.EntityType
-	if err := json.NewDecoder(r.Body).Decode(&entityType); err != nil {
+	var entityTemplate models.EntityTemplate
+	if err := json.NewDecoder(r.Body).Decode(&entityTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	if err := a.db.Model(&models.EntityType{}).Where("id = ?", id).Updates(&entityType).Error; err != nil {
+	if err := a.db.Model(&models.EntityTemplate{}).Where("id = ?", id).Updates(&entityTemplate).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entityType)
+	json.NewEncoder(w).Encode(entityTemplate)
 }
 
 func (a *AdminAPI) DeleteEntityType(w http.ResponseWriter, r *http.Request) {
@@ -157,7 +157,7 @@ func (a *AdminAPI) DeleteEntityType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if err := a.db.Delete(&models.EntityType{}, id).Error; err != nil {
+	if err := a.db.Delete(&models.EntityTemplate{}, id).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -165,33 +165,33 @@ func (a *AdminAPI) DeleteEntityType(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// Product Type management
+// Product Template management
 func (a *AdminAPI) ListProductTypes(w http.ResponseWriter, r *http.Request) {
-	var productTypes []models.ProductType
-	if err := a.db.Find(&productTypes).Error; err != nil {
+	var productTemplates []models.ProductTemplate
+	if err := a.db.Find(&productTemplates).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(productTypes)
+	json.NewEncoder(w).Encode(productTemplates)
 }
 
 func (a *AdminAPI) CreateProductType(w http.ResponseWriter, r *http.Request) {
-	var productType models.ProductType
-	if err := json.NewDecoder(r.Body).Decode(&productType); err != nil {
+	var productTemplate models.ProductTemplate
+	if err := json.NewDecoder(r.Body).Decode(&productTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	if err := a.db.Create(&productType).Error; err != nil {
+	if err := a.db.Create(&productTemplate).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(productType)
+	json.NewEncoder(w).Encode(productTemplate)
 }
 
 func (a *AdminAPI) UpdateProductType(w http.ResponseWriter, r *http.Request) {
@@ -202,19 +202,19 @@ func (a *AdminAPI) UpdateProductType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	var productType models.ProductType
-	if err := json.NewDecoder(r.Body).Decode(&productType); err != nil {
+	var productTemplate models.ProductTemplate
+	if err := json.NewDecoder(r.Body).Decode(&productTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	if err := a.db.Model(&models.ProductType{}).Where("id = ?", id).Updates(&productType).Error; err != nil {
+	if err := a.db.Model(&models.ProductTemplate{}).Where("id = ?", id).Updates(&productTemplate).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(productType)
+	json.NewEncoder(w).Encode(productTemplate)
 }
 
 func (a *AdminAPI) DeleteProductType(w http.ResponseWriter, r *http.Request) {
@@ -225,7 +225,7 @@ func (a *AdminAPI) DeleteProductType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if err := a.db.Delete(&models.ProductType{}, id).Error; err != nil {
+	if err := a.db.Delete(&models.ProductTemplate{}, id).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -260,6 +260,48 @@ func (a *AdminAPI) CreatePricingTemplate(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(template)
+}
+
+func (a *AdminAPI) UpdatePricingTemplate(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	templateID, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	
+	var template models.PricingTemplate
+	if err := json.NewDecoder(r.Body).Decode(&template); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	
+	// Ensure the ID matches
+	template.ID = uint(templateID)
+	
+	if err := a.db.Save(&template).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(template)
+}
+
+func (a *AdminAPI) DeletePricingTemplate(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	templateID, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+	
+	if err := a.db.Delete(&models.PricingTemplate{}, uint(templateID)).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // UserAPI handles user operations

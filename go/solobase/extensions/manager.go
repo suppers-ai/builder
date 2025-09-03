@@ -20,6 +20,7 @@ type ExtensionManager struct {
 	services *core.ExtensionServices
 	config   *ExtensionConfig
 	logger   logger.Logger
+	db       *gorm.DB
 }
 
 // ExtensionConfig holds the configuration for all extensions
@@ -61,6 +62,7 @@ func NewExtensionManager(db *gorm.DB, logger logger.Logger) (*ExtensionManager, 
 		services: services,
 		config:   config,
 		logger:   logger,
+		db:       db,
 	}, nil
 }
 
@@ -129,6 +131,11 @@ func (m *ExtensionManager) Shutdown(ctx context.Context) error {
 // GetRegistry returns the extension registry
 func (m *ExtensionManager) GetRegistry() *core.ExtensionRegistry {
 	return m.registry
+}
+
+// GetExtension returns a specific extension by name
+func (m *ExtensionManager) GetExtension(name string) (core.Extension, bool) {
+	return m.registry.Get(name)
 }
 
 // SaveExtensionState saves the enabled/disabled state of an extension
@@ -239,8 +246,8 @@ func loadExtensionConfig() (*ExtensionConfig, error) {
 func (m *ExtensionManager) registerExtensions() error {
 	m.logger.Info(context.Background(), "Registering extensions")
 
-	// Register all available extensions
-	if err := RegisterAllExtensions(m.registry); err != nil {
+	// Register all available extensions with database
+	if err := RegisterAllExtensions(m.registry, m.db); err != nil {
 		return fmt.Errorf("failed to register extensions: %w", err)
 	}
 

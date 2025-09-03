@@ -31,100 +31,205 @@ func (j *JSONB) Scan(value interface{}) error {
 
 // Variable represents a pricing variable
 type Variable struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Name        string    `gorm:"uniqueIndex;not null" json:"name"`
-	DisplayName string    `json:"display_name"`
-	Type        string    `json:"type"` // number, string, boolean, date
-	Source      string    `json:"source"` // system, user_input, product, calculated, entity
-	Category    string    `json:"category"`
+	ID          uint        `gorm:"primaryKey" json:"id"`
+	Name        string      `gorm:"uniqueIndex;not null" json:"name"`
+	DisplayName string      `json:"display_name"`
+	ValueType   string      `json:"value_type"` // number, string, boolean, date, select
+	Type        string      `json:"type"`       // user_input, seller_input, calculated, system
+	SourceType  string      `json:"source_type"` // product, entity, system, global
+	SourceID    *uint       `json:"source_id,omitempty"` // ID of the entity/product this variable belongs to
+	Category    string      `json:"category"`
 	DefaultValue interface{} `gorm:"type:jsonb" json:"default_value"`
-	Description string    `json:"description"`
-	Formula     string    `json:"formula,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	Description string      `json:"description"`
+	Formula     string      `json:"formula,omitempty"` // For calculated variables
+	Options     []string    `gorm:"type:jsonb;serializer:json" json:"options,omitempty"` // For select type
+	Constraints JSONB       `gorm:"type:jsonb" json:"constraints,omitempty"` // Min, max, pattern, etc.
+	IsActive    bool        `gorm:"default:true" json:"is_active"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
 }
 
-// EntityType represents a type of business entity
-type EntityType struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Name        string    `gorm:"uniqueIndex;not null" json:"name"`
-	DisplayName string    `json:"display_name"`
-	Description string    `json:"description"`
-	Schema      JSONB     `gorm:"type:jsonb" json:"schema"` // JSON schema for custom fields
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+// FieldConstraints defines constraints for a field
+type FieldConstraints struct {
+	Required    bool        `json:"required,omitempty"`
+	Min         *float64    `json:"min,omitempty"`
+	Max         *float64    `json:"max,omitempty"`
+	MinLength   *int        `json:"min_length,omitempty"`
+	MaxLength   *int        `json:"max_length,omitempty"`
+	Pattern     string      `json:"pattern,omitempty"`
+	Options     []string    `json:"options,omitempty"` // For select/enum types
+	Default     interface{} `json:"default,omitempty"`
+	Placeholder string      `json:"placeholder,omitempty"`
+}
+
+// FieldDefinition defines a custom field with its constraints
+type FieldDefinition struct {
+	ID          string           `json:"id"`          // e.g., "filter_text_1", "filter_numeric_1"
+	Name        string           `json:"name"`        // Display name for the field
+	Type        string           `json:"type"`        // numeric, text, boolean, enum, location
+	Required    bool             `json:"required"`
+	Description string           `json:"description,omitempty"`
+	Constraints FieldConstraints `json:"constraints"`
+}
+
+// EntityTemplate represents a template for business entities
+type EntityTemplate struct {
+	ID          uint              `gorm:"primaryKey" json:"id"`
+	Name        string            `gorm:"uniqueIndex;not null" json:"name"`
+	DisplayName string            `json:"display_name"`
+	Description string            `json:"description"`
+	Icon        string            `json:"icon,omitempty"`
+	Fields      []FieldDefinition `gorm:"type:jsonb;serializer:json" json:"fields"` // Custom field definitions
+	Status      string            `gorm:"default:'active'" json:"status"` // active, pending, deleted
+	CreatedAt   time.Time         `json:"created_at"`
+	UpdatedAt   time.Time         `json:"updated_at"`
+}
+
+func (EntityTemplate) TableName() string {
+	return "entity_template"
 }
 
 // Entity represents a business entity (restaurant, store, etc)
 type Entity struct {
-	ID           uint      `gorm:"primaryKey" json:"id"`
-	UserID       uint      `gorm:"index;not null" json:"user_id"`
-	EntityTypeID uint      `gorm:"index;not null" json:"entity_type_id"`
-	EntityType   EntityType `json:"entity_type,omitempty"`
-	Name         string    `gorm:"not null" json:"name"`
-	Description  string    `json:"description"`
-	CustomFields JSONB     `gorm:"type:jsonb" json:"custom_fields"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID               uint           `gorm:"primaryKey" json:"id"`
+	UserID           uint           `gorm:"index;not null" json:"user_id"`
+	EntityTemplateID uint           `gorm:"index;not null" json:"entity_template_id"`
+	EntityTemplate   EntityTemplate `json:"entity_template,omitempty" gorm:"foreignKey:EntityTemplateID"`
+	Name             string         `gorm:"not null" json:"name"`
+	Description      string         `json:"description"`
+	
+	// Filter columns for indexing and searching
+	FilterNumeric1  *float64 `gorm:"index" json:"filter_numeric_1,omitempty"`
+	FilterNumeric2  *float64 `gorm:"index" json:"filter_numeric_2,omitempty"`
+	FilterNumeric3  *float64 `gorm:"index" json:"filter_numeric_3,omitempty"`
+	FilterNumeric4  *float64 `gorm:"index" json:"filter_numeric_4,omitempty"`
+	FilterNumeric5  *float64 `gorm:"index" json:"filter_numeric_5,omitempty"`
+	
+	FilterText1     *string  `gorm:"index" json:"filter_text_1,omitempty"`
+	FilterText2     *string  `gorm:"index" json:"filter_text_2,omitempty"`
+	FilterText3     *string  `gorm:"index" json:"filter_text_3,omitempty"`
+	FilterText4     *string  `gorm:"index" json:"filter_text_4,omitempty"`
+	FilterText5     *string  `gorm:"index" json:"filter_text_5,omitempty"`
+	
+	FilterBoolean1  *bool    `gorm:"index" json:"filter_boolean_1,omitempty"`
+	FilterBoolean2  *bool    `gorm:"index" json:"filter_boolean_2,omitempty"`
+	FilterBoolean3  *bool    `gorm:"index" json:"filter_boolean_3,omitempty"`
+	FilterBoolean4  *bool    `gorm:"index" json:"filter_boolean_4,omitempty"`
+	FilterBoolean5  *bool    `gorm:"index" json:"filter_boolean_5,omitempty"`
+	
+	FilterEnum1     *string  `gorm:"index" json:"filter_enum_1,omitempty"`
+	FilterEnum2     *string  `gorm:"index" json:"filter_enum_2,omitempty"`
+	FilterEnum3     *string  `gorm:"index" json:"filter_enum_3,omitempty"`
+	FilterEnum4     *string  `gorm:"index" json:"filter_enum_4,omitempty"`
+	FilterEnum5     *string  `gorm:"index" json:"filter_enum_5,omitempty"`
+	
+	FilterLocation1 *string  `gorm:"index" json:"filter_location_1,omitempty"` // Store as GeoJSON or lat,lng
+	FilterLocation2 *string  `gorm:"index" json:"filter_location_2,omitempty"`
+	FilterLocation3 *string  `gorm:"index" json:"filter_location_3,omitempty"`
+	FilterLocation4 *string  `gorm:"index" json:"filter_location_4,omitempty"`
+	FilterLocation5 *string  `gorm:"index" json:"filter_location_5,omitempty"`
+	
+	CustomFields JSONB      `gorm:"type:jsonb" json:"custom_fields"` // Additional non-indexed fields
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
-// ProductType represents a type of product
-type ProductType struct {
-	ID              uint      `gorm:"primaryKey" json:"id"`
-	Name            string    `gorm:"uniqueIndex;not null" json:"name"`
-	DisplayName     string    `json:"display_name"`
-	Description     string    `json:"description"`
-	Category        string    `json:"category,omitempty"`
-	Icon            string    `json:"icon,omitempty"`
-	Schema          JSONB     `gorm:"type:jsonb" json:"schema"` // JSON schema for custom fields
-	PricingModel    string    `json:"pricing_model,omitempty"`
-	BaseFormula     string    `json:"base_formula"` // Default pricing formula
-	DefaultVariables JSONB    `gorm:"type:jsonb" json:"default_variables,omitempty"`
-	Settings        JSONB     `gorm:"type:jsonb" json:"settings,omitempty"`
-	IsActive        bool      `gorm:"default:true" json:"is_active"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+// ProductTemplate represents a template for products
+type ProductTemplate struct {
+	ID                          uint              `gorm:"primaryKey" json:"id"`
+	Name                        string            `gorm:"uniqueIndex;not null" json:"name"`
+	DisplayName                 string            `json:"display_name"`
+	Description                 string            `json:"description"`
+	Category                    string            `json:"category,omitempty"`
+	Icon                        string            `json:"icon,omitempty"`
+	Fields                      []FieldDefinition `gorm:"type:jsonb;serializer:json" json:"fields"` // Custom field definitions
+	PricingTemplates            []uint            `gorm:"type:jsonb;serializer:json" json:"pricing_templates"` // IDs of pricing templates to use
+	BillingMode                 string            `gorm:"default:'instant';not null" json:"billing_mode"` // instant, approval
+	BillingType                 string            `gorm:"default:'one-time';not null" json:"billing_type"` // one-time, recurring
+	BillingRecurringInterval    *string           `json:"billing_recurring_interval,omitempty"` // day, week, month, year
+	BillingRecurringIntervalCount *int           `gorm:"default:1" json:"billing_recurring_interval_count,omitempty"`
+	Status                      string            `gorm:"default:'active'" json:"status"` // active, pending, deleted
+	CreatedAt                   time.Time         `json:"created_at"`
+	UpdatedAt                   time.Time         `json:"updated_at"`
+}
+
+func (ProductTemplate) TableName() string {
+	return "product_template"
 }
 
 // Product represents a product
 type Product struct {
-	ID            uint        `gorm:"primaryKey" json:"id"`
-	EntityID      uint        `gorm:"index;not null" json:"entity_id"`
-	Entity        Entity      `json:"entity,omitempty"`
-	ProductTypeID uint        `gorm:"index;not null" json:"product_type_id"`
-	ProductType   ProductType `json:"product_type,omitempty"`
-	Name          string      `gorm:"not null" json:"name"`
-	Description   string      `json:"description"`
-	BasePrice     float64     `json:"base_price"`
-	Currency      string      `gorm:"default:'USD'" json:"currency"`
-	CustomFields  JSONB       `gorm:"type:jsonb" json:"custom_fields"`
-	Variables     JSONB       `gorm:"type:jsonb" json:"variables"` // Product-specific variable values
-	PricingFormula string     `json:"pricing_formula"` // Override formula
-	Active        bool        `gorm:"default:true" json:"active"`
-	CreatedAt     time.Time   `json:"created_at"`
-	UpdatedAt     time.Time   `json:"updated_at"`
+	ID                 uint            `gorm:"primaryKey" json:"id"`
+	EntityID           uint            `gorm:"index;not null" json:"entity_id"`
+	Entity             Entity          `json:"entity,omitempty"`
+	ProductTemplateID  uint            `gorm:"index;not null" json:"product_template_id"`
+	ProductTemplate    ProductTemplate `json:"product_template,omitempty" gorm:"foreignKey:ProductTemplateID"`
+	Name               string          `gorm:"not null" json:"name"`
+	Description        string          `json:"description"`
+	BasePrice          float64         `json:"base_price"`
+	Currency           string          `gorm:"default:'USD'" json:"currency"`
+	
+	// Filter columns for indexing and searching
+	FilterNumeric1  *float64 `gorm:"index" json:"filter_numeric_1,omitempty"`
+	FilterNumeric2  *float64 `gorm:"index" json:"filter_numeric_2,omitempty"`
+	FilterNumeric3  *float64 `gorm:"index" json:"filter_numeric_3,omitempty"`
+	FilterNumeric4  *float64 `gorm:"index" json:"filter_numeric_4,omitempty"`
+	FilterNumeric5  *float64 `gorm:"index" json:"filter_numeric_5,omitempty"`
+	
+	FilterText1     *string  `gorm:"index" json:"filter_text_1,omitempty"`
+	FilterText2     *string  `gorm:"index" json:"filter_text_2,omitempty"`
+	FilterText3     *string  `gorm:"index" json:"filter_text_3,omitempty"`
+	FilterText4     *string  `gorm:"index" json:"filter_text_4,omitempty"`
+	FilterText5     *string  `gorm:"index" json:"filter_text_5,omitempty"`
+	
+	FilterBoolean1  *bool    `gorm:"index" json:"filter_boolean_1,omitempty"`
+	FilterBoolean2  *bool    `gorm:"index" json:"filter_boolean_2,omitempty"`
+	FilterBoolean3  *bool    `gorm:"index" json:"filter_boolean_3,omitempty"`
+	FilterBoolean4  *bool    `gorm:"index" json:"filter_boolean_4,omitempty"`
+	FilterBoolean5  *bool    `gorm:"index" json:"filter_boolean_5,omitempty"`
+	
+	FilterEnum1     *string  `gorm:"index" json:"filter_enum_1,omitempty"`
+	FilterEnum2     *string  `gorm:"index" json:"filter_enum_2,omitempty"`
+	FilterEnum3     *string  `gorm:"index" json:"filter_enum_3,omitempty"`
+	FilterEnum4     *string  `gorm:"index" json:"filter_enum_4,omitempty"`
+	FilterEnum5     *string  `gorm:"index" json:"filter_enum_5,omitempty"`
+	
+	FilterLocation1 *string  `gorm:"index" json:"filter_location_1,omitempty"` // Store as GeoJSON or lat,lng
+	FilterLocation2 *string  `gorm:"index" json:"filter_location_2,omitempty"`
+	FilterLocation3 *string  `gorm:"index" json:"filter_location_3,omitempty"`
+	FilterLocation4 *string  `gorm:"index" json:"filter_location_4,omitempty"`
+	FilterLocation5 *string  `gorm:"index" json:"filter_location_5,omitempty"`
+	
+	CustomFields   JSONB       `gorm:"type:jsonb" json:"custom_fields"` // Additional non-indexed fields
+	Variables      JSONB       `gorm:"type:jsonb" json:"variables"`     // Product-specific variable values
+	PricingFormula string      `json:"pricing_formula"`                 // Override formula
+	Active         bool        `gorm:"default:true" json:"active"`
+	CreatedAt      time.Time   `json:"created_at"`
+	UpdatedAt      time.Time   `json:"updated_at"`
 }
 
 // PricingTemplate represents a reusable pricing template
 type PricingTemplate struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Name        string    `gorm:"uniqueIndex;not null" json:"name"`
-	DisplayName string    `json:"display_name"`
-	Description string    `json:"description"`
-	Formula     string    `gorm:"not null" json:"formula"`
-	Variables   JSONB     `gorm:"type:jsonb" json:"variables"` // Required variables
-	Category    string    `json:"category"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID               uint      `gorm:"primaryKey" json:"id"`
+	Name             string    `gorm:"uniqueIndex;not null" json:"name"`
+	DisplayName      string    `json:"display_name"`
+	Description      string    `json:"description"`
+	PriceFormula     string    `gorm:"not null" json:"price_formula"` // Formula to calculate price
+	ConditionFormula string    `json:"condition_formula,omitempty"`   // Formula to determine if template applies
+	Variables        JSONB     `gorm:"type:jsonb" json:"variables"`   // Required variables for this template
+	Category         string    `json:"category"`
+	IsActive         bool      `gorm:"default:true" json:"is_active"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
 
 // RegisterModels registers all models with GORM for auto-migration
 func RegisterModels(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&Variable{},
-		&EntityType{},
+		&EntityTemplate{},
 		&Entity{},
-		&ProductType{},
+		&ProductTemplate{},
 		&Product{},
 		&PricingTemplate{},
 	)

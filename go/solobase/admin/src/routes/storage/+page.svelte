@@ -6,13 +6,14 @@
 		Folder, File, Image, FileText, Film,
 		Music, Archive, Code, ChevronRight,
 		Plus, X, Check, Copy, Move, Eye, RefreshCw,
-		MoreVertical
+		MoreVertical, FolderTree
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import ExportButton from '$lib/components/ExportButton.svelte';
+	import FileExplorer from '$lib/components/FileExplorer.svelte';
 	import { requireAdmin } from '$lib/utils/auth';
 	
-	let viewMode = 'grid'; // 'grid' or 'list'
+	let viewMode = 'grid'; // 'grid', 'list', or 'explorer'
 	let selectedBucket: any = null;
 	let currentPath = '';
 	let searchQuery = '';
@@ -712,6 +713,68 @@
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 	}
 	
+	function convertToFileTree(files: any[]): any[] {
+		// Convert flat file list to tree structure for FileExplorer
+		const tree: any[] = [];
+		const folderMap = new Map();
+		
+		// First pass: create all folders
+		files.forEach(file => {
+			if (file.isFolder || file.type === 'folder') {
+				const node = {
+					id: file.id,
+					name: file.name,
+					path: file.fullPath || file.name,
+					type: 'directory',
+					children: []
+				};
+				folderMap.set(file.fullPath || file.name, node);
+				tree.push(node);
+			}
+		});
+		
+		// Second pass: add files
+		files.forEach(file => {
+			if (!file.isFolder && file.type !== 'folder') {
+				const node = {
+					id: file.id,
+					name: file.name,
+					path: file.fullPath || file.name,
+					type: 'file',
+					size: file.size
+				};
+				
+				// Try to find parent folder
+				const parentPath = currentPath;
+				const parentFolder = folderMap.get(parentPath);
+				
+				if (parentFolder) {
+					parentFolder.children.push(node);
+				} else {
+					tree.push(node);
+				}
+			}
+		});
+		
+		return tree;
+	}
+	
+	function handleExplorerSelect(item: any) {
+		if (item.type === 'directory') {
+			// Navigate to folder
+			const file = files.find(f => f.id === item.id);
+			if (file) {
+				navigateToFolder(file);
+			}
+		} else {
+			// View or download file
+			const file = files.find(f => f.id === item.id);
+			if (file) {
+				viewFile(file);
+			}
+		}
+	}
+
 	onMount(async () => {
 		// Check admin access
 		if (!requireAdmin()) return;
@@ -851,6 +914,13 @@
 						>
 							<List size={16} />
 						</button>
+						<button 
+							class="view-toggle-btn {viewMode === 'explorer' ? 'active' : ''}"
+							on:click={() => viewMode = 'explorer'}
+							title="Explorer view"
+						>
+							<FolderTree size={16} />
+						</button>
 					</div>
 				</div>
 			</div>
@@ -979,7 +1049,7 @@
 							</div>
 						{/if}
 					</div>
-				{:else}
+				{:else if viewMode === 'list'}
 					<div class="files-list">
 						<table class="table">
 							<thead>
@@ -1079,6 +1149,14 @@
 								<p style="font-size: 0.875rem;">Upload files or create folders to get started</p>
 							</div>
 						{/if}
+					</div>
+				{:else if viewMode === 'explorer'}
+					<div class="explorer-view">
+						<FileExplorer 
+							files={convertToFileTree(filteredFiles)}
+							mode="both"
+							on:select={(e) => handleExplorerSelect(e.detail)}
+						/>
 					</div>
 				{/if}
 				
@@ -1833,6 +1911,11 @@
 	/* List View */
 	.files-list {
 		padding: 0;
+	}
+	
+	.explorer-view {
+		padding: 1rem;
+		min-height: 400px;
 	}
 	
 	/* Bucket Info Bar */

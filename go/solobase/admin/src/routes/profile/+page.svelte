@@ -229,6 +229,21 @@
 				
 				<!-- Quick Actions -->
 				<div class="actions-grid">
+					<!-- Products -->
+					<button 
+						class="action-card"
+						on:click={() => goto('/profile/products')}
+					>
+						<Package size={24} />
+						<span>Products</span>
+					</button>
+					
+					<!-- Home (for non-admins) -->
+					<a href="/" class="action-card">
+						<Home size={24} />
+						<span>Home</span>
+					</a>
+
 					<!-- Account Settings -->
 					<button 
 						class="action-card"
@@ -247,28 +262,11 @@
 						<span>Change Password</span>
 					</button>
 					
-					<!-- Products -->
-					<button 
-						class="action-card"
-						on:click={() => goto('/profile/products')}
-					>
-						<Package size={24} />
-						<span>Products</span>
-					</button>
-					
 					<!-- Admin Dashboard (only for admins) -->
 					{#if user.role === 'admin'}
 						<a href="/" class="action-card">
 							<Shield size={24} />
 							<span>Admin Dashboard</span>
-						</a>
-					{/if}
-					
-					<!-- Home (for non-admins) -->
-					{#if user.role !== 'admin'}
-						<a href="/" class="action-card">
-							<Home size={24} />
-							<span>Home</span>
 						</a>
 					{/if}
 					

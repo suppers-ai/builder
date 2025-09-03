@@ -2,12 +2,34 @@
 	import { onMount } from 'svelte';
 	import { 
 		Building2, Plus, Edit2, Trash2, Search, Filter,
-		CheckCircle, XCircle
+		CheckCircle, XCircle, Settings
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { requireAdmin } from '$lib/utils/auth';
 	import IconPicker from '$lib/components/IconPicker.svelte';
+	import FieldEditor from '$lib/components/FieldEditor.svelte';
 	import { getIconComponent } from '$lib/utils/icons';
+
+	interface FieldConstraints {
+		required?: boolean;
+		min?: number;
+		max?: number;
+		min_length?: number;
+		max_length?: number;
+		pattern?: string;
+		options?: string[];
+		default?: any;
+		placeholder?: string;
+	}
+
+	interface FieldDefinition {
+		id: string;  // e.g., "filter_text_1", "filter_numeric_1"
+		name: string;
+		type: string;  // numeric, text, boolean, enum, location
+		required?: boolean;
+		description?: string;
+		constraints: FieldConstraints;
+	}
 
 	interface EntityType {
 		id: string;
@@ -15,9 +37,8 @@
 		display_name: string;
 		description: string;
 		icon?: string;
-		fields_schema?: any;
-		settings?: any;
-		is_active: boolean;
+		fields?: FieldDefinition[];
+		status: 'active' | 'pending' | 'deleted';
 		created_at: string;
 		updated_at: string;
 	}
@@ -35,8 +56,8 @@
 		display_name: '',
 		description: '',
 		icon: 'building',
-		is_active: true,
-		fields_schema: {}
+		status: 'active',
+		fields: []
 	};
 
 	$: filteredEntityTypes = entityTypes.filter(entityType => {
@@ -66,13 +87,9 @@
 	
 	async function createEntityType() {
 		try {
-			// Ensure fields_schema is a valid object
-			if (typeof newEntityType.fields_schema === 'string') {
-				try {
-					newEntityType.fields_schema = JSON.parse(newEntityType.fields_schema);
-				} catch {
-					newEntityType.fields_schema = {};
-				}
+			// Ensure fields is a valid array
+			if (!Array.isArray(newEntityType.fields)) {
+				newEntityType.fields = [];
 			}
 
 			const result = await api.post('/products/entity-types', newEntityType);
@@ -83,8 +100,8 @@
 					display_name: '',
 					description: '',
 					icon: 'building',
-					is_active: true,
-					fields_schema: {}
+					status: 'active',
+					fields: []
 				};
 				showCreateModal = false;
 				// Reload entity types
@@ -96,34 +113,31 @@
 		}
 	}
 	
-	async function editEntityType(entityType: EntityType) {
-		selectedEntityType = { ...entityType };
-		showEditModal = true;
-	}
-	
-	async function updateEntityType() {
+	async function saveEntityType() {
 		if (!selectedEntityType) return;
 		
+		// Update fields from schema editor
+		selectedEntityType.fields = schemaFields.filter(field => field.name).map(field => ({
+			id: field.id,
+			name: field.name,
+			type: field.type,
+			required: field.required || false,
+			description: field.description || '',
+			constraints: field.constraints || {}
+		}));
+		
 		try {
-			// Ensure fields_schema is a valid object
-			if (typeof selectedEntityType.fields_schema === 'string') {
-				try {
-					selectedEntityType.fields_schema = JSON.parse(selectedEntityType.fields_schema);
-				} catch {
-					selectedEntityType.fields_schema = {};
-				}
-			}
-
 			const result = await api.put(`/products/entity-types/${selectedEntityType.id}`, selectedEntityType);
 			if (result) {
 				showEditModal = false;
 				selectedEntityType = null;
+				schemaFields = [];
 				// Reload entity types
 				await loadEntityTypes();
 			}
 		} catch (error) {
-			console.error('Failed to update entity type:', error);
-			alert('Failed to update entity type');
+			console.error('Failed to save entity type:', error);
+			alert('Failed to save entity type');
 		}
 	}
 	
@@ -141,53 +155,109 @@
 	}
 
 	// Schema editor state
-	let schemaFields: any[] = [];
-	let editingSchema = false;
+	let schemaFields: FieldDefinition[] = [];
+	let showFieldTypeSelector = false;
+	
+	// Track used filter IDs
+	function getUsedFilterIds(fields: FieldDefinition[]): Map<string, number> {
+		const usage = new Map<string, number>();
+		usage.set('numeric', 0);
+		usage.set('text', 0);
+		usage.set('boolean', 0);
+		usage.set('enum', 0);
+		usage.set('location', 0);
+		
+		fields.forEach(field => {
+			if (field.id) {
+				const parts = field.id.split('_');
+				if (parts.length === 3 && parts[0] === 'filter') {
+					const type = parts[1];
+					const num = parseInt(parts[2]);
+					if (usage.has(type)) {
+						usage.set(type, Math.max(usage.get(type) || 0, num));
+					}
+				}
+			}
+		});
+		
+		return usage;
+	}
+	
+	// Get next available filter ID for a type
+	function getNextFilterId(type: string, fields: FieldDefinition[]): string | null {
+		const usage = getUsedFilterIds(fields);
+		const count = usage.get(type) || 0;
+		
+		// Check if we've reached the limit of 5
+		if (count >= 5) {
+			return null;
+		}
+		
+		// Find the next available number (might not be count+1 if some were deleted)
+		for (let i = 1; i <= 5; i++) {
+			const id = `filter_${type}_${i}`;
+			if (!fields.some(f => f.id === id)) {
+				return id;
+			}
+		}
+		
+		return null;
+	}
+	
+	// Check if a field type is available
+	function isTypeAvailable(type: string, fields: FieldDefinition[]): boolean {
+		return getNextFilterId(type, fields) !== null;
+	}
+	
+	// Count fields by type
+	function countFieldsByType(type: string, fields: FieldDefinition[]): number {
+		return fields.filter(f => {
+			if (f.id) {
+				const parts = f.id.split('_');
+				return parts[0] === 'filter' && parts[1] === type;
+			}
+			return false;
+		}).length;
+	}
 
-	function startSchemaEdit(entityType: any) {
-		editingSchema = true;
-		if (entityType.fields_schema && typeof entityType.fields_schema === 'object') {
-			schemaFields = Object.entries(entityType.fields_schema).map(([key, value]: [string, any]) => ({
-				name: key,
-				type: value.type || 'text',
-				label: value.label || key,
-				required: value.required || false,
-				description: value.description || ''
+	function openEditModal(entityType: EntityType) {
+		selectedEntityType = { ...entityType };
+		if (Array.isArray(entityType.fields)) {
+			schemaFields = entityType.fields.map((field: any) => ({
+				id: field.id || '',
+				name: field.name || '',
+				type: field.type || 'text',
+				required: field.required || false,
+				description: field.description || '',
+				constraints: field.constraints || {}
 			}));
 		} else {
 			schemaFields = [];
 		}
+		showFieldTypeSelector = false;
+		showEditModal = true;
 	}
 
-	function addSchemaField() {
+	function addSchemaField(type: string) {
+		const id = getNextFilterId(type, schemaFields);
+		if (!id) {
+			alert(`Maximum of 5 ${type} fields reached`);
+			return;
+		}
+		
 		schemaFields = [...schemaFields, {
+			id: id,
 			name: '',
-			type: 'text',
-			label: '',
+			type: type,
 			required: false,
-			description: ''
+			description: '',
+			constraints: {}
 		}];
+		showFieldTypeSelector = false;
 	}
 
 	function removeSchemaField(index: number) {
 		schemaFields = schemaFields.filter((_, i) => i !== index);
-	}
-
-	function saveSchema(entityType: any) {
-		const schema: any = {};
-		schemaFields.forEach(field => {
-			if (field.name) {
-				schema[field.name] = {
-					type: field.type,
-					label: field.label || field.name,
-					required: field.required,
-					description: field.description
-				};
-			}
-		});
-		entityType.fields_schema = schema;
-		editingSchema = false;
-		schemaFields = [];
 	}
 </script>
 
@@ -255,51 +325,42 @@
 		{:else}
 			<div class="entity-grid">
 				{#each filteredEntityTypes as entityType}
-					<div class="entity-card">
+					<div class="entity-card" on:click={() => openEditModal(entityType)} role="button" tabindex="0" on:keypress={(e) => e.key === 'Enter' && openEditModal(entityType)}>
 						<div class="entity-header">
 							<div class="entity-icon">
 								<svelte:component this={getIconComponent(entityType.icon)} size={24} />
 							</div>
-							<div class="entity-actions">
-								<button class="btn-icon" on:click={() => editEntityType(entityType)} title="Edit">
-									<Edit2 size={16} />
-								</button>
-								<button class="btn-icon btn-icon-danger" on:click={() => deleteEntityType(entityType.id)} title="Delete">
-									<Trash2 size={16} />
-								</button>
-							</div>
+							<span class="status-badge status-{entityType.status}">
+								{#if entityType.status === 'active'}
+									<CheckCircle size={12} />
+									Active
+								{:else if entityType.status === 'pending'}
+									<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<circle cx="12" cy="12" r="10"></circle>
+										<polyline points="12 6 12 12 16 14"></polyline>
+									</svg>
+									Pending
+								{:else}
+									<XCircle size={12} />
+									Deleted
+								{/if}
+							</span>
 						</div>
 						<div class="entity-content">
 							<h3 class="entity-name">{entityType.display_name}</h3>
 							<code class="entity-code">{entityType.name}</code>
 							<p class="entity-description">{entityType.description}</p>
 							
-							{#if entityType.fields_schema && Object.keys(entityType.fields_schema).length > 0}
+							{#if entityType.fields && entityType.fields.length > 0}
 								<div class="entity-fields">
 									<p class="fields-label">Custom Fields:</p>
 									<div class="fields-list">
-										{#each Object.keys(entityType.fields_schema) as field}
-											<span class="field-badge">{field}</span>
+										{#each entityType.fields as field}
+											<span class="field-badge" title="{field.type}{field.constraints?.required ? ' (required)' : ''}">{field.label || field.name}</span>
 										{/each}
 									</div>
 								</div>
 							{/if}
-							
-							<div class="entity-footer">
-								<span class="status-badge {entityType.is_active ? 'status-active' : 'status-inactive'}">
-									{#if entityType.is_active}
-										<CheckCircle size={12} />
-										Active
-									{:else}
-										<XCircle size={12} />
-										Inactive
-									{/if}
-								</span>
-								<button class="btn-link" on:click={() => { selectedEntityType = entityType; startSchemaEdit(entityType); showEditModal = true; }}>
-									<Settings size={14} />
-									Configure Fields
-								</button>
-							</div>
 						</div>
 					</div>
 				{/each}
@@ -457,6 +518,15 @@
 	.btn-secondary:hover {
 		background: #f9fafb;
 	}
+	
+	.btn-danger {
+		background: #ef4444;
+		color: white;
+	}
+	
+	.btn-danger:hover {
+		background: #dc2626;
+	}
 
 	.btn-icon {
 		display: flex;
@@ -512,10 +582,20 @@
 		border-radius: 0.5rem;
 		overflow: hidden;
 		transition: all 0.2s;
+		cursor: pointer;
+		background: white;
 	}
 
 	.entity-card:hover {
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		border-color: #06b6d4;
+		transform: translateY(-2px);
+	}
+	
+	.entity-card:focus {
+		outline: none;
+		border-color: #06b6d4;
+		box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 	}
 
 	.entity-header {
@@ -623,7 +703,12 @@
 		color: #065f46;
 	}
 
-	.status-inactive {
+	.status-pending {
+		background: #fed7aa;
+		color: #9a3412;
+	}
+
+	.status-deleted {
 		background: #fee2e2;
 		color: #991b1b;
 	}
@@ -733,10 +818,15 @@
 
 	.modal-footer {
 		display: flex;
-		justify-content: flex-end;
-		gap: 0.75rem;
+		justify-content: space-between;
+		align-items: center;
 		padding: 1.5rem;
 		border-top: 1px solid #e5e7eb;
+	}
+	
+	.modal-footer-right {
+		display: flex;
+		gap: 0.75rem;
 	}
 
 	.schema-editor {
@@ -808,6 +898,121 @@
 	.btn-remove:hover {
 		background: #fca5a5;
 	}
+
+	/* Improved Field Editor Styles */
+	.field-editor-card {
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		padding: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.field-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 1px solid #f3f4f6;
+	}
+
+	.field-header h4 {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.field-editor-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+
+	.field-col {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.field-col.full-width {
+		grid-column: span 2;
+	}
+
+	.field-col label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #6b7280;
+		margin-bottom: 0.25rem;
+	}
+
+	.field-col input,
+	.field-col select {
+		padding: 0.375rem 0.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.25rem;
+		font-size: 0.813rem;
+	}
+
+	.constraints-section {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #f3f4f6;
+	}
+
+	.constraints-section h5 {
+		margin: 0 0 0.75rem 0;
+		font-size: 0.813rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	.constraints-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+
+	.constraint-row {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.constraint-row.full-width {
+		grid-column: span 2;
+	}
+
+	.constraint-row label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: #6b7280;
+		margin-bottom: 0.25rem;
+	}
+
+	.constraint-row input,
+	.constraint-row select {
+		padding: 0.375rem 0.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.25rem;
+		font-size: 0.813rem;
+	}
+
+	.checkbox-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.813rem;
+		color: #374151;
+		grid-column: span 2;
+	}
+
+	.checkbox-label input[type="checkbox"] {
+		margin: 0;
+	}
+
+	.full-width {
+		grid-column: span 2;
+	}
 </style>
 
 <!-- Create Entity Type Modal -->
@@ -843,10 +1048,11 @@
 					<IconPicker bind:value={newEntityType.icon} placeholder="Choose an icon" />
 				</div>
 				<div class="form-group">
-					<label for="is_active">Status</label>
-					<select id="is_active" bind:value={newEntityType.is_active}>
-						<option value={true}>Active</option>
-						<option value={false}>Inactive</option>
+					<label for="status">Status</label>
+					<select id="status" bind:value={newEntityType.status}>
+						<option value="active">Active</option>
+						<option value="pending">Pending</option>
+						<option value="deleted">Deleted</option>
 					</select>
 				</div>
 			</div>
@@ -888,52 +1094,34 @@
 					<IconPicker bind:value={selectedEntityType.icon} placeholder="Choose an icon" />
 				</div>
 				
-				{#if editingSchema}
-					<div class="form-group">
-						<label>Custom Fields Schema</label>
-						<div class="schema-editor">
-							{#each schemaFields as field, index}
-								<div class="schema-field">
-									<input type="text" placeholder="Field name" bind:value={field.name} />
-									<input type="text" placeholder="Label" bind:value={field.label} />
-									<select bind:value={field.type}>
-										<option value="text">Text</option>
-										<option value="number">Number</option>
-										<option value="date">Date</option>
-										<option value="boolean">Boolean</option>
-										<option value="select">Select</option>
-									</select>
-									<label>
-										<input type="checkbox" bind:checked={field.required} />
-										Required
-									</label>
-									<button class="btn-remove" on:click={() => removeSchemaField(index)}>
-										×
-									</button>
-								</div>
-							{/each}
-							<button class="btn-add-field" on:click={addSchemaField}>
-								<Plus size={14} />
-								Add Field
-							</button>
-						</div>
-					</div>
-				{/if}
+				<div class="form-group">
+					<label>Custom Fields Definition</label>
+					<FieldEditor 
+						fields={schemaFields} 
+						onFieldsChange={(newFields) => schemaFields = newFields} 
+					/>
+				</div>
 				
 				<div class="form-group">
-					<label for="edit-is_active">Status</label>
-					<select id="edit-is_active" bind:value={selectedEntityType.is_active}>
-						<option value={true}>Active</option>
-						<option value={false}>Inactive</option>
+					<label for="edit-status">Status</label>
+					<select id="edit-status" bind:value={selectedEntityType.status}>
+						<option value="active">Active</option>
+						<option value="pending">Pending</option>
+						<option value="deleted">Deleted</option>
 					</select>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-secondary" on:click={() => { showEditModal = false; editingSchema = false; }}>Cancel</button>
-				{#if editingSchema}
-					<button class="btn btn-primary" on:click={() => saveSchema(selectedEntityType)}>Save Schema</button>
-				{/if}
-				<button class="btn btn-primary" on:click={updateEntityType}>Update Entity Type</button>
+				<button class="btn btn-danger" on:click={() => { 
+					if (confirm('Are you sure you want to delete this entity type? This will affect all entities of this type.')) {
+						deleteEntityType(selectedEntityType.id);
+						showEditModal = false;
+					}
+				}}>Delete</button>
+				<div class="modal-footer-right">
+					<button class="btn btn-secondary" on:click={() => { showEditModal = false; schemaFields = []; }}>Cancel</button>
+					<button class="btn btn-primary" on:click={saveEntityType}>Save</button>
+				</div>
 			</div>
 		</div>
 	</div>

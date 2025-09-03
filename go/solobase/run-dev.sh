@@ -8,8 +8,8 @@ NC='\033[0m' # No Color
 
 # Configuration
 DATABASE_TYPE="${1:-sqlite}"
-API_PORT=8080
-FRONTEND_PORT=5173
+API_PORT=${API_PORT:-8080}
+FRONTEND_PORT=${FRONTEND_PORT:-5173}
 
 echo -e "${GREEN}=== Solobase Development Server ===${NC}"
 echo -e "${YELLOW}Database Type: $DATABASE_TYPE${NC}"
@@ -90,9 +90,9 @@ API_PID=$!
 echo "Waiting for API server to start..."
 sleep 3
 
-# Start frontend dev server
-echo -e "${YELLOW}Starting frontend dev server...${NC}"
-cd admin && npm run dev &
+# Start frontend dev server with API_PORT environment variable
+echo -e "${YELLOW}Starting frontend dev server (API_PORT=$API_PORT)...${NC}"
+cd admin && API_PORT=$API_PORT npm run dev &
 FRONTEND_PID=$!
 cd ..
 
