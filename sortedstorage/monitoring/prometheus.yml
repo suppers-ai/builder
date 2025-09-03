@@ -1,0 +1,89 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'sortedstorage'
+    environment: 'production'
+
+# Alert rules
+rule_files:
+  - /etc/prometheus/alerts/*.yml
+
+# AlertManager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter for system metrics
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # cAdvisor for container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # SortedStorage application metrics
+  - job_name: 'sortedstorage'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['sortedstorage:3000']
+        labels:
+          service: 'frontend'
+          
+  # Solobase backend metrics
+  - job_name: 'solobase'
+    metrics_path: '/api/metrics'
+    static_configs:
+      - targets: ['solobase:8090']
+        labels:
+          service: 'backend'
+
+  # PostgreSQL metrics (via postgres_exporter)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'database'
+
+  # Redis metrics (via redis_exporter)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'cache'
+
+  # Nginx metrics (via nginx-prometheus-exporter)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          service: 'proxy'
+
+  # Blackbox exporter for endpoint monitoring
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://sortedstorage:3000/health
+          - http://solobase:8090/api/health
+          - https://sortedstorage.com
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

@@ -3,6 +3,36 @@
 .temp
 
 # sorted-storage/
+sortedstorage/.svelte-kit/
+sortedstorage/.svelte-kit/**
+sortedstorage/build/
+sortedstorage/dist/
+sortedstorage/.vercel/
+sortedstorage/.netlify/
+sortedstorage/vite.config.js.timestamp-*
+sortedstorage/vite.config.ts.timestamp-*
+
+# Backend/Go generated files for sortedstorage
+sortedstorage/backend/build/
+sortedstorage/backend/backend/
+sortedstorage/backend/.data/
+sortedstorage/backend/storage/
+sortedstorage/backend/*.exe
+sortedstorage/backend/sortedstorage
+sortedstorage/backend/test
+sortedstorage/backend/test-build
+sortedstorage/sortedstorage
+sortedstorage/test
+sortedstorage/test-build
+sortedstorage/*.exe
+sortedstorage/*.db
+sortedstorage/.data/
+sortedstorage/storage/
+
+# Go build artifacts
+*.o
+*.a
+*.so
 
 _fresh/
 

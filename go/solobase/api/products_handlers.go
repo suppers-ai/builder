@@ -72,104 +72,104 @@ func (h *ProductsExtensionHandlers) HandleDeleteVariable() http.HandlerFunc {
 }
 
 // Admin API handlers - Entity Types
-func (h *ProductsExtensionHandlers) HandleListEntityTypes() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleListGroupTypes() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetAdminAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetAdminAPI().ListEntityTypes(w, r)
+		h.ext.GetAdminAPI().ListGroupTypes(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleCreateEntityType() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleCreateGroupType() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetAdminAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetAdminAPI().CreateEntityType(w, r)
+		h.ext.GetAdminAPI().CreateGroupType(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleUpdateEntityType() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleUpdateGroupType() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetAdminAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetAdminAPI().UpdateEntityType(w, r)
+		h.ext.GetAdminAPI().UpdateGroupType(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleDeleteEntityType() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleDeleteGroupType() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetAdminAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetAdminAPI().DeleteEntityType(w, r)
+		h.ext.GetAdminAPI().DeleteGroupType(w, r)
 	}
 }
 
 // User API handlers - Entities (user's actual entities)
-func (h *ProductsExtensionHandlers) HandleListEntities() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleListGroups() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetUserAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetUserAPI().ListMyEntities(w, r)
+		h.ext.GetUserAPI().ListMyGroups(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleCreateEntity() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleCreateGroup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetUserAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetUserAPI().CreateEntity(w, r)
+		h.ext.GetUserAPI().CreateGroup(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleUpdateEntity() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleUpdateGroup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetUserAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetUserAPI().UpdateEntity(w, r)
+		h.ext.GetUserAPI().UpdateGroup(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleDeleteEntity() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleDeleteGroup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetUserAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetUserAPI().DeleteEntity(w, r)
+		h.ext.GetUserAPI().DeleteGroup(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleGetEntity() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleGetGroup() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetUserAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetUserAPI().GetEntity(w, r)
+		h.ext.GetUserAPI().GetGroup(w, r)
 	}
 }
 
-func (h *ProductsExtensionHandlers) HandleEntityProducts() http.HandlerFunc {
+func (h *ProductsExtensionHandlers) HandleGroupProducts() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if h.ext == nil || h.ext.GetUserAPI() == nil {
 			http.Error(w, "Extension not initialized", http.StatusServiceUnavailable)
 			return
 		}
-		h.ext.GetUserAPI().ListEntityProducts(w, r)
+		h.ext.GetUserAPI().ListGroupProducts(w, r)
 	}
 }
 

@@ -16,54 +16,45 @@ func NewVariableService(db *gorm.DB) *VariableService {
 	return &VariableService{db: db}
 }
 
-func (s *VariableService) List() ([]models.Variable, error) {
-	var variables []models.Variable
-	err := s.db.Find(&variables).Error
-	return variables, err
+// GetSystemVariables returns hard-coded system variables
+func GetSystemVariables() []models.Variable {
+	return []models.Variable{
+		{
+			Name:        "running_total",
+			DisplayName: "Running Total",
+			ValueType:   "number",
+			Type:        "system",
+			Description: "Accumulated total from previous calculations",
+			IsActive:    true,
+		},
+	}
 }
 
-func (s *VariableService) ListBySource(sourceType string, sourceID *uint) ([]models.Variable, error) {
-	var variables []models.Variable
-	query := s.db.Where("source_type = ?", sourceType)
-	if sourceID != nil {
-		query = query.Where("source_id = ?", *sourceID)
-	} else {
-		query = query.Where("source_id IS NULL")
+func (s *VariableService) List() ([]models.Variable, error) {
+	var userVariables []models.Variable
+	err := s.db.Find(&userVariables).Error
+	if err != nil {
+		return nil, err
 	}
-	err := query.Find(&variables).Error
-	return variables, err
+	
+	// Combine user variables from DB with hard-coded system variables
+	allVariables := append(userVariables, GetSystemVariables()...)
+	return allVariables, nil
 }
 
 func (s *VariableService) Create(variable *models.Variable) error {
 	return s.db.Create(variable).Error
 }
 
-func (s *VariableService) CreateFromField(field models.FieldDefinition, sourceType string, sourceID *uint) (*models.Variable, error) {
+func (s *VariableService) CreateFromField(field models.FieldDefinition) (*models.Variable, error) {
 	variable := &models.Variable{
 		Name:        field.Name,
 		DisplayName: field.Name,
 		ValueType:   field.Type,
-		Type:        "seller_input",
-		SourceType:  sourceType,
-		SourceID:    sourceID,
+		Type:        "user",
 		Description: field.Description,
 		DefaultValue: field.Constraints.Default,
 		IsActive:    true,
-	}
-	
-	// Handle select fields
-	if field.Type == "select" && len(field.Constraints.Options) > 0 {
-		variable.Options = field.Constraints.Options
-	}
-	
-	// Convert constraints to JSONB
-	variable.Constraints = models.JSONB{
-		"required":   field.Constraints.Required,
-		"min":        field.Constraints.Min,
-		"max":        field.Constraints.Max,
-		"min_length": field.Constraints.MinLength,
-		"max_length": field.Constraints.MaxLength,
-		"pattern":    field.Constraints.Pattern,
 	}
 	
 	if err := s.db.Create(variable).Error; err != nil {
@@ -80,72 +71,61 @@ func (s *VariableService) Delete(id uint) error {
 	return s.db.Delete(&models.Variable{}, id).Error
 }
 
-func (s *VariableService) DeleteBySource(sourceType string, sourceID uint) error {
-	return s.db.Where("source_type = ? AND source_id = ?", sourceType, sourceID).Delete(&models.Variable{}).Error
-}
+// DeleteBySource is no longer needed as we removed source tracking from variables
+// Variables are now standalone and not tied to specific groups/products
 
-// EntityService handles entity operations
-type EntityService struct {
+// GroupService handles group operations
+type GroupService struct {
 	db              *gorm.DB
 	variableService *VariableService
 }
 
-func NewEntityService(db *gorm.DB) *EntityService {
-	return &EntityService{
+func NewGroupService(db *gorm.DB) *GroupService {
+	return &GroupService{
 		db:              db,
 		variableService: NewVariableService(db),
 	}
 }
 
-func (s *EntityService) ListByUser(userID uint) ([]models.Entity, error) {
-	var entities []models.Entity
-	err := s.db.Preload("EntityTemplate").Where("user_id = ?", userID).Find(&entities).Error
-	return entities, err
+func (s *GroupService) ListByUser(userID uint) ([]models.Group, error) {
+	var groups []models.Group
+	err := s.db.Preload("GroupTemplate").Where("user_id = ?", userID).Find(&groups).Error
+	return groups, err
 }
 
-func (s *EntityService) Create(entity *models.Entity) error {
+func (s *GroupService) Create(group *models.Group) error {
 	// Start a transaction
 	tx := s.db.Begin()
 	
-	// Create the entity
-	if err := tx.Create(entity).Error; err != nil {
+	// Create the group
+	if err := tx.Create(group).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 	
-	// Load the entity template to get field definitions
-	var entityTemplate models.EntityTemplate
-	if err := tx.First(&entityTemplate, entity.EntityTemplateID).Error; err == nil && len(entityTemplate.Fields) > 0 {
+	// Load the group template to get field definitions
+	var groupTemplate models.GroupTemplate
+	if err := tx.First(&groupTemplate, group.GroupTemplateID).Error; err == nil && len(groupTemplate.Fields) > 0 {
 		// Map field values to filter columns based on field IDs
-		if customFields, ok := entity.CustomFields["fields"].(map[string]interface{}); ok {
-			for _, field := range entityTemplate.Fields {
+		if customFields, ok := group.CustomFields["fields"].(map[string]interface{}); ok {
+			for _, field := range groupTemplate.Fields {
 				if value, exists := customFields[field.Name]; exists {
 					// Map to appropriate filter column based on field ID
-					s.mapToFilterColumn(tx, entity, field.ID, value)
+					s.mapToFilterColumn(tx, group, field.ID, value)
 				}
 			}
 		}
 		
 		// Create variables for each field using the transaction
 		txVariableService := &VariableService{db: tx}
-		for _, field := range entityTemplate.Fields {
+		for _, field := range groupTemplate.Fields {
 			variable := &models.Variable{
 				Name:        field.ID,
 				DisplayName: field.Name,
 				ValueType:   field.Type,
-				Type:        "seller_input",
-				SourceType:  "entity",
-				SourceID:    &entity.ID,
+				Type:        "user",
 				Description: field.Description,
-				Constraints: models.JSONB{
-					"required":   field.Required,
-					"min":        field.Constraints.Min,
-					"max":        field.Constraints.Max,
-					"min_length": field.Constraints.MinLength,
-					"max_length": field.Constraints.MaxLength,
-					"pattern":    field.Constraints.Pattern,
-					"options":    field.Constraints.Options,
-				},
+				DefaultValue: field.Constraints.Default,
 				IsActive:    true,
 			}
 			txVariableService.Create(variable)
@@ -157,7 +137,7 @@ func (s *EntityService) Create(entity *models.Entity) error {
 }
 
 // mapToFilterColumn maps a value to the appropriate filter column
-func (s *EntityService) mapToFilterColumn(tx *gorm.DB, entity *models.Entity, fieldID string, value interface{}) {
+func (s *GroupService) mapToFilterColumn(tx *gorm.DB, group *models.Group, fieldID string, value interface{}) {
 	// Parse the field ID to get type and index (e.g., "filter_numeric_1" -> type: "numeric", index: 1)
 	parts := strings.Split(fieldID, "_")
 	if len(parts) != 3 || parts[0] != "filter" {
@@ -193,25 +173,25 @@ func (s *EntityService) mapToFilterColumn(tx *gorm.DB, entity *models.Entity, fi
 	}
 	
 	if len(updates) > 0 {
-		tx.Model(&models.Entity{}).Where("id = ?", entity.ID).Updates(updates)
+		tx.Model(&models.Group{}).Where("id = ?", group.ID).Updates(updates)
 	}
 }
 
-func (s *EntityService) Update(id uint, userID uint, entity *models.Entity) error {
-	return s.db.Model(&models.Entity{}).Where("id = ? AND user_id = ?", id, userID).Updates(entity).Error
+func (s *GroupService) Update(id uint, userID uint, group *models.Group) error {
+	return s.db.Model(&models.Group{}).Where("id = ? AND user_id = ?", id, userID).Updates(group).Error
 }
 
-func (s *EntityService) Delete(id uint, userID uint) error {
-	return s.db.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Entity{}).Error
+func (s *GroupService) Delete(id uint, userID uint) error {
+	return s.db.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Group{}).Error
 }
 
-func (s *EntityService) GetByID(id uint, userID uint) (*models.Entity, error) {
-	var entity models.Entity
-	err := s.db.Preload("EntityTemplate").Where("id = ? AND user_id = ?", id, userID).First(&entity).Error
+func (s *GroupService) GetByID(id uint, userID uint) (*models.Group, error) {
+	var group models.Group
+	err := s.db.Preload("GroupTemplate").Where("id = ? AND user_id = ?", id, userID).First(&group).Error
 	if err != nil {
 		return nil, err
 	}
-	return &entity, nil
+	return &group, nil
 }
 
 // ProductService handles product operations
@@ -227,25 +207,25 @@ func NewProductService(db *gorm.DB, variableService *VariableService) *ProductSe
 	}
 }
 
-func (s *ProductService) ListByEntity(entityID uint) ([]models.Product, error) {
+func (s *ProductService) ListByGroup(groupID uint) ([]models.Product, error) {
 	var products []models.Product
-	err := s.db.Preload("ProductTemplate").Where("entity_id = ?", entityID).Find(&products).Error
+	err := s.db.Preload("ProductTemplate").Where("group_id = ?", groupID).Find(&products).Error
 	return products, err
 }
 
 func (s *ProductService) ListByUser(userID uint) ([]models.Product, error) {
 	var products []models.Product
 	
-	// First, get all entity IDs for the user
-	var entityIDs []uint
-	if err := s.db.Table("entity").Where("user_id = ?", userID).Pluck("id", &entityIDs).Error; err != nil {
+	// First, get all group IDs for the user
+	var groupIDs []uint
+	if err := s.db.Table("groups").Where("user_id = ?", userID).Pluck("id", &groupIDs).Error; err != nil {
 		return nil, err
 	}
 	
-	// Then get products for those entities
-	if len(entityIDs) > 0 {
-		err := s.db.Preload("Entity").Preload("ProductTemplate").
-			Where("entity_id IN ?", entityIDs).
+	// Then get products for those groups
+	if len(groupIDs) > 0 {
+		err := s.db.Preload("Group").Preload("ProductTemplate").
+			Where("group_id IN ?", groupIDs).
 			Find(&products).Error
 		return products, err
 	}
@@ -283,19 +263,9 @@ func (s *ProductService) Create(product *models.Product) error {
 				Name:        field.ID,
 				DisplayName: field.Name,
 				ValueType:   field.Type,
-				Type:        "seller_input",
-				SourceType:  "product",
-				SourceID:    &product.ID,
+				Type:        "user",
 				Description: field.Description,
-				Constraints: models.JSONB{
-					"required":   field.Required,
-					"min":        field.Constraints.Min,
-					"max":        field.Constraints.Max,
-					"min_length": field.Constraints.MinLength,
-					"max_length": field.Constraints.MaxLength,
-					"pattern":    field.Constraints.Pattern,
-					"options":    field.Constraints.Options,
-				},
+				DefaultValue: field.Constraints.Default,
 				IsActive:    true,
 			}
 			txVariableService.Create(variable)

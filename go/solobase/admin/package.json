@@ -31,6 +31,7 @@
 		"vite": "^5.0.0"
 	},
 	"dependencies": {
+		"@common/ui-components": "file:../../../common/ui-components",
 		"chart.js": "^4.5.0",
 		"chartjs-adapter-date-fns": "^3.0.0",
 		"date-fns": "^4.1.0",

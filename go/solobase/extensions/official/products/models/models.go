@@ -34,19 +34,17 @@ type Variable struct {
 	ID          uint        `gorm:"primaryKey" json:"id"`
 	Name        string      `gorm:"uniqueIndex;not null" json:"name"`
 	DisplayName string      `json:"display_name"`
-	ValueType   string      `json:"value_type"` // number, string, boolean, date, select
-	Type        string      `json:"type"`       // user_input, seller_input, calculated, system
-	SourceType  string      `json:"source_type"` // product, entity, system, global
-	SourceID    *uint       `json:"source_id,omitempty"` // ID of the entity/product this variable belongs to
-	Category    string      `json:"category"`
+	ValueType   string      `json:"value_type"` // number, string, boolean
+	Type        string      `json:"type"`       // user, system
 	DefaultValue interface{} `gorm:"type:jsonb" json:"default_value"`
 	Description string      `json:"description"`
-	Formula     string      `json:"formula,omitempty"` // For calculated variables
-	Options     []string    `gorm:"type:jsonb;serializer:json" json:"options,omitempty"` // For select type
-	Constraints JSONB       `gorm:"type:jsonb" json:"constraints,omitempty"` // Min, max, pattern, etc.
 	IsActive    bool        `gorm:"default:true" json:"is_active"`
 	CreatedAt   time.Time   `json:"created_at"`
 	UpdatedAt   time.Time   `json:"updated_at"`
+}
+
+func (Variable) TableName() string {
+	return "variables"
 }
 
 // FieldConstraints defines constraints for a field
@@ -72,8 +70,8 @@ type FieldDefinition struct {
 	Constraints FieldConstraints `json:"constraints"`
 }
 
-// EntityTemplate represents a template for business entities
-type EntityTemplate struct {
+// GroupTemplate represents a template for business groups
+type GroupTemplate struct {
 	ID          uint              `gorm:"primaryKey" json:"id"`
 	Name        string            `gorm:"uniqueIndex;not null" json:"name"`
 	DisplayName string            `json:"display_name"`
@@ -85,16 +83,16 @@ type EntityTemplate struct {
 	UpdatedAt   time.Time         `json:"updated_at"`
 }
 
-func (EntityTemplate) TableName() string {
-	return "entity_template"
+func (GroupTemplate) TableName() string {
+	return "group_templates"
 }
 
-// Entity represents a business entity (restaurant, store, etc)
-type Entity struct {
-	ID               uint           `gorm:"primaryKey" json:"id"`
-	UserID           uint           `gorm:"index;not null" json:"user_id"`
-	EntityTemplateID uint           `gorm:"index;not null" json:"entity_template_id"`
-	EntityTemplate   EntityTemplate `json:"entity_template,omitempty" gorm:"foreignKey:EntityTemplateID"`
+// Group represents a business group (restaurant, store, etc)
+type Group struct {
+	ID              uint          `gorm:"primaryKey" json:"id"`
+	UserID          uint          `gorm:"index;not null" json:"user_id"`
+	GroupTemplateID uint          `gorm:"index;not null" json:"group_template_id"`
+	GroupTemplate   GroupTemplate `json:"group_template,omitempty" gorm:"foreignKey:GroupTemplateID"`
 	Name             string         `gorm:"not null" json:"name"`
 	Description      string         `json:"description"`
 	
@@ -134,6 +132,10 @@ type Entity struct {
 	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
+func (Group) TableName() string {
+	return "groups"
+}
+
 // ProductTemplate represents a template for products
 type ProductTemplate struct {
 	ID                          uint              `gorm:"primaryKey" json:"id"`
@@ -154,14 +156,14 @@ type ProductTemplate struct {
 }
 
 func (ProductTemplate) TableName() string {
-	return "product_template"
+	return "product_templates"
 }
 
 // Product represents a product
 type Product struct {
 	ID                 uint            `gorm:"primaryKey" json:"id"`
-	EntityID           uint            `gorm:"index;not null" json:"entity_id"`
-	Entity             Entity          `json:"entity,omitempty"`
+	GroupID            uint            `gorm:"index;not null" json:"group_id"`
+	Group              Group           `json:"group,omitempty" gorm:"foreignKey:GroupID"`
 	ProductTemplateID  uint            `gorm:"index;not null" json:"product_template_id"`
 	ProductTemplate    ProductTemplate `json:"product_template,omitempty" gorm:"foreignKey:ProductTemplateID"`
 	Name               string          `gorm:"not null" json:"name"`
@@ -208,6 +210,10 @@ type Product struct {
 	UpdatedAt      time.Time   `json:"updated_at"`
 }
 
+func (Product) TableName() string {
+	return "products"
+}
+
 // PricingTemplate represents a reusable pricing template
 type PricingTemplate struct {
 	ID               uint      `gorm:"primaryKey" json:"id"`
@@ -223,12 +229,16 @@ type PricingTemplate struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
+func (PricingTemplate) TableName() string {
+	return "pricing_templates"
+}
+
 // RegisterModels registers all models with GORM for auto-migration
 func RegisterModels(db *gorm.DB) error {
 	return db.AutoMigrate(
 		&Variable{},
-		&EntityTemplate{},
-		&Entity{},
+		&GroupTemplate{},
+		&Group{},
 		&ProductTemplate{},
 		&Product{},
 		&PricingTemplate{},

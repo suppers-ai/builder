@@ -9,13 +9,13 @@ import (
 func SeedSimpleData(db *gorm.DB) error {
 	// Check if already seeded
 	var count int64
-	db.Model(&models.EntityTemplate{}).Count(&count)
+	db.Model(&models.GroupTemplate{}).Count(&count)
 	if count > 0 {
 		return nil
 	}
 
-	// Create simple entity templates
-	entityTemplates := []models.EntityTemplate{
+	// Create simple group templates
+	groupTemplates := []models.GroupTemplate{
 		{
 			Name:        "restaurant",
 			DisplayName: "Restaurant",
@@ -96,7 +96,7 @@ func SeedSimpleData(db *gorm.DB) error {
 		},
 	}
 
-	for _, et := range entityTemplates {
+	for _, et := range groupTemplates {
 		if err := db.Create(&et).Error; err != nil {
 			return err
 		}
@@ -220,14 +220,13 @@ func SeedSimpleData(db *gorm.DB) error {
 		}
 	}
 
-	// Create sample variables
+	// Create sample variables (only user variables in DB, system variables are hard-coded)
 	variables := []models.Variable{
 		{
 			Name:        "base_price",
 			DisplayName: "Base Price",
 			ValueType:   "number",
-			Type:        "system",
-			SourceType:  "global",
+			Type:        "user",
 			Description: "Base price before any modifications",
 			IsActive:    true,
 		},
@@ -235,8 +234,7 @@ func SeedSimpleData(db *gorm.DB) error {
 			Name:        "quantity",
 			DisplayName: "Quantity",
 			ValueType:   "number",
-			Type:        "user_input",
-			SourceType:  "global",
+			Type:        "user",
 			Description: "Number of items being purchased",
 			IsActive:    true,
 		},
@@ -244,17 +242,32 @@ func SeedSimpleData(db *gorm.DB) error {
 			Name:        "is_member",
 			DisplayName: "Is Member",
 			ValueType:   "boolean",
-			Type:        "user_input",
-			SourceType:  "global",
+			Type:        "user",
 			Description: "Whether the customer is a member",
+			IsActive:    true,
+		},
+		{
+			Name:        "is_premium_member",
+			DisplayName: "Is Premium Member",
+			ValueType:   "boolean",
+			Type:        "user",
+			Description: "Whether the customer is a premium member",
+			IsActive:    true,
+		},
+		{
+			Name:        "discount_percentage",
+			DisplayName: "Discount Percentage",
+			ValueType:   "number",
+			Type:        "user",
+			Description: "Discount percentage to apply",
+			DefaultValue: 0,
 			IsActive:    true,
 		},
 		{
 			Name:        "tax_rate",
 			DisplayName: "Tax Rate",
 			ValueType:   "number",
-			Type:        "system",
-			SourceType:  "global",
+			Type:        "user",
 			Description: "Applicable tax rate",
 			DefaultValue: 0.08,
 			IsActive:    true,

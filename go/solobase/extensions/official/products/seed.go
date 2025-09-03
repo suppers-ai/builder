@@ -14,107 +14,106 @@ func SeedData(db *gorm.DB) error {
 		return nil // Data already seeded
 	}
 	
-	// Seed system variables
-	systemVariables := []models.Variable{
+	// Seed user variables (system variables like running_total are hard-coded)
+	userVariables := []models.Variable{
 		// Product variables
-		{Name: "quantity", DisplayName: "Quantity", ValueType: "number", Type: "user_input", SourceType: "global", Category: "Product", DefaultValue: 1.0, Description: "Number of items"},
-		{Name: "weight", DisplayName: "Weight (kg)", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "Product", DefaultValue: 0.0, Description: "Product weight in kilograms"},
-		{Name: "volume", DisplayName: "Volume (L)", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "Product", DefaultValue: 0.0, Description: "Product volume in liters"},
-		{Name: "dimensions_length", DisplayName: "Length (cm)", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "Product", DefaultValue: 0.0, Description: "Product length"},
-		{Name: "dimensions_width", DisplayName: "Width (cm)", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "Product", DefaultValue: 0.0, Description: "Product width"},
-		{Name: "dimensions_height", DisplayName: "Height (cm)", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "Product", DefaultValue: 0.0, Description: "Product height"},
+		{Name: "quantity", DisplayName: "Quantity", ValueType: "number", Type: "user", DefaultValue: 1.0, Description: "Number of items"},
+		{Name: "weight", DisplayName: "Weight (kg)", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Product weight in kilograms"},
+		{Name: "volume", DisplayName: "Volume (L)", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Product volume in liters"},
+		{Name: "dimensions_length", DisplayName: "Length (cm)", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Product length"},
+		{Name: "dimensions_width", DisplayName: "Width (cm)", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Product width"},
+		{Name: "dimensions_height", DisplayName: "Height (cm)", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Product height"},
 		
 		// Order variables
-		{Name: "order_total", DisplayName: "Order Total", ValueType: "number", Type: "calculated", SourceType: "system", Category: "Order", DefaultValue: 0.0, Description: "Total order value before discounts"},
-		{Name: "order_item_count", DisplayName: "Item Count", ValueType: "number", Type: "calculated", SourceType: "system", Category: "Order", DefaultValue: 0.0, Description: "Number of different items in order"},
-		{Name: "order_quantity_total", DisplayName: "Total Quantity", ValueType: "number", Type: "calculated", SourceType: "system", Category: "Order", DefaultValue: 0.0, Description: "Total quantity of all items"},
+		{Name: "order_total", DisplayName: "Order Total", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Total order value before discounts"},
+		{Name: "order_item_count", DisplayName: "Item Count", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Number of different items in order"},
+		{Name: "order_quantity_total", DisplayName: "Total Quantity", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Total quantity of all items"},
 		
 		// Shipping variables
-		{Name: "shipping_distance", DisplayName: "Shipping Distance (km)", ValueType: "number", Type: "calculated", SourceType: "system", Category: "Shipping", DefaultValue: 0.0, Description: "Distance to shipping destination"},
-		{Name: "shipping_method", DisplayName: "Shipping Method", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Shipping", DefaultValue: "standard", Description: "Selected shipping method"},
-		{Name: "shipping_zone", DisplayName: "Shipping Zone", ValueType: "string", Type: "calculated", SourceType: "system", Category: "Shipping", DefaultValue: "local", Description: "Shipping zone based on destination"},
-		{Name: "shipping_rate_per_kg", DisplayName: "Rate per kg", ValueType: "number", Type: "system", SourceType: "system", Category: "Shipping", DefaultValue: 4.99, Description: "Shipping rate per kilogram"},
-		{Name: "express_shipping", DisplayName: "Express Shipping", ValueType: "boolean", Type: "user_input", SourceType: "global", Category: "Shipping", DefaultValue: false, Description: "Whether express shipping is selected"},
-		{Name: "express_shipping_surcharge", DisplayName: "Express Surcharge", ValueType: "number", Type: "system", SourceType: "system", Category: "Shipping", DefaultValue: 20.0, Description: "Additional charge for express shipping"},
+		{Name: "shipping_distance", DisplayName: "Shipping Distance (km)", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Distance to shipping destination"},
+		{Name: "shipping_method", DisplayName: "Shipping Method", ValueType: "string", Type: "user", DefaultValue: "standard", Description: "Selected shipping method"},
+		{Name: "shipping_zone", DisplayName: "Shipping Zone", ValueType: "string", Type: "user", DefaultValue: "local", Description: "Shipping zone based on destination"},
+		{Name: "shipping_rate_per_kg", DisplayName: "Rate per kg", ValueType: "number", Type: "user", DefaultValue: 4.99, Description: "Shipping rate per kilogram"},
+		{Name: "express_shipping", DisplayName: "Express Shipping", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether express shipping is selected"},
+		{Name: "express_shipping_surcharge", DisplayName: "Express Surcharge", ValueType: "number", Type: "user", DefaultValue: 20.0, Description: "Additional charge for express shipping"},
 		
 		// Promotion variables
-		{Name: "discount_percentage", DisplayName: "Discount %", ValueType: "number", Type: "system", SourceType: "system", Category: "Promotion", DefaultValue: 0.0, Description: "Discount percentage"},
-		{Name: "discount_amount", DisplayName: "Discount Amount", ValueType: "number", Type: "system", SourceType: "system", Category: "Promotion", DefaultValue: 0.0, Description: "Fixed discount amount"},
-		{Name: "promo_code", DisplayName: "Promo Code", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Promotion", DefaultValue: "", Description: "Applied promotional code"},
-		{Name: "bulk_discount_threshold", DisplayName: "Bulk Threshold", ValueType: "number", Type: "system", SourceType: "system", Category: "Promotion", DefaultValue: 10.0, Description: "Minimum quantity for bulk discount"},
-		{Name: "bulk_discount_rate", DisplayName: "Bulk Discount Rate", ValueType: "number", Type: "system", SourceType: "system", Category: "Promotion", DefaultValue: 0.1, Description: "Discount rate for bulk purchases"},
+		{Name: "discount_percentage", DisplayName: "Discount %", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Discount percentage"},
+		{Name: "discount_amount", DisplayName: "Discount Amount", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Fixed discount amount"},
+		{Name: "promo_code", DisplayName: "Promo Code", ValueType: "string", Type: "user", DefaultValue: "", Description: "Applied promotional code"},
+		{Name: "bulk_discount_threshold", DisplayName: "Bulk Threshold", ValueType: "number", Type: "user", DefaultValue: 10.0, Description: "Minimum quantity for bulk discount"},
+		{Name: "bulk_discount_rate", DisplayName: "Bulk Discount Rate", ValueType: "number", Type: "user", DefaultValue: 0.1, Description: "Discount rate for bulk purchases"},
 		
 		// Location variables
-		{Name: "tax_rate", DisplayName: "Tax Rate", ValueType: "number", Type: "system", SourceType: "system", Category: "Location", DefaultValue: 0.08, Description: "Local tax rate"},
-		{Name: "currency", DisplayName: "Currency", ValueType: "string", Type: "system", SourceType: "system", Category: "Location", DefaultValue: "USD", Description: "Transaction currency"},
-		{Name: "country", DisplayName: "Country", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Location", DefaultValue: "US", Description: "Destination country"},
-		{Name: "state", DisplayName: "State/Province", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Location", DefaultValue: "", Description: "Destination state or province"},
-		{Name: "city", DisplayName: "City", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Location", DefaultValue: "", Description: "Destination city"},
-		{Name: "postal_code", DisplayName: "Postal Code", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Location", DefaultValue: "", Description: "Destination postal code"},
+		{Name: "tax_rate", DisplayName: "Tax Rate", ValueType: "number", Type: "user", DefaultValue: 0.08, Description: "Local tax rate"},
+		{Name: "currency", DisplayName: "Currency", ValueType: "string", Type: "user", DefaultValue: "USD", Description: "Transaction currency"},
+		{Name: "country", DisplayName: "Country", ValueType: "string", Type: "user", DefaultValue: "US", Description: "Destination country"},
+		{Name: "state", DisplayName: "State/Province", ValueType: "string", Type: "user", DefaultValue: "", Description: "Destination state or province"},
+		{Name: "city", DisplayName: "City", ValueType: "string", Type: "user", DefaultValue: "", Description: "Destination city"},
+		{Name: "postal_code", DisplayName: "Postal Code", ValueType: "string", Type: "user", DefaultValue: "", Description: "Destination postal code"},
 		
 		// Service variables
-		{Name: "urgency", DisplayName: "Urgency Level", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Service", DefaultValue: "normal", Description: "Service urgency level"},
-		{Name: "complexity", DisplayName: "Complexity", ValueType: "number", Type: "user_input", SourceType: "global", Category: "Service", DefaultValue: 1.0, Description: "Service complexity (1-5 scale)"},
-		{Name: "hourly_rate", DisplayName: "Hourly Rate", ValueType: "number", Type: "seller_input", SourceType: "entity", Category: "Service", DefaultValue: 100.0, Description: "Base hourly rate for services"},
-		{Name: "hours", DisplayName: "Hours", ValueType: "number", Type: "user_input", SourceType: "global", Category: "Service", DefaultValue: 1.0, Description: "Number of service hours"},
-		{Name: "service_level", DisplayName: "Service Level", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Service", DefaultValue: "standard", Description: "Selected service level"},
+		{Name: "urgency", DisplayName: "Urgency Level", ValueType: "string", Type: "user", DefaultValue: "normal", Description: "Service urgency level"},
+		{Name: "complexity", DisplayName: "Complexity", ValueType: "number", Type: "user", DefaultValue: 1.0, Description: "Service complexity (1-5 scale)"},
+		{Name: "hourly_rate", DisplayName: "Hourly Rate", ValueType: "number", Type: "user", DefaultValue: 100.0, Description: "Base hourly rate for services"},
+		{Name: "hours", DisplayName: "Hours", ValueType: "number", Type: "user", DefaultValue: 1.0, Description: "Number of service hours"},
+		{Name: "service_level", DisplayName: "Service Level", ValueType: "string", Type: "user", DefaultValue: "standard", Description: "Selected service level"},
 		
-		// System variables
-		{Name: "base_price", DisplayName: "Base Price", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "System", DefaultValue: 0.0, Description: "Base product price"},
-		{Name: "cost", DisplayName: "Cost", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "System", DefaultValue: 0.0, Description: "Product cost"},
-		{Name: "margin", DisplayName: "Margin", ValueType: "number", Type: "system", SourceType: "global", Category: "System", DefaultValue: 0.3, Description: "Default profit margin"},
-		{Name: "running_total", DisplayName: "Running Total", ValueType: "number", Type: "calculated", SourceType: "global", Category: "System", DefaultValue: 0.0, Description: "Running total during price calculation"},
-		{Name: "subtotal", DisplayName: "Subtotal", ValueType: "number", Type: "calculated", SourceType: "global", Category: "System", DefaultValue: 0.0, Description: "Subtotal before taxes and fees"},
-		{Name: "total_discount", DisplayName: "Total Discount", ValueType: "number", Type: "calculated", SourceType: "global", Category: "System", DefaultValue: 0.0, Description: "Total discount amount applied"},
-		{Name: "total_tax", DisplayName: "Total Tax", ValueType: "number", Type: "calculated", SourceType: "global", Category: "System", DefaultValue: 0.0, Description: "Total tax amount"},
-		{Name: "total_fees", DisplayName: "Total Fees", ValueType: "number", Type: "calculated", SourceType: "global", Category: "System", DefaultValue: 0.0, Description: "Total fees amount"},
-		{Name: "final_price", DisplayName: "Final Price", ValueType: "number", Type: "calculated", SourceType: "global", Category: "System", DefaultValue: 0.0, Description: "Final calculated price"},
-		{Name: "calculation_date", DisplayName: "Calculation Date", ValueType: "date", Type: "system", SourceType: "global", Category: "System", DefaultValue: "now", Description: "Date of price calculation"},
-		{Name: "is_taxable", DisplayName: "Is Taxable", ValueType: "boolean", Type: "seller_input", SourceType: "product", Category: "System", DefaultValue: true, Description: "Whether product is taxable"},
-		{Name: "tax_exempt", DisplayName: "Tax Exempt", ValueType: "boolean", Type: "user_input", SourceType: "global", Category: "System", DefaultValue: false, Description: "Whether customer is tax exempt"},
+		// System variables (note: running_total is now hard-coded as a system variable)
+		{Name: "base_price", DisplayName: "Base Price", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Base product price"},
+		{Name: "cost", DisplayName: "Cost", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Product cost"},
+		{Name: "margin", DisplayName: "Margin", ValueType: "number", Type: "user", DefaultValue: 0.3, Description: "Default profit margin"},
+		{Name: "subtotal", DisplayName: "Subtotal", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Subtotal before taxes and fees"},
+		{Name: "total_discount", DisplayName: "Total Discount", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Total discount amount applied"},
+		{Name: "total_tax", DisplayName: "Total Tax", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Total tax amount"},
+		{Name: "total_fees", DisplayName: "Total Fees", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Total fees amount"},
+		{Name: "final_price", DisplayName: "Final Price", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Final calculated price"},
+		{Name: "calculation_date", DisplayName: "Calculation Date", ValueType: "date", Type: "user", DefaultValue: "now", Description: "Date of price calculation"},
+		{Name: "is_taxable", DisplayName: "Is Taxable", ValueType: "boolean", Type: "user", DefaultValue: true, Description: "Whether product is taxable"},
+		{Name: "tax_exempt", DisplayName: "Tax Exempt", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether customer is tax exempt"},
 		
 		// Time-based variables
-		{Name: "current_hour", DisplayName: "Current Hour", ValueType: "number", Type: "system", SourceType: "global", Category: "Time", DefaultValue: 12, Description: "Current hour (0-23)"},
-		{Name: "current_day_of_week", DisplayName: "Day of Week", ValueType: "number", Type: "system", SourceType: "global", Category: "Time", DefaultValue: 1, Description: "Current day of week (1-7)"},
-		{Name: "current_month", DisplayName: "Current Month", ValueType: "number", Type: "system", SourceType: "global", Category: "Time", DefaultValue: 1, Description: "Current month (1-12)"},
-		{Name: "is_weekend", DisplayName: "Is Weekend", ValueType: "boolean", Type: "calculated", SourceType: "global", Category: "Time", DefaultValue: false, Description: "Whether it's weekend"},
-		{Name: "is_holiday", DisplayName: "Is Holiday", ValueType: "boolean", Type: "system", SourceType: "global", Category: "Time", DefaultValue: false, Description: "Whether it's a holiday"},
-		{Name: "is_peak_time", DisplayName: "Is Peak Time", ValueType: "boolean", Type: "calculated", SourceType: "global", Category: "Time", DefaultValue: false, Description: "Whether it's peak hours"},
-		{Name: "days_until_delivery", DisplayName: "Days Until Delivery", ValueType: "number", Type: "calculated", SourceType: "global", Category: "Time", DefaultValue: 0, Description: "Number of days until delivery"},
-		{Name: "lead_time", DisplayName: "Lead Time", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "Time", DefaultValue: 1, Description: "Product lead time in days"},
+		{Name: "current_hour", DisplayName: "Current Hour", ValueType: "number", Type: "user", DefaultValue: 12, Description: "Current hour (0-23)"},
+		{Name: "current_day_of_week", DisplayName: "Day of Week", ValueType: "number", Type: "user", DefaultValue: 1, Description: "Current day of week (1-7)"},
+		{Name: "current_month", DisplayName: "Current Month", ValueType: "number", Type: "user", DefaultValue: 1, Description: "Current month (1-12)"},
+		{Name: "is_weekend", DisplayName: "Is Weekend", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether it's weekend"},
+		{Name: "is_holiday", DisplayName: "Is Holiday", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether it's a holiday"},
+		{Name: "is_peak_time", DisplayName: "Is Peak Time", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether it's peak hours"},
+		{Name: "days_until_delivery", DisplayName: "Days Until Delivery", ValueType: "number", Type: "user", DefaultValue: 0, Description: "Number of days until delivery"},
+		{Name: "lead_time", DisplayName: "Lead Time", ValueType: "number", Type: "user", DefaultValue: 1, Description: "Product lead time in days"},
 		
 		// Customer variables
-		{Name: "customer_type", DisplayName: "Customer Type", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Customer", DefaultValue: "regular", Description: "Type of customer"},
-		{Name: "is_member", DisplayName: "Is Member", ValueType: "boolean", Type: "user_input", SourceType: "global", Category: "Customer", DefaultValue: false, Description: "Whether customer is a member"},
-		{Name: "is_premium_member", DisplayName: "Is Premium Member", ValueType: "boolean", Type: "user_input", SourceType: "global", Category: "Customer", DefaultValue: false, Description: "Whether customer is a premium member"},
-		{Name: "customer_loyalty_points", DisplayName: "Loyalty Points", ValueType: "number", Type: "user_input", SourceType: "global", Category: "Customer", DefaultValue: 0, Description: "Customer's loyalty points"},
-		{Name: "customer_lifetime_value", DisplayName: "Customer LTV", ValueType: "number", Type: "calculated", SourceType: "global", Category: "Customer", DefaultValue: 0, Description: "Customer lifetime value"},
-		{Name: "is_first_purchase", DisplayName: "First Purchase", ValueType: "boolean", Type: "calculated", SourceType: "global", Category: "Customer", DefaultValue: false, Description: "Whether this is customer's first purchase"},
-		{Name: "referral_code", DisplayName: "Referral Code", ValueType: "string", Type: "user_input", SourceType: "global", Category: "Customer", DefaultValue: "", Description: "Referral code used"},
+		{Name: "customer_type", DisplayName: "Customer Type", ValueType: "string", Type: "user", DefaultValue: "regular", Description: "Type of customer"},
+		{Name: "is_member", DisplayName: "Is Member", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether customer is a member"},
+		{Name: "is_premium_member", DisplayName: "Is Premium Member", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether customer is a premium member"},
+		{Name: "customer_loyalty_points", DisplayName: "Loyalty Points", ValueType: "number", Type: "user", DefaultValue: 0, Description: "Customer's loyalty points"},
+		{Name: "customer_lifetime_value", DisplayName: "Customer LTV", ValueType: "number", Type: "user", DefaultValue: 0, Description: "Customer lifetime value"},
+		{Name: "is_first_purchase", DisplayName: "First Purchase", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether this is customer's first purchase"},
+		{Name: "referral_code", DisplayName: "Referral Code", ValueType: "string", Type: "user", DefaultValue: "", Description: "Referral code used"},
 		
 		// Inventory variables
-		{Name: "stock_level", DisplayName: "Stock Level", ValueType: "number", Type: "seller_input", SourceType: "product", Category: "Inventory", DefaultValue: 100, Description: "Current stock level"},
-		{Name: "low_stock_threshold", DisplayName: "Low Stock Threshold", ValueType: "number", Type: "system", SourceType: "global", Category: "Inventory", DefaultValue: 10, Description: "Low stock alert threshold"},
-		{Name: "is_low_stock", DisplayName: "Is Low Stock", ValueType: "boolean", Type: "calculated", SourceType: "global", Category: "Inventory", DefaultValue: false, Description: "Whether stock is low"},
-		{Name: "backorder_allowed", DisplayName: "Backorder Allowed", ValueType: "boolean", Type: "seller_input", SourceType: "product", Category: "Inventory", DefaultValue: false, Description: "Whether backorders are allowed"},
-		{Name: "reserved_quantity", DisplayName: "Reserved Quantity", ValueType: "number", Type: "calculated", SourceType: "global", Category: "Inventory", DefaultValue: 0, Description: "Quantity reserved in other orders"},
+		{Name: "stock_level", DisplayName: "Stock Level", ValueType: "number", Type: "user", DefaultValue: 100, Description: "Current stock level"},
+		{Name: "low_stock_threshold", DisplayName: "Low Stock Threshold", ValueType: "number", Type: "user", DefaultValue: 10, Description: "Low stock alert threshold"},
+		{Name: "is_low_stock", DisplayName: "Is Low Stock", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether stock is low"},
+		{Name: "backorder_allowed", DisplayName: "Backorder Allowed", ValueType: "boolean", Type: "user", DefaultValue: false, Description: "Whether backorders are allowed"},
+		{Name: "reserved_quantity", DisplayName: "Reserved Quantity", ValueType: "number", Type: "user", DefaultValue: 0, Description: "Quantity reserved in other orders"},
 		
 		// Fee variables
-		{Name: "processing_fee", DisplayName: "Processing Fee", ValueType: "number", Type: "system", SourceType: "global", Category: "Fees", DefaultValue: 2.99, Description: "Payment processing fee"},
-		{Name: "handling_fee", DisplayName: "Handling Fee", ValueType: "number", Type: "system", SourceType: "global", Category: "Fees", DefaultValue: 0.0, Description: "Order handling fee"},
-		{Name: "rush_fee", DisplayName: "Rush Fee", ValueType: "number", Type: "system", SourceType: "global", Category: "Fees", DefaultValue: 25.0, Description: "Rush order fee"},
-		{Name: "cancellation_fee", DisplayName: "Cancellation Fee", ValueType: "number", Type: "system", SourceType: "global", Category: "Fees", DefaultValue: 10.0, Description: "Order cancellation fee"},
-		{Name: "restocking_fee", DisplayName: "Restocking Fee", ValueType: "number", Type: "system", SourceType: "global", Category: "Fees", DefaultValue: 0.15, Description: "Restocking fee percentage"},
+		{Name: "processing_fee", DisplayName: "Processing Fee", ValueType: "number", Type: "user", DefaultValue: 2.99, Description: "Payment processing fee"},
+		{Name: "handling_fee", DisplayName: "Handling Fee", ValueType: "number", Type: "user", DefaultValue: 0.0, Description: "Order handling fee"},
+		{Name: "rush_fee", DisplayName: "Rush Fee", ValueType: "number", Type: "user", DefaultValue: 25.0, Description: "Rush order fee"},
+		{Name: "cancellation_fee", DisplayName: "Cancellation Fee", ValueType: "number", Type: "user", DefaultValue: 10.0, Description: "Order cancellation fee"},
+		{Name: "restocking_fee", DisplayName: "Restocking Fee", ValueType: "number", Type: "user", DefaultValue: 0.15, Description: "Restocking fee percentage"},
 	}
 	
-	for _, v := range systemVariables {
+	for _, v := range userVariables {
 		if err := db.Create(&v).Error; err != nil {
 			return err
 		}
 	}
 	
-	// Seed entity types
-	entityTemplates := []models.EntityTemplate{
+	// Seed group types
+	groupTemplates := []models.GroupTemplate{
 		{
 			Name:        "restaurant",
 			DisplayName: "Restaurant",
@@ -244,7 +243,7 @@ func SeedData(db *gorm.DB) error {
 		},
 	}
 	
-	for _, et := range entityTemplates {
+	for _, et := range groupTemplates {
 		if err := db.Create(&et).Error; err != nil {
 			return err
 		}

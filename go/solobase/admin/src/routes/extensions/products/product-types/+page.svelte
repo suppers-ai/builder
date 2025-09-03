@@ -9,6 +9,7 @@
 	import IconPicker from '$lib/components/IconPicker.svelte';
 	import FieldEditor from '$lib/components/FieldEditor.svelte';
 	import ReorderableList from '$lib/components/ReorderableList.svelte';
+	import PricingTemplateModal from '$lib/components/PricingTemplateModal.svelte';
 	import { getIconComponent } from '$lib/utils/icons';
 
 	interface FieldConstraints {
@@ -65,6 +66,20 @@
 	let showCreateModal = false;
 	let showEditModal = false;
 	let selectedProductType: ProductType | null = null;
+	let showCreatePricingModal = false;
+	let showEditPricingModal = false;
+	let editingPricingTemplate: any = null;
+	let newPricingTemplate = {
+		name: '',
+		display_name: '',
+		description: '',
+		price_formula: '',
+		condition_formula: '',
+		category: 'standard',
+		is_active: true
+	};
+	let availableVariables: any[] = [];
+	let variables: any[] = []; // For formula editor in pricing template modal
 	
 	// Form data for new product type
 	let newProductType: Partial<ProductType> = {
@@ -113,6 +128,79 @@
 			console.error('Failed to load pricing templates:', error);
 			pricingTemplates = [];
 		}
+	}
+	
+	async function loadVariables() {
+		try {
+			const response = await api.get('/products/variables');
+			availableVariables = response || [];
+			variables = response || []; // Also set variables for formula editor
+		} catch (error) {
+			console.error('Failed to load variables:', error);
+			availableVariables = [];
+			variables = [];
+		}
+	}
+	
+	async function createPricingTemplate() {
+		try {
+			const result = await api.post('/products/pricing-templates', newPricingTemplate);
+			await loadPricingTemplates();
+			
+			// Add the new template to the selected product type
+			if (!selectedProductType.pricing_templates) {
+				selectedProductType.pricing_templates = [];
+			}
+			selectedProductType.pricing_templates.push(result.id);
+			
+			// Reset form
+			newPricingTemplate = {
+				name: '',
+				display_name: '',
+				description: '',
+				price_formula: '',
+				condition_formula: '',
+				category: 'standard',
+				is_active: true
+			};
+			showCreatePricingModal = false;
+		} catch (error) {
+			console.error('Failed to create pricing template:', error);
+			alert('Failed to create pricing template: ' + (error.message || 'Unknown error'));
+		}
+	}
+	
+	function handleCreatePricingTemplate() {
+		showCreatePricingModal = true;
+		loadVariables();
+	}
+	
+	function handleEditPricingTemplate(event: CustomEvent) {
+		const template = event.detail.item;
+		editingPricingTemplate = { ...template };
+		showEditPricingModal = true;
+		loadVariables();
+	}
+	
+	async function updatePricingTemplate() {
+		try {
+			await api.put(`/products/pricing-templates/${editingPricingTemplate.id}`, editingPricingTemplate);
+			await loadPricingTemplates();
+			showEditPricingModal = false;
+			editingPricingTemplate = null;
+		} catch (error) {
+			console.error('Failed to update pricing template:', error);
+			alert('Failed to update pricing template');
+		}
+	}
+	
+	function handleCreateVariable(context: string) {
+		// This could open a modal to create a new variable
+		// For now, just log it
+		console.log('Create variable requested from:', context);
+		// You could implement a variable creation modal here
+		// or navigate to the variables page
+		window.open('/extensions/products/variables', '_blank');
 	}
 	
 	async function createProductType() {
@@ -381,11 +469,11 @@
 				</button>
 			</div>
 		{:else}
-			<div class="entity-grid">
+			<div class="group-grid">
 				{#each filteredProductTypes as productType}
-					<div class="entity-card" on:click={() => openEditModal(productType)} role="button" tabindex="0" on:keypress={(e) => e.key === 'Enter' && openEditModal(productType)}>
-						<div class="entity-header">
-							<div class="entity-icon">
+					<div class="group-card" on:click={() => openEditModal(productType)} role="button" tabindex="0" on:keypress={(e) => e.key === 'Enter' && openEditModal(productType)}>
+						<div class="group-header">
+							<div class="group-icon">
 								<svelte:component this={getIconComponent(productType.icon)} size={24} />
 							</div>
 							<span class="status-badge status-{productType.status}">
@@ -404,13 +492,13 @@
 								{/if}
 							</span>
 						</div>
-						<div class="entity-content">
-							<h3 class="entity-name">{productType.display_name}</h3>
-							<code class="entity-code">{productType.name}</code>
-							<p class="entity-description">{productType.description}</p>
+						<div class="group-content">
+							<h3 class="group-name">{productType.display_name}</h3>
+							<code class="group-code">{productType.name}</code>
+							<p class="group-description">{productType.description}</p>
 							
 							{#if productType.fields && productType.fields.length > 0}
-								<div class="entity-fields">
+								<div class="group-fields">
 									<p class="fields-label">Custom Fields:</p>
 									<div class="fields-list">
 										{#each productType.fields as field}
@@ -421,7 +509,7 @@
 							{/if}
 							
 							{#if productType.pricing_templates && productType.pricing_templates.length > 0}
-								<div class="entity-fields">
+								<div class="group-fields">
 									<p class="fields-label">Pricing Templates:</p>
 									<div class="fields-list">
 										{#each productType.pricing_templates as templateId}
@@ -656,14 +744,14 @@
 		color: #0891b2;
 	}
 
-	.entity-grid {
+	.group-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
 		gap: 1.5rem;
 		padding: 1.5rem;
 	}
 
-	.entity-card {
+	.group-card {
 		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
 		overflow: hidden;
@@ -672,19 +760,19 @@
 		background: white;
 	}
 
-	.entity-card:hover {
+	.group-card:hover {
 		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		border-color: #06b6d4;
 		transform: translateY(-2px);
 	}
 	
-	.entity-card:focus {
+	.group-card:focus {
 		outline: none;
 		border-color: #06b6d4;
 		box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 	}
 
-	.entity-header {
+	.group-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -693,7 +781,7 @@
 		border-bottom: 1px solid #e5e7eb;
 	}
 
-	.entity-icon {
+	.group-icon {
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -705,23 +793,23 @@
 		color: #06b6d4;
 	}
 
-	.entity-actions {
+	.group-actions {
 		display: flex;
 		gap: 0.5rem;
 	}
 
-	.entity-content {
+	.group-content {
 		padding: 1rem;
 	}
 
-	.entity-name {
+	.group-name {
 		font-size: 1.125rem;
 		font-weight: 600;
 		color: #111827;
 		margin: 0 0 0.25rem 0;
 	}
 
-	.entity-code {
+	.group-code {
 		display: inline-block;
 		font-family: 'Courier New', monospace;
 		font-size: 0.75rem;
@@ -732,13 +820,13 @@
 		margin-bottom: 0.75rem;
 	}
 
-	.entity-description {
+	.group-description {
 		font-size: 0.875rem;
 		color: #6b7280;
 		margin: 0 0 1rem 0;
 	}
 
-	.entity-fields {
+	.group-fields {
 		margin-bottom: 1rem;
 	}
 
@@ -765,8 +853,14 @@
 		font-weight: 500;
 		border-radius: 0.25rem;
 	}
+	
+	.help-text {
+		font-size: 0.875rem;
+		color: #6b7280;
+		margin: 0.25rem 0 0 0;
+	}
 
-	.entity-footer {
+	.group-footer {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
@@ -1452,7 +1546,10 @@
 							name: t.name,
 							displayName: t.display_name,
 							description: t.description,
-							category: t.category
+							category: t.category,
+							price_formula: t.price_formula,
+							condition_formula: t.condition_formula,
+							is_active: t.is_active
 						}))}
 						title="Pricing Templates"
 						helpText="Templates will be applied in the order shown. Drag to reorder."
@@ -1461,6 +1558,10 @@
 						addButtonText="Add Pricing Template"
 						createLink="/extensions/products/pricing"
 						createLinkText="Create templates first"
+						allowCreateNew={true}
+						allowEdit={true}
+						on:createNew={handleCreatePricingTemplate}
+						on:editItem={handleEditPricingTemplate}
 					/>
 				</div>
 				
@@ -1487,4 +1588,31 @@
 			</div>
 		</div>
 	</div>
+{/if}
+
+<!-- Create Pricing Template Modal -->
+<PricingTemplateModal
+	show={showCreatePricingModal}
+	mode="create"
+	bind:template={newPricingTemplate}
+	variables={variables}
+	on:close={() => showCreatePricingModal = false}
+	on:save={createPricingTemplate}
+	on:createVariable={() => handleCreateVariable('pricing')}
+/>
+
+<!-- Edit Pricing Template Modal -->
+{#if editingPricingTemplate}
+	<PricingTemplateModal
+		show={showEditPricingModal}
+		mode="edit"
+		bind:template={editingPricingTemplate}
+		variables={variables}
+		on:close={() => {
+			showEditPricingModal = false;
+			editingPricingTemplate = null;
+		}}
+		on:save={updatePricingTemplate}
+		on:createVariable={() => handleCreateVariable('pricing')}
+	/>
 {/if}

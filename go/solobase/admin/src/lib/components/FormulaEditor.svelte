@@ -2,7 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { 
 		X, Play, Info, HelpCircle, AlertCircle, CheckCircle, 
-		Variable, Calculator, Code2, Copy, Sparkles, Shield
+		Variable, Calculator, Code2, Copy, Sparkles, Shield, Plus
 	} from 'lucide-svelte';
 	
 	export let show = false;
@@ -27,6 +27,13 @@
 	let validationError = '';
 	let showHelp = false;
 	let activeTab: 'editor' | 'help' = 'editor';
+	let showCreateVariable = false;
+	let newVariable = {
+		name: '',
+		displayName: '',
+		valueType: 'number',
+		description: ''
+	};
 	
 	// Extract variables used in the formula
 	function getUsedVariables(formulaStr: string): string[] {
@@ -216,6 +223,33 @@
 	function copyFormula() {
 		navigator.clipboard.writeText(formula);
 	}
+	
+	function createVariable() {
+		if (!newVariable.name || !newVariable.displayName) {
+			alert('Please provide both name and display name for the variable');
+			return;
+		}
+		
+		// Emit event to parent to create the variable
+		dispatch('createVariable', newVariable);
+		
+		// Add to local variables list
+		variables = [...variables, {
+			name: newVariable.name,
+			displayName: newVariable.displayName,
+			valueType: newVariable.valueType,
+			description: newVariable.description
+		}];
+		
+		// Reset form
+		newVariable = {
+			name: '',
+			displayName: '',
+			valueType: 'number',
+			description: ''
+		};
+		showCreateVariable = false;
+	}
 </script>
 
 {#if show}
@@ -299,6 +333,13 @@
 													bind:value={testVariables[variable.name]}
 													placeholder="0"
 												/>
+											{:else if variable.valueType === 'string'}
+												<input 
+													type="text" 
+													id="var-{variable.name}"
+													bind:value={testVariables[variable.name]}
+													placeholder="Enter text value"
+												/>
 											{:else}
 												<input 
 													type="text" 
@@ -353,10 +394,53 @@
 						
 						<div class="helpers">
 							<div class="helper-section">
-								<h4>
-									<Variable size={16} />
-									Available Variables
-								</h4>
+								<div class="helper-header">
+									<h4>
+										<Variable size={16} />
+										Available Variables
+									</h4>
+									<button class="btn-add-variable" on:click={() => showCreateVariable = !showCreateVariable} title="Create new variable">
+										<Plus size={14} />
+										Create variable
+									</button>
+								</div>
+								{#if showCreateVariable}
+									<div class="create-variable-form">
+										<input 
+											type="text" 
+											placeholder="Variable name (e.g., discount_rate)"
+											bind:value={newVariable.name}
+											class="variable-input"
+										/>
+										<input 
+											type="text" 
+											placeholder="Display name (e.g., Discount Rate)"
+											bind:value={newVariable.displayName}
+											class="variable-input"
+										/>
+										<select bind:value={newVariable.valueType} class="variable-input">
+											<option value="number">Number</option>
+											<option value="boolean">Boolean</option>
+											<option value="string">Text</option>
+										</select>
+										<input 
+											type="text" 
+											placeholder="Description (optional)"
+											bind:value={newVariable.description}
+											class="variable-input"
+										/>
+										<div class="create-variable-actions">
+											<button class="btn-save-variable" on:click={createVariable}>
+												<CheckCircle size={14} />
+												Create
+											</button>
+											<button class="btn-cancel-variable" on:click={() => showCreateVariable = false}>
+												<X size={14} />
+												Cancel
+											</button>
+										</div>
+									</div>
+								{/if}
 								<div class="variable-list">
 									{#if variables.length > 0}
 										{#each variables as variable}
@@ -678,6 +762,12 @@
 		gap: 0.625rem;
 	}
 	
+	.helper-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
 	.helper-section h4 {
 		display: flex;
 		align-items: center;
@@ -686,6 +776,90 @@
 		font-size: 0.813rem;
 		font-weight: 600;
 		color: #374151;
+	}
+	
+	.btn-add-variable {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.25rem 0.75rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		background: white;
+		color: #06b6d4;
+		font-size: 0.75rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	
+	.btn-add-variable:hover {
+		background: #f0fdfa;
+		border-color: #06b6d4;
+	}
+	
+	.create-variable-form {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		margin-top: 0.5rem;
+	}
+	
+	.variable-input {
+		padding: 0.375rem 0.5rem;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+		background: white;
+	}
+	
+	.variable-input:focus {
+		outline: none;
+		border-color: #06b6d4;
+		box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+	}
+	
+	.create-variable-actions {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 0.25rem;
+	}
+	
+	.btn-save-variable,
+	.btn-cancel-variable {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem 0.5rem;
+		border: none;
+		border-radius: 0.25rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	
+	.btn-save-variable {
+		background: #10b981;
+		color: white;
+	}
+	
+	.btn-save-variable:hover {
+		background: #059669;
+	}
+	
+	.btn-cancel-variable {
+		background: white;
+		color: #6b7280;
+		border: 1px solid #e5e7eb;
+	}
+	
+	.btn-cancel-variable:hover {
+		background: #f3f4f6;
 	}
 	
 	.variable-list {

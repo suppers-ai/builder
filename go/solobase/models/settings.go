@@ -17,6 +17,10 @@ type Setting struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+func (Setting) TableName() string {
+	return "settings"
+}
+
 func (s *Setting) BeforeCreate(tx *gorm.DB) error {
 	if s.ID == uuid.Nil {
 		s.ID = uuid.New()

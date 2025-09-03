@@ -194,21 +194,21 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/products/variables/{id}", a.productHandlers.HandleUpdateVariable()).Methods("PUT", "OPTIONS")
 	apiRouter.HandleFunc("/products/variables/{id}", a.productHandlers.HandleDeleteVariable()).Methods("DELETE", "OPTIONS")
 	
-	// Products extension - Entity Types
-	apiRouter.HandleFunc("/products/entity-types", a.productHandlers.HandleListEntityTypes()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/products/entity-types", a.productHandlers.HandleCreateEntityType()).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/products/entity-types/{id}", a.productHandlers.HandleUpdateEntityType()).Methods("PUT", "OPTIONS")
-	apiRouter.HandleFunc("/products/entity-types/{id}", a.productHandlers.HandleDeleteEntityType()).Methods("DELETE", "OPTIONS")
+	// Products extension - Group Types
+	apiRouter.HandleFunc("/products/group-types", a.productHandlers.HandleListGroupTypes()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/group-types", a.productHandlers.HandleCreateGroupType()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/group-types/{id}", a.productHandlers.HandleUpdateGroupType()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/group-types/{id}", a.productHandlers.HandleDeleteGroupType()).Methods("DELETE", "OPTIONS")
 	
-	// Products extension - Entities (user's entities)
-	apiRouter.HandleFunc("/products/entities", a.productHandlers.HandleListEntities()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/products/entities", a.productHandlers.HandleCreateEntity()).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/products/entities/{id}", a.productHandlers.HandleUpdateEntity()).Methods("PUT", "OPTIONS")
-	apiRouter.HandleFunc("/products/entities/{id}", a.productHandlers.HandleDeleteEntity()).Methods("DELETE", "OPTIONS")
+	// Products extension - Groups (user's groups)
+	apiRouter.HandleFunc("/products/groups", a.productHandlers.HandleListGroups()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/products/groups", a.productHandlers.HandleCreateGroup()).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/products/groups/{id}", a.productHandlers.HandleUpdateGroup()).Methods("PUT", "OPTIONS")
+	apiRouter.HandleFunc("/products/groups/{id}", a.productHandlers.HandleDeleteGroup()).Methods("DELETE", "OPTIONS")
 	
-	// User entity and product endpoints (for user profile pages)
-	apiRouter.HandleFunc("/user/entities/{id}", a.productHandlers.HandleGetEntity()).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/user/entities/{id}/products", a.productHandlers.HandleEntityProducts()).Methods("GET", "OPTIONS")
+	// User group and product endpoints (for user profile pages)
+	apiRouter.HandleFunc("/user/groups/{id}", a.productHandlers.HandleGetGroup()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/user/groups/{id}/products", a.productHandlers.HandleGroupProducts()).Methods("GET", "OPTIONS")
 	
 	// Price calculation endpoint
 	apiRouter.HandleFunc("/products/calculate-price", a.productHandlers.HandleCalculatePrice()).Methods("POST", "OPTIONS")

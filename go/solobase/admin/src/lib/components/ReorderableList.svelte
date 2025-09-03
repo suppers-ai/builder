@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { GripVertical, XCircle, Plus } from 'lucide-svelte';
+	import { GripVertical, XCircle, Plus, X, PlusCircle, Edit2 } from 'lucide-svelte';
+	import { createEventDispatcher } from 'svelte';
 	
 	export let selectedIds: string[] = [];
 	export let availableItems: Array<{
@@ -17,8 +18,11 @@
 	export let addButtonText: string = 'Add Item';
 	export let createLink: string | null = null;
 	export let createLinkText: string = 'Create items first';
+	export let allowCreateNew: boolean = false;
+	export let allowEdit: boolean = false;
 	
 	let showSelector = false;
+	const dispatch = createEventDispatcher();
 	
 	// Get the actual item object from an ID
 	function getItem(id: string) {
@@ -69,6 +73,20 @@
 	function removeItem(itemId: string) {
 		selectedIds = selectedIds.filter(id => id !== itemId);
 	}
+	
+	// Handle create new
+	function handleCreateNew() {
+		showSelector = false;
+		dispatch('createNew');
+	}
+	
+	// Handle edit item
+	function handleEditItem(itemId: string) {
+		const item = getItem(itemId);
+		if (item) {
+			dispatch('editItem', { item });
+		}
+	}
 </script>
 
 <div class="reorderable-list">
@@ -104,12 +122,22 @@
 									{/if}
 								</div>
 							</div>
-							<button class="remove-btn" 
-								on:click={() => removeItem(itemId)}
-								title="Remove item"
-								type="button">
-								<XCircle size={16} />
-							</button>
+							<div class="item-actions">
+								{#if allowEdit}
+									<button class="edit-btn" 
+										on:click={() => handleEditItem(itemId)}
+										title="Edit item"
+										type="button">
+										<Edit2 size={16} />
+									</button>
+								{/if}
+								<button class="remove-btn" 
+									on:click={() => removeItem(itemId)}
+									title="Remove item"
+									type="button">
+									<XCircle size={16} />
+								</button>
+							</div>
 						</div>
 					{/if}
 				{/each}
@@ -130,6 +158,24 @@
 				
 				{#if showSelector}
 					<div class="item-selector">
+						<div class="selector-header">
+							<span class="selector-title">Select {title}</span>
+							<button type="button" class="close-selector" on:click={() => showSelector = false}>
+								<X size={16} />
+							</button>
+						</div>
+						
+						{#if allowCreateNew}
+							<div class="create-new-option" 
+								on:click={handleCreateNew}
+								on:keypress={(e) => e.key === 'Enter' && handleCreateNew()}
+								role="button"
+								tabindex="0">
+								<PlusCircle size={16} />
+								<span>Create New {title.slice(0, -1)}</span>
+							</div>
+						{/if}
+						
 						{#if unselectedItems.length > 0}
 							{#each unselectedItems as item}
 								<div class="item-option"
@@ -304,7 +350,14 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
+	
+	.item-actions {
+		display: flex;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
 
+	.edit-btn,
 	.remove-btn {
 		padding: 0.25rem;
 		background: transparent;
@@ -314,6 +367,11 @@
 		transition: all 0.2s;
 		flex-shrink: 0;
 		border-radius: 0.25rem;
+	}
+	
+	.edit-btn:hover {
+		color: #3b82f6;
+		background: #dbeafe;
 	}
 
 	.remove-btn:hover {
@@ -372,6 +430,60 @@
 		border-radius: 0.375rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 		z-index: 10;
+	}
+	
+	.selector-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem;
+		border-bottom: 1px solid #e5e7eb;
+		background: #f9fafb;
+		position: sticky;
+		top: 0;
+		z-index: 1;
+	}
+	
+	.selector-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+	
+	.close-selector {
+		padding: 0.25rem;
+		background: transparent;
+		border: none;
+		color: #6b7280;
+		cursor: pointer;
+		transition: all 0.2s;
+		border-radius: 0.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.close-selector:hover {
+		background: #e5e7eb;
+		color: #374151;
+	}
+	
+	.create-new-option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem;
+		background: linear-gradient(to right, #f0fdf4, #dcfce7);
+		border-bottom: 2px solid #10b981;
+		cursor: pointer;
+		color: #059669;
+		font-weight: 500;
+		transition: all 0.2s;
+	}
+	
+	.create-new-option:hover {
+		background: linear-gradient(to right, #dcfce7, #bbf7d0);
+		color: #047857;
 	}
 
 	.item-option {

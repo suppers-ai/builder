@@ -14,16 +14,16 @@ import (
 type AdminAPI struct {
 	db              *gorm.DB
 	variableService *VariableService
-	entityService   *EntityService
+	groupService   *GroupService
 	productService  *ProductService
 	pricingService  *PricingService
 }
 
-func NewAdminAPI(db *gorm.DB, vs *VariableService, es *EntityService, ps *ProductService, prs *PricingService) *AdminAPI {
+func NewAdminAPI(db *gorm.DB, vs *VariableService, es *GroupService, ps *ProductService, prs *PricingService) *AdminAPI {
 	return &AdminAPI{
 		db:              db,
 		variableService: vs,
-		entityService:   es,
+		groupService:   es,
 		productService:  ps,
 		pricingService:  prs,
 	}
@@ -97,36 +97,36 @@ func (a *AdminAPI) DeleteVariable(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// Entity Template management
-func (a *AdminAPI) ListEntityTypes(w http.ResponseWriter, r *http.Request) {
-	var entityTemplates []models.EntityTemplate
-	if err := a.db.Find(&entityTemplates).Error; err != nil {
+// Group Template management
+func (a *AdminAPI) ListGroupTypes(w http.ResponseWriter, r *http.Request) {
+	var groupTemplates []models.GroupTemplate
+	if err := a.db.Find(&groupTemplates).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entityTemplates)
+	json.NewEncoder(w).Encode(groupTemplates)
 }
 
-func (a *AdminAPI) CreateEntityType(w http.ResponseWriter, r *http.Request) {
-	var entityTemplate models.EntityTemplate
-	if err := json.NewDecoder(r.Body).Decode(&entityTemplate); err != nil {
+func (a *AdminAPI) CreateGroupType(w http.ResponseWriter, r *http.Request) {
+	var groupTemplate models.GroupTemplate
+	if err := json.NewDecoder(r.Body).Decode(&groupTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	if err := a.db.Create(&entityTemplate).Error; err != nil {
+	if err := a.db.Create(&groupTemplate).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(entityTemplate)
+	json.NewEncoder(w).Encode(groupTemplate)
 }
 
-func (a *AdminAPI) UpdateEntityType(w http.ResponseWriter, r *http.Request) {
+func (a *AdminAPI) UpdateGroupType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
@@ -134,22 +134,22 @@ func (a *AdminAPI) UpdateEntityType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	var entityTemplate models.EntityTemplate
-	if err := json.NewDecoder(r.Body).Decode(&entityTemplate); err != nil {
+	var groupTemplate models.GroupTemplate
+	if err := json.NewDecoder(r.Body).Decode(&groupTemplate); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	if err := a.db.Model(&models.EntityTemplate{}).Where("id = ?", id).Updates(&entityTemplate).Error; err != nil {
+	if err := a.db.Model(&models.GroupTemplate{}).Where("id = ?", id).Updates(&groupTemplate).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entityTemplate)
+	json.NewEncoder(w).Encode(groupTemplate)
 }
 
-func (a *AdminAPI) DeleteEntityType(w http.ResponseWriter, r *http.Request) {
+func (a *AdminAPI) DeleteGroupType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
@@ -157,7 +157,7 @@ func (a *AdminAPI) DeleteEntityType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if err := a.db.Delete(&models.EntityTemplate{}, id).Error; err != nil {
+	if err := a.db.Delete(&models.GroupTemplate{}, id).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -307,56 +307,56 @@ func (a *AdminAPI) DeletePricingTemplate(w http.ResponseWriter, r *http.Request)
 // UserAPI handles user operations
 type UserAPI struct {
 	db             *gorm.DB
-	entityService  *EntityService
+	groupService  *GroupService
 	productService *ProductService
 	pricingService *PricingService
 }
 
-func NewUserAPI(db *gorm.DB, es *EntityService, ps *ProductService, prs *PricingService) *UserAPI {
+func NewUserAPI(db *gorm.DB, es *GroupService, ps *ProductService, prs *PricingService) *UserAPI {
 	return &UserAPI{
 		db:             db,
-		entityService:  es,
+		groupService:  es,
 		productService: ps,
 		pricingService: prs,
 	}
 }
 
-// Entity management for users
-func (u *UserAPI) ListMyEntities(w http.ResponseWriter, r *http.Request) {
+// Group management for users
+func (u *UserAPI) ListMyGroups(w http.ResponseWriter, r *http.Request) {
 	// TODO: Get user ID from context/session
 	userID := uint(1) // Placeholder
 	
-	entities, err := u.entityService.ListByUser(userID)
+	groups, err := u.groupService.ListByUser(userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entities)
+	json.NewEncoder(w).Encode(groups)
 }
 
-func (u *UserAPI) CreateEntity(w http.ResponseWriter, r *http.Request) {
+func (u *UserAPI) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	userID := uint(1) // TODO: Get from context
 	
-	var entity models.Entity
-	if err := json.NewDecoder(r.Body).Decode(&entity); err != nil {
+	var group models.Group
+	if err := json.NewDecoder(r.Body).Decode(&group); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	entity.UserID = userID
-	if err := u.entityService.Create(&entity); err != nil {
+	group.UserID = userID
+	if err := u.groupService.Create(&group); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(entity)
+	json.NewEncoder(w).Encode(group)
 }
 
-func (u *UserAPI) UpdateEntity(w http.ResponseWriter, r *http.Request) {
+func (u *UserAPI) UpdateGroup(w http.ResponseWriter, r *http.Request) {
 	userID := uint(1) // TODO: Get from context
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -365,22 +365,22 @@ func (u *UserAPI) UpdateEntity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	var entity models.Entity
-	if err := json.NewDecoder(r.Body).Decode(&entity); err != nil {
+	var group models.Group
+	if err := json.NewDecoder(r.Body).Decode(&group); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	
-	if err := u.entityService.Update(uint(id), userID, &entity); err != nil {
+	if err := u.groupService.Update(uint(id), userID, &group); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entity)
+	json.NewEncoder(w).Encode(group)
 }
 
-func (u *UserAPI) DeleteEntity(w http.ResponseWriter, r *http.Request) {
+func (u *UserAPI) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 	userID := uint(1) // TODO: Get from context
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -389,7 +389,7 @@ func (u *UserAPI) DeleteEntity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if err := u.entityService.Delete(uint(id), userID); err != nil {
+	if err := u.groupService.Delete(uint(id), userID); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -397,7 +397,7 @@ func (u *UserAPI) DeleteEntity(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (u *UserAPI) GetEntity(w http.ResponseWriter, r *http.Request) {
+func (u *UserAPI) GetGroup(w http.ResponseWriter, r *http.Request) {
 	userID := uint(1) // TODO: Get from context
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -406,26 +406,26 @@ func (u *UserAPI) GetEntity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	entity, err := u.entityService.GetByID(uint(id), userID)
+	group, err := u.groupService.GetByID(uint(id), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(entity)
+	json.NewEncoder(w).Encode(group)
 }
 
 // Product management
-func (u *UserAPI) ListEntityProducts(w http.ResponseWriter, r *http.Request) {
+func (u *UserAPI) ListGroupProducts(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	entityID, err := strconv.ParseUint(vars["id"], 10, 32)
+	groupID, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
 	}
 	
-	products, err := u.productService.ListByEntity(uint(entityID))
+	products, err := u.productService.ListByGroup(uint(groupID))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -455,7 +455,7 @@ func (u *UserAPI) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Verify user owns the entity
+	// TODO: Verify user owns the group
 	
 	if err := u.productService.Create(&product); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -496,18 +496,18 @@ func (u *UserAPI) GetProductStats(w http.ResponseWriter, r *http.Request) {
 	userID := uint(1) // TODO: Get from context
 	
 	// Get counts
-	var entityCount int64
-	u.db.Model(&models.Entity{}).Where("user_id = ?", userID).Count(&entityCount)
+	var groupCount int64
+	u.db.Model(&models.Group{}).Where("user_id = ?", userID).Count(&groupCount)
 	
 	var productCount int64
 	u.db.Model(&models.Product{}).
-		Joins("JOIN entities ON products.entity_id = entities.id").
-		Where("entities.user_id = ?", userID).
+		Joins("JOIN groups ON products.group_id = groups.id").
+		Where("groups.user_id = ?", userID).
 		Count(&productCount)
 	
 	stats := map[string]interface{}{
 		"totalProducts":  productCount,
-		"totalEntities":  entityCount,
+		"totalEntities":  groupCount,
 		"activeProducts": productCount, // TODO: Filter by active
 		"totalRevenue":   0,
 		"avgPrice":       0,

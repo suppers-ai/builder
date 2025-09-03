@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { 
-		Package, Variable, Building2, Package2, Calculator,
+		Package, Building2, Package2, Calculator,
 		Database, ChevronRight,
 		ShoppingBag
 	} from 'lucide-svelte';
@@ -13,8 +13,7 @@
 	
 	// Stats
 	let stats = {
-		variables: 0,
-		entityTypes: 0,
+		groupTypes: 0,
 		productTypes: 0,
 		pricingTemplates: 0
 	};
@@ -22,18 +21,10 @@
 	// Configuration sections
 	const configSections = [
 		{
-			title: 'Variables',
-			description: 'Define variables for dynamic pricing and product attributes',
-			icon: Variable,
-			path: '/extensions/products/variables',
-			color: 'cyan',
-			count: 0
-		},
-		{
-			title: 'Entity Types',
-			description: 'Configure types of entities that can own products',
+			title: 'Group Types',
+			description: 'Configure types of groups that can own products',
 			icon: Building2,
-			path: '/extensions/products/entity-types',
+			path: '/extensions/products/group-types',
 			color: 'purple',
 			count: 0
 		},
@@ -65,25 +56,22 @@
 			loading = true;
 			
 			// Fetch counts from API
-			const [variablesRes, entityTypesRes, productTypesRes, templatesRes] = await Promise.all([
-				api.get('/products/variables'),
-				api.get('/products/entity-types'),
+			const [groupTypesRes, productTypesRes, templatesRes] = await Promise.all([
+				api.get('/products/group-types'),
 				api.get('/products/product-types'),
 				api.get('/products/pricing-templates')
 			]);
 			
 			stats = {
-				variables: variablesRes?.length || 0,
-				entityTypes: entityTypesRes?.length || 0,
+				groupTypes: groupTypesRes?.length || 0,
 				productTypes: productTypesRes?.length || 0,
 				pricingTemplates: templatesRes?.length || 0
 			};
 			
 			// Update counts in config sections
-			configSections[0].count = stats.variables;
-			configSections[1].count = stats.entityTypes;
-			configSections[2].count = stats.productTypes;
-			configSections[3].count = stats.pricingTemplates;
+			configSections[0].count = stats.groupTypes;
+			configSections[1].count = stats.productTypes;
+			configSections[2].count = stats.pricingTemplates;
 		} catch (error) {
 			console.error('Failed to load stats:', error);
 		} finally {
@@ -118,9 +106,9 @@
 				<p class="header-subtitle">Configure variables, entities, products, and pricing formulas</p>
 			</div>
 			<div class="header-actions">
-				<button class="btn btn-secondary" on:click={() => goto('/profile/entities')}>
+				<button class="btn btn-secondary" on:click={() => goto('/profile/groups')}>
 					<Database size={16} />
-					My Entities
+					My Groups
 				</button>
 			</div>
 		</div>
@@ -160,11 +148,11 @@
 			<div class="user-settings-content">
 				<label class="checkbox-label">
 					<input type="checkbox" bind:checked={userProductCreationEnabled} />
-					<span>Enable users to create their own entities and products</span>
+					<span>Enable users to create their own groups and products</span>
 				</label>
 				<p class="settings-description">
 					{#if userProductCreationEnabled}
-						Users can create entities and manage their products. Currently enabled.
+						Users can create groups and manage their products. Currently enabled.
 					{:else}
 						Only administrators can create and manage products. User access is disabled.
 					{/if}

@@ -18,14 +18,14 @@
 	// Real data from API
 	let products: any[] = [];
 	let orders: any[] = [];
-	let entities: any[] = [];
-	let entityTypes: any[] = [];
+	let groups: any[] = [];
+	let groupTypes: any[] = [];
 	
 	// Stats (calculated from real data)
 	let stats = {
 		totalProducts: 0,
 		totalSales: 0,
-		totalEntities: 0,
+		totalGroups: 0,
 		totalViews: 0,
 		productLikes: 0,
 		totalRevenue: 0
@@ -36,17 +36,17 @@
 	let filterStatus = 'all';
 	let sortBy = 'date';
 	
-	// Entity and Product creation
-	let showCreateEntityModal = false;
+	// Group and Product creation
+	let showCreateGroupModal = false;
 	let showCreateProductModal = false;
-	let selectedEntityForProduct: any = null;
-	let selectedEntityType: any = null;
+	let selectedGroupForProduct: any = null;
+	let selectedGroupType: any = null;
 	let selectedProductType: any = null;
 	let productTypes: any[] = [];
 	
-	let newEntity = {
+	let newGroup = {
 		name: '',
-		entity_type_id: '',
+		group_type_id: '',
 		description: '',
 		custom_fields: {}
 	};
@@ -55,7 +55,7 @@
 		name: '',
 		description: '',
 		base_price: 0,
-		entity_id: '',
+		group_id: '',
 		product_type_id: '',
 		custom_fields: {}
 	};
@@ -109,13 +109,13 @@
 		try {
 			loading = true;
 			
-			// Load entity types
+			// Load group types
 			try {
-				const typesRes = await api.get('/products/entity-types');
-				entityTypes = Array.isArray(typesRes) ? typesRes : [];
+				const typesRes = await api.get('/products/group-types');
+				groupTypes = Array.isArray(typesRes) ? typesRes : [];
 			} catch (err) {
-				console.error('Failed to load entity types:', err);
-				entityTypes = [];
+				console.error('Failed to load group types:', err);
+				groupTypes = [];
 			}
 			
 			// Load product types
@@ -127,13 +127,13 @@
 				productTypes = [];
 			}
 			
-			// Load entities
+			// Load groups
 			try {
-				const entitiesRes = await api.get('/products/entities');
-				entities = Array.isArray(entitiesRes) ? entitiesRes : [];
+				const groupsRes = await api.get('/products/groups');
+				groups = Array.isArray(groupsRes) ? groupsRes : [];
 			} catch (err) {
-				console.error('Failed to load entities:', err);
-				entities = [];
+				console.error('Failed to load groups:', err);
+				groups = [];
 			}
 			
 			// Load products
@@ -152,7 +152,7 @@
 			stats = {
 				totalProducts: products.length,
 				totalSales: orders.filter(o => o.status === 'completed').length,
-				totalEntities: entities.length,
+				totalGroups: groups.length,
 				totalViews: products.reduce((sum, p) => sum + (p.views || 0), 0),
 				productLikes: products.reduce((sum, p) => sum + (p.likes || 0), 0),
 				totalRevenue: orders
@@ -167,30 +167,30 @@
 		}
 	}
 	
-	async function createEntity() {
+	async function createGroup() {
 		try {
 			// Don't send user_id - backend should handle it from session
-			const entityData = {
-				name: newEntity.name,
-				entity_type_id: parseInt(newEntity.entity_type_id) || undefined,
-				description: newEntity.description || '',
-				custom_fields: newEntity.custom_fields || {}
+			const groupData = {
+				name: newGroup.name,
+				group_type_id: parseInt(newGroup.group_type_id) || undefined,
+				description: newGroup.description || '',
+				custom_fields: newGroup.custom_fields || {}
 			};
 			
-			const entity = await api.post('/products/entities', entityData);
-			entities = [...entities, entity];
+			const group = await api.post('/products/groups', groupData);
+			groups = [...groups, group];
 			await loadData();
-			showCreateEntityModal = false;
-			selectedEntityType = null;
-			newEntity = {
+			showCreateGroupModal = false;
+			selectedGroupType = null;
+			newGroup = {
 				name: '',
-				entity_type_id: '',
+				group_type_id: '',
 				description: '',
 				custom_fields: {}
 			};
 		} catch (error) {
-			console.error('Failed to create entity:', error);
-			alert('Failed to create entity: ' + (error.message || 'Unknown error'));
+			console.error('Failed to create group:', error);
+			alert('Failed to create group: ' + (error.message || 'Unknown error'));
 		}
 	}
 	
@@ -200,7 +200,7 @@
 				name: newProduct.name,
 				description: newProduct.description || '',
 				base_price: parseFloat(newProduct.base_price) || 0,
-				entity_id: parseInt(selectedEntityForProduct?.id || newProduct.entity_id),
+				group_id: parseInt(selectedGroupForProduct?.id || newProduct.group_id),
 				product_type_id: parseInt(newProduct.product_type_id) || undefined,
 				custom_fields: newProduct.custom_fields || {}
 			};
@@ -209,13 +209,13 @@
 			products = [...products, product];
 			await loadData();
 			showCreateProductModal = false;
-			selectedEntityForProduct = null;
+			selectedGroupForProduct = null;
 			selectedProductType = null;
 			newProduct = {
 				name: '',
 				description: '',
 				base_price: 0,
-				entity_id: '',
+				group_id: '',
 				product_type_id: '',
 				custom_fields: {}
 			};
@@ -240,35 +240,35 @@
 		}
 	}
 	
-	async function deleteEntity(id: string) {
-		if (!confirm('Are you sure you want to delete this entity? All associated products will also be deleted.')) {
+	async function deleteGroup(id: string) {
+		if (!confirm('Are you sure you want to delete this group? All associated products will also be deleted.')) {
 			return;
 		}
 		
 		try {
-			await api.delete(`/products/entities/${id}`);
-			entities = entities.filter(e => e.id !== id);
+			await api.delete(`/products/groups/${id}`);
+			groups = groups.filter(e => e.id !== id);
 			await loadData();
 		} catch (error) {
-			console.error('Failed to delete entity:', error);
-			alert('Failed to delete entity');
+			console.error('Failed to delete group:', error);
+			alert('Failed to delete group');
 		}
 	}
 	
-	function openProductCreationForEntity(entity: any) {
-		selectedEntityForProduct = entity;
-		newProduct.entity_id = entity.id;
+	function openProductCreationForGroup(group: any) {
+		selectedGroupForProduct = group;
+		newProduct.group_id = group.id;
 		showCreateProductModal = true;
 	}
 	
-	function getEntityTypeName(typeId: string): string {
-		const type = entityTypes.find(t => t.id === typeId);
+	function getGroupTypeName(typeId: string): string {
+		const type = groupTypes.find(t => t.id === typeId);
 		return type?.name || 'Unknown';
 	}
 	
-	// Get products for a specific entity
-	function getEntityProducts(entityId: string) {
-		return products.filter(p => p.entity_id === entityId);
+	// Get products for a specific group
+	function getGroupProducts(groupId: string) {
+		return products.filter(p => p.group_id === groupId);
 	}
 	
 	function getStatusColor(status: string) {
@@ -393,8 +393,8 @@
 						<div class="stat-card">
 							<div class="stat-icon blue"><Users size={16} /></div>
 							<div class="stat-info">
-								<span class="stat-value">{stats.totalEntities}</span>
-								<span class="stat-label">Entities</span>
+								<span class="stat-value">{stats.totalGroups}</span>
+								<span class="stat-label">Groups</span>
 							</div>
 						</div>
 					</div>
@@ -526,43 +526,43 @@
 				<div class="products-content">
 					<div class="products-header">
 						<h3 class="section-title">Manage Products</h3>
-						{#if entities.length === 0}
-							<button class="btn-primary" on:click={() => showCreateEntityModal = true}>
+						{#if groups.length === 0}
+							<button class="btn-primary" on:click={() => showCreateGroupModal = true}>
 								<Plus size={14} />
-								Create Entity
+								Create Group
 							</button>
 						{/if}
 					</div>
 					
-					{#if entities.length > 0}
-						<!-- Entities with their products -->
-						<div class="entities-section">
-							{#each entities as entity}
-								{@const entityProducts = getEntityProducts(entity.id)}
-								<div class="entity-container">
-									<div class="entity-header">
-										<div class="entity-info">
-											<h4>{entity.name}</h4>
-											<span class="entity-type">{getEntityTypeName(entity.entity_type_id)}</span>
+					{#if groups.length > 0}
+						<!-- Groups with their products -->
+						<div class="groups-section">
+							{#each groups as group}
+								{@const groupProducts = getGroupProducts(group.id)}
+								<div class="group-container">
+									<div class="group-header">
+										<div class="group-info">
+											<h4>{group.name}</h4>
+											<span class="group-type">{getGroupTypeName(group.group_type_id)}</span>
 										</div>
-										<div class="entity-actions">
-											<button class="btn-sm btn-primary" on:click={() => openProductCreationForEntity(entity)}>
+										<div class="group-actions">
+											<button class="btn-sm btn-primary" on:click={() => openProductCreationForGroup(group)}>
 												<Plus size={12} />
 												Add Product
 											</button>
-											<button class="btn-icon" on:click={() => deleteEntity(entity.id)} title="Delete Entity">
+											<button class="btn-icon" on:click={() => deleteGroup(group.id)} title="Delete Group">
 												<Trash2 size={14} />
 											</button>
 										</div>
 									</div>
 									
-									{#if entity.description}
-										<p class="entity-description">{entity.description}</p>
+									{#if group.description}
+										<p class="group-description">{group.description}</p>
 									{/if}
 									
-									{#if entityProducts.length > 0}
-										<div class="entity-products">
-											{#each entityProducts as product}
+									{#if groupProducts.length > 0}
+										<div class="group-products">
+											{#each groupProducts as product}
 												<div class="product-card">
 													<div class="product-card-header">
 														<h5>{product.name}</h5>
@@ -578,8 +578,8 @@
 									{:else}
 										<div class="no-products">
 											<Package size={20} />
-											<p>No products for this entity</p>
-											<button class="btn-sm" on:click={() => openProductCreationForEntity(entity)}>
+											<p>No products for this group</p>
+											<button class="btn-sm" on:click={() => openProductCreationForGroup(group)}>
 												Add First Product
 											</button>
 										</div>
@@ -587,21 +587,21 @@
 								</div>
 							{/each}
 							
-							<!-- Add New Entity Card -->
-							<div class="entity-container add-entity" on:click={() => showCreateEntityModal = true}>
+							<!-- Add New Group Card -->
+							<div class="group-container add-group" on:click={() => showCreateGroupModal = true}>
 								<Plus size={24} />
-								<span>Add New Entity</span>
+								<span>Add New Group</span>
 							</div>
 						</div>
 					{:else}
-						<!-- No entities yet -->
+						<!-- No groups yet -->
 						<div class="empty-state">
 							<Box size={32} />
-							<h4>Start by Creating an Entity</h4>
-							<p>Entities represent your business units (stores, restaurants, services)</p>
-							<button class="btn-primary" on:click={() => showCreateEntityModal = true}>
+							<h4>Start by Creating an Group</h4>
+							<p>Groups represent your business units (stores, restaurants, services)</p>
+							<button class="btn-primary" on:click={() => showCreateGroupModal = true}>
 								<Plus size={14} />
-								Create Your First Entity
+								Create Your First Group
 							</button>
 						</div>
 					{/if}
@@ -611,47 +611,47 @@
 	</div>
 </div>
 
-<!-- Create Entity Modal -->
-{#if showCreateEntityModal}
-	<div class="modal-overlay" on:click={() => showCreateEntityModal = false}>
+<!-- Create Group Modal -->
+{#if showCreateGroupModal}
+	<div class="modal-overlay" on:click={() => showCreateGroupModal = false}>
 		<div class="modal" on:click|stopPropagation>
 			<div class="modal-header">
-				<h3>Create New Entity</h3>
-				<button class="btn-close" on:click={() => showCreateEntityModal = false}>
+				<h3>Create New Group</h3>
+				<button class="btn-close" on:click={() => showCreateGroupModal = false}>
 					<X size={18} />
 				</button>
 			</div>
 			<div class="modal-body">
 				<div class="form-group">
-					<label for="entity-name">Entity Name</label>
+					<label for="group-name">Group Name</label>
 					<input 
 						type="text" 
-						id="entity-name" 
-						bind:value={newEntity.name}
+						id="group-name" 
+						bind:value={newGroup.name}
 						placeholder="e.g., Main Store, Downtown Restaurant"
 					/>
 				</div>
 				
-				{#if entityTypes.length > 0}
+				{#if groupTypes.length > 0}
 					<div class="form-group">
-						<label for="entity-type">Entity Type</label>
-						<select id="entity-type" bind:value={newEntity.entity_type_id} 
+						<label for="group-type">Group Type</label>
+						<select id="group-type" bind:value={newGroup.group_type_id} 
 							on:change={() => {
-								selectedEntityType = entityTypes.find(t => t.id == newEntity.entity_type_id);
-								newEntity.custom_fields = {};
+								selectedGroupType = groupTypes.find(t => t.id == newGroup.group_type_id);
+								newGroup.custom_fields = {};
 							}}>
 							<option value="">Select type</option>
-							{#each entityTypes as type}
+							{#each groupTypes as type}
 								<option value={type.id}>{type.display_name || type.name}</option>
 							{/each}
 						</select>
 					</div>
 				{/if}
 				
-				{#if selectedEntityType && selectedEntityType.fields && selectedEntityType.fields.length > 0}
+				{#if selectedGroupType && selectedGroupType.fields && selectedGroupType.fields.length > 0}
 					<div class="custom-fields-section">
 						<h4 class="custom-fields-title">Custom Fields</h4>
-						{#each selectedEntityType.fields as field}
+						{#each selectedGroupType.fields as field}
 							<div class="form-group">
 								<label for="field-{field.name}">
 									{field.label || field.name}
@@ -662,13 +662,13 @@
 								{/if}
 								
 								{#if field.type === 'boolean'}
-									<select id="field-{field.name}" bind:value={newEntity.custom_fields[field.name]}>
+									<select id="field-{field.name}" bind:value={newGroup.custom_fields[field.name]}>
 										<option value="">Select...</option>
 										<option value={true}>Yes</option>
 										<option value={false}>No</option>
 									</select>
 								{:else if field.type === 'select' && field.constraints?.options}
-									<select id="field-{field.name}" bind:value={newEntity.custom_fields[field.name]}>
+									<select id="field-{field.name}" bind:value={newGroup.custom_fields[field.name]}>
 										<option value="">Select...</option>
 										{#each field.constraints.options as option}
 											<option value={option}>{option}</option>
@@ -677,7 +677,7 @@
 								{:else if field.type === 'textarea'}
 									<textarea 
 										id="field-{field.name}"
-										bind:value={newEntity.custom_fields[field.name]}
+										bind:value={newGroup.custom_fields[field.name]}
 										placeholder={field.constraints?.placeholder || ''}
 										rows="3"
 									></textarea>
@@ -685,7 +685,7 @@
 									<input 
 										type="number"
 										id="field-{field.name}"
-										bind:value={newEntity.custom_fields[field.name]}
+										bind:value={newGroup.custom_fields[field.name]}
 										placeholder={field.constraints?.placeholder || ''}
 										min={field.constraints?.min}
 										max={field.constraints?.max}
@@ -694,13 +694,13 @@
 									<input 
 										type="date"
 										id="field-{field.name}"
-										bind:value={newEntity.custom_fields[field.name]}
+										bind:value={newGroup.custom_fields[field.name]}
 									/>
 								{:else if field.type === 'email'}
 									<input 
 										type="email"
 										id="field-{field.name}"
-										bind:value={newEntity.custom_fields[field.name]}
+										bind:value={newGroup.custom_fields[field.name]}
 										placeholder={field.constraints?.placeholder || ''}
 										minlength={field.constraints?.min_length}
 										maxlength={field.constraints?.max_length}
@@ -710,7 +710,7 @@
 									<input 
 										type="url"
 										id="field-{field.name}"
-										bind:value={newEntity.custom_fields[field.name]}
+										bind:value={newGroup.custom_fields[field.name]}
 										placeholder={field.constraints?.placeholder || ''}
 										minlength={field.constraints?.min_length}
 										maxlength={field.constraints?.max_length}
@@ -720,7 +720,7 @@
 									<input 
 										type="text"
 										id="field-{field.name}"
-										bind:value={newEntity.custom_fields[field.name]}
+										bind:value={newGroup.custom_fields[field.name]}
 										placeholder={field.constraints?.placeholder || ''}
 										minlength={field.constraints?.min_length}
 										maxlength={field.constraints?.max_length}
@@ -733,25 +733,25 @@
 				{/if}
 				
 				<div class="form-group">
-					<label for="entity-description">Description (optional)</label>
+					<label for="group-description">Description (optional)</label>
 					<textarea 
-						id="entity-description" 
-						bind:value={newEntity.description}
+						id="group-description" 
+						bind:value={newGroup.description}
 						rows="3"
-						placeholder="Brief description of this entity"
+						placeholder="Brief description of this group"
 					></textarea>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-secondary" on:click={() => showCreateEntityModal = false}>
+				<button class="btn btn-secondary" on:click={() => showCreateGroupModal = false}>
 					Cancel
 				</button>
 				<button 
 					class="btn btn-primary" 
-					on:click={createEntity}
-					disabled={!newEntity.name}
+					on:click={createGroup}
+					disabled={!newGroup.name}
 				>
-					Create Entity
+					Create Group
 				</button>
 			</div>
 		</div>
@@ -764,8 +764,8 @@
 		<div class="modal" on:click|stopPropagation>
 			<div class="modal-header">
 				<h3>
-					{#if selectedEntityForProduct}
-						Add Product to {selectedEntityForProduct.name}
+					{#if selectedGroupForProduct}
+						Add Product to {selectedGroupForProduct.name}
 					{:else}
 						Create New Product
 					{/if}
@@ -909,7 +909,7 @@
 			<div class="modal-footer">
 				<button class="btn btn-secondary" on:click={() => {
 					showCreateProductModal = false;
-					selectedEntityForProduct = null;
+					selectedGroupForProduct = null;
 				}}>
 					Cancel
 				</button>
@@ -1421,21 +1421,21 @@
 		margin-bottom: 1rem;
 	}
 	
-	/* Entities Section */
-	.entities-section {
+	/* Groups Section */
+	.groups-section {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
 	}
 	
-	.entity-container {
+	.group-container {
 		background: #f9fafb;
 		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
 		padding: 1rem;
 	}
 	
-	.entity-container.add-entity {
+	.group-container.add-group {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -1448,46 +1448,46 @@
 		color: #6b7280;
 	}
 	
-	.entity-container.add-entity:hover {
+	.group-container.add-group:hover {
 		border-color: #189AB4;
 		background: #f0f9ff;
 		color: #189AB4;
 	}
 	
-	.entity-header {
+	.group-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
 		margin-bottom: 0.75rem;
 	}
 	
-	.entity-info h4 {
+	.group-info h4 {
 		margin: 0;
 		font-size: 1rem;
 		font-weight: 600;
 		color: #111827;
 	}
 	
-	.entity-type {
+	.group-type {
 		font-size: 0.75rem;
 		color: #189AB4;
 		font-weight: 500;
 	}
 	
-	.entity-description {
+	.group-description {
 		font-size: 0.813rem;
 		color: #6b7280;
 		margin: 0 0 0.75rem 0;
 		line-height: 1.4;
 	}
 	
-	.entity-actions {
+	.group-actions {
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
 	}
 	
-	.entity-products {
+	.group-products {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 		gap: 0.75rem;

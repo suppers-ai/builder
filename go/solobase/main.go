@@ -23,6 +23,7 @@ import (
 )
 
 func main() {
+
 	// Load configuration
 	cfg := config.Load()
 
@@ -87,11 +88,22 @@ func main() {
 		adminPassword = "admin123"
 	}
 
-	log.Printf("========================================")
+	log.Printf("=========================================")
+	log.Printf("=========================================")
+	log.Printf("            _       _                    ")
+	log.Printf("           | |     | |                   ")
+	log.Printf("  ___  ___ | | ___ | |__   __ _ ___  ___ ")
+	log.Printf(" / __|/ _ \\| |/ _ \\| '_ \\ / _` / __|/ _ \\")
+	log.Printf(" \\__ \\ (_) | | (_) | |_) | (_| \\__ \\  __/")
+	log.Printf(" |___/\\___/|_|\\___/|_.__/ \\__,_|___/\\___|")
+	log.Printf("                                         ")
+	log.Printf("=========================================")
+	log.Printf("===== 🏰 Get ready for greatness 🏰 =====")
+	log.Printf("=========================================")
 	log.Printf("Default Admin Credentials:")
 	log.Printf("Email: %s", adminEmail)
 	log.Printf("Password: %s", adminPassword)
-	log.Printf("========================================")
+	log.Printf("=========================================")
 
 	if err := authService.CreateDefaultAdmin(adminEmail, adminPassword); err != nil {
 		log.Printf("Failed to create default admin: %v", err)
@@ -153,7 +165,7 @@ func main() {
 
 	// Register extension routes
 	extensionManager.RegisterRoutes(router)
-	
+
 	// Register admin extension management routes
 	adminExtHandler := admin.NewExtensionsHandler(extensionManager, dbLogger)
 	adminExtHandler.RegisterRoutes(router)
@@ -164,7 +176,7 @@ func main() {
 	// Serve static files
 	staticDir := "./static/"
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
-	
+
 	// Serve storage files (both internal and extension storage)
 	storageDir := "./.data/storage/"
 	router.PathPrefix("/storage/").Handler(http.StripPrefix("/storage/", http.FileServer(http.Dir(storageDir))))

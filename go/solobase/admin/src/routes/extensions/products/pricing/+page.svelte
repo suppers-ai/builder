@@ -27,7 +27,7 @@
 		id: string;
 		name: string;
 		product_type_id?: string;
-		entity_type_id?: string;
+		group_type_id?: string;
 		template_id?: string;
 		formula: string;
 		priority: number;
@@ -1621,6 +1621,28 @@
 	formula={tempFormula}
 	variables={availableVariables}
 	isConditionFormula={editingFormulaType === 'condition'}
+	on:createVariable={async (e) => {
+		const newVar = e.detail;
+		try {
+			// Create the variable via API
+			const result = await api.post('/products/variables', {
+				name: newVar.name,
+				display_name: newVar.displayName,
+				value_type: newVar.valueType,
+				type: 'user',
+				description: newVar.description,
+				is_active: true
+			});
+			
+			if (result) {
+				// Reload variables
+				await loadPricingData();
+			}
+		} catch (error) {
+			console.error('Failed to create variable:', error);
+			alert('Failed to create variable');
+		}
+	}}
 	on:save={(e) => {
 		if (selectedTemplate) {
 			if (editingFormulaType === 'price') {

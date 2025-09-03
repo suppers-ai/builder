@@ -58,13 +58,13 @@ func (e *ProductsExtension) initializeAPIs() {
 	
 	// Initialize services
 	variableService := NewVariableService(e.db)
-	entityService := NewEntityService(e.db)
+	groupService := NewGroupService(e.db)
 	productService := NewProductService(e.db, variableService)
 	pricingService := NewPricingService(e.db, variableService)
 	
 	// Initialize APIs with services
-	e.adminAPI = NewAdminAPI(e.db, variableService, entityService, productService, pricingService)
-	e.userAPI = NewUserAPI(e.db, entityService, productService, pricingService)
+	e.adminAPI = NewAdminAPI(e.db, variableService, groupService, productService, pricingService)
+	e.userAPI = NewUserAPI(e.db, groupService, productService, pricingService)
 	e.publicAPI = NewPublicAPI(e.db, productService)
 }
 
