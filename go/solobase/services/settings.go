@@ -18,7 +18,21 @@ func NewSettingsService(db *database.DB) *SettingsService {
 	service := &SettingsService{db: db}
 	// Initialize default settings on first run
 	service.initializeDefaults()
+	// Initialize extension-specific settings
+	service.initializeExtensionSettings()
 	return service
+}
+
+// initializeExtensionSettings creates extension-specific default settings
+func (s *SettingsService) initializeExtensionSettings() error {
+	// Initialize CloudStorage extension setting for showing usage in profile
+	// This is set to true by default when CloudStorage is available
+	err := s.setSetting("ext_cloudstorage_profile_show_usage", true)
+	if err != nil {
+		// Log but don't fail - setting might already exist
+		return nil
+	}
+	return nil
 }
 
 // initializeDefaults creates default settings if they don't exist
@@ -110,7 +124,12 @@ func (s *SettingsService) GetSetting(key string) (interface{}, error) {
 	return s.parseValue(setting.Value, setting.Type)
 }
 
-// SetSetting updates or creates a single setting
+// SetSetting updates or creates a single setting (public method)
+func (s *SettingsService) SetSetting(key string, value interface{}) error {
+	return s.setSetting(key, value)
+}
+
+// setSetting updates or creates a single setting
 func (s *SettingsService) setSetting(key string, value interface{}) error {
 	var setting models.Setting
 	

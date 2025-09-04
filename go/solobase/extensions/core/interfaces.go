@@ -177,6 +177,12 @@ const (
 	HookPostAuth       HookType = "post_auth"
 	HookPreDatabase    HookType = "pre_database"
 	HookPostDatabase   HookType = "post_database"
+	
+	// Storage-specific hooks
+	HookBeforeUpload   HookType = "before_upload"
+	HookAfterUpload    HookType = "after_upload"
+	HookBeforeDownload HookType = "before_download"
+	HookAfterDownload  HookType = "after_download"
 )
 
 // HookContext provides context for hook execution

@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
-const API_PORT = process.env.API_PORT || '8080';
+const API_PORT = process.env.API_PORT || '8090';
 
 export default defineConfig({
 	plugins: [sveltekit()],

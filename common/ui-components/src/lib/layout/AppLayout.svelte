@@ -11,6 +11,7 @@
 	export let projectName: string = 'Project';
 	export let mobileTitle: string = projectName;
 	export let onLogout: () => void = () => {};
+	export let onOpenSettings: (() => void) | null = null;
 	export let sidebarCollapsed: boolean = false;
 	
 	let mobileMenuOpen = false;
@@ -63,6 +64,7 @@
 				{logoCollapsedSrc}
 				{projectName}
 				{onLogout}
+				{onOpenSettings}
 				bind:collapsed={sidebarCollapsed}
 			/>
 		</div>

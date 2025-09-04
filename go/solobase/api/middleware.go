@@ -75,6 +75,8 @@ func AuthMiddleware(authService *services.AuthService) func(http.Handler) http.H
 
 			// Add user to context
 			ctx := context.WithValue(r.Context(), "user", user)
+			// Also add just the user ID for easier access
+			ctx = context.WithValue(ctx, "userID", claims.UserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

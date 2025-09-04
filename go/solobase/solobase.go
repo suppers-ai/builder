@@ -1,0 +1,527 @@
+package main
+
+import (
+	"context"
+	"embed"
+	"fmt"
+	"io/fs"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/gorilla/mux"
+	auth "github.com/suppers-ai/auth"
+	"github.com/suppers-ai/logger"
+	"github.com/suppers-ai/solobase/admin"
+	"github.com/suppers-ai/solobase/api"
+	"github.com/suppers-ai/solobase/config"
+	"github.com/suppers-ai/solobase/database"
+	"github.com/suppers-ai/solobase/extensions"
+	"github.com/suppers-ai/solobase/models"
+	"github.com/suppers-ai/solobase/services"
+	storage "github.com/suppers-ai/storage"
+)
+
+// App represents the Solobase application
+type App struct {
+	router           *mux.Router
+	db               *database.DB
+	config           *config.Config
+	services         *AppServices
+	extensionManager *extensions.ExtensionManager
+	server           *http.Server
+	
+	// Event hooks
+	onServeHooks     []func(*ServeEvent) error
+	onBeforeAPIHooks []func(*APIEvent) error
+	onAfterAPIHooks  []func(*APIEvent) error
+	onModelHooks     map[string][]func(*ModelEvent) error
+}
+
+// AppServices contains all the services used by the app
+type AppServices struct {
+	Auth       *services.AuthService
+	User       *services.UserService
+	Storage    *services.StorageService
+	Collection *services.CollectionService
+	Database   *services.DatabaseService
+	Settings   *services.SettingsService
+	Logs       *services.LogsService
+	Logger     *services.DBLogger
+}
+
+// ServeEvent is passed to OnServe hooks
+type ServeEvent struct {
+	App    *App
+	Router *mux.Router
+	Next   func() error
+}
+
+// APIEvent is passed to API hooks
+type APIEvent struct {
+	App      *App
+	Request  *http.Request
+	Response http.ResponseWriter
+	Next     func() error
+}
+
+// ModelEvent is passed to model hooks
+type ModelEvent struct {
+	App   *App
+	Model interface{}
+	Next  func() error
+}
+
+// Options for creating a new Solobase app
+type Options struct {
+	DatabaseType         string
+	DatabaseURL          string
+	StorageType          string
+	StoragePath          string
+	S3Config             *S3Config
+	DefaultAdminEmail    string
+	DefaultAdminPassword string
+	JWTSecret            string
+	Port                 string
+	DisableAdminUI       bool
+}
+
+// S3Config for S3 storage
+type S3Config struct {
+	Bucket          string
+	Region          string
+	AccessKeyID     string
+	SecretAccessKey string
+	Endpoint        string
+	UsePathStyle    bool
+}
+
+//go:embed all:admin/build/*
+var adminFiles embed.FS
+
+//go:embed all:static/*
+var staticFiles embed.FS
+
+// New creates a new Solobase application instance
+func New() *App {
+	return NewWithOptions(&Options{})
+}
+
+// NewWithOptions creates a new Solobase app with custom options
+func NewWithOptions(opts *Options) *App {
+	// Set defaults
+	if opts.DatabaseType == "" {
+		opts.DatabaseType = os.Getenv("DATABASE_TYPE")
+		if opts.DatabaseType == "" {
+			opts.DatabaseType = "sqlite"
+		}
+	}
+	if opts.DatabaseURL == "" {
+		opts.DatabaseURL = os.Getenv("DATABASE_URL")
+		if opts.DatabaseURL == "" {
+			opts.DatabaseURL = "file:./.data/solobase.db"
+		}
+	}
+	if opts.StorageType == "" {
+		opts.StorageType = os.Getenv("STORAGE_TYPE")
+		if opts.StorageType == "" {
+			opts.StorageType = "local"
+		}
+	}
+	if opts.StoragePath == "" {
+		opts.StoragePath = os.Getenv("STORAGE_PATH")
+		if opts.StoragePath == "" {
+			opts.StoragePath = "./.data/storage"
+		}
+	}
+	if opts.JWTSecret == "" {
+		opts.JWTSecret = os.Getenv("JWT_SECRET")
+		if opts.JWTSecret == "" {
+			opts.JWTSecret = "your-secret-key-change-in-production"
+		}
+	}
+	if opts.Port == "" {
+		opts.Port = os.Getenv("PORT")
+		if opts.Port == "" {
+			opts.Port = "8090"
+		}
+	}
+	if opts.DefaultAdminEmail == "" {
+		opts.DefaultAdminEmail = os.Getenv("DEFAULT_ADMIN_EMAIL")
+		if opts.DefaultAdminEmail == "" {
+			opts.DefaultAdminEmail = "admin@example.com"
+		}
+	}
+	if opts.DefaultAdminPassword == "" {
+		opts.DefaultAdminPassword = os.Getenv("DEFAULT_ADMIN_PASSWORD")
+		if opts.DefaultAdminPassword == "" {
+			opts.DefaultAdminPassword = "admin123"
+		}
+	}
+
+	app := &App{
+		onModelHooks: make(map[string][]func(*ModelEvent) error),
+	}
+
+	// Create config
+	app.config = &config.Config{
+		Port:        opts.Port,
+		Environment: os.Getenv("ENVIRONMENT"),
+		Database: database.Config{
+			Type: opts.DatabaseType,
+			// Parse DATABASE_URL based on type
+		},
+		Storage: config.StorageConfig{
+			Type:             opts.StorageType,
+			LocalStoragePath: opts.StoragePath,
+		},
+		JWTSecret:         opts.JWTSecret,
+		AdminEmail:        opts.DefaultAdminEmail,
+		AdminPassword:     opts.DefaultAdminPassword,
+		DisableAdminUI:    opts.DisableAdminUI,
+	}
+
+	// Set S3 config if provided
+	if opts.S3Config != nil {
+		app.config.Storage.S3Bucket = opts.S3Config.Bucket
+		app.config.Storage.S3Region = opts.S3Config.Region
+		app.config.Storage.S3AccessKey = opts.S3Config.AccessKeyID
+		app.config.Storage.S3SecretKey = opts.S3Config.SecretAccessKey
+		app.config.Storage.S3Endpoint = opts.S3Config.Endpoint
+	}
+
+	// Parse database URL
+	if opts.DatabaseType == "postgres" {
+		// Parse PostgreSQL URL
+		app.config.Database = parsePostgresURL(opts.DatabaseURL)
+	} else {
+		// SQLite
+		app.config.Database = database.Config{
+			Type:     "sqlite",
+			Database: opts.DatabaseURL,
+		}
+	}
+
+	return app
+}
+
+// Initialize initializes the app (database, services, etc)
+func (app *App) Initialize() error {
+	// Set JWT secret
+	api.SetJWTSecret(app.config.JWTSecret)
+
+	// Initialize database
+	log.Printf("Initializing database with type: %s", app.config.Database.Type)
+	db, err := database.New(app.config.Database)
+	if err != nil {
+		return fmt.Errorf("failed to connect to database: %w", err)
+	}
+	app.db = db
+
+	// Run migrations
+	if err := db.Migrate(); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
+	}
+
+	// Initialize database logger
+	dbLogger := services.NewDBLogger(db)
+
+	// Auto-migrate models
+	db.AutoMigrate(
+		&auth.User{},
+		&models.Setting{},
+		&models.Collection{},
+		&models.CollectionRecord{},
+		&models.ExtensionMigration{},
+		&models.DownloadToken{},
+		&models.UploadToken{},
+		&storage.StorageObject{},
+		&storage.StorageBucket{},
+		&logger.LogModel{},
+		&logger.RequestLogModel{},
+	)
+
+	// Setup database metrics
+	database.RecordDBQueryFunc = api.RecordDBQuery
+
+	// Initialize services
+	app.services = &AppServices{
+		Auth:       services.NewAuthService(db),
+		User:       services.NewUserService(db),
+		Storage:    services.NewStorageService(db, app.config.Storage),
+		Collection: services.NewCollectionService(db),
+		Database:   services.NewDatabaseService(db),
+		Settings:   services.NewSettingsService(db),
+		Logs:       services.NewLogsService(db),
+		Logger:     dbLogger,
+	}
+
+	// Create default admin
+	if app.config.AdminEmail != "" && app.config.AdminPassword != "" {
+		if err := app.services.Auth.CreateDefaultAdmin(app.config.AdminEmail, app.config.AdminPassword); err != nil {
+			log.Printf("Warning: Failed to create default admin: %v", err)
+		}
+	}
+
+	// Initialize extension system
+	extensionManager, err := extensions.NewExtensionManager(db.DB, dbLogger)
+	if err != nil {
+		return fmt.Errorf("failed to create extension manager: %w", err)
+	}
+	app.extensionManager = extensionManager
+
+	// Initialize extensions
+	ctx := context.Background()
+	if err := extensionManager.Initialize(ctx); err != nil {
+		log.Printf("Warning: Failed to initialize some extensions: %v", err)
+	}
+
+	return nil
+}
+
+// OnServe adds a hook that runs when the server starts
+func (app *App) OnServe() *ServeHook {
+	return &ServeHook{app: app}
+}
+
+// ServeHook allows binding functions to the serve event
+type ServeHook struct {
+	app *App
+}
+
+// BindFunc binds a function to the serve event
+func (h *ServeHook) BindFunc(fn func(*ServeEvent) error) *ServeHook {
+	h.app.onServeHooks = append(h.app.onServeHooks, fn)
+	return h
+}
+
+// OnBeforeAPI adds a hook that runs before API requests
+func (app *App) OnBeforeAPI() *APIHook {
+	return &APIHook{app: app, hooks: &app.onBeforeAPIHooks}
+}
+
+// OnAfterAPI adds a hook that runs after API requests
+func (app *App) OnAfterAPI() *APIHook {
+	return &APIHook{app: app, hooks: &app.onAfterAPIHooks}
+}
+
+// APIHook allows binding functions to API events
+type APIHook struct {
+	app   *App
+	hooks *[]func(*APIEvent) error
+}
+
+// BindFunc binds a function to the API event
+func (h *APIHook) BindFunc(fn func(*APIEvent) error) *APIHook {
+	*h.hooks = append(*h.hooks, fn)
+	return h
+}
+
+// OnModel adds hooks for model events
+func (app *App) OnModel(modelName string) *ModelHook {
+	return &ModelHook{app: app, modelName: modelName}
+}
+
+// ModelHook allows binding functions to model events
+type ModelHook struct {
+	app       *App
+	modelName string
+}
+
+// BindFunc binds a function to the model event
+func (h *ModelHook) BindFunc(fn func(*ModelEvent) error) *ModelHook {
+	h.app.onModelHooks[h.modelName] = append(h.app.onModelHooks[h.modelName], fn)
+	return h
+}
+
+// Start initializes and starts the server
+func (app *App) Start() error {
+	// Initialize if not already done
+	if app.db == nil {
+		if err := app.Initialize(); err != nil {
+			return err
+		}
+	}
+
+	// Setup router
+	app.router = mux.NewRouter()
+
+	// Apply middleware
+	app.router.Use(services.HTTPLoggingMiddleware(app.services.Logger))
+	app.router.Use(api.PrometheusMiddleware)
+
+	// Apply extension middleware
+	app.router.Use(func(next http.Handler) http.Handler {
+		return app.extensionManager.ApplyMiddleware(next)
+	})
+
+	// Setup API router
+	apiRouter := api.NewAPI(
+		app.db,
+		app.services.Auth,
+		app.services.User,
+		app.services.Storage,
+		app.services.Collection,
+		app.services.Database,
+		app.services.Settings,
+		app.services.Logs,
+		app.extensionManager.GetRegistry(),
+	)
+
+	// Register extension routes
+	app.extensionManager.RegisterRoutes(app.router)
+
+	// Register admin extension management routes
+	adminExtHandler := admin.NewExtensionsHandler(app.extensionManager, app.services.Logger)
+	adminExtHandler.RegisterRoutes(app.router)
+
+	// API routes
+	app.router.PathPrefix("/api").Handler(http.StripPrefix("/api", apiRouter))
+
+	// Storage files
+	storageDir := "./.data/storage/"
+	app.router.PathPrefix("/storage/").Handler(http.StripPrefix("/storage/", http.FileServer(http.Dir(storageDir))))
+
+	// Static files
+	staticDir := "./static/"
+	if _, err := os.Stat(staticDir); err == nil {
+		app.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
+	}
+
+	// Admin UI (if not disabled)
+	if !app.config.DisableAdminUI {
+		app.router.PathPrefix("/admin/").Handler(app.ServeAdmin())
+	}
+
+	// Run OnServe hooks
+	serveEvent := &ServeEvent{
+		App:    app,
+		Router: app.router,
+		Next:   func() error { return nil },
+	}
+
+	for _, hook := range app.onServeHooks {
+		if err := hook(serveEvent); err != nil {
+			return fmt.Errorf("OnServe hook failed: %w", err)
+		}
+	}
+
+	// Create HTTP server
+	app.server = &http.Server{
+		Addr:    ":" + app.config.Port,
+		Handler: app.router,
+	}
+
+	// Setup graceful shutdown
+	go app.handleShutdown()
+
+	// Start server
+	log.Printf("🚀 Solobase server starting on port %s", app.config.Port)
+	if err := app.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return fmt.Errorf("server failed to start: %w", err)
+	}
+
+	return nil
+}
+
+// Router returns the underlying router
+func (app *App) Router() *mux.Router {
+	return app.router
+}
+
+// DB returns the database connection
+func (app *App) DB() *database.DB {
+	return app.db
+}
+
+// Services returns the app services
+func (app *App) Services() *AppServices {
+	return app.services
+}
+
+// Config returns the app config
+func (app *App) Config() *config.Config {
+	return app.config
+}
+
+// ServeAdmin returns the admin UI handler
+func (app *App) ServeAdmin() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Try embedded files first
+		if adminFS, err := fs.Sub(adminFiles, "admin/build"); err == nil {
+			http.StripPrefix("/admin/", http.FileServer(http.FS(adminFS))).ServeHTTP(w, r)
+			return
+		}
+		
+		// Fallback to ServeAdmin function if it exists
+		http.Error(w, "Admin interface not available", http.StatusNotFound)
+	})
+}
+
+// Shutdown gracefully shuts down the server
+func (app *App) Shutdown(ctx context.Context) error {
+	// Shutdown extensions
+	if app.extensionManager != nil {
+		if err := app.extensionManager.Shutdown(ctx); err != nil {
+			log.Printf("Extension shutdown error: %v", err)
+		}
+	}
+
+	// Shutdown HTTP server
+	if app.server != nil {
+		if err := app.server.Shutdown(ctx); err != nil {
+			return fmt.Errorf("server shutdown error: %w", err)
+		}
+	}
+
+	// Close database
+	if app.db != nil {
+		if err := app.db.Close(); err != nil {
+			return fmt.Errorf("database close error: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (app *App) handleShutdown() {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	log.Println("Shutdown signal received, starting graceful shutdown")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := app.Shutdown(ctx); err != nil {
+		log.Printf("Shutdown error: %v", err)
+	}
+}
+
+func parsePostgresURL(url string) database.Config {
+	// Simple URL parsing for postgres://user:pass@host:port/dbname
+	// This is a simplified version, you might want to use a proper URL parser
+	return database.Config{
+		Type:     "postgres",
+		Host:     "localhost",
+		Port:     5432,
+		Database: "solobase",
+		Username: "postgres",
+		Password: "postgres",
+		SSLMode:  "disable",
+	}
+}
+
+func main() {
+	app := New()
+	if err := app.Initialize(); err != nil {
+		log.Fatal("Failed to initialize app:", err)
+	}
+	if err := app.Start(); err != nil {
+		log.Fatal("Failed to start app:", err)
+	}
+}

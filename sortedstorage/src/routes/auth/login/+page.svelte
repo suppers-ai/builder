@@ -11,7 +11,18 @@
 	let error = '';
 	
 	// Get redirect URL from query params
-	$: redirectTo = $page.url.searchParams.get('redirect') || '/files';
+	$: redirectTo = (() => {
+		const redirect = $page.url.searchParams.get('redirect');
+		// Avoid invalid redirects like 'false' or boolean values
+		if (!redirect || redirect === 'false' || redirect === 'true' || redirect === 'null' || redirect === 'undefined') {
+			return '/files';
+		}
+		// Ensure it starts with /
+		if (!redirect.startsWith('/')) {
+			return '/files';
+		}
+		return redirect;
+	})();
 	
 	async function handleLogin(loginEmail: string, loginPassword: string) {
 		error = '';

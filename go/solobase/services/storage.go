@@ -57,12 +57,105 @@ func NewStorageService(db *database.DB, cfg config.StorageConfig) *StorageServic
 		}
 	}
 	
-	return &StorageService{
+	service := &StorageService{
 		config:   cfg,
 		provider: provider,
 		storage:  storage.New(provider),
 		db:       db,
 	}
+	
+	// Initialize default buckets
+	service.initializeDefaultBuckets()
+	
+	return service
+}
+
+// initializeDefaultBuckets creates default buckets if they don't exist
+func (s *StorageService) initializeDefaultBuckets() {
+	defaultBuckets := []struct {
+		name   string
+		public bool
+	}{
+		{"user-files", false},
+		{"uploads", false},
+		{"public", true},
+	}
+	
+	for _, bucket := range defaultBuckets {
+		// Try to create the bucket (it will fail silently if it already exists)
+		if s.storage != nil {
+			if err := s.storage.CreateBucket(bucket.name, bucket.public); err != nil {
+				// Only log if it's not an "already exists" error
+				if !strings.Contains(err.Error(), "exists") && !strings.Contains(err.Error(), "exist") {
+					log.Printf("Failed to create default bucket %s: %v", bucket.name, err)
+				}
+			} else {
+				log.Printf("Created default bucket: %s", bucket.name)
+			}
+		}
+	}
+}
+
+// GetProviderType returns the type of storage provider being used
+func (s *StorageService) GetProviderType() string {
+	return s.config.Type
+}
+
+// GetObjectInfo retrieves information about an object
+func (s *StorageService) GetObjectInfo(bucket, objectID string) (*pkgstorage.StorageObject, error) {
+	var object pkgstorage.StorageObject
+	if err := s.db.Where("id = ? AND bucket = ?", objectID, bucket).First(&object).Error; err != nil {
+		return nil, err
+	}
+	return &object, nil
+}
+
+// GetObjectByKey retrieves an object by its storage key
+func (s *StorageService) GetObjectByKey(bucket, key string) (io.ReadCloser, string, string, error) {
+	if s.storage == nil {
+		return nil, "", "", fmt.Errorf("storage not initialized")
+	}
+	
+	// Get object metadata from database
+	var object pkgstorage.StorageObject
+	if err := s.db.Where("key = ? AND bucket = ?", key, bucket).First(&object).Error; err != nil {
+		return nil, "", "", err
+	}
+	
+	// Get the actual file from storage
+	reader, err := s.storage.GetObject(bucket, key)
+	if err != nil {
+		return nil, "", "", err
+	}
+	
+	// Extract filename from object key (last part after /)
+	filename := object.ObjectKey
+	if idx := strings.LastIndex(filename, "/"); idx >= 0 {
+		filename = filename[idx+1:]
+	}
+	
+	return reader, filename, object.ContentType, nil
+}
+
+// GeneratePresignedDownloadURL generates a presigned URL for downloading (S3 only)
+func (s *StorageService) GeneratePresignedDownloadURL(bucket, key string, expiry int) (string, error) {
+	if s.config.Type != "s3" {
+		return "", fmt.Errorf("presigned URLs are only supported for S3 storage")
+	}
+	
+	// Use the storage's GetSignedURL method which internally uses GeneratePresignedURL
+	return s.storage.GetSignedURL(bucket, key, time.Duration(expiry)*time.Second)
+}
+
+// GeneratePresignedUploadURL generates a presigned URL for uploading (S3 only)
+func (s *StorageService) GeneratePresignedUploadURL(bucket, key, contentType string, expiry int) (string, error) {
+	if s.config.Type != "s3" {
+		return "", fmt.Errorf("presigned URLs are only supported for S3 storage")
+	}
+	
+	// For now, we'll use the same method as download
+	// In a full implementation, we'd need to extend the storage package to support upload URLs
+	return s.storage.GetSignedURL(bucket, key, time.Duration(expiry)*time.Second)
 }
 
 func (s *StorageService) CreateBucket(name string, public bool) error {
@@ -354,6 +447,15 @@ func (s *StorageService) GetObject(bucket, objectID string) (io.ReadCloser, stri
 	return reader, filename, obj.ContentType, nil
 }
 
+// GeneratePresignedURL generates a presigned URL for direct downloads
+func (s *StorageService) GeneratePresignedURL(bucket, objectKey string, expiry time.Duration) (string, error) {
+	// For now, return empty string to indicate presigned URLs are not supported
+	// This will cause the system to fall back to token-based downloads
+	// In future, we can implement presigned URLs for S3 here
+	return "", fmt.Errorf("presigned URLs not supported by current storage provider")
+}
+
+
 func (s *StorageService) CreateFolder(bucket, folderName string) error {
 	if s.storage == nil {
 		return fmt.Errorf("storage not initialized")
@@ -467,12 +569,111 @@ func (s *StorageService) GetTotalStorageUsed() (int64, error) {
 	return totalSize, nil
 }
 
-
-func (s *StorageService) GetObjectInfo(bucket, key string) (*storage.Object, error) {
-	if s.storage == nil {
-		return nil, fmt.Errorf("storage not initialized")
+// GetUserStorageUsed returns the total storage used by a specific user
+func (s *StorageService) GetUserStorageUsed(userID string) (int64, error) {
+	var totalSize int64
+	
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Select("COALESCE(SUM(size), 0)").
+		Where("user_id = ?", userID).
+		Scan(&totalSize).Error; err != nil {
+		return 0, err
 	}
-	return s.storage.GetObjectInfo(bucket, key)
+	
+	return totalSize, nil
+}
+
+// GetStorageStats returns comprehensive storage statistics
+func (s *StorageService) GetStorageStats(userID string) (map[string]interface{}, error) {
+	stats := make(map[string]interface{})
+	
+	// Get total file count for user
+	var fileCount int64
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Where("user_id = ? AND NOT is_folder", userID).
+		Count(&fileCount).Error; err != nil {
+		return nil, err
+	}
+	stats["file_count"] = fileCount
+	
+	// Get total folder count for user
+	var folderCount int64
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Where("user_id = ? AND is_folder", userID).
+		Count(&folderCount).Error; err != nil {
+		return nil, err
+	}
+	stats["folder_count"] = folderCount
+	
+	// Get total storage used
+	totalSize, err := s.GetUserStorageUsed(userID)
+	if err != nil {
+		return nil, err
+	}
+	stats["total_size"] = totalSize
+	
+	// Get shared files count (if public column exists)
+	var sharedCount int64
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Where("user_id = ? AND public = ?", userID, true).
+		Count(&sharedCount).Error; err != nil {
+		// Ignore error if public column doesn't exist
+		sharedCount = 0
+	}
+	stats["shared_count"] = sharedCount
+	
+	// Get recent uploads (last 7 days)
+	var recentCount int64
+	sevenDaysAgo := time.Now().AddDate(0, 0, -7)
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Where("user_id = ? AND created_at >= ?", userID, sevenDaysAgo).
+		Count(&recentCount).Error; err != nil {
+		recentCount = 0
+	}
+	stats["recent_uploads"] = recentCount
+	
+	return stats, nil
+}
+
+// GetAllUsersStorageStats returns storage statistics for all users (admin use)
+func (s *StorageService) GetAllUsersStorageStats() (map[string]interface{}, error) {
+	stats := make(map[string]interface{})
+	
+	// Get total storage used across all users
+	totalSize, err := s.GetTotalStorageUsed()
+	if err != nil {
+		return nil, err
+	}
+	stats["total_storage_used"] = totalSize
+	
+	// Get total file count
+	var totalFiles int64
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Where("NOT is_folder").
+		Count(&totalFiles).Error; err != nil {
+		return nil, err
+	}
+	stats["total_files"] = totalFiles
+	
+	// Get total folder count
+	var totalFolders int64
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Where("is_folder").
+		Count(&totalFolders).Error; err != nil {
+		return nil, err
+	}
+	stats["total_folders"] = totalFolders
+	
+	// Get number of users with files
+	var activeUsers int64
+	if err := s.db.Model(&pkgstorage.StorageObject{}).
+		Select("COUNT(DISTINCT user_id)").
+		Scan(&activeUsers).Error; err != nil {
+		return nil, err
+	}
+	stats["active_users"] = activeUsers
+	
+	return stats, nil
 }
 
 func (s *StorageService) GetPublicURL(bucket, key string) string {

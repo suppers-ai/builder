@@ -7,7 +7,7 @@ echo "================================"
 echo "1. Logging in..."
 SESSION=$(curl -s -c /tmp/cookies.txt -X POST http://localhost:8091/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "email=admin@example.com&password=AdminSecurePass2024!" \
+  -d "email=admin@example.com&password=admin123" \
   -L -o /dev/null -w "%{http_code}")
 
 if [ "$SESSION" != "200" ]; then

@@ -65,7 +65,12 @@ export class KeyboardShortcutManager {
 		if (event.ctrlKey || event.metaKey) keys.push('Ctrl');
 		if (event.altKey) keys.push('Alt');
 		if (event.shiftKey) keys.push('Shift');
-		keys.push(event.key.toUpperCase());
+		// Ensure key exists before calling toUpperCase
+		if (event.key) {
+			keys.push(event.key.toUpperCase());
+		} else {
+			return; // No key to process
+		}
 		
 		const key = this.getShortcutKey(keys);
 		const shortcut = this.shortcuts.get(key);

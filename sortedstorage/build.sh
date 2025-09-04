@@ -2,9 +2,7 @@
 
 set -e
 
-echo "=========================================="
-echo "Building SortedStorage with Integrated Backend"
-echo "=========================================="
+echo "🔨 Building SortedStorage..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -12,49 +10,52 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Check if Node.js is installed
-if ! command -v node &> /dev/null; then
-    echo -e "${RED}Error: Node.js is not installed${NC}"
+# Check if we're in the right directory
+if [ ! -f "package.json" ]; then
+    echo -e "${RED}Error: package.json not found. Please run this script from the SortedStorage root directory.${NC}"
     exit 1
 fi
 
-# Check if Go is installed
-if ! command -v go &> /dev/null; then
-    echo -e "${RED}Error: Go is not installed${NC}"
-    exit 1
-fi
+# Step 1: Install frontend dependencies
+echo -e "${YELLOW}📦 Installing frontend dependencies...${NC}"
+npm install --legacy-peer-deps
 
-echo -e "${YELLOW}Step 1: Installing npm dependencies...${NC}"
-npm install
-
-echo -e "${YELLOW}Step 2: Building SvelteKit frontend...${NC}"
+# Step 2: Build the frontend
+echo -e "${YELLOW}🎨 Building frontend...${NC}"
 npm run build
 
-echo -e "${YELLOW}Step 3: Copying build to backend directory...${NC}"
-rm -rf backend/build
-cp -r build backend/
+# Step 3: Copy built files to backend/static
+echo -e "${YELLOW}📁 Preparing static files...${NC}"
+rm -rf backend/static
+mkdir -p backend/static
 
-echo -e "${YELLOW}Step 4: Downloading Go dependencies...${NC}"
+# Copy the built SvelteKit files
+if [ -d "build" ]; then
+    cp -r build/* backend/static/
+else
+    echo -e "${RED}Error: Build directory not found. Frontend build may have failed.${NC}"
+    exit 1
+fi
+
+# Step 4: Build the Go backend with embedded files
+echo -e "${YELLOW}🚀 Building Go backend...${NC}"
 cd backend
-go mod download
-go mod tidy
 
-echo -e "${YELLOW}Step 5: Building Go backend with embedded frontend...${NC}"
-CGO_ENABLED=1 go build -o ../sortedstorage-server .
+# Build for current platform
+go build -o ../sortedstorage -ldflags="-s -w" .
 
 cd ..
 
-echo -e "${GREEN}=========================================="
-echo -e "Build completed successfully!"
-echo -e "Binary created: ./sortedstorage-server"
-echo -e ""
-echo -e "To run the server:"
-echo -e "  ./sortedstorage-server"
-echo -e ""
-echo -e "Configuration via environment variables:"
-echo -e "  PORT=3000"
-echo -e "  DATABASE_TYPE=sqlite"
-echo -e "  DATABASE_URL=file:./sortedstorage.db"
-echo -e "  DEFAULT_ADMIN_EMAIL=admin@sortedstorage.com"
-echo -e "  DEFAULT_ADMIN_PASSWORD=YourSecurePassword"
-echo -e "==========================================${NC}"
+# Make executable
+chmod +x sortedstorage
+
+echo -e "${GREEN}✅ Build complete!${NC}"
+echo ""
+echo "To run SortedStorage:"
+echo "  ./sortedstorage --port 8080 --solobase http://localhost:8090"
+echo ""
+echo "Available flags:"
+echo "  --port       Port to run server on (default: 8080)"
+echo "  --solobase   Solobase backend URL (default: http://localhost:8090)"
+echo "  --dev        Development mode - proxy to Vite (default: false)"
+echo "  --vite       Vite dev server URL for dev mode (default: http://localhost:5173)"

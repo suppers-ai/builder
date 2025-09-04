@@ -5,7 +5,8 @@
 	import { 
 		User, Lock, LogOut, Shield, ChevronRight,
 		Mail, Phone, Calendar, MapPin, Save, X, Settings,
-		Edit, Home, Package
+		Edit, Home, Package, HardDrive, Database, TrendingUp,
+		Activity, Share2, Download, Upload
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { authStore } from '$lib/stores/auth';
@@ -19,6 +20,13 @@
 	// Modals
 	let showAccountSettings = false;
 	let showPasswordChange = false;
+	let showStorageModal = false;
+	
+	// Storage data
+	let showStorageCard = false;
+	let storageStats: any = null;
+	let storageQuota: any = null;
+	let recentActivity: any[] = [];
 	
 	// Profile form data
 	let profileForm = {
@@ -43,7 +51,7 @@
 		// Check if user is logged in
 		const currentUser = $authStore.user;
 		if (!currentUser) {
-			goto('/login');
+			goto('/auth/login');
 			return;
 		}
 		
@@ -61,6 +69,9 @@
 				phone: user.phone || '',
 				location: user.location || ''
 			};
+			
+			// Check if cloud storage extension is enabled and should show in profile
+			await checkStorageSettings();
 			
 			loading = false;
 		} catch (err: any) {
@@ -160,11 +171,11 @@
 		try {
 			await api.post('/auth/logout', {});
 			authStore.logout();
-			goto('/login');
+			goto('/auth/login');
 		} catch (err) {
 			// Even if logout fails on server, clear local auth
 			authStore.logout();
-			goto('/login');
+			goto('/auth/login');
 		}
 	}
 	
@@ -182,6 +193,69 @@
 			hash = email.charCodeAt(i) + ((hash << 5) - hash);
 		}
 		return colors[Math.abs(hash) % colors.length];
+	}
+	
+	async function checkStorageSettings() {
+		try {
+			// Check if the setting exists and is enabled
+			const response = await api.get('/settings/ext_cloudstorage_profile_show_usage');
+			if (response && response.value) {
+				showStorageCard = response.value === 'true' || response.value === true;
+			}
+		} catch (err) {
+			// Setting doesn't exist, don't show storage card
+			showStorageCard = false;
+		}
+	}
+	
+	async function loadStorageData() {
+		try {
+			// Load storage statistics
+			const [statsRes, quotaRes, logsRes] = await Promise.all([
+				api.get('/ext/cloudstorage/api/stats').catch(() => null),
+				api.get('/ext/cloudstorage/api/quota/me').catch(() => null),
+				api.get('/ext/cloudstorage/api/access-logs?user_id=me&limit=10').catch(() => null)
+			]);
+			
+			storageStats = statsRes;
+			storageQuota = quotaRes;
+			recentActivity = logsRes || [];
+		} catch (err) {
+			console.error('Failed to load storage data:', err);
+		}
+	}
+	
+	async function openStorageModal() {
+		showStorageModal = true;
+		if (!storageStats) {
+			await loadStorageData();
+		}
+	}
+	
+	function formatBytes(bytes: number): string {
+		if (!bytes || bytes === 0) return '0 B';
+		const k = 1024;
+		const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	}
+	
+	function getActionIcon(action: string) {
+		switch (action) {
+			case 'download': return Download;
+			case 'upload': return Upload;
+			case 'share': return Share2;
+			default: return Activity;
+		}
+	}
+	
+	function getActionColor(action: string) {
+		switch (action) {
+			case 'download': return 'text-purple-600';
+			case 'upload': return 'text-green-600';
+			case 'share': return 'text-cyan-600';
+			default: return 'text-gray-600';
+		}
 	}
 </script>
 
@@ -262,9 +336,20 @@
 						<span>Change Password</span>
 					</button>
 					
+					<!-- Storage Usage (if enabled) -->
+					{#if showStorageCard}
+						<button 
+							class="action-card"
+							on:click={openStorageModal}
+						>
+							<HardDrive size={24} />
+							<span>Storage</span>
+						</button>
+					{/if}
+					
 					<!-- Admin Dashboard (only for admins) -->
 					{#if user.role === 'admin'}
-						<a href="/" class="action-card">
+						<a href="/admin" class="action-card">
 							<Shield size={24} />
 							<span>Admin Dashboard</span>
 						</a>
@@ -453,6 +538,153 @@
 					on:click={changePassword}
 				>
 					Change Password
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Storage Usage Modal -->
+{#if showStorageModal}
+	<div class="modal-overlay" on:click={() => showStorageModal = false}>
+		<div class="modal storage-modal" on:click|stopPropagation>
+			<div class="modal-header">
+				<h3>Storage Usage</h3>
+				<button class="close-btn" on:click={() => showStorageModal = false}>
+					<X size={20} />
+				</button>
+			</div>
+			
+			<div class="modal-body">
+				<!-- Storage Overview -->
+				<div class="storage-overview">
+					<div class="storage-stat-card">
+						<div class="stat-icon storage-icon">
+							<HardDrive size={20} />
+						</div>
+						<div class="stat-details">
+							<span class="stat-label">Storage Used</span>
+							<span class="stat-value">
+								{#if storageQuota}
+									{formatBytes(storageQuota.storage_used || 0)}
+								{:else}
+									Loading...
+								{/if}
+							</span>
+							{#if storageQuota && storageQuota.max_storage_bytes}
+								<div class="progress-bar">
+									<div class="progress-fill" style="width: {Math.min((storageQuota.storage_used / storageQuota.max_storage_bytes) * 100, 100)}%"></div>
+								</div>
+								<span class="stat-detail">
+									of {formatBytes(storageQuota.max_storage_bytes)} available
+								</span>
+							{/if}
+						</div>
+					</div>
+					
+					<div class="storage-stat-card">
+						<div class="stat-icon bandwidth-icon">
+							<TrendingUp size={20} />
+						</div>
+						<div class="stat-details">
+							<span class="stat-label">Bandwidth Used</span>
+							<span class="stat-value">
+								{#if storageQuota}
+									{formatBytes(storageQuota.bandwidth_used || 0)}
+								{:else}
+									Loading...
+								{/if}
+							</span>
+							{#if storageQuota && storageQuota.max_bandwidth_bytes}
+								<div class="progress-bar">
+									<div class="progress-fill bandwidth" style="width: {Math.min((storageQuota.bandwidth_used / storageQuota.max_bandwidth_bytes) * 100, 100)}%"></div>
+								</div>
+								<span class="stat-detail">
+									of {formatBytes(storageQuota.max_bandwidth_bytes)} this month
+								</span>
+							{/if}
+						</div>
+					</div>
+				</div>
+				
+				<!-- Storage Details -->
+				{#if storageStats || storageQuota}
+					<div class="storage-details">
+						<h4>Storage Details</h4>
+						<div class="detail-grid">
+							<div class="detail-item">
+								<span class="detail-label">Total Files:</span>
+								<span class="detail-value">{storageStats?.storage?.total_objects || 0}</span>
+							</div>
+							<div class="detail-item">
+								<span class="detail-label">Shared Files:</span>
+								<span class="detail-value">{storageStats?.shares?.total_shares || 0}</span>
+							</div>
+							{#if storageQuota?.reset_bandwidth_at}
+								<div class="detail-item">
+									<span class="detail-label">Bandwidth Resets:</span>
+									<span class="detail-value">
+										{new Date(storageQuota.reset_bandwidth_at).toLocaleDateString()}
+									</span>
+								</div>
+							{/if}
+							{#if storageQuota && storageQuota.storage_used > storageQuota.max_storage_bytes * 0.9}
+								<div class="detail-item warning">
+									<span class="detail-label">⚠️ Storage Warning:</span>
+									<span class="detail-value">Over 90% used</span>
+								</div>
+							{/if}
+						</div>
+					</div>
+				{/if}
+				
+				<!-- Storage Info -->
+				<div class="storage-tips">
+					<h4>Storage Information</h4>
+					<ul>
+						<li>Your storage quota is managed by your administrator</li>
+						<li>Contact your admin if you need more storage space</li>
+						{#if storageQuota && storageQuota.storage_used > storageQuota.max_storage_bytes * 0.75}
+							<li class="warning">Your storage is almost full - please contact your administrator</li>
+						{/if}
+					</ul>
+				</div>
+				
+				<!-- Recent Activity -->
+				{#if recentActivity && recentActivity.length > 0}
+					<div class="recent-activity">
+						<h4>Recent Activity</h4>
+						<div class="activity-list">
+							{#each recentActivity.slice(0, 5) as activity}
+								<div class="activity-item">
+									<div class="activity-icon {getActionColor(activity.action)}">
+										<svelte:component this={getActionIcon(activity.action)} size={14} />
+									</div>
+									<div class="activity-details">
+										<span class="activity-action">{activity.action}</span>
+										<span class="activity-time">{new Date(activity.created_at).toLocaleString()}</span>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+			</div>
+			
+			<div class="modal-footer">
+				{#if user && user.role === 'admin'}
+					<a href="/admin/extensions/cloudstorage" class="btn btn-secondary">
+						Extension Settings
+					</a>
+					<a href="/admin/storage" class="btn btn-secondary">
+						Manage Files
+					</a>
+				{/if}
+				<button 
+					class="btn btn-primary"
+					on:click={() => showStorageModal = false}
+				>
+					Close
 				</button>
 			</div>
 		</div>
@@ -803,6 +1035,232 @@
 		cursor: not-allowed;
 	}
 	
+	/* Storage Modal Styles */
+	.storage-modal {
+		max-width: 600px;
+	}
+	
+	.storage-overview {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+	
+	.storage-stat-card {
+		display: flex;
+		gap: 0.75rem;
+		padding: 1rem;
+		background: #f9fafb;
+		border-radius: 8px;
+		border: 1px solid #e5e7eb;
+	}
+	
+	.stat-icon {
+		width: 40px;
+		height: 40px;
+		border-radius: 8px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+	
+	.stat-icon.storage-icon {
+		background: rgba(59, 130, 246, 0.1);
+		color: #3b82f6;
+	}
+	
+	.stat-icon.bandwidth-icon {
+		background: rgba(139, 92, 246, 0.1);
+		color: #8b5cf6;
+	}
+	
+	.stat-details {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	
+	.stat-label {
+		font-size: 0.75rem;
+		color: #6b7280;
+		text-transform: uppercase;
+	}
+	
+	.stat-value {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #1f2937;
+	}
+	
+	.progress-bar {
+		height: 6px;
+		background: #e5e7eb;
+		border-radius: 3px;
+		overflow: hidden;
+		margin: 0.25rem 0;
+	}
+	
+	.progress-fill {
+		height: 100%;
+		background: linear-gradient(to right, #3b82f6, #2563eb);
+		border-radius: 3px;
+		transition: width 0.3s ease;
+	}
+	
+	.progress-fill.bandwidth {
+		background: linear-gradient(to right, #8b5cf6, #7c3aed);
+	}
+	
+	.stat-detail {
+		font-size: 0.75rem;
+		color: #9ca3af;
+	}
+	
+	.storage-details {
+		margin-bottom: 1.5rem;
+	}
+	
+	.storage-details h4,
+	.recent-activity h4 {
+		margin: 0 0 0.75rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #374151;
+	}
+	
+	.detail-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+	}
+	
+	.detail-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+		background: #f9fafb;
+		border-radius: 6px;
+		font-size: 0.813rem;
+	}
+	
+	.detail-label {
+		color: #6b7280;
+	}
+	
+	.detail-value {
+		font-weight: 600;
+		color: #1f2937;
+	}
+	
+	.activity-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	
+	.activity-item {
+		display: flex;
+		gap: 0.75rem;
+		padding: 0.625rem;
+		border-radius: 6px;
+		border: 1px solid #e5e7eb;
+		transition: background 0.2s;
+	}
+	
+	.activity-item:hover {
+		background: #f9fafb;
+	}
+	
+	.activity-icon {
+		width: 28px;
+		height: 28px;
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #f3f4f6;
+	}
+	
+	.activity-details {
+		flex: 1;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.activity-action {
+		font-size: 0.813rem;
+		font-weight: 500;
+		color: #374151;
+		text-transform: capitalize;
+	}
+	
+	.activity-time {
+		font-size: 0.75rem;
+		color: #9ca3af;
+	}
+	
+	.storage-tips {
+		margin-top: 1.5rem;
+		padding: 1rem;
+		background: #f0f9ff;
+		border: 1px solid #bae6fd;
+		border-radius: 8px;
+	}
+	
+	.storage-tips h4 {
+		margin: 0 0 0.75rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #0369a1;
+	}
+	
+	.storage-tips ul {
+		margin: 0;
+		padding-left: 1.25rem;
+		list-style-type: disc;
+	}
+	
+	.storage-tips li {
+		margin: 0.5rem 0;
+		font-size: 0.813rem;
+		color: #0c4a6e;
+		line-height: 1.5;
+	}
+	
+	.storage-tips li.warning {
+		color: #dc2626;
+		font-weight: 500;
+	}
+	
+	.storage-tips a {
+		color: #0891b2;
+		text-decoration: underline;
+		font-weight: 500;
+	}
+	
+	.storage-tips a:hover {
+		color: #0e7490;
+	}
+	
+	.detail-item.warning {
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+	}
+	
+	.detail-item.warning .detail-label {
+		color: #b91c1c;
+		font-weight: 500;
+	}
+	
+	.detail-item.warning .detail-value {
+		color: #dc2626;
+	}
+	
 	@media (max-width: 640px) {
 		.profile-page {
 			padding: 1rem;
@@ -818,6 +1276,14 @@
 		
 		.modal {
 			max-width: calc(100vw - 2rem);
+		}
+		
+		.storage-overview {
+			grid-template-columns: 1fr;
+		}
+		
+		.detail-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 	

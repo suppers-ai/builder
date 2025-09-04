@@ -4,8 +4,7 @@
 	import { page } from '$app/stores';
 	import { AppLayout } from '@common/ui-components';
 	import { 
-		Home, Files, Share2, Settings, CreditCard, 
-		Activity, BarChart3
+		Files, Share2, BarChart3
 	} from 'lucide-svelte';
 	import Toast from '$lib/components/common/Toast.svelte';
 	import NotificationContainer from '$lib/components/common/NotificationContainer.svelte';
@@ -15,6 +14,8 @@
 	import { goto } from '$app/navigation';
 	import { registerServiceWorker, setupInstallPrompt, setupNetworkHandling } from '$lib/utils/pwa';
 	import { KeyboardShortcutManager, defaultShortcuts } from '$lib/utils/keyboard-shortcuts';
+	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import UpgradeModal from '$lib/components/upgrade/UpgradeModal.svelte';
 	
 	export let data;
 	
@@ -27,15 +28,11 @@
 	$: user = authState.user;
 	
 	// Define public pages that don't require authentication
-	const publicPages = ['/auth/login', '/auth/register', '/auth/logout', '/auth/forgot'];
+	const publicPages = ['/auth/login', '/auth/register', '/auth/logout', '/auth/forgot', '/'];
 	
 	const navigation = [
-		{ title: 'Home', href: '/', icon: Home },
 		{ title: 'My Files', href: '/files', icon: Files },
-		{ title: 'Shared', href: '/shared', icon: Share2 },
-		{ title: 'Activity', href: '/activity', icon: Activity },
-		{ title: 'Settings', href: '/settings', icon: Settings },
-		{ title: 'Upgrade', href: '/upgrade', icon: CreditCard }
+		{ title: 'Shared', href: '/shared', icon: Share2 }
 	];
 	
 	// Add admin navigation if user is admin
@@ -46,18 +43,26 @@
 	}
 	
 	let commandPaletteOpen = false;
+	let settingsModalOpen = false;
+	let upgradeModalOpen = false;
 	let shortcutManager: KeyboardShortcutManager;
 	
 	onMount(async () => {
+		// Fix invalid URLs that might come from boolean values
+		const currentPath = $page.url.pathname;
+		if (currentPath === '/false' || currentPath === '/true' || currentPath === '/null' || currentPath === '/undefined') {
+			goto('/');
+			return;
+		}
+		
 		// Check if user is authenticated
 		await auth.checkAuth();
 		authChecked = true;
 		
 		// If not authenticated and not on a public page, redirect to login
-		const currentPath = $page.url.pathname;
 		const isPublicPage = publicPages.some(path => currentPath.startsWith(path));
 		
-		if (!$auth.user && !isPublicPage) {
+		if (!$auth.user && !isPublicPage && currentPath !== '/') {
 			goto('/auth/login');
 		}
 		
@@ -94,7 +99,7 @@
 		const currentPath = $page.url.pathname;
 		const isPublicPage = publicPages.some(path => currentPath.startsWith(path));
 		
-		if (!user && !isPublicPage) {
+		if (!user && !isPublicPage && currentPath !== '/') {
 			goto('/auth/login');
 		}
 	}
@@ -103,15 +108,25 @@
 		await auth.logout();
 	}
 	
-	// Check if on login or signup page
-	$: isAuthPage = publicPages.some(path => $page.url.pathname.startsWith(path));
+	function handleOpenSettings() {
+		settingsModalOpen = true;
+	}
+	
+	function handleOpenUpgradeFromSettings() {
+		settingsModalOpen = false;
+		upgradeModalOpen = true;
+	}
+	
+	// Check if on login/signup page or homepage without auth
+	$: isAuthPage = $page.url.pathname.startsWith('/auth/');
+	$: isHomepageNoAuth = $page.url.pathname === '/' && !user;
 </script>
 
 <Toast />
 <NotificationContainer />
 
-{#if isAuthPage}
-	<!-- Auth pages without layout -->
+{#if isAuthPage || isHomepageNoAuth}
+	<!-- Auth pages and homepage without layout -->
 	<slot />
 {:else if !authChecked}
 	<!-- Show loading state while checking auth -->
@@ -125,11 +140,12 @@
 		currentUser={user}
 		{navigation}
 		currentPath={$page.url.pathname}
-		logoSrc="/images/long_light.svg"
-		logoCollapsedSrc="/favicon.svg"
+		logoSrc="/logos/long_light.svg"
+		logoCollapsedSrc="/favicon.ico"
 		projectName="SortedStorage"
 		mobileTitle="SortedStorage"
 		onLogout={handleLogout}
+		onOpenSettings={handleOpenSettings}
 	>
 		<slot />
 	</AppLayout>
@@ -137,6 +153,16 @@
 
 <!-- Command Palette -->
 <CommandPalette bind:open={commandPaletteOpen} />
+
+<!-- Settings Modal -->
+<SettingsModal 
+	bind:open={settingsModalOpen} 
+	user={user}
+	on:openUpgrade={handleOpenUpgradeFromSettings}
+/>
+
+<!-- Upgrade Modal -->
+<UpgradeModal bind:open={upgradeModalOpen} />
 
 <style>
 	:global(:root) {

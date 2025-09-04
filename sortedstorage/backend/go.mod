@@ -2,13 +2,7 @@ module github.com/suppers-ai/sortedstorage
 
 go 1.23.0
 
-require (
-	github.com/gorilla/mux v1.8.1
-	github.com/suppers-ai/auth v0.0.0
-	github.com/suppers-ai/logger v0.0.0
-	github.com/suppers-ai/solobase v0.0.0
-	github.com/suppers-ai/storage v0.0.0
-)
+require github.com/suppers-ai/solobase v0.0.0
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
@@ -37,6 +31,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.2.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -51,8 +46,11 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.65.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
+	github.com/suppers-ai/auth v0.0.0-local // indirect
 	github.com/suppers-ai/database v0.0.0 // indirect
+	github.com/suppers-ai/logger v0.0.0 // indirect
 	github.com/suppers-ai/mailer v0.0.0 // indirect
+	github.com/suppers-ai/storage v0.0.0-local // indirect
 	github.com/volatiletech/authboss/v3 v3.5.0 // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
@@ -69,7 +67,6 @@ require (
 	gorm.io/gorm v1.30.2 // indirect
 )
 
-// Local replacements pointing to solobase and its packages
 replace github.com/suppers-ai/solobase => ../../go/solobase
 
 replace github.com/suppers-ai/auth => ../../go/packages/auth
@@ -78,9 +75,11 @@ replace github.com/suppers-ai/database => ../../go/packages/database
 
 replace github.com/suppers-ai/logger => ../../go/packages/logger
 
+replace github.com/suppers-ai/mailer => ../../go/packages/mailer
+
 replace github.com/suppers-ai/storage => ../../go/packages/storage
 
-replace github.com/suppers-ai/mailer => ../../go/packages/mailer
+replace github.com/suppers-ai/storageadapter => ../../go/integrations/storageadapter
 
 replace github.com/suppers-ai/formulaengine => ../../go/packages/formulaengine
 

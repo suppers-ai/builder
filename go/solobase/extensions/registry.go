@@ -31,9 +31,19 @@ func RegisterAllExtensions(registry *core.ExtensionRegistry, db *gorm.DB) error 
 		return fmt.Errorf("failed to register analytics extension: %w", err)
 	}
 
-	// Register Cloud Storage extension
-	if err := registry.Register(cloudstorage.NewCloudStorageExtension(nil)); err != nil {
+	// Register Cloud Storage extension with database
+	cloudStorageExt := cloudstorage.NewCloudStorageExtensionWithDB(db, nil)
+	// Set the database first to trigger migrations before registration
+	cloudStorageExt.SetDatabase(db)
+	
+	if err := registry.Register(cloudStorageExt); err != nil {
 		return fmt.Errorf("failed to register cloud storage extension: %w", err)
+	}
+	
+	// Enable CloudStorage extension by default for hook functionality
+	if err := registry.Enable("cloudstorage"); err != nil {
+		// Log but don't fail - extension can still work without being enabled
+		fmt.Printf("Warning: Failed to enable CloudStorage extension: %v\n", err)
 	}
 
 	// Register Webhooks extension

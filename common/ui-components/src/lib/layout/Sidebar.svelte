@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { 
 		Home, Users, Database, HardDrive, 
-		FileText, Puzzle, Settings, ChevronRight,
+		FileText, Puzzle, Settings as SettingsIcon, ChevronRight,
 		ChevronLeft, LogOut, User, ChevronDown,
 		ChevronUp, Menu, X
 	} from 'lucide-svelte';
@@ -15,6 +15,7 @@
 	export let logoCollapsedSrc: string = '/logo.png';
 	export let projectName: string = 'Project';
 	export let onLogout: () => void = () => {};
+	export let onOpenSettings: () => void | null = null;
 	
 	let expandedItems: { [key: string]: boolean } = {};
 	let showProfileMenu = false;
@@ -28,6 +29,7 @@
 	}
 	
 	function toggleProfileMenu() {
+		// Remove setTimeout to make it instant
 		showProfileMenu = !showProfileMenu;
 	}
 	
@@ -174,10 +176,17 @@
 						</div>
 					</div>
 					<div class="profile-menu-divider"></div>
-					<a href="/profile" class="profile-menu-item" on:click={() => showProfileMenu = false}>
-						<User size={16} />
-						<span>My Profile</span>
-					</a>
+					{#if onOpenSettings}
+						<button class="profile-menu-item" on:click={() => { showProfileMenu = false; onOpenSettings(); }}>
+							<SettingsIcon size={16} />
+							<span>Settings</span>
+						</button>
+					{:else}
+						<a href="/profile" class="profile-menu-item" on:click={() => showProfileMenu = false}>
+							<User size={16} />
+							<span>My Profile</span>
+						</a>
+					{/if}
 					<button class="profile-menu-item profile-menu-item-danger" on:click={handleLogout}>
 						<LogOut size={16} />
 						<span>Sign Out</span>

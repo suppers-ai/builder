@@ -29,14 +29,14 @@ echo "1. Testing PostgreSQL Database"
 echo "-------------------------------"
 
 # Start PostgreSQL version
-DATABASE_TYPE=postgres DATABASE_URL="postgresql://solobase:solobase123@localhost:5432/solobase?sslmode=disable" DEFAULT_ADMIN_EMAIL="admin@example.com" DEFAULT_ADMIN_PASSWORD="AdminSecurePass2024!" PORT=8091 ./solobase &
+DATABASE_TYPE=postgres DATABASE_URL="postgresql://solobase:solobase123@localhost:5432/solobase?sslmode=disable" DEFAULT_ADMIN_EMAIL="admin@example.com" DEFAULT_ADMIN_PASSWORD="admin123" PORT=8091 ./solobase &
 PG_PID=$!
 sleep 3
 
 # Test PostgreSQL login
 curl -s -X POST http://localhost:8091/auth/login \
     -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "email=admin@example.com&password=AdminSecurePass2024!" \
+    -d "email=admin@example.com&password=admin123" \
     -c cookies-pg.txt -w "%{http_code}" -o /dev/null | grep -q "303"
 print_result $? "PostgreSQL: Admin login"
 
@@ -65,14 +65,14 @@ echo "--------------------------"
 rm -f test.db
 
 # Start SQLite version
-DATABASE_TYPE=sqlite DATABASE_URL=file:./test.db DEFAULT_ADMIN_EMAIL="admin@example.com" DEFAULT_ADMIN_PASSWORD="AdminSecurePass2024!" PORT=8092 ./solobase &
+DATABASE_TYPE=sqlite DATABASE_URL=file:./test.db DEFAULT_ADMIN_EMAIL="admin@example.com" DEFAULT_ADMIN_PASSWORD="admin123" PORT=8092 ./solobase &
 SQLITE_PID=$!
 sleep 3
 
 # Test SQLite login
 curl -s -X POST http://localhost:8092/auth/login \
     -H "Content-Type: application/x-www-form-urlencoded" \
-    -d "email=admin@example.com&password=AdminSecurePass2024!" \
+    -d "email=admin@example.com&password=admin123" \
     -c cookies-sqlite.txt -w "%{http_code}" -o /dev/null | grep -q "303"
 print_result $? "SQLite: Admin login"
 

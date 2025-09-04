@@ -83,7 +83,7 @@
 	}
 </script>
 
-<div class="max-w-6xl mx-auto">
+<div class="container mx-auto px-4 py-6">
 	<h1 class="text-2xl font-bold mb-6">Settings</h1>
 	
 	<div class="grid grid-cols-12 gap-6">

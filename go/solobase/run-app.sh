@@ -63,7 +63,7 @@ export SESSION_SECRET="164c51780de8b817b300447c4b4fb81c"
 export LOG_LEVEL=DEBUG
 
 export DEFAULT_ADMIN_EMAIL=admin@example.com
-export DEFAULT_ADMIN_PASSWORD=solobaseadmin123
+export DEFAULT_ADMIN_PASSWORD=admin123
 
 # Check if docker services are running
 if ! docker compose -f docker-compose.dev.yml ps | grep -q "Up"; then

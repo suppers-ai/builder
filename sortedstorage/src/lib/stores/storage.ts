@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import { storageAPI as storageApi } from './storage-api';
+import { storage as storageApi } from './storage-api';
 import { notifications } from './notifications';
 
 export interface UploadItem {
@@ -72,13 +72,23 @@ function createStorageStore() {
 			update(state => ({ ...state, loading: true, error: null, currentPath: path }));
 			
 			try {
-				const response = await storageApi.listFiles(path);
-				update(state => ({
-					...state,
-					files: response.files || [],
-					folders: response.folders || [],
-					loading: false
-				}));
+				// Load files through storage API
+				await storageApi.loadFiles(path);
+				
+				// Get the current state from storage API
+				const unsubscribe = storageApi.subscribe(apiState => {
+					update(state => ({
+						...state,
+						files: apiState.files || [],
+						folders: apiState.folders || [],
+						loading: apiState.loading,
+						error: apiState.error,
+						currentPath: path
+					}));
+				});
+				
+				// Store unsubscribe for cleanup if needed
+				return unsubscribe;
 			} catch (error: any) {
 				update(state => ({
 					...state,
@@ -161,6 +171,14 @@ function createStorageStore() {
 				
 				notifications.error(`Failed to upload ${file.name}`);
 			}
+		},
+
+		async uploadFiles(files: File[], path: string = '/') {
+			// Use the storage API's uploadFiles method directly
+			await storageApi.uploadFiles(files, path);
+			// The storage API will handle updating its state, just sync with it
+			const currentPath = get(this).currentPath || path;
+			await this.loadFiles(currentPath);
 		},
 
 		async createFolder(name: string, path: string = '/') {

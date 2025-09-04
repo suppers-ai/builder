@@ -59,7 +59,7 @@ All admin pages include `requireAdmin()` check in their `onMount()`:
 
 To test the implementation:
 
-1. Login as admin: `admin@example.com` / `Test123456789!`
+1. Login as admin: `admin@example.com` / `admin123`
 2. Create a user with role 'user'
 3. Logout and login as the test user
 4. Verify automatic redirect to `/profile`

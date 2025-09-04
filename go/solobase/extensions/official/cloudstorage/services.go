@@ -46,8 +46,6 @@ func (s *ShareService) CreateShare(ctx context.Context, objectID, userID string,
 		InheritToChildren: opts.InheritToChildren,
 		IsPublic:          opts.IsPublic,
 		ExpiresAt:         opts.ExpiresAt,
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
 	}
 
 	// Set sharing target
@@ -121,12 +119,22 @@ type ShareOptions struct {
 
 // QuotaService manages storage quotas and bandwidth limits
 type QuotaService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	config *CloudStorageConfig
 }
 
 // NewQuotaService creates a new quota service
-func NewQuotaService(db *gorm.DB) *QuotaService {
-	return &QuotaService{db: db}
+func NewQuotaService(db *gorm.DB, config *CloudStorageConfig) *QuotaService {
+	if config == nil {
+		config = &CloudStorageConfig{
+			DefaultStorageLimit:   10737418240, // 10GB
+			DefaultBandwidthLimit: 53687091200, // 50GB
+		}
+	}
+	return &QuotaService{
+		db:     db,
+		config: config,
+	}
 }
 
 // GetOrCreateQuota gets or creates a quota for a user
@@ -139,12 +147,10 @@ func (q *QuotaService) GetOrCreateQuota(ctx context.Context, userID string) (*St
 		quota = StorageQuota{
 			ID:                uuid.New().String(),
 			UserID:            userID,
-			MaxStorageBytes:   5368709120,  // 5GB default
-			MaxBandwidthBytes: 10737418240, // 10GB default
+			MaxStorageBytes:   q.config.DefaultStorageLimit,
+			MaxBandwidthBytes: q.config.DefaultBandwidthLimit,
 			StorageUsed:       0,
 			BandwidthUsed:     0,
-			CreatedAt:         time.Now(),
-			UpdatedAt:         time.Now(),
 		}
 
 		if err := q.db.Create(&quota).Error; err != nil {

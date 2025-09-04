@@ -5,7 +5,7 @@ echo ""
 
 # Start the application in the background
 echo "Starting application with PostgreSQL..."
-DATABASE_TYPE=postgres DATABASE_URL="postgresql://solobase:solobase123@localhost:5432/solobase?sslmode=disable" DEFAULT_ADMIN_EMAIL="admin@example.com" DEFAULT_ADMIN_PASSWORD="AdminSecurePass2024!" PORT=8091 ./solobase &
+DATABASE_TYPE=postgres DATABASE_URL="postgresql://solobase:solobase123@localhost:5432/solobase?sslmode=disable" DEFAULT_ADMIN_EMAIL="admin@example.com" DEFAULT_ADMIN_PASSWORD="admin123" PORT=8091 ./solobase &
 APP_PID=$!
 
 # Wait for app to start
@@ -25,7 +25,7 @@ echo ""
 echo "Testing login with admin@example.com..."
 RESPONSE=$(curl -s -c cookies.txt -X POST http://localhost:8091/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "email=admin@example.com&password=AdminSecurePass2024!" \
+  -d "email=admin@example.com&password=admin123" \
   -w "\n%{http_code}" \
   -L)
 

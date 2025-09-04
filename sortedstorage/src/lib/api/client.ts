@@ -4,8 +4,6 @@
 
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
-import { auth, token$ } from '$lib/stores/auth';
-import { notifications } from '$lib/stores/notifications';
 
 export interface ApiConfig {
 	baseURL: string;
@@ -48,8 +46,12 @@ class ApiClient {
 	private refreshPromise: Promise<boolean> | null = null;
 
 	constructor(config?: Partial<ApiConfig>) {
+		// In development, use relative URLs to leverage Vite proxy
+		const isDev = import.meta.env.MODE === 'development';
+		const defaultBaseURL = isDev ? '' : (import.meta.env.PUBLIC_VITE_API_URL || 'http://localhost:8091');
+		
 		this.config = {
-			baseURL: config?.baseURL || import.meta.env.VITE_API_URL || '',
+			baseURL: config?.baseURL || defaultBaseURL,
 			timeout: config?.timeout || 30000,
 			headers: {
 				'Content-Type': 'application/json',
@@ -57,18 +59,19 @@ class ApiClient {
 			}
 		};
 
-		// Subscribe to auth changes
-		if (browser) {
-			token$.subscribe(token => {
-				this.authToken = token;
-			});
+		// Load token from localStorage if available
+		if (browser && typeof localStorage !== 'undefined') {
+			const storedToken = localStorage.getItem('token');
+			if (storedToken) {
+				this.authToken = storedToken;
+			}
 		}
 	}
 
 	/**
 	 * Set authorization token
 	 */
-	setAuthToken(token: string | null) {
+	setToken(token: string | null) {
 		this.authToken = token;
 	}
 
@@ -131,9 +134,10 @@ class ApiClient {
 					}
 				}
 				
-				// Redirect to login if not authenticated
+				// Clear auth and redirect to login if not authenticated
 				if (browser) {
-					auth.logout();
+					this.authToken = null;
+					localStorage.removeItem('token');
 					goto('/auth/login');
 				}
 				break;
@@ -174,7 +178,8 @@ class ApiClient {
 			if (response.ok) {
 				const data = await response.json();
 				if (data.token) {
-					auth.setToken(data.token);
+					this.setToken(data.token);
+					localStorage.setItem('token', data.token);
 					return true;
 				}
 			}
@@ -199,7 +204,14 @@ class ApiClient {
 			retry?: number;
 		}
 	): Promise<ApiResponse<T>> {
-		const url = new URL(this.buildURL(endpoint));
+		const urlString = this.buildURL(endpoint);
+		// For relative URLs, use the current origin (or a default in SSR)
+		const baseUrl = typeof window !== 'undefined' 
+			? window.location.origin 
+			: 'http://localhost:3000';
+		const url = urlString.startsWith('http') 
+			? new URL(urlString)
+			: new URL(urlString, baseUrl);
 		
 		// Add query parameters
 		if (options?.params) {
@@ -368,6 +380,68 @@ class ApiClient {
 						resolve(response);
 					} catch {
 						resolve(xhr.responseText);
+					}
+				} else {
+					reject(new ApiError(
+						'Upload failed',
+						xhr.status,
+						'UPLOAD_ERROR'
+					));
+				}
+			});
+
+			// Handle errors
+			xhr.addEventListener('error', () => {
+				reject(new ApiError('Upload failed', 0, 'NETWORK_ERROR'));
+			});
+
+			xhr.addEventListener('abort', () => {
+				reject(new ApiError('Upload cancelled', 0, 'ABORTED'));
+			});
+
+			// Open and send request
+			xhr.open('POST', this.buildURL(endpoint));
+			
+			// Set auth header
+			if (this.authToken) {
+				xhr.setRequestHeader('Authorization', `Bearer ${this.authToken}`);
+			}
+
+			xhr.send(formData);
+		});
+	}
+
+	/**
+	 * Upload FormData with progress tracking
+	 */
+	async uploadFormData<T = any>(
+		endpoint: string,
+		formData: FormData,
+		options?: {
+			onProgress?: (progress: number) => void;
+		}
+	): Promise<T> {
+		return new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest();
+
+			// Track upload progress
+			if (options?.onProgress) {
+				xhr.upload.addEventListener('progress', (event) => {
+					if (event.lengthComputable) {
+						const progress = (event.loaded / event.total) * 100;
+						options.onProgress!(progress);
+					}
+				});
+			}
+
+			// Handle completion
+			xhr.addEventListener('load', () => {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					try {
+						const response = JSON.parse(xhr.responseText);
+						resolve(response);
+					} catch {
+						resolve(xhr.responseText as any);
 					}
 				} else {
 					reject(new ApiError(

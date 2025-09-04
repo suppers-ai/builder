@@ -59,7 +59,7 @@
 	}
 </script>
 
-<div class="space-y-6">
+<div class="container mx-auto px-4 py-6 space-y-6">
 	<h1 class="text-2xl font-bold">Shared Files</h1>
 	
 	<!-- Tabs -->

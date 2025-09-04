@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 
 # Configuration
 DATABASE_TYPE="${1:-sqlite}"
-API_PORT=${API_PORT:-8080}
+API_PORT=${API_PORT:-8090}
 FRONTEND_PORT=${FRONTEND_PORT:-5173}
 
 echo -e "${GREEN}=== Solobase Development Server ===${NC}"
@@ -32,12 +32,17 @@ echo -e "${YELLOW}Stopping any existing servers...${NC}"
 pkill -f "solobase" 2>/dev/null
 pkill -f "./solobase" 2>/dev/null
 pkill -f "go run ." 2>/dev/null
+pkill -f "go run main.go" 2>/dev/null
 pkill -f "npm run dev" 2>/dev/null
 pkill -f "vite" 2>/dev/null
-# Kill anything on our ports
-lsof -ti:$API_PORT | xargs kill -9 2>/dev/null
-lsof -ti:$FRONTEND_PORT | xargs kill -9 2>/dev/null
-lsof -ti:5174 | xargs kill -9 2>/dev/null  # Also kill the fallback port
+
+# Kill anything on our ports - more thorough cleanup
+for port in $API_PORT $FRONTEND_PORT 5174 8090 8091 8092 8093 8094; do
+    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+        echo -e "${YELLOW}  Killing process on port $port${NC}"
+        lsof -ti:$port | xargs kill -9 2>/dev/null
+    fi
+done
 sleep 2
 
 # Set database URL based on type
@@ -74,6 +79,10 @@ else
     DATABASE_URL="file:./.data/solobase.db"
 fi
 
+# Build the solobase binary first for better performance
+echo -e "${YELLOW}Building solobase...${NC}"
+./compile.sh
+
 # Start API server
 echo -e "${YELLOW}Starting API server on port $API_PORT...${NC}"
 # ENVIRONMENT=development ensures consistent JWT secret across restarts
@@ -83,7 +92,7 @@ DATABASE_URL=$DATABASE_URL \
 DEFAULT_ADMIN_EMAIL=admin@example.com \
 DEFAULT_ADMIN_PASSWORD=admin123 \
 PORT=$API_PORT \
-go run . &
+./solobase &
 API_PID=$!
 
 # Wait for API to start

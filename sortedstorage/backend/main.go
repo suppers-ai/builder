@@ -1,215 +1,111 @@
 package main
 
 import (
-	"context"
 	"embed"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"path/filepath"
 	"strings"
-	"syscall"
-	"time"
 
-	"github.com/gorilla/mux"
-	auth "github.com/suppers-ai/auth"
-	"github.com/suppers-ai/logger"
-	"github.com/suppers-ai/solobase/api"
-	"github.com/suppers-ai/solobase/config"
-	"github.com/suppers-ai/solobase/database"
-	"github.com/suppers-ai/solobase/models"
-	"github.com/suppers-ai/solobase/services"
-	storage "github.com/suppers-ai/storage"
+	"github.com/suppers-ai/solobase"
 )
 
-//go:embed all:build/*
-var frontendFiles embed.FS
+//go:embed static/*
+var sortedStorageFiles embed.FS
 
 func main() {
-	// Load configuration
-	cfg := config.Load()
-
-	// Override port if specified
-	if port := os.Getenv("PORT"); port != "" {
-		cfg.Port = port
-	} else if cfg.Port == "" {
-		cfg.Port = "3000"
-	}
-
-	// Set JWT secret for API
-	api.SetJWTSecret(cfg.JWTSecret)
-
-	// Initialize database
-	log.Printf("Initializing database with type: %s", cfg.Database.Type)
-	db, err := database.New(cfg.Database)
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
-	log.Printf("Successfully connected to %s database", cfg.Database.Type)
-	defer db.Close()
-
-	// Run migrations
-	if err := db.Migrate(); err != nil {
-		log.Fatal("Failed to run migrations:", err)
-	}
-	
-	// Auto-migrate models
-	log.Println("Running auto-migrations...")
-	if err := db.AutoMigrate(
-		&auth.User{},
-		&models.Setting{},
-		&models.Collection{},
-		&models.CollectionRecord{},
-		&models.ExtensionMigration{},
-		&storage.StorageObject{},
-		&storage.StorageBucket{},
-		&logger.LogModel{},
-		&logger.RequestLogModel{},
-	); err != nil {
-		log.Printf("Warning: AutoMigrate failed: %v", err)
-	}
-
-	// Initialize services
-	authService := services.NewAuthService(db)
-	userService := services.NewUserService(db)
-	storageService := services.NewStorageService(db, cfg.Storage)
-	collectionService := services.NewCollectionService(db)
-	databaseService := services.NewDatabaseService(db)
-	settingsService := services.NewSettingsService(db)
-	logsService := services.NewLogsService(db)
-
-	// Create default admin user if needed
-	adminEmail := os.Getenv("DEFAULT_ADMIN_EMAIL")
-	adminPassword := os.Getenv("DEFAULT_ADMIN_PASSWORD")
-
-	if adminEmail == "" {
-		adminEmail = "admin@sortedstorage.com"
-	}
-	if adminPassword == "" {
-		adminPassword = "AdminSecurePass2024!"
-	}
-
-	log.Printf("========================================")
-	log.Printf("SortedStorage with Integrated Backend")
-	log.Printf("Default Admin Credentials:")
-	log.Printf("Email: %s", adminEmail)
-	log.Printf("Password: %s", adminPassword)
-	log.Printf("========================================")
-
-	if err := authService.CreateDefaultAdmin(adminEmail, adminPassword); err != nil {
-		log.Printf("Note: Default admin might already exist: %v", err)
-	}
-
-	// Create API instance
-	apiInstance := api.NewAPI(
-		db,
-		authService,
-		userService,
-		storageService,
-		collectionService,
-		databaseService,
-		settingsService,
-		logsService,
-	)
-
-	// Create main router
-	mainRouter := mux.NewRouter()
-
-	// Mount API routes under /api
-	mainRouter.PathPrefix("/api/").Handler(http.StripPrefix("/api", apiInstance.Router))
-
-	// Serve frontend files
-	frontendFS, err := fs.Sub(frontendFiles, "build")
-	if err != nil {
-		log.Fatal("Failed to create frontend filesystem:", err)
-	}
-
-	fileServer := http.FileServer(http.FS(frontendFS))
-
-	// Handle all other routes with the frontend
-	mainRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		path := r.URL.Path
-
-		// Check if file exists in embedded filesystem
-		file, err := frontendFS.Open(strings.TrimPrefix(path, "/"))
-		if err == nil {
-			file.Close()
-			// Serve the file directly
-			fileServer.ServeHTTP(w, r)
-			return
-		}
-
-		// For client-side routing, serve index.html for non-file requests
-		if filepath.Ext(path) == "" || strings.Contains(path, ".") == false {
-			// Reset the path to serve index.html
-			r.URL.Path = "/"
-		}
-		
-		fileServer.ServeHTTP(w, r)
+	// Create a new Solobase application
+	app := solobase.NewWithOptions(&solobase.Options{
+		DatabaseType:         os.Getenv("DATABASE_TYPE"),
+		DatabaseURL:          os.Getenv("DATABASE_URL"),
+		StorageType:          os.Getenv("STORAGE_TYPE"),
+		StoragePath:          os.Getenv("STORAGE_PATH"),
+		DefaultAdminEmail:    os.Getenv("DEFAULT_ADMIN_EMAIL"),
+		DefaultAdminPassword: os.Getenv("DEFAULT_ADMIN_PASSWORD"),
+		JWTSecret:            os.Getenv("JWT_SECRET"),
+		Port:                 os.Getenv("PORT"),
+		DisableAdminUI:       false, // We want to keep the admin UI
 	})
 
-	// Configure CORS middleware
-	corsMiddleware := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// CORS headers
-			origin := r.Header.Get("Origin")
-			if origin == "" {
-				origin = "*"
-			}
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-			w.Header().Set("Access-Control-Allow-Credentials", "true")
-
-			// Handle preflight requests
-			if r.Method == "OPTIONS" {
-				w.WriteHeader(http.StatusNoContent)
+	// Add OnServe hook to serve SortedStorage frontend
+	app.OnServe().BindFunc(func(se *solobase.ServeEvent) error {
+		// Serve SortedStorage frontend for root routes
+		se.Router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Skip API and admin routes
+			if strings.HasPrefix(r.URL.Path, "/api/") || 
+			   strings.HasPrefix(r.URL.Path, "/admin/") || 
+			   strings.HasPrefix(r.URL.Path, "/storage/") {
+				// These are handled by Solobase
+				http.NotFound(w, r)
 				return
 			}
 
-			next.ServeHTTP(w, r)
+			// Check if we have embedded static files
+			staticFS, err := fs.Sub(sortedStorageFiles, "static")
+			if err != nil {
+				// If no embedded files (development mode), serve from filesystem
+				staticDir := "../build/"
+				if _, err := os.Stat(staticDir); err == nil {
+					http.FileServer(http.Dir(staticDir)).ServeHTTP(w, r)
+				} else {
+					http.Error(w, "SortedStorage frontend not found", http.StatusNotFound)
+				}
+				return
+			}
+
+			// Serve embedded SortedStorage frontend
+			path := r.URL.Path
+			if path == "/" {
+				path = "/index.html"
+			}
+
+			// Try to open the file
+			file, err := staticFS.Open(strings.TrimPrefix(path, "/"))
+			if err != nil {
+				// For SPA routing, serve index.html for non-asset routes
+				if !strings.Contains(path, ".") {
+					indexFile, err := staticFS.Open("index.html")
+					if err != nil {
+						http.Error(w, "Not found", http.StatusNotFound)
+						return
+					}
+					defer indexFile.Close()
+					
+					// Serve index.html
+					w.Header().Set("Content-Type", "text/html; charset=utf-8")
+					if indexData, err := fs.ReadFile(staticFS, "index.html"); err == nil {
+						w.Write(indexData)
+					}
+					return
+				}
+				http.NotFound(w, r)
+				return
+			}
+			file.Close()
+
+			http.FileServer(http.FS(staticFS)).ServeHTTP(w, r)
 		})
-	}
-
-	// Apply CORS middleware
-	mainRouter.Use(corsMiddleware)
-
-	// Create HTTP server
-	srv := &http.Server{
-		Addr:         ":" + cfg.Port,
-		Handler:      mainRouter,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
-
-	// Start server in a goroutine
-	go func() {
-		log.Printf("Starting SortedStorage server on port %s", cfg.Port)
-		log.Printf("Frontend: http://localhost:%s", cfg.Port)
-		log.Printf("API: http://localhost:%s/api", cfg.Port)
 		
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Failed to start server: %v", err)
-		}
-	}()
+		return se.Next()
+	})
 
-	// Wait for interrupt signal to gracefully shutdown the server
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	log.Println("Shutting down server...")
-
-	// Graceful shutdown with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+	// Print startup message
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
+	
+	log.Printf("=========================================")
+	log.Printf("      🗄️  SortedStorage  🗄️")
+	log.Printf("    Powered by Solobase Backend")
+	log.Printf("=========================================")
+	log.Printf("📍 SortedStorage UI: http://localhost:%s", port)
+	log.Printf("📍 Admin UI: http://localhost:%s/admin/", port)
+	log.Printf("=========================================")
 
-	log.Println("Server exited")
+	// Start the application
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
+	}
 }

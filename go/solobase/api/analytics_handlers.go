@@ -127,25 +127,65 @@ func (h *AnalyticsHandlers) HandleTrack() http.HandlerFunc {
 			userID = fmt.Sprintf("%v", uid)
 		}
 		
-		// Store the event
-		if h.db != nil && h.db.DB != nil {
-			eventName := ""
-			if name, ok := data["event"].(string); ok {
-				eventName = name
+		// Check if this is a page view event
+		if eventName, ok := data["event"].(string); ok && eventName == "page_view" {
+			// Track as page view
+			pageURL := "/"
+			if url, ok := data["url"].(string); ok {
+				pageURL = url
 			}
 			
-			eventData, _ := json.Marshal(data)
-			
-			event := map[string]interface{}{
-				"user_id":    userID,
-				"event_name": eventName,
-				"event_data": string(eventData),
-				"created_at": time.Now(),
+			// Get session ID from cookie or generate one
+			sessionID := ""
+			if cookie, err := r.Cookie("session_id"); err == nil {
+				sessionID = cookie.Value
+			} else {
+				sessionID = fmt.Sprintf("session_%d", time.Now().Unix())
+				http.SetCookie(w, &http.Cookie{
+					Name:     "session_id",
+					Value:    sessionID,
+					Path:     "/",
+					HttpOnly: true,
+					MaxAge:   86400, // 1 day
+				})
 			}
 			
-			if err := h.db.DB.Table("analytics_events").Create(&event).Error; err != nil {
-				// Log error but don't fail the request
-				fmt.Printf("Failed to track event: %v\n", err)
+			// Insert page view
+			if h.db != nil && h.db.DB != nil {
+				pageView := map[string]interface{}{
+					"user_id":    userID,
+					"session_id": sessionID,
+					"page_url":   pageURL,
+					"referrer":   r.Referer(),
+					"user_agent": r.UserAgent(),
+					"ip_address": r.RemoteAddr,
+					"created_at": time.Now(),
+				}
+				
+				if err := h.db.DB.Table("page_views").Create(&pageView).Error; err != nil {
+					fmt.Printf("Failed to track page view: %v\n", err)
+				}
+			}
+		} else {
+			// Store as regular event
+			if h.db != nil && h.db.DB != nil {
+				eventName := ""
+				if name, ok := data["event"].(string); ok {
+					eventName = name
+				}
+				
+				eventData, _ := json.Marshal(data)
+				
+				event := map[string]interface{}{
+					"user_id":    userID,
+					"event_name": eventName,
+					"event_data": string(eventData),
+					"created_at": time.Now(),
+				}
+				
+				if err := h.db.DB.Table("analytics_events").Create(&event).Error; err != nil {
+					fmt.Printf("Failed to track event: %v\n", err)
+				}
 			}
 		}
 		
@@ -159,33 +199,68 @@ func (h *AnalyticsHandlers) InitializeSchema() error {
 		return fmt.Errorf("database not initialized")
 	}
 	
-	// Create page_views table
-	err := h.db.DB.Exec(`
-		CREATE TABLE IF NOT EXISTS page_views (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			user_id TEXT,
-			session_id TEXT,
-			page_url TEXT NOT NULL,
-			referrer TEXT,
-			user_agent TEXT,
-			ip_address TEXT,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		)
-	`).Error
+	// Detect database type for proper SQL syntax
+	dbType := "sqlite"
+	if h.db.Config.Type == "postgres" || h.db.Config.Type == "postgresql" {
+		dbType = "postgres"
+	}
+	
+	// Create page_views table with appropriate syntax
+	var createPageViewsSQL string
+	if dbType == "postgres" {
+		createPageViewsSQL = `
+			CREATE TABLE IF NOT EXISTS page_views (
+				id SERIAL PRIMARY KEY,
+				user_id TEXT,
+				session_id TEXT,
+				page_url TEXT NOT NULL,
+				referrer TEXT,
+				user_agent TEXT,
+				ip_address TEXT,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			)`
+	} else {
+		createPageViewsSQL = `
+			CREATE TABLE IF NOT EXISTS page_views (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				user_id TEXT,
+				session_id TEXT,
+				page_url TEXT NOT NULL,
+				referrer TEXT,
+				user_agent TEXT,
+				ip_address TEXT,
+				created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			)`
+	}
+	
+	err := h.db.DB.Exec(createPageViewsSQL).Error
 	if err != nil {
 		return fmt.Errorf("failed to create page_views table: %w", err)
 	}
 	
 	// Create analytics_events table
-	err = h.db.DB.Exec(`
-		CREATE TABLE IF NOT EXISTS analytics_events (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			user_id TEXT,
-			event_name TEXT NOT NULL,
-			event_data TEXT,
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		)
-	`).Error
+	var createEventsSQL string
+	if dbType == "postgres" {
+		createEventsSQL = `
+			CREATE TABLE IF NOT EXISTS analytics_events (
+				id SERIAL PRIMARY KEY,
+				user_id TEXT,
+				event_name TEXT NOT NULL,
+				event_data TEXT,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			)`
+	} else {
+		createEventsSQL = `
+			CREATE TABLE IF NOT EXISTS analytics_events (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				user_id TEXT,
+				event_name TEXT NOT NULL,
+				event_data TEXT,
+				created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			)`
+	}
+	
+	err = h.db.DB.Exec(createEventsSQL).Error
 	if err != nil {
 		return fmt.Errorf("failed to create analytics_events table: %w", err)
 	}
@@ -325,4 +400,34 @@ func (h *AnalyticsHandlers) GetDailyStats(ctx context.Context, days int) ([]map[
 	}
 	
 	return stats, nil
+}
+
+// HandleDailyStats returns daily statistics for charts
+func (h *AnalyticsHandlers) HandleDailyStats() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get days parameter from query
+		days := 7
+		if d := r.URL.Query().Get("days"); d != "" {
+			if parsed, err := fmt.Sscanf(d, "%d", &days); err == nil && parsed == 1 {
+				// Limit to reasonable range
+				if days > 90 {
+					days = 90
+				} else if days < 1 {
+					days = 7
+				}
+			}
+		}
+		
+		stats, err := h.GetDailyStats(r.Context(), days)
+		if err != nil {
+			respondWithJSON(w, http.StatusInternalServerError, map[string]interface{}{
+				"error": err.Error(),
+			})
+			return
+		}
+		
+		respondWithJSON(w, http.StatusOK, map[string]interface{}{
+			"dailyStats": stats,
+		})
+	}
 }

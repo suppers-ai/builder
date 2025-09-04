@@ -215,22 +215,49 @@ func (e *CloudStorageExtension) handleQuota(w http.ResponseWriter, r *http.Reque
 
 	ctx := r.Context()
 	userID := r.Header.Get("X-User-ID")
+	isAdmin := r.Header.Get("X-User-Role") == "admin"
 
 	switch r.Method {
 	case http.MethodGet:
-		// Get quota stats
-		stats, err := e.quotaService.GetQuotaStats(ctx, userID)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		// Get quota stats - either for a specific user or all users (admin only)
+		queryUserID := r.URL.Query().Get("user_id")
+		
+		if queryUserID != "" && isAdmin {
+			// Admin getting specific user's quota
+			stats, err := e.quotaService.GetQuotaStats(ctx, queryUserID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(stats)
+		} else if isAdmin && queryUserID == "" {
+			// Admin getting all quotas
+			var quotas []StorageQuota
+			if err := e.db.Find(&quotas).Error; err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(quotas)
+		} else {
+			// Regular user getting their own quota
+			stats, err := e.quotaService.GetQuotaStats(ctx, userID)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(stats)
 		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(stats)
 
 	case http.MethodPut:
 		// Update quota (admin only)
-		// TODO: Check admin permissions
+		if !isAdmin {
+			http.Error(w, "Admin access required", http.StatusForbidden)
+			return
+		}
+		
 		var req struct {
 			UserID            string `json:"user_id"`
 			MaxStorageBytes   int64  `json:"max_storage_bytes"`
@@ -441,6 +468,7 @@ func (e *CloudStorageExtension) handleUpload(w http.ResponseWriter, r *http.Requ
 func (e *CloudStorageExtension) handleStats(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := r.Header.Get("X-User-ID")
+	isAdmin := r.Header.Get("X-User-Role") == "admin"
 
 	stats := make(map[string]interface{})
 
@@ -449,35 +477,132 @@ func (e *CloudStorageExtension) handleStats(w http.ResponseWriter, r *http.Reque
 		TotalObjects int64 `json:"total_objects"`
 		TotalSize    int64 `json:"total_size"`
 	}
-	e.db.Model(&pkgstorage.StorageObject{}).
-		Where("user_id = ?", userID).
-		Select("COUNT(*) as total_objects, COALESCE(SUM(size), 0) as total_size").
-		Scan(&storageStats)
+	
+	// For admins, show all storage stats; for users, show only their own
+	if isAdmin {
+		e.db.Model(&pkgstorage.StorageObject{}).
+			Select("COUNT(*) as total_objects, COALESCE(SUM(size), 0) as total_size").
+			Scan(&storageStats)
+	} else {
+		e.db.Model(&pkgstorage.StorageObject{}).
+			Where("user_id = ?", userID).
+			Select("COUNT(*) as total_objects, COALESCE(SUM(size), 0) as total_size").
+			Scan(&storageStats)
+	}
 	
 	stats["storage"] = storageStats
 
 	// Get quota stats if enabled
 	if e.quotaService != nil && e.config.EnableQuotas {
-		quotaStats, err := e.quotaService.GetQuotaStats(ctx, userID)
-		if err == nil {
-			stats["quota"] = quotaStats
+		if isAdmin {
+			// Get overall quota usage for admin
+			var totalQuotaStats struct {
+				TotalUsers        int64   `json:"total_users"`
+				TotalStorageUsed  int64   `json:"total_storage_used"`
+				TotalStorageLimit int64   `json:"total_storage_limit"`
+				TotalBandwidthUsed int64  `json:"total_bandwidth_used"`
+				TotalBandwidthLimit int64 `json:"total_bandwidth_limit"`
+			}
+			e.db.Model(&StorageQuota{}).
+				Select(`
+					COUNT(*) as total_users,
+					COALESCE(SUM(storage_used), 0) as total_storage_used,
+					COALESCE(SUM(max_storage_bytes), 0) as total_storage_limit,
+					COALESCE(SUM(bandwidth_used), 0) as total_bandwidth_used,
+					COALESCE(SUM(max_bandwidth_bytes), 0) as total_bandwidth_limit
+				`).
+				Scan(&totalQuotaStats)
+				
+			var storagePercentage, bandwidthPercentage float64
+			if totalQuotaStats.TotalStorageLimit > 0 {
+				storagePercentage = float64(totalQuotaStats.TotalStorageUsed) / float64(totalQuotaStats.TotalStorageLimit) * 100
+			}
+			if totalQuotaStats.TotalBandwidthLimit > 0 {
+				bandwidthPercentage = float64(totalQuotaStats.TotalBandwidthUsed) / float64(totalQuotaStats.TotalBandwidthLimit) * 100
+			}
+			
+			// Count users near their storage limit (>80%)
+			var usersNearLimit int64
+			e.db.Model(&StorageQuota{}).
+				Where("(storage_used * 100.0 / max_storage_bytes) > 80 OR (bandwidth_used * 100.0 / max_bandwidth_bytes) > 80").
+				Count(&usersNearLimit)
+			
+			stats["quota"] = map[string]interface{}{
+				"total_users":           totalQuotaStats.TotalUsers,
+				"storage_used":          totalQuotaStats.TotalStorageUsed,
+				"storage_limit":         totalQuotaStats.TotalStorageLimit,
+				"storage_percentage":    storagePercentage,
+				"bandwidth_used":        totalQuotaStats.TotalBandwidthUsed,
+				"bandwidth_limit":       totalQuotaStats.TotalBandwidthLimit,
+				"bandwidth_percentage":  bandwidthPercentage,
+				"users_near_limit":      usersNearLimit,
+			}
+		} else {
+			quotaStats, err := e.quotaService.GetQuotaStats(ctx, userID)
+			if err == nil {
+				stats["quota"] = quotaStats
+			}
 		}
 	}
 
 	// Get share stats if enabled
 	if e.shareService != nil && e.config.EnableSharing {
-		var shareCount int64
-		e.db.Model(&StorageShare{}).Where("created_by = ?", userID).Count(&shareCount)
-		stats["shares"] = map[string]interface{}{
-			"total_shares": shareCount,
+		var shareStats struct {
+			TotalShares    int64 `json:"total_shares"`
+			PublicShares   int64 `json:"public_shares"`
+			PrivateShares  int64 `json:"private_shares"`
+			FoldersShared  int64 `json:"folders_shared"`
+			FilesShared    int64 `json:"files_shared"`
+			ActiveShares   int64 `json:"active_shares"`
+			ExpiredShares  int64 `json:"expired_shares"`
 		}
+		
+		if isAdmin {
+			// Get all shares for admin
+			e.db.Model(&StorageShare{}).Count(&shareStats.TotalShares)
+			e.db.Model(&StorageShare{}).Where("is_public = ?", true).Count(&shareStats.PublicShares)
+			e.db.Model(&StorageShare{}).Where("is_public = ?", false).Count(&shareStats.PrivateShares)
+			e.db.Model(&StorageShare{}).Where("expires_at IS NULL OR expires_at > ?", time.Now()).Count(&shareStats.ActiveShares)
+			e.db.Model(&StorageShare{}).Where("expires_at IS NOT NULL AND expires_at <= ?", time.Now()).Count(&shareStats.ExpiredShares)
+			
+			// Count shared folders vs files
+			e.db.Table("ext_cloudstorage_storage_shares ss").
+				Joins("JOIN storage_objects so ON ss.object_id = so.id").
+				Where("so.content_type = 'application/x-directory'").
+				Count(&shareStats.FoldersShared)
+			shareStats.FilesShared = shareStats.TotalShares - shareStats.FoldersShared
+		} else {
+			// Get user's own shares
+			e.db.Model(&StorageShare{}).Where("created_by = ?", userID).Count(&shareStats.TotalShares)
+			e.db.Model(&StorageShare{}).Where("created_by = ? AND is_public = ?", userID, true).Count(&shareStats.PublicShares)
+			e.db.Model(&StorageShare{}).Where("created_by = ? AND is_public = ?", userID, false).Count(&shareStats.PrivateShares)
+			e.db.Model(&StorageShare{}).Where("created_by = ? AND (expires_at IS NULL OR expires_at > ?)", userID, time.Now()).Count(&shareStats.ActiveShares)
+			e.db.Model(&StorageShare{}).Where("created_by = ? AND expires_at IS NOT NULL AND expires_at <= ?", userID, time.Now()).Count(&shareStats.ExpiredShares)
+			
+			// Count shared folders vs files for user
+			e.db.Table("ext_cloudstorage_storage_shares ss").
+				Joins("JOIN storage_objects so ON ss.object_id = so.id").
+				Where("ss.created_by = ? AND so.content_type = 'application/x-directory'", userID).
+				Count(&shareStats.FoldersShared)
+			shareStats.FilesShared = shareStats.TotalShares - shareStats.FoldersShared
+		}
+		
+		stats["shares"] = shareStats
 	}
 
 	// Get access stats if enabled
 	if e.accessLogService != nil && e.config.EnableAccessLogs {
-		accessStats, err := e.accessLogService.GetAccessStats(ctx, StatsFilters{UserID: userID})
-		if err == nil {
-			stats["access"] = accessStats
+		if isAdmin {
+			// Get overall access stats for admin
+			accessStats, err := e.accessLogService.GetAccessStats(ctx, StatsFilters{})
+			if err == nil {
+				stats["access"] = accessStats
+			}
+		} else {
+			accessStats, err := e.accessLogService.GetAccessStats(ctx, StatsFilters{UserID: userID})
+			if err == nil {
+				stats["access"] = accessStats
+			}
 		}
 	}
 
@@ -563,4 +688,42 @@ func (e *CloudStorageExtension) handleDownload(w http.ResponseWriter, r *http.Re
 	
 	// Write content
 	w.Write(content)
+}
+
+// handleUserSearch handles user search for admin panel
+func (e *CloudStorageExtension) handleUserSearch(w http.ResponseWriter, r *http.Request) {
+	isAdmin := r.Header.Get("X-User-Role") == "admin"
+	
+	// Only admins can search users
+	if !isAdmin {
+		http.Error(w, "Admin access required", http.StatusForbidden)
+		return
+	}
+	
+	query := r.URL.Query().Get("q")
+	if query == "" || len(query) < 2 {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte("[]"))
+		return
+	}
+	
+	// Search for users by email, name, or ID
+	type UserSearchResult struct {
+		ID    string `json:"id"`
+		Email string `json:"email"`
+		Name  string `json:"name,omitempty"`
+	}
+	
+	var users []UserSearchResult
+	
+	// Search in auth_users table
+	e.db.Table("auth_users").
+		Select("id, email, COALESCE(raw_user_meta_data->>'name', '') as name").
+		Where("email ILIKE ? OR id::text ILIKE ? OR raw_user_meta_data->>'name' ILIKE ?",
+			"%"+query+"%", "%"+query+"%", "%"+query+"%").
+		Limit(10).
+		Scan(&users)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
 }

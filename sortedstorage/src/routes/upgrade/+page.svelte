@@ -96,7 +96,7 @@
 	$: yearlyDiscount = Math.round((1 - (99.99 / (9.99 * 12))) * 100);
 </script>
 
-<div class="max-w-7xl mx-auto">
+<div class="container mx-auto px-4 py-6">
 	<!-- Header -->
 	<div class="text-center mb-8">
 		<h1 class="text-3xl font-bold mb-2">Choose Your Plan</h1>

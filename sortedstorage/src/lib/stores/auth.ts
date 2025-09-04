@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { api } from '$lib/services/api';
+import { apiClient } from '$lib/api/client';
 import { goto } from '$app/navigation';
 import type { User } from '$lib/types/storage';
 
@@ -30,6 +31,7 @@ function createAuthStore() {
 				});
 				
 				api.setToken(response.token);
+				apiClient.setToken(response.token);
 				localStorage.setItem('token', response.token);
 				token$.set(response.token);
 				
@@ -56,6 +58,7 @@ function createAuthStore() {
 				});
 				
 				api.setToken(response.token);
+				apiClient.setToken(response.token);
 				localStorage.setItem('token', response.token);
 				token$.set(response.token);
 				
@@ -79,6 +82,7 @@ function createAuthStore() {
 			}
 			
 			api.setToken(null);
+			apiClient.setToken(null);
 			localStorage.removeItem('token');
 			token$.set(null);
 			// Clear auth cookie
@@ -95,6 +99,7 @@ function createAuthStore() {
 			}
 
 			api.setToken(token);
+			apiClient.setToken(token);
 			update(state => ({ ...state, loading: true }));
 
 			try {
@@ -104,6 +109,7 @@ function createAuthStore() {
 				token$.set(token);
 			} catch {
 				api.setToken(null);
+				apiClient.setToken(null);
 				localStorage.removeItem('token');
 				token$.set(null);
 				set({ user: null, loading: false, error: null });
@@ -113,10 +119,12 @@ function createAuthStore() {
 		setToken(token: string | null) {
 			if (token) {
 				api.setToken(token);
+				apiClient.setToken(token);
 				localStorage.setItem('token', token);
 				token$.set(token);
 			} else {
 				api.setToken(null);
+				apiClient.setToken(null);
 				localStorage.removeItem('token');
 				token$.set(null);
 			}

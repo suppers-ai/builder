@@ -37,7 +37,7 @@ func (e *ProductsExtension) SetDatabase(db *gorm.DB) {
 	e.db = db
 	e.initializeAPIs()
 	
-	// Register models for auto-migration
+	// Register models for auto-migration (tables have prefix in TableName methods)
 	if err := models.RegisterModels(e.db); err != nil {
 		// Log error but don't fail
 		return

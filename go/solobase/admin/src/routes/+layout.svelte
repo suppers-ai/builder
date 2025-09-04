@@ -18,34 +18,34 @@
 	$: user = $currentUser;
 	
 	// Define pages that don't require admin role
-	const publicPages = ['/login', '/signup', '/logout'];
+	const publicPages = ['/auth/login', '/auth/signup', '/auth/logout', '/'];
 	const profilePages = ['/profile'];
 	
-	// Navigation configuration
+	// Navigation configuration for admin
 	const navigation = [
 		{ 
-			title: 'Home', 
-			href: '/', 
+			title: 'Dashboard', 
+			href: '/admin', 
 			icon: Home 
 		},
 		{ 
 			title: 'Users', 
-			href: '/users', 
+			href: '/admin/users', 
 			icon: Users 
 		},
 		{ 
 			title: 'Database', 
-			href: '/database', 
+			href: '/admin/database', 
 			icon: Database 
 		},
 		{ 
 			title: 'Storage', 
-			href: '/storage', 
+			href: '/admin/storage', 
 			icon: HardDrive 
 		},
 		{ 
 			title: 'Logs', 
-			href: '/logs', 
+			href: '/admin/logs', 
 			icon: FileText 
 		},
 		{
@@ -55,34 +55,34 @@
 			children: [
 				{ 
 					title: 'Products & Pricing', 
-					href: '/extensions/products'
+					href: '/admin/extensions/products'
 				},
 				{ 
 					title: 'Hugo Sites', 
-					href: '/extensions/hugo'
+					href: '/admin/extensions/hugo'
 				},
 				{ 
 					title: 'Analytics', 
-					href: '/extensions/analytics'
+					href: '/admin/extensions/analytics'
 				},
 				{ 
 					title: 'Cloud Storage', 
-					href: '/extensions/cloudstorage'
+					href: '/admin/extensions/cloudstorage'
 				},
 				{ 
 					title: 'Webhooks', 
-					href: '/extensions/webhooks'
+					href: '/admin/extensions/webhooks'
 				},
 				{ 
 					title: 'Manage Extensions', 
-					href: '/extensions/manage',
+					href: '/admin/extensions/manage',
 					icon: Plus
 				}
 			]
 		},
 		{ 
 			title: 'Settings', 
-			href: '/settings', 
+			href: '/admin/settings', 
 			icon: Settings 
 		}
 	];
@@ -90,9 +90,9 @@
 	// Reactive role-based routing - handles navigation after auth state changes
 	$: if (user && typeof window !== 'undefined') {
 		const currentPath = $page.url.pathname;
-		const isPublicPage = publicPages.includes(currentPath);
+		const isPublicPage = publicPages.some(p => currentPath === p || currentPath.startsWith('/auth/'));
 		const isProfilePage = currentPath.startsWith('/profile');
-		const isAdminPage = !isPublicPage && !isProfilePage;
+		const isAdminPage = currentPath.startsWith('/admin');
 		
 		// Redirect non-admin users away from admin pages
 		if (user.role !== 'admin' && isAdminPage) {
@@ -113,24 +113,24 @@
 			// Only redirect if auth check definitively failed (not just loading)
 			if (!isAuth) {
 				const currentPath = $page.url.pathname;
-				const isPublicPage = publicPages.includes(currentPath);
+				const isPublicPage = publicPages.some(p => currentPath === p || currentPath.startsWith('/auth/'));
 				const isProfilePage = currentPath.startsWith('/profile');
 				
 				if (!isPublicPage && !isProfilePage) {
-					goto('/login');
+					goto('/auth/login');
 					return;
 				}
 			}
 		} else {
 			// No stored token, check if we need to redirect
 			const currentPath = $page.url.pathname;
-			const isPublicPage = publicPages.includes(currentPath);
+			const isPublicPage = publicPages.some(p => currentPath === p || currentPath.startsWith('/auth/'));
 			const isProfilePage = currentPath.startsWith('/profile');
 			
 			authChecked = true;
 			
 			if (!isPublicPage && !isProfilePage) {
-				goto('/login');
+				goto('/auth/login');
 				return;
 			}
 		}
@@ -138,18 +138,20 @@
 	
 	async function handleLogout() {
 		// Navigate to logout page which handles the logout process
-		window.location.href = '/logout';
+		window.location.href = '/auth/logout';
 	}
 	
-	// Check if on auth pages
-	$: isAuthPage = $page.url.pathname === '/login' || $page.url.pathname === '/signup' || $page.url.pathname === '/logout';
+	// Check if on auth pages or admin pages
+	$: isAuthPage = $page.url.pathname.startsWith('/auth/');
 	$: isProfilePage = $page.url.pathname.startsWith('/profile');
+	$: isAdminPage = $page.url.pathname.startsWith('/admin');
+	$: isRootPage = $page.url.pathname === '/';
 </script>
 
-{#if isAuthPage}
-	<!-- Auth pages without layout -->
+{#if isAuthPage || isRootPage}
+	<!-- Auth pages and root page without layout -->
 	<slot />
-{:else if !authChecked && !publicPages.includes($page.url.pathname)}
+{:else if !authChecked && !publicPages.some(p => $page.url.pathname === p || $page.url.pathname.startsWith('/auth/'))}
 	<!-- Show loading state while checking auth for protected pages -->
 	<div class="auth-loading">
 		<div class="spinner"></div>
@@ -158,8 +160,8 @@
 {:else if isProfilePage}
 	<!-- Profile pages have their own layout -->
 	<slot />
-{:else}
-	<!-- Main admin layout -->
+{:else if isAdminPage}
+	<!-- Main admin layout - only for admin pages -->
 	<AppLayout
 		currentUser={user}
 		{navigation}
@@ -172,6 +174,9 @@
 	>
 		<slot />
 	</AppLayout>
+{:else}
+	<!-- Other pages without layout -->
+	<slot />
 {/if}
 
 <style>

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/suppers-ai/solobase/database"
+	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/services"
 )
 
@@ -21,6 +22,8 @@ type API struct {
 	LogsService       *services.LogsService
 	productHandlers   *ProductsExtensionHandlers
 	analyticsHandlers *AnalyticsHandlers
+	storageHandlers   *StorageHandlers
+	ExtensionRegistry *core.ExtensionRegistry
 }
 
 func NewAPI(
@@ -32,6 +35,7 @@ func NewAPI(
 	databaseService *services.DatabaseService,
 	settingsService *services.SettingsService,
 	logsService *services.LogsService,
+	extensionRegistry *core.ExtensionRegistry,
 ) *API {
 	api := &API{
 		Router:            mux.NewRouter(),
@@ -43,7 +47,11 @@ func NewAPI(
 		DatabaseService:   databaseService,
 		SettingsService:   settingsService,
 		LogsService:       logsService,
+		ExtensionRegistry: extensionRegistry,
 	}
+	
+	// Initialize storage handlers with hook support
+	api.storageHandlers = NewStorageHandlers(storageService, db, extensionRegistry)
 
 	api.setupRoutes()
 	return api
@@ -122,15 +130,24 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/database/query", HandleExecuteQuery(a.DatabaseService)).Methods("POST", "OPTIONS")
 
 	// Storage routes (temporarily public for development)
-	apiRouter.HandleFunc("/storage/buckets", HandleGetStorageBuckets(a.StorageService)).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets", HandleCreateBucket(a.StorageService)).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets/{bucket}", HandleDeleteBucket(a.StorageService)).Methods("DELETE", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects", HandleGetBucketObjects(a.StorageService)).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets/{bucket}/upload", HandleUploadFile(a.StorageService)).Methods("POST", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}", HandleDeleteObject(a.StorageService)).Methods("DELETE", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}/download", HandleDownloadObject(a.StorageService)).Methods("GET", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}/rename", HandleRenameObject(a.StorageService)).Methods("PATCH", "OPTIONS")
-	apiRouter.HandleFunc("/storage/buckets/{bucket}/folders", HandleCreateFolder(a.StorageService)).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets", a.storageHandlers.HandleGetStorageBuckets).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets", a.storageHandlers.HandleCreateBucket).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}", a.storageHandlers.HandleDeleteBucket).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects", a.storageHandlers.HandleGetBucketObjects).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/upload", a.storageHandlers.HandleUploadFile).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/upload-url", a.storageHandlers.HandleGenerateUploadURL).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/storage/direct-upload/{token}", a.storageHandlers.HandleDirectUpload).Methods("POST", "PUT", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}", a.storageHandlers.HandleDeleteObject).Methods("DELETE", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}/download", a.storageHandlers.HandleDownloadObject).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}/download-url", a.storageHandlers.HandleGenerateDownloadURL).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/direct/{token}", a.storageHandlers.HandleDirectDownload).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}/rename", a.storageHandlers.HandleRenameObject).Methods("PATCH", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/folders", a.storageHandlers.HandleCreateFolder).Methods("POST", "OPTIONS")
+	
+	// Storage quota and statistics routes
+	apiRouter.HandleFunc("/storage/quota", a.storageHandlers.HandleGetStorageQuota).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/stats", a.storageHandlers.HandleGetStorageStats).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/admin/stats", a.storageHandlers.HandleGetAdminStorageStats).Methods("GET", "OPTIONS")
 
 	// Logs routes (temporarily public for development)
 	apiRouter.HandleFunc("/logs", HandleGetLogs(a.LogsService)).Methods("GET", "OPTIONS")
@@ -150,7 +167,9 @@ func (a *API) setupRoutes() {
 	// Settings routes
 	protected.HandleFunc("/settings", HandleGetSettings(a.SettingsService)).Methods("GET", "OPTIONS")
 	protected.HandleFunc("/settings", HandleUpdateSettings(a.SettingsService)).Methods("PATCH", "OPTIONS")
+	protected.HandleFunc("/settings", HandleSetSetting(a.SettingsService)).Methods("POST", "OPTIONS")
 	protected.HandleFunc("/settings/reset", HandleResetSettings(a.SettingsService)).Methods("POST", "OPTIONS")
+	protected.HandleFunc("/settings/{key}", HandleGetSetting(a.SettingsService)).Methods("GET", "OPTIONS")
 	
 	// Extensions routes (temporarily public for development)
 	apiRouter.HandleFunc("/extensions", HandleGetExtensions()).Methods("GET", "OPTIONS")
@@ -169,6 +188,7 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/ext/analytics/dashboard", HandleAnalyticsDashboard()).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/ext/analytics/api/stats", a.analyticsHandlers.HandleStats()).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/ext/analytics/api/pageviews", a.analyticsHandlers.HandlePageViews()).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/ext/analytics/api/daily", a.analyticsHandlers.HandleDailyStats()).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/ext/analytics/api/track", a.analyticsHandlers.HandleTrack()).Methods("POST", "OPTIONS")
 	
 	// Webhooks dashboard

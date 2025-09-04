@@ -306,14 +306,18 @@ func (r *ExtensionRegistry) ExecuteHooks(ctx context.Context, hookType HookType,
 	
 	for _, hook := range hooks {
 		// Check if hook should apply to this path
-		if len(hook.Paths) > 0 && !r.matchPath(hookCtx.Request.URL.Path, hook.Paths) {
-			continue
+		if len(hook.Paths) > 0 {
+			if hookCtx.Request == nil {
+				continue
+			}
+			if !r.matchPath(hookCtx.Request.URL.Path, hook.Paths) {
+				continue
+			}
 		}
 		
 		// Execute hook with panic recovery
 		if err := r.executeHookSafely(ctx, hook, hookCtx); err != nil {
 			r.logger.Error(ctx, fmt.Sprintf("Hook execution failed: %s/%s (%s)", hook.Extension, hook.Name, string(hook.Type)))
-			
 			// Continue with other hooks even if one fails
 		}
 	}

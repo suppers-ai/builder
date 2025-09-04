@@ -10,6 +10,10 @@
 	export let href: string | null = null;
 	export let type: 'button' | 'submit' | 'reset' = 'button';
 	
+	// Allow custom classes to be passed
+	let className = '';
+	export { className as class };
+	
 	$: classes = [
 		'inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2',
 		{
@@ -23,8 +27,9 @@
 			'px-4 py-2 text-base': size === 'md',
 			'px-6 py-3 text-lg': size === 'lg'
 		}[size],
-		'disabled:opacity-50 disabled:cursor-not-allowed'
-	].join(' ');
+		'disabled:opacity-50 disabled:cursor-not-allowed',
+		className // Add custom class if provided
+	].filter(Boolean).join(' ');
 </script>
 
 {#if href && !disabled}

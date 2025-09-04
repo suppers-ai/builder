@@ -791,15 +791,6 @@ html, body {
     color: var(--primary-color);
 }
 
-.tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--primary-color);
-}
 
 /* Responsive Styles */
 @media (max-width: 767px) {

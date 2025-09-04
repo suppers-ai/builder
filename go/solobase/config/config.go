@@ -46,8 +46,9 @@ type Config struct {
 	EnableAPI    bool
 
 	// Admin
-	AdminEmail    string
-	AdminPassword string
+	AdminEmail     string
+	AdminPassword  string
+	DisableAdminUI bool
 
 	// Logging
 	LogLevel string

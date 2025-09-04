@@ -43,8 +43,9 @@ type Variable struct {
 	UpdatedAt   time.Time   `json:"updated_at"`
 }
 
+// TableName specifies the table name with extension prefix
 func (Variable) TableName() string {
-	return "variables"
+	return "ext_products_variables"
 }
 
 // FieldConstraints defines constraints for a field
@@ -83,8 +84,9 @@ type GroupTemplate struct {
 	UpdatedAt   time.Time         `json:"updated_at"`
 }
 
+// TableName specifies the table name with extension prefix
 func (GroupTemplate) TableName() string {
-	return "group_templates"
+	return "ext_products_group_templates"
 }
 
 // Group represents a business group (restaurant, store, etc)
@@ -132,8 +134,9 @@ type Group struct {
 	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
+// TableName specifies the table name with extension prefix  
 func (Group) TableName() string {
-	return "groups"
+	return "ext_products_groups"
 }
 
 // ProductTemplate represents a template for products
@@ -155,8 +158,9 @@ type ProductTemplate struct {
 	UpdatedAt                   time.Time         `json:"updated_at"`
 }
 
+// TableName specifies the table name with extension prefix
 func (ProductTemplate) TableName() string {
-	return "product_templates"
+	return "ext_products_product_templates"
 }
 
 // Product represents a product
@@ -210,8 +214,9 @@ type Product struct {
 	UpdatedAt      time.Time   `json:"updated_at"`
 }
 
+// TableName specifies the table name with extension prefix
 func (Product) TableName() string {
-	return "products"
+	return "ext_products_products"
 }
 
 // PricingTemplate represents a reusable pricing template
@@ -229,18 +234,29 @@ type PricingTemplate struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
+// TableName specifies the table name with extension prefix
 func (PricingTemplate) TableName() string {
-	return "pricing_templates"
+	return "ext_products_pricing_templates"
 }
 
 // RegisterModels registers all models with GORM for auto-migration
 func RegisterModels(db *gorm.DB) error {
-	return db.AutoMigrate(
+	// Import the extensions package for the auto-migrate function
+	return extensionsMigrate(db)
+}
+
+// extensionsMigrate uses the extension auto-migrate with proper prefix
+func extensionsMigrate(db *gorm.DB) error {
+	models := []interface{}{
 		&Variable{},
 		&GroupTemplate{},
 		&Group{},
 		&ProductTemplate{},
 		&Product{},
 		&PricingTemplate{},
-	)
+	}
+	
+	// This will be called from the extension.go file which has access to the extensions package
+	// For now, we'll use regular AutoMigrate and the extension will handle the prefix
+	return db.AutoMigrate(models...)
 }

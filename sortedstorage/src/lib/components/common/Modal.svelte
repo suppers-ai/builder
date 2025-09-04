@@ -13,8 +13,8 @@
 	$: sizeClass = {
 		'sm': 'max-w-md',
 		'md': 'max-w-lg',
-		'lg': 'max-w-2xl',
-		'xl': 'max-w-4xl'
+		'lg': 'max-w-3xl',
+		'xl': 'max-w-5xl'
 	}[size];
 	
 	function handleClose() {
@@ -35,12 +35,12 @@
 
 {#if open}
 	<div 
-		class="fixed inset-0 z-50 overflow-y-auto"
+		class="fixed inset-0 overflow-y-auto modal-wrapper"
 		transition:fade={{ duration: 200 }}
 	>
 		<!-- Backdrop -->
 		<div 
-			class="fixed inset-0 bg-black bg-opacity-50"
+			class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm modal-backdrop"
 			on:click={handleClose}
 			role="button"
 			tabindex="-1"
@@ -49,35 +49,37 @@
 		<!-- Modal -->
 		<div class="flex min-h-full items-center justify-center p-4">
 			<div
-				class="relative w-full {sizeClass} glass rounded-lg shadow-xl"
+				class="relative w-full {sizeClass} bg-white rounded-xl shadow-2xl overflow-hidden modal-dialog"
 				transition:scale={{ duration: 200 }}
 				on:click|stopPropagation
 				role="dialog"
 				aria-modal="true"
 			>
-				<!-- Header -->
-				<div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-					<h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-						{title}
-					</h2>
-					{#if closable}
-						<button
-							on:click={handleClose}
-							class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-						>
-							<X class="w-5 h-5" />
-						</button>
-					{/if}
-				</div>
+				<!-- Header (only shown if title is provided) -->
+				{#if title}
+					<div class="modal-header flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+						<h2 class="text-xl font-semibold text-gray-900">
+							{title}
+						</h2>
+						{#if closable}
+							<button
+								on:click={handleClose}
+								class="p-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
+							>
+								<X class="w-5 h-5 text-gray-500" />
+							</button>
+						{/if}
+					</div>
+				{/if}
 				
 				<!-- Content -->
-				<div class="p-6">
+				<div class="modal-content">
 					<slot />
 				</div>
 				
 				<!-- Footer -->
 				{#if $$slots.footer}
-					<div class="p-6 border-t border-gray-200 dark:border-gray-700">
+					<div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
 						<slot name="footer" />
 					</div>
 				{/if}
@@ -85,3 +87,46 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	.modal-wrapper {
+		z-index: 99999 !important;
+	}
+	
+	.modal-backdrop {
+		z-index: 99998 !important;
+	}
+	
+	.modal-dialog {
+		z-index: 100000 !important;
+		position: relative;
+	}
+	
+	.modal-header {
+		z-index: 10;
+		position: relative;
+	}
+	
+	.modal-content {
+		max-height: calc(80vh - 120px);
+		overflow: visible;
+		position: relative;
+	}
+	
+	.modal-content::-webkit-scrollbar {
+		width: 6px;
+	}
+	
+	.modal-content::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	
+	.modal-content::-webkit-scrollbar-thumb {
+		background: #d1d5db;
+		border-radius: 3px;
+	}
+	
+	.modal-content::-webkit-scrollbar-thumb:hover {
+		background: #9ca3af;
+	}
+</style>

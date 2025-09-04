@@ -292,6 +292,10 @@ class ApiClient {
 		return this.request<any>('/ext/analytics/api/pageviews');
 	}
 
+	async getAnalyticsDailyStats(days: number = 7): Promise<ApiResponse<any>> {
+		return this.request<any>(`/ext/analytics/api/daily?days=${days}`);
+	}
+
 	async trackAnalyticsEvent(event: any): Promise<ApiResponse<void>> {
 		return this.request<void>('/ext/analytics/api/track', {
 			method: 'POST',
