@@ -4,6 +4,8 @@
 
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import { getAuthLoginUrl } from '$lib/config/auth';
+import { config } from '$lib/config/env';
 
 export interface ApiConfig {
 	baseURL: string;
@@ -45,17 +47,17 @@ class ApiClient {
 	private authToken: string | null = null;
 	private refreshPromise: Promise<boolean> | null = null;
 
-	constructor(config?: Partial<ApiConfig>) {
+	constructor(apiConfig?: Partial<ApiConfig>) {
 		// In development, use relative URLs to leverage Vite proxy
 		const isDev = import.meta.env.MODE === 'development';
-		const defaultBaseURL = isDev ? '' : (import.meta.env.PUBLIC_VITE_API_URL || 'http://localhost:8091');
+		const defaultBaseURL = isDev ? '' : (config.apiUrl || 'http://localhost:8091');
 		
 		this.config = {
-			baseURL: config?.baseURL || defaultBaseURL,
-			timeout: config?.timeout || 30000,
+			baseURL: apiConfig?.baseURL || defaultBaseURL,
+			timeout: apiConfig?.timeout || 30000,
 			headers: {
 				'Content-Type': 'application/json',
-				...config?.headers
+				...apiConfig?.headers
 			}
 		};
 
@@ -134,11 +136,12 @@ class ApiClient {
 					}
 				}
 				
-				// Clear auth and redirect to login if not authenticated
+				// Clear auth and redirect to Solobase login if not authenticated
 				if (browser) {
 					this.authToken = null;
 					localStorage.removeItem('token');
-					goto('/auth/login');
+					// Redirect to login with files page as the return URL
+					window.location.href = getAuthLoginUrl('/files');
 				}
 				break;
 

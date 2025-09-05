@@ -12,6 +12,30 @@ export default defineConfig({
 				secure: false,
 				ws: true,
 				rewrite: (path) => path
+			},
+			'/auth': {
+				target: 'http://localhost:8091',
+				changeOrigin: true,
+				secure: false,
+				rewrite: (path) => path
+			},
+			'/admin': {
+				target: 'http://localhost:8091',
+				changeOrigin: true,
+				secure: false,
+				rewrite: (path) => path
+			},
+			'/profile': {
+				target: 'http://localhost:8091',
+				changeOrigin: true,
+				secure: false,
+				rewrite: (path) => path
+			},
+			'/_app': {
+				target: 'http://localhost:8091',
+				changeOrigin: true,
+				secure: false,
+				rewrite: (path) => path
 			}
 		}
 	}

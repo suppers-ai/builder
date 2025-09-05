@@ -5,7 +5,7 @@
 		HardDrive, Shield, Trash2, Eye, Link, UserPlus,
 		Clock, AlertCircle, BarChart3, FileText, Settings,
 		CheckCircle, XCircle, Info, TrendingUp, Database, Folder, BarChart,
-		Search, FolderOpen, File, Lock, Globe, Zap, AlertTriangle
+		FolderOpen, File, Lock, Globe, Zap, AlertTriangle
 	} from 'lucide-svelte';
 	import { api } from '$lib/api';
 	import { requireAdmin } from '$lib/utils/auth';
@@ -1336,22 +1336,18 @@
 				<div class="form-group">
 					<label class="form-label">Search User</label>
 					<div class="user-search">
-						<div class="search-input-container">
-							<Search size={16} class="search-icon" />
-							<input 
-								type="text" 
-								class="form-input search-input" 
-								bind:value={userSearchQuery}
-								on:input={searchUsers}
-								on:focus={() => {if (searchResults.length > 0) showSearchDropdown = true}}
-								placeholder="Search by email, name or ID..." 
-							/>
-							{#if searchingUsers}
-								<div class="search-loading">
-									<div class="spinner"></div>
-								</div>
-							{/if}
-						</div>
+						<SearchInput 
+							bind:value={userSearchQuery}
+							placeholder="Search by email, name or ID..."
+							on:input={searchUsers}
+							on:focus={() => {if (searchResults.length > 0) showSearchDropdown = true}}
+							maxWidth="100%"
+						/>
+						{#if searchingUsers}
+							<div class="search-loading">
+								<div class="spinner"></div>
+							</div>
+						{/if}
 						{#if showSearchDropdown && searchResults.length > 0}
 							<div class="search-results">
 								{#each searchResults as user}

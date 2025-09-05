@@ -7,6 +7,7 @@
 	import { slide, fade } from 'svelte/transition';
 	import { auth } from '$lib/stores/auth';
 	import StorageMeter from '../storage/StorageMeter.svelte';
+	import { authConfig } from '$lib/config/auth';
 	
 	export let user: any = null;
 	
@@ -77,7 +78,7 @@
 			</button>
 		{:else}
 			<a 
-				href="/auth/login" 
+				href={authConfig.loginUrl()} 
 				class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium"
 			>
 				Sign In

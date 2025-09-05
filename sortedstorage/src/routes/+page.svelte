@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { fade, fly, scale } from 'svelte/transition';
+	import { authConfig } from '$lib/config/auth';
 	
 	let visible = false;
 	
@@ -34,10 +35,10 @@
 			<img src="/logos/long_light.svg" alt="SortedStorage" class="h-10 w-auto" />
 		</div>
 		<div class="flex gap-3">
-			<Button href="/auth/login" variant="ghost" size="sm" class="nav-login-btn">
+			<Button href={authConfig.loginUrl()} variant="ghost" size="sm" class="nav-login-btn">
 				Sign In
 			</Button>
-			<Button href="/auth/register" size="sm" class="nav-signup-btn">
+			<Button href={authConfig.registerUrl()} size="sm" class="nav-signup-btn">
 				<Sparkles class="w-4 h-4" />
 				Get Started Free
 			</Button>
@@ -64,12 +65,12 @@
 
 				<!-- CTA Buttons -->
 				<div class="hero-actions">
-					<Button href="/auth/login" size="lg" class="hero-cta-button">
+					<Button href={authConfig.loginUrl()} size="lg" class="hero-cta-button">
 						<Sparkles class="w-5 h-5" />
 						Get Started Now
 						<ArrowRight class="w-5 h-5" />
 					</Button>
-					<Button href="/auth/login" variant="ghost" size="lg" class="hero-secondary-button">
+					<Button href={authConfig.loginUrl()} variant="ghost" size="lg" class="hero-secondary-button">
 						Sign In
 					</Button>
 				</div>
@@ -153,7 +154,7 @@
 				<p class="cta-description">
 					Join thousands of users who trust SortedStorage
 				</p>
-				<Button href="/auth/register" size="lg" class="btn-cta">
+				<Button href={authConfig.registerUrl()} size="lg" class="btn-cta">
 					<ArrowRight class="w-5 h-5 mr-2" />
 					Create Your Free Account
 				</Button>

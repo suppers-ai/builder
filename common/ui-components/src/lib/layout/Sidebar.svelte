@@ -16,6 +16,8 @@
 	export let projectName: string = 'Project';
 	export let onLogout: () => void = () => {};
 	export let onOpenSettings: () => void | null = null;
+	export let profileUrl: string = '/profile';
+	export let adminUrl: string = '/admin';
 	
 	let expandedItems: { [key: string]: boolean } = {};
 	let showProfileMenu = false;
@@ -176,17 +178,30 @@
 						</div>
 					</div>
 					<div class="profile-menu-divider"></div>
+					
+					<!-- Profile Link - opens Solobase profile page -->
+					<a href={profileUrl} class="profile-menu-item" on:click={() => showProfileMenu = false}>
+						<User size={16} />
+						<span>My Profile</span>
+					</a>
+					
 					{#if onOpenSettings}
 						<button class="profile-menu-item" on:click={() => { showProfileMenu = false; onOpenSettings(); }}>
 							<SettingsIcon size={16} />
 							<span>Settings</span>
 						</button>
-					{:else}
-						<a href="/profile" class="profile-menu-item" on:click={() => showProfileMenu = false}>
-							<User size={16} />
-							<span>My Profile</span>
+					{/if}
+					
+					<!-- Admin Panel Link - only for admin users -->
+					{#if currentUser.role === 'admin'}
+						<div class="profile-menu-divider"></div>
+						<a href={adminUrl} class="profile-menu-item" on:click={() => showProfileMenu = false}>
+							<SettingsIcon size={16} />
+							<span>Admin Panel</span>
 						</a>
 					{/if}
+					
+					<div class="profile-menu-divider"></div>
 					<button class="profile-menu-item profile-menu-item-danger" on:click={handleLogout}>
 						<LogOut size={16} />
 						<span>Sign Out</span>

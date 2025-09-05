@@ -3,6 +3,15 @@ import { api } from '$lib/services/api';
 import { apiClient } from '$lib/api/client';
 import { goto } from '$app/navigation';
 import type { User } from '$lib/types/storage';
+import { authConfig } from '$lib/config/auth';
+
+// Initialize token store first to avoid hoisting issues
+let currentToken: string | null = null;
+if (typeof window !== 'undefined') {
+	// Check both possible token keys
+	currentToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
+}
+export const token$ = writable(currentToken);
 
 interface AuthState {
 	user: User | null;
@@ -25,18 +34,38 @@ function createAuthStore() {
 			
 			try {
 				// Solobase auth login endpoint
-				const response = await api.post<{ user: User, token: string }>('/api/auth/login', {
+				const response = await api.post<{ user: any, token: string }>('/api/auth/login', {
 					email,
 					password
 				});
 				
 				api.setToken(response.token);
 				apiClient.setToken(response.token);
-				localStorage.setItem('token', response.token);
+				localStorage.setItem('auth_token', response.token);
 				token$.set(response.token);
 				
-				set({ user: response.user, loading: false, error: null });
-				goto('/');
+				// Map Solobase user to SortedStorage User type
+				const user: User = {
+					id: response.user.id,
+					email: response.user.email,
+					name: response.user.name || response.user.email.split('@')[0],
+					role: response.user.role as 'user' | 'admin',
+					subscription: {
+						id: 'free',
+						name: 'free',
+						storageLimit: 5 * 1024 * 1024 * 1024, // 5GB
+						bandwidthLimit: 10 * 1024 * 1024 * 1024, // 10GB
+						features: ['Basic storage', 'File sharing'],
+						price: 0,
+						interval: 'monthly',
+						status: 'active'
+					},
+					createdAt: new Date(response.user.created_at || Date.now())
+				};
+				
+				set({ user, loading: false, error: null });
+				// Don't redirect here, let the login page handle it
+				// goto('/');
 			} catch (error) {
 				update(state => ({
 					...state,
@@ -51,7 +80,7 @@ function createAuthStore() {
 			
 			try {
 				// Solobase auth register endpoint
-				const response = await api.post<{ user: User, token: string }>('/api/auth/register', {
+				const response = await api.post<{ user: any, token: string }>('/api/auth/register', {
 					email,
 					password,
 					name
@@ -59,11 +88,31 @@ function createAuthStore() {
 				
 				api.setToken(response.token);
 				apiClient.setToken(response.token);
-				localStorage.setItem('token', response.token);
+				localStorage.setItem('auth_token', response.token);
 				token$.set(response.token);
 				
+				// Map Solobase user to SortedStorage User type
+				const user: User = {
+					id: response.user.id,
+					email: response.user.email,
+					name: response.user.name || response.user.email.split('@')[0],
+					role: response.user.role as 'user' | 'admin',
+					subscription: {
+						id: 'free',
+						name: 'free',
+						storageLimit: 5 * 1024 * 1024 * 1024,
+						bandwidthLimit: 10 * 1024 * 1024 * 1024,
+						features: ['Basic storage', 'File sharing'],
+						price: 0,
+						interval: 'monthly',
+						status: 'active'
+					},
+					createdAt: new Date(response.user.created_at || Date.now())
+				};
+				
 				set({ user: response.user, loading: false, error: null });
-				goto('/');
+				// Don't redirect here, let the register page handle it
+				// goto('/');
 			} catch (error) {
 				update(state => ({
 					...state,
@@ -88,23 +137,44 @@ function createAuthStore() {
 			// Clear auth cookie
 			document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 			set({ user: null, loading: false, error: null });
-			goto('/auth/login');
+			// Redirect to Solobase logout
+			window.location.href = authConfig.logoutUrl();
 		},
 
 		async checkAuth() {
-			const token = localStorage.getItem('token');
+			// Check both possible keys for backward compatibility
+			const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
 			if (!token) {
 				set({ user: null, loading: false, error: null });
 				return;
 			}
-
 			api.setToken(token);
 			apiClient.setToken(token);
 			update(state => ({ ...state, loading: true }));
 
 			try {
 				// Solobase auth me endpoint
-				const user = await api.get<User>('/api/auth/me');
+				const solobaseUser = await api.get<any>('/api/auth/me');
+				
+				// Map Solobase user to SortedStorage User type
+				const user: User = {
+					id: solobaseUser.id,
+					email: solobaseUser.email,
+					name: solobaseUser.name || solobaseUser.email.split('@')[0], // Use email prefix as name if not provided
+					role: solobaseUser.role as 'user' | 'admin',
+					subscription: {
+						id: 'free',
+						name: 'free',
+						storageLimit: 5 * 1024 * 1024 * 1024, // 5GB
+						bandwidthLimit: 10 * 1024 * 1024 * 1024, // 10GB
+						features: ['Basic storage', 'File sharing'],
+						price: 0,
+						interval: 'monthly',
+						status: 'active'
+					},
+					createdAt: new Date(solobaseUser.created_at || Date.now())
+				};
+				
 				set({ user, loading: false, error: null });
 				token$.set(token);
 			} catch {
@@ -150,10 +220,3 @@ function createAuthStore() {
 
 export const auth = createAuthStore();
 export const isAuthenticated = derived(auth, $auth => !!$auth.user);
-
-// Add a derived store for the token
-let currentToken: string | null = null;
-if (typeof window !== 'undefined') {
-	currentToken = localStorage.getItem('token');
-}
-export const token$ = writable(currentToken);

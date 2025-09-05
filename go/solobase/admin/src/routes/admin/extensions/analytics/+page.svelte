@@ -6,7 +6,7 @@
 	import 'chartjs-adapter-date-fns';
 	import { 
 		BarChart3, TrendingUp, Users, Eye, 
-		Clock, RefreshCw, Plus,
+		Clock, RefreshCw, Plus, X,
 		Calendar, Activity, MousePointer, Globe
 	} from 'lucide-svelte';
 	import ExportButton from '$lib/components/ExportButton.svelte';
@@ -372,12 +372,12 @@
 				<p class="header-subtitle">Monitor your application's performance and user engagement</p>
 			</div>
 			<div class="header-actions">
-				<select bind:value={selectedTimeRange} on:change={() => loadData()} class="select select-bordered select-sm">
+				<select bind:value={selectedTimeRange} on:change={() => loadData()} class="time-range-select">
 					{#each timeRanges as range}
 						<option value={range.value}>{range.label}</option>
 					{/each}
 				</select>
-				<button on:click={openTrackModal} class="btn btn-primary btn-sm">
+				<button on:click={openTrackModal} class="action-btn btn-primary">
 					<Plus size={16} />
 					Track Event
 				</button>
@@ -387,7 +387,7 @@
 					flatten={false}
 					disabled={loading}
 				/>
-				<button on:click={() => loadData()} class="btn btn-ghost btn-sm" disabled={loading}>
+				<button on:click={() => loadData()} class="action-btn btn-ghost" disabled={loading}>
 					<RefreshCw size={16} class={loading ? 'animate-spin' : ''} />
 				</button>
 			</div>
@@ -564,63 +564,62 @@
 
 <!-- Track Event Modal -->
 {#if showTrackModal}
-	<div class="modal modal-open">
-		<div class="modal-box">
-			<h3 class="font-bold text-lg mb-4">Track Custom Event</h3>
-			
-			<div class="form-control mb-4">
-				<label class="label">
-					<span class="label-text">Event Category</span>
-				</label>
-				<select bind:value={trackEventCategory} class="select select-bordered w-full">
-					{#each eventCategories as category}
-						<option value={category.value}>{category.label}</option>
-					{/each}
-				</select>
+	<div class="modal-overlay">
+		<div class="modal-container">
+			<div class="modal-header">
+				<h3 class="modal-title">Track Custom Event</h3>
+				<button class="modal-close" on:click={closeTrackModal}>
+					<X size={20} />
+				</button>
 			</div>
 			
-			<div class="form-control mb-4">
-				<label class="label">
-					<span class="label-text">
+			<div class="modal-body">
+				<div class="form-group">
+					<label class="form-label">Event Category</label>
+					<select bind:value={trackEventCategory} class="form-select">
+						{#each eventCategories as category}
+							<option value={category.value}>{category.label}</option>
+						{/each}
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label class="form-label">
 						{trackEventCategory === 'page_view' ? 'Page URL' : 'Event Name'}
-					</span>
-				</label>
-				<input 
-					type="text" 
-					bind:value={trackEventName}
-					placeholder={trackEventCategory === 'page_view' ? '/example-page' : 'button_click'}
-					class="input input-bordered w-full" 
-				/>
-				<label class="label">
-					<span class="label-text-alt">
+					</label>
+					<input 
+						type="text" 
+						bind:value={trackEventName}
+						placeholder={trackEventCategory === 'page_view' ? '/example-page' : 'button_click'}
+						class="form-input" 
+					/>
+					<p class="form-hint">
 						{trackEventCategory === 'page_view' 
 							? 'Enter the URL of the page to track'
 							: 'Give your event a descriptive name'}
-					</span>
-				</label>
+					</p>
+				</div>
+				
+				<div class="form-group">
+					<div class="form-label-row">
+						<label class="form-label">Additional Properties (JSON)</label>
+						<span class="form-optional">Optional</span>
+					</div>
+					<textarea 
+						bind:value={trackEventProperties}
+						placeholder={'{"userId": "123", "value": 99.99}'}
+						class="form-textarea"
+						rows="4"
+					></textarea>
+					<p class="form-hint">Add custom properties as JSON object</p>
+				</div>
 			</div>
 			
-			<div class="form-control mb-4">
-				<label class="label">
-					<span class="label-text">Additional Properties (JSON)</span>
-					<span class="label-text-alt">Optional</span>
-				</label>
-				<textarea 
-					bind:value={trackEventProperties}
-					placeholder={'{"userId": "123", "value": 99.99}'}
-					class="textarea textarea-bordered w-full h-24"
-				></textarea>
-				<label class="label">
-					<span class="label-text-alt">Add custom properties as JSON object</span>
-				</label>
-			</div>
-			
-			<div class="modal-action">
-				<button on:click={closeTrackModal} class="btn btn-ghost">Cancel</button>
-				<button on:click={submitTrackEvent} class="btn btn-primary">Track Event</button>
+			<div class="modal-footer">
+				<button on:click={closeTrackModal} class="modal-btn modal-btn-secondary">Cancel</button>
+				<button on:click={submitTrackEvent} class="modal-btn modal-btn-primary">Track Event</button>
 			</div>
 		</div>
-		<div class="modal-backdrop" on:click={closeTrackModal}></div>
 	</div>
 {/if}
 
@@ -951,20 +950,262 @@
 		text-align: center;
 	}
 
-	/* Modal */
-	.modal-backdrop {
+	/* Modal Styles */
+	.modal-overlay {
 		position: fixed;
 		top: 0;
 		left: 0;
 		right: 0;
 		bottom: 0;
 		background: rgba(0, 0, 0, 0.5);
-		z-index: 40;
+		z-index: 9999;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		animation: fadeIn 0.2s;
 	}
 
-	.modal-box {
-		position: relative;
-		z-index: 50;
+	.modal-container {
+		background: white;
+		border-radius: 0.75rem;
+		width: 100%;
+		max-width: 500px;
+		max-height: 90vh;
+		overflow-y: auto;
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		animation: slideUp 0.3s;
+	}
+
+	.modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5rem;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.modal-title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #111827;
+		margin: 0;
+	}
+
+	.modal-close {
+		background: transparent;
+		border: none;
+		color: #6b7280;
+		cursor: pointer;
+		padding: 0.25rem;
+		border-radius: 0.375rem;
+		transition: all 0.2s;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.modal-close:hover {
+		color: #374151;
+		background: #f3f4f6;
+	}
+
+	.modal-body {
+		padding: 1.5rem;
+	}
+
+	.modal-footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.75rem;
+		padding: 1.5rem;
+		border-top: 1px solid #e5e7eb;
+	}
+
+	/* Form Styles */
+	.form-group {
+		margin-bottom: 1.25rem;
+	}
+
+	.form-group:last-child {
+		margin-bottom: 0;
+	}
+
+	.form-label {
+		display: block;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #374151;
+		margin-bottom: 0.5rem;
+	}
+
+	.form-label-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.5rem;
+	}
+
+	.form-optional {
+		font-size: 0.75rem;
+		color: #9ca3af;
+		font-weight: 400;
+	}
+
+	.form-input,
+	.form-select,
+	.form-textarea {
+		width: 100%;
+		padding: 0.625rem 0.875rem;
+		font-size: 0.875rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		background: white;
+		color: #111827;
+		transition: all 0.2s;
+	}
+
+	.form-input:focus,
+	.form-select:focus,
+	.form-textarea:focus {
+		outline: none;
+		border-color: #06b6d4;
+		box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+	}
+
+	.form-textarea {
+		resize: vertical;
+		font-family: inherit;
+		line-height: 1.5;
+	}
+
+	.form-hint {
+		font-size: 0.75rem;
+		color: #6b7280;
+		margin-top: 0.375rem;
+		margin-bottom: 0;
+	}
+
+	/* Modal Buttons */
+	.modal-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.625rem 1.25rem;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		border: 1px solid transparent;
+		cursor: pointer;
+		transition: all 0.2s;
+		line-height: 1;
+	}
+
+	.modal-btn-primary {
+		background: #06b6d4;
+		color: white;
+		border-color: #06b6d4;
+	}
+
+	.modal-btn-primary:hover {
+		background: #0891b2;
+		border-color: #0891b2;
+	}
+
+	.modal-btn-secondary {
+		background: white;
+		color: #374151;
+		border: 1px solid #d1d5db;
+	}
+
+	.modal-btn-secondary:hover {
+		background: #f9fafb;
+		border-color: #9ca3af;
+	}
+
+	/* Animations */
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes slideUp {
+		from {
+			transform: translateY(1rem);
+			opacity: 0;
+		}
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+
+	/* Time Range Select (matching dashboard style) */
+	.time-range-select {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		background: white;
+		color: #374151;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.time-range-select:hover {
+		border-color: #9ca3af;
+	}
+
+	.time-range-select:focus {
+		outline: none;
+		border-color: #3b82f6;
+		box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1);
+	}
+
+	/* Action buttons styling */
+	.action-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		border: 1px solid transparent;
+		cursor: pointer;
+		transition: all 0.2s;
+		line-height: 1;
+	}
+
+	.action-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.btn-primary {
+		background: #06b6d4;
+		color: white;
+		border-color: #06b6d4;
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		background: #0891b2;
+		border-color: #0891b2;
+	}
+
+	.btn-ghost {
+		background: transparent;
+		color: #6b7280;
+		border-color: transparent;
+	}
+
+	.btn-ghost:hover:not(:disabled) {
+		background: #f3f4f6;
+		color: #374151;
 	}
 
 	/* Responsive */

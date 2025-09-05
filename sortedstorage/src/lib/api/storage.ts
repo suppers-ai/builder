@@ -4,9 +4,10 @@
 
 import apiClient, { type ApiError, type PaginatedResponse } from './client';
 import type { FileItem, FolderItem, StorageQuota } from '$lib/types/storage';
+import { config } from '$lib/config/env';
 
 // Default bucket name for user files
-const STORAGE_BUCKET = import.meta.env.PUBLIC_VITE_STORAGE_BUCKET || 'user-files';
+const STORAGE_BUCKET = 'user-files';
 
 export interface UploadOptions {
 	path?: string;
@@ -323,7 +324,7 @@ class StorageAPI {
 		if (options?.width) params.append('w', String(options.width));
 		if (options?.height) params.append('h', String(options.height));
 		
-		const baseURL = import.meta.env.PUBLIC_VITE_API_URL || 'http://localhost:8090';
+		const baseURL = config.apiUrl || 'http://localhost:8091';
 		const queryString = params.toString();
 		return `${baseURL}${this.basePath}/buckets/${this.bucket}/objects/${id}/preview${queryString ? `?${queryString}` : ''}`;
 	}

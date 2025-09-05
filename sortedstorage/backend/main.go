@@ -32,9 +32,11 @@ func main() {
 	app.OnServe().BindFunc(func(se *solobase.ServeEvent) error {
 		// Serve SortedStorage frontend for root routes
 		se.Router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Skip API and admin routes
+			// Skip API, auth, admin, profile, and storage routes - these are handled by Solobase
 			if strings.HasPrefix(r.URL.Path, "/api/") || 
+			   strings.HasPrefix(r.URL.Path, "/auth/") ||
 			   strings.HasPrefix(r.URL.Path, "/admin/") || 
+			   strings.HasPrefix(r.URL.Path, "/profile") ||
 			   strings.HasPrefix(r.URL.Path, "/storage/") {
 				// These are handled by Solobase
 				http.NotFound(w, r)

@@ -16,6 +16,7 @@
 	import { KeyboardShortcutManager, defaultShortcuts } from '$lib/utils/keyboard-shortcuts';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import UpgradeModal from '$lib/components/upgrade/UpgradeModal.svelte';
+	import { getAuthLoginUrl } from '$lib/config/auth';
 	
 	export let data;
 	
@@ -26,21 +27,18 @@
 	// Subscribe to auth store
 	$: authState = $auth;
 	$: user = authState.user;
+	// Consider auth checked if we have a user or if we've already checked and there's no user
+	$: authReady = user !== null || (authChecked && !authState.loading);
 	
 	// Define public pages that don't require authentication
-	const publicPages = ['/auth/login', '/auth/register', '/auth/logout', '/auth/forgot', '/'];
+	const publicPages = ['/', '/auth/login'];
 	
 	const navigation = [
 		{ title: 'My Files', href: '/files', icon: Files },
 		{ title: 'Shared', href: '/shared', icon: Share2 }
 	];
 	
-	// Add admin navigation if user is admin
-	$: if (user?.role === 'admin') {
-		if (!navigation.find(item => item.title === 'Admin Analytics')) {
-			navigation.push({ title: 'Admin Analytics', href: '/admin/analytics', icon: BarChart3 });
-		}
-	}
+	// Admin navigation is not needed for this app
 	
 	let commandPaletteOpen = false;
 	let settingsModalOpen = false;
@@ -59,11 +57,12 @@
 		await auth.checkAuth();
 		authChecked = true;
 		
-		// If not authenticated and not on a public page, redirect to login
+		// If not authenticated and not on a public page, redirect to Solobase login
 		const isPublicPage = publicPages.some(path => currentPath.startsWith(path));
 		
 		if (!$auth.user && !isPublicPage && currentPath !== '/') {
-			goto('/auth/login');
+			// Redirect to Solobase's auth login page
+			goto('/auth/login?redirect=' + encodeURIComponent(currentPath));
 		}
 		
 		// Apply saved theme
@@ -100,7 +99,8 @@
 		const isPublicPage = publicPages.some(path => currentPath.startsWith(path));
 		
 		if (!user && !isPublicPage && currentPath !== '/') {
-			goto('/auth/login');
+			// Redirect to Solobase's auth login page
+			goto('/auth/login?redirect=' + encodeURIComponent(currentPath));
 		}
 	}
 	
@@ -117,7 +117,7 @@
 		upgradeModalOpen = true;
 	}
 	
-	// Check if on login/signup page or homepage without auth
+	// Check if on homepage without auth or login page
 	$: isAuthPage = $page.url.pathname.startsWith('/auth/');
 	$: isHomepageNoAuth = $page.url.pathname === '/' && !user;
 </script>
@@ -128,7 +128,7 @@
 {#if isAuthPage || isHomepageNoAuth}
 	<!-- Auth pages and homepage without layout -->
 	<slot />
-{:else if !authChecked}
+{:else if !authReady}
 	<!-- Show loading state while checking auth -->
 	<div class="auth-loading">
 		<div class="spinner"></div>

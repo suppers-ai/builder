@@ -39,7 +39,7 @@
 
 <div class="export-dropdown">
 	<button 
-		class="btn btn-secondary export-btn"
+		class="export-btn"
 		on:click|stopPropagation={toggleDropdown}
 		{disabled}
 		title="Export data"
@@ -75,23 +75,24 @@
 	}
 	
 	.export-btn {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.5rem 1rem;
 		background: white;
-		border: 1px solid var(--border-color);
-		border-radius: 6px;
-		color: var(--text-primary);
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		color: #374151;
 		font-size: 0.875rem;
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.2s;
+		line-height: 1;
 	}
 	
 	.export-btn:hover:not(:disabled) {
-		background: var(--bg-hover);
-		border-color: var(--primary-color);
+		background: #f9fafb;
+		border-color: #d1d5db;
 	}
 	
 	.export-btn:disabled {
@@ -133,27 +134,5 @@
 	
 	.dropdown-item:not(:last-child) {
 		border-bottom: 1px solid var(--border-color-light, #f0f0f0);
-	}
-	
-	/* Default button styles if not already defined */
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 500;
-		transition: all 0.2s;
-		cursor: pointer;
-		border: 1px solid transparent;
-		outline: none;
-	}
-	
-	.btn-secondary {
-		background: white;
-		color: var(--text-primary);
-		border-color: var(--border-color);
-	}
-	
-	.btn-secondary:hover:not(:disabled) {
-		background: var(--bg-hover, #f5f5f5);
 	}
 </style>

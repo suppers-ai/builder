@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -391,9 +392,18 @@ func (app *App) Start() error {
 		app.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
 	}
 
-	// Admin UI (if not disabled)
+	// Admin UI routes (if not disabled)
 	if !app.config.DisableAdminUI {
+		// Serve auth pages at root level
+		app.router.PathPrefix("/auth/").Handler(app.ServeAdmin())
+		app.router.PathPrefix("/profile").Handler(app.ServeAdmin())
+		
+		// Keep admin pages under /admin for admin-only features
 		app.router.PathPrefix("/admin/").Handler(app.ServeAdmin())
+		
+		// Serve root last as catch-all for the main dashboard
+		// Note: This must come after more specific routes
+		app.router.PathPrefix("/").Handler(app.ServeAdmin())
 	}
 
 	// Run OnServe hooks
@@ -451,13 +461,29 @@ func (app *App) Config() *config.Config {
 func (app *App) ServeAdmin() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Try embedded files first
-		if adminFS, err := fs.Sub(adminFiles, "admin/build"); err == nil {
-			http.StripPrefix("/admin/", http.FileServer(http.FS(adminFS))).ServeHTTP(w, r)
+		adminFS, err := fs.Sub(adminFiles, "admin/build")
+		if err != nil {
+			http.Error(w, "Admin interface not available", http.StatusNotFound)
 			return
 		}
 		
-		// Fallback to ServeAdmin function if it exists
-		http.Error(w, "Admin interface not available", http.StatusNotFound)
+		// For SPA routing, always serve index.html for non-asset paths
+		path := r.URL.Path
+		
+		// Check if it's an asset request (has file extension)
+		if strings.Contains(path, ".") {
+			// Serve the actual file
+			http.FileServer(http.FS(adminFS)).ServeHTTP(w, r)
+		} else {
+			// Serve index.html for all routes (SPA routing)
+			indexData, err := fs.ReadFile(adminFS, "index.html")
+			if err != nil {
+				http.Error(w, "Admin interface not available", http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write(indexData)
+		}
 	})
 }
 
