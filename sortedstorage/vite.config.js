@@ -7,32 +7,32 @@ export default defineConfig({
 		port: 5174,
 		proxy: {
 			'/api': {
-				target: 'http://localhost:8091',
+				target: 'http://localhost:8093',
 				changeOrigin: true,
 				secure: false,
 				ws: true,
 				rewrite: (path) => path
 			},
 			'/auth': {
-				target: 'http://localhost:8091',
+				target: 'http://localhost:8093',
 				changeOrigin: true,
 				secure: false,
 				rewrite: (path) => path
 			},
 			'/admin': {
-				target: 'http://localhost:8091',
+				target: 'http://localhost:8093',
 				changeOrigin: true,
 				secure: false,
 				rewrite: (path) => path
 			},
 			'/profile': {
-				target: 'http://localhost:8091',
+				target: 'http://localhost:8093',
 				changeOrigin: true,
 				secure: false,
 				rewrite: (path) => path
 			},
 			'/_app': {
-				target: 'http://localhost:8091',
+				target: 'http://localhost:8093',
 				changeOrigin: true,
 				secure: false,
 				rewrite: (path) => path

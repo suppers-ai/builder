@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Writable } from 'svelte/store';
-import { storage as storageApi } from './storage-api';
+import { storageAPI as storageApi } from './storage-api';
 import { notifications } from './notifications';
 
 export interface UploadItem {
@@ -100,6 +100,7 @@ function createStorageStore() {
 		},
 
 		async uploadFile(file: File, path: string = '/') {
+			console.log('uploadFile with path', path);
 			const uploadItem: UploadItem = {
 				id: Math.random().toString(36).substr(2, 9),
 				file,
@@ -123,20 +124,8 @@ function createStorageStore() {
 					)
 				);
 
-				const response = await storageApi.uploadFile(
-					file, 
-					path,
-					(progress) => {
-						uploadQueue.update(queue => 
-							queue.map(item => 
-								item.id === uploadItem.id 
-									? { ...item, progress }
-									: item
-							)
-						);
-					},
-					uploadItem.cancelToken.signal
-				);
+				// Use uploadFiles method with single file array
+				await storageApi.uploadFiles([file], path);
 
 				// Update status to completed
 				uploadQueue.update(queue => 
@@ -145,8 +134,7 @@ function createStorageStore() {
 							? { 
 								...item, 
 								status: 'completed' as const, 
-								progress: 100,
-								uploadedUrl: response.url 
+								progress: 100
 							}
 							: item
 					)
@@ -157,6 +145,7 @@ function createStorageStore() {
 				
 				notifications.success(`${file.name} uploaded successfully`);
 			} catch (error: any) {
+				console.log('uploadFile error', error);
 				uploadQueue.update(queue => 
 					queue.map(item => 
 						item.id === uploadItem.id 
@@ -193,7 +182,7 @@ function createStorageStore() {
 
 		async deleteItems(itemIds: string[]) {
 			try {
-				await Promise.all(itemIds.map(id => storageApi.deleteFile(id)));
+				await storageApi.deleteItems(itemIds);
 				const currentPath = get(this).currentPath;
 				await this.loadFiles(currentPath);
 				notifications.success(`${itemIds.length} item(s) deleted`);
@@ -204,7 +193,7 @@ function createStorageStore() {
 
 		async moveItems(itemIds: string[], targetPath: string) {
 			try {
-				await Promise.all(itemIds.map(id => storageApi.moveFile(id, targetPath)));
+				await storageApi.moveItems(itemIds, targetPath);
 				const currentPath = get(this).currentPath;
 				await this.loadFiles(currentPath);
 				notifications.success(`${itemIds.length} item(s) moved`);
@@ -215,7 +204,7 @@ function createStorageStore() {
 
 		async copyItems(itemIds: string[], targetPath: string) {
 			try {
-				await Promise.all(itemIds.map(id => storageApi.copyFile(id, targetPath)));
+				await storageApi.copyItems(itemIds, targetPath);
 				await this.loadFiles(targetPath);
 				notifications.success(`${itemIds.length} item(s) copied`);
 			} catch (error: any) {
@@ -225,12 +214,31 @@ function createStorageStore() {
 
 		async renameItem(itemId: string, newName: string) {
 			try {
-				await storageApi.renameFile(itemId, newName);
+				await storageApi.renameItem(itemId, newName);
 				const currentPath = get(this).currentPath;
 				await this.loadFiles(currentPath);
 				notifications.success('Item renamed');
 			} catch (error: any) {
 				notifications.error(`Failed to rename item: ${error.message}`);
+			}
+		},
+
+		async updateItem(itemId: string, updates: any) {
+			try {
+				// For now, we can only update the name through the API
+				// Other properties like icon, description would need backend support
+				if (updates.name) {
+					await storageApi.renameItem(itemId, updates.name);
+				}
+				
+				// Store other metadata locally if needed
+				// This would require extending the backend API to support metadata
+				
+				const currentPath = get(this).currentPath;
+				await this.loadFiles(currentPath);
+				notifications.success('Item updated');
+			} catch (error: any) {
+				notifications.error(`Failed to update item: ${error.message}`);
 			}
 		},
 

@@ -8,8 +8,8 @@ import { authConfig } from '$lib/config/auth';
 // Initialize token store first to avoid hoisting issues
 let currentToken: string | null = null;
 if (typeof window !== 'undefined') {
-	// Check both possible token keys
-	currentToken = localStorage.getItem('auth_token') || localStorage.getItem('token');
+	// Use 'auth_token' as the consistent key (matching Solobase)
+	currentToken = localStorage.getItem('auth_token');
 }
 export const token$ = writable(currentToken);
 
@@ -132,7 +132,7 @@ function createAuthStore() {
 			
 			api.setToken(null);
 			apiClient.setToken(null);
-			localStorage.removeItem('token');
+			localStorage.removeItem('auth_token');
 			token$.set(null);
 			// Clear auth cookie
 			document.cookie = 'auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -142,19 +142,24 @@ function createAuthStore() {
 		},
 
 		async checkAuth() {
-			// Check both possible keys for backward compatibility
-			const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+			// Use 'token' as the consistent key
+			const token = localStorage.getItem('auth_token');
+			console.log('[Auth] Checking auth, token exists:', !!token);
+			
 			if (!token) {
 				set({ user: null, loading: false, error: null });
 				return;
 			}
 			api.setToken(token);
 			apiClient.setToken(token);
+			// Also ensure the token is loaded from storage
+			apiClient.loadTokenFromStorage();
 			update(state => ({ ...state, loading: true }));
 
 			try {
 				// Solobase auth me endpoint
 				const solobaseUser = await api.get<any>('/api/auth/me');
+				console.log('[Auth] User loaded:', solobaseUser);
 				
 				// Map Solobase user to SortedStorage User type
 				const user: User = {
@@ -180,7 +185,7 @@ function createAuthStore() {
 			} catch {
 				api.setToken(null);
 				apiClient.setToken(null);
-				localStorage.removeItem('token');
+				localStorage.removeItem('auth_token');
 				token$.set(null);
 				set({ user: null, loading: false, error: null });
 			}
@@ -190,12 +195,12 @@ function createAuthStore() {
 			if (token) {
 				api.setToken(token);
 				apiClient.setToken(token);
-				localStorage.setItem('token', token);
+				localStorage.setItem('auth_token', token);
 				token$.set(token);
 			} else {
 				api.setToken(null);
 				apiClient.setToken(null);
-				localStorage.removeItem('token');
+				localStorage.removeItem('auth_token');
 				token$.set(null);
 			}
 		},

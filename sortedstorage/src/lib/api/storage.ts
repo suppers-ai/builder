@@ -5,9 +5,15 @@
 import apiClient, { type ApiError, type PaginatedResponse } from './client';
 import type { FileItem, FolderItem, StorageQuota } from '$lib/types/storage';
 import { config } from '$lib/config/env';
+import { browser } from '$app/environment';
 
-// Default bucket name for user files
-const STORAGE_BUCKET = 'user-files';
+// Default bucket name for internal storage
+const STORAGE_BUCKET = 'int_storage';
+
+// Ensure the API client has the current token from localStorage
+function ensureToken() {
+	apiClient.loadTokenFromStorage();
+}
 
 export interface UploadOptions {
 	path?: string;
@@ -100,6 +106,7 @@ class StorageAPI {
 	 * List files and folders
 	 */
 	async listFiles(options: ListFilesOptions = {}): Promise<PaginatedResponse<FileItem | FolderItem>> {
+		ensureToken(); // Ensure token is set before making request
 		try {
 			// Get objects from Solobase bucket
 			const response = await apiClient.get(
@@ -144,21 +151,32 @@ class StorageAPI {
 	 * Upload single file
 	 */
 	async uploadFile(file: File, options: UploadOptions = {}): Promise<FileItem> {
+		ensureToken(); // Ensure token is set before making request
+		console.log('uploadFile called:', { fileName: file.name, size: file.size, path: options.path });
+		
 		const formData = new FormData();
 		formData.append('file', file);
 		if (options.path) {
 			formData.append('path', options.path);
 		}
 		
-		const response = await apiClient.uploadFormData(
-			`${this.basePath}/buckets/${this.bucket}/upload`,
-			formData,
-			{
-				onProgress: options.onProgress
-			}
-		);
-
-		return convertSolobaseObject(response) as FileItem;
+		const uploadUrl = `${this.basePath}/buckets/${this.bucket}/upload`;
+		console.log('Upload URL:', uploadUrl);
+		
+		try {
+			const response = await apiClient.uploadFormData(
+				uploadUrl,
+				formData,
+				{
+					onProgress: options.onProgress
+				}
+			);
+			console.log('Upload response:', response);
+			return convertSolobaseObject(response) as FileItem;
+		} catch (error) {
+			console.error('Upload failed:', error);
+			throw error;
+		}
 	}
 
 	/**
@@ -229,11 +247,19 @@ class StorageAPI {
 	 * Rename file/folder
 	 */
 	async rename(id: string, newName: string): Promise<FileItem | FolderItem> {
-		const response = await apiClient.patch(
-			`${this.basePath}/buckets/${this.bucket}/objects/${id}/rename`,
-			{ newName }
-		);
-		return convertSolobaseObject(response);
+		try {
+			const response = await apiClient.patch(
+				`${this.basePath}/buckets/${this.bucket}/objects/${id}/rename`,
+				{ newName }
+			);
+			return convertSolobaseObject(response);
+		} catch (error: any) {
+			console.error('Rename failed:', error);
+			if (error.status === 500) {
+				throw new Error('Failed to rename. The file may not exist or you may need to re-login.');
+			}
+			throw error;
+		}
 	}
 
 	/**
@@ -292,6 +318,7 @@ class StorageAPI {
 		parentPath = '/',
 		parentId?: string
 	): Promise<FolderItem> {
+		ensureToken(); // Ensure token is set before making request
 		const response = await apiClient.post(
 			`${this.basePath}/buckets/${this.bucket}/folders`,
 			{
@@ -317,23 +344,18 @@ class StorageAPI {
 	}
 
 	/**
-	 * Get file preview URL
+	 * Get file download URL
 	 */
-	getPreviewUrl(id: string, options?: { width?: number; height?: number }): string {
-		const params = new URLSearchParams();
-		if (options?.width) params.append('w', String(options.width));
-		if (options?.height) params.append('h', String(options.height));
-		
+	getDownloadUrl(id: string): string {
 		const baseURL = config.apiUrl || 'http://localhost:8091';
-		const queryString = params.toString();
-		return `${baseURL}${this.basePath}/buckets/${this.bucket}/objects/${id}/preview${queryString ? `?${queryString}` : ''}`;
+		return `${baseURL}${this.basePath}/buckets/${this.bucket}/objects/${id}/download`;
 	}
 
 	/**
-	 * Get file thumbnail URL
+	 * Get file thumbnail URL (same as download for now)
 	 */
 	getThumbnailUrl(id: string): string {
-		return this.getPreviewUrl(id, { width: 200, height: 200 });
+		return this.getDownloadUrl(id);
 	}
 
 	/**

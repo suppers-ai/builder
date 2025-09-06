@@ -37,6 +37,11 @@ export interface FolderItem {
 	modifiedAt: Date;
 }
 
+// Union type for any storage item (file or folder)
+export type StorageItem = (FileItem | FolderItem) & {
+	type: 'file' | 'folder';
+};
+
 export interface Share {
 	id: string;
 	itemId: string;
@@ -91,4 +96,10 @@ export interface UploadProgress {
 	progress: number;
 	status: 'pending' | 'uploading' | 'completed' | 'error';
 	error?: string;
+}
+
+export interface StorageQuota {
+	used: number;
+	total: number;
+	percentage: number;
 }

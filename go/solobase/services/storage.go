@@ -20,16 +20,38 @@ import (
 // EnhancedStorageService is an alias for StorageService
 type EnhancedStorageService = StorageService
 
+// StorageOptions contains optional configuration for StorageService
+type StorageOptions struct {
+	AppID string // Application ID for storage isolation (defaults to "solobase")
+}
+
 type StorageService struct {
 	config   config.StorageConfig
 	provider storage.Provider
 	storage  *storage.Storage
 	db       *database.DB
+	appID    string // Application ID for storage isolation
 }
 
 func NewStorageService(db *database.DB, cfg config.StorageConfig) *StorageService {
+	// Default to "solobase" app ID
+	return NewStorageServiceWithOptions(db, cfg, &StorageOptions{
+		AppID: "solobase",
+	})
+}
+
+// NewStorageServiceWithOptions creates a new storage service with custom options
+func NewStorageServiceWithOptions(db *database.DB, cfg config.StorageConfig, opts *StorageOptions) *StorageService {
 	var provider storage.Provider
 	var err error
+	
+	// Default options
+	if opts == nil {
+		opts = &StorageOptions{}
+	}
+	if opts.AppID == "" {
+		opts.AppID = "solobase"
+	}
 	
 	// Update path to use new structure
 	localPath := cfg.LocalStoragePath
@@ -62,6 +84,7 @@ func NewStorageService(db *database.DB, cfg config.StorageConfig) *StorageServic
 		provider: provider,
 		storage:  storage.New(provider),
 		db:       db,
+		appID:    opts.AppID,
 	}
 	
 	// Initialize default buckets
@@ -76,9 +99,9 @@ func (s *StorageService) initializeDefaultBuckets() {
 		name   string
 		public bool
 	}{
-		{"user-files", false},
-		{"uploads", false},
-		{"public", true},
+		{"int_storage", false},  // Internal storage for user/app data
+		{"ext_storage", false},  // External storage for extensions
+		{"public", true},        // Public files
 	}
 	
 	for _, bucket := range defaultBuckets {
@@ -101,12 +124,20 @@ func (s *StorageService) GetProviderType() string {
 	return s.config.Type
 }
 
+// GetAppID returns the application ID for storage isolation
+func (s *StorageService) GetAppID() string {
+	return s.appID
+}
+
 // GetObjectInfo retrieves information about an object
 func (s *StorageService) GetObjectInfo(bucket, objectID string) (*pkgstorage.StorageObject, error) {
 	var object pkgstorage.StorageObject
-	if err := s.db.Where("id = ? AND bucket = ?", objectID, bucket).First(&object).Error; err != nil {
+	log.Printf("GetObjectInfo: Looking for object with id=%s in bucket=%s", objectID, bucket)
+	if err := s.db.Where("id = ? AND bucket_name = ?", objectID, bucket).First(&object).Error; err != nil {
+		log.Printf("GetObjectInfo: Failed to find object: %v", err)
 		return nil, err
 	}
+	log.Printf("GetObjectInfo: Found object with key=%s", object.ObjectKey)
 	return &object, nil
 }
 

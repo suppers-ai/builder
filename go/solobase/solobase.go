@@ -1,4 +1,4 @@
-package main
+package solobase
 
 import (
 	"context"
@@ -31,6 +31,7 @@ type App struct {
 	router           *mux.Router
 	db               *database.DB
 	config           *config.Config
+	appID            string // Application ID for storage isolation
 	services         *AppServices
 	extensionManager *extensions.ExtensionManager
 	server           *http.Server
@@ -81,7 +82,7 @@ type Options struct {
 	DatabaseType         string
 	DatabaseURL          string
 	StorageType          string
-	StoragePath          string
+	AppID                string // Application ID for storage isolation (defaults to "solobase")
 	S3Config             *S3Config
 	DefaultAdminEmail    string
 	DefaultAdminPassword string
@@ -132,10 +133,12 @@ func NewWithOptions(opts *Options) *App {
 			opts.StorageType = "local"
 		}
 	}
-	if opts.StoragePath == "" {
-		opts.StoragePath = os.Getenv("STORAGE_PATH")
-		if opts.StoragePath == "" {
-			opts.StoragePath = "./.data/storage"
+	// Remove StoragePath as we're using AppID instead
+	// Storage path will be determined based on AppID
+	if opts.AppID == "" {
+		opts.AppID = os.Getenv("APP_ID")
+		if opts.AppID == "" {
+			opts.AppID = "solobase"
 		}
 	}
 	if opts.JWTSecret == "" {
@@ -164,6 +167,7 @@ func NewWithOptions(opts *Options) *App {
 	}
 
 	app := &App{
+		appID:        opts.AppID,
 		onModelHooks: make(map[string][]func(*ModelEvent) error),
 	}
 
@@ -177,7 +181,7 @@ func NewWithOptions(opts *Options) *App {
 		},
 		Storage: config.StorageConfig{
 			Type:             opts.StorageType,
-			LocalStoragePath: opts.StoragePath,
+			LocalStoragePath: "./.data/storage", // Default path, AppID will be used for organization
 		},
 		JWTSecret:         opts.JWTSecret,
 		AdminEmail:        opts.DefaultAdminEmail,
@@ -252,7 +256,9 @@ func (app *App) Initialize() error {
 	app.services = &AppServices{
 		Auth:       services.NewAuthService(db),
 		User:       services.NewUserService(db),
-		Storage:    services.NewStorageService(db, app.config.Storage),
+		Storage:    services.NewStorageServiceWithOptions(db, app.config.Storage, &services.StorageOptions{
+			AppID: app.appID,
+		}),
 		Collection: services.NewCollectionService(db),
 		Database:   services.NewDatabaseService(db),
 		Settings:   services.NewSettingsService(db),
@@ -457,6 +463,11 @@ func (app *App) Config() *config.Config {
 	return app.config
 }
 
+// GetAppID returns the application ID for storage isolation
+func (app *App) GetAppID() string {
+	return app.appID
+}
+
 // ServeAdmin returns the admin UI handler
 func (app *App) ServeAdmin() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -542,12 +553,3 @@ func parsePostgresURL(url string) database.Config {
 	}
 }
 
-func main() {
-	app := New()
-	if err := app.Initialize(); err != nil {
-		log.Fatal("Failed to initialize app:", err)
-	}
-	if err := app.Start(); err != nil {
-		log.Fatal("Failed to start app:", err)
-	}
-}

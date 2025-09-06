@@ -15,12 +15,12 @@ import (
 var sortedStorageFiles embed.FS
 
 func main() {
-	// Create a new Solobase application
+	// Create a new Solobase application with sortedstorage AppID
 	app := solobase.NewWithOptions(&solobase.Options{
+		AppID:                "sortedstorage", // Set AppID for storage isolation
 		DatabaseType:         os.Getenv("DATABASE_TYPE"),
 		DatabaseURL:          os.Getenv("DATABASE_URL"),
 		StorageType:          os.Getenv("STORAGE_TYPE"),
-		StoragePath:          os.Getenv("STORAGE_PATH"),
 		DefaultAdminEmail:    os.Getenv("DEFAULT_ADMIN_EMAIL"),
 		DefaultAdminPassword: os.Getenv("DEFAULT_ADMIN_PASSWORD"),
 		JWTSecret:            os.Getenv("JWT_SECRET"),
@@ -31,15 +31,18 @@ func main() {
 	// Add OnServe hook to serve SortedStorage frontend
 	app.OnServe().BindFunc(func(se *solobase.ServeEvent) error {
 		// Serve SortedStorage frontend for root routes
+		// Note: This should be registered AFTER all API routes
+		// to ensure API routes take precedence
 		se.Router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Skip API, auth, admin, profile, and storage routes - these are handled by Solobase
 			if strings.HasPrefix(r.URL.Path, "/api/") || 
 			   strings.HasPrefix(r.URL.Path, "/auth/") ||
 			   strings.HasPrefix(r.URL.Path, "/admin/") || 
 			   strings.HasPrefix(r.URL.Path, "/profile") ||
-			   strings.HasPrefix(r.URL.Path, "/storage/") {
-				// These are handled by Solobase
-				http.NotFound(w, r)
+			   strings.HasPrefix(r.URL.Path, "/storage/") ||
+			   strings.HasPrefix(r.URL.Path, "/_app/") {
+				// These paths should not be served by the frontend handler
+				// Let them fall through to other handlers
 				return
 			}
 

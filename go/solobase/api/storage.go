@@ -77,10 +77,34 @@ func (h *StorageHandlers) HandleGetBucketObjects(w http.ResponseWriter, r *http.
 	vars := mux.Vars(r)
 	bucket := vars["bucket"]
 	
+	// Get user ID from context if available, otherwise try to extract from token
+	userID, _ := r.Context().Value("user_id").(string)
+	if userID == "" {
+		userID = extractUserIDFromToken(r)
+	}
+	
 	// Get path from query parameters
 	path := r.URL.Query().Get("path")
+	
+	// For internal storage, prepend user path
+	actualBucket := bucket
+	actualPath := path
+	
+	if bucket == "user-files" || bucket == "int_storage" {
+		actualBucket = "int_storage"
+		// Use the configured app ID for this instance
+		
+		// Only show files for the authenticated user
+		if userID != "" {
+			actualPath = fmt.Sprintf("%s/%s/%s", userID, h.storageService.GetAppID(), path)
+		} else {
+			// No user ID means no access to user files
+			respondWithJSON(w, http.StatusOK, []interface{}{})
+			return
+		}
+	}
 
-	objects, err := h.storageService.GetBucketObjectsWithPath(bucket, path)
+	objects, err := h.storageService.GetBucketObjectsWithPath(actualBucket, actualPath)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to fetch objects")
 		return
@@ -177,6 +201,24 @@ func (h *StorageHandlers) HandleUploadFile(w http.ResponseWriter, r *http.Reques
 	if userID == "" {
 		userID = extractUserIDFromToken(r)
 	}
+	
+	// Require user authentication for uploads
+	if userID == "" {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+	
+	// Determine the correct bucket and path based on request
+	actualBucket := bucket
+	actualKey := key
+	
+	// For internal storage, enforce user-based paths
+	if bucket == "user-files" || bucket == "int_storage" {
+		actualBucket = "int_storage"
+		// Use the configured app ID for this instance
+		// Construct user-based path: int_storage/{userId}/{appId}/...
+		actualKey = fmt.Sprintf("%s/%s/%s", userID, h.storageService.GetAppID(), key)
+	}
 
 	// Prepare hook context for before upload
 	if h.hookRegistry != nil {
@@ -208,8 +250,8 @@ func (h *StorageHandlers) HandleUploadFile(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Upload file using the storage service
-	object, err := h.storageService.UploadFile(bucket, key, bytes.NewReader(fileContent), header.Size, contentType)
+	// Upload file using the storage service with user-based path
+	object, err := h.storageService.UploadFile(actualBucket, actualKey, bytes.NewReader(fileContent), header.Size, contentType)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to upload file: " + err.Error())
 		return
@@ -252,7 +294,42 @@ func (h *StorageHandlers) HandleDeleteObject(w http.ResponseWriter, r *http.Requ
 	bucket := vars["bucket"]
 	objectID := vars["id"]
 
-	err := h.storageService.DeleteObject(bucket, objectID)
+	// Get user ID from context if available, otherwise try to extract from token
+	userID, _ := r.Context().Value("user_id").(string)
+	if userID == "" {
+		userID = extractUserIDFromToken(r)
+	}
+	
+	// Require user authentication for deletions
+	if userID == "" {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// For internal storage, verify user owns the object
+	var err error
+	if bucket == "user-files" || bucket == "int_storage" {
+		// Get object info to verify ownership
+		objectInfo, getErr := h.storageService.GetObjectInfo("int_storage", objectID)
+		if getErr != nil {
+			respondWithError(w, http.StatusNotFound, "Object not found")
+			return
+		}
+		
+		// Check if object key starts with user's path
+		expectedPrefix := fmt.Sprintf("%s/", userID)
+		if !strings.HasPrefix(objectInfo.ObjectKey, expectedPrefix) {
+			respondWithError(w, http.StatusForbidden, "Access denied")
+			return
+		}
+		
+		// Delete from int_storage bucket
+		err = h.storageService.DeleteObject("int_storage", objectID)
+	} else {
+		// For other buckets, proceed normally
+		err = h.storageService.DeleteObject(bucket, objectID)
+	}
+	
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to delete object: " + err.Error())
 		return
@@ -267,10 +344,39 @@ func (h *StorageHandlers) HandleDownloadObject(w http.ResponseWriter, r *http.Re
 	bucket := vars["bucket"]
 	objectID := vars["id"]
 	
+	log.Printf("HandleDownloadObject: bucket=%s, objectID=%s", bucket, objectID)
+	
 	// Get user ID from context if available, otherwise try to extract from token
 	userID, _ := r.Context().Value("user_id").(string)
 	if userID == "" {
 		userID = extractUserIDFromToken(r)
+	}
+	log.Printf("HandleDownloadObject: userID=%s", userID)
+	
+	// For internal storage, verify user access
+	actualBucket := bucket
+	if bucket == "user-files" || bucket == "int_storage" {
+		actualBucket = "int_storage"
+		
+		// Require authentication for internal storage
+		if userID == "" {
+			respondWithError(w, http.StatusUnauthorized, "Authentication required")
+			return
+		}
+		
+		// Get object info to verify ownership
+		objectInfo, err := h.storageService.GetObjectInfo(actualBucket, objectID)
+		if err != nil {
+			respondWithError(w, http.StatusNotFound, "Object not found")
+			return
+		}
+		
+		// Check if object key starts with user's path
+		expectedPrefix := fmt.Sprintf("%s/", userID)
+		if !strings.HasPrefix(objectInfo.ObjectKey, expectedPrefix) {
+			respondWithError(w, http.StatusForbidden, "Access denied")
+			return
+		}
 	}
 	
 	// Execute before download hooks
@@ -293,7 +399,7 @@ func (h *StorageHandlers) HandleDownloadObject(w http.ResponseWriter, r *http.Re
 	}
 	
 	// Get the file from storage service
-	reader, filename, contentType, err := h.storageService.GetObject(bucket, objectID)
+	reader, filename, contentType, err := h.storageService.GetObject(actualBucket, objectID)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, "Object not found")
 		return
@@ -351,6 +457,18 @@ func (h *StorageHandlers) HandleRenameObject(w http.ResponseWriter, r *http.Requ
 	bucket := vars["bucket"]
 	objectID := vars["id"]
 	
+	// Get user ID from context if available, otherwise try to extract from token
+	userID, _ := r.Context().Value("user_id").(string)
+	if userID == "" {
+		userID = extractUserIDFromToken(r)
+	}
+	
+	// Require user authentication for renames
+	if userID == "" {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+	
 	var request struct {
 		NewName string `json:"newName"`
 	}
@@ -365,7 +483,27 @@ func (h *StorageHandlers) HandleRenameObject(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	
-	if err := h.storageService.RenameObject(bucket, objectID, request.NewName); err != nil {
+	// For internal storage, verify user owns the object
+	actualBucket := bucket
+	if bucket == "user-files" || bucket == "int_storage" {
+		actualBucket = "int_storage"
+		
+		// Get object info to verify ownership
+		objectInfo, err := h.storageService.GetObjectInfo(actualBucket, objectID)
+		if err != nil {
+			respondWithError(w, http.StatusNotFound, "Object not found")
+			return
+		}
+		
+		// Check if object key starts with user's path
+		expectedPrefix := fmt.Sprintf("%s/", userID)
+		if !strings.HasPrefix(objectInfo.ObjectKey, expectedPrefix) {
+			respondWithError(w, http.StatusForbidden, "Access denied")
+			return
+		}
+	}
+	
+	if err := h.storageService.RenameObject(actualBucket, objectID, request.NewName); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -379,6 +517,18 @@ func (h *StorageHandlers) HandleRenameObject(w http.ResponseWriter, r *http.Requ
 func (h *StorageHandlers) HandleCreateFolder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bucket := vars["bucket"]
+	
+	// Get user ID from context if available, otherwise try to extract from token
+	userID, _ := r.Context().Value("user_id").(string)
+	if userID == "" {
+		userID = extractUserIDFromToken(r)
+	}
+	
+	// Require user authentication for folder creation
+	if userID == "" {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
 	
 	var request struct {
 		Name string `json:"name"`
@@ -395,13 +545,29 @@ func (h *StorageHandlers) HandleCreateFolder(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	
-	// Construct the full folder path
+	// Determine the correct bucket and path based on request
+	actualBucket := bucket
 	folderPath := request.Name
-	if request.Path != "" {
-		folderPath = strings.TrimSuffix(request.Path, "/") + "/" + request.Name
+	
+	// For internal storage, enforce user-based paths
+	if bucket == "user-files" || bucket == "int_storage" {
+		actualBucket = "int_storage"
+		// Use the configured app ID for this instance
+		// Construct user-based path: int_storage/{userId}/{appId}/...
+		basePath := fmt.Sprintf("%s/%s", userID, h.storageService.GetAppID())
+		if request.Path != "" {
+			folderPath = fmt.Sprintf("%s/%s/%s", basePath, strings.TrimSuffix(request.Path, "/"), request.Name)
+		} else {
+			folderPath = fmt.Sprintf("%s/%s", basePath, request.Name)
+		}
+	} else {
+		// For other buckets, use standard path construction
+		if request.Path != "" {
+			folderPath = strings.TrimSuffix(request.Path, "/") + "/" + request.Name
+		}
 	}
 	
-	err := h.storageService.CreateFolder(bucket, folderPath)
+	err := h.storageService.CreateFolder(actualBucket, folderPath)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Failed to create folder: " + err.Error())
 		return

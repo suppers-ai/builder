@@ -62,12 +62,8 @@ class ApiClient {
 		};
 
 		// Load token from localStorage if available
-		if (browser && typeof localStorage !== 'undefined') {
-			const storedToken = localStorage.getItem('token');
-			if (storedToken) {
-				this.authToken = storedToken;
-			}
-		}
+		// We'll try immediately, but also provide a method to reload it later
+		this.loadTokenFromStorage();
 	}
 
 	/**
@@ -75,6 +71,20 @@ class ApiClient {
 	 */
 	setToken(token: string | null) {
 		this.authToken = token;
+	}
+
+	/**
+	 * Load token from localStorage if available
+	 */
+	loadTokenFromStorage() {
+		if (browser && typeof localStorage !== 'undefined') {
+			const storedToken = localStorage.getItem('auth_token');
+			if (storedToken) {
+				this.authToken = storedToken;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -116,9 +126,16 @@ class ApiClient {
 			errorMessage = errorData.message || errorData.error || errorMessage;
 			errorCode = errorData.code;
 			errorDetails = errorData.details;
+			console.error('API Error JSON:', errorData);
 		} catch {
-			// If response is not JSON
-			errorMessage = response.statusText || errorMessage;
+			// If response is not JSON, try to get text
+			try {
+				const text = await response.text();
+				console.error('API Error Text:', text);
+				errorMessage = text || response.statusText || errorMessage;
+			} catch {
+				errorMessage = response.statusText || errorMessage;
+			}
 		}
 
 		// Handle specific status codes
@@ -139,7 +156,7 @@ class ApiClient {
 				// Clear auth and redirect to Solobase login if not authenticated
 				if (browser) {
 					this.authToken = null;
-					localStorage.removeItem('token');
+					localStorage.removeItem('auth_token');
 					// Redirect to login with files page as the return URL
 					window.location.href = getAuthLoginUrl('/files');
 				}
@@ -182,7 +199,7 @@ class ApiClient {
 				const data = await response.json();
 				if (data.token) {
 					this.setToken(data.token);
-					localStorage.setItem('token', data.token);
+					localStorage.setItem('auth_token', data.token);
 					return true;
 				}
 			}
@@ -329,6 +346,8 @@ class ApiClient {
 	 * PATCH request
 	 */
 	async patch<T = any>(endpoint: string, body?: any, options?: any): Promise<T> {
+		console.log('PATCH request to:', endpoint, 'with body:', body);
+		console.log('Auth token:', this.authToken ? this.authToken.substring(0, 20) + '...' : 'none');
 		const response = await this.request<T>('PATCH', endpoint, { body, ...options });
 		return response.data!;
 	}
@@ -403,11 +422,17 @@ class ApiClient {
 			});
 
 			// Open and send request
-			xhr.open('POST', this.buildURL(endpoint));
+			const url = this.buildURL(endpoint);
+			console.log('Upload URL:', url);
+			console.log('Auth token present:', !!this.authToken);
+			
+			xhr.open('POST', url);
 			
 			// Set auth header
 			if (this.authToken) {
 				xhr.setRequestHeader('Authorization', `Bearer ${this.authToken}`);
+			} else {
+				console.warn('No auth token available for upload');
 			}
 
 			xhr.send(formData);
@@ -424,8 +449,15 @@ class ApiClient {
 			onProgress?: (progress: number) => void;
 		}
 	): Promise<T> {
+		console.log('uploadFormData called for endpoint:', endpoint);
+		console.log('FormData entries:');
+		for (const [key, value] of formData.entries()) {
+			console.log(`  ${key}:`, value);
+		}
+		
 		return new Promise((resolve, reject) => {
-			const xhr = new XMLHttpRequest();
+			try {
+				const xhr = new XMLHttpRequest();
 
 			// Track upload progress
 			if (options?.onProgress) {
@@ -447,8 +479,16 @@ class ApiClient {
 						resolve(xhr.responseText as any);
 					}
 				} else {
+					let errorMessage = 'Upload failed';
+					try {
+						const errorData = JSON.parse(xhr.responseText);
+						errorMessage = errorData.error || errorData.message || errorMessage;
+					} catch {
+						errorMessage = xhr.responseText || errorMessage;
+					}
+					console.error('Upload error:', xhr.status, errorMessage);
 					reject(new ApiError(
-						'Upload failed',
+						errorMessage,
 						xhr.status,
 						'UPLOAD_ERROR'
 					));
@@ -465,14 +505,25 @@ class ApiClient {
 			});
 
 			// Open and send request
-			xhr.open('POST', this.buildURL(endpoint));
+			const url = this.buildURL(endpoint);
+			console.log('Upload URL:', url);
+			console.log('Auth token present:', !!this.authToken);
+			
+			xhr.open('POST', url);
 			
 			// Set auth header
 			if (this.authToken) {
 				xhr.setRequestHeader('Authorization', `Bearer ${this.authToken}`);
+			} else {
+				console.warn('No auth token available for upload');
 			}
 
 			xhr.send(formData);
+			console.log('XHR request sent');
+			} catch (error) {
+				console.error('Error creating/sending XHR request:', error);
+				reject(error);
+			}
 		});
 	}
 

@@ -47,7 +47,7 @@ class WebSocketService {
 	
 	connect() {
 		const wsUrl = import.meta.env.PUBLIC_WS_URL || 'ws://localhost:8090/ws';
-		const token = localStorage.getItem('token');
+		const token = localStorage.getItem('auth_token');
 		
 		if (!token) {
 			console.warn('No auth token found, skipping WebSocket connection');

@@ -23,33 +23,38 @@ trap cleanup EXIT INT TERM
 
 # SINGLE SOURCE OF TRUTH FOR PORTS
 FRONTEND_PORT=5174
-BACKEND_PORT=8091  # Solobase port
+BACKEND_PORT=8093  # Solobase port
 
 echo -e "${YELLOW}Configuration:${NC}"
 echo "  Frontend (Vite): port $FRONTEND_PORT"
 echo "  Backend (Solobase): port $BACKEND_PORT"
 echo ""
 
-# Step 1: Check if Solobase is running, start if not
+# Step 1: Check if SortedStorage backend is running, start if not
 if lsof -i :$BACKEND_PORT > /dev/null 2>&1; then
-    echo -e "${GREEN}✓ Solobase already running on port $BACKEND_PORT${NC}"
+    echo -e "${GREEN}✓ SortedStorage backend already running on port $BACKEND_PORT${NC}"
 else
-    echo -e "${YELLOW}Starting Solobase on port $BACKEND_PORT...${NC}"
+    echo -e "${YELLOW}Starting SortedStorage backend on port $BACKEND_PORT...${NC}"
     
-    # Check if solobase binary exists
-    if [ -f "../go/solobase/solobase" ]; then
-        cd ../go/solobase
-        DATABASE_TYPE=sqlite DATABASE_URL=file:./test.db DEFAULT_ADMIN_EMAIL=admin@example.com DEFAULT_ADMIN_PASSWORD=admin123 PORT=$BACKEND_PORT ./solobase &
-        cd ../../sortedstorage
+    # Check if sortedstorage-backend binary exists
+    if [ -f "./sortedstorage-backend" ]; then
+        DATABASE_TYPE=sqlite DATABASE_URL=file:./.data/sortedstorage.db DEFAULT_ADMIN_EMAIL=admin@example.com DEFAULT_ADMIN_PASSWORD=admin123 PORT=$BACKEND_PORT ./sortedstorage-backend &
+    # Fallback to building if not exists
+    elif [ -f "./backend/main.go" ]; then
+        echo -e "${YELLOW}Building SortedStorage backend...${NC}"
+        cd backend
+        go build -o ../sortedstorage-backend .
+        cd ..
+        DATABASE_TYPE=sqlite DATABASE_URL=file:./.data/sortedstorage.db DEFAULT_ADMIN_EMAIL=admin@example.com DEFAULT_ADMIN_PASSWORD=admin123 PORT=$BACKEND_PORT ./sortedstorage-backend &
     else
-        echo -e "${RED}Error: Solobase binary not found at ../go/solobase/solobase${NC}"
-        echo "Please build Solobase first by running:"
-        echo "  cd ../go/solobase && go build"
+        echo -e "${RED}Error: SortedStorage backend not found${NC}"
+        echo "Please build the backend first by running:"
+        echo "  cd backend && go build -o ../sortedstorage-backend ."
         exit 1
     fi
     
-    # Wait for Solobase to start
-    echo -n "Waiting for Solobase to start..."
+    # Wait for backend to start
+    echo -n "Waiting for backend to start..."
     for i in {1..10}; do
         if lsof -i :$BACKEND_PORT > /dev/null 2>&1; then
             echo -e " ${GREEN}ready!${NC}"

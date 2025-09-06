@@ -27,7 +27,6 @@ sortedstorage/test-build
 sortedstorage/*.exe
 sortedstorage/*.db
 sortedstorage/.data/
-sortedstorage/storage/
 
 # Go build artifacts
 *.o
