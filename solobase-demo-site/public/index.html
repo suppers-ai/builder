@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en-us" class="scroll-smooth">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#2563eb">
+    
+    <title>Solobase - Modern Admin Dashboard</title>
+    <meta name="description" content="A modern, full-featured admin dashboard built with Svelte and Go. Get authentication, database management, and storage in a single binary.">
+    <meta name="author" content="Solobase Team">
+    <meta name="generator" content="Hugo 0.138.0">
+    
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:1313/">
+    <meta property="og:title" content="Solobase - Modern Admin Dashboard">
+    <meta property="og:description" content="A modern, full-featured admin dashboard built with Svelte and Go. Get authentication, database management, and storage in a single binary.">
+    <meta property="og:site_name" content="Solobase - Modern Admin Dashboard">
+    
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="http://localhost:1313/">
+    <meta name="twitter:title" content="Solobase - Modern Admin Dashboard">
+    <meta name="twitter:description" content="A modern, full-featured admin dashboard built with Svelte and Go. Get authentication, database management, and storage in a single binary.">
+    
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.ico">
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    
+    
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="http://localhost:1313/css/main.css" >
+    <link rel="stylesheet" href="/css/minimalist.css">
+    <style>
+         
+        * {
+            font-family: 'Itim', cursive !important;
+        }
+        body {
+            font-family: 'Itim', cursive !important;
+        }
+        h1, h2, h3, h4, h5, h6, p, a, span, div, button, input, select, textarea {
+            font-family: 'Itim', cursive !important;
+        }
+        code, pre {
+            font-family: 'Itim', monospace !important;
+        }
+    </style>
+    
+    
+    <link rel="preload" href="http://localhost:1313/css/main.css" as="style">
+    <link rel="dns-prefetch" href="https://demo.solobase.dev">
+    
+    
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+</head>
+<body class="bg-gray-50 text-gray-900">
+    
+    <header style="background: white; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 40;">
+    <nav class="container max-w-6xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+            
+            <div class="flex items-center">
+                <a href="http://localhost:1313/" class="flex items-center space-x-2">
+                    <i data-lucide="database" style="width: 32px; height: 32px; color: #06b6d4;"></i>
+                    <span style="font-size: 1.25rem; font-weight: 600; color: #1f2937; font-family: 'Itim', cursive;">Solobase</span>
+                </a>
+            </div>
+            
+            
+            <div class="hidden md:flex items-center space-x-6">
+                
+                <a href="/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Home
+                </a>
+                
+                <a href="/docs/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Documentation
+                </a>
+                
+                <a href="/demo/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Live Demo
+                </a>
+                
+                <a href="https://github.com/user/solobase" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   target="_blank" rel="noopener noreferrer">
+                    GitHub
+                </a>
+                
+            </div>
+            
+            
+            <div class="md:hidden">
+                <button type="button" 
+                        id="mobile-menu-button"
+                        style="padding: 0.5rem; color: #6b7280;"
+                        onclick="toggleMobileMenu()">
+                    <svg id="menu-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="close-icon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <div id="mobile-menu" class="hidden md:hidden" style="background: white; border-top: 1px solid #e5e7eb;">
+        <nav class="px-6 py-4">
+            
+            <a href="/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Home
+            </a>
+            
+            <a href="/docs/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Documentation
+            </a>
+            
+            <a href="/demo/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Live Demo
+            </a>
+            
+            <a href="https://github.com/user/solobase" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               target="_blank" rel="noopener noreferrer">
+                GitHub
+            </a>
+            
+        </nav>
+    </div>
+</header>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+    } else {
+        menu.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+    }
+}
+</script>
+    
+    
+    <main>
+        
+
+<section class="min-h-screen flex items-center pb-20" style="background: linear-gradient(135deg, #ecfeff 0%, #ffffff 50%, #ecfeff 100%);">
+    <div class="container max-w-6xl mx-auto px-6 text-center">
+        
+        <div class="relative mx-auto" style="max-width: 1280px; width: 100%;">
+            
+            <div class="mb-8 relative inline-block">
+                <img src="/images/hero.png" alt="Solobase Dashboard" class="mx-auto rounded-lg shadow-lg hero-image" style="max-width: 400px; width: 100%; height: auto; position: relative;">
+                
+                
+                <video class="absolute top-0 left-0 rounded-lg shadow-lg" id="overlayVideo" style="max-width: 400px; width: 100%; height: 100%; object-fit: cover; display: none; z-index: 25;">
+                    <source src="/videos/video_1.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                
+                
+                <div class="absolute flex justify-center items-center" style="bottom: 28%; left: 52%; transform: translateX(-50%); gap: 12px; z-index: 20;">
+                    
+                    <div class="eye-container" style="width: 24px; height: 24px; padding: 0px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img src="/images/eye.png" alt="Eye" class="eye-image" style="width: 12px; height: 12px; max-width: 12px; object-fit: contain; position: relative;">
+                    </div>
+                    
+                    
+                    <div class="eye-container" style="width: 24px; height: 24px; padding: 0px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img src="/images/eye.png" alt="Eye" class="eye-image" style="width: 12px; height: 12px; max-width: 12px; object-fit: contain; position: relative;">
+                    </div>
+                </div>
+            </div>
+            
+            
+            <img src="/images/do_not_touch.png" alt="Do not touch" class="absolute do-not-touch-img" style="bottom: 40px; right: 0; width: 80px; height: auto; z-index: 15; cursor: pointer;">
+        </div>
+        
+        
+        <h1 class="text-5xl md:text-6xl font-bold mb-6" style="color: #1f2937; font-family: 'Itim', cursive; letter-spacing: -0.02em;">
+            Solobase
+        </h1>
+        
+        
+        <p class="text-xl md:text-2xl mb-12 max-w-2xl mx-auto" style="color: #6b7280; font-family: 'Itim', cursive;">
+            Open source backend, with authentication, storage, database, and extensions all built in one file.
+        </p>
+        
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="https://demo.solobase.dev" 
+               class="inline-flex items-center justify-center px-8 py-3 rounded-lg font-medium text-white transition-all duration-200"
+               style="background: #06b6d4; font-family: 'Itim', cursive;">
+                Try Demo
+            </a>
+            <a href="/docs/" 
+               class="inline-flex items-center justify-center px-8 py-3 rounded-lg font-medium transition-all duration-200"
+               style="border: 1px solid #06b6d4; color: #06b6d4; font-family: 'Itim', cursive;">
+                Read Docs
+            </a>
+        </div>
+        
+        
+        <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div class="text-center">
+                <div class="mb-3 flex justify-center">
+                    <i data-lucide="rocket" style="width: 32px; height: 32px; color: #06b6d4;"></i>
+                </div>
+                <h3 class="font-semibold mb-2" style="color: #1f2937; font-family: 'Itim', cursive;">Quick Setup</h3>
+                <p style="color: #6b7280; font-family: 'Itim', cursive;">Download and run. No dependencies.</p>
+            </div>
+            <div class="text-center">
+                <div class="mb-3 flex justify-center">
+                    <i data-lucide="lock" style="width: 32px; height: 32px; color: #06b6d4;"></i>
+                </div>
+                <h3 class="font-semibold mb-2" style="color: #1f2937; font-family: 'Itim', cursive;">Secure</h3>
+                <p style="color: #6b7280; font-family: 'Itim', cursive;">Built-in auth and security.</p>
+            </div>
+            <div class="text-center">
+                <div class="mb-3 flex justify-center">
+                    <i data-lucide="zap" style="width: 32px; height: 32px; color: #06b6d4;"></i>
+                </div>
+                <h3 class="font-semibold mb-2" style="color: #1f2937; font-family: 'Itim', cursive;">Fast</h3>
+                <p style="color: #6b7280; font-family: 'Itim', cursive;">Optimized Go backend.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+@keyframes wobble {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+}
+
+.do-not-touch-img {
+    transform-origin: center center;
+    transition: transform 0.2s ease;
+}
+
+.do-not-touch-img:hover {
+    animation: wobble 0.8s ease-in-out infinite;
+}
+</style>
+
+<script>
+(function() {
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        
+        
+        const preloadVideos = function() {
+            const videoQueue = [];
+            for (let i = 1; i <= 6; i++) {
+                videoQueue.push(`/videos/video_${i}.mp4`);
+            }
+            
+            function preloadNext(index) {
+                if (index >= videoQueue.length) return;
+                
+                const video = document.createElement('video');
+                video.preload = 'auto';
+                video.style.display = 'none';
+                
+                video.addEventListener('canplaythrough', function() {
+                    console.log(`Video ${index + 1} preloaded`);
+                    
+                    setTimeout(() => preloadNext(index + 1), 100);
+                }, { once: true });
+                
+                video.addEventListener('error', function() {
+                    console.error(`Failed to preload video ${index + 1}`);
+                    
+                    preloadNext(index + 1);
+                }, { once: true });
+                
+                const source = document.createElement('source');
+                source.src = videoQueue[index];
+                source.type = 'video/mp4';
+                video.appendChild(source);
+                
+                
+                video.load();
+            }
+            
+            
+            preloadNext(0);
+        };
+        
+        
+        preloadVideos();
+        
+        const eyes = document.querySelectorAll('.eye-image');
+        
+        
+        document.addEventListener('mousemove', function(e) {
+            requestAnimationFrame(function() {
+                eyes.forEach(function(eye) {
+                    const container = eye.parentElement;
+                    const containerRect = container.getBoundingClientRect();
+                    const eyeRect = eye.getBoundingClientRect();
+                    
+                    
+                    const containerCenterX = containerRect.left + containerRect.width / 2;
+                    const containerCenterY = containerRect.top + containerRect.height / 2;
+                    
+                    
+                    const deltaX = e.clientX - containerCenterX;
+                    const deltaY = e.clientY - containerCenterY;
+                    
+                    
+                    const angle = Math.atan2(deltaY, deltaX);
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    
+                    
+                    const maxMoveX = (containerRect.width - eyeRect.width) / 2;
+                    const maxMoveY = (containerRect.height - eyeRect.height) / 2;
+                    
+                    
+                    const movementScale = Math.min(distance / 200, 1);
+                    
+                    
+                    const moveX = Math.cos(angle) * maxMoveX * movementScale;
+                    const moveY = Math.sin(angle) * maxMoveY * movementScale;
+                    
+                    
+                    eye.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                });
+            });
+        });
+        
+        
+        document.addEventListener('mouseleave', function() {
+            eyes.forEach(function(eye) {
+                eye.style.transform = 'translate(0, 0)';
+            });
+        });
+        
+        
+        const doNotTouchImg = document.querySelector('.do-not-touch-img');
+        const overlayVideo = document.getElementById('overlayVideo');
+        const heroImage = document.querySelector('.hero-image');
+        let currentVideoIndex = 1;
+        let videoEndHandler = null;
+        let isVideoPlaying = false;
+        
+        if (doNotTouchImg && overlayVideo) {
+            doNotTouchImg.addEventListener('click', function() {
+                
+                if (isVideoPlaying) return;
+                
+                
+                isVideoPlaying = true;
+                doNotTouchImg.style.pointerEvents = 'none';
+                doNotTouchImg.style.opacity = '0.5';
+                
+                
+                overlayVideo.querySelector('source').src = `/videos/video_${currentVideoIndex}.mp4`;
+                overlayVideo.load(); 
+                
+                
+                overlayVideo.style.display = 'block';
+                overlayVideo.play();
+                
+                
+                heroImage.style.opacity = '0';
+                
+                
+                if (videoEndHandler) {
+                    overlayVideo.removeEventListener('ended', videoEndHandler);
+                }
+                
+                
+                if (currentVideoIndex < 6) {
+                    
+                    videoEndHandler = function() {
+                        overlayVideo.style.display = 'none';
+                        heroImage.style.opacity = '1';
+                        overlayVideo.currentTime = 0;
+                        currentVideoIndex++; 
+                        
+                        
+                        isVideoPlaying = false;
+                        doNotTouchImg.style.pointerEvents = 'auto';
+                        doNotTouchImg.style.opacity = '1';
+                    };
+                } else {
+                    
+                    videoEndHandler = function() {
+                        overlayVideo.pause();
+                        
+                        doNotTouchImg.style.display = 'none';
+                    };
+                }
+                
+                overlayVideo.addEventListener('ended', videoEndHandler);
+            });
+        }
+    });
+})();
+</script>
+
+
+<section class="py-responsive bg-white">
+    <div class="container-responsive">
+        <div class="text-center mb-12 sm:mb-16 lg:mb-20">
+            <h2 class="text-responsive-lg font-bold text-gray-900 mb-4 sm:mb-6">Everything You Need</h2>
+            <p class="text-responsive-md text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                Solobase provides all the essential features for building modern admin dashboards and internal tools.
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+            
+            <div class="feature-card text-center group">
+                <div class="feature-icon bg-primary-100 rounded-full flex items-center justify-center group-hover:bg-primary-200 transition-colors duration-300">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Authentication</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    Built-in user authentication with role-based access control and session management.
+                </p>
+            </div>
+            
+            
+            <div class="feature-card text-center group">
+                <div class="feature-icon bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Database Management</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    Visual database browser with support for SQLite and PostgreSQL databases.
+                </p>
+            </div>
+            
+            
+            <div class="feature-card text-center group">
+                <div class="feature-icon bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors duration-300">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">File Storage</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    Integrated file storage system with upload, download, and organization capabilities.
+                </p>
+            </div>
+            
+            
+            <div class="feature-card text-center group">
+                <div class="feature-icon bg-yellow-100 rounded-full flex items-center justify-center group-hover:bg-yellow-200 transition-colors duration-300">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">REST API</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    Full REST API for integration with external applications and services.
+                </p>
+            </div>
+            
+            
+            <div class="feature-card text-center group">
+                <div class="feature-icon bg-red-100 rounded-full flex items-center justify-center group-hover:bg-red-200 transition-colors duration-300">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Modern UI</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    Beautiful, responsive interface built with Svelte and modern web technologies.
+                </p>
+            </div>
+            
+            
+            <div class="feature-card text-center group">
+                <div class="feature-icon bg-indigo-100 rounded-full flex items-center justify-center group-hover:bg-indigo-200 transition-colors duration-300">
+                    <svg class="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Single Binary</h3>
+                <p class="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    Deploy anywhere with a single executable file. No complex setup or dependencies.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Get Started in Minutes</h2>
+                <p class="text-xl text-gray-600">
+                    Download, run, and start building your admin dashboard immediately.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                
+                <div class="text-center">
+                    <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                        1
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Download</h3>
+                    <p class="text-gray-600">Get the latest Solobase binary for your platform</p>
+                </div>
+                
+                
+                <div class="text-center">
+                    <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                        2
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Configure</h3>
+                    <p class="text-gray-600">Set up your database and basic configuration</p>
+                </div>
+                
+                
+                <div class="text-center">
+                    <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                        3
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Launch</h3>
+                    <p class="text-gray-600">Run the binary and access your dashboard</p>
+                </div>
+            </div>
+            
+            
+            <div class="bg-gray-900 rounded-lg p-6 text-white">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold">Quick Start</h3>
+                    <button onclick="copyToClipboard('install-code')" 
+                            class="text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                    </button>
+                </div>
+                <pre id="install-code" class="text-sm overflow-x-auto"><code># Download the latest release
+curl -L https://github.com/user/solobase/releases/latest/download/solobase-linux -o solobase
+chmod +x solobase
+
+# Run with default settings
+./solobase
+
+# Access your dashboard at http://localhost:8080</code></pre>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    const text = element.textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        
+        console.log('Code copied to clipboard');
+    });
+}
+</script>
+
+
+<section class="py-20 bg-blue-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl font-bold mb-6">Ready to Get Started?</h2>
+            <p class="text-xl text-blue-100 mb-8">
+                Try Solobase today and see how quickly you can build powerful admin dashboards.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://demo.solobase.dev" 
+                   class="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-colors inline-flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m6-10V7a3 3 0 11-6 0V4a3 3 0 116 0v3M5 7a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H7a2 2 0 01-2-2V7z"/>
+                    </svg>
+                    Try Live Demo
+                </a>
+                <a href="https://github.com/user/solobase" 
+                   class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-600 transition-colors inline-flex items-center justify-center"
+                   target="_blank" rel="noopener noreferrer">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+    </main>
+    
+    
+    <footer class="bg-gray-900 text-white print-hidden">
+    <div class="container-responsive py-responsive">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            
+            <div class="col-span-1 sm:col-span-2 lg:col-span-2">
+                <div class="flex items-center space-x-2 mb-4 sm:mb-6">
+                    
+                    <img src="/images/solobase-logo.svg" alt="Solobase - Modern Admin Dashboard" class="h-8 w-auto sm:h-10">
+                    
+                    <span class="text-lg sm:text-xl font-bold">Solobase - Modern Admin Dashboard</span>
+                </div>
+                <p class="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed max-w-md">
+                    A modern, full-featured admin dashboard built with Svelte and Go
+                </p>
+                <div class="flex space-x-4">
+                    
+                    <a href="https://github.com/user/solobase" 
+                       class="text-gray-300 hover:text-white transition-all duration-200 hover:scale-110 focus-ring rounded-md p-1"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="View on GitHub">
+                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    
+                </div>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Quick Links</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    
+                    <li>
+                        <a href="/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Home
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/docs/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Documentation
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/demo/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Live Demo
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://github.com/user/solobase" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           target="_blank" rel="noopener noreferrer">
+                            GitHub
+                        </a>
+                    </li>
+                    
+                </ul>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Resources</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    <li>
+                        <a href="/docs/installation/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Installation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/configuration/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Configuration
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            API Reference
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Deployment
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="border-t border-gray-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-gray-300 text-sm sm:text-base text-center sm:text-left">
+                    © 2025 Solobase Team. All rights reserved.
+                </p>
+                <div class="flex items-center space-x-4 text-xs sm:text-sm text-gray-400">
+                    <span>Built with Hugo & Tailwind CSS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+    
+    
+    
+    
+        
+        <script src="http://localhost:1313/js/main.min.js" defer></script>
+    
+    
+    
+    <script src="/js/sw-register.js" defer></script>
+    
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
+    
+    
+    <script>
+        if ('loading' in HTMLImageElement.prototype) {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            images.forEach(img => {
+                img.src = img.dataset.src || img.src;
+            });
+        } else {
+            
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+            document.body.appendChild(script);
+        }
+    </script>
+    
+    
+    
+</body>
+</html>

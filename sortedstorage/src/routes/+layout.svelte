@@ -2,10 +2,7 @@
 	import '../app.css';
 	import '@common/ui-components/css/variables.css';
 	import { page } from '$app/stores';
-	import { AppLayout } from '@common/ui-components';
-	import { 
-		Files, Share2, BarChart3
-	} from 'lucide-svelte';
+	import MinimalLayout from '$lib/components/layout/MinimalLayout.svelte';
 	import Toast from '$lib/components/common/Toast.svelte';
 	import NotificationContainer from '$lib/components/common/NotificationContainer.svelte';
 	import CommandPalette from '$lib/components/common/CommandPalette.svelte';
@@ -32,13 +29,6 @@
 	
 	// Define public pages that don't require authentication
 	const publicPages = ['/', '/auth/login'];
-	
-	const navigation = [
-		{ title: 'My Files', href: '/files', icon: Files },
-		{ title: 'Shared', href: '/shared', icon: Share2 }
-	];
-	
-	// Admin navigation is not needed for this app
 	
 	let commandPaletteOpen = false;
 	let settingsModalOpen = false;
@@ -135,20 +125,15 @@
 		<p>Loading...</p>
 	</div>
 {:else}
-	<!-- Main app with layout -->
-	<AppLayout
+	<!-- Main app with minimal layout -->
+	<MinimalLayout
 		currentUser={user}
-		{navigation}
 		currentPath={$page.url.pathname}
-		logoSrc="/logos/long_light.svg"
-		logoCollapsedSrc="/favicon.ico"
-		projectName="SortedStorage"
-		mobileTitle="SortedStorage"
 		onLogout={handleLogout}
 		onOpenSettings={handleOpenSettings}
 	>
 		<slot />
-	</AppLayout>
+	</MinimalLayout>
 {/if}
 
 <!-- Command Palette -->
@@ -165,12 +150,6 @@
 <UpgradeModal bind:open={upgradeModalOpen} />
 
 <style>
-	:global(:root) {
-		/* Override primary color for SortedStorage */
-		--primary-color: #3b82f6;
-		--primary-hover: #2563eb;
-	}
-	
 	.auth-loading {
 		display: flex;
 		flex-direction: column;
@@ -180,16 +159,16 @@
 		background: #f0f0f0;
 	}
 	
-	.spinner {
+	.auth-loading .spinner {
 		width: 40px;
 		height: 40px;
 		border: 4px solid #e2e8f0;
 		border-top-color: #3b82f6;
 		border-radius: 50%;
-		animation: spin 1s linear infinite;
+		animation: layout-spin 1s linear infinite;
 	}
 	
-	@keyframes spin {
+	@keyframes layout-spin {
 		0% { transform: rotate(0deg); }
 		100% { transform: rotate(360deg); }
 	}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -44,7 +45,7 @@ func NewStorageService(db *database.DB, cfg config.StorageConfig) *StorageServic
 func NewStorageServiceWithOptions(db *database.DB, cfg config.StorageConfig, opts *StorageOptions) *StorageService {
 	var provider storage.Provider
 	var err error
-	
+
 	// Default options
 	if opts == nil {
 		opts = &StorageOptions{}
@@ -52,13 +53,20 @@ func NewStorageServiceWithOptions(db *database.DB, cfg config.StorageConfig, opt
 	if opts.AppID == "" {
 		opts.AppID = "solobase"
 	}
-	
+
 	// Update path to use new structure
 	localPath := cfg.LocalStoragePath
-	if localPath == "" || localPath == "./data/storage" || localPath == "./.data/storage" {
-		localPath = "./.data/storage/int" // Internal storage path
+	if localPath == "" || localPath == "./data/storage" || localPath == "./.data/storage" || localPath == "./.data/storage/int" {
+		localPath = "./.data/storage" // Base storage path - buckets will be subdirectories
 	}
-	
+
+	// Ensure storage directory exists for local storage
+	if cfg.Type != "s3" {
+		if err := os.MkdirAll(localPath, 0755); err != nil {
+			log.Printf("Failed to create storage directory %s: %v", localPath, err)
+		}
+	}
+
 	switch cfg.Type {
 	case "s3":
 		provider, err = storage.NewS3Provider(
@@ -78,7 +86,7 @@ func NewStorageServiceWithOptions(db *database.DB, cfg config.StorageConfig, opt
 			log.Printf("Failed to initialize local storage: %v", err)
 		}
 	}
-	
+
 	service := &StorageService{
 		config:   cfg,
 		provider: provider,
@@ -86,10 +94,10 @@ func NewStorageServiceWithOptions(db *database.DB, cfg config.StorageConfig, opt
 		db:       db,
 		appID:    opts.AppID,
 	}
-	
+
 	// Initialize default buckets
 	service.initializeDefaultBuckets()
-	
+
 	return service
 }
 
@@ -99,15 +107,17 @@ func (s *StorageService) initializeDefaultBuckets() {
 		name   string
 		public bool
 	}{
-		{"int_storage", false},  // Internal storage for user/app data
-		{"ext_storage", false},  // External storage for extensions
-		{"public", true},        // Public files
+		{"int_storage", false}, // Internal storage for user/app data
+		{"ext_storage", false}, // External storage for extensions
+		{"public", true},       // Public files
 	}
-	
+
 	for _, bucket := range defaultBuckets {
-		// Try to create the bucket (it will fail silently if it already exists)
-		if s.storage != nil {
-			if err := s.storage.CreateBucket(bucket.name, bucket.public); err != nil {
+		// Check if bucket already exists in database
+		var existingBucket pkgstorage.StorageBucket
+		if err := s.db.Where("name = ?", bucket.name).First(&existingBucket).Error; err != nil {
+			// Bucket doesn't exist, create it using CreateBucket method which saves to DB
+			if err := s.CreateBucket(bucket.name, bucket.public); err != nil {
 				// Only log if it's not an "already exists" error
 				if !strings.Contains(err.Error(), "exists") && !strings.Contains(err.Error(), "exist") {
 					log.Printf("Failed to create default bucket %s: %v", bucket.name, err)
@@ -137,7 +147,7 @@ func (s *StorageService) GetObjectInfo(bucket, objectID string) (*pkgstorage.Sto
 		log.Printf("GetObjectInfo: Failed to find object: %v", err)
 		return nil, err
 	}
-	log.Printf("GetObjectInfo: Found object with key=%s", object.ObjectKey)
+	log.Printf("GetObjectInfo: Found object with id=%s, name=%s", object.ID, object.ObjectName)
 	return &object, nil
 }
 
@@ -146,25 +156,22 @@ func (s *StorageService) GetObjectByKey(bucket, key string) (io.ReadCloser, stri
 	if s.storage == nil {
 		return nil, "", "", fmt.Errorf("storage not initialized")
 	}
-	
+
 	// Get object metadata from database
 	var object pkgstorage.StorageObject
 	if err := s.db.Where("key = ? AND bucket = ?", key, bucket).First(&object).Error; err != nil {
 		return nil, "", "", err
 	}
-	
+
 	// Get the actual file from storage
 	reader, err := s.storage.GetObject(bucket, key)
 	if err != nil {
 		return nil, "", "", err
 	}
-	
-	// Extract filename from object key (last part after /)
-	filename := object.ObjectKey
-	if idx := strings.LastIndex(filename, "/"); idx >= 0 {
-		filename = filename[idx+1:]
-	}
-	
+
+	// Use the object name directly
+	filename := object.ObjectName
+
 	return reader, filename, object.ContentType, nil
 }
 
@@ -173,7 +180,7 @@ func (s *StorageService) GeneratePresignedDownloadURL(bucket, key string, expiry
 	if s.config.Type != "s3" {
 		return "", fmt.Errorf("presigned URLs are only supported for S3 storage")
 	}
-	
+
 	// Use the storage's GetSignedURL method which internally uses GeneratePresignedURL
 	return s.storage.GetSignedURL(bucket, key, time.Duration(expiry)*time.Second)
 }
@@ -183,7 +190,7 @@ func (s *StorageService) GeneratePresignedUploadURL(bucket, key, contentType str
 	if s.config.Type != "s3" {
 		return "", fmt.Errorf("presigned URLs are only supported for S3 storage")
 	}
-	
+
 	// For now, we'll use the same method as download
 	// In a full implementation, we'd need to extend the storage package to support upload URLs
 	return s.storage.GetSignedURL(bucket, key, time.Duration(expiry)*time.Second)
@@ -193,13 +200,23 @@ func (s *StorageService) CreateBucket(name string, public bool) error {
 	if s.storage == nil {
 		return fmt.Errorf("storage not initialized")
 	}
-	
+
+	// Check if bucket already exists in database
+	var existingBucket pkgstorage.StorageBucket
+	if err := s.db.Where("name = ?", name).First(&existingBucket).Error; err == nil {
+		// Bucket already exists in database
+		return fmt.Errorf("bucket %s already exists", name)
+	}
+
 	// Create bucket in storage provider
 	err := s.storage.CreateBucket(name, public)
 	if err != nil {
-		return err
+		// If bucket already exists on disk but not in DB, that's ok - we'll add it to DB
+		if !strings.Contains(err.Error(), "exists") && !strings.Contains(err.Error(), "exist") {
+			return err
+		}
 	}
-	
+
 	// Save bucket to database
 	bucket := &pkgstorage.StorageBucket{
 		ID:        uuid.New().String(),
@@ -208,13 +225,15 @@ func (s *StorageService) CreateBucket(name string, public bool) error {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	
+
 	if err := s.db.Create(bucket).Error; err != nil {
-		// Try to rollback storage bucket creation
-		s.storage.DeleteBucket(name)
+		// If we just created the bucket on disk, try to rollback
+		if err == nil {
+			s.storage.DeleteBucket(name)
+		}
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -222,22 +241,22 @@ func (s *StorageService) DeleteBucket(name string) error {
 	if s.storage == nil {
 		return fmt.Errorf("storage not initialized")
 	}
-	
+
 	// Delete from storage provider
 	err := s.storage.DeleteBucket(name)
 	if err != nil {
 		return err
 	}
-	
+
 	// Delete bucket and all objects from database
 	if err := s.db.Where("bucket_name = ?", name).Delete(&pkgstorage.StorageObject{}).Error; err != nil {
 		return err
 	}
-	
+
 	if err := s.db.Where("name = ?", name).Delete(&pkgstorage.StorageBucket{}).Error; err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
@@ -245,29 +264,29 @@ func (s *StorageService) GetBuckets() ([]interface{}, error) {
 	if s.storage == nil {
 		return []interface{}{}, nil
 	}
-	
+
 	// Get buckets from database
 	var buckets []pkgstorage.StorageBucket
 	if err := s.db.Find(&buckets).Error; err != nil {
 		return nil, err
 	}
-	
+
 	// Convert to interface slice with stats
 	result := make([]interface{}, len(buckets))
 	for i, bucket := range buckets {
 		// Get object count and size for this bucket
 		var count int64
 		var totalSize int64
-		
+
 		s.db.Model(&pkgstorage.StorageObject{}).
 			Where("bucket_name = ?", bucket.Name).
 			Count(&count)
-		
+
 		s.db.Model(&pkgstorage.StorageObject{}).
 			Where("bucket_name = ?", bucket.Name).
 			Select("COALESCE(SUM(size), 0)").
 			Scan(&totalSize)
-		
+
 		result[i] = map[string]interface{}{
 			"id":         bucket.ID,
 			"name":       bucket.Name,
@@ -278,80 +297,54 @@ func (s *StorageService) GetBuckets() ([]interface{}, error) {
 			"size_bytes": totalSize,
 		}
 	}
-	
+
 	return result, nil
 }
 
-func (s *StorageService) GetBucketObjects(bucket string) ([]interface{}, error) {
-	return s.GetBucketObjectsWithPath(bucket, "")
-}
-
-func (s *StorageService) GetBucketObjectsWithPath(bucket string, path string) ([]interface{}, error) {
+// GetObjects returns objects in a bucket filtered by userID, appID, and parentFolderID
+func (s *StorageService) GetObjects(bucket string, userID string, parentFolderID *string) ([]interface{}, error) {
 	if s.storage == nil {
 		return []interface{}{}, nil
 	}
+
+	log.Printf("GetObjects: bucket=%s, userID=%s, parentFolderID=%v, appID=%s", bucket, userID, parentFolderID, s.appID)
+
+	// Build query for objects
+	query := s.db.Where("bucket_name = ? AND user_id = ?", bucket, userID)
 	
-	// Clean up the path
-	path = strings.TrimPrefix(path, "/")
-	path = strings.TrimSuffix(path, "/")
-	
-	log.Printf("GetBucketObjectsWithPath: bucket=%s, path=%s", bucket, path)
-	
-	// Determine parent folder ID for current path
-	var parentFolderID *string
-	if path != "" {
-		// Find the folder object for the current path
-		var currentFolder pkgstorage.StorageObject
-		folderPath := path + "/"
-		if err := s.db.Where("bucket_name = ? AND object_key = ? AND content_type = ?", 
-			bucket, folderPath, "application/x-directory").First(&currentFolder).Error; err == nil {
-			parentFolderID = &currentFolder.ID
-		}
+	// Filter by app ID
+	if s.appID != "" {
+		query = query.Where("app_id = ?", s.appID)
+	} else {
+		query = query.Where("app_id IS NULL")
 	}
 	
-	// Query for direct children (files and folders) at this level
-	query := s.db.Where("bucket_name = ?", bucket)
+	// Filter by parent folder
 	if parentFolderID != nil {
-		// Get items with this parent folder
 		query = query.Where("parent_folder_id = ?", *parentFolderID)
 	} else {
-		// Get root items (no parent folder)
 		query = query.Where("parent_folder_id IS NULL")
 	}
 	
 	var objects []pkgstorage.StorageObject
+	
 	if err := query.Find(&objects).Error; err != nil {
 		return nil, err
 	}
-	
-	// Build a tree structure from objects
-	type Item struct {
-		IsFolder bool
-		Object   *pkgstorage.StorageObject
-	}
-	
+
 	// Convert to result format
 	result := make([]interface{}, 0, len(objects))
-	
+
 	for i := range objects {
 		obj := &objects[i]
-		
-		// Extract display name from object key
-		displayName := obj.ObjectKey
-		if obj.IsFolder() {
-			// Remove trailing slash for folder display
-			displayName = strings.TrimSuffix(displayName, "/")
-		}
-		
-		// Get just the name part (not the full path)
-		if idx := strings.LastIndex(displayName, "/"); idx >= 0 {
-			displayName = displayName[idx+1:]
-		}
-		
+
+		// Use ObjectName for display
+		displayName := obj.ObjectName
+
 		if displayName == "" || displayName == ".keep" {
 			continue // Skip empty names and .keep files
 		}
-		
+
 		// Determine file type for display
 		fileType := "file"
 		if obj.IsFolder() {
@@ -359,122 +352,137 @@ func (s *StorageService) GetBucketObjectsWithPath(bucket string, path string) ([
 		} else {
 			fileType = getFileType(displayName)
 		}
-		
+
 		result = append(result, map[string]interface{}{
-			"id":           obj.ID,
-			"name":         displayName,
-			"fullPath":     obj.ObjectKey,
-			"type":         fileType,
-			"size":         formatBytes(obj.Size),
-			"size_bytes":   obj.Size,
-			"modified":     obj.UpdatedAt.Format("2006-01-02 15:04"),
-			"content_type": obj.ContentType,
-			"checksum":     obj.Checksum,
-			"public":       false,
-			"isFolder":     obj.IsFolder(),
+			"id":                obj.ID,
+			"name":              displayName,
+			"type":              fileType,
+			"size":              formatBytes(obj.Size),
+			"size_bytes":        obj.Size,
+			"modified":          obj.UpdatedAt.Format("2006-01-02 15:04"),
+			"content_type":      obj.ContentType,
+			"checksum":          obj.Checksum,
+			"public":            false,
+			"isFolder":          obj.IsFolder(),
+			"parent_folder_id":  obj.ParentFolderID,
 		})
 	}
-	
-	log.Printf("Returning %d items for path '%s'", len(result), path)
+
+	log.Printf("Returning %d items", len(result))
 	return result, nil
 }
 
-func (s *StorageService) UploadFile(bucket, filename string, reader io.Reader, size int64, mimeType string) (interface{}, error) {
+func (s *StorageService) UploadFile(bucket, filename, userID string, reader io.Reader, size int64, mimeType string, parentFolderID *string) (interface{}, error) {
 	if s.storage == nil {
 		return nil, fmt.Errorf("storage not initialized")
 	}
-	
-	// Clean filename - remove leading slashes
-	filename = strings.TrimPrefix(filename, "/")
-	
+
 	// Read the content to calculate checksum
 	var buf bytes.Buffer
 	tee := io.TeeReader(reader, &buf)
-	
+
 	// Calculate MD5 checksum
 	hash := md5.New()
 	if _, err := io.Copy(hash, tee); err != nil {
 		return nil, fmt.Errorf("failed to calculate checksum: %v", err)
 	}
 	checksum := hex.EncodeToString(hash.Sum(nil))
+
+	// Generate a unique ID for this object
+	objectID := uuid.New().String()
 	
-	// Find parent folder ID if file is in a folder
-	var parentFolderID *string
-	if idx := strings.LastIndex(filename, "/"); idx > 0 {
-		parentPath := filename[:idx] + "/"
-		var parentFolder pkgstorage.StorageObject
-		if err := s.db.Where("bucket_name = ? AND object_key = ? AND content_type = ?", 
-			bucket, parentPath, "application/x-directory").First(&parentFolder).Error; err == nil {
-			parentFolderID = &parentFolder.ID
-		}
-	}
+	// Storage key is simply bucket/objectID/filename
+	// This keeps files organized and avoids collisions without complex paths
+	storageKey := fmt.Sprintf("%s/%s", objectID, filename)
 	
-	// Upload to storage provider using the buffered content
-	err := s.storage.PutObject(bucket, filename, &buf, size, mimeType)
+	// Upload to storage provider
+	err := s.storage.PutObject(bucket, storageKey, &buf, size, mimeType)
 	if err != nil {
 		return nil, err
 	}
-	
-	// Save to database
+
+	// Get app ID as pointer
+	var appIDPtr *string
+	if s.appID != "" {
+		appIDPtr = &s.appID
+	}
+
+	// Save to database with simplified structure
 	storageObj := &pkgstorage.StorageObject{
-		ID:             uuid.New().String(),
+		ID:             objectID,
 		BucketName:     bucket,
-		ObjectKey:      filename,
+		ObjectName:     filename,
 		ParentFolderID: parentFolderID,
 		Size:           size,
 		ContentType:    mimeType,
 		Checksum:       checksum,
+		UserID:         userID,
+		AppID:          appIDPtr,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
-	
+
 	if err := s.db.Create(storageObj).Error; err != nil {
 		// Try to rollback storage upload
-		s.storage.DeleteObject(bucket, filename)
+		s.storage.DeleteObject(bucket, storageKey)
 		return nil, err
 	}
-	
+
 	return map[string]interface{}{
-		"id":           storageObj.ID,
-		"key":          filename,
-		"size":         size,
-		"content_type": mimeType,
-		"checksum":     checksum,
-		"url":          s.storage.GetPublicURL(bucket, filename),
+		"id":                storageObj.ID,
+		"size":              size,
+		"content_type":      mimeType,
+		"checksum":          checksum,
+		"parent_folder_id":  parentFolderID,
+		"app_id":            appIDPtr,
+		"url":               s.storage.GetPublicURL(bucket, storageKey),
 	}, nil
 }
 
-func (s *StorageService) UploadFileBytes(bucket, filename string, content []byte, mimeType string) (interface{}, error) {
+// UploadFileWithParent uploads a file with a specific parent folder ID
+func (s *StorageService) UploadFileWithParent(bucket, filename, parentFolderID, userID string, reader io.Reader, size int64, mimeType string) (interface{}, error) {
+	// Simply delegate to UploadFile with the parent folder ID
+	var parentFolderPtr *string
+	if parentFolderID != "" {
+		parentFolderPtr = &parentFolderID
+	}
+	return s.UploadFile(bucket, filename, userID, reader, size, mimeType, parentFolderPtr)
+}
+
+func (s *StorageService) UploadFileBytes(bucket, filename, userID string, content []byte, mimeType string) (interface{}, error) {
 	reader := bytes.NewReader(content)
-	return s.UploadFile(bucket, filename, reader, int64(len(content)), mimeType)
+	return s.UploadFile(bucket, filename, userID, reader, int64(len(content)), mimeType, nil)
+}
+
+// getStorageKey builds the storage key for an object
+// Storage key is simply objectID/filename for simplicity
+func (s *StorageService) getStorageKey(obj *pkgstorage.StorageObject) string {
+	return fmt.Sprintf("%s/%s", obj.ID, obj.ObjectName)
 }
 
 func (s *StorageService) GetObject(bucket, objectID string) (io.ReadCloser, string, string, error) {
 	if s.storage == nil {
 		return nil, "", "", fmt.Errorf("storage not initialized")
 	}
-	
+
 	// Get object from database to get the actual key and metadata
 	var obj pkgstorage.StorageObject
 	if err := s.db.Where("id = ? AND bucket_name = ?", objectID, bucket).First(&obj).Error; err != nil {
-		// Try with objectID as the key for backward compatibility
-		if err := s.db.Where("object_key = ? AND bucket_name = ?", objectID, bucket).First(&obj).Error; err != nil {
-			return nil, "", "", fmt.Errorf("object not found")
-		}
+		return nil, "", "", fmt.Errorf("object not found")
 	}
+
+	// Build the storage key using the simple ID-based approach
+	storageKey := s.getStorageKey(&obj)
 	
 	// Get the object from storage
-	reader, err := s.storage.GetObject(bucket, obj.ObjectKey)
+	reader, err := s.storage.GetObject(bucket, storageKey)
 	if err != nil {
 		return nil, "", "", err
 	}
-	
-	// Extract filename from path
-	filename := obj.ObjectKey
-	if idx := strings.LastIndex(filename, "/"); idx >= 0 {
-		filename = filename[idx+1:]
-	}
-	
+
+	// Use ObjectName as the filename
+	filename := obj.ObjectName
+
 	return reader, filename, obj.ContentType, nil
 }
 
@@ -486,138 +494,153 @@ func (s *StorageService) GeneratePresignedURL(bucket, objectKey string, expiry t
 	return "", fmt.Errorf("presigned URLs not supported by current storage provider")
 }
 
-
-func (s *StorageService) CreateFolder(bucket, folderName string) error {
+// CreateFolderWithParent creates a folder with explicit parent folder ID
+func (s *StorageService) CreateFolderWithParent(bucket, folderName, userID string, parentFolderID *string) (string, error) {
 	if s.storage == nil {
-		return fmt.Errorf("storage not initialized")
+		return "", fmt.Errorf("storage not initialized")
 	}
-	
+
 	// Clean up the folder name
-	folderName = strings.TrimSuffix(folderName, "/")
+	folderName = strings.TrimSpace(folderName)
 	if folderName == "" {
-		return fmt.Errorf("folder name cannot be empty")
+		return "", fmt.Errorf("folder name cannot be empty")
 	}
+
+	log.Printf("CreateFolderWithParent: Creating folder '%s' in bucket '%s' for user '%s', parent: %v", 
+		folderName, bucket, userID, parentFolderID)
+
+	// Generate a unique ID for the folder
+	folderID := uuid.New().String()
 	
-	log.Printf("CreateFolder: Creating folder '%s' in bucket '%s'", folderName, bucket)
+	// Storage key for folder (we don't actually store anything for folders in the provider)
+	storageKey := fmt.Sprintf("%s/%s", folderID, folderName)
 	
-	// Check if folder already exists
+	// Check if folder already exists at this location
 	var existingFolder pkgstorage.StorageObject
-	folderKey := folderName + "/"
-	if err := s.db.Where("bucket_name = ? AND object_key = ?", bucket, folderKey).First(&existingFolder).Error; err == nil {
-		log.Printf("CreateFolder: Folder already exists: %s", folderKey)
-		return fmt.Errorf("folder already exists: %s", folderName)
+	query := s.db.Where("bucket_name = ? AND object_name = ? AND content_type = ? AND user_id = ?",
+		bucket, folderName, "application/x-directory", userID)
+	
+	// Add AppID filter if present
+	if s.appID != "" {
+		query = query.Where("app_id = ?", s.appID)
+	} else {
+		query = query.Where("app_id IS NULL")
 	}
 	
-	// Find parent folder ID if this is a nested folder
-	var parentFolderID *string
-	if idx := strings.LastIndex(folderName, "/"); idx > 0 {
-		parentPath := folderName[:idx] + "/"
-		var parentFolder pkgstorage.StorageObject
-		if err := s.db.Where("bucket_name = ? AND object_key = ? AND content_type = ?", 
-			bucket, parentPath, "application/x-directory").First(&parentFolder).Error; err == nil {
-			parentFolderID = &parentFolder.ID
-			log.Printf("CreateFolder: Found parent folder with ID: %s", parentFolder.ID)
-		} else {
-			log.Printf("CreateFolder: Parent folder not found for path: %s", parentPath)
-		}
+	// Add parent folder filter
+	if parentFolderID != nil {
+		query = query.Where("parent_folder_id = ?", *parentFolderID)
+	} else {
+		query = query.Where("parent_folder_id IS NULL")
 	}
 	
-	// In object storage, create a placeholder object to represent the folder
-	// This ensures the folder appears even when empty
-	keepFilePath := folderName + "/.keep"
-	
-	// Create a placeholder file
+	if err := query.First(&existingFolder).Error; err == nil {
+		log.Printf("CreateFolderWithParent: Folder already exists: %s", folderName)
+		return existingFolder.ID, nil // Return existing folder ID
+	}
+
+	// Create a placeholder file in storage
+	keepFilePath := storageKey + "/.keep"
 	content := []byte("")
 	err := s.storage.PutObject(bucket, keepFilePath, bytes.NewReader(content), 0, "application/x-directory")
 	if err != nil {
-		log.Printf("CreateFolder: Failed to create .keep file: %v", err)
-		return fmt.Errorf("failed to create folder structure: %v", err)
+		log.Printf("CreateFolderWithParent: Failed to create .keep file: %v", err)
+		return "", fmt.Errorf("failed to create folder structure: %v", err)
 	}
-	
-	// Save folder to database
-	storageObj := &pkgstorage.StorageObject{
-		ID:             uuid.New().String(),
+
+	// Get app ID as pointer
+	var appIDPtr *string
+	if s.appID != "" {
+		appIDPtr = &s.appID
+	}
+
+	// Create folder object in database with simplified structure
+	folderObj := &pkgstorage.StorageObject{
+		ID:             folderID,
 		BucketName:     bucket,
-		ObjectKey:      folderKey, // Use folderKey which has the trailing slash
+		ObjectName:     folderName,
 		ParentFolderID: parentFolderID,
 		Size:           0,
 		ContentType:    "application/x-directory",
-		Checksum:       "", // No checksum for folders
+		UserID:         userID,
+		AppID:          appIDPtr,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
-	
-	if err := s.db.Create(storageObj).Error; err != nil {
-		// Try to rollback
+
+	if err := s.db.Create(folderObj).Error; err != nil {
+		// Try to rollback storage creation
 		s.storage.DeleteObject(bucket, keepFilePath)
-		log.Printf("CreateFolder: Failed to save folder to database: %v", err)
-		return fmt.Errorf("failed to save folder: %v", err)
+		return "", fmt.Errorf("failed to create folder in database: %v", err)
 	}
-	
-	log.Printf("CreateFolder: Created folder %s in bucket %s", folderName, bucket)
-	return nil
+
+	log.Printf("CreateFolderWithParent: Successfully created folder with ID: %s", folderObj.ID)
+	return folderObj.ID, nil
+}
+
+// GetDB returns the database connection (needed for API handler)
+func (s *StorageService) GetDB() *database.DB {
+	return s.db
 }
 
 func (s *StorageService) DeleteObject(bucket, objectID string) error {
 	if s.storage == nil {
 		return fmt.Errorf("storage not initialized")
 	}
-	
+
 	// Get object from database to get the actual key
 	var obj pkgstorage.StorageObject
 	if err := s.db.Where("id = ? AND bucket_name = ?", objectID, bucket).First(&obj).Error; err != nil {
-		// Try with objectID as the key for backward compatibility
-		if err := s.storage.DeleteObject(bucket, objectID); err != nil {
-			return err
-		}
-		// Delete from database using objectID as key
-		return s.db.Where("object_key = ? AND bucket_name = ?", objectID, bucket).Delete(&pkgstorage.StorageObject{}).Error
+		return fmt.Errorf("object not found")
 	}
+
+	// Build the storage key using the simple ID-based approach
+	storageKey := s.getStorageKey(&obj)
 	
 	// Delete from storage provider
-	if err := s.storage.DeleteObject(bucket, obj.ObjectKey); err != nil {
+	if err := s.storage.DeleteObject(bucket, storageKey); err != nil {
 		return err
 	}
-	
+
 	// Delete from database
 	if err := s.db.Delete(&obj).Error; err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
 func (s *StorageService) GetTotalStorageUsed() (int64, error) {
 	var totalSize int64
-	
+
 	// Get total storage used from database
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
 		Select("COALESCE(SUM(size), 0)").
 		Scan(&totalSize).Error; err != nil {
 		return 0, err
 	}
-	
+
 	return totalSize, nil
 }
 
 // GetUserStorageUsed returns the total storage used by a specific user
 func (s *StorageService) GetUserStorageUsed(userID string) (int64, error) {
 	var totalSize int64
-	
+
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
 		Select("COALESCE(SUM(size), 0)").
 		Where("user_id = ?", userID).
 		Scan(&totalSize).Error; err != nil {
 		return 0, err
 	}
-	
+
 	return totalSize, nil
 }
 
 // GetStorageStats returns comprehensive storage statistics
 func (s *StorageService) GetStorageStats(userID string) (map[string]interface{}, error) {
 	stats := make(map[string]interface{})
-	
+
 	// Get total file count for user
 	var fileCount int64
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
@@ -626,7 +649,7 @@ func (s *StorageService) GetStorageStats(userID string) (map[string]interface{},
 		return nil, err
 	}
 	stats["file_count"] = fileCount
-	
+
 	// Get total folder count for user
 	var folderCount int64
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
@@ -635,14 +658,14 @@ func (s *StorageService) GetStorageStats(userID string) (map[string]interface{},
 		return nil, err
 	}
 	stats["folder_count"] = folderCount
-	
+
 	// Get total storage used
 	totalSize, err := s.GetUserStorageUsed(userID)
 	if err != nil {
 		return nil, err
 	}
 	stats["total_size"] = totalSize
-	
+
 	// Get shared files count (if public column exists)
 	var sharedCount int64
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
@@ -652,7 +675,7 @@ func (s *StorageService) GetStorageStats(userID string) (map[string]interface{},
 		sharedCount = 0
 	}
 	stats["shared_count"] = sharedCount
-	
+
 	// Get recent uploads (last 7 days)
 	var recentCount int64
 	sevenDaysAgo := time.Now().AddDate(0, 0, -7)
@@ -662,21 +685,21 @@ func (s *StorageService) GetStorageStats(userID string) (map[string]interface{},
 		recentCount = 0
 	}
 	stats["recent_uploads"] = recentCount
-	
+
 	return stats, nil
 }
 
 // GetAllUsersStorageStats returns storage statistics for all users (admin use)
 func (s *StorageService) GetAllUsersStorageStats() (map[string]interface{}, error) {
 	stats := make(map[string]interface{})
-	
+
 	// Get total storage used across all users
 	totalSize, err := s.GetTotalStorageUsed()
 	if err != nil {
 		return nil, err
 	}
 	stats["total_storage_used"] = totalSize
-	
+
 	// Get total file count
 	var totalFiles int64
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
@@ -685,7 +708,7 @@ func (s *StorageService) GetAllUsersStorageStats() (map[string]interface{}, erro
 		return nil, err
 	}
 	stats["total_files"] = totalFiles
-	
+
 	// Get total folder count
 	var totalFolders int64
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
@@ -694,7 +717,7 @@ func (s *StorageService) GetAllUsersStorageStats() (map[string]interface{}, erro
 		return nil, err
 	}
 	stats["total_folders"] = totalFolders
-	
+
 	// Get number of users with files
 	var activeUsers int64
 	if err := s.db.Model(&pkgstorage.StorageObject{}).
@@ -703,7 +726,7 @@ func (s *StorageService) GetAllUsersStorageStats() (map[string]interface{}, erro
 		return nil, err
 	}
 	stats["active_users"] = activeUsers
-	
+
 	return stats, nil
 }
 
@@ -721,35 +744,23 @@ func (s *StorageService) RenameObject(bucket, objectID, newName string) error {
 	if err := s.db.Where("id = ? AND bucket_name = ?", objectID, bucket).First(&object).Error; err != nil {
 		return fmt.Errorf("object not found: %v", err)
 	}
+
+	// Build old key using the simple ID-based approach
+	oldKey := s.getStorageKey(&object)
 	
-	// Extract the path from the current object key
-	oldKey := object.ObjectKey
-	lastSlash := -1
-	for i := len(oldKey) - 1; i >= 0; i-- {
-		if oldKey[i] == '/' {
-			lastSlash = i
-			break
-		}
-	}
-	
-	// Build new key with same path but new name
-	var newKey string
-	if lastSlash >= 0 {
-		newKey = oldKey[:lastSlash+1] + newName
-	} else {
-		newKey = newName
-	}
-	
+	// Build new key - keep same ID but new filename
+	newKey := fmt.Sprintf("%s/%s", object.ID, newName)
+
 	// Check if new name already exists
 	var existingCount int64
 	s.db.Model(&pkgstorage.StorageObject{}).
 		Where("bucket_name = ? AND object_key = ?", bucket, newKey).
 		Count(&existingCount)
-	
+
 	if existingCount > 0 {
 		return fmt.Errorf("an object with name '%s' already exists", newName)
 	}
-	
+
 	// If it's a file, rename in storage backend
 	if object.ContentType != "application/x-directory" {
 		// Copy to new location
@@ -758,18 +769,18 @@ func (s *StorageService) RenameObject(bucket, objectID, newName string) error {
 			return fmt.Errorf("failed to get object: %v", err)
 		}
 		defer reader.Close()
-		
+
 		// Read the content
 		content, err := io.ReadAll(reader)
 		if err != nil {
 			return fmt.Errorf("failed to read object: %v", err)
 		}
-		
+
 		// Upload with new name
 		if err := s.storage.PutObject(bucket, newKey, bytes.NewReader(content), int64(len(content)), object.ContentType); err != nil {
 			return fmt.Errorf("failed to put renamed object: %v", err)
 		}
-		
+
 		// Delete old object from storage
 		if err := s.storage.DeleteObject(bucket, oldKey); err != nil {
 			// Try to clean up the new object
@@ -777,9 +788,9 @@ func (s *StorageService) RenameObject(bucket, objectID, newName string) error {
 			return fmt.Errorf("failed to delete old object: %v", err)
 		}
 	}
-	
-	// Update database record
-	object.ObjectKey = newKey
+
+	// Update database record with new name
+	object.ObjectName = newName
 	if err := s.db.Save(&object).Error; err != nil {
 		// If database update fails and it's a file, try to revert storage changes
 		if object.ContentType != "application/x-directory" {
@@ -794,21 +805,68 @@ func (s *StorageService) RenameObject(bucket, objectID, newName string) error {
 		}
 		return fmt.Errorf("failed to update database: %v", err)
 	}
+
+	// If it's a folder, we don't need to update child paths since we use IDs
+	// The children still reference the same parent folder ID
+
+	return nil
+}
+
+// EnsureUserMyFilesFolder ensures that the user has a "My Files" folder and returns its ID
+func (s *StorageService) EnsureUserMyFilesFolder(userID string) (string, error) {
+	if userID == "" {
+		return "", fmt.Errorf("user ID is required")
+	}
+
+	// Check if "My Files" folder already exists for this user
+	var existingFolder pkgstorage.StorageObject
+	query := s.db.Where("bucket_name = ? AND object_name = ? AND content_type = ? AND user_id = ?",
+		"int_storage", "My Files", "application/x-directory", userID)
 	
-	// If it's a folder, update all child objects' paths
-	if object.ContentType == "application/x-directory" {
-		var childObjects []pkgstorage.StorageObject
-		s.db.Where("bucket_name = ? AND object_key LIKE ?", bucket, oldKey + "/%").Find(&childObjects)
-		
-		for _, child := range childObjects {
-			// Replace the old folder path with new one
-			newChildKey := newKey + child.ObjectKey[len(oldKey):]
-			child.ObjectKey = newChildKey
-			s.db.Save(&child)
-		}
+	// Add AppID filter if present
+	if s.appID != "" {
+		query = query.Where("app_id = ?", s.appID)
 	}
 	
-	return nil
+	// Check for existing folder with parent_folder_id = NULL (root level)
+	query = query.Where("parent_folder_id IS NULL")
+	
+	err := query.First(&existingFolder).Error
+	if err == nil {
+		// Folder already exists
+		log.Printf("EnsureUserMyFilesFolder: My Files folder already exists for user %s with ID %s", userID, existingFolder.ID)
+		return existingFolder.ID, nil
+	}
+
+	// Create "My Files" folder
+	log.Printf("EnsureUserMyFilesFolder: Creating My Files folder for user %s", userID)
+	
+	folderID := uuid.New().String()
+	
+	// Prepare AppID pointer
+	var appIDPtr *string
+	if s.appID != "" {
+		appIDPtr = &s.appID
+	}
+	
+	// Create the folder record in database
+	folder := pkgstorage.StorageObject{
+		ID:             folderID,
+		BucketName:     "int_storage",
+		ObjectName:     "My Files",
+		UserID:         userID,
+		ContentType:    "application/x-directory",
+		Size:           0,
+		ParentFolderID: nil, // Root level folder
+		AppID:          appIDPtr,
+	}
+
+	if err := s.db.Create(&folder).Error; err != nil {
+		return "", fmt.Errorf("failed to create My Files folder: %v", err)
+	}
+
+	log.Printf("EnsureUserMyFilesFolder: Created My Files folder for user %s with ID %s", userID, folderID)
+	return folderID, nil
 }
 
 // Helper functions
@@ -828,6 +886,7 @@ func formatBytes(bytes int64) string {
 	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
 }
 
+
 func getFileType(filename string) string {
 	// Get file extension
 	ext := ""
@@ -837,7 +896,7 @@ func getFileType(filename string) string {
 			break
 		}
 	}
-	
+
 	switch ext {
 	case "jpg", "jpeg", "png", "gif", "webp", "svg":
 		return "image"

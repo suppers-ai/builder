@@ -378,7 +378,7 @@
 		display: inline-block;
 		width: 3em;
 		margin-right: 1em;
-		color: #6b7280;
+		color: var(--color-accent, #a16d5b);
 		text-align: right;
 		user-select: none;
 	}

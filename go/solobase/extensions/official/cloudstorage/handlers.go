@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -179,7 +178,7 @@ func (e *CloudStorageExtension) handleShareAccess(w http.ResponseWriter, r *http
 	switch r.Method {
 	case http.MethodGet:
 		// Download the file
-		content, contentType, err := e.manager.GetFile(ctx, obj.BucketName, obj.ObjectKey)
+		content, contentType, err := e.manager.GetFile(ctx, obj.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -196,7 +195,7 @@ func (e *CloudStorageExtension) handleShareAccess(w http.ResponseWriter, r *http
 		// Set headers
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Content-Length", strconv.FormatInt(obj.Size, 10))
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", obj.ObjectKey))
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", obj.ObjectName))
 
 		// Write content
 		w.Write(content)
@@ -415,7 +414,6 @@ func (e *CloudStorageExtension) handleUpload(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Upload file
-	path := userID // Use userID as the path/directory
 	filename := header.Filename
 	contentType := header.Header.Get("Content-Type")
 	if contentType == "" {
@@ -431,7 +429,17 @@ func (e *CloudStorageExtension) handleUpload(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	obj, err := e.manager.UploadObject(ctx, bucketName, path, filename, content, contentType, userUUID)
+	// Get parent folder ID from form (optional)
+	parentFolderID := r.FormValue("parent_folder_id")
+	var parentFolderPtr *string
+	if parentFolderID != "" {
+		parentFolderPtr = &parentFolderID
+	}
+
+	// AppID for the cloudstorage extension
+	appID := "cloudstorage"
+
+	obj, err := e.manager.UploadObject(ctx, bucketName, filename, parentFolderPtr, content, contentType, userUUID, &appID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -491,6 +499,26 @@ func (e *CloudStorageExtension) handleStats(w http.ResponseWriter, r *http.Reque
 	}
 	
 	stats["storage"] = storageStats
+	
+	// Add provider type and bucket count
+	if e.services != nil && e.services.Storage() != nil {
+		// Get provider type from storage service
+		if storageService, ok := e.services.Storage().(interface{ GetProviderType() string }); ok {
+			stats["provider"] = storageService.GetProviderType()
+		} else {
+			stats["provider"] = "local" // Default to local
+		}
+	} else {
+		stats["provider"] = "local"
+	}
+	
+	// Get bucket count
+	if e.manager != nil {
+		buckets, _ := e.manager.ListBuckets(ctx)
+		stats["total_buckets"] = len(buckets)
+	} else {
+		stats["total_buckets"] = 1 // Default int_storage bucket
+	}
 
 	// Get quota stats if enabled
 	if e.quotaService != nil && e.config.EnableQuotas {
@@ -655,7 +683,7 @@ func (e *CloudStorageExtension) handleDownload(w http.ResponseWriter, r *http.Re
 	}
 	
 	// Download the file
-	content, contentType, err := e.manager.GetFile(ctx, obj.BucketName, obj.ObjectKey)
+	content, contentType, err := e.manager.GetFile(ctx, obj.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -684,7 +712,7 @@ func (e *CloudStorageExtension) handleDownload(w http.ResponseWriter, r *http.Re
 	// Set headers
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", strconv.FormatInt(obj.Size, 10))
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filepath.Base(obj.ObjectKey)))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", obj.ObjectName))
 	
 	// Write content
 	w.Write(content)

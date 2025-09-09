@@ -10,21 +10,21 @@
 	let selectedType: 'file' | 'folder' | null = null;
 	let name = '';
 	let selectedFiles: FileList | null = null;
+	let fileInputRef: HTMLInputElement;
+	let folderNameInputRef: HTMLInputElement;
 	
 	function handleSelectType(type: 'file' | 'folder') {
 		if (type === 'folder') {
 			selectedType = 'folder';
 			// Focus on input after type selection for folders
 			setTimeout(() => {
-				const input = document.querySelector('#item-name') as HTMLInputElement;
-				input?.focus();
+				folderNameInputRef?.focus();
 			}, 100);
 		} else {
 			// For files, trigger file selection immediately without changing selectedType
 			// This keeps the modal open
-			const fileInput = document.querySelector('#file-upload') as HTMLInputElement;
-			if (fileInput) {
-				fileInput.click();
+			if (fileInputRef) {
+				fileInputRef.click();
 			}
 		}
 	}
@@ -89,10 +89,10 @@
 			</div>
 			<!-- Hidden file input -->
 			<input 
-				id="file-upload"
+				bind:this={fileInputRef}
 				type="file"
 				multiple
-				style="display: none;"
+				class="hidden"
 				on:change={handleFileSelect}
 			/>
 		{:else if selectedType === 'folder'}
@@ -101,6 +101,7 @@
 					Folder Name
 				</label>
 				<input
+					bind:this={folderNameInputRef}
 					id="item-name"
 					type="text"
 					bind:value={name}

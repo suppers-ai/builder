@@ -23,6 +23,7 @@ type API struct {
 	productHandlers   *ProductsExtensionHandlers
 	analyticsHandlers *AnalyticsHandlers
 	storageHandlers   *StorageHandlers
+	sharesHandler     *SharesHandler
 	ExtensionRegistry *core.ExtensionRegistry
 }
 
@@ -52,6 +53,9 @@ func NewAPI(
 	
 	// Initialize storage handlers with hook support
 	api.storageHandlers = NewStorageHandlers(storageService, db, extensionRegistry)
+	
+	// Initialize shares handler
+	api.sharesHandler = NewSharesHandler(db)
 
 	api.setupRoutes()
 	return api
@@ -87,7 +91,7 @@ func (a *API) setupRoutes() {
 	}).Methods("GET", "OPTIONS")
 	
 	// Public routes (no auth required)
-	apiRouter.HandleFunc("/auth/login", HandleLogin(a.AuthService)).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/auth/login", HandleLogin(a.AuthService, a.StorageService)).Methods("POST", "OPTIONS")
 	apiRouter.HandleFunc("/auth/signup", HandleSignup(a.AuthService)).Methods("POST", "OPTIONS")
 	
 	// Temporarily make dashboard public for testing
@@ -137,6 +141,7 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/storage/buckets/{bucket}/upload", a.storageHandlers.HandleUploadFile).Methods("POST", "OPTIONS")
 	apiRouter.HandleFunc("/storage/buckets/{bucket}/upload-url", a.storageHandlers.HandleGenerateUploadURL).Methods("POST", "OPTIONS")
 	apiRouter.HandleFunc("/storage/direct-upload/{token}", a.storageHandlers.HandleDirectUpload).Methods("POST", "PUT", "OPTIONS")
+	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}", a.storageHandlers.HandleGetObject).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}", a.storageHandlers.HandleDeleteObject).Methods("DELETE", "OPTIONS")
 	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}/download", a.storageHandlers.HandleDownloadObject).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/buckets/{bucket}/objects/{id}/download-url", a.storageHandlers.HandleGenerateDownloadURL).Methods("GET", "OPTIONS")
@@ -145,9 +150,17 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/storage/buckets/{bucket}/folders", a.storageHandlers.HandleCreateFolder).Methods("POST", "OPTIONS")
 	
 	// Storage quota and statistics routes
+	apiRouter.HandleFunc("/storage/my-files", a.storageHandlers.HandleGetMyFilesFolder).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/quota", a.storageHandlers.HandleGetStorageQuota).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/stats", a.storageHandlers.HandleGetStorageStats).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/admin/stats", a.storageHandlers.HandleGetAdminStorageStats).Methods("GET", "OPTIONS")
+	
+	// Recently viewed routes
+	apiRouter.HandleFunc("/storage/recently-viewed", a.storageHandlers.HandleGetRecentlyViewed).Methods("GET", "OPTIONS")
+	apiRouter.HandleFunc("/storage/items/{id}/last-viewed", a.storageHandlers.HandleUpdateLastViewed).Methods("POST", "OPTIONS")
+	
+	// Search route
+	apiRouter.HandleFunc("/storage/search", a.storageHandlers.HandleSearchStorageObjects).Methods("GET", "OPTIONS")
 
 	// Logs routes (temporarily public for development)
 	apiRouter.HandleFunc("/logs", HandleGetLogs(a.LogsService)).Methods("GET", "OPTIONS")
@@ -264,6 +277,11 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/ext/cloudstorage/api/providers", HandleCloudStorageAddProvider()).Methods("POST", "OPTIONS")
 	apiRouter.HandleFunc("/ext/cloudstorage/api/activity", HandleCloudStorageActivity()).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/ext/cloudstorage/api/stats", HandleCloudStorageStats()).Methods("GET", "OPTIONS")
+	
+	// Shares routes - For SortedStorage and other apps that use sharing
+	// These routes are temporarily public for development
+	apiRouter.HandleFunc("/shares", a.sharesHandler.HandleShares()).Methods("GET", "POST", "OPTIONS")
+	apiRouter.HandleFunc("/shares/{id}", a.sharesHandler.HandleShareByID()).Methods("GET", "DELETE", "OPTIONS")
 }
 
 func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {

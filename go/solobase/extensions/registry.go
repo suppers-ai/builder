@@ -5,7 +5,7 @@ import (
 	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/extensions/official/analytics"
 	"github.com/suppers-ai/solobase/extensions/official/cloudstorage"
-	"github.com/suppers-ai/solobase/extensions/official/hugo"
+	// "github.com/suppers-ai/solobase/extensions/official/hugo" // Temporarily disabled - needs API updates
 	"github.com/suppers-ai/solobase/extensions/official/products"
 	"github.com/suppers-ai/solobase/extensions/official/webhooks"
 	"gorm.io/gorm"
@@ -22,9 +22,10 @@ func RegisterAllExtensions(registry *core.ExtensionRegistry, db *gorm.DB) error 
 	productsExt.SetDatabase(db)
 
 	// Register Hugo extension
-	if err := registry.Register(hugo.NewHugoExtension()); err != nil {
-		return fmt.Errorf("failed to register hugo extension: %w", err)
-	}
+	// Hugo extension temporarily disabled - needs API updates
+	// if err := registry.Register(hugo.NewHugoExtension()); err != nil {
+	// 	return fmt.Errorf("failed to register hugo extension: %w", err)
+	// }
 
 	// Register Analytics extension
 	if err := registry.Register(analytics.NewAnalyticsExtension()); err != nil {

@@ -19,11 +19,11 @@ import (
 // ShareService manages file sharing functionality
 type ShareService struct {
 	db      *gorm.DB
-	manager *pkgstorage.Manager
+	manager interface{} // Storage manager interface, can be nil
 }
 
 // NewShareService creates a new share service
-func NewShareService(db *gorm.DB, manager *pkgstorage.Manager) *ShareService {
+func NewShareService(db *gorm.DB, manager interface{}) *ShareService {
 	return &ShareService{
 		db:      db,
 		manager: manager,

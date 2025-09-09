@@ -2,7 +2,7 @@
 	import { Link, Mail, Calendar, Lock, Users, Copy, Check } from 'lucide-svelte';
 	import Modal from '../common/Modal.svelte';
 	import Button from '../common/Button.svelte';
-	import { storageService } from '$lib/services/storage';
+	import { storageAPI } from '$lib/api/storage';
 	import type { FileItem, FolderItem } from '$lib/types/storage';
 	
 	export let open = false;
@@ -23,22 +23,31 @@
 		loading = true;
 		
 		try {
-			const share = await storageService.createShare(item.id, {
-				type: shareType === 'link' ? 'public' : 'user',
-				email: shareType === 'email' ? email : undefined,
-				permissions: [permissions],
-				expiresAt: expiresIn !== 'never' ? getExpiryDate(expiresIn) : undefined,
-				password: password || undefined
-			});
+			const expiresAt = expiresIn !== 'never' ? getExpiryDate(expiresIn) : null;
+			
+			const shareData = {
+				object_id: item.id,
+				is_public: shareType === 'link',
+				shared_with_email: shareType === 'email' ? email : undefined,
+				permission_level: permissions as 'view' | 'edit' | 'admin',
+				inherit_to_children: item.type === 'folder',
+				expires_at: expiresAt
+			};
+			
+			const share = await storageAPI.createShare(shareData);
+			console.log('ShareDialog - Create share response:', share);
 			
 			if (shareType === 'link') {
-				shareLink = `${window.location.origin}/shared/${share.id}`;
+				// Use the share_token from the response
+				shareLink = `${window.location.origin}/shared/${share.share_token || share.id}`;
+				console.log('ShareDialog - Generated link:', shareLink);
 			} else {
 				// Show success message
 				alert('Share invitation sent!');
 				open = false;
 			}
 		} catch (error) {
+			console.error('Share error:', error);
 			alert('Failed to create share');
 		} finally {
 			loading = false;

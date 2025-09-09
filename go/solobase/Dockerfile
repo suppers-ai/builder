@@ -6,12 +6,11 @@ RUN apk add --no-cache git make gcc musl-dev
 
 WORKDIR /build
 
-# Copy go mod files and vendor directory if it exists
+# Copy go mod files first for better caching
 COPY go.mod go.sum ./
-COPY vendor* ./vendor/
 
-# Download dependencies only if vendor doesn't exist
-RUN if [ ! -d "vendor" ]; then go mod download; fi
+# Download dependencies
+RUN go mod download
 
 # Copy source code
 COPY . .
@@ -38,6 +37,13 @@ COPY --from=builder /build/solobase .
 # Copy static files and views (templ generated files)
 COPY --from=builder /build/static ./static
 COPY --from=builder /build/views ./views
+
+# Demo configuration with in-memory database
+ENV PORT=8080
+ENV DATABASE_TYPE=sqlite
+ENV DATABASE_URL=:memory:
+ENV DEFAULT_ADMIN_EMAIL=demo@solobase.dev
+ENV DEFAULT_ADMIN_PASSWORD=Demo123!
 
 EXPOSE 8080
 

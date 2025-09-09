@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Documentation | Solobase - Modern Admin Dashboard</title>
+    <meta name="description" content="Complete documentation for installing, configuring, and using Solobase">
+    <meta name="author" content="Solobase Team">
+    
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:1313/docs/">
+    <meta property="og:title" content="Documentation | Solobase - Modern Admin Dashboard">
+    <meta property="og:description" content="Complete documentation for installing, configuring, and using Solobase">
+    
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="http://localhost:1313/docs/">
+    <meta property="twitter:title" content="Documentation | Solobase - Modern Admin Dashboard">
+    <meta property="twitter:description" content="Complete documentation for installing, configuring, and using Solobase">
+    
+    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    
+    
+        
+        <link rel="stylesheet" href="http://localhost:1313/css/main.min.css">
+    
+    
+    
+    
+    
+    <style>
+         
+        .docs-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+        .docs-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .docs-sidebar::-webkit-scrollbar-track {
+            background: #f7fafc;
+        }
+        .docs-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+        .docs-toc {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .docs-toc a {
+            display: block;
+            padding: 0.25rem 0;
+            color: #718096;
+            text-decoration: none;
+            border-left: 2px solid transparent;
+            padding-left: 1rem;
+        }
+        .docs-toc a:hover {
+            color: #2d3748;
+            border-left-color: #e2e8f0;
+        }
+        .docs-toc a.active {
+            color: #3182ce;
+            border-left-color: #3182ce;
+            font-weight: 500;
+        }
+        .docs-content h1, .docs-content h2, .docs-content h3, .docs-content h4, .docs-content h5, .docs-content h6 {
+            scroll-margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    
+    <header style="background: white; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 40;">
+    <nav class="container max-w-6xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+            
+            <div class="flex items-center">
+                <a href="http://localhost:1313/" class="flex items-center space-x-2">
+                    <i data-lucide="database" style="width: 32px; height: 32px; color: #06b6d4;"></i>
+                    <span style="font-size: 1.25rem; font-weight: 600; color: #1f2937; font-family: 'Itim', cursive;">Solobase</span>
+                </a>
+            </div>
+            
+            
+            <div class="hidden md:flex items-center space-x-6">
+                
+                <a href="/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Home
+                </a>
+                
+                <a href="/docs/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Documentation
+                </a>
+                
+                <a href="/demo/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Live Demo
+                </a>
+                
+                <a href="https://github.com/user/solobase" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   target="_blank" rel="noopener noreferrer">
+                    GitHub
+                </a>
+                
+            </div>
+            
+            
+            <div class="md:hidden">
+                <button type="button" 
+                        id="mobile-menu-button"
+                        style="padding: 0.5rem; color: #6b7280;"
+                        onclick="toggleMobileMenu()">
+                    <svg id="menu-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="close-icon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <div id="mobile-menu" class="hidden md:hidden" style="background: white; border-top: 1px solid #e5e7eb;">
+        <nav class="px-6 py-4">
+            
+            <a href="/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Home
+            </a>
+            
+            <a href="/docs/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Documentation
+            </a>
+            
+            <a href="/demo/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Live Demo
+            </a>
+            
+            <a href="https://github.com/user/solobase" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               target="_blank" rel="noopener noreferrer">
+                GitHub
+            </a>
+            
+        </nav>
+    </div>
+</header>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+    } else {
+        menu.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+    }
+}
+</script>
+    
+    
+    <div class="flex min-h-screen">
+        
+        
+<aside class="w-64 bg-white border-r border-gray-200 docs-sidebar overflow-y-auto">
+    <div class="p-6">
+        
+        <div class="mb-6">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="docs-search" 
+                    placeholder="Search documentation..." 
+                    class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <div id="search-results" class="hidden mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"></div>
+            
+            
+            <div class="mt-2 text-center">
+                <a href="/docs/search/" class="text-xs text-blue-600 hover:text-blue-800">Advanced Search</a>
+            </div>
+        </div>
+        
+        
+        <nav class="space-y-1">
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Getting Started</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 bg-blue-50 text-blue-700 border-r-2 border-blue-500">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/installation/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Installation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/configuration/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Configuration
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/quick-start/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Quick Start
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">User Guide</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/dashboard/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/users/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                            User Management
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/database/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                            </svg>
+                            Database Browser
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/storage/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2v0"></path>
+                            </svg>
+                            File Storage
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">API Reference</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/api/auth/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                            </svg>
+                            Authentication
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/database/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Database API
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/storage/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                            </svg>
+                            Storage API
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/admin/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            Admin API
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Deployment</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/deployment/docker/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            Docker
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/cloud/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                            </svg>
+                            Cloud Platforms
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/environment/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                            </svg>
+                            Environment
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/security/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Security
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Development</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/development/building/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                            </svg>
+                            Building
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/development/contributing/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Contributing
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/development/architecture/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            Architecture
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</aside>
+        
+        
+        <div class="flex-1 flex">
+            
+            <main class="flex-1 px-6 py-8 max-w-4xl">
+                
+                
+<nav class="flex mb-6" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        
+        <li class="inline-flex items-center">
+            <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L2 12.414V15a1 1 0 001 1h3a1 1 0 001-1v-3a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 001 1h3a1 1 0 001-1v-2.586l.293.293a1 1 0 001.414-1.414l-9-9z"></path>
+                </svg>
+                Home
+            </a>
+        </li>
+        
+        
+        <li>
+            <div class="flex items-center">
+                <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                <a href="/docs/" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Documentation</a>
+            </div>
+        </li>
+        
+        
+        
+        
+        
+        
+        
+            
+        
+    </ol>
+</nav>
+                
+                
+                
+<div class="docs-content">
+    
+    <header class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Documentation</h1>
+        
+        <p class="text-xl text-gray-600 mb-4">Complete documentation for installing, configuring, and using Solobase</p>
+        
+    </header>
+    
+    
+    
+    <div class="prose prose-lg max-w-none mb-12">
+        <h1 id="solobase-documentation">Solobase Documentation</h1>
+<p>Welcome to the Solobase documentation. Here you&rsquo;ll find everything you need to get started with Solobase, from installation to advanced configuration and API usage.</p>
+<h2 id="quick-navigation">Quick Navigation</h2>
+<h3 id="getting-started">Getting Started</h3>
+<ul>
+<li><a href="/docs/installation/">Installation</a> - Download and install Solobase</li>
+<li><a href="/docs/configuration/">Configuration</a> - Basic configuration options</li>
+<li><a href="/docs/quick-start/">Quick Start Guide</a> - Get up and running in minutes</li>
+</ul>
+<h3 id="user-guide">User Guide</h3>
+<ul>
+<li><a href="/docs/dashboard/">Dashboard Overview</a> - Understanding the interface</li>
+<li><a href="/docs/users/">User Management</a> - Managing users and permissions</li>
+<li><a href="/docs/database/">Database Browser</a> - Working with databases</li>
+<li><a href="/docs/storage/">File Storage</a> - Managing files and uploads</li>
+</ul>
+<h3 id="api-reference">API Reference</h3>
+<ul>
+<li><a href="/docs/api/auth/">Authentication API</a> - User authentication endpoints</li>
+<li><a href="/docs/api/database/">Database API</a> - Database operations</li>
+<li><a href="/docs/api/storage/">Storage API</a> - File storage operations</li>
+<li><a href="/docs/api/admin/">Admin API</a> - Administrative functions</li>
+</ul>
+<h3 id="deployment">Deployment</h3>
+<ul>
+<li><a href="/docs/deployment/docker/">Docker Deployment</a> - Running with Docker</li>
+<li><a href="/docs/deployment/cloud/">Cloud Deployment</a> - Deploy to cloud platforms</li>
+<li><a href="/docs/deployment/environment/">Environment Variables</a> - Configuration options</li>
+<li><a href="/docs/deployment/security/">Security Considerations</a> - Security best practices</li>
+</ul>
+<h3 id="development">Development</h3>
+<ul>
+<li><a href="/docs/development/building/">Building from Source</a> - Compile Solobase yourself</li>
+<li><a href="/docs/development/contributing/">Contributing</a> - How to contribute to the project</li>
+<li><a href="/docs/development/architecture/">Architecture</a> - Understanding the codebase</li>
+</ul>
+<h2 id="need-help">Need Help?</h2>
+<p>If you can&rsquo;t find what you&rsquo;re looking for in the documentation, please:</p>
+<ul>
+<li>Check out our [GitHub repository]({{ .Site.Params.github_url }}) for issues and discussions</li>
+<li>Try the <a href="/demo/">live demo</a> to see Solobase in action</li>
+<li>Review the <a href="/docs/examples/">examples</a> for common use cases</li>
+</ul>
+
+    </div>
+    
+    
+    
+    
+    <div class="space-y-6">
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/api/auth/" class="hover:text-blue-600">Authentication API</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">User authentication and authorization endpoints</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>7 min read</span>
+                        </div>
+                        
+                        
+                        
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                api
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                authentication
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                jwt
+                            </span>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/api/auth/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/deployment/docker/" class="hover:text-blue-600">Docker Deployment</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">Deploy Solobase using Docker and Docker Compose</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>8 min read</span>
+                        </div>
+                        
+                        
+                        
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                deployment
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                docker
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                containers
+                            </span>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/deployment/docker/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/installation/" class="hover:text-blue-600">Installation</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">Download and install Solobase on your system</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>4 min read</span>
+                        </div>
+                        
+                        
+                        
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                installation
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                setup
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                getting-started
+                            </span>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/installation/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/configuration/" class="hover:text-blue-600">Configuration</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">Configure Solobase for your environment and requirements</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>5 min read</span>
+                        </div>
+                        
+                        
+                        
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                configuration
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                setup
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                environment
+                            </span>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/configuration/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/api/database/" class="hover:text-blue-600">Database API</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">Database operations and query endpoints</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>7 min read</span>
+                        </div>
+                        
+                        
+                        
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                api
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                database
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                sql
+                            </span>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/api/database/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/quick-start/" class="hover:text-blue-600">Quick Start Guide</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">Get up and running with Solobase in minutes</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>6 min read</span>
+                        </div>
+                        
+                        
+                        
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                quick-start
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                tutorial
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                getting-started
+                            </span>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/quick-start/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/dashboard/" class="hover:text-blue-600">Dashboard Overview</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">Understanding the Solobase admin dashboard interface</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>3 min read</span>
+                        </div>
+                        
+                        
+                        
+                        <div class="flex items-center space-x-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                dashboard
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                interface
+                            </span>
+                            
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                admin
+                            </span>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/dashboard/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+        <article class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                        <a href="http://localhost:1313/docs/search/" class="hover:text-blue-600">Search Documentation</a>
+                    </h2>
+                    
+                    
+                    <p class="text-gray-600 mb-4">Search through all Solobase documentation</p>
+                    
+                    
+                    
+                    <div class="flex items-center text-sm text-gray-500 space-x-4">
+                        
+                        
+                        
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>1 min read</span>
+                        </div>
+                        
+                        
+                        
+                    </div>
+                </div>
+                
+                
+                <div class="ml-4 flex-shrink-0">
+                    <a href="http://localhost:1313/docs/search/" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+        
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+                
+                
+                
+<nav class="flex justify-between items-center mt-12 pt-8 border-t border-gray-200">
+    
+    <div class="flex-1">
+        
+    </div>
+    
+    
+    <div class="flex-1 text-right">
+        
+    </div>
+</nav>
+            </main>
+            
+            
+            
+
+<aside class="hidden xl:block w-64 pl-8">
+    <div class="sticky top-8">
+        <h4 class="text-sm font-semibold text-gray-900 mb-4">On this page</h4>
+        <nav class="docs-toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#quick-navigation">Quick Navigation</a>
+      <ul>
+        <li><a href="#getting-started">Getting Started</a></li>
+        <li><a href="#user-guide">User Guide</a></li>
+        <li><a href="#api-reference">API Reference</a></li>
+        <li><a href="#deployment">Deployment</a></li>
+        <li><a href="#development">Development</a></li>
+      </ul>
+    </li>
+    <li><a href="#need-help">Need Help?</a></li>
+  </ul>
+</nav>
+        </nav>
+        
+        
+        
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <a 
+                href="https://github.com/user/solobase/edit/main/solobase-demo-site/content/docs/_index.md" 
+                class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit this page
+            </a>
+        </div>
+        
+        
+        
+        <div class="mt-4">
+            <button 
+                onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+                class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+            >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+                </svg>
+                Back to top
+            </button>
+        </div>
+    </div>
+</aside>
+
+        </div>
+    </div>
+    
+    
+    <footer class="bg-gray-900 text-white print-hidden">
+    <div class="container-responsive py-responsive">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            
+            <div class="col-span-1 sm:col-span-2 lg:col-span-2">
+                <div class="flex items-center space-x-2 mb-4 sm:mb-6">
+                    
+                    <img src="/images/solobase-logo.svg" alt="Solobase - Modern Admin Dashboard" class="h-8 w-auto sm:h-10">
+                    
+                    <span class="text-lg sm:text-xl font-bold">Solobase - Modern Admin Dashboard</span>
+                </div>
+                <p class="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed max-w-md">
+                    A modern, full-featured admin dashboard built with Svelte and Go
+                </p>
+                <div class="flex space-x-4">
+                    
+                    <a href="https://github.com/user/solobase" 
+                       class="text-gray-300 hover:text-white transition-all duration-200 hover:scale-110 focus-ring rounded-md p-1"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="View on GitHub">
+                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    
+                </div>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Quick Links</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    
+                    <li>
+                        <a href="/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Home
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/docs/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Documentation
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/demo/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Live Demo
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://github.com/user/solobase" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           target="_blank" rel="noopener noreferrer">
+                            GitHub
+                        </a>
+                    </li>
+                    
+                </ul>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Resources</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    <li>
+                        <a href="/docs/installation/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Installation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/configuration/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Configuration
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            API Reference
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Deployment
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="border-t border-gray-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-gray-300 text-sm sm:text-base text-center sm:text-left">
+                    © 2025 Solobase Team. All rights reserved.
+                </p>
+                <div class="flex items-center space-x-4 text-xs sm:text-sm text-gray-400">
+                    <span>Built with Hugo & Tailwind CSS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+    
+    
+    
+    
+        
+        <script src="http://localhost:1313/js/main.min.js"></script>
+    
+    
+    
+    
+    
+        
+        <script src="http://localhost:1313/js/search.min.js"></script>
+    
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+    
+    
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocLinks = document.querySelectorAll('.docs-toc a');
+            const headings = document.querySelectorAll('.docs-content h1, .docs-content h2, .docs-content h3, .docs-content h4, .docs-content h5, .docs-content h6');
+            
+            
+            function updateActiveTocLink() {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 100) {
+                        current = heading.id;
+                    }
+                });
+                
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', updateActiveTocLink);
+            updateActiveTocLink();
+        });
+    </script>
+    
+    
+    
+</body>
+</html>

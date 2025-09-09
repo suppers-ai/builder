@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navigation Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        button { margin: 5px; padding: 5px 10px; }
+        pre { background: #f0f0f0; padding: 10px; }
+        .path { font-weight: bold; color: blue; }
+        .folder { cursor: pointer; padding: 5px; background: #e0e0ff; margin: 2px; display: inline-block; }
+        .file { padding: 5px; background: #ffe0e0; margin: 2px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>SortedStorage Navigation Test</h1>
+    
+    <div class="section">
+        <h2>Current Path: <span class="path" id="currentPath">/</span></h2>
+        <button onclick="navigateTo('')">Root</button>
+        <button onclick="createTestStructure()">Create Test Structure</button>
+        <button onclick="refreshList()">Refresh</button>
+    </div>
+    
+    <div class="section">
+        <h2>Items:</h2>
+        <div id="items"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Debug Log:</h2>
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        let token = '';
+        let currentPath = '';
+        const API_URL = 'http://localhost:8091';
+        
+        function log(msg) {
+            const logEl = document.getElementById('log');
+            logEl.textContent = new Date().toISOString() + ' - ' + msg + '\n' + logEl.textContent;
+        }
+        
+        async function login() {
+            try {
+                const res = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@example.com', password: 'admin123' })
+                });
+                const data = await res.json();
+                token = data.token;
+                log('Logged in successfully');
+                return true;
+            } catch (e) {
+                log('Login failed: ' + e.message);
+                return false;
+            }
+        }
+        
+        async function listItems(path = '') {
+            log(`Listing items for path: "${path}"`);
+            
+            const url = new URL(`${API_URL}/api/storage/buckets/int_storage/objects`);
+            if (path) {
+                url.searchParams.append('path', path);
+            }
+            
+            log(`Request URL: ${url.toString()}`);
+            
+            try {
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                log(`Got ${data.length} items`);
+                
+                // Display items
+                const itemsEl = document.getElementById('items');
+                itemsEl.innerHTML = '';
+                
+                data.forEach(item => {
+                    const isFolder = item.content_type === 'application/x-directory' || item.isFolder;
+                    const div = document.createElement('div');
+                    div.className = isFolder ? 'folder' : 'file';
+                    div.textContent = item.name || item.key || 'unnamed';
+                    
+                    if (isFolder) {
+                        div.onclick = () => {
+                            const folderName = item.name || item.key?.split('/').filter(Boolean).pop();
+                            const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+                            navigateTo(newPath);
+                        };
+                    }
+                    
+                    itemsEl.appendChild(div);
+                });
+                
+                if (data.length === 0) {
+                    itemsEl.innerHTML = '<em>No items</em>';
+                }
+                
+                // Log raw data for debugging
+                log('Raw response: ' + JSON.stringify(data.slice(0, 3), null, 2));
+            } catch (e) {
+                log('List failed: ' + e.message);
+            }
+        }
+        
+        function navigateTo(path) {
+            currentPath = path;
+            document.getElementById('currentPath').textContent = path || '/';
+            listItems(path);
+        }
+        
+        async function createTestStructure() {
+            log('Creating test structure...');
+            
+            // Create folders
+            const folders = [
+                { name: 'Documents', path: '' },
+                { name: 'Projects', path: '' },
+                { name: 'Work', path: 'Documents' },
+                { name: 'Personal', path: 'Documents' },
+                { name: 'Code', path: 'Projects' },
+                { name: 'Design', path: 'Projects' }
+            ];
+            
+            for (const folder of folders) {
+                try {
+                    const res = await fetch(`${API_URL}/api/storage/buckets/int_storage/folders`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(folder)
+                    });
+                    const data = await res.json();
+                    log(`Created folder: ${folder.name} in ${folder.path || 'root'}`);
+                } catch (e) {
+                    log(`Failed to create ${folder.name}: ${e.message}`);
+                }
+            }
+            
+            refreshList();
+        }
+        
+        function refreshList() {
+            listItems(currentPath);
+        }
+        
+        // Initialize
+        (async () => {
+            if (await login()) {
+                refreshList();
+            }
+        })();
+    </script>
+</body>
+</html>

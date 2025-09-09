@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Interface on Solobase - Modern Admin Dashboard</title>
+    <link>http://localhost:1313/tags/interface/</link>
+    <description>Recent content in Interface on Solobase - Modern Admin Dashboard</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/tags/interface/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Dashboard Overview</title>
+      <link>http://localhost:1313/docs/dashboard/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/docs/dashboard/</guid>
+      <description>&lt;h1 id=&#34;dashboard-overview&#34;&gt;Dashboard Overview&lt;/h1&gt;&#xA;&lt;p&gt;The Solobase dashboard provides a comprehensive admin interface for managing your application. This guide covers all the main features and how to use them effectively.&lt;/p&gt;&#xA;&lt;h2 id=&#34;main-navigation&#34;&gt;Main Navigation&lt;/h2&gt;&#xA;&lt;p&gt;The dashboard is organized into several main sections:&lt;/p&gt;&#xA;&lt;h3 id=&#34;overview&#34;&gt;Overview&lt;/h3&gt;&#xA;&lt;p&gt;The main dashboard page shows:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;System statistics and health metrics&lt;/li&gt;&#xA;&lt;li&gt;Recent user activity&lt;/li&gt;&#xA;&lt;li&gt;Database usage statistics&lt;/li&gt;&#xA;&lt;li&gt;Storage usage information&lt;/li&gt;&#xA;&lt;li&gt;Quick action buttons&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;user-management&#34;&gt;User Management&lt;/h3&gt;&#xA;&lt;p&gt;Comprehensive user administration:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;View all users in a searchable table&lt;/li&gt;&#xA;&lt;li&gt;Create new user accounts&lt;/li&gt;&#xA;&lt;li&gt;Edit user profiles and permissions&lt;/li&gt;&#xA;&lt;li&gt;Manage user roles and access levels&lt;/li&gt;&#xA;&lt;li&gt;Reset passwords and manage authentication&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;database-browser&#34;&gt;Database Browser&lt;/h3&gt;&#xA;&lt;p&gt;Direct database access and management:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

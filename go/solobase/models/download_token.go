@@ -12,7 +12,8 @@ type DownloadToken struct {
 	Token        string    `gorm:"uniqueIndex;not null" json:"token"`
 	FileID       string    `gorm:"not null" json:"file_id"`
 	Bucket       string    `gorm:"not null" json:"bucket"`
-	ObjectKey    string    `gorm:"not null" json:"object_key"`
+	ParentFolderID *string `json:"parent_folder_id,omitempty"` // Parent folder ID (null for root)
+	ObjectName   string    `gorm:"not null" json:"object_name"` // The file name
 	UserID       string    `gorm:"type:uuid" json:"user_id"`
 	FileSize     int64     `json:"file_size"`
 	BytesServed  int64     `gorm:"default:0" json:"bytes_served"`
@@ -29,17 +30,18 @@ func (DownloadToken) TableName() string {
 }
 
 // NewDownloadToken creates a new download token
-func NewDownloadToken(fileID, bucket, objectKey, userID string, fileSize int64, duration time.Duration) *DownloadToken {
+func NewDownloadToken(fileID, bucket string, parentFolderID *string, objectName, userID string, fileSize int64, duration time.Duration) *DownloadToken {
 	return &DownloadToken{
-		ID:        uuid.New().String(),
-		Token:     uuid.New().String(), // Simple UUID token for now
-		FileID:    fileID,
-		Bucket:    bucket,
-		ObjectKey: objectKey,
-		UserID:    userID,
-		FileSize:  fileSize,
-		ExpiresAt: time.Now().Add(duration),
-		CreatedAt: time.Now(),
+		ID:         uuid.New().String(),
+		Token:      uuid.New().String(), // Simple UUID token for now
+		FileID:     fileID,
+		Bucket:     bucket,
+		ParentFolderID: parentFolderID,
+		ObjectName: objectName,
+		UserID:     userID,
+		FileSize:   fileSize,
+		ExpiresAt:  time.Now().Add(duration),
+		CreatedAt:  time.Now(),
 	}
 }
 

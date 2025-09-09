@@ -38,7 +38,7 @@
 			icon: File,
 			category: 'Navigation',
 			shortcut: 'Ctrl+1',
-			action: () => goto('/files')
+			action: () => goto('/')
 		},
 		{
 			id: 'nav-shared',
@@ -55,7 +55,7 @@
 			description: 'View recently accessed files',
 			icon: Clock,
 			category: 'Navigation',
-			action: () => goto('/files?view=recent')
+			action: () => goto('/?view=recent')
 		},
 		{
 			id: 'nav-starred',
@@ -63,7 +63,7 @@
 			description: 'View starred files',
 			icon: Star,
 			category: 'Navigation',
-			action: () => goto('/files?view=starred')
+			action: () => goto('/?view=starred')
 		},
 		{
 			id: 'nav-trash',
@@ -71,7 +71,7 @@
 			description: 'View deleted files',
 			icon: Trash,
 			category: 'Navigation',
-			action: () => goto('/files?view=trash')
+			action: () => goto('/?view=trash')
 		},
 		{
 			id: 'nav-settings',

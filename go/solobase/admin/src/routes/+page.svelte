@@ -1,20 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/stores/auth';
 	import { Shield, Database, HardDrive, Puzzle, Rocket, LogIn, UserPlus, User, LayoutDashboard } from 'lucide-svelte';
 
-	onMount(() => {
-		// Check if user is logged in and redirect accordingly
-		const currentUser = $authStore.user;
-		if (currentUser) {
-			if (currentUser.role === 'admin') {
-				goto('/admin');
-			} else {
-				goto('/profile');
-			}
-		}
-	});
+	// Removed automatic redirect - let users decide where to go
+	// This was causing issues with apps that embed Solobase
 </script>
 
 <svelte:head>
@@ -71,37 +60,6 @@
 					<h3>Getting Started</h3>
 				</div>
 				<p>This is the default Solobase landing page. When using Solobase as a package, you can override this with your own application.</p>
-			</div>
-			
-			<div class="features-grid">
-				<div class="feature">
-					<div class="feature-icon">
-						<Shield size={24} />
-					</div>
-					<h4>Authentication</h4>
-					<p>Built-in user management with roles and permissions</p>
-				</div>
-				<div class="feature">
-					<div class="feature-icon">
-						<HardDrive size={24} />
-					</div>
-					<h4>Storage</h4>
-					<p>File storage with local and S3 support</p>
-				</div>
-				<div class="feature">
-					<div class="feature-icon">
-						<Database size={24} />
-					</div>
-					<h4>Database</h4>
-					<p>Support for PostgreSQL and SQLite</p>
-				</div>
-				<div class="feature">
-					<div class="feature-icon">
-						<Puzzle size={24} />
-					</div>
-					<h4>Extensions</h4>
-					<p>Modular architecture with plugin support</p>
-				</div>
 			</div>
 		</div>
 	</div>

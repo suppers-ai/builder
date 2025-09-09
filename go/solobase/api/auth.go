@@ -42,7 +42,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func HandleLogin(authService *services.AuthService) http.HandlerFunc {
+func HandleLogin(authService *services.AuthService, storageService *services.StorageService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Login request received")
 		
@@ -60,6 +60,17 @@ func HandleLogin(authService *services.AuthService) http.HandlerFunc {
 			log.Printf("Authentication failed for %s: %v", req.Email, err)
 			respondWithError(w, http.StatusUnauthorized, "Invalid credentials")
 			return
+		}
+
+		// Ensure user has a "My Files" folder
+		if storageService != nil {
+			myFilesFolderID, err := storageService.EnsureUserMyFilesFolder(user.ID.String())
+			if err != nil {
+				// Log the error but don't fail the login
+				log.Printf("Warning: Failed to ensure My Files folder for user %s: %v", user.Email, err)
+			} else {
+				log.Printf("Ensured My Files folder for user %s with ID %s", user.Email, myFilesFolderID)
+			}
 		}
 
 		// Generate JWT token

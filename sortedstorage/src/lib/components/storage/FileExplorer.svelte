@@ -6,6 +6,7 @@
 	} from 'lucide-svelte';
 	import NewItemModal from './NewItemModal.svelte';
 	import EditItemModal from './EditItemModal.svelte';
+	import ShareModal from './ShareModal.svelte';
 	import AuthenticatedImage from './AuthenticatedImage.svelte';
 	import type { StorageItem } from '$lib/types/storage';
 	
@@ -14,13 +15,16 @@
 	export let items: StorageItem[] = [];
 	export let currentPath: string[] = ['Home'];
 	export let onNavigate: (path: string[]) => void = () => {};
+	export let onNavigateToFolder: (folder: StorageItem) => void = () => {};
 	export let onEdit: (item: StorageItem) => void = () => {};
 	export let onDelete: (item: StorageItem) => void = () => {};
 	export let onShare: (item: StorageItem) => void = () => {};
 	
 	let showNewModal = false;
 	let showEditModal = false;
+	let showShareModal = false;
 	let editingItem: StorageItem | null = null;
+	let sharingItem: StorageItem | null = null;
 	let activeDropdown: string | null = null;
 	
 	// Separate items by type
@@ -52,6 +56,12 @@
 		if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
 			onDelete(item);
 		}
+		activeDropdown = null;
+	}
+	
+	function handleShare(item: StorageItem) {
+		sharingItem = item;
+		showShareModal = true;
 		activeDropdown = null;
 	}
 	
@@ -96,21 +106,6 @@
 				{/if}
 			{/each}
 		</div>
-		
-		<div class="header-actions">
-			<button class="action-btn" title="Edit">
-				<Edit size={18} />
-				<span>EDIT</span>
-			</button>
-			<button class="action-btn" title="Share">
-				<Share2 size={18} />
-				<span>SHARE</span>
-			</button>
-			<button class="action-btn primary" on:click={() => showNewModal = true} title="New">
-				<Plus size={18} />
-				<span>NEW</span>
-			</button>
-		</div>
 	</div>
 	
 	<!-- Media Section -->
@@ -138,6 +133,10 @@
 									<button on:click={() => handleEdit(item)}>
 										<Edit size={14} />
 										<span>Edit</span>
+									</button>
+									<button on:click={() => handleShare(item)}>
+										<Share2 size={14} />
+										<span>Share</span>
 									</button>
 									<button on:click={() => handleDelete(item)} class="danger">
 										<Trash size={14} />
@@ -176,6 +175,10 @@
 										<Edit size={14} />
 										<span>Edit</span>
 									</button>
+									<button on:click={() => handleShare(item)}>
+										<Share2 size={14} />
+										<span>Share</span>
+									</button>
 									<button on:click={() => handleDelete(item)} class="danger">
 										<Trash size={14} />
 										<span>Delete</span>
@@ -195,11 +198,19 @@
 			<h3 class="section-title">Folders</h3>
 			<div class="items-list">
 				{#each folderItems as item}
-					<div class="list-item" on:dblclick={() => onNavigate([...currentPath, item.name])}>
-						<div class="item-info">
+					<div class="list-item folder-item" on:dblclick={() => {
+						if (onNavigateToFolder) {
+							onNavigateToFolder(item);
+						}
+					}}>
+						<button class="item-info folder-link" on:click={() => {
+							if (onNavigateToFolder) {
+								onNavigateToFolder(item);
+							}
+						}}>
 							<span class="item-icon">{item.icon || '📁'}</span>
 							<span class="item-name">{item.name}</span>
-						</div>
+						</button>
 						<div class="item-actions dropdown-container">
 							<button 
 								class="item-menu-btn"
@@ -212,6 +223,10 @@
 									<button on:click={() => handleEdit(item)}>
 										<Edit size={14} />
 										<span>Edit</span>
+									</button>
+									<button on:click={() => handleShare(item)}>
+										<Share2 size={14} />
+										<span>Share</span>
 									</button>
 									<button on:click={() => handleDelete(item)} class="danger">
 										<Trash size={14} />
@@ -231,7 +246,7 @@
 		<div class="empty-state">
 			<Folder size={48} />
 			<p>This folder is empty</p>
-			<button class="action-btn primary" on:click={() => showNewModal = true}>
+			<button class="empty-state-btn" on:click={() => showNewModal = true}>
 				<Plus size={18} />
 				<span>Add files or folders</span>
 			</button>
@@ -246,6 +261,12 @@
 		bind:open={showEditModal} 
 		item={editingItem}
 		on:update={handleUpdateItem}
+	/>
+{/if}
+{#if sharingItem}
+	<ShareModal 
+		bind:open={showShareModal} 
+		item={sharingItem}
 	/>
 {/if}
 
@@ -270,6 +291,7 @@
 		justify-content: space-between;
 		align-items: center;
 		padding-bottom: 1rem;
+		padding-top: 0.5rem;
 		border-bottom: 1px solid var(--border-color);
 	}
 	
@@ -306,42 +328,6 @@
 	.breadcrumb-separator {
 		color: var(--text-muted);
 		opacity: 0.5;
-	}
-	
-	.header-actions {
-		display: flex;
-		gap: 0.75rem;
-	}
-	
-	.action-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background: white;
-		border: 1px solid var(--border-color);
-		border-radius: 6px;
-		color: var(--text-primary);
-		cursor: pointer;
-		transition: all 0.2s;
-		font-size: 0.875rem;
-		font-weight: 500;
-	}
-	
-	.action-btn:hover {
-		background: var(--hover-bg);
-		border-color: var(--primary-color);
-	}
-	
-	.action-btn.primary {
-		background: var(--primary-color);
-		color: white;
-		border-color: var(--primary-color);
-	}
-	
-	.action-btn.primary:hover {
-		background: var(--primary-hover);
-		border-color: var(--primary-hover);
 	}
 	
 	.section {
@@ -443,6 +429,28 @@
 		min-width: 0;
 	}
 	
+	/* Make folder links clickable */
+	button.folder-link {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		flex: 1;
+		min-width: 0;
+		text-align: left;
+	}
+	
+	button.folder-link:hover {
+		opacity: 0.8;
+	}
+	
+	.folder-item .item-info {
+		color: var(--primary-color);
+	}
+	
 	.item-icon {
 		font-size: 1.25rem;
 		flex-shrink: 0;
@@ -533,11 +541,31 @@
 		margin: 0;
 	}
 	
-	/* CSS Variables */
+	.empty-state-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: var(--primary-color);
+		color: white;
+		border: 1px solid var(--primary-color);
+		border-radius: 6px;
+		cursor: pointer;
+		transition: all 0.2s;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+	
+	.empty-state-btn:hover {
+		background: var(--primary-hover);
+		border-color: var(--primary-hover);
+	}
+	
+	/* CSS Variables - using brand colors */
 	:global(:root) {
-		--border-color: #e2e8f0;
-		--hover-bg: #f7fafc;
-		--bg-secondary: #f8f9fa;
+		--border-color: var(--color-tertiary, #f1e2dd);
+		--hover-bg: var(--color-tertiary, #f1e2dd);
+		--bg-secondary: var(--color-secondary, #FBD680);
 		--danger-color: #e53e3e;
 	}
 </style>

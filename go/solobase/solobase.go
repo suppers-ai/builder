@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -218,6 +219,27 @@ func (app *App) Initialize() error {
 	// Set JWT secret
 	api.SetJWTSecret(app.config.JWTSecret)
 
+	// Ensure .data directory exists for SQLite databases
+	// We need to get the database URL from the parsed config or from NewWithOptions
+	// The database URL is set up during New/NewWithOptions
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		dbURL = "file:./.data/solobase.db"
+	}
+	
+	if app.config.Database.Type == "sqlite" && dbURL != "" {
+		// Extract directory from database path (e.g., file:./.data/solobase.db -> ./.data)
+		dbPath := dbURL
+		if strings.HasPrefix(dbPath, "file:") {
+			dbPath = strings.TrimPrefix(dbPath, "file:")
+		}
+		if dir := filepath.Dir(dbPath); dir != "" && dir != "." {
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				return fmt.Errorf("failed to create database directory: %w", err)
+			}
+		}
+	}
+
 	// Initialize database
 	log.Printf("Initializing database with type: %s", app.config.Database.Type)
 	db, err := database.New(app.config.Database)
@@ -378,15 +400,17 @@ func (app *App) Start() error {
 		app.extensionManager.GetRegistry(),
 	)
 
-	// Register extension routes
+	// IMPORTANT: Register more specific routes first
+	
+	// API routes
+	app.router.PathPrefix("/api").Handler(http.StripPrefix("/api", apiRouter))
+	
+	// Extension routes - MUST be registered before catch-all routes
 	app.extensionManager.RegisterRoutes(app.router)
 
 	// Register admin extension management routes
 	adminExtHandler := admin.NewExtensionsHandler(app.extensionManager, app.services.Logger)
 	adminExtHandler.RegisterRoutes(app.router)
-
-	// API routes
-	app.router.PathPrefix("/api").Handler(http.StripPrefix("/api", apiRouter))
 
 	// Storage files
 	storageDir := "./.data/storage/"
@@ -398,7 +422,7 @@ func (app *App) Start() error {
 		app.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
 	}
 
-	// Admin UI routes (if not disabled)
+	// Admin UI routes (if not disabled) - These are catch-all routes so must come LAST
 	if !app.config.DisableAdminUI {
 		// Serve auth pages at root level
 		app.router.PathPrefix("/auth/").Handler(app.ServeAdmin())
@@ -408,7 +432,7 @@ func (app *App) Start() error {
 		app.router.PathPrefix("/admin/").Handler(app.ServeAdmin())
 		
 		// Serve root last as catch-all for the main dashboard
-		// Note: This must come after more specific routes
+		// Note: This must come after ALL other routes
 		app.router.PathPrefix("/").Handler(app.ServeAdmin())
 	}
 

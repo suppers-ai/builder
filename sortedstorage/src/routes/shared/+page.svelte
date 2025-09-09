@@ -141,7 +141,7 @@
 				<div class="text-center py-12">
 					<Link class="w-12 h-12 text-gray-400 mx-auto mb-4" />
 					<p class="text-gray-500">You haven't shared any files yet</p>
-					<Button href="/files" variant="primary" class="mt-4">
+					<Button href="/" variant="primary" class="mt-4">
 						Go to Files
 					</Button>
 				</div>

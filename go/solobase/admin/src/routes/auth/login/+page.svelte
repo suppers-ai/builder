@@ -21,40 +21,30 @@
 		const success = await auth.login(loginEmail, loginPassword);
 		
 		if (success) {
-			// Check for redirect parameter first
+			// Always check for redirect parameter first
 			if (redirectTo) {
+				console.log('Redirecting to:', redirectTo);
 				// Handle both absolute and relative URLs
 				if (redirectTo.startsWith('http')) {
 					// Absolute URL - navigate directly
 					window.location.href = redirectTo;
+					return; // Ensure we don't continue
 				} else {
 					// Relative URL - use goto
-					goto(redirectTo);
+					await goto(redirectTo);
+					return; // Ensure we don't continue
 				}
 			} else {
-				// Default redirect to /files for SortedStorage integration
-				// Check if /files route exists (SortedStorage), otherwise use default admin/profile
-				if (window.location.pathname === '/auth/login') {
-					// We're on the login page, likely came from SortedStorage
-					goto('/files');
-				} else {
-					// Fallback to role-based redirect
-					const authState = get(auth);
-					const user = authState.user;
-					
-					if (user && user.role === 'admin') {
-						goto('/admin');
-					} else {
-						goto('/profile');
-					}
-				}
+				// Default redirect to home page
+				console.log('No redirect param, going to /');
+				await goto('/');
+				return;
 			}
 		} else {
 			const authState = get(auth);
 			error = authState.error || 'Invalid email or password';
+			loading = false;
 		}
-		
-		loading = false;
 	}
 </script>
 

@@ -57,22 +57,28 @@ export interface StorageStats {
 // Convert Solobase object format to FileItem/FolderItem
 function convertSolobaseObject(obj: any): FileItem | FolderItem {
 	// Check if it's a folder based on Solobase response
+	// Handle both list format (isFolder, type) and raw database format (content_type, size)
 	const isFolder = obj.isFolder || obj.type === 'folder' || 
 		(obj.fullPath && obj.fullPath.endsWith('/')) ||
-		obj.content_type === 'application/x-directory';
+		obj.content_type === 'application/x-directory' ||
+		(obj.object_path !== undefined && obj.object_name && !obj.size); // Raw format: folders have no size
 	
-	const name = obj.name || obj.key || obj.fullPath?.split('/').filter(Boolean).pop() || 'unknown';
+	// Get the name - handle both list format and raw database format
+	const name = obj.object_name || obj.name || obj.key || obj.fullPath?.split('/').filter(Boolean).pop() || 'unknown';
+	
+	// Get parent ID - handle both formats (parent_folder_id is the raw format field)
+	const parentId = obj.parent_folder_id || obj.parent_id || null;
 	
 	if (isFolder) {
 		return {
-			id: obj.id || obj.fullPath || name,
+			id: obj.id || obj.ID || obj.fullPath || name,
 			name: name,
-			type: 'folder',
-			path: obj.path || '/',
-			parentId: obj.parent_id || null,
+			type: 'folder' as const,
+			path: obj.object_path || obj.path || '/',
+			parentId: parentId,
 			createdAt: new Date(obj.created_at || obj.modified || Date.now()),
-			modifiedAt: new Date(obj.modified || obj.updated_at || Date.now()),
-			owner: obj.owner || 'user',
+			modifiedAt: new Date(obj.updated_at || obj.modified || Date.now()),
+			owner: obj.user_id || obj.owner || 'user',
 			permissions: ['read', 'write'],
 			shared: obj.public || false,
 			itemCount: 0
@@ -80,21 +86,21 @@ function convertSolobaseObject(obj: any): FileItem | FolderItem {
 	}
 	
 	return {
-		id: obj.id || obj.key || name,
+		id: obj.id || obj.ID || obj.key || name,
 		name: name,
 		type: 'file',
-		path: obj.path || '/',
-		parentId: obj.parent_id || null,
+		path: obj.object_path || obj.path || '/',
+		parentId: parentId,
 		size: obj.size_bytes || obj.size || 0,
 		mimeType: obj.content_type || 'application/octet-stream',
 		extension: name.split('.').pop() || '',
 		createdAt: new Date(obj.created_at || obj.modified || Date.now()),
-		modifiedAt: new Date(obj.modified || obj.updated_at || Date.now()),
-		owner: obj.owner || 'user',
+		modifiedAt: new Date(obj.updated_at || obj.modified || Date.now()),
+		owner: obj.user_id || obj.owner || 'user',
 		permissions: ['read', 'write'],
 		shared: obj.public || false,
 		thumbnail: null,
-		downloadUrl: `/api/storage/buckets/${STORAGE_BUCKET}/objects/${obj.id || name}/download`
+		downloadUrl: `/api/storage/buckets/${STORAGE_BUCKET}/objects/${obj.id || obj.ID || name}/download`
 	} as FileItem;
 }
 
@@ -107,15 +113,28 @@ class StorageAPI {
 	 */
 	async listFiles(options: ListFilesOptions = {}): Promise<PaginatedResponse<FileItem | FolderItem>> {
 		ensureToken(); // Ensure token is set before making request
+		console.log('listFiles called with path:', options.path, 'parentId:', options.parentId);
 		try {
 			// Get objects from Solobase bucket
+			// Use parent_folder_id for subfolder filtering, path for root
+			const params: any = {};
+			if (options.parentId) {
+				// If we have a parentId, use it to filter
+				params.parent_folder_id = options.parentId;
+			} else if (options.path !== undefined) {
+				// Otherwise use path (for root, send empty string)
+				params.path = options.path;
+			}
+			console.log('Sending request with params:', params);
 			const response = await apiClient.get(
 				`${this.basePath}/buckets/${this.bucket}/objects`,
-				{ path: options.path || '/' }
+				params
 			);
 			
+			console.log('Got response with', response?.length || 0, 'items');
 			// Convert Solobase format to our format
 			const items = (response || []).map((obj: any) => convertSolobaseObject(obj));
+			console.log('Converted to', items.length, 'items:', items.map(i => ({ name: i.name, type: i.type, path: i.path, parentId: i.parentId })));
 			
 			return {
 				items,
@@ -140,11 +159,55 @@ class StorageAPI {
 	/**
 	 * Get file/folder details
 	 */
-	async getItem(id: string): Promise<FileItem | FolderItem> {
-		const response = await apiClient.get(
-			`${this.basePath}/buckets/${this.bucket}/objects/${id}`
-		);
-		return convertSolobaseObject(response);
+	async getItem(id: string): Promise<FileItem | FolderItem | null> {
+		try {
+			ensureToken();
+			const response = await apiClient.get(
+				`${this.basePath}/buckets/${this.bucket}/objects/${id}`
+			);
+			return convertSolobaseObject(response);
+		} catch (error) {
+			console.error('Failed to get item:', error);
+			return null;
+		}
+	}
+
+	/**
+	 * List items in a specific folder by folder ID
+	 */
+	async listItemsInFolder(folderId: string): Promise<(FileItem | FolderItem)[]> {
+		try {
+			ensureToken();
+			// List items with parent_folder_id matching this folder
+			const response = await apiClient.get(
+				`${this.basePath}/buckets/${this.bucket}/objects?parent_folder_id=${folderId}`
+			);
+			
+			// Convert response items
+			const items = response.map((item: any) => convertSolobaseObject(item));
+			return items.filter((item): item is FileItem | FolderItem => item !== null);
+		} catch (error) {
+			console.error('Failed to list items in folder:', error);
+			return [];
+		}
+	}
+
+	/**
+	 * Get folder hierarchy (for breadcrumbs)
+	 */
+	async getFolderHierarchy(folderId: string): Promise<FolderItem[]> {
+		const hierarchy: FolderItem[] = [];
+		let currentId: string | null = folderId;
+		
+		while (currentId) {
+			const item = await this.getItem(currentId);
+			if (!item || item.type !== 'folder') break;
+			
+			hierarchy.unshift(item as FolderItem);
+			currentId = item.parentId;
+		}
+		
+		return hierarchy;
 	}
 
 	/**
@@ -152,12 +215,16 @@ class StorageAPI {
 	 */
 	async uploadFile(file: File, options: UploadOptions = {}): Promise<FileItem> {
 		ensureToken(); // Ensure token is set before making request
-		console.log('uploadFile called:', { fileName: file.name, size: file.size, path: options.path });
+		console.log('uploadFile called:', { fileName: file.name, size: file.size, path: options.path, parentId: options.parentId });
 		
 		const formData = new FormData();
 		formData.append('file', file);
 		if (options.path) {
 			formData.append('path', options.path);
+		}
+		// Add parent_folder_id if provided
+		if (options.parentId) {
+			formData.append('parent_folder_id', options.parentId);
 		}
 		
 		const uploadUrl = `${this.basePath}/buckets/${this.bucket}/upload`;
@@ -319,23 +386,28 @@ class StorageAPI {
 		parentId?: string
 	): Promise<FolderItem> {
 		ensureToken(); // Ensure token is set before making request
+		const body: any = {
+			name,
+			path: parentPath
+		};
+		// Add parent_folder_id if provided
+		if (parentId) {
+			body.parent_folder_id = parentId;
+		}
 		const response = await apiClient.post(
 			`${this.basePath}/buckets/${this.bucket}/folders`,
-			{
-				name,
-				path: parentPath
-			}
+			body
 		);
 		
-		// Convert response to FolderItem
+		// Convert response to FolderItem using the new response structure
 		return {
-			id: response.folder || name,
-			name: name,
+			id: response.id || response.folder || name,
+			name: response.name || name,
 			type: 'folder',
-			path: parentPath,
-			parentId: parentId || null,
-			createdAt: new Date(),
-			modifiedAt: new Date(),
+			path: response.object_path || parentPath,
+			parentId: response.parent_folder_id || parentId || null,
+			createdAt: response.created_at ? new Date(response.created_at) : new Date(),
+			modifiedAt: response.created_at ? new Date(response.created_at) : new Date(),
 			owner: 'user',
 			permissions: ['read', 'write'],
 			shared: false,
@@ -466,6 +538,55 @@ class StorageAPI {
 	async restoreFromTrash(ids: string[]): Promise<void> {
 		// This would need to be implemented in Solobase
 		console.log('Restoring from trash:', ids);
+	}
+
+	/**
+	 * Create a share for a file or folder
+	 */
+	async createShare(shareData: {
+		object_id: string;
+		shared_with_email?: string;
+		is_public?: boolean;
+		permission_level: 'view' | 'edit' | 'admin';
+		inherit_to_children?: boolean;
+		expires_at?: Date | null;
+	}): Promise<any> {
+		ensureToken();
+		return apiClient.post('/api/shares', shareData);
+	}
+
+	/**
+	 * Get all shares created by the current user
+	 */
+	async getShares(): Promise<any[]> {
+		ensureToken();
+		return apiClient.get('/api/shares');
+	}
+
+	/**
+	 * Remove a share
+	 */
+	async removeShare(shareId: string): Promise<void> {
+		ensureToken();
+		return apiClient.delete(`/api/shares/${shareId}`);
+	}
+
+	/**
+	 * Get shared items (items shared with the current user)
+	 */
+	async getSharedWithMe(): Promise<any[]> {
+		ensureToken();
+		// For now, return empty array as we don't have this endpoint yet
+		return [];
+	}
+
+	/**
+	 * Get items shared by the current user
+	 */
+	async getMyShares(): Promise<any[]> {
+		ensureToken();
+		// Use the same endpoint as getShares
+		return apiClient.get('/api/shares');
 	}
 }
 

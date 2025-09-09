@@ -28,17 +28,24 @@ func main() {
 		DisableAdminUI:       false, // We want to keep the admin UI
 	})
 
+	// Initialize the app to get the database
+	if err := app.Initialize(); err != nil {
+		log.Fatal(err)
+	}
+
 	// Add OnServe hook to serve SortedStorage frontend
 	app.OnServe().BindFunc(func(se *solobase.ServeEvent) error {
 		// Serve SortedStorage frontend for root routes
 		// Note: This should be registered AFTER all API routes
 		// to ensure API routes take precedence
 		se.Router.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Skip API, auth, admin, profile, and storage routes - these are handled by Solobase
+			
+			// Skip all API routes, auth, admin, profile, extension, and storage routes - these are handled by Solobase
 			if strings.HasPrefix(r.URL.Path, "/api/") || 
 			   strings.HasPrefix(r.URL.Path, "/auth/") ||
 			   strings.HasPrefix(r.URL.Path, "/admin/") || 
 			   strings.HasPrefix(r.URL.Path, "/profile") ||
+			   strings.HasPrefix(r.URL.Path, "/ext/") ||
 			   strings.HasPrefix(r.URL.Path, "/storage/") ||
 			   strings.HasPrefix(r.URL.Path, "/_app/") {
 				// These paths should not be served by the frontend handler

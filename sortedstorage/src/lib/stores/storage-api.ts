@@ -33,6 +33,7 @@ interface UploadQueueItem {
 	id: string;
 	file: File;
 	path: string;
+	parentId?: string; // Add parentId field
 	progress: number;
 	status: 'pending' | 'uploading' | 'completed' | 'error';
 	error?: string;
@@ -44,7 +45,7 @@ class StorageStoreAPI {
 	private store = writable<StorageState>({
 		files: [],
 		folders: [],
-		currentPath: '/',
+		currentPath: '',
 		selectedItems: [],
 		searchQuery: '',
 		sortBy: 'name',
@@ -155,10 +156,10 @@ class StorageStoreAPI {
 	});
 
 	/**
-	 * Load files for current path
+	 * Load files for current path or folder
 	 */
-	async loadFiles(path?: string): Promise<void> {
-		const targetPath = path || get(this.store).currentPath;
+	async loadFiles(pathOrId?: string): Promise<void> {
+		const targetPath = pathOrId || get(this.store).currentPath;
 		
 		this.store.update(state => ({
 			...state,
@@ -168,8 +169,12 @@ class StorageStoreAPI {
 		}));
 
 		try {
+			// Check if pathOrId is a folder ID (UUIDs have specific format)
+			const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetPath);
+			
 			const response = await apiClient.listFiles({
-				path: targetPath,
+				// If it's a UUID, use parentId, otherwise use path
+				...(isUUID ? { parentId: targetPath } : { path: targetPath }),
 				sortBy: get(this.store).sortBy,
 				sortOrder: get(this.store).sortOrder
 			});
@@ -194,16 +199,18 @@ class StorageStoreAPI {
 	}
 
 	/**
-	 * Upload files
+	 * Upload files - matches the signature of the base StorageAPI
 	 */
-	async uploadFiles(files: File[], path?: string): Promise<void> {
-		const targetPath = path || get(this.store).currentPath;
+	async uploadFiles(files: File[], options: { parentId?: string } = {}): Promise<void> {
+		const currentPath = get(this.store).currentPath;
+		console.log('[storage-api.ts] uploadFiles called with options:', options, 'currentPath:', currentPath);
 
 		// Add files to upload queue
 		const queueItems: UploadQueueItem[] = files.map(file => ({
 			id: Math.random().toString(36).substr(2, 9),
 			file,
-			path: targetPath,
+			path: currentPath,
+			parentId: options.parentId, // Extract parentId from options
 			progress: 0,
 			status: 'pending' as const
 		}));
@@ -233,6 +240,7 @@ class StorageStoreAPI {
 			// Upload file
 			const uploadedFile = await apiClient.uploadFile(item.file, {
 				path: item.path,
+				parentId: item.parentId, // Pass parentId to API
 				onProgress: (progress) => {
 					this.updateUploadItem(item.id, { progress });
 				}
@@ -311,11 +319,11 @@ class StorageStoreAPI {
 	/**
 	 * Create folder
 	 */
-	async createFolder(name: string, path?: string): Promise<boolean> {
+	async createFolder(name: string, path?: string, parentId?: string): Promise<boolean> {
 		const targetPath = path || get(this.store).currentPath;
 
 		try {
-			const folder = await apiClient.createFolder(name, targetPath);
+			const folder = await apiClient.createFolder(name, targetPath, parentId);
 			
 			this.store.update(state => ({
 				...state,
@@ -331,7 +339,18 @@ class StorageStoreAPI {
 	}
 
 	/**
-	 * Rename item
+	 * Update item (currently only supports renaming)
+	 */
+	async updateItem(id: string, updates: any): Promise<boolean> {
+		// For now, we only support name updates
+		if (updates.name) {
+			return this.renameItem(id, updates.name);
+		}
+		return false;
+	}
+
+	/**
+	 * Rename item (also available as 'rename' for compatibility)
 	 */
 	async renameItem(id: string, newName: string): Promise<boolean> {
 		try {
@@ -361,6 +380,13 @@ class StorageStoreAPI {
 			notifications.error('Failed to rename', error.message);
 			return false;
 		}
+	}
+
+	/**
+	 * Rename item (alias for compatibility with StorageAPI)
+	 */
+	async rename(id: string, newName: string): Promise<boolean> {
+		return this.renameItem(id, newName);
 	}
 
 	/**

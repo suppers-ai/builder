@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en-us" class="scroll-smooth">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#2563eb">
+    
+    <title>Live Demo | Solobase - Modern Admin Dashboard</title>
+    <meta name="description" content="Try Solobase in a live, interactive demo environment">
+    <meta name="author" content="Solobase Team">
+    <meta name="generator" content="Hugo 0.138.0">
+    
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:1313/demo/">
+    <meta property="og:title" content="Live Demo | Solobase - Modern Admin Dashboard">
+    <meta property="og:description" content="Try Solobase in a live, interactive demo environment">
+    <meta property="og:site_name" content="Solobase - Modern Admin Dashboard">
+    
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="http://localhost:1313/demo/">
+    <meta name="twitter:title" content="Live Demo | Solobase - Modern Admin Dashboard">
+    <meta name="twitter:description" content="Try Solobase in a live, interactive demo environment">
+    
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.ico">
+    
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    
+    
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="http://localhost:1313/css/main.css" >
+    <link rel="stylesheet" href="/css/minimalist.css">
+    <style>
+         
+        * {
+            font-family: 'Itim', cursive !important;
+        }
+        body {
+            font-family: 'Itim', cursive !important;
+        }
+        h1, h2, h3, h4, h5, h6, p, a, span, div, button, input, select, textarea {
+            font-family: 'Itim', cursive !important;
+        }
+        code, pre {
+            font-family: 'Itim', monospace !important;
+        }
+    </style>
+    
+    
+    <link rel="preload" href="http://localhost:1313/css/main.css" as="style">
+    <link rel="dns-prefetch" href="https://demo.solobase.dev">
+    
+    
+    <link rel="manifest" href="/manifest.json">
+    
+    
+    
+</head>
+<body class="bg-gray-50 text-gray-900">
+    
+    <header style="background: white; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 40;">
+    <nav class="container max-w-6xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+            
+            <div class="flex items-center">
+                <a href="http://localhost:1313/" class="flex items-center space-x-2">
+                    <i data-lucide="database" style="width: 32px; height: 32px; color: #06b6d4;"></i>
+                    <span style="font-size: 1.25rem; font-weight: 600; color: #1f2937; font-family: 'Itim', cursive;">Solobase</span>
+                </a>
+            </div>
+            
+            
+            <div class="hidden md:flex items-center space-x-6">
+                
+                <a href="/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Home
+                </a>
+                
+                <a href="/docs/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Documentation
+                </a>
+                
+                <a href="/demo/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Live Demo
+                </a>
+                
+                <a href="https://github.com/user/solobase" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   target="_blank" rel="noopener noreferrer">
+                    GitHub
+                </a>
+                
+            </div>
+            
+            
+            <div class="md:hidden">
+                <button type="button" 
+                        id="mobile-menu-button"
+                        style="padding: 0.5rem; color: #6b7280;"
+                        onclick="toggleMobileMenu()">
+                    <svg id="menu-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="close-icon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <div id="mobile-menu" class="hidden md:hidden" style="background: white; border-top: 1px solid #e5e7eb;">
+        <nav class="px-6 py-4">
+            
+            <a href="/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Home
+            </a>
+            
+            <a href="/docs/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Documentation
+            </a>
+            
+            <a href="/demo/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Live Demo
+            </a>
+            
+            <a href="https://github.com/user/solobase" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               target="_blank" rel="noopener noreferrer">
+                GitHub
+            </a>
+            
+        </nav>
+    </div>
+</header>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+    } else {
+        menu.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+    }
+}
+</script>
+    
+    
+    <main>
+        
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Live Demo</h1>
+        
+        <p class="text-xl text-gray-600">Try Solobase in a live, interactive demo environment</p>
+        
+    </header>
+    
+    
+    <div class="prose prose-lg max-w-none mb-12">
+        <h1 id="interactive-demo-instructions">Interactive Demo Instructions</h1>
+<p>Welcome to the Solobase live demo! This fully functional instance runs in a secure container, allowing you to explore all features without any installation. Use the guided tour above to get started, or dive right in using the credentials below.</p>
+<h2 id="demo-credentials">Demo Credentials</h2>
+<p>Use these credentials to log into the demo environment:</p>
+<ul>
+<li><strong>Email</strong>: <code>demo@solobase.dev</code></li>
+<li><strong>Password</strong>: <code>demo123</code></li>
+</ul>
+<h2 id="key-features-to-explore">Key Features to Explore</h2>
+<h3 id="-dashboard-overview">🏠 Dashboard Overview</h3>
+<p>Start with the main dashboard to get an overview of the system. You&rsquo;ll see:</p>
+<ul>
+<li>System statistics and metrics</li>
+<li>Recent user activity</li>
+<li>Quick access to key functions</li>
+<li>Responsive design that works on all devices</li>
+</ul>
+<h3 id="-user-management">👥 User Management</h3>
+<p>Explore the comprehensive user management system:</p>
+<ul>
+<li><strong>View Users</strong>: Browse the list of demo users with different roles</li>
+<li><strong>User Profiles</strong>: Click on users to view detailed profiles</li>
+<li><strong>Role Management</strong>: See how different permission levels work</li>
+<li><strong>Authentication</strong>: Test login/logout functionality</li>
+</ul>
+<h3 id="-database-browser">🗄️ Database Browser</h3>
+<p>Experience the powerful database management tools:</p>
+<ul>
+<li><strong>Table Browser</strong>: Navigate through database tables and relationships</li>
+<li><strong>Query Interface</strong>: Execute read-only SQL queries to explore data</li>
+<li><strong>Data Visualization</strong>: View data in formatted tables with sorting and filtering</li>
+<li><strong>Schema Explorer</strong>: Understand the database structure</li>
+</ul>
+<h3 id="-file-storage">📁 File Storage</h3>
+<p>Test the integrated file management system:</p>
+<ul>
+<li><strong>File Upload</strong>: Try uploading sample files (images, documents)</li>
+<li><strong>Folder Organization</strong>: Create and organize folders</li>
+<li><strong>File Preview</strong>: View uploaded files with built-in preview</li>
+<li><strong>Storage Management</strong>: Monitor storage usage and organization</li>
+</ul>
+<h3 id="-settings--configuration">⚙️ Settings &amp; Configuration</h3>
+<p>Explore system configuration options:</p>
+<ul>
+<li><strong>System Settings</strong>: View and modify system preferences</li>
+<li><strong>User Preferences</strong>: Customize the interface and behavior</li>
+<li><strong>Security Settings</strong>: Review authentication and security options</li>
+<li><strong>Integration Options</strong>: See available third-party integrations</li>
+</ul>
+<h2 id="demo-environment-details">Demo Environment Details</h2>
+<h3 id="session-information">Session Information</h3>
+<ul>
+<li><strong>Duration</strong>: 30 minutes of active use</li>
+<li><strong>Auto-refresh</strong>: The session extends with activity</li>
+<li><strong>Warning</strong>: You&rsquo;ll receive a 5-minute warning before expiry</li>
+<li><strong>Data Reset</strong>: All changes reset when the session ends</li>
+</ul>
+<h3 id="security--limitations">Security &amp; Limitations</h3>
+<ul>
+<li><strong>Isolated Environment</strong>: Your session is completely isolated from other users</li>
+<li><strong>Read-Only Operations</strong>: Some destructive operations are disabled for safety</li>
+<li><strong>Resource Limits</strong>: CPU and memory usage are limited for fair access</li>
+<li><strong>Network Restrictions</strong>: External network access is restricted for security</li>
+</ul>
+<h3 id="technical-specifications">Technical Specifications</h3>
+<ul>
+<li><strong>Container Technology</strong>: Docker-based isolation</li>
+<li><strong>Database</strong>: SQLite with sample data</li>
+<li><strong>Storage</strong>: Temporary file system (resets on restart)</li>
+<li><strong>Performance</strong>: Optimized for demonstration purposes</li>
+</ul>
+<h2 id="getting-help">Getting Help</h2>
+<h3 id="guided-tour">Guided Tour</h3>
+<p>Click the &ldquo;Start Guided Tour&rdquo; button above for a step-by-step walkthrough of key features.</p>
+<h3 id="quick-actions">Quick Actions</h3>
+<p>Use the quick action cards above to jump directly to specific sections of the demo.</p>
+<h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
+<ul>
+<li><code>Ctrl+R</code>: Refresh the demo</li>
+<li><code>Ctrl+Shift+R</code>: Restart the demo session</li>
+<li><code>Esc</code>: Close tour or warning dialogs</li>
+</ul>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<p>If you encounter issues:</p>
+<ol>
+<li>Try refreshing the demo using the refresh button</li>
+<li>Restart the session if problems persist</li>
+<li>Report issues using the menu in the demo toolbar</li>
+<li>Check your internet connection and browser compatibility</li>
+</ol>
+<h2 id="next-steps">Next Steps</h2>
+<h3 id="ready-to-install">Ready to Install?</h3>
+<p>If you&rsquo;re impressed with the demo, here&rsquo;s how to get started:</p>
+<ol>
+<li><strong><a href="/docs/installation/">Installation Guide</a></strong> - Step-by-step setup instructions</li>
+<li><strong><a href="/docs/configuration/">Configuration</a></strong> - Customize Solobase for your needs</li>
+<li><strong>[GitHub Repository]({{ .Site.Params.github_url }})</strong> - Download the latest release</li>
+<li><strong><a href="/docs/">Documentation</a></strong> - Complete feature documentation</li>
+</ol>
+<h3 id="need-support">Need Support?</h3>
+<ul>
+<li><strong>Community</strong>: Join our community discussions</li>
+<li><strong>Issues</strong>: Report bugs or request features on GitHub</li>
+<li><strong>Documentation</strong>: Comprehensive guides and API reference</li>
+<li><strong>Contact</strong>: Reach out for enterprise support options</li>
+</ul>
+<h2 id="demo-tips">Demo Tips</h2>
+<h3 id="best-practices">Best Practices</h3>
+<ul>
+<li><strong>Start with the Tour</strong>: Use the guided tour for the best first experience</li>
+<li><strong>Explore Freely</strong>: Don&rsquo;t worry about breaking anything - it&rsquo;s a safe environment</li>
+<li><strong>Test Real Scenarios</strong>: Try workflows you&rsquo;d use in production</li>
+<li><strong>Note Performance</strong>: Remember this is a demo environment with resource limits</li>
+</ul>
+<h3 id="common-use-cases">Common Use Cases</h3>
+<ul>
+<li><strong>Rapid Prototyping</strong>: Test Solobase for your admin panel needs</li>
+<li><strong>Feature Evaluation</strong>: Assess if Solobase meets your requirements</li>
+<li><strong>Team Demos</strong>: Show colleagues what Solobase can do</li>
+<li><strong>Learning</strong>: Understand modern admin dashboard patterns</li>
+</ul>
+<p>Enjoy exploring Solobase! The demo resets automatically, so feel free to experiment and test all the features.</p>
+
+    </div>
+    
+    
+    
+</div>
+
+    </main>
+    
+    
+    <footer class="bg-gray-900 text-white print-hidden">
+    <div class="container-responsive py-responsive">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            
+            <div class="col-span-1 sm:col-span-2 lg:col-span-2">
+                <div class="flex items-center space-x-2 mb-4 sm:mb-6">
+                    
+                    <img src="/images/solobase-logo.svg" alt="Solobase - Modern Admin Dashboard" class="h-8 w-auto sm:h-10">
+                    
+                    <span class="text-lg sm:text-xl font-bold">Solobase - Modern Admin Dashboard</span>
+                </div>
+                <p class="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed max-w-md">
+                    A modern, full-featured admin dashboard built with Svelte and Go
+                </p>
+                <div class="flex space-x-4">
+                    
+                    <a href="https://github.com/user/solobase" 
+                       class="text-gray-300 hover:text-white transition-all duration-200 hover:scale-110 focus-ring rounded-md p-1"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="View on GitHub">
+                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    
+                </div>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Quick Links</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    
+                    <li>
+                        <a href="/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Home
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/docs/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Documentation
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/demo/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Live Demo
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://github.com/user/solobase" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           target="_blank" rel="noopener noreferrer">
+                            GitHub
+                        </a>
+                    </li>
+                    
+                </ul>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Resources</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    <li>
+                        <a href="/docs/installation/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Installation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/configuration/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Configuration
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            API Reference
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Deployment
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="border-t border-gray-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-gray-300 text-sm sm:text-base text-center sm:text-left">
+                    © 2025 Solobase Team. All rights reserved.
+                </p>
+                <div class="flex items-center space-x-4 text-xs sm:text-sm text-gray-400">
+                    <span>Built with Hugo & Tailwind CSS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+    
+    
+    
+    
+        
+        <script src="http://localhost:1313/js/main.min.js" defer></script>
+    
+    
+    
+    <script src="/js/sw-register.js" defer></script>
+    
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
+    
+    
+    <script>
+        if ('loading' in HTMLImageElement.prototype) {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            images.forEach(img => {
+                img.src = img.dataset.src || img.src;
+            });
+        } else {
+            
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+            document.body.appendChild(script);
+        }
+    </script>
+    
+    
+    
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Testing SortedStorage Navigation</h1>
+    <p>Open browser console to see the logs</p>
+    <iframe src="http://localhost:5175/files" width="100%" height="600"></iframe>
+    
+    <script>
+        // Log messages from the iframe
+        window.addEventListener('message', (e) => {
+            console.log('Message from iframe:', e.data);
+        });
+        
+        // Instructions
+        console.log('%c=== NAVIGATION TEST ===', 'color: blue; font-size: 16px');
+        console.log('1. Login with: admin@example.com / admin123');
+        console.log('2. Check the console logs when you double-click folders');
+        console.log('3. Look for these log messages:');
+        console.log('   - [+page.svelte] handleNavigate called with path:');
+        console.log('   - [+page.svelte] loadItems called with path:');
+        console.log('   - [storage.ts] loadFiles called with path:');
+        console.log('   - listFiles called with path:');
+        console.log('   - Sending request with params:');
+        console.log('   - Got response with X items');
+    </script>
+</body>
+</html>

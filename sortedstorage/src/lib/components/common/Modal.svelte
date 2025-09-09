@@ -122,11 +122,11 @@
 	}
 	
 	.modal-content::-webkit-scrollbar-thumb {
-		background: #d1d5db;
+		background: var(--color-tertiary, #f1e2dd);
 		border-radius: 3px;
 	}
 	
 	.modal-content::-webkit-scrollbar-thumb:hover {
-		background: #9ca3af;
+		background: var(--color-accent, #a16d5b);
 	}
 </style>

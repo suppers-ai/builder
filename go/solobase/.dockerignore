@@ -1,0 +1,97 @@
+# flyctl launch added from .gitignore
+# Binaries
+**/solobase
+**/*.exe
+**/*.dll
+**/*.so
+**/*.dylib
+
+# Test binary, built with `go test -c`
+**/*.test
+
+# Output of the go coverage tool
+**/*.out
+
+# Go dependencies
+**/vendor
+
+# Environment files
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Data directory (SQLite database and other persistent data)
+**/.data
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Storage directory
+**/uploads
+
+# Log files
+**/*.log
+**/logs
+
+# IDE directories
+**/.idea
+**/.vscode
+**/*.swp
+**/*.swo
+**/*~
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Temporary files
+**/tmp
+**/temp
+**/*.tmp
+
+# Build artifacts
+**/dist
+**/build
+
+# Test coverage
+**/coverage.txt
+**/coverage.html
+
+# Docker volumes
+**/docker-data
+
+# Backup files
+**/*.backup
+**/*.bak
+
+# Session files
+**/sessions
+
+# Old/backup files from refactoring
+**/*.old
+
+# flyctl launch added from admin/.gitignore
+admin/**/node_modules
+
+# Output
+admin/**/.output
+admin/**/.vercel
+admin/**/.netlify
+admin/**/.wrangler
+admin/.svelte-kit
+admin/build
+
+# OS
+admin/**/.DS_Store
+admin/**/Thumbs.db
+
+# Env
+admin/**/.env
+admin/**/.env.*
+!admin/**/.env.example
+!admin/**/.env.test
+
+# Vite
+admin/**/vite.config.js.timestamp-*
+admin/**/vite.config.ts.timestamp-*
+fly.toml

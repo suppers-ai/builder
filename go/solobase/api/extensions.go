@@ -9,7 +9,7 @@ import (
 	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/extensions/official/analytics"
 	"github.com/suppers-ai/solobase/extensions/official/cloudstorage"
-	"github.com/suppers-ai/solobase/extensions/official/hugo"
+	// "github.com/suppers-ai/solobase/extensions/official/hugo" // Temporarily disabled - needs API updates
 	"github.com/suppers-ai/solobase/extensions/official/products"
 	"github.com/suppers-ai/solobase/extensions/official/webhooks"
 )
@@ -33,7 +33,7 @@ func HandleGetExtensions() http.HandlerFunc {
 		// Create a list of all available extensions with their metadata
 		tempExtensions := []core.Extension{
 			products.NewProductsExtension(),
-			hugo.NewHugoExtension(),
+			// hugo.NewHugoExtension(), // Temporarily disabled
 			analytics.NewAnalyticsExtension(),
 			cloudstorage.NewCloudStorageExtension(nil),
 			webhooks.NewWebhooksExtension(),
@@ -68,7 +68,7 @@ func HandleExtensionsManagement() http.HandlerFunc {
 		// Create a temporary registry to get metadata
 		tempExtensions := []core.Extension{
 			products.NewProductsExtension(),
-			hugo.NewHugoExtension(),
+			// hugo.NewHugoExtension(), // Temporarily disabled
 			analytics.NewAnalyticsExtension(),
 			cloudstorage.NewCloudStorageExtension(nil),
 			webhooks.NewWebhooksExtension(),
@@ -447,7 +447,7 @@ func HandleExtensionsManagement() http.HandlerFunc {
 func getExtensionIcon(name string) string {
 	icons := map[string]string{
 		"Products & Pricing": "📦",
-		"hugo":               "🌐",
+		// "hugo":               "🌐", // Temporarily disabled
 		"analytics":          "📊",
 		"cloudstorage":       "☁️",
 		"webhooks":           "🔗",

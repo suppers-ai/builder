@@ -4,12 +4,28 @@
 
 /* Global styles */
 :root {
+  /* SortedStorage brand colors */
+  --color-primary: #f7ad00;
+  --color-primary-hover: #e59c00;
+  --color-secondary: #FBD680;
+  --color-tertiary: #f1e2dd;
+  --color-accent: #a16d5b;
+  
+  /* Legacy support for components using --primary-color */
+  --primary-color: #f7ad00;
+  
+  /* Background */
+  --bg-base: #f0f0f0;
+  
+  /* Glass morphism */
   --glass-bg: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-blur: 10px;
 }
 
 .dark {
+  /* Dark mode overrides */
+  --bg-base: #0f172a;
   --glass-bg: rgba(0, 0, 0, 0.1);
   --glass-border: rgba(0, 0, 0, 0.2);
 }

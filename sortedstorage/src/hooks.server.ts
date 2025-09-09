@@ -104,7 +104,7 @@ const rateLimiting: Handle = async ({ event, resolve }) => {
 	const key = `${ip}:${event.url.pathname}`;
 	
 	// Rate limit configuration
-	const limits = {
+	const limits: Record<string, { requests: number; window: number }> = {
 		'/api/auth/login': { requests: 5, window: 900000 }, // 5 requests per 15 minutes
 		'/api/auth/register': { requests: 3, window: 3600000 }, // 3 requests per hour
 		'/api/storage/upload': { requests: 50, window: 3600000 }, // 50 uploads per hour
@@ -113,9 +113,8 @@ const rateLimiting: Handle = async ({ event, resolve }) => {
 	};
 	
 	// Get appropriate limit
-	const limit = Object.keys(limits).find(path => event.url.pathname.startsWith(path))
-		? limits[Object.keys(limits).find(path => event.url.pathname.startsWith(path))!]
-		: limits.default;
+	const matchingPath = Object.keys(limits).find(path => event.url.pathname.startsWith(path));
+	const limit = matchingPath ? limits[matchingPath] : limits.default;
 	
 	// Check rate limit (implement proper storage in production)
 	if (!dev) {

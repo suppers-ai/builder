@@ -79,12 +79,8 @@
 		);
 		
 		try {
-			let completed = 0;
-			for (const itemId of selectedItems) {
-				await storage.deleteItem(itemId);
-				completed++;
-				notifications.updateProgress(notificationId, completed, selectedCount);
-			}
+			// Delete all items at once
+			await storage.deleteItems(selectedItems);
 			
 			notifications.success(
 				`${selectedCount} item${selectedCount > 1 ? 's' : ''} deleted`

@@ -181,13 +181,13 @@ class ApiClient {
 		return this.request<StorageObject[]>(`/storage/buckets/${bucket}/objects`);
 	}
 
-	async uploadFile(bucket: string, file: File, path?: string): Promise<ApiResponse<StorageObject>> {
+	async uploadFile(bucket: string, file: File, parentFolderId?: string | null): Promise<ApiResponse<StorageObject>> {
 		const formData = new FormData();
 		formData.append('file', file);
 		
-		// Add path as a separate form field if provided
-		if (path) {
-			formData.append('path', path);
+		// Add parent_folder_id as a separate form field if provided
+		if (parentFolderId) {
+			formData.append('parent_folder_id', parentFolderId);
 		}
 
 		const response = await fetch(`${API_BASE}/storage/buckets/${bucket}/upload`, {
@@ -214,10 +214,13 @@ class ApiClient {
 		});
 	}
 
-	async createFolder(bucket: string, name: string, path?: string): Promise<ApiResponse<any>> {
+	async createFolder(bucket: string, name: string, parentFolderId?: string | null): Promise<ApiResponse<any>> {
 		return this.request<any>(`/storage/buckets/${bucket}/folders`, {
 			method: 'POST',
-			body: JSON.stringify({ name, path })
+			body: JSON.stringify({ 
+				name, 
+				parent_folder_id: parentFolderId 
+			})
 		});
 	}
 

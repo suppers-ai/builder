@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quick Start Guide | Solobase - Modern Admin Dashboard</title>
+    <meta name="description" content="Get up and running with Solobase in minutes">
+    <meta name="author" content="Solobase Team">
+    
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:1313/docs/quick-start/">
+    <meta property="og:title" content="Quick Start Guide | Solobase - Modern Admin Dashboard">
+    <meta property="og:description" content="Get up and running with Solobase in minutes">
+    
+    
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="http://localhost:1313/docs/quick-start/">
+    <meta property="twitter:title" content="Quick Start Guide | Solobase - Modern Admin Dashboard">
+    <meta property="twitter:description" content="Get up and running with Solobase in minutes">
+    
+    
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    
+    
+        
+        <link rel="stylesheet" href="http://localhost:1313/css/main.min.css">
+    
+    
+    
+    
+    
+    <style>
+         
+        .docs-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+        .docs-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .docs-sidebar::-webkit-scrollbar-track {
+            background: #f7fafc;
+        }
+        .docs-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+        .docs-toc {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .docs-toc a {
+            display: block;
+            padding: 0.25rem 0;
+            color: #718096;
+            text-decoration: none;
+            border-left: 2px solid transparent;
+            padding-left: 1rem;
+        }
+        .docs-toc a:hover {
+            color: #2d3748;
+            border-left-color: #e2e8f0;
+        }
+        .docs-toc a.active {
+            color: #3182ce;
+            border-left-color: #3182ce;
+            font-weight: 500;
+        }
+        .docs-content h1, .docs-content h2, .docs-content h3, .docs-content h4, .docs-content h5, .docs-content h6 {
+            scroll-margin-top: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    
+    <header style="background: white; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 40;">
+    <nav class="container max-w-6xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+            
+            <div class="flex items-center">
+                <a href="http://localhost:1313/" class="flex items-center space-x-2">
+                    <i data-lucide="database" style="width: 32px; height: 32px; color: #06b6d4;"></i>
+                    <span style="font-size: 1.25rem; font-weight: 600; color: #1f2937; font-family: 'Itim', cursive;">Solobase</span>
+                </a>
+            </div>
+            
+            
+            <div class="hidden md:flex items-center space-x-6">
+                
+                <a href="/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Home
+                </a>
+                
+                <a href="/docs/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Documentation
+                </a>
+                
+                <a href="/demo/" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   >
+                    Live Demo
+                </a>
+                
+                <a href="https://github.com/user/solobase" 
+                   style="color: #6b7280; font-family: 'Itim', cursive; transition: color 0.2s;"
+                   onmouseover="this.style.color='#06b6d4'"
+                   onmouseout="this.style.color='#6b7280'"
+                   target="_blank" rel="noopener noreferrer">
+                    GitHub
+                </a>
+                
+            </div>
+            
+            
+            <div class="md:hidden">
+                <button type="button" 
+                        id="mobile-menu-button"
+                        style="padding: 0.5rem; color: #6b7280;"
+                        onclick="toggleMobileMenu()">
+                    <svg id="menu-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <svg id="close-icon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <div id="mobile-menu" class="hidden md:hidden" style="background: white; border-top: 1px solid #e5e7eb;">
+        <nav class="px-6 py-4">
+            
+            <a href="/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Home
+            </a>
+            
+            <a href="/docs/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Documentation
+            </a>
+            
+            <a href="/demo/" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               >
+                Live Demo
+            </a>
+            
+            <a href="https://github.com/user/solobase" 
+               class="block py-2"
+               style="color: #6b7280; font-family: 'Itim', cursive;"
+               target="_blank" rel="noopener noreferrer">
+                GitHub
+            </a>
+            
+        </nav>
+    </div>
+</header>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const menuIcon = document.getElementById('menu-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+    } else {
+        menu.classList.add('hidden');
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+    }
+}
+</script>
+    
+    
+    <div class="flex min-h-screen">
+        
+        
+<aside class="w-64 bg-white border-r border-gray-200 docs-sidebar overflow-y-auto">
+    <div class="p-6">
+        
+        <div class="mb-6">
+            <div class="relative">
+                <input 
+                    type="text" 
+                    id="docs-search" 
+                    placeholder="Search documentation..." 
+                    class="w-full px-4 py-2 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            
+            <div id="search-results" class="hidden mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"></div>
+            
+            
+            <div class="mt-2 text-center">
+                <a href="/docs/search/" class="text-xs text-blue-600 hover:text-blue-800">Advanced Search</a>
+            </div>
+        </div>
+        
+        
+        <nav class="space-y-1">
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Getting Started</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/installation/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Installation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/configuration/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Configuration
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/quick-start/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 bg-blue-50 text-blue-700 border-r-2 border-blue-500">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Quick Start
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">User Guide</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/dashboard/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/users/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                            User Management
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/database/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                            </svg>
+                            Database Browser
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/storage/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2v0"></path>
+                            </svg>
+                            File Storage
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">API Reference</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/api/auth/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                            </svg>
+                            Authentication
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/database/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            Database API
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/storage/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                            </svg>
+                            Storage API
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/admin/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            Admin API
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Deployment</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/deployment/docker/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                            Docker
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/cloud/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                            </svg>
+                            Cloud Platforms
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/environment/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                            </svg>
+                            Environment
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/security/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            Security
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            
+            <div class="mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Development</h3>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="/docs/development/building/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                            </svg>
+                            Building
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/development/contributing/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            Contributing
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/development/architecture/" class="flex items-center px-2 py-1 text-sm text-gray-700 rounded hover:bg-gray-100 ">
+                            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            Architecture
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</aside>
+        
+        
+        <div class="flex-1 flex">
+            
+            <main class="flex-1 px-6 py-8 max-w-4xl">
+                
+                
+<nav class="flex mb-6" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+        
+        <li class="inline-flex items-center">
+            <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-9 9a1 1 0 001.414 1.414L2 12.414V15a1 1 0 001 1h3a1 1 0 001-1v-3a1 1 0 011-1h2a1 1 0 011 1v3a1 1 0 001 1h3a1 1 0 001-1v-2.586l.293.293a1 1 0 001.414-1.414l-9-9z"></path>
+                </svg>
+                Home
+            </a>
+        </li>
+        
+        
+        <li>
+            <div class="flex items-center">
+                <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                <a href="/docs/" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">Documentation</a>
+            </div>
+        </li>
+        
+        
+        
+        
+        
+        
+        
+            
+        
+             
+                
+                
+                
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2" aria-current="page">
+                                Quick start
+                            </span>
+                        
+                    </div>
+                </li>
+            
+        
+    </ol>
+</nav>
+                
+                
+                
+<div class="docs-content">
+    
+    <header class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Quick Start Guide</h1>
+        
+        <p class="text-xl text-gray-600 mb-4">Get up and running with Solobase in minutes</p>
+        
+    </header>
+    
+    
+    
+    <div class="prose prose-lg max-w-none mb-12">
+        <h1 id="quick-start-guide">Quick Start Guide</h1>
+<p>This guide will help you get Solobase up and running in just a few minutes. By the end, you&rsquo;ll have a working admin dashboard with user management and database browsing capabilities.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before starting, make sure you have:</p>
+<ul>
+<li>Solobase installed (<a href="/docs/installation/">Installation Guide</a>)</li>
+<li>A terminal or command prompt</li>
+<li>A web browser</li>
+</ul>
+<h2 id="step-1-initialize-your-project">Step 1: Initialize Your Project</h2>
+<p>Create a new directory for your Solobase project and initialize it:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Create project directory</span>
+</span></span><span style="display:flex;"><span>mkdir my-solobase-project
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">cd</span> my-solobase-project
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Initialize Solobase</span>
+</span></span><span style="display:flex;"><span>solobase init
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This creates the following structure:</p>
+<pre tabindex="0"><code>my-solobase-project/
+├── config.yaml          # Configuration file
+├── data/                 # Database and storage directory
+│   └── solobase.db      # SQLite database (created on first run)
+└── storage/             # File storage directory
+</code></pre><h2 id="step-2-configure-your-instance">Step 2: Configure Your Instance</h2>
+<p>Edit the generated <code>config.yaml</code> file:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># config.yaml</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">server</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">8080</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;localhost&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">database</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">url</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;sqlite:///data/solobase.db&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">admin</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">email</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;admin@example.com&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;changeme123&#34;</span><span style="color:#bbb">  </span><span style="color:#998;font-style:italic"># Change this!</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">auth</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">jwt_secret</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;your-secret-key-here&#34;</span><span style="color:#bbb">  </span><span style="color:#998;font-style:italic"># Generate a secure key</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">session_secret</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;your-session-key&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">storage</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">provider</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;local&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">path</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;./storage&#34;</span><span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><strong>Important</strong>: Change the default admin password and generate secure secrets:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Generate secure secrets</span>
+</span></span><span style="display:flex;"><span>solobase generate-secret --jwt
+</span></span><span style="display:flex;"><span>solobase generate-secret --session
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="step-3-start-the-server">Step 3: Start the Server</h2>
+<p>Start your Solobase instance:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>solobase serve
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>You should see output like:</p>
+<pre tabindex="0"><code>🚀 Solobase v1.0.0 starting...
+📊 Database: SQLite (data/solobase.db)
+🔧 Admin panel: http://localhost:8080/admin
+🌐 Server running on http://localhost:8080
+✅ Ready to accept connections
+</code></pre><h2 id="step-4-access-the-admin-dashboard">Step 4: Access the Admin Dashboard</h2>
+<p>Open your web browser and navigate to <a href="http://localhost:8080/admin">http://localhost:8080/admin</a>.</p>
+<p>Log in with your admin credentials:</p>
+<ul>
+<li><strong>Email</strong>: <code>admin@example.com</code></li>
+<li><strong>Password</strong>: <code>changeme123</code> (or whatever you set)</li>
+</ul>
+<h2 id="step-5-explore-the-dashboard">Step 5: Explore the Dashboard</h2>
+<p>Once logged in, you&rsquo;ll see the main dashboard with several sections:</p>
+<h3 id="overview">Overview</h3>
+<ul>
+<li>System statistics</li>
+<li>Recent activity</li>
+<li>Quick actions</li>
+</ul>
+<h3 id="user-management">User Management</h3>
+<ul>
+<li>View and manage users</li>
+<li>Create new users</li>
+<li>Set permissions and roles</li>
+</ul>
+<h3 id="database-browser">Database Browser</h3>
+<ul>
+<li>Browse database tables</li>
+<li>View and edit records</li>
+<li>Execute custom queries</li>
+</ul>
+<h3 id="file-storage">File Storage</h3>
+<ul>
+<li>Upload and manage files</li>
+<li>Organize files in folders</li>
+<li>Set access permissions</li>
+</ul>
+<h2 id="step-6-create-your-first-user">Step 6: Create Your First User</h2>
+<p>Let&rsquo;s create a new user through the admin interface:</p>
+<ol>
+<li>Navigate to <strong>Users</strong> in the sidebar</li>
+<li>Click <strong>Add New User</strong></li>
+<li>Fill in the form:
+<pre tabindex="0"><code>Name: John Doe
+Email: john@example.com
+Password: secure123
+Role: User
+</code></pre></li>
+<li>Click <strong>Create User</strong></li>
+</ol>
+<h2 id="step-7-set-up-a-database-table">Step 7: Set Up a Database Table</h2>
+<p>Create a simple table to store some data:</p>
+<ol>
+<li>Go to <strong>Database</strong> → <strong>Tables</strong></li>
+<li>Click <strong>Create Table</strong></li>
+<li>Configure your table:
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">CREATE</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">TABLE</span><span style="color:#bbb"> </span>products<span style="color:#bbb"> </span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>id<span style="color:#bbb"> </span><span style="color:#0086b3">INTEGER</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">PRIMARY</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">KEY</span><span style="color:#bbb"> </span>AUTOINCREMENT,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>name<span style="color:#bbb"> </span><span style="color:#0086b3">TEXT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NOT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">NULL</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>description<span style="color:#bbb"> </span><span style="color:#0086b3">TEXT</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>price<span style="color:#bbb"> </span><span style="color:#0086b3">DECIMAL</span>(<span style="color:#099">10</span>,<span style="color:#099">2</span>),<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span>created_at<span style="color:#bbb"> </span>DATETIME<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">DEFAULT</span><span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">CURRENT_TIMESTAMP</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span>);<span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>Click <strong>Execute</strong></li>
+</ol>
+<h2 id="step-8-add-some-data">Step 8: Add Some Data</h2>
+<p>Add sample data to your new table:</p>
+<ol>
+<li>Navigate to <strong>Database</strong> → <strong>Tables</strong> → <strong>products</strong></li>
+<li>Click <strong>Add Record</strong></li>
+<li>Fill in the form:
+<pre tabindex="0"><code>Name: Laptop Computer
+Description: High-performance laptop for developers
+Price: 1299.99
+</code></pre></li>
+<li>Click <strong>Save</strong></li>
+</ol>
+<p>Repeat this process to add a few more products.</p>
+<h2 id="step-9-upload-files">Step 9: Upload Files</h2>
+<p>Test the file storage functionality:</p>
+<ol>
+<li>Go to <strong>Storage</strong> → <strong>Files</strong></li>
+<li>Click <strong>Upload Files</strong></li>
+<li>Select some files from your computer</li>
+<li>Organize them into folders if desired</li>
+</ol>
+<h2 id="step-10-explore-the-api">Step 10: Explore the API</h2>
+<p>Solobase provides a REST API for all functionality. Test it using curl:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Get an authentication token</span>
+</span></span><span style="display:flex;"><span>curl -X POST http://localhost:8080/api/auth/login <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  -H <span style="color:#d14">&#34;Content-Type: application/json&#34;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  -d <span style="color:#d14">&#39;{&#34;email&#34;:&#34;admin@example.com&#34;,&#34;password&#34;:&#34;changeme123&#34;}&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Use the token to access the API</span>
+</span></span><span style="display:flex;"><span><span style="color:#0086b3">export</span> <span style="color:#008080">TOKEN</span><span style="color:#000;font-weight:bold">=</span><span style="color:#d14">&#34;your-jwt-token-here&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># List users</span>
+</span></span><span style="display:flex;"><span>curl -H <span style="color:#d14">&#34;Authorization: Bearer </span><span style="color:#008080">$TOKEN</span><span style="color:#d14">&#34;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  http://localhost:8080/api/users
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Get products</span>
+</span></span><span style="display:flex;"><span>curl -H <span style="color:#d14">&#34;Authorization: Bearer </span><span style="color:#008080">$TOKEN</span><span style="color:#d14">&#34;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  http://localhost:8080/api/database/products
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Upload a file</span>
+</span></span><span style="display:flex;"><span>curl -X POST <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  -H <span style="color:#d14">&#34;Authorization: Bearer </span><span style="color:#008080">$TOKEN</span><span style="color:#d14">&#34;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  -F <span style="color:#d14">&#34;file=@/path/to/your/file.jpg&#34;</span> <span style="color:#d14">\
+</span></span></span><span style="display:flex;"><span><span style="color:#d14"></span>  http://localhost:8080/api/storage/upload
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="common-next-steps">Common Next Steps</h2>
+<p>Now that you have Solobase running, here are some common next steps:</p>
+<h3 id="1-customize-the-dashboard">1. Customize the Dashboard</h3>
+<p>Create custom dashboard widgets:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Add to config.yaml</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">dashboard</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">widgets</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">type</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;chart&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">title</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;Sales Over Time&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">query</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;SELECT DATE(created_at) as date, SUM(price) as total FROM products GROUP BY DATE(created_at)&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>- <span style="color:#000080">type</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;stat&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">title</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;Total Products&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">query</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;SELECT COUNT(*) FROM products&#34;</span><span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="2-set-up-user-roles">2. Set Up User Roles</h3>
+<p>Define custom roles and permissions:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Add to config.yaml</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">auth</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">roles</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">editor</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">permissions</span>:<span style="color:#bbb"> </span>[<span style="color:#d14">&#34;read&#34;</span>,<span style="color:#bbb"> </span><span style="color:#d14">&#34;write&#34;</span>]<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">tables</span>:<span style="color:#bbb"> </span>[<span style="color:#d14">&#34;products&#34;</span>,<span style="color:#bbb"> </span><span style="color:#d14">&#34;categories&#34;</span>]<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">viewer</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">permissions</span>:<span style="color:#bbb"> </span>[<span style="color:#d14">&#34;read&#34;</span>]<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">tables</span>:<span style="color:#bbb"> </span>[<span style="color:#d14">&#34;products&#34;</span>]<span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="3-configure-email-notifications">3. Configure Email Notifications</h3>
+<p>Set up email notifications for user actions:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Add to config.yaml</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">email</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">provider</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;smtp&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">from</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;noreply@example.com&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">smtp</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">host</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;smtp.gmail.com&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">port</span>:<span style="color:#bbb"> </span><span style="color:#099">587</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">username</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;your-email@gmail.com&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">password</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;your-app-password&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">tls</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">notifications</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">new_user</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">password_reset</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">data_changes</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="4-add-custom-validation">4. Add Custom Validation</h3>
+<p>Create validation rules for your data:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Add to config.yaml</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">validation</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">tables</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">products</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">name</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">required</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">min_length</span>:<span style="color:#bbb"> </span><span style="color:#099">3</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">max_length</span>:<span style="color:#bbb"> </span><span style="color:#099">100</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">price</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">required</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">min</span>:<span style="color:#bbb"> </span><span style="color:#099">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">max</span>:<span style="color:#bbb"> </span><span style="color:#099">999999.99</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">      </span><span style="color:#000080">email</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#000080">format</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;email&#34;</span><span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="5-set-up-backups">5. Set Up Backups</h3>
+<p>Configure automatic database backups:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Add to config.yaml</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb"></span><span style="color:#000080">backup</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">enabled</span>:<span style="color:#bbb"> </span><span style="color:#000;font-weight:bold">true</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">schedule</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;0 2 * * *&#34;</span><span style="color:#bbb">  </span><span style="color:#998;font-style:italic"># Daily at 2 AM</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">retention</span>:<span style="color:#bbb"> </span><span style="color:#099">30</span><span style="color:#bbb">  </span><span style="color:#998;font-style:italic"># Keep 30 days</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">  </span><span style="color:#000080">storage</span>:<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">provider</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;s3&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#000080">bucket</span>:<span style="color:#bbb"> </span><span style="color:#d14">&#34;my-backups&#34;</span><span style="color:#bbb">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="server-wont-start">Server Won&rsquo;t Start</h3>
+<p>If the server fails to start:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Check the configuration</span>
+</span></span><span style="display:flex;"><span>solobase validate-config
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Check database connectivity</span>
+</span></span><span style="display:flex;"><span>solobase check-db
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># View detailed logs</span>
+</span></span><span style="display:flex;"><span>solobase serve --log-level debug
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="cant-access-admin-panel">Can&rsquo;t Access Admin Panel</h3>
+<p>If you can&rsquo;t access the admin panel:</p>
+<ol>
+<li>Check that the server is running on the correct port</li>
+<li>Verify your admin credentials</li>
+<li>Check firewall settings</li>
+<li>Try accessing via <code>127.0.0.1</code> instead of <code>localhost</code></li>
+</ol>
+<h3 id="database-connection-issues">Database Connection Issues</h3>
+<p>For database problems:</p>
+<div class="highlight"><div style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Reset the database (WARNING: This deletes all data)</span>
+</span></span><span style="display:flex;"><span>solobase reset-db --confirm
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Check database permissions</span>
+</span></span><span style="display:flex;"><span>ls -la data/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"># Try a different database URL</span>
+</span></span><span style="display:flex;"><span>solobase serve --database-url <span style="color:#d14">&#34;sqlite:///test.db&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="production-deployment">Production Deployment</h2>
+<p>When you&rsquo;re ready to deploy to production:</p>
+<ol>
+<li><strong>Use a Production Database</strong>: Switch from SQLite to PostgreSQL or MySQL</li>
+<li><strong>Enable HTTPS</strong>: Configure TLS certificates</li>
+<li><strong>Set Strong Secrets</strong>: Generate cryptographically secure keys</li>
+<li><strong>Configure Backups</strong>: Set up automated database backups</li>
+<li><strong>Enable Monitoring</strong>: Add logging and metrics collection</li>
+<li><strong>Use Environment Variables</strong>: Store secrets in environment variables</li>
+</ol>
+<p>See our <a href="/docs/deployment/">Deployment Guide</a> for detailed instructions.</p>
+<h2 id="whats-next">What&rsquo;s Next?</h2>
+<ul>
+<li><a href="/docs/dashboard/">Dashboard Overview</a> - Learn about all dashboard features</li>
+<li><a href="/docs/users/">User Management</a> - Advanced user and permission management</li>
+<li><a href="/docs/database/">Database Browser</a> - Advanced database operations</li>
+<li><a href="/docs/api/">API Reference</a> - Complete API documentation</li>
+<li><a href="/docs/deployment/">Deployment</a> - Deploy to production environments</li>
+</ul>
+<h2 id="getting-help">Getting Help</h2>
+<p>If you need help:</p>
+<ul>
+<li>Check our <a href="/docs/">Documentation</a></li>
+<li>Try the <a href="/demo/">Live Demo</a></li>
+<li>Search <a href="https://github.com/user/solobase/issues">GitHub Issues</a></li>
+<li>Join our <a href="https://discord.gg/solobase">Community Discord</a></li>
+<li>Email <a href="mailto:support@solobase.dev">support@solobase.dev</a></li>
+</ul>
+<p>Congratulations! You now have a fully functional Solobase instance. Explore the documentation to learn about advanced features and customization options.</p>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+                
+                
+                
+<nav class="flex justify-between items-center mt-12 pt-8 border-t border-gray-200">
+    
+    <div class="flex-1">
+        
+    </div>
+    
+    
+    <div class="flex-1 text-right">
+        
+    </div>
+</nav>
+            </main>
+            
+            
+            
+
+<aside class="hidden xl:block w-64 pl-8">
+    <div class="sticky top-8">
+        <h4 class="text-sm font-semibold text-gray-900 mb-4">On this page</h4>
+        <nav class="docs-toc">
+            <nav id="TableOfContents">
+  <ul>
+    <li><a href="#prerequisites">Prerequisites</a></li>
+    <li><a href="#step-1-initialize-your-project">Step 1: Initialize Your Project</a></li>
+    <li><a href="#step-2-configure-your-instance">Step 2: Configure Your Instance</a></li>
+    <li><a href="#step-3-start-the-server">Step 3: Start the Server</a></li>
+    <li><a href="#step-4-access-the-admin-dashboard">Step 4: Access the Admin Dashboard</a></li>
+    <li><a href="#step-5-explore-the-dashboard">Step 5: Explore the Dashboard</a>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#user-management">User Management</a></li>
+        <li><a href="#database-browser">Database Browser</a></li>
+        <li><a href="#file-storage">File Storage</a></li>
+      </ul>
+    </li>
+    <li><a href="#step-6-create-your-first-user">Step 6: Create Your First User</a></li>
+    <li><a href="#step-7-set-up-a-database-table">Step 7: Set Up a Database Table</a></li>
+    <li><a href="#step-8-add-some-data">Step 8: Add Some Data</a></li>
+    <li><a href="#step-9-upload-files">Step 9: Upload Files</a></li>
+    <li><a href="#step-10-explore-the-api">Step 10: Explore the API</a></li>
+    <li><a href="#common-next-steps">Common Next Steps</a>
+      <ul>
+        <li><a href="#1-customize-the-dashboard">1. Customize the Dashboard</a></li>
+        <li><a href="#2-set-up-user-roles">2. Set Up User Roles</a></li>
+        <li><a href="#3-configure-email-notifications">3. Configure Email Notifications</a></li>
+        <li><a href="#4-add-custom-validation">4. Add Custom Validation</a></li>
+        <li><a href="#5-set-up-backups">5. Set Up Backups</a></li>
+      </ul>
+    </li>
+    <li><a href="#troubleshooting">Troubleshooting</a>
+      <ul>
+        <li><a href="#server-wont-start">Server Won&rsquo;t Start</a></li>
+        <li><a href="#cant-access-admin-panel">Can&rsquo;t Access Admin Panel</a></li>
+        <li><a href="#database-connection-issues">Database Connection Issues</a></li>
+      </ul>
+    </li>
+    <li><a href="#production-deployment">Production Deployment</a></li>
+    <li><a href="#whats-next">What&rsquo;s Next?</a></li>
+    <li><a href="#getting-help">Getting Help</a></li>
+  </ul>
+</nav>
+        </nav>
+        
+        
+        
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <a 
+                href="https://github.com/user/solobase/edit/main/solobase-demo-site/content/docs/quick-start/_index.md" 
+                class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit this page
+            </a>
+        </div>
+        
+        
+        
+        <div class="mt-4">
+            <button 
+                onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+                class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+            >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+                </svg>
+                Back to top
+            </button>
+        </div>
+    </div>
+</aside>
+
+        </div>
+    </div>
+    
+    
+    <footer class="bg-gray-900 text-white print-hidden">
+    <div class="container-responsive py-responsive">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            
+            <div class="col-span-1 sm:col-span-2 lg:col-span-2">
+                <div class="flex items-center space-x-2 mb-4 sm:mb-6">
+                    
+                    <img src="/images/solobase-logo.svg" alt="Solobase - Modern Admin Dashboard" class="h-8 w-auto sm:h-10">
+                    
+                    <span class="text-lg sm:text-xl font-bold">Solobase - Modern Admin Dashboard</span>
+                </div>
+                <p class="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed max-w-md">
+                    A modern, full-featured admin dashboard built with Svelte and Go
+                </p>
+                <div class="flex space-x-4">
+                    
+                    <a href="https://github.com/user/solobase" 
+                       class="text-gray-300 hover:text-white transition-all duration-200 hover:scale-110 focus-ring rounded-md p-1"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="View on GitHub">
+                        <svg class="h-6 w-6 sm:h-7 sm:w-7" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    
+                </div>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Quick Links</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    
+                    <li>
+                        <a href="/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Home
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/docs/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Documentation
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/demo/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           >
+                            Live Demo
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="https://github.com/user/solobase" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm"
+                           target="_blank" rel="noopener noreferrer">
+                            GitHub
+                        </a>
+                    </li>
+                    
+                </ul>
+            </div>
+            
+            
+            <div class="col-span-1">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-white">Resources</h3>
+                <ul class="space-y-2 sm:space-y-3">
+                    <li>
+                        <a href="/docs/installation/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Installation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/configuration/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Configuration
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/api/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            API Reference
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/docs/deployment/" 
+                           class="text-gray-300 hover:text-white transition-colors duration-200 text-sm sm:text-base focus-ring rounded-sm">
+                            Deployment
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="border-t border-gray-700 mt-8 sm:mt-12 pt-6 sm:pt-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-gray-300 text-sm sm:text-base text-center sm:text-left">
+                    © 2025 Solobase Team. All rights reserved.
+                </p>
+                <div class="flex items-center space-x-4 text-xs sm:text-sm text-gray-400">
+                    <span>Built with Hugo & Tailwind CSS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+    
+    
+    
+    
+        
+        <script src="http://localhost:1313/js/main.min.js"></script>
+    
+    
+    
+    
+    
+        
+        <script src="http://localhost:1313/js/search.min.js"></script>
+    
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+    
+    
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const tocLinks = document.querySelectorAll('.docs-toc a');
+            const headings = document.querySelectorAll('.docs-content h1, .docs-content h2, .docs-content h3, .docs-content h4, .docs-content h5, .docs-content h6');
+            
+            
+            function updateActiveTocLink() {
+                let current = '';
+                headings.forEach(heading => {
+                    const rect = heading.getBoundingClientRect();
+                    if (rect.top <= 100) {
+                        current = heading.id;
+                    }
+                });
+                
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === '#' + current) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', updateActiveTocLink);
+            updateActiveTocLink();
+        });
+    </script>
+    
+    
+    
+</body>
+</html>

@@ -24,7 +24,7 @@
 			title: 'Group Types',
 			description: 'Configure types of groups that can own products',
 			icon: Building2,
-			path: '/extensions/products/group-types',
+			path: '/admin/extensions/products/group-types',
 			color: 'purple',
 			count: 0
 		},
@@ -32,7 +32,7 @@
 			title: 'Product Types',
 			description: 'Define different types of products with custom fields',
 			icon: Package2,
-			path: '/extensions/products/product-types',
+			path: '/admin/extensions/products/product-types',
 			color: 'green',
 			count: 0
 		},
@@ -40,7 +40,7 @@
 			title: 'Pricing & Formulas',
 			description: 'Create pricing templates and formulas',
 			icon: Calculator,
-			path: '/extensions/products/pricing',
+			path: '/admin/extensions/products/pricing',
 			color: 'orange',
 			count: 0
 		}

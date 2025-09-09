@@ -157,8 +157,8 @@ class ApiClient {
 				if (browser) {
 					this.authToken = null;
 					localStorage.removeItem('auth_token');
-					// Redirect to login with files page as the return URL
-					window.location.href = getAuthLoginUrl('/files');
+					// Redirect to login with home page as the return URL
+					window.location.href = getAuthLoginUrl('/');
 				}
 				break;
 

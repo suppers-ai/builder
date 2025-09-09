@@ -18,14 +18,19 @@ export const authConfig = {
 	adminUrl: () => `/admin`,
 	
 	// Redirect URL after successful login
-	loginRedirectUrl: '/files'
+	loginRedirectUrl: '/'
 };
 
 // Helper function to build auth URL with redirect
-export function getAuthLoginUrl(redirectTo: string = '/files'): string {
+export function getAuthLoginUrl(redirectTo: string = '/'): string {
 	const loginUrl = authConfig.loginUrl();
-	// With proxy, everything is same-origin, so use relative paths
+	// Need to pass the full URL for SortedStorage so redirect goes back to the right app
 	const params = new URLSearchParams();
-	params.set('redirect', redirectTo);
+	// In development, use the full URL with the dev server port
+	// In production, this would be handled differently
+	const fullRedirectUrl = typeof window !== 'undefined' 
+		? `${window.location.origin}${redirectTo}`
+		: redirectTo;
+	params.set('redirect', fullRedirectUrl);
 	return `${loginUrl}?${params.toString()}`;
 }

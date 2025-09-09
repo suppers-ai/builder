@@ -16,7 +16,7 @@
 	
 	const navigation = [
 		{ title: 'Home', href: '/', icon: Home },
-		{ title: 'My Files', href: '/files', icon: Files },
+		{ title: 'My Files', href: '/', icon: Files },
 		{ title: 'Shared', href: '/shared', icon: Share2 },
 		{ title: 'Settings', href: '/settings', icon: Settings },
 		{ title: 'Upgrade', href: '/upgrade', icon: CreditCard }

@@ -10,6 +10,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { auth, currentUser } from '$lib/stores/auth';
+	import { observeAndFixInputs } from '$lib/utils/fixTextSelection';
 	
 	let user: any = null;
 	let authChecked = false;
@@ -101,6 +102,9 @@
 	}
 	
 	onMount(async () => {
+		// Fix text selection in inputs
+		const observer = observeAndFixInputs();
+		
 		// First check if we have a stored token before doing auth check
 		const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('auth_token');
 		
@@ -134,6 +138,13 @@
 				return;
 			}
 		}
+		
+		// Cleanup observer on unmount
+		return () => {
+			if (observer) {
+				observer.disconnect();
+			}
+		};
 	});
 	
 	async function handleLogout() {

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Picker Performance Test</title>
+    <style>
+        .hidden { display: none; }
+        .button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>File Picker Performance Test</h2>
+    
+    <h3>Test 1: Empty accept attribute</h3>
+    <button class="button" onclick="document.getElementById('file1').click()">
+        Click to open file picker (accept="")
+    </button>
+    <input id="file1" type="file" accept="" class="hidden" onchange="console.log('File 1 selected')" />
+    
+    <h3>Test 2: No accept attribute</h3>
+    <button class="button" onclick="document.getElementById('file2').click()">
+        Click to open file picker (no accept)
+    </button>
+    <input id="file2" type="file" class="hidden" onchange="console.log('File 2 selected')" />
+    
+    <h3>Test 3: Specific accept types</h3>
+    <button class="button" onclick="document.getElementById('file3').click()">
+        Click to open file picker (accept="image/*")
+    </button>
+    <input id="file3" type="file" accept="image/*" class="hidden" onchange="console.log('File 3 selected')" />
+    
+    <h3>Test 4: Direct reference vs querySelector</h3>
+    <button class="button" onclick="fileInput4.click()">
+        Direct reference
+    </button>
+    <button class="button" onclick="document.querySelector('#file4').click()">
+        querySelector
+    </button>
+    <input id="file4" type="file" class="hidden" onchange="console.log('File 4 selected')" />
+    
+    <script>
+        const fileInput4 = document.getElementById('file4');
+        
+        // Performance test
+        console.log('Testing file picker performance...');
+        
+        function testPerformance(inputId, description) {
+            const start = performance.now();
+            const input = document.getElementById(inputId);
+            const setupTime = performance.now() - start;
+            console.log(`${description}: Setup took ${setupTime.toFixed(2)}ms`);
+        }
+        
+        testPerformance('file1', 'Empty accept');
+        testPerformance('file2', 'No accept');
+        testPerformance('file3', 'Image accept');
+    </script>
+</body>
+</html>

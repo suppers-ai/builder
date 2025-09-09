@@ -60,15 +60,6 @@
 		is_active: true
 	};
 
-	// Form data for new rule
-	let newRule: Partial<PricingRule> = {
-		name: '',
-		formula: '',
-		priority: 100,
-		conditions: [],
-		is_active: true
-	};
-
 	// Test data for formula testing
 	let testVariables: any = {};
 	let testResult: any = null;
@@ -117,10 +108,6 @@
 		return matchesSearch && matchesCategory;
 	});
 
-	$: filteredRules = pricingRules.filter(rule => {
-		const matchesSearch = rule.name.toLowerCase().includes(searchQuery.toLowerCase());
-		return matchesSearch;
-	});
 
 	onMount(async () => {
 		if (!requireAdmin()) return;
@@ -297,7 +284,7 @@
 <div class="page-container">
 	<!-- Header -->
 	<div class="page-header">
-		<a href="/extensions/products" class="back-button">
+		<a href="/admin/extensions/products" class="back-button">
 			<ArrowLeft size={20} />
 		</a>
 		<div class="header-content">
@@ -316,10 +303,6 @@
 		<button class="tab {activeTab === 'templates' ? 'active' : ''}" on:click={() => activeTab = 'templates'}>
 			<FileText size={16} />
 			Templates
-		</button>
-		<button class="tab {activeTab === 'rules' ? 'active' : ''}" on:click={() => activeTab = 'rules'}>
-			<Zap size={16} />
-			Rules
 		</button>
 		<button class="tab {activeTab === 'variables' ? 'active' : ''}" on:click={() => activeTab = 'variables'}>
 			<Variable size={16} />
@@ -434,47 +417,6 @@
 					{/each}
 				</div>
 			{/if}
-		{:else if activeTab === 'rules'}
-			<!-- Pricing Rules -->
-			<div class="rules-container">
-				<div class="rules-header">
-					<h3>Pricing Rules</h3>
-					<p>Define conditional pricing rules based on product types, entities, and other factors</p>
-				</div>
-				{#if filteredRules.length === 0}
-					<div class="empty-state">
-						<Zap size={48} class="text-gray-400" />
-						<h3>No pricing rules defined</h3>
-						<p>Rules allow you to apply different pricing based on conditions</p>
-					</div>
-				{:else}
-					<div class="rules-list">
-						{#each filteredRules as rule}
-							<div class="rule-item">
-								<div class="rule-priority">{rule.priority}</div>
-								<div class="rule-content">
-									<h4>{rule.name}</h4>
-									<code class="rule-formula">{rule.formula}</code>
-									{#if rule.conditions && rule.conditions.length > 0}
-										<div class="rule-conditions">
-											{#each rule.conditions as condition}
-												<span class="condition-badge">
-													{condition.field} {condition.operator} {condition.value}
-												</span>
-											{/each}
-										</div>
-									{/if}
-								</div>
-								<div class="rule-status">
-									<span class="status-badge {rule.is_active ? 'status-active' : 'status-inactive'}">
-										{rule.is_active ? 'Active' : 'Inactive'}
-									</span>
-								</div>
-							</div>
-						{/each}
-					</div>
-				{/if}
-			</div>
 		{:else if activeTab === 'variables'}
 			<!-- Variables Overview -->
 			<div class="variables-container">

@@ -11,8 +11,8 @@ type UploadToken struct {
 	ID            string     `gorm:"primaryKey;type:uuid" json:"id"`
 	Token         string     `gorm:"uniqueIndex;not null" json:"token"`
 	Bucket        string     `gorm:"not null" json:"bucket"`
-	Filename      string     `gorm:"not null" json:"filename"`
-	ObjectKey     string     `json:"object_key"`           // The key/path where file will be stored
+	ParentFolderID *string   `json:"parent_folder_id,omitempty"` // Parent folder ID (null for root)
+	ObjectName    string     `gorm:"not null" json:"object_name"` // The file name
 	UserID        string     `gorm:"type:uuid" json:"user_id"`
 	MaxSize       int64      `json:"max_size"`             // Maximum allowed file size
 	ContentType   string     `json:"content_type"`         // Expected content type
@@ -31,13 +31,13 @@ func (UploadToken) TableName() string {
 }
 
 // NewUploadToken creates a new upload token
-func NewUploadToken(bucket, filename, objectKey, userID, contentType string, maxSize int64, duration time.Duration) *UploadToken {
+func NewUploadToken(bucket string, parentFolderID *string, objectName, userID, contentType string, maxSize int64, duration time.Duration) *UploadToken {
 	return &UploadToken{
 		ID:          uuid.New().String(),
 		Token:       uuid.New().String(),
 		Bucket:      bucket,
-		Filename:    filename,
-		ObjectKey:   objectKey,
+		ParentFolderID: parentFolderID,
+		ObjectName:  objectName,
 		UserID:      userID,
 		ContentType: contentType,
 		MaxSize:     maxSize,

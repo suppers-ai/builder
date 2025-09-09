@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Folder Navigation</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .folder {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .folder:hover {
+            background: #e0e0e0;
+        }
+        #output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Test Folder Navigation</h1>
+    
+    <div>
+        <button onclick="login()">1. Login</button>
+        <button onclick="listFolders()">2. List Folders</button>
+        <button onclick="createTestFolders()">3. Create Test Folders</button>
+    </div>
+    
+    <h3>Current Path: <span id="currentPath">Home</span></h3>
+    <div id="folders"></div>
+    
+    <div id="output"></div>
+
+    <script>
+        let token = '';
+        let currentFolderId = null;
+        const API_URL = 'http://localhost:8093/api';
+        
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        async function login() {
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@example.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.token) {
+                    token = data.token;
+                    log('✅ Logged in successfully', 'success');
+                } else {
+                    log('❌ Login failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function listFolders(parentId = null) {
+            if (!token) {
+                log('❌ Please login first', 'error');
+                return;
+            }
+            
+            try {
+                const params = parentId ? `?parent_folder_id=${parentId}` : '';
+                const response = await fetch(`${API_URL}/storage/buckets/int_storage/objects${params}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const items = await response.json();
+                log(`📁 Found ${items.length} items`, 'info');
+                
+                // Display folders
+                const foldersDiv = document.getElementById('folders');
+                foldersDiv.innerHTML = '';
+                
+                // Add "Go Back" button if not at root
+                if (currentFolderId) {
+                    const backBtn = document.createElement('button');
+                    backBtn.textContent = '⬆️ Go Back';
+                    backBtn.onclick = () => {
+                        currentFolderId = null;
+                        document.getElementById('currentPath').textContent = 'Home';
+                        listFolders();
+                    };
+                    foldersDiv.appendChild(backBtn);
+                }
+                
+                // Filter and display folders
+                const folders = items.filter(item => item.isFolder || item.type === 'folder');
+                folders.forEach(folder => {
+                    const folderDiv = document.createElement('div');
+                    folderDiv.className = 'folder';
+                    folderDiv.textContent = `📁 ${folder.name}`;
+                    folderDiv.onclick = () => navigateToFolder(folder);
+                    foldersDiv.appendChild(folderDiv);
+                    
+                    log(`  - Folder: ${folder.name} (ID: ${folder.id}, type: ${folder.type})`, 'info');
+                });
+                
+                // Show files count
+                const files = items.filter(item => !item.isFolder && item.type !== 'folder');
+                if (files.length > 0) {
+                    log(`  - ${files.length} file(s) in this folder`, 'info');
+                }
+                
+            } catch (error) {
+                log(`❌ List folders error: ${error.message}`, 'error');
+            }
+        }
+        
+        function navigateToFolder(folder) {
+            log(`➡️ Navigating to folder: ${folder.name} (ID: ${folder.id})`, 'success');
+            currentFolderId = folder.id;
+            document.getElementById('currentPath').textContent = `Home / ${folder.name}`;
+            listFolders(folder.id);
+        }
+        
+        async function createTestFolders() {
+            if (!token) {
+                log('❌ Please login first', 'error');
+                return;
+            }
+            
+            try {
+                // Create root folder
+                const folder1Name = `test-folder-${Date.now()}`;
+                let response = await fetch(`${API_URL}/storage/buckets/int_storage/folders`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: folder1Name })
+                });
+                
+                const folder1 = await response.json();
+                log(`✅ Created root folder: ${folder1Name} (ID: ${folder1.id})`, 'success');
+                
+                // Create subfolder
+                const folder2Name = `subfolder-${Date.now()}`;
+                response = await fetch(`${API_URL}/storage/buckets/int_storage/folders`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: folder2Name,
+                        parent_folder_id: folder1.id
+                    })
+                });
+                
+                const folder2 = await response.json();
+                log(`✅ Created subfolder: ${folder2Name} in ${folder1Name}`, 'success');
+                
+                // Refresh list
+                listFolders();
+                
+            } catch (error) {
+                log(`❌ Create folders error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-login on load
+        window.onload = () => {
+            log('🚀 Test page loaded. Click "Login" to start.', 'info');
+        };
+    </script>
+</body>
+</html>

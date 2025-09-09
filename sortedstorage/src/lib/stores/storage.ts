@@ -44,7 +44,7 @@ export const uploadQueue: Writable<UploadItem[]> = writable([]);
 // Main storage store
 function createStorageStore() {
 	const { subscribe, set, update } = writable<StorageState>({
-		currentPath: '/',
+		currentPath: '',
 		files: [],
 		folders: [],
 		loading: false,
@@ -68,7 +68,8 @@ function createStorageStore() {
 	return {
 		subscribe,
 		
-		async loadFiles(path: string = '/') {
+		async loadFiles(path: string = '') {
+			console.log('[storage.ts] loadFiles called with path:', path);
 			update(state => ({ ...state, loading: true, error: null, currentPath: path }));
 			
 			try {
@@ -99,8 +100,8 @@ function createStorageStore() {
 			}
 		},
 
-		async uploadFile(file: File, path: string = '/') {
-			console.log('uploadFile with path', path);
+		async uploadFile(file: File, parentId?: string) {
+			console.log('uploadFile with parentId', parentId);
 			const uploadItem: UploadItem = {
 				id: Math.random().toString(36).substr(2, 9),
 				file,
@@ -125,7 +126,7 @@ function createStorageStore() {
 				);
 
 				// Use uploadFiles method with single file array
-				await storageApi.uploadFiles([file], path);
+				await storageApi.uploadFiles([file], { parentId });
 
 				// Update status to completed
 				uploadQueue.update(queue => 
@@ -140,8 +141,9 @@ function createStorageStore() {
 					)
 				);
 
-				// Reload files
-				await this.loadFiles(path);
+				// Reload files - use current path from store
+				const currentPath = get(this).currentPath;
+				await this.loadFiles(currentPath);
 				
 				notifications.success(`${file.name} uploaded successfully`);
 			} catch (error: any) {
@@ -162,11 +164,11 @@ function createStorageStore() {
 			}
 		},
 
-		async uploadFiles(files: File[], path: string = '/') {
+		async uploadFiles(files: File[], parentId?: string) {
 			// Use the storage API's uploadFiles method directly
-			await storageApi.uploadFiles(files, path);
+			await storageApi.uploadFiles(files, { parentId });
 			// The storage API will handle updating its state, just sync with it
-			const currentPath = get(this).currentPath || path;
+			const currentPath = get(this).currentPath;
 			await this.loadFiles(currentPath);
 		},
 

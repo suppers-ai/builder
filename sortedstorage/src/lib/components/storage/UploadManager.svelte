@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { Upload, X, File, CheckCircle, AlertCircle } from 'lucide-svelte';
 	import { storage, uploadQueue } from '$lib/stores/storage';
+	import { storageAPI } from '$lib/stores/storage-api';
 	import { notifications } from '$lib/stores/notifications';
 	import { fade, slide } from 'svelte/transition';
 	
 	export let maxFileSize = 100 * 1024 * 1024; // 100MB
 	export let allowedTypes: string[] = [];
 	export let multiple = true;
+	export let currentPath = '';
+	export let parentId: string | null = null; // Accept parentId prop
 	
 	let dragActive = false;
 	let fileInput: HTMLInputElement;
@@ -65,8 +68,8 @@
 				{ duration: 0 }
 			);
 			
-			// Start upload
-			storage.uploadFiles(validFiles);
+			// Start upload using storageAPI with parentId
+			storageAPI.uploadFiles(validFiles, { parentId: parentId || undefined });
 		}
 	}
 	
@@ -130,7 +133,7 @@
 			bind:this={fileInput}
 			type="file"
 			{multiple}
-			accept={allowedTypes.join(',')}
+			accept={allowedTypes.length > 0 ? allowedTypes.join(',') : undefined}
 			on:change={handleFileSelect}
 			class="hidden"
 		/>
@@ -150,7 +153,7 @@
 						class="w-5 h-5 {getStatusColor(upload.status)}"
 					/>
 					<div class="flex-1 min-w-0">
-						<p class="text-sm font-medium truncate">{upload.name}</p>
+						<p class="text-sm font-medium truncate">{upload.file?.name || upload.name || 'Unknown'}</p>
 						{#if upload.status === 'uploading'}
 							<div class="mt-1">
 								<div class="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">

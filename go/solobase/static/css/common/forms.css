@@ -55,6 +55,10 @@ textarea {
     border-radius: var(--radius-md);
     transition: all var(--transition-normal);
     appearance: none;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
 }
 
 .form-control:hover,

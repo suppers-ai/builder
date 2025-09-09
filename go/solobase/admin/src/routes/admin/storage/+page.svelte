@@ -16,6 +16,7 @@
 	let viewMode = 'grid'; // 'grid', 'list', or 'explorer'
 	let selectedBucket: any = null;
 	let currentPath = '';
+	let currentFolderId: string | null = null; // Track current folder ID
 	let searchQuery = '';
 	let selectedItems = new Set<string>();
 	let showCreateBucketModal = false;
@@ -32,6 +33,7 @@
 	let loadingFiles = false;
 	let activeDropdownId: string | null = null;
 	let newItemName = '';
+	let fileInputRef: HTMLInputElement;
 	
 	// Preview modal state
 	let showPreviewModal = false;
@@ -107,6 +109,7 @@
 		console.log('Selecting bucket:', bucket);
 		selectedBucket = bucket;
 		currentPath = ''; // Start at root of bucket
+		currentFolderId = null; // Reset folder ID to root
 		selectedItems.clear();
 		
 		// Fetch objects for this bucket
@@ -119,7 +122,15 @@
 		if (folder.type === 'folder' || folder.isFolder) {
 			console.log('Navigating to folder:', folder);
 			
-			// Clean up the folder name and fullPath
+			// Use folder ID if available
+			if (folder.id) {
+				currentFolderId = folder.id;
+				console.log('Set currentFolderId to:', currentFolderId);
+			} else {
+				console.warn('Folder has no ID:', folder);
+			}
+			
+			// Clean up the folder name and fullPath for display
 			let folderName = folder.name;
 			let fullPath = folder.fullPath;
 			
@@ -140,7 +151,7 @@
 				}
 			}
 			
-			console.log('New currentPath:', currentPath);
+			console.log('New currentPath:', currentPath, 'folderId:', currentFolderId);
 			selectedItems.clear();
 			// Refresh the files for the new path
 			await fetchBucketObjects(selectedBucket.name);
@@ -150,6 +161,12 @@
 	async function navigateToPath(index: number) {
 		const parts = pathParts.slice(0, index + 1);
 		currentPath = parts.join('/');
+		// Reset to root if navigating to root
+		if (index === -1 || parts.length === 0) {
+			currentFolderId = null;
+		} 
+		// Note: We don't know the folder ID when navigating via breadcrumb
+		// This is a limitation - we should track folder IDs in breadcrumbs
 		selectedItems.clear();
 		// Refresh the files for the new path
 		if (selectedBucket) {
@@ -220,8 +237,8 @@
 			// Clean the folder name - remove slashes
 			const cleanFolderName = newFolder.name.replace(/\//g, '');
 			
-			// Use the dedicated folder creation API with current path
-			const response = await api.createFolder(selectedBucket.name, cleanFolderName, currentPath);
+			// Use the dedicated folder creation API with current folder ID
+			const response = await api.createFolder(selectedBucket.name, cleanFolderName, currentFolderId);
 			
 			if (response.error) {
 				throw new Error(response.error);
@@ -263,6 +280,12 @@
 		}
 	}
 	
+	function openFilePicker() {
+		if (fileInputRef) {
+			fileInputRef.click();
+		}
+	}
+	
 	async function uploadFiles() {
 		if (!selectedBucket || selectedFiles.length === 0) {
 			alert('Please select files to upload');
@@ -288,8 +311,9 @@
 					fileUploadProgress.set(fileKey, 30);
 					fileUploadProgress = fileUploadProgress;
 					
-					// Upload file with current path
-					const response = await api.uploadFile(selectedBucket.name, file, currentPath);
+					// Upload file with current folder ID
+					console.log('Uploading file:', file.name, 'to folder:', currentFolderId);
+					const response = await api.uploadFile(selectedBucket.name, file, currentFolderId);
 					
 					if (response.error) {
 						throw new Error(response.error);
@@ -591,10 +615,10 @@
 		files = []; // Reset files array
 		
 		try {
-			console.log('Fetching objects for bucket:', bucketName, 'path:', currentPath);
-			// Pass the current path as a query parameter
-			const url = currentPath 
-				? `/storage/buckets/${bucketName}/objects?path=${encodeURIComponent(currentPath)}`
+			console.log('Fetching objects for bucket:', bucketName, 'folderId:', currentFolderId);
+			// Pass the current folder ID as a query parameter
+			const url = currentFolderId 
+				? `/storage/buckets/${bucketName}/objects?parent_folder_id=${encodeURIComponent(currentFolderId)}`
 				: `/storage/buckets/${bucketName}/objects`;
 			const response = await api.get(url);
 			console.log('Raw API response:', response);
@@ -930,6 +954,8 @@
 				<div class="files-breadcrumb">
 					<button class="breadcrumb-item" on:click={async () => {
 						currentPath = '';
+						currentFolderId = null; // Reset to root
+						console.log('Navigating to root, reset currentFolderId to null');
 						await fetchBucketObjects(selectedBucket.name);
 					}}>
 						<Folder size={14} />
@@ -1285,14 +1311,16 @@
 					>
 						<Upload size={48} style="color: var(--text-muted)" />
 						<p class="upload-text">Drag and drop files here or click to browse</p>
+						<button class="btn btn-primary" on:click={openFilePicker} disabled={uploadingFiles}>Browse Files</button>
 						<input 
 							type="file" 
 							multiple 
-							class="upload-input"
+							class="hidden-file-input"
 							on:change={handleFileSelect}
 							disabled={uploadingFiles}
+							bind:this={fileInputRef}
+							style="display: none;"
 						/>
-						<button class="btn btn-primary" disabled={uploadingFiles}>Browse Files</button>
 					</div>
 				{:else}
 					<div class="selected-files">
@@ -2004,14 +2032,8 @@
 		color: var(--text-secondary);
 	}
 	
-	.upload-input {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		opacity: 0;
-		cursor: pointer;
+	.hidden-file-input {
+		display: none;
 	}
 	
 	.upload-info {

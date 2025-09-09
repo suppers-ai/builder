@@ -200,7 +200,7 @@
 		console.log('Create variable requested from:', context);
 		// You could implement a variable creation modal here
 		// or navigate to the variables page
-		window.open('/extensions/products/variables', '_blank');
+		window.open('/admin/extensions/products/variables', '_blank');
 	}
 	
 	async function createProductType() {
@@ -410,7 +410,7 @@
 <div class="page-container">
 	<!-- Header -->
 	<div class="page-header">
-		<a href="/extensions/products" class="back-button">
+		<a href="/admin/extensions/products" class="back-button">
 			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 				<polyline points="15 18 9 12 15 6"></polyline>
 			</svg>
@@ -1556,7 +1556,7 @@
 						emptyMessage="No pricing templates selected"
 						noItemsMessage="No pricing templates available."
 						addButtonText="Add Pricing Template"
-						createLink="/extensions/products/pricing"
+						createLink="/admin/extensions/products/pricing"
 						createLinkText="Create templates first"
 						allowCreateNew={true}
 						allowEdit={true}
