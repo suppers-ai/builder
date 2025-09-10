@@ -146,9 +146,6 @@ func (e *CloudStorageExtension) RegisterRoutes(router core.ExtensionRouter) erro
 	// Admin routes
 	router.HandleFunc("/api/users/search", e.handleUserSearch)
 	
-	// User resources routes
-	router.HandleFunc("/api/my-files", e.handleGetMyFilesFolder)
-	
 	// Log that routes were registered
 	fmt.Printf("CloudStorage extension routes registered successfully\n")
 	

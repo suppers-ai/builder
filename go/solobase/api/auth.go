@@ -65,6 +65,14 @@ func HandleLogin(authService *services.AuthService, storageService *services.Sto
 
 		// Execute PostLogin hooks for extensions
 		if extensionRegistry != nil {
+			// Get app ID from storage service if available
+			appID := "solobase" // default
+			if storageService != nil {
+				appID = storageService.GetAppID()
+			}
+			
+			log.Printf("Executing PostLogin hooks with appID=%s for user %s", appID, user.Email)
+			
 			hookCtx := &core.HookContext{
 				Request:  r,
 				Response: w,
@@ -72,6 +80,7 @@ func HandleLogin(authService *services.AuthService, storageService *services.Sto
 					"userID":    user.ID.String(),
 					"userEmail": user.Email,
 					"userRole":  user.Role,
+					"appID":     appID,
 				},
 				Services: nil, // Services will be set by the registry
 			}
@@ -86,7 +95,11 @@ func HandleLogin(authService *services.AuthService, storageService *services.Sto
 			if err := extensionRegistry.ExecuteHooks(r.Context(), core.HookPostLogin, hookCtx); err != nil {
 				// Log the error but don't fail the login
 				log.Printf("Warning: PostLogin hook failed: %v", err)
+			} else {
+				log.Printf("PostLogin hooks executed successfully")
 			}
+		} else {
+			log.Printf("Warning: extensionRegistry is nil, skipping PostLogin hooks")
 		}
 
 		// Generate JWT token

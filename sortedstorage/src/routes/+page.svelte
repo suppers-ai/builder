@@ -23,7 +23,9 @@
 	let showAllRecent = false;
 	let showPreview = false;
 	let selectedFile: StorageItem | null = null;
-	let myFilesFolderId: string | null = null;
+	
+	// Root folders (folders with no parent)
+	let rootFolders: StorageItem[] = [];
 	
 	onMount(async () => {
 		// Wait for auth check to complete
@@ -35,20 +37,24 @@
 			return;
 		}
 		
-		// User is authenticated, get their My Files folder ID for navigation
+		// User is authenticated, get all root folders (folders with no parent)
 		try {
-			const response = await fetch('/api/storage/my-files', {
+			const response = await fetch('/api/storage/buckets/int_storage/objects?parent_folder_id=', {
 				headers: {
 					'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
 				}
 			});
 			
 			if (response.ok) {
-				const data = await response.json();
-				myFilesFolderId = data.folder_id;
+				const objects = await response.json();
+				// Filter to only get folders (not files) at the root level
+				rootFolders = objects.filter(obj => 
+					obj.content_type === 'application/x-directory' && 
+					!obj.parent_folder_id
+				);
 			}
 		} catch (error) {
-			console.error('Failed to get My Files folder:', error);
+			console.error('Failed to load root folders:', error);
 		}
 		
 		// Load recently viewed items to show on homepage
@@ -146,19 +152,21 @@
 				<p class="welcome-subtitle">What would you like to do today?</p>
 			</div>
 			
-			<!-- Quick Actions -->
+			<!-- Root Folders -->
 			<div class="quick-actions">
-				<button class="action-card" on:click={() => myFilesFolderId ? goto(`/folder/${myFilesFolderId}`) : goto('/')}>
-					<div class="action-icon">
-						<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-						</svg>
-					</div>
-					<div class="action-content">
-						<h3 class="action-title">My Files</h3>
-						<p class="action-description">Browse and manage your files</p>
-					</div>
-				</button>
+				{#each rootFolders as folder}
+					<button class="action-card" on:click={() => goto(`/folder/${folder.id}`)}>
+						<div class="action-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+							</svg>
+						</div>
+						<div class="action-content">
+							<h3 class="action-title">{folder.name}</h3>
+							<p class="action-description">Browse and manage your files</p>
+						</div>
+					</button>
+				{/each}
 				
 				<button class="action-card" on:click={() => notifications.info('Coming soon!')}>
 					<div class="action-icon">

@@ -187,13 +187,21 @@ func (e *CloudStorageExtension) setupUserResourcesHook(ctx context.Context, hook
 		return nil // Skip if no user ID
 	}
 	
+	// Get app ID from context (defaults to "solobase" if not set)
+	appID := "solobase"
+	if id, ok := hookCtx.Data["appID"].(string); ok && id != "" {
+		appID = id
+	}
+	
+	log.Printf("setupUserResourcesHook: userID=%s, appID=%s", userID, appID)
+	
 	// For now, we'll create the folder directly in the database
 	// The "My Files" folder is created in the int_storage bucket
 	if e.db != nil {
-		// Check if user already has a "My Files" folder
+		// Check if user already has a "My Files" folder (root folder with no parent) for this app
 		var existingFolder pkgstorage.StorageObject
-		err := e.db.Where("bucket_name = ? AND user_id = ? AND object_name = ? AND content_type = ?",
-			"int_storage", userID, "My Files", "application/x-directory").
+		err := e.db.Where("bucket_name = ? AND user_id = ? AND app_id = ? AND object_name = ? AND content_type = ? AND parent_folder_id IS NULL",
+			"int_storage", userID, appID, "My Files", "application/x-directory").
 			First(&existingFolder).Error
 		
 		if err != nil {
@@ -203,16 +211,19 @@ func (e *CloudStorageExtension) setupUserResourcesHook(ctx context.Context, hook
 				BucketName:  "int_storage",
 				ObjectName:  "My Files",
 				UserID:      userID,
+				AppID:       &appID,
 				ContentType: "application/x-directory",
 				Size:        0,
 			}
+			
+			log.Printf("Creating My Files folder with appID=%s for user %s", appID, userID)
 			
 			if err := e.db.Create(myFilesFolder).Error; err != nil {
 				log.Printf("Warning: Failed to create My Files folder for user %s: %v", userID, err)
 				return nil
 			}
 			
-			log.Printf("Created My Files folder for user %s with ID %s", userID, myFilesFolder.ID)
+			log.Printf("Created My Files folder for user %s with ID %s and appID=%s", userID, myFilesFolder.ID, appID)
 			
 			// Store folder ID in context
 			if hookCtx.Data == nil {

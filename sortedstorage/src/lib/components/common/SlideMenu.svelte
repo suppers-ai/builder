@@ -12,31 +12,40 @@
 	export let showSearchInMenu = true;
 	
 	let showSearch = false;
-	let myFilesFolderId: string | null = null;
+	let rootFolders: any[] = [];
 	
 	onMount(async () => {
-		// Get the My Files folder ID when component mounts
+		// Get all root folders when component mounts
 		if ($auth.user) {
 			try {
-				const response = await fetch('/api/storage/my-files', {
+				const response = await fetch('/api/storage/buckets/int_storage/objects?parent_folder_id=', {
 					headers: {
 						'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
 					}
 				});
 				
 				if (response.ok) {
-					const data = await response.json();
-					myFilesFolderId = data.folder_id;
+					const objects = await response.json();
+					// Filter to only get folders at the root level
+					rootFolders = objects.filter(obj => 
+						obj.content_type === 'application/x-directory' && 
+						!obj.parent_folder_id
+					);
 				}
 			} catch (error) {
-				console.error('Failed to get My Files folder:', error);
+				console.error('Failed to load root folders:', error);
 			}
 		}
 	});
 	
 	$: menuItems = [
 		{ title: 'Home', href: '/', icon: Home },
-		{ title: 'My Files', href: myFilesFolderId ? `/folder/${myFilesFolderId}` : '/', icon: Files },
+		// Add each root folder to the menu
+		...rootFolders.map(folder => ({
+			title: folder.name,
+			href: `/folder/${folder.id}`,
+			icon: Files
+		})),
 		{ title: 'Shared with Me', href: '#', icon: Share2, disabled: true }
 	];
 	

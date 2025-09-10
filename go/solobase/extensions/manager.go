@@ -247,6 +247,7 @@ func (m *ExtensionManager) registerExtensions() error {
 	m.logger.Info(context.Background(), "Registering extensions")
 
 	// Register all available extensions with database
+	// Use the manual registration for now since we need to pass database
 	if err := RegisterAllExtensions(m.registry, m.db); err != nil {
 		return fmt.Errorf("failed to register extensions: %w", err)
 	}

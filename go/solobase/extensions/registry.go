@@ -42,9 +42,12 @@ func RegisterAllExtensions(registry *core.ExtensionRegistry, db *gorm.DB) error 
 	}
 	
 	// Enable CloudStorage extension by default for hook functionality
+	fmt.Printf("Enabling CloudStorage extension for hooks...\n")
 	if err := registry.Enable("cloudstorage"); err != nil {
 		// Log but don't fail - extension can still work without being enabled
 		fmt.Printf("Warning: Failed to enable CloudStorage extension: %v\n", err)
+	} else {
+		fmt.Printf("CloudStorage extension enabled successfully\n")
 	}
 
 	// Register Webhooks extension

@@ -7,4 +7,4 @@ go run tools/generate-extensions.go
 
 # Build the application
 echo "Building Solobase..."
-go build -o solobase 2>&1
+go build -o solobase cmd/solobase/main.go 2>&1
