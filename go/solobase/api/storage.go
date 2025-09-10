@@ -1029,26 +1029,6 @@ func (d *DirectDownloadTracker) Close() error {
 	return d.reader.Close()
 }
 
-// HandleGetMyFilesFolder returns the user's "My Files" folder ID
-func (h *StorageHandlers) HandleGetMyFilesFolder(w http.ResponseWriter, r *http.Request) {
-	userID := extractUserIDFromToken(r)
-	if userID == "" {
-		respondWithError(w, http.StatusUnauthorized, "Authentication required")
-		return
-	}
-
-	// Ensure the folder exists and get its ID
-	folderID, err := h.storageService.EnsureUserMyFilesFolder(userID)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to get My Files folder")
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, map[string]string{
-		"folder_id": folderID,
-		"name": "My Files",
-	})
-}
 
 // HandleGetStorageQuota returns storage quota information for the current user
 func (h *StorageHandlers) HandleGetStorageQuota(w http.ResponseWriter, r *http.Request) {

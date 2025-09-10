@@ -146,6 +146,9 @@ func (e *CloudStorageExtension) RegisterRoutes(router core.ExtensionRouter) erro
 	// Admin routes
 	router.HandleFunc("/api/users/search", e.handleUserSearch)
 	
+	// User resources routes
+	router.HandleFunc("/api/my-files", e.handleGetMyFilesFolder)
+	
 	// Log that routes were registered
 	fmt.Printf("CloudStorage extension routes registered successfully\n")
 	
@@ -160,6 +163,15 @@ func (e *CloudStorageExtension) RegisterMiddleware() []core.MiddlewareRegistrati
 // RegisterHooks returns hook registrations
 func (e *CloudStorageExtension) RegisterHooks() []core.HookRegistration {
 	hooks := []core.HookRegistration{}
+	
+	// Register user lifecycle hooks
+	hooks = append(hooks, core.HookRegistration{
+		Extension: "cloudstorage",
+		Name:      "setup_user_resources",
+		Type:      core.HookPostLogin,
+		Priority:  10,
+		Handler:   e.setupUserResourcesHook,
+	})
 	
 	// Only register hooks if quotas are enabled
 	if e.config.EnableQuotas {

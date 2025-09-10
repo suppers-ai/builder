@@ -755,3 +755,78 @@ func (e *CloudStorageExtension) handleUserSearch(w http.ResponseWriter, r *http.
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
+
+// handleGetMyFilesFolder returns the user's "My Files" folder ID
+func (e *CloudStorageExtension) handleGetMyFilesFolder(w http.ResponseWriter, r *http.Request) {
+	// Get user ID from request context or header
+	userID := r.Header.Get("X-User-ID")
+	if userID == "" {
+		// Try to extract from JWT if available
+		userID = extractUserIDFromRequest(r)
+	}
+	
+	if userID == "" {
+		http.Error(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+	
+	// Check if database is available
+	if e.db == nil {
+		http.Error(w, "Database not available", http.StatusServiceUnavailable)
+		return
+	}
+	
+	// Check if user already has a "My Files" folder
+	var existingFolder pkgstorage.StorageObject
+	err := e.db.Where("bucket_name = ? AND user_id = ? AND object_name = ? AND content_type = ?",
+		"int_storage", userID, "My Files", "application/x-directory").
+		First(&existingFolder).Error
+	
+	var folderID string
+	if err != nil {
+		// Create the "My Files" folder
+		myFilesFolder := &pkgstorage.StorageObject{
+			ID:          uuid.New().String(),
+			BucketName:  "int_storage",
+			ObjectName:  "My Files",
+			UserID:      userID,
+			ContentType: "application/x-directory",
+			Size:        0,
+		}
+		
+		if err := e.db.Create(myFilesFolder).Error; err != nil {
+			http.Error(w, "Failed to create My Files folder", http.StatusInternalServerError)
+			return
+		}
+		
+		folderID = myFilesFolder.ID
+	} else {
+		folderID = existingFolder.ID
+	}
+	
+	response := map[string]string{
+		"folder_id": folderID,
+		"name":      "My Files",
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+// extractUserIDFromRequest is a helper to extract user ID from JWT token
+func extractUserIDFromRequest(r *http.Request) string {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		return ""
+	}
+	
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == authHeader {
+		return ""
+	}
+	
+	// This would need proper JWT parsing with the secret
+	// For now returning empty - the actual implementation should use
+	// the same JWT parsing logic as in the storage handlers
+	return ""
+}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	auth "github.com/suppers-ai/auth"
+	"github.com/suppers-ai/solobase/extensions/core"
 	"github.com/suppers-ai/solobase/services"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -42,7 +43,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func HandleLogin(authService *services.AuthService, storageService *services.StorageService) http.HandlerFunc {
+func HandleLogin(authService *services.AuthService, storageService *services.StorageService, extensionRegistry *core.ExtensionRegistry) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Login request received")
 		
@@ -62,14 +63,29 @@ func HandleLogin(authService *services.AuthService, storageService *services.Sto
 			return
 		}
 
-		// Ensure user has a "My Files" folder
-		if storageService != nil {
-			myFilesFolderID, err := storageService.EnsureUserMyFilesFolder(user.ID.String())
-			if err != nil {
+		// Execute PostLogin hooks for extensions
+		if extensionRegistry != nil {
+			hookCtx := &core.HookContext{
+				Request:  r,
+				Response: w,
+				Data: map[string]interface{}{
+					"userID":    user.ID.String(),
+					"userEmail": user.Email,
+					"userRole":  user.Role,
+				},
+				Services: nil, // Services will be set by the registry
+			}
+			
+			// Set the storage service in the hook context if available
+			if storageService != nil && hookCtx.Services != nil {
+				// The registry should have already set up services
+				// We just add the storage reference for backwards compatibility
+			}
+			
+			// Execute post-login hooks (e.g., CloudStorage extension will create "My Files" folder)
+			if err := extensionRegistry.ExecuteHooks(r.Context(), core.HookPostLogin, hookCtx); err != nil {
 				// Log the error but don't fail the login
-				log.Printf("Warning: Failed to ensure My Files folder for user %s: %v", user.Email, err)
-			} else {
-				log.Printf("Ensured My Files folder for user %s with ID %s", user.Email, myFilesFolderID)
+				log.Printf("Warning: PostLogin hook failed: %v", err)
 			}
 		}
 

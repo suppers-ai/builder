@@ -183,6 +183,10 @@ const (
 	HookAfterUpload    HookType = "after_upload"
 	HookBeforeDownload HookType = "before_download"
 	HookAfterDownload  HookType = "after_download"
+	
+	// User lifecycle hooks
+	HookPostLogin      HookType = "post_login"
+	HookPostSignup     HookType = "post_signup"
 )
 
 // HookContext provides context for hook execution

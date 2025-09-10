@@ -91,7 +91,7 @@ func (a *API) setupRoutes() {
 	}).Methods("GET", "OPTIONS")
 	
 	// Public routes (no auth required)
-	apiRouter.HandleFunc("/auth/login", HandleLogin(a.AuthService, a.StorageService)).Methods("POST", "OPTIONS")
+	apiRouter.HandleFunc("/auth/login", HandleLogin(a.AuthService, a.StorageService, a.ExtensionRegistry)).Methods("POST", "OPTIONS")
 	apiRouter.HandleFunc("/auth/signup", HandleSignup(a.AuthService)).Methods("POST", "OPTIONS")
 	
 	// Temporarily make dashboard public for testing
@@ -150,7 +150,6 @@ func (a *API) setupRoutes() {
 	apiRouter.HandleFunc("/storage/buckets/{bucket}/folders", a.storageHandlers.HandleCreateFolder).Methods("POST", "OPTIONS")
 	
 	// Storage quota and statistics routes
-	apiRouter.HandleFunc("/storage/my-files", a.storageHandlers.HandleGetMyFilesFolder).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/quota", a.storageHandlers.HandleGetStorageQuota).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/stats", a.storageHandlers.HandleGetStorageStats).Methods("GET", "OPTIONS")
 	apiRouter.HandleFunc("/storage/admin/stats", a.storageHandlers.HandleGetAdminStorageStats).Methods("GET", "OPTIONS")

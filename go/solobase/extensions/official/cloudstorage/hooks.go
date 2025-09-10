@@ -7,6 +7,7 @@ import (
 	
 	"github.com/google/uuid"
 	"github.com/suppers-ai/solobase/extensions/core"
+	pkgstorage "github.com/suppers-ai/storage"
 )
 
 // checkStorageQuotaHook checks if user has enough storage quota before upload
@@ -174,6 +175,60 @@ func (e *CloudStorageExtension) logDownloadAccessHook(ctx context.Context, hookC
 			log.Printf("Failed to log download access: %v", err)
 		}
 	}()
+	
+	return nil
+}
+
+// setupUserResourcesHook creates the user's "My Files" folder on login
+func (e *CloudStorageExtension) setupUserResourcesHook(ctx context.Context, hookCtx *core.HookContext) error {
+	// Extract user data
+	userID, ok := hookCtx.Data["userID"].(string)
+	if !ok || userID == "" {
+		return nil // Skip if no user ID
+	}
+	
+	// For now, we'll create the folder directly in the database
+	// The "My Files" folder is created in the int_storage bucket
+	if e.db != nil {
+		// Check if user already has a "My Files" folder
+		var existingFolder pkgstorage.StorageObject
+		err := e.db.Where("bucket_name = ? AND user_id = ? AND object_name = ? AND content_type = ?",
+			"int_storage", userID, "My Files", "application/x-directory").
+			First(&existingFolder).Error
+		
+		if err != nil {
+			// Create the "My Files" folder
+			myFilesFolder := &pkgstorage.StorageObject{
+				ID:          uuid.New().String(),
+				BucketName:  "int_storage",
+				ObjectName:  "My Files",
+				UserID:      userID,
+				ContentType: "application/x-directory",
+				Size:        0,
+			}
+			
+			if err := e.db.Create(myFilesFolder).Error; err != nil {
+				log.Printf("Warning: Failed to create My Files folder for user %s: %v", userID, err)
+				return nil
+			}
+			
+			log.Printf("Created My Files folder for user %s with ID %s", userID, myFilesFolder.ID)
+			
+			// Store folder ID in context
+			if hookCtx.Data == nil {
+				hookCtx.Data = make(map[string]interface{})
+			}
+			hookCtx.Data["myFilesFolderID"] = myFilesFolder.ID
+		} else {
+			log.Printf("User %s already has My Files folder with ID %s", userID, existingFolder.ID)
+			
+			// Store existing folder ID in context
+			if hookCtx.Data == nil {
+				hookCtx.Data = make(map[string]interface{})
+			}
+			hookCtx.Data["myFilesFolderID"] = existingFolder.ID
+		}
+	}
 	
 	return nil
 }
