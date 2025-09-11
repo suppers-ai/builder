@@ -6,14 +6,14 @@ import { dev } from '$app/environment';
 const securityHeaders: Handle = async ({ event, resolve }) => {
 	const response = await resolve(event);
 	
-	// Content Security Policy
+	// Content Security Policy - Allow connections to solobase backend
 	const csp = [
 		"default-src 'self'",
 		"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
 		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-		"img-src 'self' data: blob: https:",
+		"img-src 'self' data: blob: https: http://localhost:8095",
 		"font-src 'self' data: https://fonts.gstatic.com",
-		"connect-src 'self' wss: https:",
+		"connect-src 'self' http://localhost:8095 ws://localhost:8095 wss: https:",
 		"media-src 'self' blob:",
 		"object-src 'none'",
 		"frame-src 'self'",
@@ -105,8 +105,6 @@ const rateLimiting: Handle = async ({ event, resolve }) => {
 	
 	// Rate limit configuration
 	const limits: Record<string, { requests: number; window: number }> = {
-		'/api/auth/login': { requests: 5, window: 900000 }, // 5 requests per 15 minutes
-		'/api/auth/register': { requests: 3, window: 3600000 }, // 3 requests per hour
 		'/api/storage/upload': { requests: 50, window: 3600000 }, // 50 uploads per hour
 		'/api': { requests: 100, window: 60000 }, // 100 API requests per minute
 		default: { requests: 1000, window: 60000 } // 1000 requests per minute

@@ -3,15 +3,16 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
-import { storageAPI as apiClient } from '$lib/api/storage';
+import storageAPI from '$lib/api/storage';
 import { sharingAPI } from '$lib/api/sharing';
 import { notifications } from './notifications';
 import { recentFiles } from './recent';
-import type { FileItem, FolderItem, StorageQuota } from '$lib/types/storage';
+import type { StorageObject, StorageQuota } from '$lib/types/storage';
+import { isFolder, isFile } from '$lib/types/storage';
 
 interface StorageState {
-	files: FileItem[];
-	folders: FolderItem[];
+	files: StorageObject[];
+	folders: StorageObject[];
 	currentPath: string;
 	selectedItems: string[];
 	searchQuery: string;
@@ -37,7 +38,7 @@ interface UploadQueueItem {
 	progress: number;
 	status: 'pending' | 'uploading' | 'completed' | 'error';
 	error?: string;
-	uploadedFile?: FileItem;
+	uploadedFile?: StorageObject;
 	cancelToken?: () => void;
 }
 
@@ -79,17 +80,17 @@ class StorageStoreAPI {
 		if ($store.searchQuery) {
 			const query = $store.searchQuery.toLowerCase();
 			items = items.filter(item => 
-				item.name.toLowerCase().includes(query)
+				item.object_name.toLowerCase().includes(query)
 			);
 		}
 
 		// Apply filters
 		if ($store.filters.type && $store.filters.type !== 'all') {
 			items = items.filter(item => {
-				if ($store.filters.type === 'folder') return item.type === 'folder';
-				if ($store.filters.type === 'file') return item.type === 'file';
-				if (item.type === 'file') {
-					const mimeType = (item as FileItem).mimeType;
+				if ($store.filters.type === 'folder') return isFolder(item);
+				if ($store.filters.type === 'file') return isFile(item);
+				if (isFile(item)) {
+					const mimeType = item.content_type;
 					switch ($store.filters.type) {
 						case 'image': return mimeType.startsWith('image/');
 						case 'document': return mimeType.includes('document') || mimeType.includes('pdf');
@@ -105,7 +106,7 @@ class StorageStoreAPI {
 		if ($store.filters.dateRange) {
 			const { from, to } = $store.filters.dateRange;
 			items = items.filter(item => {
-				const date = item.modifiedAt;
+				const date = new Date(item.updated_at);
 				if (from && date < from) return false;
 				if (to && date > to) return false;
 				return true;
@@ -116,8 +117,8 @@ class StorageStoreAPI {
 		if ($store.filters.sizeRange) {
 			const { min, max } = $store.filters.sizeRange;
 			items = items.filter(item => {
-				if (item.type !== 'file') return true;
-				const size = (item as FileItem).size;
+				if (!isFile(item)) return true;
+				const size = item.size;
 				if (min && size < min) return false;
 				if (max && size > max) return false;
 				return true;
@@ -130,21 +131,21 @@ class StorageStoreAPI {
 
 			switch ($store.sortBy) {
 				case 'name':
-					comparison = a.name.localeCompare(b.name);
+					comparison = a.object_name.localeCompare(b.object_name);
 					break;
 				case 'size':
-					const sizeA = a.type === 'file' ? (a as FileItem).size : 0;
-					const sizeB = b.type === 'file' ? (b as FileItem).size : 0;
+					const sizeA = isFile(a) ? a.size : 0;
+					const sizeB = isFile(b) ? b.size : 0;
 					comparison = sizeA - sizeB;
 					break;
 				case 'date':
-					comparison = a.modifiedAt.getTime() - b.modifiedAt.getTime();
+					comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
 					break;
 				case 'type':
-					if (a.type !== b.type) {
-						comparison = a.type === 'folder' ? -1 : 1;
-					} else if (a.type === 'file') {
-						comparison = (a as FileItem).mimeType.localeCompare((b as FileItem).mimeType);
+					if (isFolder(a) !== isFolder(b)) {
+						comparison = isFolder(a) ? -1 : 1;
+					} else if (isFile(a) && isFile(b)) {
+						comparison = a.content_type.localeCompare(b.content_type);
 					}
 					break;
 			}
@@ -172,15 +173,15 @@ class StorageStoreAPI {
 			// Check if pathOrId is a folder ID (UUIDs have specific format)
 			const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetPath);
 			
-			const response = await apiClient.listFiles({
+			const response = await storageAPI.listFiles({
 				// If it's a UUID, use parentId, otherwise use path
 				...(isUUID ? { parentId: targetPath } : { path: targetPath }),
 				sortBy: get(this.store).sortBy,
 				sortOrder: get(this.store).sortOrder
 			});
 
-			const files = response.items.filter(item => item.type === 'file') as FileItem[];
-			const folders = response.items.filter(item => item.type === 'folder') as FolderItem[];
+			const files = response.items.filter(item => isFile(item));
+			const folders = response.items.filter(item => isFolder(item));
 
 			this.store.update(state => ({
 				...state,
@@ -238,7 +239,7 @@ class StorageStoreAPI {
 			});
 
 			// Upload file
-			const uploadedFile = await apiClient.uploadFile(item.file, {
+			const uploadedFile = await storageAPI.uploadFile(item.file, {
 				path: item.path,
 				parentId: item.parentId, // Pass parentId to API
 				onProgress: (progress) => {
@@ -280,7 +281,7 @@ class StorageStoreAPI {
 	 */
 	async deleteItem(id: string): Promise<boolean> {
 		try {
-			await apiClient.deleteItem(id);
+			await storageAPI.deleteItem(id);
 			
 			this.store.update(state => ({
 				...state,
@@ -299,7 +300,7 @@ class StorageStoreAPI {
 
 	async deleteItems(ids: string[]): Promise<boolean> {
 		try {
-			await apiClient.deleteMultiple(ids);
+			await storageAPI.deleteMultiple(ids);
 			
 			this.store.update(state => ({
 				...state,
@@ -323,7 +324,7 @@ class StorageStoreAPI {
 		const targetPath = path || get(this.store).currentPath;
 
 		try {
-			const folder = await apiClient.createFolder(name, targetPath, parentId);
+			const folder = await storageAPI.createFolder(name, targetPath, parentId);
 			
 			this.store.update(state => ({
 				...state,
@@ -354,21 +355,22 @@ class StorageStoreAPI {
 	 */
 	async renameItem(id: string, newName: string): Promise<boolean> {
 		try {
-			const updated = await apiClient.rename(id, newName);
+			const updated = await storageAPI.rename(id, newName);
 			
 			this.store.update(state => {
-				if (updated.type === 'file') {
+				// Check if the item is a folder or file based on content_type
+				if (isFolder(updated)) {
 					return {
 						...state,
-						files: state.files.map(f => 
-							f.id === id ? updated as FileItem : f
+						folders: state.folders.map(f => 
+							f.id === id ? updated : f
 						)
 					};
 				} else {
 					return {
 						...state,
-						folders: state.folders.map(f => 
-							f.id === id ? updated as FolderItem : f
+						files: state.files.map(f => 
+							f.id === id ? updated : f
 						)
 					};
 				}
@@ -394,7 +396,7 @@ class StorageStoreAPI {
 	 */
 	async moveItems(ids: string[], targetPath: string): Promise<boolean> {
 		try {
-			await apiClient.moveMultiple(ids, { targetPath });
+			await storageAPI.moveMultiple(ids, { targetPath });
 			
 			// Remove items from current view
 			this.store.update(state => ({
@@ -417,12 +419,12 @@ class StorageStoreAPI {
 	 */
 	async copyItems(ids: string[], targetPath: string): Promise<boolean> {
 		try {
-			const copied = await apiClient.copyMultiple(ids, { targetPath });
+			const copied = await storageAPI.copyMultiple(ids, { targetPath });
 			
 			// If copying to current path, add to view
 			if (targetPath === get(this.store).currentPath) {
-				const copiedFiles = copied.filter(i => i.type === 'file') as FileItem[];
-				const copiedFolders = copied.filter(i => i.type === 'folder') as FolderItem[];
+				const copiedFiles = copied.filter(i => isFile(i));
+				const copiedFolders = copied.filter(i => isFolder(i));
 				
 				this.store.update(state => ({
 					...state,
@@ -447,7 +449,7 @@ class StorageStoreAPI {
 			const item = get(this.store).files.find(f => f.id === id);
 			if (!item) throw new Error('File not found');
 
-			const blob = await apiClient.downloadFile(id, {
+			const blob = await storageAPI.downloadFile(id, {
 				onProgress: (progress) => {
 					// Could show progress in UI
 				}
@@ -459,7 +461,7 @@ class StorageStoreAPI {
 			return {
 				success: true,
 				blob,
-				filename: item.name
+				filename: item.object_name
 			};
 		} catch (error: any) {
 			return {
@@ -474,7 +476,7 @@ class StorageStoreAPI {
 	 */
 	async downloadFiles(ids: string[]): Promise<{ success: boolean; blob?: Blob; filename?: string; error?: string }> {
 		try {
-			const blob = await apiClient.downloadMultiple(ids, {
+			const blob = await storageAPI.downloadMultiple(ids, {
 				onProgress: (progress) => {
 					// Could show progress in UI
 				}
@@ -541,7 +543,7 @@ class StorageStoreAPI {
 	 */
 	async loadQuota(): Promise<void> {
 		try {
-			const quota = await apiClient.getQuota();
+			const quota = await storageAPI.getQuota();
 			this.store.update(state => ({ ...state, quota }));
 		} catch (error: any) {
 			console.error('Failed to load quota:', error);
@@ -622,7 +624,7 @@ class StorageStoreAPI {
 }
 
 // Create singleton instance
-export const storageAPI = new StorageStoreAPI();
+export const storageStoreAPI = new StorageStoreAPI();
 
 // Re-export for convenience
-export const storage = storageAPI;
+export const storage = storageStoreAPI;

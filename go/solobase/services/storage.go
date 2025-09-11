@@ -332,39 +332,32 @@ func (s *StorageService) GetObjects(bucket string, userID string, parentFolderID
 		return nil, err
 	}
 
-	// Convert to result format
+	// Return raw StorageObject data without transformation
 	result := make([]interface{}, 0, len(objects))
 
 	for i := range objects {
 		obj := &objects[i]
 
-		// Use ObjectName for display
-		displayName := obj.ObjectName
-
-		if displayName == "" || displayName == ".keep" {
-			continue // Skip empty names and .keep files
+		// Skip empty names and .keep files
+		if obj.ObjectName == "" || obj.ObjectName == ".keep" {
+			continue
 		}
 
-		// Determine file type for display
-		fileType := "file"
-		if obj.IsFolder() {
-			fileType = "folder"
-		} else {
-			fileType = getFileType(displayName)
-		}
-
+		// Return the raw StorageObject fields
 		result = append(result, map[string]interface{}{
-			"id":                obj.ID,
-			"name":              displayName,
-			"type":              fileType,
-			"size":              formatBytes(obj.Size),
-			"size_bytes":        obj.Size,
-			"modified":          obj.UpdatedAt.Format("2006-01-02 15:04"),
-			"content_type":      obj.ContentType,
-			"checksum":          obj.Checksum,
-			"public":            false,
-			"isFolder":          obj.IsFolder(),
-			"parent_folder_id":  obj.ParentFolderID,
+			"id":               obj.ID,
+			"bucket_name":      obj.BucketName,
+			"object_name":      obj.ObjectName,
+			"parent_folder_id": obj.ParentFolderID,
+			"size":             obj.Size,
+			"content_type":     obj.ContentType,
+			"checksum":         obj.Checksum,
+			"metadata":         obj.Metadata,
+			"created_at":       obj.CreatedAt,
+			"updated_at":       obj.UpdatedAt,
+			"last_viewed":      obj.LastViewed,
+			"user_id":          obj.UserID,
+			"app_id":           obj.AppID,
 		})
 	}
 
@@ -809,6 +802,24 @@ func (s *StorageService) RenameObject(bucket, objectID, newName string) error {
 	// If it's a folder, we don't need to update child paths since we use IDs
 	// The children still reference the same parent folder ID
 
+	return nil
+}
+
+// UpdateObjectMetadata updates the metadata field of a storage object
+func (s *StorageService) UpdateObjectMetadata(bucket, objectID, metadata string) error {
+	// Update the metadata field in the database
+	result := s.db.Model(&pkgstorage.StorageObject{}).
+		Where("id = ? AND bucket_name = ?", objectID, bucket).
+		Update("metadata", metadata)
+	
+	if result.Error != nil {
+		return fmt.Errorf("failed to update metadata: %v", result.Error)
+	}
+	
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("object not found")
+	}
+	
 	return nil
 }
 

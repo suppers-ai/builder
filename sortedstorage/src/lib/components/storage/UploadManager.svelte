@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Upload, X, File, CheckCircle, AlertCircle } from 'lucide-svelte';
 	import { storage, uploadQueue } from '$lib/stores/storage';
-	import { storageAPI } from '$lib/stores/storage-api';
+	import storageAPI from '$lib/stores/storage-api';
 	import { notifications } from '$lib/stores/notifications';
 	import { fade, slide } from 'svelte/transition';
 	

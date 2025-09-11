@@ -5,11 +5,13 @@
 	import ShareDialog from './ShareDialog.svelte';
 	import FilePreview from './FilePreview.svelte';
 	import NewItemModal from './NewItemModal.svelte';
-	import { storageAPI } from '$lib/api/storage';
+	import EditItemModal from './EditItemModal.svelte';
+	import storageAPI from '$lib/api/storage';
 	import { notifications } from '$lib/stores/notifications';
 	import { websocket } from '$lib/services/websocket';
 	import { onMount, onDestroy } from 'svelte';
 	import type { StorageItem } from '$lib/types/storage';
+	import { isFolder, isFile } from '$lib/types/storage';
 	import SlideMenu from '$lib/components/common/SlideMenu.svelte';
 	import { Plus, Share2, Edit, Menu } from 'lucide-svelte';
 	
@@ -26,12 +28,14 @@
 	let showShare = false;
 	let showPreview = false;
 	let showNewModal = false;
+	let showEditModal = false;
 	let selectedFile: StorageItem | null = null;
 	let selectedItem: StorageItem | null = null;
-	let selectedItems: StorageItem[] = [];
+	let editingItem: StorageItem | null = null;
 	let loading = false;
 	let storageUnsubscribe: (() => void) | null = null;
 	let mounted = false;
+	let currentFolder: StorageItem | null = null; // Track current folder info
 	
 	// WebSocket subscriptions
 	let unsubscribers: (() => void)[] = [];
@@ -82,11 +86,15 @@
 				// Load folder contents
 				const folderInfo = await storageAPI.getItem(folderId);
 				
-				if (!folderInfo || folderInfo.type !== 'folder') {
+				if (!folderInfo || !isFolder(folderInfo)) {
 					notifications.error('Folder not found');
 					goto('/');
 					return;
 				}
+				
+				// Store current folder info
+				currentFolder = folderInfo;
+				console.log('Current folder loaded:', currentFolder);
 				
 				// Update last viewed for this folder
 				try {
@@ -102,7 +110,7 @@
 				
 				// Get folder hierarchy for breadcrumbs
 				const hierarchy = await storageAPI.getFolderHierarchy(folderId);
-				currentPath = ['Home', ...hierarchy.map(f => f.name)];
+				currentPath = ['Home', ...hierarchy.map(f => f.object_name || 'Unnamed')];
 				pathIds = [null, ...hierarchy.map(f => f.id)];
 				
 				// Load items in this folder
@@ -114,9 +122,28 @@
 				items = result.items;
 				currentPath = ['Home'];
 				pathIds = [null];
+				currentFolder = null;
 			}
 			
-			console.log('Loaded items:', items);
+			// Debug: Get the raw JSON structure
+			const rawJSON = JSON.parse(JSON.stringify(items));
+			console.log('Raw items JSON:', rawJSON);
+			console.log('Items object:', items);
+			
+			// Debug: Check the structure of the first item
+			if (items.length > 0) {
+				const firstItem = items[0];
+				console.log('First item direct access:', {
+					object_name: firstItem.object_name,
+					content_type: firstItem.content_type,
+					'has .name': 'name' in firstItem,
+					'has .object_name': 'object_name' in firstItem,
+					'has .type': 'type' in firstItem,
+					'has .content_type': 'content_type' in firstItem,
+					allKeys: Object.keys(firstItem),
+					rawStringified: JSON.stringify(firstItem)
+				});
+			}
 		} catch (error) {
 			console.error('Failed to load items:', error);
 			notifications.error('Failed to load files');
@@ -127,7 +154,7 @@
 	}
 	
 	function navigateToFolder(folder: StorageItem) {
-		if (folder.type === 'folder') {
+		if (isFolder(folder)) {
 			// Update last viewed and navigate
 			updateLastViewed(folder.id);
 			goto(`/folder/${folder.id}`);
@@ -135,7 +162,7 @@
 	}
 	
 	function handleFileSelect(file: StorageItem) {
-		if (file.type === 'folder') {
+		if (isFolder(file)) {
 			navigateToFolder(file);
 		} else {
 			selectedFile = file;
@@ -149,14 +176,31 @@
 		showShare = true;
 	}
 	
+	function handleEdit(item: StorageItem) {
+		editingItem = item;
+		showEditModal = true;
+	}
+	
 	async function handleDeleteItem(item: StorageItem) {
-		if (confirm(`Are you sure you want to delete ${item.name}?`)) {
+		const isFolderItem = isFolder(item);
+		const message = isFolderItem 
+			? `Are you sure you want to delete the folder "${item.object_name}" and all its contents?`
+			: `Are you sure you want to delete "${item.object_name}"?`;
+			
+		if (confirm(message)) {
 			try {
-				await storageAPI.deleteItem(item.id);
-				notifications.success(`${item.name} deleted`);
+				// For folders, we may need to handle recursive deletion
+				await storageAPI.deleteItem(item.id, true); // Pass permanent=true for folders
+				notifications.success(`${item.object_name} deleted`);
 				await loadItems();
-			} catch (error) {
-				notifications.error('Failed to delete item');
+			} catch (error: any) {
+				console.error('Delete error:', error);
+				// Check if it's a "directory not empty" error
+				if (error.message?.includes('directory not empty')) {
+					notifications.error(`Cannot delete folder "${item.object_name}": Folder is not empty. Please delete its contents first.`);
+				} else {
+					notifications.error(`Failed to delete ${item.object_name}: ${error.message || 'Unknown error'}`);
+				}
 			}
 		}
 	}
@@ -168,6 +212,42 @@
 			await loadItems();
 		} catch (error) {
 			notifications.error('Failed to rename item');
+		}
+	}
+	
+	async function handleEditItem(updatedItem: StorageItem) {
+		console.log('handleEditItem called with:', updatedItem);
+		if (!updatedItem.id) {
+			notifications.error('Cannot update item: ID is missing');
+			return;
+		}
+		
+		try {
+			const currentItem = items.find(i => i.id === updatedItem.id);
+			
+			// Update name if changed
+			if (currentItem && currentItem.object_name !== updatedItem.object_name) {
+				console.log('Renaming from', currentItem.object_name, 'to', updatedItem.object_name);
+				await storageAPI.rename(updatedItem.id, updatedItem.object_name);
+			}
+			
+			// Update metadata
+			let metadata = {};
+			if (typeof updatedItem.metadata === 'string') {
+				try {
+					metadata = JSON.parse(updatedItem.metadata);
+				} catch (e) {
+					console.error('Failed to parse metadata:', e);
+				}
+			}
+			
+			console.log('Updating metadata:', metadata);
+			await storageAPI.updateMetadata(updatedItem.id, metadata);
+			notifications.success(`${updatedItem.object_name} updated successfully`);
+			await loadItems();
+		} catch (error: any) {
+			console.error('handleEditItem error:', error);
+			notifications.error(`Failed to update item: ${error.message || 'Unknown error'}`);
 		}
 	}
 	
@@ -219,6 +299,30 @@
 			goto(`/folder/${pathIds[index]}`);
 		}
 	}
+	
+	function handleFloatingEdit() {
+		// If we're in a folder, edit the folder itself using the exact same modal
+		if (currentFolder) {
+			console.log('handleFloatingEdit - currentFolder:', currentFolder);
+			console.log('handleFloatingEdit - currentFolder.id:', currentFolder.id);
+			// This will open the EditItemModal with the current folder
+			handleEdit(currentFolder);
+		} else {
+			// At root level, show a message
+			notifications.info('Navigate to a folder to edit it, or select an item from the list');
+		}
+	}
+	
+	function handleFloatingShare() {
+		// If we're in a folder, share the folder itself using the exact same modal
+		if (currentFolder) {
+			// This will open the ShareDialog with the current folder
+			handleShare(currentFolder);
+		} else {
+			// At root level, show a message
+			notifications.info('Navigate to a folder to share it, or select an item from the list');
+		}
+	}
 </script>
 
 <div class="files-container">
@@ -229,29 +333,22 @@
 	<div class="floating-actions">
 		<button 
 			class="floating-action-btn" 
-			on:click={() => notifications.info('Edit mode coming soon!')}
-			title="Edit"
+			on:click={handleFloatingEdit}
+			title="Edit {currentFolder ? currentFolder.object_name : 'item'}"
 		>
 			<Edit size={20} />
 		</button>
 		<button 
 			class="floating-action-btn" 
-			on:click={() => {
-				if (selectedItems.length > 0) {
-					selectedItem = selectedItems[0];
-					showShare = true;
-				} else {
-					notifications.info('Select items to share');
-				}
-			}}
-			title="Share"
+			on:click={handleFloatingShare}
+			title="Share {currentFolder ? currentFolder.object_name : 'item'}"
 		>
 			<Share2 size={20} />
 		</button>
 		<button 
 			class="floating-action-btn primary" 
 			on:click={() => showNewModal = true}
-			title="New"
+			title="New item in {currentFolder ? currentFolder.object_name : 'Home'}"
 		>
 			<Plus size={20} />
 		</button>
@@ -273,10 +370,11 @@
 				navigateToBreadcrumb(path.length - 1);
 			}}
 			onNavigateToFolder={navigateToFolder}
-			onEdit={(item) => console.log('Edit:', item)}
+			onEdit={handleEdit}
 			onDelete={(item) => handleDeleteItem(item)}
 			onShare={(item) => handleShare(item)}
 			on:new={handleNewItem}
+			on:itemUpdated={loadItems}
 		/>
 	</div>
 	
@@ -308,6 +406,18 @@
 			on:new={handleNewItem}
 		/>
 	{/if}
+	
+	{#if showEditModal && editingItem}
+		<EditItemModal
+			bind:open={showEditModal}
+			item={editingItem}
+			onSave={async (updatedItem) => {
+				console.log('onSave callback called with:', updatedItem);
+				await handleEditItem(updatedItem);
+				showEditModal = false;
+			}}
+		/>
+	{/if}
 </div>
 
 <style>
@@ -323,7 +433,7 @@
 		background: #ffffff;
 		border-radius: 24px;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		overflow: hidden;
+		overflow: visible;
 	}
 	
 	/* Floating Action Buttons */

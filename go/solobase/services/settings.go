@@ -67,6 +67,7 @@ func (s *SettingsService) initializeDefaults() error {
 		"enable_debug_mode":           defaults.EnableDebugMode,
 		"maintenance_mode":            defaults.MaintenanceMode,
 		"maintenance_message":         defaults.MaintenanceMessage,
+		"notification":                defaults.Notification,
 	}
 
 	// Save each setting
@@ -294,6 +295,10 @@ func (s *SettingsService) applySetting(appSettings *models.AppSettings, setting 
 	case "maintenance_message":
 		if v, ok := value.(string); ok {
 			appSettings.MaintenanceMessage = v
+		}
+	case "notification":
+		if v, ok := value.(string); ok {
+			appSettings.Notification = v
 		}
 	}
 

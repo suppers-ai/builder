@@ -2,7 +2,7 @@
  * API client for Solobase backend integration
  */
 
-import { browser } from '$app/environment';
+import { browser, dev } from '$app/environment';
 import { goto } from '$app/navigation';
 import { getAuthLoginUrl } from '$lib/config/auth';
 import { config } from '$lib/config/env';
@@ -48,9 +48,9 @@ class ApiClient {
 	private refreshPromise: Promise<boolean> | null = null;
 
 	constructor(apiConfig?: Partial<ApiConfig>) {
-		// In development, use relative URLs to leverage Vite proxy
-		const isDev = import.meta.env.MODE === 'development';
-		const defaultBaseURL = isDev ? '' : (config.apiUrl || 'http://localhost:8091');
+		// In development, use empty baseURL to let the vite proxy handle routing
+		// In production, use the configured API URL
+		const defaultBaseURL = dev ? '' : (config.apiUrl || 'http://localhost:8095');
 		
 		this.config = {
 			baseURL: apiConfig?.baseURL || defaultBaseURL,
@@ -188,25 +188,8 @@ class ApiClient {
 	 * Refresh authentication token
 	 */
 	private async refreshToken(): Promise<boolean> {
-		try {
-			const response = await fetch(this.buildURL('/api/auth/refresh'), {
-				method: 'POST',
-				credentials: 'include',
-				headers: this.buildHeaders()
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				if (data.token) {
-					this.setToken(data.token);
-					localStorage.setItem('auth_token', data.token);
-					return true;
-				}
-			}
-		} catch (error) {
-			console.error('Token refresh failed:', error);
-		}
-
+		// Token refresh should be handled by solobase
+		// For now, just return false to trigger re-authentication
 		return false;
 	}
 

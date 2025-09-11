@@ -24,6 +24,13 @@ export type {
 } from './services/auth.service';
 
 export type {
+  ListOptions,
+  UploadFileOptions,
+  MoveOptions,
+  ShareOptions,
+} from './services/storage.service';
+
+export type {
   DatabaseRecord,
   CreateRecordOptions,
   UpdateRecordOptions,

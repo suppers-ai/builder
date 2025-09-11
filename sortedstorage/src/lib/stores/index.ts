@@ -4,7 +4,7 @@
  */
 
 // Use the API-integrated storage store as the main storage store
-export { storageAPI as storage } from './storage-api';
+export { storageStoreAPI as storage } from './storage-api';
 export type { FileItem, FolderItem, StorageQuota } from '$lib/types/storage';
 
 // Authentication store
@@ -19,10 +19,10 @@ export { recentFiles } from './recent';
 export { collaboration } from './collaboration';
 
 // Create derived stores from storage API
-import { storageAPI } from './storage-api';
+import { storageStoreAPI } from './storage-api';
 
 // Export derived stores with more intuitive names
-export const currentFiles = storageAPI.files$;
-export const currentFolders = storageAPI.folders$;
-export const isLoading = storageAPI.loading$;
-export const uploadQueue = storageAPI.uploadQueue$;
+export const currentFiles = storageStoreAPI.files$;
+export const currentFolders = storageStoreAPI.folders$;
+export const isLoading = storageStoreAPI.loading$;
+export const uploadQueue = storageStoreAPI.uploadQueue$;

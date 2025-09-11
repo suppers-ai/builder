@@ -9,6 +9,9 @@
 	import ShareModal from './ShareModal.svelte';
 	import AuthenticatedImage from './AuthenticatedImage.svelte';
 	import type { StorageItem } from '$lib/types/storage';
+	import { isFolder, isFile } from '$lib/types/storage';
+	import storageAPI from '$lib/api/storage';
+	import { notifications } from '$lib/stores/notifications';
 	
 	const dispatch = createEventDispatcher();
 	
@@ -26,11 +29,12 @@
 	let editingItem: StorageItem | null = null;
 	let sharingItem: StorageItem | null = null;
 	let activeDropdown: string | null = null;
+	let dropdownPositions: Record<string, { top?: string; bottom?: string; left?: string; right?: string }> = {};
 	
 	// Separate items by type
-	$: mediaItems = items.filter(item => item.type === 'file' && isImageFile(item.name));
-	$: fileItems = items.filter(item => item.type === 'file' && !isImageFile(item.name));
-	$: folderItems = items.filter(item => item.type === 'folder');
+	$: mediaItems = items.filter(item => isFile(item) && isImageFile(item.object_name));
+	$: fileItems = items.filter(item => isFile(item) && !isImageFile(item.object_name));
+	$: folderItems = items.filter(item => isFolder(item));
 	
 	function isImageFile(name: string): boolean {
 		const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.ico', '.bmp'];
@@ -42,8 +46,44 @@
 		onNavigate(newPath);
 	}
 	
-	function toggleDropdown(itemId: string) {
-		activeDropdown = activeDropdown === itemId ? null : itemId;
+	function toggleDropdown(itemId: string, event?: MouseEvent) {
+		if (activeDropdown === itemId) {
+			activeDropdown = null;
+		} else {
+			activeDropdown = itemId;
+			// Calculate position if event is provided
+			if (event) {
+				const button = event.currentTarget as HTMLElement;
+				const rect = button.getBoundingClientRect();
+				const dropdownWidth = 150; // min-width of dropdown
+				const dropdownHeight = 140; // approximate height
+				const viewportWidth = window.innerWidth;
+				const viewportHeight = window.innerHeight;
+				
+				let position: typeof dropdownPositions[string] = {};
+				
+				// Check if dropdown would overflow right edge
+				if (rect.right + dropdownWidth > viewportWidth) {
+					position.right = '0';
+				} else {
+					position.left = 'auto';
+					position.right = '0';
+				}
+				
+				// Check if dropdown would overflow bottom edge
+				if (rect.bottom + dropdownHeight > viewportHeight) {
+					// Position above the button
+					position.bottom = '100%';
+					position.top = 'auto';
+				} else {
+					// Position below the button
+					position.top = '100%';
+					position.bottom = 'auto';
+				}
+				
+				dropdownPositions[itemId] = position;
+			}
+		}
 	}
 	
 	function handleEdit(item: StorageItem) {
@@ -53,9 +93,8 @@
 	}
 	
 	function handleDelete(item: StorageItem) {
-		if (confirm(`Are you sure you want to delete "${item.name}"?`)) {
-			onDelete(item);
-		}
+		// Pass delete request to parent - confirmation is handled there
+		onDelete(item);
 		activeDropdown = null;
 	}
 	
@@ -71,10 +110,55 @@
 		showNewModal = false;
 	}
 	
-	function handleUpdateItem(event: CustomEvent<StorageItem>) {
-		onEdit(event.detail);
-		showEditModal = false;
-		editingItem = null;
+	async function handleUpdateItem(updatedItem: StorageItem) {
+		console.log('FileExplorer - handleUpdateItem called with:', updatedItem);
+		console.log('Current item:', editingItem);
+		
+		if (!updatedItem.id) {
+			notifications.error('Cannot update item: ID is missing');
+			return;
+		}
+		
+		try {
+			const currentItem = items.find(i => i.id === updatedItem.id);
+			console.log('Found current item:', currentItem);
+			
+			// Update name if changed
+			if (currentItem && currentItem.object_name !== updatedItem.object_name) {
+				const newName = updatedItem.object_name?.trim();
+				if (!newName) {
+					notifications.error('Name cannot be empty');
+					return;
+				}
+				console.log('Renaming from', currentItem.object_name, 'to', newName);
+				await storageAPI.rename(updatedItem.id, newName);
+			}
+			
+			// Update metadata
+			let metadata = {};
+			if (typeof updatedItem.metadata === 'string') {
+				try {
+					metadata = JSON.parse(updatedItem.metadata);
+				} catch (e) {
+					console.error('Failed to parse metadata:', e);
+				}
+			} else if (updatedItem.metadata && typeof updatedItem.metadata === 'object') {
+				metadata = updatedItem.metadata;
+			}
+			
+			console.log('Updating metadata:', metadata);
+			await storageAPI.updateMetadata(updatedItem.id, metadata);
+			notifications.success(`${updatedItem.object_name} updated successfully`);
+			
+			// Notify parent to reload items
+			dispatch('itemUpdated');
+			
+			showEditModal = false;
+			editingItem = null;
+		} catch (error: any) {
+			console.error('handleUpdateItem error:', error);
+			notifications.error(`Failed to update item: ${error.message || 'Unknown error'}`);
+		}
 	}
 	
 	function handleClickOutside(event: MouseEvent) {
@@ -117,19 +201,19 @@
 					<div class="media-item">
 						<AuthenticatedImage 
 							src={item.downloadUrl || `/api/storage/buckets/int_storage/objects/${item.id}/download`} 
-							alt={item.name}
+							alt={item.object_name}
 							loading="lazy"
 							className="media-image"
 						/>
 						<div class="media-overlay">
 							<button 
 								class="item-menu-btn"
-								on:click|stopPropagation={() => toggleDropdown(item.id)}
+								on:click|stopPropagation={(e) => toggleDropdown(item.id, e)}
 							>
 								<MoreHorizontal size={16} />
 							</button>
 							{#if activeDropdown === item.id}
-								<div class="dropdown-menu dropdown-container">
+								<div class="dropdown-menu dropdown-container" style={Object.entries(dropdownPositions[item.id] || {}).map(([k, v]) => `${k}: ${v}`).join('; ')}>
 									<button on:click={() => handleEdit(item)}>
 										<Edit size={14} />
 										<span>Edit</span>
@@ -159,18 +243,18 @@
 				{#each fileItems as item}
 					<div class="list-item">
 						<div class="item-info">
-							<span class="item-icon">{item.icon || '📄'}</span>
-							<span class="item-name">{item.name}</span>
+							<span class="item-icon">{item.metadata?.icon || '📄'}</span>
+							<span class="item-name">{item.object_name}</span>
 						</div>
 						<div class="item-actions dropdown-container">
 							<button 
 								class="item-menu-btn"
-								on:click|stopPropagation={() => toggleDropdown(item.id)}
+								on:click|stopPropagation={(e) => toggleDropdown(item.id, e)}
 							>
 								<MoreHorizontal size={18} />
 							</button>
 							{#if activeDropdown === item.id}
-								<div class="dropdown-menu">
+								<div class="dropdown-menu" style={Object.entries(dropdownPositions[item.id] || {}).map(([k, v]) => `${k}: ${v}`).join('; ')}>
 									<button on:click={() => handleEdit(item)}>
 										<Edit size={14} />
 										<span>Edit</span>
@@ -208,18 +292,18 @@
 								onNavigateToFolder(item);
 							}
 						}}>
-							<span class="item-icon">{item.icon || '📁'}</span>
-							<span class="item-name">{item.name}</span>
+							<span class="item-icon">{item.metadata?.icon || '📁'}</span>
+							<span class="item-name">{item.object_name}</span>
 						</button>
 						<div class="item-actions dropdown-container">
 							<button 
 								class="item-menu-btn"
-								on:click|stopPropagation={() => toggleDropdown(item.id)}
+								on:click|stopPropagation={(e) => toggleDropdown(item.id, e)}
 							>
 								<MoreHorizontal size={18} />
 							</button>
 							{#if activeDropdown === item.id}
-								<div class="dropdown-menu">
+								<div class="dropdown-menu" style={Object.entries(dropdownPositions[item.id] || {}).map(([k, v]) => `${k}: ${v}`).join('; ')}>
 									<button on:click={() => handleEdit(item)}>
 										<Edit size={14} />
 										<span>Edit</span>
@@ -260,7 +344,7 @@
 	<EditItemModal 
 		bind:open={showEditModal} 
 		item={editingItem}
-		on:update={handleUpdateItem}
+		onSave={handleUpdateItem}
 	/>
 {/if}
 {#if sharingItem}
@@ -366,7 +450,7 @@
 		position: relative;
 		aspect-ratio: 1;
 		border-radius: 8px;
-		overflow: hidden;
+		overflow: visible;
 		background: var(--bg-secondary);
 		cursor: pointer;
 		transition: transform 0.2s;
@@ -381,12 +465,18 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		border-radius: 8px;
 	}
 	
 	.media-overlay {
 		position: absolute;
 		top: 0.5rem;
 		right: 0.5rem;
+		z-index: 10;
+	}
+	
+	.dropdown-container {
+		overflow: visible !important;
 	}
 	
 	/* List Items - Grid layout on desktop */
@@ -466,6 +556,7 @@
 	
 	.item-actions {
 		position: relative;
+		overflow: visible;
 	}
 	
 	.item-menu-btn {
@@ -489,14 +580,13 @@
 	
 	.dropdown-menu {
 		position: absolute;
-		top: 100%;
-		right: 0;
 		margin-top: 0.5rem;
+		margin-bottom: 0.5rem;
 		background: white;
 		border: 1px solid var(--border-color);
 		border-radius: 8px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-		z-index: 1000;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		z-index: 9999;
 		min-width: 150px;
 		padding: 0.5rem;
 	}
@@ -559,6 +649,25 @@
 	.empty-state-btn:hover {
 		background: var(--primary-hover);
 		border-color: var(--primary-hover);
+	}
+	
+	/* Dark mode dropdown menu */
+	:global(.dark) .dropdown-menu {
+		background: #1f2937;
+		border-color: #374151;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	}
+	
+	:global(.dark) .dropdown-menu button {
+		color: #e5e7eb;
+	}
+	
+	:global(.dark) .dropdown-menu button:hover {
+		background: #374151;
+	}
+	
+	:global(.dark) .dropdown-menu button.danger {
+		color: #ef4444;
 	}
 	
 	/* CSS Variables - using brand colors */

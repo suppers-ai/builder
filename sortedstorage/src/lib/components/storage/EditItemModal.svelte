@@ -3,44 +3,65 @@
 	import { X, Calendar, FileText } from 'lucide-svelte';
 	import Modal from '../common/Modal.svelte';
 	import EmojiPicker from '../common/EmojiPicker.svelte';
-	import type { StorageItem } from '$lib/types/storage';
+	import type { StorageItem, StorageObjectMetadata } from '$lib/types/storage';
+	import { isFolder, parseMetadata } from '$lib/types/storage';
 	
 	export let open = false;
 	export let item: StorageItem | null = null;
+	export let onSave: ((item: StorageItem) => void) | undefined = undefined;
 	
 	const dispatch = createEventDispatcher();
 	
 	let name = '';
 	let description = '';
 	let icon = '';
-	let metadata: { date?: string } = {};
+	let date = '';
 	let showEmojiPicker = false;
+	let initialized = false;
+	let isSaving = false;
 	
-	// Initialize form when item changes
-	$: if (item) {
-		name = item.name;
-		description = item.description || '';
-		icon = item.icon || (item.type === 'folder' ? '📁' : '📄');
-		metadata = item.metadata || {};
-		if (!metadata.date) {
-			metadata.date = new Date().toISOString().split('T')[0];
-		}
+	// Initialize form when modal opens
+	$: if (open && item && !initialized) {
+		console.log('EditItemModal - onSave prop:', typeof onSave, onSave);
+		name = item.object_name || '';
+		// Extract fields from metadata
+		const meta = parseMetadata(item);
+		description = meta?.description || '';
+		icon = meta?.icon || (isFolder(item) ? '📁' : '📄');
+		date = meta?.date || new Date().toISOString().split('T')[0];
+		initialized = true;
+	}
+	
+	// Reset initialization flag when modal closes
+	$: if (!open) {
+		initialized = false;
 	}
 	
 	function handleSave() {
+		console.log('handleSave called');
 		if (item && name.trim()) {
-			const updatedItem: StorageItem = {
-				...item,
-				name: name.trim(),
+			const existingMeta = parseMetadata(item) || {};
+			const updatedMetadata: StorageObjectMetadata = {
+				...existingMeta,
 				description: description.trim(),
 				icon,
-				metadata: {
-					...metadata,
-					lastModified: new Date().toISOString()
-				}
+				date,
+				lastModified: new Date().toISOString()
 			};
-			dispatch('update', updatedItem);
-			resetModal();
+			const updatedItem: StorageItem = {
+				...item,
+				object_name: name.trim(),
+				metadata: JSON.stringify(updatedMetadata)
+			};
+			
+			// Use callback if provided, otherwise dispatch event
+			if (onSave) {
+				console.log('Calling onSave callback with:', updatedItem);
+				onSave(updatedItem);
+			} else {
+				console.log('Dispatching update event with:', updatedItem);
+				dispatch('update', updatedItem);
+			}
 		}
 	}
 	
@@ -53,8 +74,10 @@
 		name = '';
 		description = '';
 		icon = '';
-		metadata = {};
+		date = '';
 		open = false;
+		initialized = false;
+		isSaving = false;
 	}
 	
 	function handleKeydown(event: KeyboardEvent) {
@@ -65,9 +88,9 @@
 </script>
 
 <Modal bind:open on:close={resetModal}>
-	<div class="edit-modal" on:keydown={handleKeydown}>
+	<div class="edit-modal">
 		<div class="modal-header">
-			<h2>Edit {item?.type === 'folder' ? 'Folder' : 'File'}</h2>
+			<h2>Edit {item && isFolder(item) ? 'Folder' : 'File'}</h2>
 			<button class="close-btn" on:click={resetModal}>
 				<X size={20} />
 			</button>
@@ -93,7 +116,7 @@
 						id="item-name"
 						type="text"
 						bind:value={name}
-						placeholder="Enter {item?.type} name..."
+						placeholder="Enter {item && isFolder(item) ? 'folder' : 'file'} name..."
 						autocomplete="off"
 					/>
 				</div>
@@ -119,7 +142,7 @@
 				<input
 					id="item-date"
 					type="date"
-					bind:value={metadata.date}
+					bind:value={date}
 				/>
 				<span class="helper-text">Used for organizing and sorting</span>
 			</div>
@@ -207,6 +230,7 @@
 		font-size: 0.95rem;
 		transition: border-color 0.2s;
 		font-family: inherit;
+		background: white;
 	}
 	
 	.form-group input:focus,

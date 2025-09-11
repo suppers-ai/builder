@@ -9,9 +9,10 @@
 	import FilePreview from '$lib/components/storage/FilePreview.svelte';
 	import SearchModal from '$lib/components/storage/SearchModal.svelte';
 	import SlideMenu from '$lib/components/common/SlideMenu.svelte';
-	import { storageAPI } from '$lib/api/storage';
+	import storageAPI from '$lib/api/storage';
 	import { notifications } from '$lib/stores/notifications';
 	import type { StorageItem } from '$lib/types/storage';
+	import { isFolder, isFile } from '$lib/types/storage';
 	
 	let loading = true;
 	let menuOpen = false;
@@ -82,7 +83,7 @@
 	}
 	
 	async function handleRecentItemClick(item: StorageItem) {
-		if (item.type === 'folder') {
+		if (isFolder(item)) {
 			// Navigate to the folder
 			goto(`/folder/${item.id}`);
 		} else {
@@ -222,7 +223,7 @@
 								on:click={() => handleRecentItemClick(item)}
 							>
 								<div class="recent-item-icon">
-									{#if item.type === 'folder'}
+									{#if isFolder(item)}
 										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 											<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
 										</svg>
@@ -239,7 +240,7 @@
 										</svg>
 									{/if}
 								</div>
-								<span class="recent-item-name">{item.name}</span>
+								<span class="recent-item-name">{item.object_name || 'Unnamed'}</span>
 								<span class="recent-item-time">{formatTimeAgo(item.last_viewed)}</span>
 							</button>
 						{/each}

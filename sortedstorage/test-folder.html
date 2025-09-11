@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Folder Navigation</title>
+    <script>
+        // Login first
+        async function login() {
+            const response = await fetch('http://localhost:8095/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: 'admin@example.com',
+                    password: 'Test123456789!'
+                })
+            });
+            const data = await response.json();
+            if (data.tokens) {
+                localStorage.setItem('auth_token', data.tokens.access_token);
+                console.log('Logged in successfully');
+                return data.tokens.access_token;
+            }
+            throw new Error('Login failed');
+        }
+
+        // Create a test folder
+        async function createFolder(token) {
+            const response = await fetch('http://localhost:8095/api/storage/buckets/int_storage/folders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name: 'Test Folder',
+                    parent_folder_id: null
+                })
+            });
+            const data = await response.json();
+            console.log('Created folder:', data);
+            return data;
+        }
+
+        // Get folder details
+        async function getFolder(token, folderId) {
+            const response = await fetch(`http://localhost:8095/api/storage/buckets/int_storage/objects/${folderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            console.log('Folder details:', data);
+            console.log('Content type:', data.content_type);
+            console.log('Is folder?', data.content_type === 'application/x-directory');
+            return data;
+        }
+
+        // Main test
+        async function test() {
+            try {
+                const token = await login();
+                const folder = await createFolder(token);
+                const folderDetails = await getFolder(token, folder.id);
+                
+                document.getElementById('results').innerHTML = `
+                    <h2>Test Results:</h2>
+                    <p><strong>Folder ID:</strong> ${folder.id}</p>
+                    <p><strong>Folder Name:</strong> ${folder.object_name}</p>
+                    <p><strong>Content Type:</strong> ${folderDetails.content_type}</p>
+                    <p><strong>Is Folder?</strong> ${folderDetails.content_type === 'application/x-directory' ? 'Yes' : 'No'}</p>
+                    <p>Navigate to folder: <a href="http://localhost:5175/folder/${folder.id}" target="_blank">Open Folder</a></p>
+                `;
+            } catch (error) {
+                console.error('Test failed:', error);
+                document.getElementById('results').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Test Folder Navigation</h1>
+    <button onclick="test()">Run Test</button>
+    <div id="results"></div>
+</body>
+</html>

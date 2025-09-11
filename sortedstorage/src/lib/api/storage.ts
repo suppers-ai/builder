@@ -1,19 +1,33 @@
 /**
- * Storage API service for file operations - integrated with Solobase
+ * Storage API service - wrapper around Solobase SDK
  */
 
-import apiClient, { type ApiError, type PaginatedResponse } from './client';
-import type { FileItem, FolderItem, StorageQuota } from '$lib/types/storage';
+import { createSolobaseClient, type StorageObject, type StorageObjectMetadata } from '@solobase/sdk';
 import { config } from '$lib/config/env';
 import { browser } from '$app/environment';
 
+// Get token from localStorage if in browser
+function getAuthToken(): string | null {
+	if (browser && typeof window !== 'undefined') {
+		return localStorage.getItem('auth_token');
+	}
+	return null;
+}
+
+// Create Solobase client
+const apiUrl = browser ? '' : config.apiUrl;
+const client = createSolobaseClient(apiUrl || 'http://localhost:8095');
+
+// Set auth token if available
+if (browser) {
+	const token = getAuthToken();
+	if (token) {
+		client.storage.setAuthToken(token);
+	}
+}
+
 // Default bucket name for internal storage
 const STORAGE_BUCKET = 'int_storage';
-
-// Ensure the API client has the current token from localStorage
-function ensureToken() {
-	apiClient.loadTokenFromStorage();
-}
 
 export interface UploadOptions {
 	path?: string;
@@ -42,8 +56,10 @@ export interface ShareOptions {
 
 export interface MoveOptions {
 	targetPath: string;
-	targetParentId?: string;
+	targetId?: string;  // ID of the target parent folder
+	targetParentId?: string;  // Deprecated, use targetId
 	overwrite?: boolean;
+	order?: number;  // Sort order within the target folder
 }
 
 export interface StorageStats {
@@ -54,90 +70,52 @@ export interface StorageStats {
 	trashedCount: number;
 }
 
-// Convert Solobase object format to FileItem/FolderItem
-function convertSolobaseObject(obj: any): FileItem | FolderItem {
-	// Check if it's a folder based on Solobase response
-	// Handle both list format (isFolder, type) and raw database format (content_type, size)
-	const isFolder = obj.isFolder || obj.type === 'folder' || 
-		(obj.fullPath && obj.fullPath.endsWith('/')) ||
-		obj.content_type === 'application/x-directory' ||
-		(obj.object_path !== undefined && obj.object_name && !obj.size); // Raw format: folders have no size
-	
-	// Get the name - handle both list format and raw database format
-	const name = obj.object_name || obj.name || obj.key || obj.fullPath?.split('/').filter(Boolean).pop() || 'unknown';
-	
-	// Get parent ID - handle both formats (parent_folder_id is the raw format field)
-	const parentId = obj.parent_folder_id || obj.parent_id || null;
-	
-	if (isFolder) {
-		return {
-			id: obj.id || obj.ID || obj.fullPath || name,
-			name: name,
-			type: 'folder' as const,
-			path: obj.object_path || obj.path || '/',
-			parentId: parentId,
-			createdAt: new Date(obj.created_at || obj.modified || Date.now()),
-			modifiedAt: new Date(obj.updated_at || obj.modified || Date.now()),
-			owner: obj.user_id || obj.owner || 'user',
-			permissions: ['read', 'write'],
-			shared: obj.public || false,
-			itemCount: 0
-		} as FolderItem;
-	}
-	
-	return {
-		id: obj.id || obj.ID || obj.key || name,
-		name: name,
-		type: 'file',
-		path: obj.object_path || obj.path || '/',
-		parentId: parentId,
-		size: obj.size_bytes || obj.size || 0,
-		mimeType: obj.content_type || 'application/octet-stream',
-		extension: name.split('.').pop() || '',
-		createdAt: new Date(obj.created_at || obj.modified || Date.now()),
-		modifiedAt: new Date(obj.updated_at || obj.modified || Date.now()),
-		owner: obj.user_id || obj.owner || 'user',
-		permissions: ['read', 'write'],
-		shared: obj.public || false,
-		thumbnail: null,
-		downloadUrl: `/api/storage/buckets/${STORAGE_BUCKET}/objects/${obj.id || obj.ID || name}/download`
-	} as FileItem;
+export interface PaginatedResponse<T> {
+	items: T[];
+	total: number;
+	page: number;
+	pageSize: number;
+	hasMore: boolean;
+}
+
+export interface StorageQuota {
+	used: number;
+	total: number;
+	percentage: number;
 }
 
 class StorageAPI {
-	private basePath = '/api/storage';
 	private bucket = STORAGE_BUCKET;
+
+	/**
+	 * Ensure the auth token is current
+	 */
+	private ensureToken() {
+		const token = getAuthToken();
+		if (token) {
+			client.storage.setAuthToken(token);
+		}
+	}
 
 	/**
 	 * List files and folders
 	 */
-	async listFiles(options: ListFilesOptions = {}): Promise<PaginatedResponse<FileItem | FolderItem>> {
-		ensureToken(); // Ensure token is set before making request
-		console.log('listFiles called with path:', options.path, 'parentId:', options.parentId);
+	async listFiles(options: ListFilesOptions = {}): Promise<PaginatedResponse<StorageObject>> {
 		try {
-			// Get objects from Solobase bucket
-			// Use parent_folder_id for subfolder filtering, path for root
-			const params: any = {};
-			if (options.parentId) {
-				// If we have a parentId, use it to filter
-				params.parent_folder_id = options.parentId;
-			} else if (options.path !== undefined) {
-				// Otherwise use path (for root, send empty string)
-				params.path = options.path;
-			}
-			console.log('Sending request with params:', params);
-			const response = await apiClient.get(
-				`${this.basePath}/buckets/${this.bucket}/objects`,
-				params
-			);
+			this.ensureToken();
 			
-			console.log('Got response with', response?.length || 0, 'items');
-			// Convert Solobase format to our format
-			const items = (response || []).map((obj: any) => convertSolobaseObject(obj));
-			console.log('Converted to', items.length, 'items:', items.map(i => ({ name: i.name, type: i.type, path: i.path, parentId: i.parentId })));
+			const items = await client.storage.listObjects(this.bucket, {
+				parent_folder_id: options.parentId,
+				search: options.search,
+				type: options.type === 'all' ? undefined : options.type,
+				sort: options.sortBy as any,
+				order: options.sortOrder,
+				page: options.page,
+				limit: options.pageSize,
+			});
 			
 			return {
-				items,
+				items: items || [],
 				total: items.length,
 				page: options.page || 1,
 				pageSize: options.pageSize || 100,
@@ -145,7 +123,6 @@ class StorageAPI {
 			};
 		} catch (error) {
 			console.error('Failed to list files:', error);
-			// Return empty list on error
 			return {
 				items: [],
 				total: 0,
@@ -159,13 +136,10 @@ class StorageAPI {
 	/**
 	 * Get file/folder details
 	 */
-	async getItem(id: string): Promise<FileItem | FolderItem | null> {
+	async getItem(id: string): Promise<StorageObject | null> {
 		try {
-			ensureToken();
-			const response = await apiClient.get(
-				`${this.basePath}/buckets/${this.bucket}/objects/${id}`
-			);
-			return convertSolobaseObject(response);
+			this.ensureToken();
+			return await client.storage.getObject(this.bucket, id);
 		} catch (error) {
 			console.error('Failed to get item:', error);
 			return null;
@@ -175,17 +149,12 @@ class StorageAPI {
 	/**
 	 * List items in a specific folder by folder ID
 	 */
-	async listItemsInFolder(folderId: string): Promise<(FileItem | FolderItem)[]> {
+	async listItemsInFolder(folderId: string): Promise<StorageObject[]> {
 		try {
-			ensureToken();
-			// List items with parent_folder_id matching this folder
-			const response = await apiClient.get(
-				`${this.basePath}/buckets/${this.bucket}/objects?parent_folder_id=${folderId}`
-			);
-			
-			// Convert response items
-			const items = response.map((item: any) => convertSolobaseObject(item));
-			return items.filter((item): item is FileItem | FolderItem => item !== null);
+			this.ensureToken();
+			return await client.storage.listObjects(this.bucket, {
+				parent_folder_id: folderId
+			});
 		} catch (error) {
 			console.error('Failed to list items in folder:', error);
 			return [];
@@ -195,16 +164,16 @@ class StorageAPI {
 	/**
 	 * Get folder hierarchy (for breadcrumbs)
 	 */
-	async getFolderHierarchy(folderId: string): Promise<FolderItem[]> {
-		const hierarchy: FolderItem[] = [];
+	async getFolderHierarchy(folderId: string): Promise<StorageObject[]> {
+		const hierarchy: StorageObject[] = [];
 		let currentId: string | null = folderId;
 		
 		while (currentId) {
 			const item = await this.getItem(currentId);
-			if (!item || item.type !== 'folder') break;
+			if (!item || item.content_type !== 'application/x-directory') break;
 			
-			hierarchy.unshift(item as FolderItem);
-			currentId = item.parentId;
+			hierarchy.unshift(item);
+			currentId = item.parent_folder_id || null;
 		}
 		
 		return hierarchy;
@@ -213,385 +182,223 @@ class StorageAPI {
 	/**
 	 * Upload single file
 	 */
-	async uploadFile(file: File, options: UploadOptions = {}): Promise<FileItem> {
-		ensureToken(); // Ensure token is set before making request
+	async uploadFile(file: File, options: UploadOptions = {}): Promise<StorageObject> {
+		this.ensureToken();
 		console.log('uploadFile called:', { fileName: file.name, size: file.size, path: options.path, parentId: options.parentId });
 		
-		const formData = new FormData();
-		formData.append('file', file);
-		if (options.path) {
-			formData.append('path', options.path);
-		}
-		// Add parent_folder_id if provided
-		if (options.parentId) {
-			formData.append('parent_folder_id', options.parentId);
-		}
-		
-		const uploadUrl = `${this.basePath}/buckets/${this.bucket}/upload`;
-		console.log('Upload URL:', uploadUrl);
-		
-		try {
-			const response = await apiClient.uploadFormData(
-				uploadUrl,
-				formData,
-				{
-					onProgress: options.onProgress
-				}
-			);
-			console.log('Upload response:', response);
-			return convertSolobaseObject(response) as FileItem;
-		} catch (error) {
-			console.error('Upload failed:', error);
-			throw error;
-		}
+		return client.storage.uploadFile(this.bucket, file, {
+			path: options.path,
+			parent_folder_id: options.parentId,
+			metadata: options.metadata,
+			onProgress: options.onProgress,
+		});
 	}
 
 	/**
 	 * Upload multiple files
 	 */
-	async uploadFiles(
-		files: File[],
-		options: UploadOptions = {}
-	): Promise<FileItem[]> {
-		const uploads = files.map(file => this.uploadFile(file, options));
-		return Promise.all(uploads);
-	}
-
-	/**
-	 * Download file
-	 */
-	async downloadFile(
-		id: string,
-		options?: {
-			onProgress?: (progress: number) => void;
-		}
-	): Promise<Blob> {
-		return apiClient.download(
-			`${this.basePath}/buckets/${this.bucket}/objects/${id}/download`,
-			options
-		);
-	}
-
-	/**
-	 * Download multiple files as archive
-	 */
-	async downloadMultiple(
-		ids: string[],
-		options?: {
-			onProgress?: (progress: number) => void;
-		}
-	): Promise<Blob> {
-		// Create an archive first
-		const { archiveId } = await apiClient.post(`${this.basePath}/archive`, {
-			fileIds: ids
-		});
-
-		// Then download it
-		return apiClient.download(
-			`${this.basePath}/archive/${archiveId}/download`,
-			options
-		);
-	}
-
-	/**
-	 * Delete file/folder
-	 */
-	async deleteItem(id: string, permanent = false): Promise<void> {
-		await apiClient.delete(
-			`${this.basePath}/buckets/${this.bucket}/objects/${id}`
-		);
-	}
-
-	/**
-	 * Delete multiple items
-	 */
-	async deleteMultiple(ids: string[], permanent = false): Promise<void> {
-		// Delete one by one since Solobase doesn't have batch delete
-		await Promise.all(ids.map(id => this.deleteItem(id, permanent)));
-	}
-
-	/**
-	 * Rename file/folder
-	 */
-	async rename(id: string, newName: string): Promise<FileItem | FolderItem> {
-		try {
-			const response = await apiClient.patch(
-				`${this.basePath}/buckets/${this.bucket}/objects/${id}/rename`,
-				{ newName }
-			);
-			return convertSolobaseObject(response);
-		} catch (error: any) {
-			console.error('Rename failed:', error);
-			if (error.status === 500) {
-				throw new Error('Failed to rename. The file may not exist or you may need to re-login.');
+	async uploadFiles(files: File[], options: UploadOptions = {}): Promise<StorageObject[]> {
+		// Upload files one by one for now
+		const results: StorageObject[] = [];
+		for (const file of files) {
+			try {
+				const result = await this.uploadFile(file, options);
+				results.push(result);
+			} catch (error) {
+				console.error(`Failed to upload ${file.name}:`, error);
 			}
-			throw error;
 		}
-	}
-
-	/**
-	 * Move file/folder
-	 */
-	async move(id: string, options: MoveOptions): Promise<FileItem | FolderItem> {
-		// Solobase doesn't have a move endpoint, so we'll rename with path
-		const newPath = options.targetPath.endsWith('/') 
-			? options.targetPath 
-			: options.targetPath + '/';
-		
-		const response = await apiClient.patch(
-			`${this.basePath}/buckets/${this.bucket}/objects/${id}/rename`,
-			{ newName: newPath + id }
-		);
-		return convertSolobaseObject(response);
-	}
-
-	/**
-	 * Move multiple items
-	 */
-	async moveMultiple(
-		ids: string[],
-		options: MoveOptions
-	): Promise<(FileItem | FolderItem)[]> {
-		const moves = ids.map(id => this.move(id, options));
-		return Promise.all(moves);
-	}
-
-	/**
-	 * Copy file/folder
-	 */
-	async copy(id: string, options: MoveOptions): Promise<FileItem | FolderItem> {
-		// Implement copy by downloading and re-uploading
-		const blob = await this.downloadFile(id);
-		const file = new File([blob], id, { type: blob.type });
-		return this.uploadFile(file, { path: options.targetPath });
-	}
-
-	/**
-	 * Copy multiple items
-	 */
-	async copyMultiple(
-		ids: string[],
-		options: MoveOptions
-	): Promise<(FileItem | FolderItem)[]> {
-		const copies = ids.map(id => this.copy(id, options));
-		return Promise.all(copies);
+		return results;
 	}
 
 	/**
 	 * Create folder
 	 */
-	async createFolder(
-		name: string,
-		parentPath = '/',
-		parentId?: string
-	): Promise<FolderItem> {
-		ensureToken(); // Ensure token is set before making request
-		const body: any = {
-			name,
-			path: parentPath
-		};
-		// Add parent_folder_id if provided
-		if (parentId) {
-			body.parent_folder_id = parentId;
-		}
-		const response = await apiClient.post(
-			`${this.basePath}/buckets/${this.bucket}/folders`,
-			body
-		);
+	async createFolder(name: string, path?: string, parentId?: string): Promise<StorageObject> {
+		this.ensureToken();
+		console.log('createFolder called:', { name, path, parentId });
 		
-		// Convert response to FolderItem using the new response structure
+		return client.storage.createFolder(this.bucket, name, path, parentId);
+	}
+
+	/**
+	 * Download file
+	 */
+	async downloadFile(fileId: string): Promise<void> {
+		this.ensureToken();
+		const url = client.storage.getDownloadUrl(this.bucket, fileId);
+		
+		// Add auth token to URL
+		const token = getAuthToken();
+		const finalUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url;
+		
+		// Create a temporary link and click it
+		const a = document.createElement('a');
+		a.href = finalUrl;
+		a.download = '';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	}
+
+	/**
+	 * Delete file or folder
+	 */
+	async deleteItem(itemId: string): Promise<void> {
+		this.ensureToken();
+		await client.storage.deleteObject(this.bucket, itemId);
+	}
+
+	/**
+	 * Delete multiple items
+	 */
+	async deleteItems(itemIds: string[]): Promise<void> {
+		this.ensureToken();
+		await client.storage.deleteObjects(this.bucket, itemIds);
+	}
+
+	/**
+	 * Rename file or folder (only changes the object_name)
+	 */
+	async rename(itemId: string, newName: string): Promise<StorageObject> {
+		this.ensureToken();
+		return client.storage.renameObject(this.bucket, itemId, newName);
+	}
+
+	/**
+	 * Update metadata (all fields except name)
+	 */
+	async updateMetadata(id: string, metadata: Record<string, any>): Promise<StorageObject> {
+		this.ensureToken();
+		return client.storage.updateMetadata(this.bucket, id, metadata);
+	}
+
+	/**
+	 * Get metadata for an object
+	 */
+	async getMetadata(id: string): Promise<Record<string, any> | null> {
+		const item = await this.getItem(id);
+		if (!item || !item.metadata) return null;
+		
+		try {
+			return typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata;
+		} catch (e) {
+			console.error('Failed to parse metadata:', e);
+			return null;
+		}
+	}
+
+	/**
+	 * Move file or folder (updates parent_folder_id and optionally order in metadata)
+	 */
+	async move(itemId: string, options: MoveOptions): Promise<StorageObject> {
+		this.ensureToken();
+		
+		// Get current metadata
+		const currentMetadata = await this.getMetadata(itemId) || {};
+		
+		// Update order in metadata if provided
+		if (options.order !== undefined) {
+			currentMetadata.order = options.order;
+			await this.updateMetadata(itemId, currentMetadata);
+		}
+		
+		// Move to new parent folder
+		return client.storage.moveObject(this.bucket, itemId, {
+			parent_folder_id: options.targetId || options.targetParentId,
+			overwrite: options.overwrite
+		});
+	}
+
+	/**
+	 * Share file or folder
+	 */
+	async shareItem(itemId: string, options: ShareOptions = {}): Promise<{ url: string; expiresAt?: Date }> {
+		this.ensureToken();
+		
+		// Convert milliseconds to seconds for API
+		const shareOptions = options.expiresIn ? {
+			expires_in: Math.floor(options.expiresIn / 1000),
+			password: options.password,
+			permissions: options.permissions,
+			max_downloads: options.maxDownloads,
+		} : {};
+		
+		const response = await client.storage.shareObject(this.bucket, itemId, shareOptions);
+		
+		// Convert expires_at to expiresAt for consistency
 		return {
-			id: response.id || response.folder || name,
-			name: response.name || name,
-			type: 'folder',
-			path: response.object_path || parentPath,
-			parentId: response.parent_folder_id || parentId || null,
-			createdAt: response.created_at ? new Date(response.created_at) : new Date(),
-			modifiedAt: response.created_at ? new Date(response.created_at) : new Date(),
-			owner: 'user',
-			permissions: ['read', 'write'],
-			shared: false,
-			itemCount: 0
+			url: response.url,
+			expiresAt: response.expires_at
 		};
-	}
-
-	/**
-	 * Get file download URL
-	 */
-	getDownloadUrl(id: string): string {
-		const baseURL = config.apiUrl || 'http://localhost:8091';
-		return `${baseURL}${this.basePath}/buckets/${this.bucket}/objects/${id}/download`;
-	}
-
-	/**
-	 * Get file thumbnail URL (same as download for now)
-	 */
-	getThumbnailUrl(id: string): string {
-		return this.getDownloadUrl(id);
-	}
-
-	/**
-	 * Create share link
-	 */
-	async createShareLink(
-		id: string,
-		options: ShareOptions = {}
-	): Promise<{ url: string; shareId: string; expiresAt?: Date }> {
-		// This would need to be implemented in Solobase
-		return {
-			url: `${window.location.origin}/share/${id}`,
-			shareId: id,
-			expiresAt: options.expiresIn ? new Date(Date.now() + options.expiresIn) : undefined
-		};
-	}
-
-	/**
-	 * Revoke share link
-	 */
-	async revokeShareLink(shareId: string): Promise<void> {
-		// This would need to be implemented in Solobase
-		console.log('Revoking share link:', shareId);
 	}
 
 	/**
 	 * Get storage quota
 	 */
 	async getQuota(): Promise<StorageQuota> {
-		try {
-			const response = await apiClient.get(`${this.basePath}/quota`);
-			return {
-				used: response.used || response.storage_used || 0,
-				total: response.total || response.storage_limit || (5 * 1024 * 1024 * 1024),
-				percentage: response.percentage || 0
-			};
-		} catch (error) {
-			console.error('Failed to get quota:', error);
-			// Return default values if API fails
-			return {
-				used: 0,
-				total: 5 * 1024 * 1024 * 1024, // 5 GB
-				percentage: 0
-			};
-		}
+		this.ensureToken();
+		return client.storage.getQuota();
 	}
 
 	/**
 	 * Get storage statistics
 	 */
 	async getStats(): Promise<StorageStats> {
-		try {
-			const response = await apiClient.get(`${this.basePath}/stats`);
-			return {
-				totalSize: response.totalSize || 0,
-				fileCount: response.fileCount || response.totalFiles || 0,
-				folderCount: response.folderCount || response.totalFolders || 0,
-				sharedCount: response.sharedCount || 0,
-				trashedCount: response.trashedCount || 0
-			};
-		} catch (error) {
-			console.error('Failed to get stats:', error);
-			// Return zeros if API fails
-			return {
-				totalSize: 0,
-				fileCount: 0,
-				folderCount: 0,
-				sharedCount: 0,
-				trashedCount: 0
-			};
-		}
+		this.ensureToken();
+		return client.storage.getStats();
 	}
 
 	/**
-	 * Search files
+	 * Search files and folders
 	 */
-	async search(
-		query: string,
-		options?: {
-			type?: 'all' | 'file' | 'folder';
-			path?: string;
-		}
-	): Promise<(FileItem | FolderItem)[]> {
-		// Get all files and filter client-side for now
-		const response = await this.listFiles({ path: options?.path });
-		
-		return response.items.filter(item => {
-			const matchesQuery = item.name.toLowerCase().includes(query.toLowerCase());
-			const matchesType = !options?.type || 
-				options.type === 'all' || 
-				item.type === options.type;
-			
-			return matchesQuery && matchesType;
-		});
+	async search(query: string, options: { type?: 'file' | 'folder' | 'all' } = {}): Promise<StorageObject[]> {
+		this.ensureToken();
+		return client.storage.search(query, options);
+	}
+
+	/**
+	 * Get recent files
+	 */
+	async getRecentFiles(limit: number = 10): Promise<StorageObject[]> {
+		this.ensureToken();
+		return client.storage.getRecentFiles(limit);
+	}
+
+	/**
+	 * Get shared files
+	 */
+	async getSharedFiles(): Promise<StorageObject[]> {
+		this.ensureToken();
+		return client.storage.getSharedFiles();
+	}
+
+	/**
+	 * Get trashed files
+	 */
+	async getTrashedFiles(): Promise<StorageObject[]> {
+		this.ensureToken();
+		return client.storage.getTrashedFiles();
+	}
+
+	/**
+	 * Restore file from trash
+	 */
+	async restoreFromTrash(itemId: string): Promise<void> {
+		this.ensureToken();
+		await client.storage.restoreFromTrash(itemId);
 	}
 
 	/**
 	 * Empty trash
 	 */
 	async emptyTrash(): Promise<void> {
-		// This would need to be implemented in Solobase
-		console.log('Emptying trash');
-	}
-
-	/**
-	 * Restore from trash
-	 */
-	async restoreFromTrash(ids: string[]): Promise<void> {
-		// This would need to be implemented in Solobase
-		console.log('Restoring from trash:', ids);
-	}
-
-	/**
-	 * Create a share for a file or folder
-	 */
-	async createShare(shareData: {
-		object_id: string;
-		shared_with_email?: string;
-		is_public?: boolean;
-		permission_level: 'view' | 'edit' | 'admin';
-		inherit_to_children?: boolean;
-		expires_at?: Date | null;
-	}): Promise<any> {
-		ensureToken();
-		return apiClient.post('/api/shares', shareData);
-	}
-
-	/**
-	 * Get all shares created by the current user
-	 */
-	async getShares(): Promise<any[]> {
-		ensureToken();
-		return apiClient.get('/api/shares');
-	}
-
-	/**
-	 * Remove a share
-	 */
-	async removeShare(shareId: string): Promise<void> {
-		ensureToken();
-		return apiClient.delete(`/api/shares/${shareId}`);
-	}
-
-	/**
-	 * Get shared items (items shared with the current user)
-	 */
-	async getSharedWithMe(): Promise<any[]> {
-		ensureToken();
-		// For now, return empty array as we don't have this endpoint yet
-		return [];
-	}
-
-	/**
-	 * Get items shared by the current user
-	 */
-	async getMyShares(): Promise<any[]> {
-		ensureToken();
-		// Use the same endpoint as getShares
-		return apiClient.get('/api/shares');
+		this.ensureToken();
+		await client.storage.emptyTrash();
 	}
 }
 
-// Create and export singleton instance
-export const storageAPI = new StorageAPI();
+// Create singleton instance
+const storageAPI = new StorageAPI();
 
-// Also export the class for testing
-export default StorageAPI;
+export default storageAPI;

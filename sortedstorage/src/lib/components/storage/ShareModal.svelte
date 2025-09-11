@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { Plus, X, Copy, Mail, Link, Users, Clock, Shield, Folder, File, Check } from 'lucide-svelte';
+	import { X, Copy, Mail, Link, Users, Clock, Shield, Folder, File, Check } from 'lucide-svelte';
 	import type { StorageItem } from '$lib/types/storage';
-	import { storageAPI } from '$lib/api/storage';
+	import { isFolder, isFile } from '$lib/types/storage';
 	
 	export let item: StorageItem | null = null;
 	export let open = false;
@@ -18,30 +18,6 @@
 	let shareEmails: string[] = [''];
 	let shareLink = '';
 	let copied = false;
-	let loading = false;
-	let error = '';
-	
-	// Existing shares
-	let existingShares: any[] = [];
-	let loadingShares = false;
-	
-	$: if (open && item) {
-		loadExistingShares();
-	}
-	
-	async function loadExistingShares() {
-		loadingShares = true;
-		try {
-			// Get all shares and filter for this item
-			const allShares = await storageAPI.getMyShares();
-			existingShares = allShares.filter((share: any) => share.object_id === item!.id);
-			console.log('Loaded shares:', existingShares);
-		} catch (err) {
-			console.error('Failed to load shares:', err);
-		} finally {
-			loadingShares = false;
-		}
-	}
 	
 	function addEmailField() {
 		shareEmails = [...shareEmails, ''];
@@ -55,87 +31,28 @@
 		shareEmails[index] = value;
 	}
 	
-	async function createShare() {
+	function createShare() {
 		if (!item) return;
 		
-		loading = true;
-		error = '';
-		
-		try {
-			// Calculate expiry date
-			let expiresAt: Date | null = null;
-			if (expiresIn !== 'never') {
-				expiresAt = new Date();
-				switch (expiresIn) {
-					case '1day':
-						expiresAt.setDate(expiresAt.getDate() + 1);
-						break;
-					case '7days':
-						expiresAt.setDate(expiresAt.getDate() + 7);
-						break;
-					case '30days':
-						expiresAt.setDate(expiresAt.getDate() + 30);
-						break;
-					case 'custom':
-						expiresAt = new Date(customExpiry);
-						break;
-				}
-			}
+		// For demo purposes, just generate a fake share link
+		if (shareType === 'public') {
+			const randomToken = Math.random().toString(36).substring(2, 15);
+			shareLink = `${window.location.origin}/shared/${randomToken}`;
 			
-			if (shareType === 'public') {
-				// Create public share link
-				const response = await storageAPI.createShare({
-					object_id: item.id,
-					is_public: true,
-					permission_level: permissionLevel,
-					inherit_to_children: item.type === 'folder' ? inheritToChildren : false,
-					expires_at: expiresAt
+			// Auto-copy to clipboard
+			copyToClipboard();
+		} else {
+			// For user shares, just show success message
+			const validEmails = shareEmails.filter(email => email.trim());
+			if (validEmails.length > 0) {
+				dispatch('shared', { 
+					item, 
+					shareType: 'users',
+					emails: validEmails,
+					permission: permissionLevel 
 				});
-				
-				console.log('Create share response:', response);
-				shareLink = `${window.location.origin}/shared/${response.share_token || response.id}`;
-				
-				// Auto-copy to clipboard
-				await copyToClipboard();
-			} else {
-				// Create user shares
-				const validEmails = shareEmails.filter(email => email.trim());
-				if (validEmails.length === 0) {
-					error = 'Please enter at least one email address';
-					return;
-				}
-				
-				for (const email of validEmails) {
-					await storageAPI.createShare({
-						object_id: item.id,
-						shared_with_email: email,
-						permission_level: permissionLevel,
-						inherit_to_children: item.type === 'folder' ? inheritToChildren : false,
-						expires_at: expiresAt
-					});
-				}
-				
-				// Reload shares
-				await loadExistingShares();
-				
-				// Reset form
-				shareEmails = [''];
+				close();
 			}
-			
-			dispatch('shared', { item, shareType });
-		} catch (err: any) {
-			error = err.message || 'Failed to create share';
-		} finally {
-			loading = false;
-		}
-	}
-	
-	async function removeShare(shareId: string) {
-		try {
-			await storageAPI.removeShare(shareId);
-			await loadExistingShares();
-		} catch (err) {
-			console.error('Failed to remove share:', err);
 		}
 	}
 	
@@ -159,7 +76,6 @@
 		customExpiry = '';
 		shareEmails = [''];
 		shareLink = '';
-		error = '';
 		dispatch('close');
 	}
 </script>
@@ -169,12 +85,12 @@
 	<div class="modal-container" on:click|stopPropagation>
 		<div class="modal-header">
 			<div class="header-content">
-				{#if item.type === 'folder'}
+				{#if isFolder(item)}
 					<Folder class="w-5 h-5 text-blue-600" />
 				{:else}
 					<File class="w-5 h-5 text-gray-600" />
 				{/if}
-				<h2>Share "{item.name}"</h2>
+				<h2>Share "{item.object_name}"</h2>
 			</div>
 			<button class="close-btn" on:click={close}>
 				<X class="w-5 h-5" />
@@ -182,12 +98,6 @@
 		</div>
 		
 		<div class="modal-body">
-			{#if error}
-				<div class="error-message">
-					{error}
-				</div>
-			{/if}
-			
 			<!-- Share Type Tabs -->
 			<div class="share-tabs">
 				<button 
@@ -353,44 +263,6 @@
 					/>
 				{/if}
 			</div>
-			
-			<!-- Existing Shares -->
-			{#if existingShares.length > 0}
-				<div class="existing-shares">
-					<h3 class="section-title">Current Shares</h3>
-					{#if loadingShares}
-						<div class="loading">Loading shares...</div>
-					{:else}
-						<div class="shares-list">
-							{#each existingShares as share}
-								<div class="share-item">
-									<div class="share-info">
-										{#if share.is_public}
-											<Link class="w-4 h-4 text-blue-600" />
-											<span>Public link</span>
-										{:else if share.shared_with_email}
-											<Mail class="w-4 h-4 text-green-600" />
-											<span>{share.shared_with_email}</span>
-										{:else if share.shared_with_user}
-											<Users class="w-4 h-4 text-purple-600" />
-											<span>{share.shared_with_user.name || share.shared_with_user.email}</span>
-										{/if}
-										<span class="permission-badge {share.permission_level}">
-											{share.permission_level}
-										</span>
-									</div>
-									<button 
-										class="remove-share-btn"
-										on:click={() => removeShare(share.id)}
-									>
-										<X class="w-4 h-4" />
-									</button>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			{/if}
 		</div>
 		
 		<div class="modal-footer">
@@ -400,11 +272,9 @@
 			<button 
 				class="btn-primary"
 				on:click={createShare}
-				disabled={loading || (shareType === 'public' && shareLink)}
+				disabled={shareType === 'public' && shareLink}
 			>
-				{#if loading}
-					Creating...
-				{:else if shareType === 'public' && shareLink}
+				{#if shareType === 'public' && shareLink}
 					Link Created
 				{:else}
 					Create Share
@@ -426,7 +296,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		z-index: 1000;
+		z-index: 10000;
 		animation: fadeIn 0.2s ease;
 	}
 	
@@ -481,15 +351,6 @@
 		padding: 1.5rem;
 		overflow-y: auto;
 		flex: 1;
-	}
-	
-	.error-message {
-		background: #fef2f2;
-		color: #dc2626;
-		padding: 0.75rem 1rem;
-		border-radius: 8px;
-		margin-bottom: 1rem;
-		font-size: 0.875rem;
 	}
 	
 	.share-tabs {
@@ -736,81 +597,6 @@
 		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 	}
 	
-	.existing-shares {
-		margin-top: 2rem;
-		padding-top: 1.5rem;
-		border-top: 1px solid #e5e7eb;
-	}
-	
-	.section-title {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: #374151;
-		margin-bottom: 1rem;
-	}
-	
-	.shares-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-	
-	.share-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.75rem;
-		background: #f9fafb;
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-	}
-	
-	.share-info {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		flex: 1;
-	}
-	
-	.permission-badge {
-		padding: 0.25rem 0.5rem;
-		border-radius: 4px;
-		font-size: 0.625rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.025em;
-	}
-	
-	.permission-badge.view {
-		background: #dbeafe;
-		color: #1e40af;
-	}
-	
-	.permission-badge.edit {
-		background: #fef3c7;
-		color: #92400e;
-	}
-	
-	.permission-badge.admin {
-		background: #ede9fe;
-		color: #5b21b6;
-	}
-	
-	.remove-share-btn {
-		padding: 0.25rem;
-		background: none;
-		border: none;
-		color: #6b7280;
-		cursor: pointer;
-		border-radius: 4px;
-		transition: all 0.2s;
-	}
-	
-	.remove-share-btn:hover {
-		background: #fef2f2;
-		color: #dc2626;
-	}
-	
 	.modal-footer {
 		padding: 1.5rem;
 		border-top: 1px solid #e5e7eb;
@@ -854,11 +640,106 @@
 		cursor: not-allowed;
 	}
 	
-	.loading {
-		text-align: center;
-		color: #6b7280;
-		padding: 1rem;
-		font-size: 0.875rem;
+	/* Dark mode */
+	:global(.dark) .modal-container {
+		background: #1f2937;
+	}
+	
+	:global(.dark) .modal-header {
+		border-bottom-color: #374151;
+	}
+	
+	:global(.dark) .modal-header h2 {
+		color: #f3f4f6;
+	}
+	
+	:global(.dark) .close-btn {
+		color: #9ca3af;
+	}
+	
+	:global(.dark) .close-btn:hover {
+		background: #374151;
+		color: #e5e7eb;
+	}
+	
+	:global(.dark) .share-tabs {
+		border-bottom-color: #374151;
+	}
+	
+	:global(.dark) .tab-btn {
+		color: #9ca3af;
+	}
+	
+	:global(.dark) .tab-btn:hover {
+		color: #e5e7eb;
+	}
+	
+	:global(.dark) .tab-btn.active {
+		color: #60a5fa;
+		border-bottom-color: #60a5fa;
+	}
+	
+	:global(.dark) .share-link-container {
+		background: #111827;
+	}
+	
+	:global(.dark) .link-input,
+	:global(.dark) .form-input,
+	:global(.dark) .form-select {
+		background: #1f2937;
+		border-color: #374151;
+		color: #e5e7eb;
+	}
+	
+	:global(.dark) .copy-btn,
+	:global(.dark) .remove-btn {
+		background: #1f2937;
+		border-color: #374151;
+		color: #9ca3af;
+	}
+	
+	:global(.dark) .copy-btn:hover,
+	:global(.dark) .remove-btn:hover {
+		background: #374151;
+	}
+	
+	:global(.dark) .form-label {
+		color: #e5e7eb;
+	}
+	
+	:global(.dark) .radio-option,
+	:global(.dark) .checkbox-option label {
+		background: #111827;
+		border-color: #374151;
+	}
+	
+	:global(.dark) .radio-option:hover,
+	:global(.dark) .checkbox-option label:hover {
+		background: #1f2937;
+		border-color: #4b5563;
+	}
+	
+	:global(.dark) .radio-option strong {
+		color: #f3f4f6;
+	}
+	
+	:global(.dark) .radio-option small,
+	:global(.dark) .help-text {
+		color: #9ca3af;
+	}
+	
+	:global(.dark) .modal-footer {
+		border-top-color: #374151;
+	}
+	
+	:global(.dark) .btn-secondary {
+		background: #1f2937;
+		border-color: #374151;
+		color: #e5e7eb;
+	}
+	
+	:global(.dark) .btn-secondary:hover {
+		background: #374151;
 	}
 	
 	@keyframes fadeIn {

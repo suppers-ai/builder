@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@common/ui-components": "file:../common/ui-components",
+    "@solobase/sdk": "file:../go/solobase/sdk/typescript",
     "axios": "^1.6.7",
     "chart.js": "^4.4.1",
     "date-fns": "^3.3.1",

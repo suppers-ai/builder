@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { File, Folder, MoreVertical, Download, Share2, Trash2 } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { FileItem, FolderItem } from '$lib/types/storage';
+	import type { StorageItem } from '$lib/types/storage';
+	import { isFolder as checkIsFolder } from '$lib/types/storage';
 	
-	export let item: FileItem | FolderItem;
+	export let item: StorageItem;
 	export let selected = false;
 	
 	const dispatch = createEventDispatcher();
 	
-	$: isFolder = item.type === 'folder';
+	$: isFolder = checkIsFolder(item);
 	
 	function formatFileSize(bytes: number): string {
 		if (bytes === 0) return '0 Bytes';
@@ -76,7 +77,7 @@
 			{:else if item.thumbnailUrl}
 				<img 
 					src={item.thumbnailUrl} 
-					alt={item.name} 
+					alt={item.object_name} 
 					class="w-10 h-10 object-cover rounded"
 					loading="lazy"
 				/>
@@ -87,10 +88,10 @@
 		
 		<!-- Info -->
 		<div class="info">
-			<p class="name">{item.name}</p>
+			<p class="name">{item.object_name}</p>
 			<p class="meta">
 				{#if isFolder}
-					{item.itemCount} items
+					Folder
 				{:else}
 					{formatFileSize(item.size)}
 				{/if}

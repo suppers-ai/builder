@@ -131,49 +131,6 @@ export class SolobaseClient {
     return this.auth.isAuthenticated();
   }
 
-  /**
-   * Quick access to common operations
-   */
-  
-  /**
-   * Upload a file (shortcut method)
-   */
-  async upload(
-    bucketName: string,
-    file: File | Buffer | Blob,
-    fileName: string,
-    options?: any
-  ) {
-    return this.storage.upload(bucketName, file, fileName, options);
-  }
-
-  /**
-   * Query a collection (shortcut method)
-   */
-  async query(collection: string, options?: any) {
-    return this.database.query(collection, options);
-  }
-
-  /**
-   * Get current user (shortcut method)
-   */
-  async getUser() {
-    return this.auth.getUser();
-  }
-
-  /**
-   * Sign in (shortcut method)
-   */
-  async signIn(email: string, password: string) {
-    return this.auth.signIn({ email, password });
-  }
-
-  /**
-   * Sign out (shortcut method)
-   */
-  async signOut() {
-    return this.auth.signOut();
-  }
 }
 
 // Export a factory function for convenience

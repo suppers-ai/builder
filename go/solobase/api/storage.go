@@ -523,7 +523,7 @@ func (h *StorageHandlers) HandleRenameObject(w http.ResponseWriter, r *http.Requ
 	}
 
 	var request struct {
-		NewName string `json:"newName"`
+		Name string `json:"name"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -531,7 +531,7 @@ func (h *StorageHandlers) HandleRenameObject(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if request.NewName == "" {
+	if request.Name == "" {
 		respondWithError(w, http.StatusBadRequest, "New name is required")
 		return
 	}
@@ -562,7 +562,7 @@ func (h *StorageHandlers) HandleRenameObject(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
-	if err := h.storageService.RenameObject(actualBucket, objectID, request.NewName); err != nil {
+	if err := h.storageService.RenameObject(actualBucket, objectID, request.Name); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -631,10 +631,18 @@ func (h *StorageHandlers) HandleCreateFolder(w http.ResponseWriter, r *http.Requ
 
 	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
 		"id":               folder.ID,
-		"name":             folder.ObjectName,
-		"object_path":      "",
+		"bucket_name":      folder.BucketName,
+		"object_name":      folder.ObjectName,
 		"parent_folder_id": folder.ParentFolderID,
+		"size":             folder.Size,
+		"content_type":     folder.ContentType,
+		"checksum":         folder.Checksum,
+		"metadata":         folder.Metadata,
 		"created_at":       folder.CreatedAt,
+		"updated_at":       folder.UpdatedAt,
+		"last_viewed":      folder.LastViewed,
+		"user_id":          folder.UserID,
+		"app_id":           folder.AppID,
 		"message":          "Folder created successfully",
 	})
 }
@@ -1170,19 +1178,23 @@ func (h *StorageHandlers) HandleGetRecentlyViewed(w http.ResponseWriter, r *http
 		return
 	}
 
-	// Format response
+	// Return raw StorageObject data
 	response := make([]map[string]interface{}, len(items))
 	for i, item := range items {
 		response[i] = map[string]interface{}{
 			"id":               item.ID,
-			"name":             item.ObjectName,
-			"type":             getItemType(item),
+			"bucket_name":      item.BucketName,
+			"object_name":      item.ObjectName,
+			"parent_folder_id": item.ParentFolderID,
 			"size":             item.Size,
 			"content_type":     item.ContentType,
-			"parent_folder_id": item.ParentFolderID,
-			"last_viewed":      item.LastViewed,
+			"checksum":         item.Checksum,
+			"metadata":         item.Metadata,
 			"created_at":       item.CreatedAt,
 			"updated_at":       item.UpdatedAt,
+			"last_viewed":      item.LastViewed,
+			"user_id":          item.UserID,
+			"app_id":           item.AppID,
 		}
 	}
 
@@ -1253,25 +1265,98 @@ func (h *StorageHandlers) HandleSearchStorageObjects(w http.ResponseWriter, r *h
 		return
 	}
 
-	// Format response
+	// Return raw StorageObject data
 	var result []map[string]interface{}
 	for _, item := range items {
 		result = append(result, map[string]interface{}{
 			"id":               item.ID,
-			"name":             item.ObjectName,
-			"type":             getItemType(item),
+			"bucket_name":      item.BucketName,
+			"object_name":      item.ObjectName,
+			"parent_folder_id": item.ParentFolderID,
 			"size":             item.Size,
 			"content_type":     item.ContentType,
-			"parent_folder_id": item.ParentFolderID,
+			"checksum":         item.Checksum,
+			"metadata":         item.Metadata,
 			"created_at":       item.CreatedAt,
 			"updated_at":       item.UpdatedAt,
 			"last_viewed":      item.LastViewed,
+			"user_id":          item.UserID,
+			"app_id":           item.AppID,
 		})
 	}
 
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{
 		"items": result,
 	})
+}
+
+// HandleUpdateObjectMetadata handles updating object metadata
+func (h *StorageHandlers) HandleUpdateObjectMetadata(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	bucket := vars["bucket"]
+	objectID := vars["id"]
+
+	// Get user ID from context if available, otherwise try to extract from token
+	userID, _ := r.Context().Value("user_id").(string)
+	if userID == "" {
+		userID = extractUserIDFromToken(r)
+	}
+
+	// Require user authentication
+	if userID == "" {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	var request struct {
+		Metadata string `json:"metadata"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// For internal storage, verify user owns the object
+	actualBucket := bucket
+	if bucket == "user-files" || bucket == "int_storage" {
+		actualBucket = "int_storage"
+
+		// Get object info to verify ownership
+		objectInfo, err := h.storageService.GetObjectInfo(actualBucket, objectID)
+		if err != nil {
+			respondWithError(w, http.StatusNotFound, "Object not found")
+			return
+		}
+
+		// Check if object belongs to user
+		isOwner := objectInfo.UserID == userID
+
+		// Also check app ID if configured
+		if isOwner && h.storageService.GetAppID() != "" {
+			isOwner = objectInfo.AppID != nil && *objectInfo.AppID == h.storageService.GetAppID()
+		}
+
+		if !isOwner {
+			respondWithError(w, http.StatusForbidden, "Access denied")
+			return
+		}
+	}
+
+	// Update the metadata field in the database
+	if err := h.storageService.UpdateObjectMetadata(actualBucket, objectID, request.Metadata); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// Get updated object info to return
+	objectInfo, err := h.storageService.GetObjectInfo(actualBucket, objectID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to retrieve updated object")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, objectInfo)
 }
 
 // Helper function to determine item type

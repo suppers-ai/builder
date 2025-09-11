@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { File, Folder, Image, FileText, Film, Music, Archive, MoreVertical, Download, Share2, Trash2, Edit3 } from 'lucide-svelte';
 	import Dropdown from '../common/Dropdown.svelte';
-	import type { FileItem, FolderItem } from '$lib/types/storage';
+	import type { StorageObject } from '$lib/types/storage';
+	import { isFolder as checkIsFolder } from '$lib/types/storage';
 	import { createEventDispatcher } from 'svelte';
 	
-	export let item: FileItem | FolderItem;
+	export let item: StorageObject;
 	export let selected = false;
 	export let view: 'grid' | 'list' = 'grid';
 	
@@ -34,10 +35,6 @@
 		return new Date(date).toLocaleDateString();
 	}
 	
-	function isFolder(item: FileItem | FolderItem): item is FolderItem {
-		return 'itemCount' in item;
-	}
-	
 	const dropdownItems = [
 		{ label: 'Download', value: 'download', icon: Download },
 		{ label: 'Share', value: 'share', icon: Share2 },
@@ -50,7 +47,7 @@
 		dispatch('action', { action: event.detail.value, item });
 	}
 	
-	$: Icon = isFolder(item) ? Folder : getFileIcon((item as FileItem).mimeType);
+	$: Icon = checkIsFolder(item) ? Folder : getFileIcon(item.content_type);
 </script>
 
 {#if view === 'grid'}
@@ -87,7 +84,7 @@
 		
 		<!-- Icon/Thumbnail -->
 		<div class="flex justify-center mb-3">
-			{#if !isFolder(item) && (item as FileItem).mimeType?.startsWith('image/')}
+			{#if !checkIsFolder(item) && item.content_type?.startsWith('image/')}
 				<!-- Image thumbnail would go here -->
 				<div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
 					<Image class="w-8 h-8 text-gray-400" />
@@ -98,14 +95,14 @@
 		</div>
 		
 		<!-- Name -->
-		<p class="text-sm font-medium truncate mb-1" title={item.name}>
-			{item.name}
+		<p class="text-sm font-medium truncate mb-1" title={item.object_name || 'Unnamed'}>
+			{item.object_name || 'Unnamed'}
 		</p>
 		
 		<!-- Info -->
 		<div class="text-xs text-gray-500">
-			{#if isFolder(item)}
-				<span>{item.itemCount} items</span>
+			{#if checkIsFolder(item)}
+				<span>Folder</span>
 			{:else}
 				<span>{formatFileSize(item.size)}</span>
 			{/if}
@@ -138,21 +135,21 @@
 		<td class="px-4 py-3">
 			<div class="flex items-center gap-3">
 				<svelte:component this={Icon} class="w-5 h-5 text-gray-400 flex-shrink-0" />
-				<span class="truncate font-medium">{item.name}</span>
+				<span class="truncate font-medium">{item.object_name || 'Unnamed'}</span>
 				{#if item.isShared}
 					<Share2 class="w-3 h-3 text-primary-500" />
 				{/if}
 			</div>
 		</td>
 		<td class="px-4 py-3 text-sm text-gray-500">
-			{#if isFolder(item)}
-				{item.itemCount} items
+			{#if checkIsFolder(item)}
+				Folder
 			{:else}
 				{formatFileSize(item.size)}
 			{/if}
 		</td>
 		<td class="px-4 py-3 text-sm text-gray-500">
-			{formatDate(item.modifiedAt)}
+			{formatDate(item.updated_at)}
 		</td>
 		<td class="px-4 py-3">
 			<div class="opacity-0 group-hover:opacity-100 transition-opacity">

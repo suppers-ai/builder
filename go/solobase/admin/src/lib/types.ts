@@ -121,6 +121,7 @@ export interface AppSettings {
 	enable_debug_mode: boolean;
 	maintenance_mode: boolean;
 	maintenance_message?: string;
+	notification?: string;
 }
 
 // Dashboard types

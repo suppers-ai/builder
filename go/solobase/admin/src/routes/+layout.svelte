@@ -5,15 +5,19 @@
 	import { AppLayout } from '@common/ui-components';
 	import { 
 		Home, Users, Database, HardDrive, 
-		FileText, Puzzle, Settings, Plus
+		FileText, Puzzle, Settings, Plus, X
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { auth, currentUser } from '$lib/stores/auth';
 	import { observeAndFixInputs } from '$lib/utils/fixTextSelection';
+	import { api } from '$lib/api';
+	import type { AppSettings } from '$lib/types';
 	
 	let user: any = null;
 	let authChecked = false;
+	let settings: AppSettings | null = null;
+	let notificationDismissed = false;
 	
 	// Subscribe to the currentUser store
 	$: user = $currentUser;
@@ -124,6 +128,9 @@
 					goto('/auth/login');
 					return;
 				}
+			} else {
+				// Load settings to check for notification
+				loadSettings();
 			}
 		} else {
 			// No stored token, check if we need to redirect
@@ -147,6 +154,17 @@
 		};
 	});
 	
+	async function loadSettings() {
+		const response = await api.getSettings();
+		if (response.data) {
+			settings = response.data;
+		}
+	}
+	
+	function dismissNotification() {
+		notificationDismissed = true;
+	}
+	
 	async function handleLogout() {
 		// Navigate to logout page which handles the logout process
 		window.location.href = '/auth/logout';
@@ -157,40 +175,124 @@
 	$: isProfilePage = $page.url.pathname.startsWith('/profile');
 	$: isAdminPage = $page.url.pathname.startsWith('/admin');
 	$: isRootPage = $page.url.pathname === '/';
+	
+	// Track if notification should be shown
+	$: showNotification = settings?.notification && !notificationDismissed && !isAuthPage && !isRootPage;
 </script>
 
-{#if isAuthPage || isRootPage}
-	<!-- Auth pages and root page without layout -->
-	<slot />
-{:else if !authChecked && !publicPages.some(p => $page.url.pathname === p || $page.url.pathname.startsWith('/auth/'))}
-	<!-- Show loading state while checking auth for protected pages -->
-	<div class="auth-loading">
-		<div class="spinner"></div>
-		<p>Loading...</p>
+<div class="app-container" class:with-notification={showNotification}>
+	{#if showNotification}
+		<div class="notification-banner">
+			<div class="notification-content">
+				<span>{settings.notification}</span>
+				<button class="notification-close" on:click={dismissNotification}>
+					<X size={18} />
+				</button>
+			</div>
+		</div>
+	{/if}
+
+	<div class="main-content">
+		{#if isAuthPage || isRootPage}
+			<!-- Auth pages and root page without layout -->
+			<slot />
+		{:else if !authChecked && !publicPages.some(p => $page.url.pathname === p || $page.url.pathname.startsWith('/auth/'))}
+			<!-- Show loading state while checking auth for protected pages -->
+			<div class="auth-loading">
+				<div class="spinner"></div>
+				<p>Loading...</p>
+			</div>
+		{:else if isProfilePage}
+			<!-- Profile pages have their own layout -->
+			<slot />
+		{:else if isAdminPage}
+			<!-- Main admin layout - only for admin pages -->
+			<AppLayout
+				currentUser={user}
+				{navigation}
+				currentPath={$page.url.pathname}
+				logoSrc="/logo_long.png"
+				logoCollapsedSrc="/logo.png"
+				projectName="Solobase"
+				mobileTitle="Solobase Admin"
+				onLogout={handleLogout}
+			>
+				<slot />
+			</AppLayout>
+		{:else}
+			<!-- Other pages without layout -->
+			<slot />
+		{/if}
 	</div>
-{:else if isProfilePage}
-	<!-- Profile pages have their own layout -->
-	<slot />
-{:else if isAdminPage}
-	<!-- Main admin layout - only for admin pages -->
-	<AppLayout
-		currentUser={user}
-		{navigation}
-		currentPath={$page.url.pathname}
-		logoSrc="/logo_long.png"
-		logoCollapsedSrc="/logo.png"
-		projectName="Solobase"
-		mobileTitle="Solobase Admin"
-		onLogout={handleLogout}
-	>
-		<slot />
-	</AppLayout>
-{:else}
-	<!-- Other pages without layout -->
-	<slot />
-{/if}
+</div>
 
 <style>
+	.app-container {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.main-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.app-container.with-notification .main-content {
+		padding-top: 52px;
+	}
+	
+	.notification-banner {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+		padding: 0.75rem 1rem;
+		z-index: 9999;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		height: 52px;
+		display: flex;
+		align-items: center;
+	}
+	
+	.notification-content {
+		max-width: 1200px;
+		width: 100%;
+		margin: 0 auto;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	
+	.notification-content span {
+		flex: 1;
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+	
+	.notification-close {
+		background: rgba(255, 255, 255, 0.2);
+		border: none;
+		color: white;
+		width: 28px;
+		height: 28px;
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: background 0.2s;
+		flex-shrink: 0;
+	}
+	
+	.notification-close:hover {
+		background: rgba(255, 255, 255, 0.3);
+	}
+	
 	.auth-loading {
 		display: flex;
 		flex-direction: column;

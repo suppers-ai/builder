@@ -34,27 +34,27 @@
 <svelte:window on:keydown={handleKeydown} />
 
 {#if open}
+	<!-- Backdrop -->
 	<div 
-		class="fixed inset-0 overflow-y-auto modal-wrapper"
+		class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop"
+		transition:fade={{ duration: 200 }}
+		on:click={handleClose}
+		role="presentation"
+		aria-hidden="true"
+	/>
+	
+	<!-- Modal -->
+	<div 
+		class="fixed inset-0 flex items-center justify-center p-4 modal-wrapper"
 		transition:fade={{ duration: 200 }}
 	>
-		<!-- Backdrop -->
-		<div 
-			class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm modal-backdrop"
-			on:click={handleClose}
-			role="button"
-			tabindex="-1"
-		/>
-		
-		<!-- Modal -->
-		<div class="flex min-h-full items-center justify-center p-4">
-			<div
-				class="relative w-full {sizeClass} bg-white rounded-xl shadow-2xl overflow-hidden modal-dialog"
-				transition:scale={{ duration: 200 }}
-				on:click|stopPropagation
-				role="dialog"
-				aria-modal="true"
-			>
+		<div
+			class="relative w-full {sizeClass} bg-white rounded-xl shadow-2xl overflow-hidden modal-dialog"
+			transition:scale={{ duration: 200 }}
+			on:click|stopPropagation
+			role="dialog"
+			aria-modal="true"
+		>
 				<!-- Header (only shown if title is provided) -->
 				{#if title}
 					<div class="modal-header flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
@@ -85,25 +85,29 @@
 				{/if}
 			</div>
 		</div>
-	</div>
 {/if}
 
 <style>
-	.modal-wrapper {
-		z-index: 99999 !important;
+	.modal-backdrop {
+		z-index: 9998;
 	}
 	
-	.modal-backdrop {
-		z-index: 99998 !important;
+	.modal-wrapper {
+		z-index: 9999;
+		pointer-events: none;
+	}
+	
+	.modal-wrapper > * {
+		pointer-events: auto;
 	}
 	
 	.modal-dialog {
-		z-index: 100000 !important;
+		z-index: 10000;
 		position: relative;
 	}
 	
 	.modal-header {
-		z-index: 10;
+		z-index: 1;
 		position: relative;
 	}
 	
@@ -111,6 +115,7 @@
 		max-height: calc(80vh - 120px);
 		overflow: visible;
 		position: relative;
+		z-index: 1;
 	}
 	
 	.modal-content::-webkit-scrollbar {

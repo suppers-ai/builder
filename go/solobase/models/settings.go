@@ -52,6 +52,7 @@ type AppSettings struct {
 	EnableDebugMode          bool   `json:"enable_debug_mode"`
 	MaintenanceMode          bool   `json:"maintenance_mode"`
 	MaintenanceMessage       string `json:"maintenance_message,omitempty"`
+	Notification             string `json:"notification,omitempty"`
 }
 
 // DefaultSettings returns the default application settings

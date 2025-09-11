@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Objects</title>
+</head>
+<body>
+    <h1>Test API Objects Response</h1>
+    <button onclick="test()">Test API</button>
+    <pre id="result"></pre>
+    
+    <script>
+        async function test() {
+            try {
+                // Login first
+                const loginRes = await fetch('http://localhost:8095/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@example.com',
+                        password: 'Test123456789!'
+                    })
+                });
+                const loginData = await loginRes.json();
+                console.log('Login response:', loginData);
+                
+                if (!loginData.tokens) {
+                    throw new Error('Login failed');
+                }
+                
+                const token = loginData.tokens.access_token;
+                
+                // Get objects from API
+                const res = await fetch('http://localhost:8095/api/storage/buckets/int_storage/objects', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await res.json();
+                console.log('Raw API response:', data);
+                
+                // Display the raw response
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                
+                // Check field names
+                if (data && data.length > 0) {
+                    const firstItem = data[0];
+                    console.log('First item fields:', Object.keys(firstItem));
+                    console.log('Has "name" field?', 'name' in firstItem);
+                    console.log('Has "object_name" field?', 'object_name' in firstItem);
+                    console.log('Has "type" field?', 'type' in firstItem);
+                    console.log('Has "content_type" field?', 'content_type' in firstItem);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

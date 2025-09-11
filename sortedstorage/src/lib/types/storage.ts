@@ -1,3 +1,30 @@
+/**
+ * Storage types - Re-exported from @solobase/sdk
+ */
+
+// Import types from SDK
+export type { 
+  StorageObject,
+  StorageObjectMetadata,
+  PaginatedResponse 
+} from '@solobase/sdk';
+
+// Import helper functions from SDK
+export { 
+  isFolder,
+  isFile,
+  parseMetadata,
+  getDisplayName,
+  getFileExtension
+} from '@solobase/sdk';
+
+// Legacy type aliases for backward compatibility (to be removed later)
+import type { StorageObject } from '@solobase/sdk';
+export type StorageItem = StorageObject;
+export type FileItem = StorageObject;
+export type FolderItem = StorageObject;
+
+// Application-specific types that aren't in the SDK
 export interface User {
 	id: string;
 	email: string;
@@ -7,40 +34,6 @@ export interface User {
 	subscription: SubscriptionPlan;
 	createdAt: Date;
 }
-
-export interface FileItem {
-	id: string;
-	name: string;
-	path: string;
-	size: number;
-	mimeType: string;
-	thumbnailUrl?: string;
-	isShared: boolean;
-	permissions: Permission[];
-	createdAt: Date;
-	modifiedAt: Date;
-	owner?: {
-		id: string;
-		name: string;
-	};
-}
-
-export interface FolderItem {
-	id: string;
-	name: string;
-	path: string;
-	itemCount: number;
-	size: number;
-	isShared: boolean;
-	permissions: Permission[];
-	createdAt: Date;
-	modifiedAt: Date;
-}
-
-// Union type for any storage item (file or folder)
-export type StorageItem = (FileItem | FolderItem) & {
-	type: 'file' | 'folder';
-};
 
 export interface Share {
 	id: string;

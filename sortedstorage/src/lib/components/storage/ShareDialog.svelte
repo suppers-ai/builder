@@ -2,7 +2,7 @@
 	import { Link, Mail, Calendar, Lock, Users, Copy, Check } from 'lucide-svelte';
 	import Modal from '../common/Modal.svelte';
 	import Button from '../common/Button.svelte';
-	import { storageAPI } from '$lib/api/storage';
+	import storageAPI from '$lib/api/storage';
 	import type { FileItem, FolderItem } from '$lib/types/storage';
 	
 	export let open = false;

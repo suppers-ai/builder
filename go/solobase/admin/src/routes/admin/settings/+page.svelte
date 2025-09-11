@@ -194,6 +194,21 @@
 							/>
 						</label>
 					</div>
+					
+					<div class="form-control">
+						<label class="label">
+							<span class="label-text font-medium">Notification Banner</span>
+						</label>
+						<textarea 
+							class="textarea textarea-bordered" 
+							bind:value={settings.notification}
+							placeholder="Enter a notification message to display to all users"
+							rows="2"
+						/>
+						<label class="label">
+							<span class="label-text-alt">Leave empty to hide the notification banner</span>
+						</label>
+					</div>
 				</div>
 				</div>
 			</div>

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { storageAPI } from '$lib/api/storage';
+	import storageAPI from '$lib/api/storage';
 	import { goto } from '$app/navigation';
 	import { Search, X, Folder, File, Clock } from 'lucide-svelte';
 	import type { StorageItem } from '$lib/types/storage';
+	import { isFolder, isFile } from '$lib/types/storage';
 	
 	export let open = false;
 	
@@ -70,7 +71,7 @@
 	}
 	
 	function handleResultClick(item: StorageItem) {
-		if (item.type === 'folder') {
+		if (isFolder(item)) {
 			goto(`/folder/${item.id}`);
 		} else {
 			// For files, navigate to parent folder and highlight/preview the file
@@ -174,14 +175,14 @@
 								on:click={() => handleResultClick(item)}
 							>
 								<div class="result-icon">
-									{#if item.type === 'folder'}
+									{#if isFolder(item)}
 										<Folder size={24} />
 									{:else}
 										<File size={24} />
 									{/if}
 								</div>
 								<div class="result-info">
-									<div class="result-name">{item.name}</div>
+									<div class="result-name">{item.object_name}</div>
 									<div class="result-meta">
 										<span class="result-path">{formatPath(item)}</span>
 										{#if item.updated_at}

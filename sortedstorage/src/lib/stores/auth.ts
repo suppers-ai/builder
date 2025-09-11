@@ -30,106 +30,19 @@ function createAuthStore() {
 		subscribe,
 		
 		async login(email: string, password: string) {
-			update(state => ({ ...state, loading: true, error: null }));
-			
-			try {
-				// Solobase auth login endpoint
-				const response = await api.post<{ user: any, token: string }>('/api/auth/login', {
-					email,
-					password
-				});
-				
-				api.setToken(response.token);
-				apiClient.setToken(response.token);
-				localStorage.setItem('auth_token', response.token);
-				token$.set(response.token);
-				
-				// Map Solobase user to SortedStorage User type
-				const user: User = {
-					id: response.user.id,
-					email: response.user.email,
-					name: response.user.name || response.user.email.split('@')[0],
-					role: response.user.role as 'user' | 'admin',
-					subscription: {
-						id: 'free',
-						name: 'free',
-						storageLimit: 5 * 1024 * 1024 * 1024, // 5GB
-						bandwidthLimit: 10 * 1024 * 1024 * 1024, // 10GB
-						features: ['Basic storage', 'File sharing'],
-						price: 0,
-						interval: 'monthly',
-						status: 'active'
-					},
-					createdAt: new Date(response.user.created_at || Date.now())
-				};
-				
-				set({ user, loading: false, error: null });
-				// Don't redirect here, let the login page handle it
-				// goto('/');
-			} catch (error) {
-				update(state => ({
-					...state,
-					loading: false,
-					error: error instanceof Error ? error.message : 'Login failed'
-				}));
-			}
+			// In sortedstorage, we don't handle login directly
+			// Redirect to solobase login page
+			window.location.href = getAuthLoginUrl('/');
 		},
 
 		async register(email: string, password: string, name: string) {
-			update(state => ({ ...state, loading: true, error: null }));
-			
-			try {
-				// Solobase auth register endpoint
-				const response = await api.post<{ user: any, token: string }>('/api/auth/register', {
-					email,
-					password,
-					name
-				});
-				
-				api.setToken(response.token);
-				apiClient.setToken(response.token);
-				localStorage.setItem('auth_token', response.token);
-				token$.set(response.token);
-				
-				// Map Solobase user to SortedStorage User type
-				const user: User = {
-					id: response.user.id,
-					email: response.user.email,
-					name: response.user.name || response.user.email.split('@')[0],
-					role: response.user.role as 'user' | 'admin',
-					subscription: {
-						id: 'free',
-						name: 'free',
-						storageLimit: 5 * 1024 * 1024 * 1024,
-						bandwidthLimit: 10 * 1024 * 1024 * 1024,
-						features: ['Basic storage', 'File sharing'],
-						price: 0,
-						interval: 'monthly',
-						status: 'active'
-					},
-					createdAt: new Date(response.user.created_at || Date.now())
-				};
-				
-				set({ user: response.user, loading: false, error: null });
-				// Don't redirect here, let the register page handle it
-				// goto('/');
-			} catch (error) {
-				update(state => ({
-					...state,
-					loading: false,
-					error: error instanceof Error ? error.message : 'Registration failed'
-				}));
-			}
+			// In sortedstorage, we don't handle registration directly
+			// Redirect to solobase register page
+			window.location.href = authConfig.registerUrl();
 		},
 
 		async logout() {
-			try {
-				// Solobase auth logout endpoint
-				await api.post('/api/auth/logout');
-			} catch {
-				// Ignore logout errors
-			}
-			
+			// Clear local storage and tokens
 			api.setToken(null);
 			apiClient.setToken(null);
 			localStorage.removeItem('auth_token');
@@ -156,39 +69,29 @@ function createAuthStore() {
 			apiClient.loadTokenFromStorage();
 			update(state => ({ ...state, loading: true }));
 
-			try {
-				// Solobase auth me endpoint
-				const solobaseUser = await api.get<any>('/api/auth/me');
-				console.log('[Auth] User loaded:', solobaseUser);
-				
-				// Map Solobase user to SortedStorage User type
-				const user: User = {
-					id: solobaseUser.id,
-					email: solobaseUser.email,
-					name: solobaseUser.name || solobaseUser.email.split('@')[0], // Use email prefix as name if not provided
-					role: solobaseUser.role as 'user' | 'admin',
-					subscription: {
-						id: 'free',
-						name: 'free',
-						storageLimit: 5 * 1024 * 1024 * 1024, // 5GB
-						bandwidthLimit: 10 * 1024 * 1024 * 1024, // 10GB
-						features: ['Basic storage', 'File sharing'],
-						price: 0,
-						interval: 'monthly',
-						status: 'active'
-					},
-					createdAt: new Date(solobaseUser.created_at || Date.now())
-				};
-				
-				set({ user, loading: false, error: null });
-				token$.set(token);
-			} catch {
-				api.setToken(null);
-				apiClient.setToken(null);
-				localStorage.removeItem('auth_token');
-				token$.set(null);
-				set({ user: null, loading: false, error: null });
-			}
+			// Since we have a token, assume user is authenticated
+			// In production, user info would come from solobase session
+			// For now, create a simple user object
+			const user: User = {
+				id: 'user-1',
+				email: 'user@example.com',
+				name: 'User',
+				role: 'user',
+				subscription: {
+					id: 'free',
+					name: 'free',
+					storageLimit: 5 * 1024 * 1024 * 1024, // 5GB
+					bandwidthLimit: 10 * 1024 * 1024 * 1024, // 10GB
+					features: ['Basic storage', 'File sharing'],
+					price: 0,
+					interval: 'monthly',
+					status: 'active'
+				},
+				createdAt: new Date()
+			};
+			
+			set({ user, loading: false, error: null });
+			token$.set(token);
 		},
 
 		setToken(token: string | null) {
@@ -206,19 +109,9 @@ function createAuthStore() {
 		},
 
 		async updateProfile(updates: Partial<User>) {
-			update(state => ({ ...state, loading: true, error: null }));
-			
-			try {
-				// Solobase auth profile endpoint
-				const user = await api.put<User>('/api/auth/profile', updates);
-				set({ user, loading: false, error: null });
-			} catch (error) {
-				update(state => ({
-					...state,
-					loading: false,
-					error: error instanceof Error ? error.message : 'Update failed'
-				}));
-			}
+			// Profile updates should be handled in solobase
+			// Redirect to profile page
+			window.location.href = authConfig.profileUrl();
 		}
 	};
 }
