@@ -78,18 +78,18 @@ require (
 	gorm.io/driver/sqlite v1.5.6 // indirect
 )
 
-replace github.com/suppers-ai/auth => ../packages/auth
+replace github.com/suppers-ai/auth => ./packages/auth
 
-replace github.com/suppers-ai/database => ../packages/database
+replace github.com/suppers-ai/database => ./packages/database
 
-replace github.com/suppers-ai/logger => ../packages/logger
+replace github.com/suppers-ai/logger => ./packages/logger
 
-replace github.com/suppers-ai/mailer => ../packages/mailer
+replace github.com/suppers-ai/mailer => ./packages/mailer
 
-replace github.com/suppers-ai/storage => ../packages/storage
+replace github.com/suppers-ai/storage => ./packages/storage
 
 replace github.com/suppers-ai/storageadapter => ../integrations/storageadapter
 
-replace github.com/suppers-ai/formulaengine => ../packages/formulaengine
+replace github.com/suppers-ai/formulaengine => ./packages/formulaengine
 
-replace github.com/suppers-ai/dynamicfields => ../packages/dynamicfields
+replace github.com/suppers-ai/dynamicfields => ./packages/dynamicfields

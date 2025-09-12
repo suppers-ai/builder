@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/suppers-ai/builder/go/packages/database"
+	"github.com/suppers-ai/builder/go/solobase/packages/database"
 )
 
 var DB database.Database
